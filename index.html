@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIS — GMC & AH Rajouri</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Inter',Arial,sans-serif;background:linear-gradient(135deg,#0a1f5c 0%,#0F2B8C 40%,#1A3DB5 100%)}
+.page{display:flex;flex-direction:column;height:100vh;padding:12px 14px 0}
+
+/* ── HEADER ── */
+.header{background:#fff;border-radius:50px;padding:0 16px;height:64px;display:flex;align-items:center;gap:0;flex-shrink:0;box-shadow:0 4px 24px rgba(15,43,140,0.18);margin-bottom:11px}
+
+.logo-circle{width:46px;height:46px;border-radius:50%;background:#e8efff;border:2px solid #93b4ff;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;position:relative;cursor:pointer}
+.logo-circle img{width:100%;height:100%;object-fit:contain;display:none}
+.logo-ph{font-size:6px;font-weight:700;color:#0F2B8C;text-align:center;pointer-events:none;line-height:1.3}
+.logo-upload{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+.header-brand{display:flex;flex-direction:column;gap:0px;flex-shrink:0;margin-left:10px}
+.hb1{font-size:11px;font-weight:800;color:#f97316;white-space:nowrap;line-height:1.3;letter-spacing:0.3px}
+.hb2{font-size:14px;font-weight:900;color:#15803d;white-space:nowrap;line-height:1.2;letter-spacing:0.2px}
+.hb3{font-size:10px;font-weight:700;color:#374151;white-space:nowrap;font-style:italic;line-height:1.3}
+
+.vline{width:1.5px;height:40px;background:#c7d2fe;border-radius:2px;flex-shrink:0;margin:0 14px}
+
+.logo-contact{display:flex;align-items:center;gap:10px;flex-shrink:0}
+
+.nav-area{display:flex;align-items:center;flex:1;overflow:hidden;margin-left:4px}
+.nav-item{padding:5px 9px;font-size:11px;font-weight:700;color:#0F2B8C;cursor:pointer;white-space:nowrap;text-decoration:none;display:flex;align-items:center;border-radius:50px;transition:all 0.15s;gap:2px;flex-shrink:0}
+.nav-item:hover,.nav-item.active{background:#e8efff;color:#0F2B8C}
+.nav-arrow{font-size:8px;opacity:0.5}
+
+/* ── MAIN SPLIT ── */
+.main-split{display:flex;flex:1;overflow:hidden;gap:12px;padding-bottom:11px}
+
+/* LEFT */
+.left-side{flex:1;position:relative;overflow:hidden;border-radius:22px;background:linear-gradient(135deg,#071a4a,#0a2472);cursor:pointer}
+.left-side img#hdPhoto{width:100%;height:100%;object-fit:cover;display:none;border-radius:22px}
+.photo-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none}
+.photo-ph svg{width:52px;height:52px;fill:rgba(255,255,255,0.2)}
+.photo-ph span{font-size:12px;color:rgba(255,255,255,0.35);text-align:center;line-height:1.7}
+.photo-upload{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2}
+
+/* LEFT OVERLAY BRANDING */
+.left-overlay{position:absolute;bottom:24px;left:24px;right:24px;pointer-events:none}
+.left-overlay .ov-scheme{font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.left-overlay .ov-title{font-size:22px;font-weight:900;color:#fff;line-height:1.2;text-shadow:0 2px 12px rgba(0,0,0,0.4)}
+.left-overlay .ov-sub{font-size:12px;color:rgba(255,255,255,0.6);margin-top:5px;font-style:italic}
+
+/* RIGHT LOGIN PANEL */
+.right-side{width:420px;flex-shrink:0;background:linear-gradient(160deg,#071a4a,#0F2B8C,#1A3DB5);border-radius:26px;border:1.5px solid rgba(147,180,255,0.35);box-shadow:0 8px 40px rgba(15,43,140,0.45);display:flex;flex-direction:column;justify-content:center;padding:26px 28px;overflow:hidden}
+
+.portal-heading{text-align:center;margin-bottom:14px}
+.ph1{font-size:11px;font-weight:700;color:#f97316;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px}
+.ph2{font-size:19px;font-weight:900;color:#4ade80;letter-spacing:0.3px;line-height:1.15}
+.ph3{font-size:11px;font-weight:600;color:rgba(255,255,255,0.6);margin-top:5px;font-style:italic}
+
+.divider{height:1px;background:rgba(255,255,255,0.15);margin:12px 0}
+
+.form-group{margin-bottom:10px}
+.form-group label{display:block;font-size:10px;font-weight:800;color:rgba(255,255,255,0.85);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:5px}
+.form-group input,.form-group select{width:100%;height:38px;padding:0 14px;border:1.5px solid rgba(147,180,255,0.35);border-radius:50px;font-size:12px;color:#071a4a;background:rgba(255,255,255,0.93);outline:none;font-family:'Inter',sans-serif;transition:all 0.2s}
+.form-group input:focus,.form-group select:focus{border-color:#3b82f6;background:#fff;box-shadow:0 0 0 3px rgba(59,130,246,0.2)}
+.form-group select{cursor:pointer}
+
+.pin-row{display:flex;gap:7px;justify-content:center}
+.pin-input{width:42px;height:48px;text-align:center;font-size:22px;font-weight:800;border:1.5px solid rgba(147,180,255,0.35);border-radius:12px;outline:none;color:#071a4a;background:rgba(255,255,255,0.93);font-family:'Inter',sans-serif;transition:all 0.2s}
+.pin-input:focus{border-color:#3b82f6;background:#fff;box-shadow:0 0 0 3px rgba(59,130,246,0.2)}
+.pin-input.filled{border-color:#3b82f6;background:#fff}
+
+.login-btn{width:100%;height:42px;background:#fff;color:#0F2B8C;border:none;border-radius:50px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;margin-top:10px;transition:all 0.2s;box-shadow:0 4px 16px rgba(15,43,140,0.35);letter-spacing:0.3px}
+.login-btn:hover{background:#eef2ff;transform:translateY(-1px);box-shadow:0 6px 20px rgba(15,43,140,0.4)}
+.login-btn:active{transform:translateY(0)}
+
+.bottom-links{display:flex;justify-content:center;gap:24px;margin-top:10px}
+.bottom-link{font-size:11px;color:rgba(255,255,255,0.65);font-weight:600;cursor:pointer;padding:2px 0;border-bottom:1.5px solid transparent;transition:all 0.15s}
+.bottom-link:hover{color:#fff;border-bottom-color:rgba(255,255,255,0.5)}
+
+.auth-form{display:none}
+.auth-form.active{display:block}
+
+.form-note{font-size:10px;color:rgba(255,255,255,0.4);text-align:center;margin-top:8px;line-height:1.5}
+.login-img-box{width:100%;height:110px;border-radius:14px;border:1.5px dashed rgba(147,180,255,0.45);background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:12px;overflow:hidden;position:relative;transition:border-color 0.2s}
+.login-img-box:hover{border-color:rgba(147,180,255,0.75);background:rgba(255,255,255,0.11)}
+.login-img-ph{display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none}
+.login-img-ph span{font-size:11px;color:rgba(255,255,255,0.35);font-weight:500}
+
+/* ── FOOTER ── */
+.footer-bar{background:linear-gradient(90deg,#071a4a,#0F2B8C,#1A3DB5);border-radius:50px;padding:6px 20px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:6px}
+.footer-links{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.footer-lbl{font-size:10px;color:rgba(255,255,255,0.4);margin-right:4px}
+.footer-link{color:rgba(255,255,255,0.8);font-size:10px;font-weight:500;text-decoration:none;padding:3px 11px;border:1px solid rgba(255,255,255,0.25);border-radius:20px;transition:all 0.15s;background:rgba(255,255,255,0.08)}
+.footer-link:hover{background:rgba(255,255,255,0.2);color:#fff}
+.footer-copy{font-size:10px;color:rgba(255,255,255,0.45);white-space:nowrap}
+/* ── REMEMBER ME ── */
+.remember-row{display:flex;align-items:center;justify-content:space-between;margin:8px 0 2px}
+.rm-check{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
+.rm-check input[type=checkbox]{width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer;flex-shrink:0}
+.rm-check span{font-size:11px;color:rgba(255,255,255,0.75);font-weight:600}
+/* Auto-login banner */
+.auto-banner{background:rgba(255,255,255,0.12);border:1.5px solid rgba(147,180,255,0.4);border-radius:14px;padding:12px 16px;margin-bottom:10px;display:none}
+.auto-banner.show{display:block}
+.auto-banner-name{font-size:14px;font-weight:800;color:#fff;margin-bottom:2px}
+.auto-banner-sub{font-size:11px;color:rgba(255,255,255,0.65)}
+.auto-banner-btns{display:flex;gap:8px;margin-top:10px}
+.ab-btn-go{flex:1;height:36px;background:#fff;color:#0F2B8C;border:none;border-radius:50px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
+.ab-btn-go:hover{background:#eef2ff}
+.ab-btn-switch{height:36px;padding:0 14px;background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.3);border-radius:50px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
+.ab-btn-switch:hover{background:rgba(255,255,255,0.25)}
+
+/* ── Weekend Roster Overlay ── */
+.wr-overlay{position:fixed;inset:0;background:rgba(15,43,140,0.92);z-index:8888;display:none;flex-direction:column;overflow-y:auto}
+.wr-overlay.open{display:flex}
+.wr-header{background:linear-gradient(135deg,#2D1B8E,#6650D8);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.wr-title{color:#fff;font-size:18px;font-weight:800;letter-spacing:0.5px}
+.wr-close{background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:20px;font-weight:800;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
+.wr-close:hover{background:rgba(255,255,255,0.3)}
+.wr-body{padding:20px 24px;flex:1}
+.wr-table-wrap{border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.3)}
+.wr-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
+.wr-table th{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;padding:11px 14px;text-align:center;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;white-space:nowrap}
+.wr-table td{padding:10px 14px;border-bottom:1px solid rgba(26,61,181,0.08);text-align:center;vertical-align:middle;color:#1a1a2e}
+.wr-table tr:nth-child(even) td{background:#F8FAFF}
+.wr-table tr:hover td{background:#EEF3FF}
+.wr-sno{font-weight:800;color:#1A3DB5;font-size:14px}
+.wr-pmam{font-weight:600;font-size:13px;color:#0F2B8C}
+.wr-date{font-weight:700;color:#166534;font-size:13px}
+.wr-empty{text-align:center;padding:40px;color:#9ca3af;font-style:italic;font-size:14px}
+
+
+/* Staff card grid */
+.ov-staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:4px}
+.ov-staff-card{background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;transition:background 0.15s}
+.ov-staff-card:hover{background:rgba(255,255,255,0.14)}
+.ov-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1A3DB5,#6650D8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:800}
+.ov-name{color:#fff;font-weight:700;font-size:13px;text-align:center}
+.ov-desig{color:rgba(255,255,255,0.6);font-size:11px;text-align:center}
+.ov-ward{background:rgba(255,255,255,0.15);color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;margin-top:2px}
+
+.order-card{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:14px 18px;text-decoration:none;transition:background 0.15s}
+.order-card:hover{background:rgba(255,255,255,0.16)}
+</style>
+  <!-- Firebase v10 -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+    authDomain: "gmcrajouri-pmam.firebaseapp.com",
+    projectId: "gmcrajouri-pmam",
+    storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+    messagingSenderId: "115490476421",
+    appId: "1:115490476421:web:871a91987e1a92a45f34ec",
+    measurementId: "G-NK9VL87CJC"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  var db   = firebase.firestore();
+  var auth = firebase.auth();
+  var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+  var EMAILJS_SERVICE    = 'service_1x9ecam';
+  var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+  if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+</script>
+<script>
+// ══════════════════════════════════════════════════════════
+// FIREBASE BRIDGE — Replaces all localStorage calls
+// Provides same API as localStorage but uses Firestore
+// ══════════════════════════════════════════════════════════
+
+// Keys that stay in localStorage (temp/device-only)
+var LOCAL_ONLY_KEYS = ['pmjay_admin_switch','pmjay_remember','pmjay_user'];
+
+// Keys that are collections (arrays of objects)
+var COLLECTION_KEYS = ['pmjay_leave_requests','pmjay_all_entries'];
+
+// Firestore path mapping
+var FS_PATH = {
+  'pmjay_leave_requests' : { type:'collection', path:'leave_requests'        },
+  'pmjay_all_entries'    : { type:'collection', path:'daily_entries'          },
+  'pmjay_leave_policy'   : { type:'doc',        path:'settings/leave_policy'  },
+  'pmjay_holidays_master': { type:'doc',        path:'settings/holidays_master'},
+  'pmjay_holiday_roster' : { type:'doc',        path:'settings/holiday_roster' },
+  'pmjay_weekend_roster' : { type:'doc',        path:'settings/weekend_roster' },
+  'pmjay_weekend_history': { type:'doc',        path:'settings/weekend_history'},
+  'pmjay_ward_roster'    : { type:'doc',        path:'settings/ward_roster'    },
+  'pmjay_staff_data'     : { type:'doc',        path:'settings/staff_data'     },
+  'pmjay_orders'         : { type:'doc',        path:'settings/orders'         },
+  'pmjay_about_us'       : { type:'doc',        path:'settings/about_us'       },
+  'pmjay_contact_us'     : { type:'doc',        path:'settings/contact_us'     },
+  'pmjay_logo1'          : { type:'doc',        path:'settings/branding'       },
+  'pmjay_logo2'          : { type:'doc',        path:'settings/branding'       },
+  'pmjay_hdPhoto'        : { type:'doc',        path:'settings/branding'       },
+};
+
+// ── Core: set data to Firestore ──
+function fsSet(key, value, callback) {
+  if (LOCAL_ONLY_KEYS.indexOf(key) >= 0) {
+    localStorage.setItem(key, value);
+    if (callback) callback();
+    return;
+  }
+  var map = FS_PATH[key];
+  if (!map) { localStorage.setItem(key, value); if (callback) callback(); return; }
+
+  try {
+    var data = JSON.parse(value);
+    if (map.type === 'collection') {
+      // For collections: save array as batch
+      var batch = db.batch();
+      // Clear old docs first, then write new ones
+      db.collection(map.path).get().then(function(snap) {
+        snap.forEach(function(d) { batch.delete(d.ref); });
+        if (Array.isArray(data)) {
+          data.forEach(function(item, i) {
+            var ref = db.collection(map.path).doc(item._id || ('item_' + i + '_' + Date.now()));
+            batch.set(ref, item);
+          });
+        }
+        return batch.commit();
+      }).then(function() { if (callback) callback(); })
+        .catch(function(e) { console.error('fsSet collection error:', e); localStorage.setItem(key, value); if (callback) callback(); });
+    } else {
+      // For docs: save entire object
+      var parts = map.path.split('/');
+      var ref = parts.length === 2
+        ? db.collection(parts[0]).doc(parts[1])
+        : db.collection(map.path);
+      var saveData = {};
+      saveData[key] = data;
+      ref.set(saveData, { merge: true })
+        .then(function() { if (callback) callback(); })
+        .catch(function(e) { console.error('fsSet doc error:', e); localStorage.setItem(key, value); if (callback) callback(); });
+    }
+  } catch(e) {
+    localStorage.setItem(key, value);
+    if (callback) callback();
+  }
+}
+
+// ── Core: get data from Firestore ──
+function fsGet(key, callback) {
+  if (LOCAL_ONLY_KEYS.indexOf(key) >= 0) {
+    callback(localStorage.getItem(key));
+    return;
+  }
+  var map = FS_PATH[key];
+  if (!map) { callback(localStorage.getItem(key)); return; }
+
+  if (map.type === 'collection') {
+    db.collection(map.path).orderBy('_ts', 'asc').get()
+      .then(function(snap) {
+        var items = [];
+        snap.forEach(function(d) { items.push(Object.assign({ _id: d.id }, d.data())); });
+        callback(JSON.stringify(items));
+      })
+      .catch(function() {
+        // Try without orderBy
+        db.collection(map.path).get()
+          .then(function(snap) {
+            var items = [];
+            snap.forEach(function(d) { items.push(Object.assign({ _id: d.id }, d.data())); });
+            callback(JSON.stringify(items));
+          })
+          .catch(function() { callback(localStorage.getItem(key)); });
+      });
+  } else {
+    var parts = map.path.split('/');
+    var ref = parts.length === 2
+      ? db.collection(parts[0]).doc(parts[1])
+      : null;
+    if (!ref) { callback(localStorage.getItem(key)); return; }
+    ref.get()
+      .then(function(doc) {
+        if (doc.exists) {
+          var d = doc.data();
+          callback(JSON.stringify(d[key] !== undefined ? d[key] : d));
+        } else {
+          callback(localStorage.getItem(key));
+        }
+      })
+      .catch(function() { callback(localStorage.getItem(key)); });
+  }
+}
+
+// ── Override localStorage for pmjay_ keys ──
+// Wrap getItem and setItem to intercept pmjay_ keys
+var _origGetItem = localStorage.getItem.bind(localStorage);
+var _origSetItem = localStorage.setItem.bind(localStorage);
+
+// Synchronous fallback cache (populated on page load)
+var _fsCache = {};
+
+function fsPreload(keys, onDone) {
+  var pending = keys.length;
+  if (!pending) { onDone(); return; }
+  keys.forEach(function(key) {
+    fsGet(key, function(val) {
+      if (val !== null) _fsCache[key] = val;
+      pending--;
+      if (pending === 0) onDone();
+    });
+  });
+}
+
+// ── Public API matching localStorage interface ──
+var pmStorage = {
+  setItem: function(key, value, callback) {
+    _fsCache[key] = value; // update cache immediately
+    if (key.indexOf('pmjay_') === 0) {
+      fsSet(key, value, callback);
+    } else {
+      localStorage.setItem(key, value);
+      if (callback) callback();
+    }
+  },
+  getItem: function(key) {
+    if (key.indexOf('pmjay_') === 0 && LOCAL_ONLY_KEYS.indexOf(key) < 0) {
+      return _fsCache[key] !== undefined ? _fsCache[key] : localStorage.getItem(key);
+    }
+    return localStorage.getItem(key);
+  },
+  removeItem: function(key, callback) {
+    delete _fsCache[key];
+    if (key.indexOf('pmjay_') === 0 && LOCAL_ONLY_KEYS.indexOf(key) < 0) {
+      var map = FS_PATH[key];
+      if (map) {
+        var parts = map.path.split('/');
+        if (parts.length === 2) {
+          db.collection(parts[0]).doc(parts[1]).delete()
+            .then(callback || function(){})
+            .catch(callback || function(){});
+          return;
+        }
+      }
+    }
+    localStorage.removeItem(key);
+    if (callback) callback();
+  }
+};
+
+// ── ALL KEYS TO PRELOAD ON PAGE LOAD ──
+var ALL_PMJAY_KEYS = [
+  'pmjay_leave_requests','pmjay_all_entries','pmjay_leave_policy',
+  'pmjay_holidays_master','pmjay_holiday_roster','pmjay_weekend_roster',
+  'pmjay_weekend_history','pmjay_ward_roster','pmjay_staff_data',
+  'pmjay_orders','pmjay_about_us','pmjay_contact_us',
+  'pmjay_logo1','pmjay_logo2','pmjay_hdPhoto'
+];
+
+</script>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-circle" title="Click to upload Logo 1">
+      <div class="logo-ph">PM-JAY<br>LOGO</div>
+      <img id="logo1" alt="">
+      <input type="file" class="logo-upload" accept="image/*" onchange="loadLogo(this,'logo1',this.closest('.logo-circle').querySelector('.logo-ph'))">
+    </div>
+
+    <div class="header-brand">
+      <div class="hb1">AYUSHMAN BHARAT — PM-JAY</div>
+      <div class="hb2">MANAGEMENT INFORMATION SYSTEM</div>
+      <div class="hb3">Government Medical College &amp; Associated Hospital, Rajouri</div>
+    </div>
+
+    <div class="vline"></div>
+
+    <div class="logo-contact">
+      <div class="logo-circle" title="Click to upload Logo 2">
+        <div class="logo-ph">GMC<br>LOGO</div>
+        <img id="logo2" alt="">
+        <input type="file" class="logo-upload" accept="image/*" onchange="loadLogo(this,'logo2',this.closest('.logo-circle').querySelector('.logo-ph'))">
+      </div>
+    </div>
+
+    <div class="vline"></div>
+
+    <div class="nav-area">
+      <a class="nav-item active" href="#">Home</a>
+      <a class="nav-item" href="#" onclick="goAboutUs();return false;">About Us</a>
+      <a class="nav-item" href="#" onclick="goStaff();return false;">Staff</a>
+      <a class="nav-item" href="#" onclick="goWardRoster();return false;">Ward Roster</a>
+      <a class="nav-item" href="#" onclick="goHolidayRoster();return false;">Holiday Roster</a>
+      <a class="nav-item" href="#" onclick="goWeekendRoster()">Weekend Roster</a>
+      <a class="nav-item" href="#" onclick="goLeave();return false;">Leave</a>
+      <a class="nav-item" href="#" onclick="goOrders();return false;">Orders</a>
+      <a class="nav-item" href="#" onclick="goContactUs();return false;">Contact Us</a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-split">
+
+    <!-- LEFT: Hospital Photo -->
+    <div class="left-side">
+      <div class="photo-ph" id="photoPh">
+        <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+        <span>Click anywhere to upload<br>Hospital / HD Photo</span>
+      </div>
+      <img id="hdPhoto" alt="">
+      <input type="file" class="photo-upload" accept="image/*" onchange="loadHD(this)">
+
+    </div>
+
+    <!-- RIGHT: Login Panel -->
+    <div class="right-side">
+
+      <!-- AUTO-LOGIN BANNER (shown when Remember Me is active) -->
+      <div class="auto-banner" id="autoBanner">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0" id="autoInitials">--</div>
+          <div>
+            <div class="auto-banner-name" id="autoName">Welcome back</div>
+            <div class="auto-banner-sub" id="autoRole">Tap to continue to your portal</div>
+          </div>
+        </div>
+        <div class="auto-banner-btns">
+          <button class="ab-btn-go" onclick="autoLogin()">→ Continue to Portal</button>
+          <button class="ab-btn-switch" onclick="switchAccount()">Switch Account</button>
+        </div>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <!-- LOGIN FORM -->
+        <div class="auth-form active" id="loginForm">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="loginEmail" placeholder="Enter your email" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label>6-Digit Security PIN</label>
+            <div class="pin-row">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,0)" onkeydown="pinBack(event,this,0)">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,1)" onkeydown="pinBack(event,this,1)">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,2)" onkeydown="pinBack(event,this,2)">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,3)" onkeydown="pinBack(event,this,3)">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,4)" onkeydown="pinBack(event,this,4)">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,5)" onkeydown="pinBack(event,this,5)">
+            </div>
+          </div>
+          <div class="remember-row">
+            <label class="rm-check">
+              <input type="checkbox" id="rememberMe">
+              <span>Remember me</span>
+            </label>
+            <span class="bottom-link" onclick="showForm('forgotForm')" style="margin:0">Forgot PIN?</span>
+          </div>
+          <button class="login-btn" onclick="doLogin()">Login to Portal</button>
+          <div style="text-align:center;margin-top:12px;font-size:12px;color:rgba(255,255,255,0.7)">
+            New staff? <span class="bottom-link" onclick="showForm('signupForm')" style="margin:0;color:#FFD700;font-weight:700">Sign Up Here</span>
+          </div>
+          <div id="loginMsg" style="min-height:18px;font-size:12px;text-align:center;margin-top:8px;color:#FFD700;font-weight:600"></div>
+        </div>
+
+        <!-- SIGNUP FORM -->
+        <div class="auth-form" id="signupForm">
+          <div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:12px;text-align:center">Create Your Account</div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="suName" placeholder="Enter your full name">
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="suEmail" placeholder="Enter your email">
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <select id="suRole">
+              <option value="">-- Select Role --</option>
+              <option value="PMAM">PMAM</option>
+              <option value="I/C AB-PMJAY">I/C AB-PMJAY</option>
+            </select>
+          </div>
+          <div class="form-group" id="suWardGroup">
+            <label>Ward</label>
+            <input type="text" id="suWard" placeholder="Enter your ward name">
+          </div>
+          <!-- OTP Section -->
+          <div id="suOtpSection" style="display:none">
+            <div class="form-group">
+              <label>Enter OTP sent to your email</label>
+              <input type="text" id="suOtp" placeholder="6-digit OTP" maxlength="6" inputmode="numeric">
+            </div>
+          </div>
+          <!-- PIN Section -->
+          <div id="suPinSection" style="display:none">
+            <div class="form-group">
+              <label>Set 6-Digit PIN</label>
+              <div class="pin-row" id="suPinRow">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,0)" onkeydown="pinBackId('suPin',event,this,0)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,1)" onkeydown="pinBackId('suPin',event,this,1)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,2)" onkeydown="pinBackId('suPin',event,this,2)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,3)" onkeydown="pinBackId('suPin',event,this,3)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,4)" onkeydown="pinBackId('suPin',event,this,4)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,5)" onkeydown="pinBackId('suPin',event,this,5)">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Confirm PIN</label>
+              <div class="pin-row" id="suPin2Row">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,0)" onkeydown="pinBackId('suPin2',event,this,0)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,1)" onkeydown="pinBackId('suPin2',event,this,1)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,2)" onkeydown="pinBackId('suPin2',event,this,2)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,3)" onkeydown="pinBackId('suPin2',event,this,3)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,4)" onkeydown="pinBackId('suPin2',event,this,4)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,5)" onkeydown="pinBackId('suPin2',event,this,5)">
+              </div>
+            </div>
+          </div>
+          <button class="login-btn" id="suBtn" onclick="doSignupStep()">Send OTP</button>
+          <div id="suMsg" style="min-height:18px;font-size:12px;text-align:center;margin-top:8px;color:#FFD700;font-weight:600"></div>
+          <div style="text-align:center;margin-top:10px">
+            <span class="bottom-link" onclick="showForm('loginForm')" style="margin:0;font-size:12px">← Back to Login</span>
+          </div>
+        </div>
+
+        <!-- FORGOT PIN FORM -->
+        <div class="auth-form" id="forgotForm">
+          <div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:12px;text-align:center">Reset Your PIN</div>
+          <div class="form-group">
+            <label>Registered Email Address</label>
+            <input type="email" id="forgotEmail" placeholder="Enter your registered email">
+          </div>
+          <div id="forgotOtpSection" style="display:none">
+            <div class="form-group">
+              <label>Enter OTP</label>
+              <input type="text" id="forgotOtp" placeholder="6-digit OTP" maxlength="6" inputmode="numeric">
+            </div>
+          </div>
+          <div id="forgotPinSection" style="display:none">
+            <div class="form-group">
+              <label>New 6-Digit PIN</label>
+              <div class="pin-row" id="fgtPinRow">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('fgtPin',this,0)" onkeydown="pinBackId('fgtPin',event,this,0)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('fgtPin',this,1)" onkeydown="pinBackId('fgtPin',event,this,1)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('fgtPin',this,2)" onkeydown="pinBackId('fgtPin',event,this,2)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('fgtPin',this,3)" onkeydown="pinBackId('fgtPin',event,this,3)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('fgtPin',this,4)" onkeydown="pinBackId('fgtPin',event,this,4)">
+                <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('fgtPin',this,5)" onkeydown="pinBackId('fgtPin',event,this,5)">
+              </div>
+            </div>
+          </div>
+          <button class="login-btn" id="forgotBtn" onclick="doForgotStep()">Send Reset OTP</button>
+          <div id="forgotMsg" style="min-height:18px;font-size:12px;text-align:center;margin-top:8px;color:#FFD700;font-weight:600"></div>
+          <div style="text-align:center;margin-top:10px">
+            <span class="bottom-link" onclick="showForm('loginForm')" style="margin:0;font-size:12px">← Back to Login</span>
+          </div>
+        </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-bar">
+    <div class="footer-links">
+      <span class="footer-lbl">Quick Links:</span>
+      <a class="footer-link" href="#" target="_blank">TMS Portal</a>
+      <a class="footer-link" href="#" target="_blank">BIS Portal</a>
+      <a class="footer-link" href="#" target="_blank">UMP Portal</a>
+      <a class="footer-link" href="#" target="_blank">HEM Portal</a>
+    </div>
+    <div class="footer-copy">&copy; 2026 <span>GMC &amp; AH Rajouri — AB PM-JAY MIS</span></div>
+  </div>
+
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Firebase initialized in head
+
+  // Load all data from Firebase into cache on startup
+
+
+
+function showForm(id){
+  document.querySelectorAll('.auth-form').forEach(f=>f.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Load images set by Admin Portal
+function loadBrandingFromStorage(){
+  const logo1=pmStorage.getItem('pmjay_logo1');
+  if(logo1){
+    const img=document.getElementById('logo1');
+    const ph=img.previousElementSibling;
+    img.src=logo1;img.style.display='block';
+    if(ph&&ph.classList.contains('logo-ph'))ph.style.display='none';
+  }
+  const logo2=pmStorage.getItem('pmjay_logo2');
+  if(logo2){
+    const img=document.getElementById('logo2');
+    const ph=img.previousElementSibling;
+    img.src=logo2;img.style.display='block';
+    if(ph&&ph.classList.contains('logo-ph'))ph.style.display='none';
+  }
+  const hd=pmStorage.getItem('pmjay_hdPhoto');
+  if(hd){
+    const img=document.getElementById('hdPhoto');
+    const ph=document.getElementById('photoPh');
+    img.src=hd;img.style.display='block';
+    if(ph)ph.style.display='none';
+  }
+}
+loadBrandingFromStorage();
+checkRemembered();
+function pinNext(el,idx){
+  el.value=el.value.replace(/\D/g,'');
+  el.classList.toggle('filled',el.value!=='');
+  const inputs=el.closest('.pin-row').querySelectorAll('.pin-input');
+  if(el.value&&idx<5)inputs[idx+1].focus();
+  if(el.value&&idx===5){
+    const allFilled=Array.from(inputs).every(i=>i.value!=='');
+    if(allFilled)doLogin();
+  }
+}
+function pinBack(e,el,idx){
+  if(e.key==='Backspace'&&!el.value&&idx>0){
+    const inputs=el.closest('.pin-row').querySelectorAll('.pin-input');
+    inputs[idx-1].focus();
+    inputs[idx-1].value='';
+    inputs[idx-1].classList.remove('filled');
+  }
+}
+function loadLoginImg(inp){
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=document.getElementById('loginImg');
+    const ph=document.getElementById('loginImgPh');
+    img.src=e.target.result;
+    img.style.display='block';
+    ph.style.display='none';
+  };
+  r.readAsDataURL(inp.files[0]);
+}
+function loadLogo(inp,imgId,placeholder){
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=document.getElementById(imgId);
+    img.src=e.target.result;
+    img.style.display='block';
+    if(placeholder)placeholder.style.display='none';
+  };
+  r.readAsDataURL(inp.files[0]);
+}
+function loadHD(inp){
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=document.getElementById('hdImg');
+    if(img){img.src=e.target.result;img.style.display='block';}
+    const ph=document.getElementById('hdPh');
+    if(ph)ph.style.display='none';
+  };
+  r.readAsDataURL(inp.files[0]);
+}
+
+// ══════════════════════════════════════
+// AUTH SYSTEM — Firebase + PIN
+// ══════════════════════════════════════
+var ADMIN_EMAIL = 'aravarya99@gmail.com';
+
+// ── Show/hide forms ──
+function showForm(id) {
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── PIN input helpers ──
+function pinNext(el, idx) {
+  if (el.value && idx < 5) {
+    var inputs = el.closest('.pin-row').querySelectorAll('.pin-input');
+    inputs[idx+1].focus();
+  }
+}
+function pinBack(e, el, idx) {
+  if (e.key==='Backspace' && !el.value && idx > 0) {
+    var inputs = el.closest('.pin-row').querySelectorAll('.pin-input');
+    inputs[idx-1].focus();
+  }
+}
+function pinNextId(rowId, el, idx) {
+  if (el.value && idx < 5) {
+    var inputs = document.getElementById(rowId+'Row').querySelectorAll('.pin-input');
+    if (inputs[idx+1]) inputs[idx+1].focus();
+  }
+}
+function pinBackId(rowId, e, el, idx) {
+  if (e.key==='Backspace' && !el.value && idx > 0) {
+    var inputs = document.getElementById(rowId+'Row').querySelectorAll('.pin-input');
+    if (inputs[idx-1]) inputs[idx-1].focus();
+  }
+}
+function getPinVal(rowId) {
+  return Array.from(document.getElementById(rowId+'Row').querySelectorAll('.pin-input'))
+    .map(i => i.value).join('');
+}
+function getLoginPin() {
+  return Array.from(document.querySelectorAll('.pin-row .pin-input'))
+    .map(i => i.value).join('');
+}
+
+// ── Save session ──
+function _saveSession(userData) {
+  sessionStorage.setItem('pmjay_user', JSON.stringify(userData));
+}
+
+// ── Redirect based on role ──
+function _redirect(role) {
+  if (role === 'Admin')         window.location.href = 'admin_portal.html';
+  else if (role === 'I/C AB-PMJAY') window.location.href = 'ic_portal.html';
+  else                          window.location.href = 'pmam_portal.html';
+}
+
+// ══════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════
+function doLogin() {
+  var email = (document.getElementById('loginEmail').value || '').trim().toLowerCase();
+  var pin   = getLoginPin();
+  var msg   = document.getElementById('loginMsg');
+  
+  if (!email) { msg.textContent = 'Please enter your email.'; return; }
+  if (pin.length < 6) { msg.textContent = 'Please enter your 6-digit PIN.'; return; }
+  
+  msg.textContent = 'Verifying...';
+  
+  // Check Firebase users collection
+  db.collection('users').doc(email).get().then(function(doc) {
+    if (!doc.exists) {
+      msg.textContent = 'Email not registered. Please sign up first.';
+      return;
+    }
+    var user = doc.data();
+    
+    // Check PIN
+    if (user.pin !== pin) {
+      msg.textContent = 'Incorrect PIN. Please try again.';
+      return;
+    }
+    
+    // Check approval status (Admin is always approved)
+    if (email !== ADMIN_EMAIL && user.status !== 'approved') {
+      if (user.status === 'rejected') {
+        msg.textContent = 'Your account was rejected. Contact Admin.';
+      } else {
+        msg.textContent = 'Your account is pending Admin approval. Please wait.';
+      }
+      return;
+    }
+    
+    // Save session and redirect
+    _saveSession({
+      email: email,
+      name:  user.name  || '',
+      role:  user.role  || 'PMAM',
+      desig: user.role  || 'PMAM',
+      ward:  user.ward  || '',
+      portal: email === ADMIN_EMAIL ? 'admin_portal.html' : (user.role === 'I/C AB-PMJAY' ? 'ic_portal.html' : 'pmam_portal.html')
+    });
+    
+    // Remember me
+    if (document.getElementById('rememberMe').checked) {
+      localStorage.setItem('pmjay_remember', JSON.stringify({ email: email }));
+    } else {
+      localStorage.removeItem('pmjay_remember');
+    }
+    
+    msg.textContent = 'Login successful! Redirecting...';
+    msg.style.color = '#90EE90';
+    
+    setTimeout(function() {
+      _redirect(email === ADMIN_EMAIL ? 'Admin' : user.role);
+    }, 800);
+    
+  }).catch(function(e) {
+    msg.textContent = 'Error: ' + e.code + ' — ' + e.message;
+    console.error('Firebase error:', e);
+  });
+}
+
+// ══════════════════════════════════════
+// SIGNUP — Step by step
+// ══════════════════════════════════════
+var _suStep = 'info'; // info → otp → pin
+
+function doSignupStep() {
+  if (_suStep === 'info')  _signupSendOTP();
+  else if (_suStep === 'otp') _signupVerifyOTP();
+  else if (_suStep === 'pin') _signupSetPin();
+}
+
+function _signupSendOTP() {
+  var name  = (document.getElementById('suName').value || '').trim();
+  var email = (document.getElementById('suEmail').value || '').trim().toLowerCase();
+  var role  = document.getElementById('suRole').value;
+  var ward  = (document.getElementById('suWard').value || '').trim();
+  var msg   = document.getElementById('suMsg');
+  
+  if (!name)  { msg.textContent = 'Please enter your full name.'; return; }
+  if (!email) { msg.textContent = 'Please enter your email.'; return; }
+  if (!role)  { msg.textContent = 'Please select your role.'; return; }
+  if (role === 'PMAM' && !ward) { msg.textContent = 'Please enter your ward.'; return; }
+  
+  // Block admin email
+  if (email === ADMIN_EMAIL) {
+    msg.textContent = 'This email is reserved. Please use a different email.';
+    return;
+  }
+  
+  // Check if already registered
+  msg.textContent = 'Checking...';
+  db.collection('users').doc(email).get().then(function(doc) {
+    if (doc.exists && doc.data().pin) {
+      msg.textContent = 'This email is already registered. Please login.';
+      return;
+    }
+    // Send OTP
+    msg.textContent = 'Sending OTP...';
+    fbSendOTP(email, function() {
+      document.getElementById('suOtpSection').style.display = 'block';
+      document.getElementById('suBtn').textContent = 'Verify OTP';
+      msg.textContent = 'OTP sent to ' + email + '. Check inbox/spam.';
+      _suStep = 'otp';
+    }, function(e) {
+      msg.textContent = 'Failed to send OTP. Check email and try again.';
+      console.error(e);
+    });
+  }).catch(function(e) {
+    msg.textContent = 'Connection error. Please try again.';
+  });
+}
+
+function _signupVerifyOTP() {
+  var email = (document.getElementById('suEmail').value || '').trim().toLowerCase();
+  var otp   = (document.getElementById('suOtp').value || '').trim();
+  var msg   = document.getElementById('suMsg');
+  
+  if (!otp || otp.length < 6) { msg.textContent = 'Please enter the 6-digit OTP.'; return; }
+  
+  msg.textContent = 'Verifying OTP...';
+  fbVerifyOTP(email, otp, function() {
+    document.getElementById('suOtpSection').style.display = 'none';
+    document.getElementById('suPinSection').style.display = 'block';
+    document.getElementById('suBtn').textContent = 'Complete Registration';
+    msg.textContent = 'Email verified! Now set your PIN.';
+    _suStep = 'pin';
+  }, function(e) {
+    msg.textContent = e || 'Invalid OTP. Please try again.';
+  });
+}
+
+function _signupSetPin() {
+  var email = (document.getElementById('suEmail').value || '').trim().toLowerCase();
+  var name  = (document.getElementById('suName').value || '').trim();
+  var role  = document.getElementById('suRole').value;
+  var ward  = (document.getElementById('suWard').value || '').trim();
+  var pin   = getPinVal('suPin');
+  var pin2  = getPinVal('suPin2');
+  var msg   = document.getElementById('suMsg');
+  
+  if (pin.length < 6)  { msg.textContent = 'Please enter a 6-digit PIN.'; return; }
+  if (pin !== pin2)    { msg.textContent = 'PINs do not match. Please try again.'; return; }
+  
+  msg.textContent = 'Creating account...';
+  
+  var userData = {
+    email:     email,
+    name:      name,
+    role:      role,
+    ward:      ward,
+    pin:       pin,
+    status:    'pending',
+    createdAt: new Date().toISOString()
+  };
+  
+  db.collection('users').doc(email).set(userData).then(function() {
+    msg.textContent = '✅ Account created! Awaiting Admin approval. You will be notified.';
+    msg.style.color = '#90EE90';
+    document.getElementById('suBtn').style.display = 'none';
+    // Notify admin via Firestore
+    db.collection('notifications').add({
+      type: 'new_user',
+      email: email,
+      name: name,
+      role: role,
+      ward: ward,
+      ts: new Date().toISOString(),
+      read: false
+    });
+    setTimeout(function() { showForm('loginForm'); _suStep='info'; }, 3000);
+  }).catch(function(e) {
+    msg.textContent = 'Error creating account. Please try again.';
+    console.error(e);
+  });
+}
+
+// ══════════════════════════════════════
+// FORGOT PIN
+// ══════════════════════════════════════
+var _fgtStep = 'email';
+
+function doForgotStep() {
+  if (_fgtStep === 'email') _forgotSendOTP();
+  else if (_fgtStep === 'otp') _forgotVerifyOTP();
+  else if (_fgtStep === 'pin') _forgotSetPin();
+}
+
+function _forgotSendOTP() {
+  var email = (document.getElementById('forgotEmail').value || '').trim().toLowerCase();
+  var msg   = document.getElementById('forgotMsg');
+  if (!email) { msg.textContent = 'Please enter your email.'; return; }
+  
+  msg.textContent = 'Checking...';
+  db.collection('users').doc(email).get().then(function(doc) {
+    if (!doc.exists) { msg.textContent = 'Email not registered.'; return; }
+    msg.textContent = 'Sending OTP...';
+    fbSendOTP(email, function() {
+      document.getElementById('forgotOtpSection').style.display = 'block';
+      document.getElementById('forgotBtn').textContent = 'Verify OTP';
+      msg.textContent = 'OTP sent to ' + email;
+      _fgtStep = 'otp';
+    }, function() { msg.textContent = 'Failed to send OTP.'; });
+  });
+}
+
+function _forgotVerifyOTP() {
+  var email = (document.getElementById('forgotEmail').value || '').trim().toLowerCase();
+  var otp   = (document.getElementById('forgotOtp').value || '').trim();
+  var msg   = document.getElementById('forgotMsg');
+  if (!otp) { msg.textContent = 'Enter OTP.'; return; }
+  msg.textContent = 'Verifying...';
+  fbVerifyOTP(email, otp, function() {
+    document.getElementById('forgotOtpSection').style.display = 'none';
+    document.getElementById('forgotPinSection').style.display = 'block';
+    document.getElementById('forgotBtn').textContent = 'Reset PIN';
+    msg.textContent = 'OTP verified! Set new PIN.';
+    _fgtStep = 'pin';
+  }, function(e) { msg.textContent = e || 'Invalid OTP.'; });
+}
+
+function _forgotSetPin() {
+  var email = (document.getElementById('forgotEmail').value || '').trim().toLowerCase();
+  var pin   = getPinVal('fgtPin');
+  var msg   = document.getElementById('forgotMsg');
+  if (pin.length < 6) { msg.textContent = 'Enter 6-digit PIN.'; return; }
+  msg.textContent = 'Resetting...';
+  db.collection('users').doc(email).update({ pin: pin }).then(function() {
+    msg.textContent = '✅ PIN reset successfully! Please login.';
+    msg.style.color = '#90EE90';
+    setTimeout(function() { showForm('loginForm'); _fgtStep='email'; }, 2000);
+  }).catch(function(e) { msg.textContent = 'Error. Please try again.'; });
+}
+
+// ── Load remembered email on page load ──
+function checkRemembered() {
+  try {
+    var rem = localStorage.getItem('pmjay_remember');
+    if (rem) {
+      var r = JSON.parse(rem);
+      if (r.email) {
+        var el = document.getElementById('loginEmail');
+        if (el) el.value = r.email;
+      }
+    }
+  } catch(e) {}
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  // Test Firebase connection on load
+  setTimeout(function() {
+    if (typeof firebase === 'undefined') {
+      console.error('Firebase not loaded');
+      return;
+    }
+    if (typeof db === 'undefined') {
+      console.error('Firestore db not initialized');
+      return;
+    }
+    db.collection('_test').limit(1).get()
+      .then(function() { console.log('Firebase connected OK'); })
+      .catch(function(e) { console.error('Firebase test failed:', e.code, e.message); });
+  }, 1000);
+  var rem = localStorage.getItem('pmjay_remember');
+  if (rem) {
+    try {
+      var r = JSON.parse(rem);
+      if (r.email) document.getElementById('loginEmail').value = r.email;
+    } catch(e) {}
+  }
+  // If already logged in, redirect
+  var sess = sessionStorage.getItem('pmjay_user');
+  if (sess) {
+    try {
+      var u = JSON.parse(sess);
+      if (u.email) {
+        if (u.email === ADMIN_EMAIL) window.location.href = 'admin_portal.html';
+        else if (u.role === 'I/C AB-PMJAY') window.location.href = 'ic_portal.html';
+        else window.location.href = 'pmam_portal.html';
+      }
+    } catch(e) {}
+  }
+});
+
+</script>
+
+<!-- ── WEEKEND ROSTER OVERLAY ── -->
+<div class="wr-overlay" id="wrOverlay">
+  <div class="wr-header">
+    <div>
+      <div class="wr-title">📅 Weekend Roster</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:2px">GMC &amp; AH Rajouri — AB PM-JAY Weekend Duty Schedule</div>
+    </div>
+    <button class="wr-close" onclick="closeWeekendRoster()">✕</button>
+  </div>
+  <div class="wr-body">
+    <div class="wr-table-wrap">
+      <table class="wr-table">
+        <thead>
+          <tr>
+            <th rowspan="2" style="vertical-align:middle;width:60px">S.No</th>
+            <th colspan="2" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)">Name of Employee</th>
+            <th rowspan="2" style="vertical-align:middle">Saturday<br><span style="font-size:9px;font-weight:400;opacity:0.75">(Date)</span></th>
+            <th rowspan="2" style="vertical-align:middle">Sunday<br><span style="font-size:9px;font-weight:400;opacity:0.75">(Date)</span></th>
+          </tr>
+          <tr>
+            <th style="font-size:10px;font-weight:600">PMAM 1</th>
+            <th style="font-size:10px;font-weight:600">PMAM 2</th>
+          </tr>
+        </thead>
+        <tbody id="wrDisplayBody">
+          <tr><td colspan="5" class="wr-empty">Weekend roster not published yet.<br>Please contact Admin.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="text-align:center;margin-top:16px;color:rgba(255,255,255,0.5);font-size:11px">
+      Last updated by Admin Portal &nbsp;|&nbsp; For changes contact I/C AB-PMJAY
+    </div>
+  </div>
+</div>
+
+
+<!-- ── STAFF OVERLAY ── -->
+<div class="wr-overlay" id="staffOverlay">
+  <div class="wr-header">
+    <div>
+      <div class="wr-title">👥 Staff Directory</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:2px">GMC &amp; AH Rajouri — AB PM-JAY PMAM Team</div>
+    </div>
+    <button class="wr-close" onclick="document.getElementById('staffOverlay').classList.remove('open')">✕</button>
+  </div>
+  <div class="wr-body">
+    <div id="staffDisplayGrid" class="ov-staff-grid"></div>
+    <div style="text-align:center;margin-top:16px;color:rgba(255,255,255,0.5);font-size:11px">
+      Managed by Admin Portal &nbsp;|&nbsp; For changes contact I/C AB-PMJAY
+    </div>
+  </div>
+</div>
+
+<!-- ── WARD ROSTER OVERLAY ── -->
+<div class="wr-overlay" id="wardRosterOverlay">
+  <div class="wr-header">
+    <div>
+      <div class="wr-title">🏥 Ward Roster</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:2px">GMC &amp; AH Rajouri — PMAM Ward Assignments</div>
+    </div>
+    <button class="wr-close" onclick="document.getElementById('wardRosterOverlay').classList.remove('open')">✕</button>
+  </div>
+  <div class="wr-body">
+    <div class="wr-table-wrap">
+      <table class="wr-table">
+        <thead>
+          <tr>
+            <th style="width:60px">S.No</th>
+            <th>PMAM Name</th>
+            <th>Ward Assigned</th>
+          </tr>
+        </thead>
+        <tbody id="wardRosterDisplayBody">
+          <tr><td colspan="3" class="wr-empty">Ward roster not published yet.<br>Please contact Admin.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="text-align:center;margin-top:16px;color:rgba(255,255,255,0.5);font-size:11px">
+      Managed by Admin Portal &nbsp;|&nbsp; For changes contact I/C AB-PMJAY
+    </div>
+  </div>
+</div>
+
+<!-- ── HOLIDAY ROSTER OVERLAY ── -->
+<div class="wr-overlay" id="holidayRosterOverlay">
+  <div class="wr-header">
+    <div>
+      <div class="wr-title">🎉 Holiday Roster</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:2px">GMC &amp; AH Rajouri — Holiday Duty Schedule</div>
+    </div>
+    <button class="wr-close" onclick="document.getElementById('holidayRosterOverlay').classList.remove('open')">✕</button>
+  </div>
+  <div class="wr-body">
+    <div class="wr-table-wrap">
+      <table class="wr-table">
+        <thead>
+          <tr>
+            <th style="width:50px">S.No</th>
+            <th>Holiday Name</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>PMAMs on Duty</th>
+          </tr>
+        </thead>
+        <tbody id="holidayRosterDisplayBody">
+          <tr><td colspan="4" class="wr-empty">Holiday roster not published yet.<br>Please contact Admin.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="text-align:center;margin-top:16px;color:rgba(255,255,255,0.5);font-size:11px">
+      Managed by Admin Portal &nbsp;|&nbsp; For changes contact I/C AB-PMJAY
+    </div>
+  </div>
+</div>
+
+
+<!-- ── ABOUT US OVERLAY ── -->
+<div class="wr-overlay" id="aboutUsOverlay">
+  <div class="wr-header">
+    <div>
+      <div class="wr-title">ℹ️ About Us</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:2px">GMC &amp; AH Rajouri — Ayushman Bharat PM-JAY</div>
+    </div>
+    <button class="wr-close" onclick="document.getElementById('aboutUsOverlay').classList.remove('open')">✕</button>
+  </div>
+  <div class="wr-body" style="max-width:700px;margin:0 auto">
+    <div style="background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:20px;padding:28px 32px">
+      <div id="aboutHeading" style="color:#fff;font-size:18px;font-weight:800;margin-bottom:16px;line-height:1.4">
+        Ayushman Bharat — Pradhan Mantri Jan Arogya Yojana
+      </div>
+      <div id="aboutText" style="color:rgba(255,255,255,0.82);font-size:13px;line-height:1.8">
+        Ayushman Bharat PM-JAY is the world's largest health assurance scheme launched by Government of India. It provides health coverage of Rs 5 lakh per family per year for secondary and tertiary care hospitalization. At GMC &amp; AH Rajouri, our dedicated PMAM team works to ensure every eligible beneficiary receives their entitled healthcare services seamlessly.
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px;color:rgba(255,255,255,0.5);font-size:11px">
+      Managed by Admin Portal &nbsp;|&nbsp; For changes contact I/C AB-PMJAY
+    </div>
+  </div>
+</div>
+
+<!-- ── LEAVE OVERLAY ── -->
+<div class="wr-overlay" id="leaveOverlay">
+  <div class="wr-header">
+    <div>
+      <div class="wr-title">📋 Leave Status</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:2px">GMC &amp; AH Rajouri — PMAM Leave Requests</div>
+    </div>
+    <button class="wr-close" onclick="document.getElementById('leaveOverlay').classList.remove('open')">✕</button>
+  </div>
+  <div class="wr-body">
+    <div class="wr-table-wrap">
+      <table class="wr-table">
+        <thead>
+          <tr>
+            <th style="width:50px">S.No</th>
+            <th>PMAM Name</th>
+            <th>Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Days</th>
+            <th>Covered By</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="leaveDisplayBody">
+          <tr><td colspan="8" class="wr-empty">No leave requests published yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="text-align:center;margin-top:16px;color:rgba(255,255,255,0.5);font-size:11px">
+      Managed by Admin Portal &nbsp;|&nbsp; For changes contact I/C AB-PMJAY
+    </div>
+  </div>
+</div>
+
+<!-- ── ORDERS OVERLAY ── -->
+<div class="wr-overlay" id="ordersOverlay">
+  <div class="wr-header">
+    <div>
+      <div class="wr-title">📄 Orders &amp; Circulars</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:2px">GMC &amp; AH Rajouri — Official Orders</div>
+    </div>
+    <button class="wr-close" onclick="document.getElementById('ordersOverlay').classList.remove('open')">✕</button>
+  </div>
+  <div class="wr-body">
+    <div id="ordersDisplayList" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div style="text-align:center;margin-top:16px;color:rgba(255,255,255,0.5);font-size:11px">
+      Managed by Admin Portal &nbsp;|&nbsp; For changes contact I/C AB-PMJAY
+    </div>
+  </div>
+</div>
+
+<!-- ── CONTACT US OVERLAY ── -->
+<div class="wr-overlay" id="contactUsOverlay">
+  <div class="wr-header">
+    <div>
+      <div class="wr-title">📞 Contact Us</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:2px">GMC &amp; AH Rajouri — AB PM-JAY Contact Information</div>
+    </div>
+    <button class="wr-close" onclick="document.getElementById('contactUsOverlay').classList.remove('open')">✕</button>
+  </div>
+  <div class="wr-body" style="max-width:500px;margin:0 auto">
+    <div style="background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:20px;padding:28px 32px;display:flex;flex-direction:column;gap:18px">
+      <div style="text-align:center">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1A3DB5,#6650D8);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:24px">👤</div>
+        <div id="ctName"  style="color:#fff;font-size:18px;font-weight:800">Suresh Kumar</div>
+        <div id="ctDesig" style="color:rgba(255,255,255,0.65);font-size:12px;margin-top:4px">I/C AB-PMJAY</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.08);border-radius:12px;padding:12px 16px">
+          <span style="font-size:20px">📱</span>
+          <div>
+            <div style="color:rgba(255,255,255,0.55);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Mobile</div>
+            <div id="ctPhone" style="color:#fff;font-size:15px;font-weight:700">9999999999</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.08);border-radius:12px;padding:12px 16px">
+          <span style="font-size:20px">✉️</span>
+          <div>
+            <div style="color:rgba(255,255,255,0.55);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Email</div>
+            <div id="ctEmail" style="color:#fff;font-size:15px;font-weight:700"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8efdfbfcebfde6cee9e3edfcefe4e1fbfce7a0e7e0">[email&#160;protected]</a></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.08);border-radius:12px;padding:12px 16px">
+          <span style="font-size:20px">🏥</span>
+          <div>
+            <div style="color:rgba(255,255,255,0.55);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Institution</div>
+            <div style="color:#fff;font-size:13px;font-weight:600">GMC &amp; Associated Hospital, Rajouri</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px;color:rgba(255,255,255,0.5);font-size:11px"
