@@ -10,30 +10,30 @@
 body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F0FF 0%,#C8DCFF 50%,#D6EAFF 100%);min-height:100vh;overflow-x:hidden}
 
 /* ===== BANNER ===== */
-.banner-wrap{width:100%;position:relative;height:82px;overflow:visible;z-index:500;background:linear-gradient(135deg,#2D1B8E 0%,#3D2AA0 25%,#4A35B5 50%,#5842C8 75%,#6650D8 100%);display:flex;align-items:center;padding:0 20px;gap:16px}
+.banner-wrap{width:100%;position:relative;height:82px;overflow:hidden;background:linear-gradient(135deg,#2D1B8E 0%,#3D2AA0 25%,#4A35B5 50%,#5842C8 75%,#6650D8 100%);display:flex;align-items:center;padding:0 20px;gap:16px}
 .banner-logo{width:56px;height:56px;border-radius:50%;background:#fff;border:3px solid rgba(255,255,255,0.5);overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .banner-titles{flex:0 0 auto;display:flex;flex-direction:column;gap:2px;max-width:360px}
 .banner-line1{font-size:11px;font-weight:800;color:#FF9933;letter-spacing:0.8px;text-transform:uppercase}
 .banner-line2{font-size:17px;font-weight:900;color:#4ade80;letter-spacing:0.5px;text-transform:uppercase;line-height:1.15}
 .banner-line3{font-size:10px;font-weight:600;color:rgba(255,255,255,0.75);font-style:italic}
-.banner-right-text{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;padding:0 10px;pointer-events:none}
-.brt-bars{display:flex;align-items:center;gap:10px;pointer-events:none}
+.banner-right-text{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;padding:0 20px;margin-right:200px}
+.brt-bars{display:flex;align-items:center;gap:10px}
 .brt-bar{width:5px;height:38px;background:#fff;border-radius:3px;flex-shrink:0}
 .brt-main{display:flex;flex-direction:column;align-items:center;gap:3px}
 .brt1{font-size:17px;font-weight:900;color:#fff;text-align:center;letter-spacing:1.5px;text-transform:uppercase}
 .brt2{font-size:10px;font-weight:700;color:rgba(255,255,255,0.85);letter-spacing:0.8px;text-transform:uppercase}
-.banner-overlay{display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;pointer-events:all;position:relative;z-index:100}
+.banner-overlay{position:absolute;top:0;right:0;bottom:0;display:flex;align-items:center;padding:0 16px;gap:10px;z-index:10}
 .bell-wrap{position:relative;cursor:pointer}
 .bell-wrap svg{width:22px;height:22px;fill:#fff;opacity:0.85}
 .bell-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:800;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center}
-.user-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.35);border-radius:50px;padding:5px 5px 5px 14px;cursor:pointer;position:relative}
+.user-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.35);border-radius:50px;padding:5px 12px 5px 5px;cursor:pointer;position:relative}
 .uphoto{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
 .uphoto .ini{font-size:13px;font-weight:800;color:#fff}
 .uname{font-size:11px;font-weight:800;color:#fff;white-space:nowrap}
 .udesig{font-size:9px;color:rgba(255,255,255,0.75);white-space:nowrap;text-transform:uppercase;letter-spacing:0.3px}
 .dd-arrow{font-size:10px;color:rgba(255,255,255,0.7)}
-.user-dropdown{position:fixed;top:80px;right:16px;background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,0.22);min-width:230px;display:none;z-index:999999;}
-.user-dropdown.open{display:block}.user-dropdown .dd-item:first-child{border-radius:0}.user-dropdown .dd-item:last-child{border-radius:0 0 14px 14px}
+.user-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);min-width:200px;overflow:hidden;display:none;z-index:300}
+.user-dropdown.open{display:block}
 .dd-header{padding:12px 16px;background:linear-gradient(135deg,#0F2B8C,#1A3DB5);display:flex;align-items:center;gap:10px}
 .dd-av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff}
 .dd-hname{font-size:12px;font-weight:800;color:#fff}
@@ -43,20 +43,20 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .dd-item.danger{color:#dc2626;border-bottom:none}
 .dd-item.danger:hover{background:#FFF0F0}
 .dd-item svg{width:14px;height:14px;flex-shrink:0}
-
-
-
-
-
-
+.role-submenu{background:#F8FAFF;border-top:1px solid #EEF3FF;border-bottom:1px solid #EEF3FF;display:none}
+.role-submenu.open{display:block}
+.role-opt{padding:8px 16px 8px 36px;font-size:11px;font-weight:600;cursor:pointer;color:#374151;transition:background 0.15s;display:flex;align-items:center;gap:8px}
+.role-opt:hover{background:#EFF6FF;color:#1A3DB5}
+.role-opt.current{color:#1A3DB5;font-weight:800}
+.role-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
 /* TICKER */
-.ticker{background:#E0F7FA;border-bottom:1px solid #B2EBF2;height:28px;overflow:hidden;display:flex;position:relative;z-index:0;align-items:center}
+.ticker{background:#E0F7FA;border-bottom:1px solid #B2EBF2;height:28px;overflow:hidden;display:flex;align-items:center}
 .ticker-inner{white-space:nowrap;animation:tick 35s linear infinite;color:#005F66;font-size:11px;font-weight:500;padding:0 16px}
 @keyframes tick{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
 
 /* LAYOUT */
-.layout{display:flex;min-height:calc(100vh - 110px);position:relative;z-index:1}
+.layout{display:flex;min-height:calc(100vh - 110px)}
 
 /* SIDEBAR */
 .sidebar{width:76px;background:#fff;border-right:1.5px solid #E0E8FF;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:2px;flex-shrink:0;box-shadow:2px 0 8px rgba(26,61,181,0.06)}
@@ -151,9 +151,9 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .user-name{font-size:13px;font-weight:700;color:#0F2B8C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .user-email{font-size:10px;color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .user-role{font-size:9px;padding:2px 8px;border-radius:10px;font-weight:700;display:inline-block;margin-top:4px}
-
-
-
+.role-pmam{background:#E8EFFF;color:#1A3DB5}
+.role-ic{background:#DCFCE7;color:#166534}
+.role-admin{background:#F3E8FF;color:#7c3aed}
 .user-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
 .act-btn{padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:none;font-family:"Inter",sans-serif}
 .act-edit{background:#E8EFFF;color:#1A3DB5}
@@ -249,230 +249,26 @@ tr:hover td{background:#EEF3FF}
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script>
-  var firebaseConfig = {
-    apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
-    authDomain: "gmcrajouri-pmam.firebaseapp.com",
-    projectId: "gmcrajouri-pmam",
-    storageBucket: "gmcrajouri-pmam.firebasestorage.app",
-    messagingSenderId: "115490476421",
-    appId: "1:115490476421:web:871a91987e1a92a45f34ec",
-    measurementId: "G-NK9VL87CJC"
-  };
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  var db   = firebase.firestore();
-  var auth = firebase.auth();
-  var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
-  var EMAILJS_SERVICE    = 'service_1x9ecam';
-  var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
-  if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
-</script>
-<script>
-// ══════════════════════════════════════════════════════════
-// FIREBASE BRIDGE — Replaces all localStorage calls
-// Provides same API as localStorage but uses Firestore
-// ══════════════════════════════════════════════════════════
-
-// Keys that stay in localStorage (temp/device-only)
-var LOCAL_ONLY_KEYS = ['pmjay_admin_switch','pmjay_remember','pmjay_user'];
-
-// Keys that are collections (arrays of objects)
-var COLLECTION_KEYS = ['pmjay_leave_requests','pmjay_all_entries'];
-
-// Firestore path mapping
-var FS_PATH = {
-  'pmjay_leave_requests' : { type:'collection', path:'leave_requests'        },
-  'pmjay_all_entries'    : { type:'collection', path:'daily_entries'          },
-  'pmjay_leave_policy'   : { type:'doc',        path:'settings/leave_policy'  },
-  'pmjay_holidays_master': { type:'doc',        path:'settings/holidays_master'},
-  'pmjay_holiday_roster' : { type:'doc',        path:'settings/holiday_roster' },
-  'pmjay_weekend_roster' : { type:'doc',        path:'settings/weekend_roster' },
-  'pmjay_weekend_history': { type:'doc',        path:'settings/weekend_history'},
-  'pmjay_ward_roster'    : { type:'doc',        path:'settings/ward_roster'    },
-  'pmjay_staff_data'     : { type:'doc',        path:'settings/staff_data'     },
-  'pmjay_orders'         : { type:'doc',        path:'settings/orders'         },
-  'pmjay_about_us'       : { type:'doc',        path:'settings/about_us'       },
-  'pmjay_contact_us'     : { type:'doc',        path:'settings/contact_us'     },
-  'pmjay_logo1'          : { type:'doc',        path:'settings/branding'       },
-  'pmjay_logo2'          : { type:'doc',        path:'settings/branding'       },
-  'pmjay_hdPhoto'        : { type:'doc',        path:'settings/branding'       },
-};
-
-// ── Core: set data to Firestore ──
-function fsSet(key, value, callback) {
-  if (LOCAL_ONLY_KEYS.indexOf(key) >= 0) {
-    localStorage.setItem(key, value);
-    if (callback) callback();
-    return;
-  }
-  var map = FS_PATH[key];
-  if (!map) { localStorage.setItem(key, value); if (callback) callback(); return; }
-
-  try {
-    var data = JSON.parse(value);
-    if (map.type === 'collection') {
-      // For collections: save array as batch
-      var batch = db.batch();
-      // Clear old docs first, then write new ones
-      db.collection(map.path).get().then(function(snap) {
-        snap.forEach(function(d) { batch.delete(d.ref); });
-        if (Array.isArray(data)) {
-          data.forEach(function(item, i) {
-            var ref = db.collection(map.path).doc(item._id || ('item_' + i + '_' + Date.now()));
-            batch.set(ref, item);
-          });
-        }
-        return batch.commit();
-      }).then(function() { if (callback) callback(); })
-        .catch(function(e) { console.error('fsSet collection error:', e); localStorage.setItem(key, value); if (callback) callback(); });
-    } else {
-      // For docs: save entire object
-      var parts = map.path.split('/');
-      var ref = parts.length === 2
-        ? db.collection(parts[0]).doc(parts[1])
-        : db.collection(map.path);
-      var saveData = {};
-      saveData[key] = data;
-      ref.set(saveData, { merge: true })
-        .then(function() { if (callback) callback(); })
-        .catch(function(e) { console.error('fsSet doc error:', e); localStorage.setItem(key, value); if (callback) callback(); });
-    }
-  } catch(e) {
-    localStorage.setItem(key, value);
-    if (callback) callback();
-  }
-}
-
-// ── Core: get data from Firestore ──
-function fsGet(key, callback) {
-  if (LOCAL_ONLY_KEYS.indexOf(key) >= 0) {
-    callback(localStorage.getItem(key));
-    return;
-  }
-  var map = FS_PATH[key];
-  if (!map) { callback(localStorage.getItem(key)); return; }
-
-  if (map.type === 'collection') {
-    db.collection(map.path).orderBy('_ts', 'asc').get()
-      .then(function(snap) {
-        var items = [];
-        snap.forEach(function(d) { items.push(Object.assign({ _id: d.id }, d.data())); });
-        callback(JSON.stringify(items));
-      })
-      .catch(function() {
-        // Try without orderBy
-        db.collection(map.path).get()
-          .then(function(snap) {
-            var items = [];
-            snap.forEach(function(d) { items.push(Object.assign({ _id: d.id }, d.data())); });
-            callback(JSON.stringify(items));
-          })
-          .catch(function() { callback(localStorage.getItem(key)); });
-      });
-  } else {
-    var parts = map.path.split('/');
-    var ref = parts.length === 2
-      ? db.collection(parts[0]).doc(parts[1])
-      : null;
-    if (!ref) { callback(localStorage.getItem(key)); return; }
-    ref.get()
-      .then(function(doc) {
-        if (doc.exists) {
-          var d = doc.data();
-          callback(JSON.stringify(d[key] !== undefined ? d[key] : d));
-        } else {
-          callback(localStorage.getItem(key));
-        }
-      })
-      .catch(function() { callback(localStorage.getItem(key)); });
-  }
-}
-
-// ── Override localStorage for pmjay_ keys ──
-// Wrap getItem and setItem to intercept pmjay_ keys
-var _origGetItem = localStorage.getItem.bind(localStorage);
-var _origSetItem = localStorage.setItem.bind(localStorage);
-
-// Synchronous fallback cache (populated on page load)
-var _fsCache = {};
-
-function fsPreload(keys, onDone) {
-  var pending = keys.length;
-  if (!pending) { onDone(); return; }
-  keys.forEach(function(key) {
-    fsGet(key, function(val) {
-      if (val !== null) _fsCache[key] = val;
-      pending--;
-      if (pending === 0) onDone();
-    });
-  });
-}
-
-// ── Public API matching localStorage interface ──
-var pmStorage = {
-  setItem: function(key, value, callback) {
-    _fsCache[key] = value; // update cache immediately
-    if (key.indexOf('pmjay_') === 0) {
-      fsSet(key, value, callback);
-    } else {
-      localStorage.setItem(key, value);
-      if (callback) callback();
-    }
-  },
-  getItem: function(key) {
-    if (key.indexOf('pmjay_') === 0 && LOCAL_ONLY_KEYS.indexOf(key) < 0) {
-      return _fsCache[key] !== undefined ? _fsCache[key] : localStorage.getItem(key);
-    }
-    return localStorage.getItem(key);
-  },
-  removeItem: function(key, callback) {
-    delete _fsCache[key];
-    if (key.indexOf('pmjay_') === 0 && LOCAL_ONLY_KEYS.indexOf(key) < 0) {
-      var map = FS_PATH[key];
-      if (map) {
-        var parts = map.path.split('/');
-        if (parts.length === 2) {
-          db.collection(parts[0]).doc(parts[1]).delete()
-            .then(callback || function(){})
-            .catch(callback || function(){});
-          return;
-        }
-      }
-    }
-    localStorage.removeItem(key);
-    if (callback) callback();
-  }
-};
-
-// ── ALL KEYS TO PRELOAD ON PAGE LOAD ──
-var ALL_PMJAY_KEYS = [
-  'pmjay_leave_requests','pmjay_all_entries','pmjay_leave_policy',
-  'pmjay_holidays_master','pmjay_holiday_roster','pmjay_weekend_roster',
-  'pmjay_weekend_history','pmjay_ward_roster','pmjay_staff_data',
-  'pmjay_orders','pmjay_about_us','pmjay_contact_us',
-  'pmjay_logo1','pmjay_logo2','pmjay_hdPhoto'
-];
-
-</script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec",
+      measurementId: "G-NK9VL87CJC"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
 </head>
 <body>
-<div class="user-dropdown" id="userDD">
-        <div class="dd-header">
-          <div class="dd-av">VK</div>
-          <div><div class="dd-hname">Vinod Kumar</div><div class="dd-hrole">Admin — GMC Rajouri</div></div>
-        </div>
-        <div class="dd-item" onclick="closeDD()">
-          <svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-          Update Profile
-        </div>
-        
-        
-        <div class="dd-item danger" onclick="confirmLogout()">
-          <svg viewBox="0 0 24 24" fill="#dc2626"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-          Logout
-        </div>
-      </div>
-
 
 <!-- ===== BANNER ===== -->
 <div class="banner-wrap">
@@ -503,30 +299,39 @@ var ALL_PMJAY_KEYS = [
     </div>
   </div>
   <div class="banner-overlay">
-    <!-- LEFT: User Pill -->
-    <div class="user-pill" style="margin-right:14px">
+    <div class="bell-wrap">
+      <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+      <div class="bell-badge">3</div>
+    </div>
+    <div class="user-pill" onclick="toggleDD()">
+      <div class="uphoto"><span class="ini">VK</span></div>
       <div>
         <div class="uname">Vinod Kumar</div>
         <div class="udesig">Admin</div>
       </div>
-      <div class="uphoto"><span class="ini">VK</span></div>
-    </div>
-    <!-- RIGHT: 3 rows stacked + bell -->
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="display:flex;flex-direction:column;gap:3px">
-        <button onclick="goSec('users', null)" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);border-radius:6px;padding:4px 10px;color:#fff;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:Inter,sans-serif;white-space:nowrap;width:100%">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      <span class="dd-arrow">▾</span>
+      <div class="user-dropdown" id="userDD">
+        <div class="dd-header">
+          <div class="dd-av">VK</div>
+          <div><div class="dd-hname">Vinod Kumar</div><div class="dd-hrole">Admin — GMC Rajouri</div></div>
+        </div>
+        <div class="dd-item" onclick="closeDD()">
+          <svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
           Update Profile
-        </button>
-        
-        <button onclick="confirmLogout()" style="background:rgba(220,38,38,0.3);border:1.5px solid rgba(255,100,100,0.4);border-radius:6px;padding:4px 10px;color:#fff;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:Inter,sans-serif;white-space:nowrap;width:100%">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+        </div>
+        <div class="dd-item" onclick="toggleRoleMenu(event)">
+          <svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/></svg>
+          Change Role ▸
+        </div>
+        <div class="role-submenu" id="roleMenu">
+          <div class="role-opt" onclick="switchRole('pmam')"><span class="role-dot" style="background:#1A3DB5"></span>PMAM Portal</div>
+          <div class="role-opt" onclick="switchRole('ic')"><span class="role-dot" style="background:#166534"></span>I/C AB-PMJAY Portal</div>
+          <div class="role-opt current" onclick="switchRole('admin')"><span class="role-dot" style="background:#7c3aed"></span>Admin Portal ✓</div>
+        </div>
+        <div class="dd-item danger" onclick="confirmLogout()">
+          <svg viewBox="0 0 24 24" fill="#dc2626"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
           Logout
-        </button>
-      </div>
-      <div class="bell-wrap">
-        <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-        <div class="bell-badge">3</div>
+        </div>
       </div>
     </div>
   </div>
@@ -554,21 +359,9 @@ var ALL_PMJAY_KEYS = [
       <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
       <div class="sbl">Roster</div>
     </div>
-    <div class="sbi" onclick="goSec('holidayMaster',this)" title="Holiday Master List">
-      <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zm-7-7H7v5h5v-5zm1-5h-2v3h2V7z"/></svg>
-      <div class="sbl">Holidays</div>
-    </div>
-    <div class="sbi" onclick="goSec('holiday',this)" title="Holiday Roster">
+    <div class="sbi" onclick="goSec('holiday',this)" title="Holiday Duty">
       <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
       <div class="sbl">Holiday</div>
-    </div>
-    <div class="sbi" onclick="goSec('leaveApproval',this)" title="Leave Approval">
-      <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-      <div class="sbl">Leave</div>
-    </div>
-    <div class="sbi" onclick="goSec('weekendRoster',this)" title="Weekend Roster">
-      <svg viewBox="0 0 24 24"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z"/></svg>
-      <div class="sbl">Weekend</div>
     </div>
     <div class="sb-div"></div>
     <div class="sbi" onclick="goSec('settings',this)" title="Settings">
@@ -614,10 +407,12 @@ var ALL_PMJAY_KEYS = [
             <div class="qa-icon" style="background:#F3E8FF"><svg viewBox="0 0 24 24" fill="#7c3aed"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg></div>
             <div><div class="qa-label">Settings</div><div class="qa-sub">Portal configuration</div></div>
           </div>
-          
+          <div class="qa-card" onclick="switchRole('pmam')">
+            <div class="qa-icon" style="background:#E8EFFF"><svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/></svg></div>
             <div><div class="qa-label">Open PMAM Portal</div><div class="qa-sub">Switch to PMAM view</div></div>
           </div>
-          
+          <div class="qa-card" onclick="switchRole('ic')">
+            <div class="qa-icon" style="background:#DCFCE7"><svg viewBox="0 0 24 24" fill="#166534"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/></svg></div>
             <div><div class="qa-label">Open I/C Portal</div><div class="qa-sub">Switch to I/C view</div></div>
           </div>
         </div>
@@ -644,17 +439,6 @@ var ALL_PMJAY_KEYS = [
     <!-- ===== USER MANAGEMENT ===== -->
     <div class="sec" id="sec-users">
       <div class="page-hd">User Management</div>
-      <!-- Pending Approvals -->
-      <div class="card" style="margin-bottom:14px;border:2px solid #FDE68A">
-        <div class="card-hd" style="color:#92400e">
-          ⏳ Pending Approvals
-          <span id="pendingCntBadge" style="background:#F59E0B;color:#fff;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-left:8px">0</span>
-          <button onclick="loadAllUsers()" style="margin-left:auto;background:#EEF3FF;border:none;color:#1A3DB5;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer">🔄 Refresh</button>
-        </div>
-        <div id="pendingUsersGrid">
-          <div style="color:#9ca3af;font-style:italic;font-size:12px;padding:16px">Loading...</div>
-        </div>
-      </div>
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-icon" style="background:#E8EFFF"><svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
@@ -708,156 +492,29 @@ var ALL_PMJAY_KEYS = [
           </table>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <button class="btn btn-pri" onclick="saveWardRoster()">Save &amp; Publish</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== HOLIDAY MASTER LIST ===== -->
-    <div class="sec" id="sec-holidayMaster">
-      <div class="page-hd">Holiday Master List</div>
-
-      <!-- Add Holiday Form -->
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-hd">
-          Add / Edit Official Holidays
-          <button class="btn-add" onclick="addHolidayMaster()">+ Add Holiday</button>
-        </div>
-        <div class="tbl-wrap">
-          <table id="holidayMasterTable">
-            <thead><tr>
-              <th style="width:50px">S.No</th>
-              <th>Holiday Name</th>
-              <th>Date</th>
-              <th>Type</th>
-              <th style="width:130px">Action</th>
-            </tr></thead>
-            <tbody id="holidayMasterBody">
-              <tr><td colspan="5" class="empty-td">No holidays added yet. Click + Add Holiday.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <button class="btn btn-pri" onclick="saveHolidayMaster()">Save &amp; Publish</button>
-        </div>
-        <div id="holidayMasterMsg" style="font-size:12px;text-align:right;margin-top:6px;min-height:16px;color:#166534"></div>
-      </div>
-
-      <!-- Info card -->
-      <div class="card">
-        <div style="background:#E8F0FF;border:1px solid #C5D5F5;border-radius:10px;padding:12px 14px;font-size:12px;color:#1A3DB5">
-          <strong>ℹ️ How this works:</strong><br><br>
-          1. Add all official/gazetted holidays here with correct dates<br>
-          2. These holidays auto-populate in the <strong>Holiday Roster</strong> section<br>
-          3. PMAMs see this list as a dropdown when filling <strong>Compensatory Leave</strong><br>
-          4. For Islamic festivals (Eid etc.) — edit the date after moon sighting confirmation<br>
-          5. Click <strong>Save &amp; Publish</strong> after any change — all portals update instantly
+          <button class="btn btn-pri">Save Roster</button>
         </div>
       </div>
     </div>
 
     <!-- ===== HOLIDAY DUTY ===== -->
     <div class="sec" id="sec-holiday">
-      <div class="page-hd">Holiday Roster</div>
+      <div class="page-hd">Holiday Duty Roster</div>
       <div class="card">
         <div class="card-hd">
-          Holiday Duty Assignments
-          <button class="btn-add" onclick="addHolidayRow()">+ Add Row</button>
-          <button class="btn btn-pri" onclick="populateFromMaster()" style="margin-left:8px;font-size:11px;height:30px;padding:0 12px">↓ Load from Holiday Master</button>
+          Holiday Assignments
+          <button class="btn-add" onclick="addHolidayRow()">+ Add Holiday</button>
         </div>
         <div class="tbl-wrap">
           <table class="holiday-tbl">
             <thead><tr>
-              <th>S.No</th><th>Holiday Name</th><th>Date</th>
-              <th style="background:linear-gradient(90deg,#166534,#15803d)">PMAMs on Duty</th>
-              <th style="background:linear-gradient(90deg,#0F2B8C,#1A3DB5)">PMAMs on Holiday <span style="font-size:9px;font-weight:400;opacity:0.8">(auto)</span></th>
-              <th>Action</th>
+              <th>S.No</th><th>Holiday Name</th><th>Date</th><th>PMAMs on Duty (Max 7)</th><th>Action</th>
             </tr></thead>
             <tbody id="holidayBody"></tbody>
           </table>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <button class="btn btn-pri" onclick="saveHolidayRoster()">Save &amp; Publish</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== LEAVE APPROVAL ===== -->
-    <div class="sec" id="sec-leaveApproval">
-      <div class="page-hd">Leave Approval</div>
-      <div class="card">
-        <div class="card-hd">
-          Pending Leave Requests
-          <button class="btn-add" onclick="loadLeaveApproval()" style="margin-left:auto">🔄 Refresh</button>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>S.No</th><th>PMAM Name</th><th>Ward</th><th>Type</th>
-              <th>From</th><th>To</th><th>Days</th><th>Covered By</th><th>Reason</th><th>Status</th><th>Action</th>
-            </tr></thead>
-            <tbody id="leaveApprovalBody">
-              <tr><td colspan="11" class="empty-td">Click Refresh to load leave requests</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <button class="btn btn-pri" onclick="publishLeaveStatus()">Save &amp; Publish Status</button>
-        </div>
-        <div id="leaveApprovalMsg" style="font-size:12px;text-align:right;margin-top:6px;min-height:16px;color:#166534"></div>
-      </div>
-    </div>
-
-    <!-- ===== WEEKEND ROSTER ===== -->
-    <div class="sec" id="sec-weekendRoster">
-      <div class="page-hd">Weekend Roster</div>
-
-      <!-- Tabs -->
-      <div class="tabs" style="margin-bottom:14px">
-        <div class="tab active" id="wr-tab-current" onclick="switchWrTab('current',this)">Current Roster</div>
-        <div class="tab" id="wr-tab-history" onclick="switchWrTab('history',this)">History <span id="wr-hist-cnt" style="background:rgba(26,61,181,0.15);color:#1A3DB5;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px">0</span></div>
-      </div>
-
-      <!-- Current Roster Tab -->
-      <div id="wr-panel-current">
-        <div class="card" style="margin-bottom:12px">
-          <div id="wr-cycle-alert" style="display:none;background:#FEF9EC;border:1.5px solid #FDE68A;border-radius:10px;padding:10px 14px;font-size:12px;color:#92400e;font-weight:600;margin-bottom:12px;align-items:center;gap:8px"></div>
-          <div class="card-hd">
-            Weekend Duty Assignments
-            <button class="btn-add" onclick="addWeekendRow()">+ Add Row</button>
-          </div>
-          <div class="tbl-wrap">
-            <table id="weekendTable">
-              <thead>
-                <tr>
-                  <th rowspan="2" style="width:50px;vertical-align:middle">S.No</th>
-                  <th colspan="2" style="text-align:center;background:linear-gradient(90deg,#0F2B8C,#1A3DB5)">Name of Employee</th>
-                  <th rowspan="2" style="vertical-align:middle">Saturday<br><span style="font-size:10px;font-weight:400;opacity:0.8">(Date)</span></th>
-                  <th rowspan="2" style="vertical-align:middle">Sunday<br><span style="font-size:10px;font-weight:400;opacity:0.8">(Date)</span></th>
-                  <th rowspan="2" style="width:90px;vertical-align:middle">Action</th>
-                </tr>
-                <tr>
-                  <th style="font-size:10px;font-weight:600;letter-spacing:0.3px">PMAM 1</th>
-                  <th style="font-size:10px;font-weight:600;letter-spacing:0.3px">PMAM 2</th>
-                </tr>
-              </thead>
-              <tbody id="weekendBody"></tbody>
-            </table>
-          </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:8px">
-            <button class="btn btn-pri" onclick="saveWeekendRoster()">Save &amp; Publish</button>
-          </div>
-          <div id="weekendMsg" style="font-size:12px;text-align:right;margin-top:6px;min-height:16px;color:#166534"></div>
-        </div>
-      </div>
-
-      <!-- History Tab -->
-      <div id="wr-panel-history" style="display:none">
-        <div class="card">
-          <div class="card-hd">Past Roster Cycles</div>
-          <div id="wr-history-list">
-            <div style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">No completed cycles yet</div>
-          </div>
+          <button class="btn btn-pri">Save Holiday Roster</button>
         </div>
       </div>
     </div>
@@ -872,9 +529,6 @@ var ALL_PMJAY_KEYS = [
           <div class="sbs-section-label">Portal</div>
           <div class="sbs-item active" onclick="showPanel('portal',this)">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Portal Info
-          </div>
-          <div class="sbs-item" onclick="showPanel('branding',this)">
-            <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>Branding &amp; Images
           </div>
           <div class="sbs-item" onclick="showPanel('ticker',this)">
             <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>Ticker Message
@@ -904,9 +558,6 @@ var ALL_PMJAY_KEYS = [
           <div class="sbs-item" onclick="showPanel('wards',this)">
             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>Ward Management
           </div>
-          <div class="sbs-item" onclick="showPanel('leavepolicy',this)">
-            <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>Leave Policy
-          </div>
           <div class="sbs-item" onclick="showPanel('sysinfo',this)">
             <svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z"/></svg>System Info
           </div>
@@ -923,66 +574,7 @@ var ALL_PMJAY_KEYS = [
                 <div class="sfld"><label>Contact Email</label><input type="email" value="Ayushman@gmail.com"></div>
                 <div class="sfld"><label>Contact Phone</label><input type="text" value="+91 99999 99999"></div>
               </div>
-              <div class="save-row"><button class="btn btn-pri" onclick="showToast('Settings saved successfully ✓','success')">Save Changes</button></div>
-            </div>
-          </div>
-
-          <!-- BRANDING & IMAGES PANEL -->
-          <div class="settings-panel" id="panel-branding">
-            <div class="s-card">
-              <div class="s-card-title">
-                <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                Branding &amp; Images
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:18px">
-
-                <!-- Logo 1: PM-JAY -->
-                <div>
-                  <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px">Logo 1 — PM-JAY</div>
-                  <div id="adminLogo1Box" style="width:100%;height:110px;border:2px dashed #C5D5F5;border-radius:14px;background:#F0F5FF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;overflow:hidden;position:relative;transition:border-color 0.2s" onclick="document.getElementById('adminLogo1Input').click()">
-                    <img id="adminLogo1Img" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:12px" alt="">
-                    <div id="adminLogo1Ph">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="#93b4ff"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                      <div style="font-size:10px;color:#6b7280;text-align:center">Click to upload<br>PM-JAY Logo</div>
-                    </div>
-                    <input type="file" id="adminLogo1Input" accept="image/*" style="display:none" onchange="adminUploadImg(this,'logo1')">
-                  </div>
-                  <button onclick="adminClearImg('logo1')" style="margin-top:6px;width:100%;padding:5px;border:1px solid #FCA5A5;background:#FEF2F2;color:#dc2626;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">Remove</button>
-                </div>
-
-                <!-- Logo 2: GMC -->
-                <div>
-                  <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px">Logo 2 — GMC</div>
-                  <div id="adminLogo2Box" style="width:100%;height:110px;border:2px dashed #C5D5F5;border-radius:14px;background:#F0F5FF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;overflow:hidden;position:relative;transition:border-color 0.2s" onclick="document.getElementById('adminLogo2Input').click()">
-                    <img id="adminLogo2Img" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:12px" alt="">
-                    <div id="adminLogo2Ph">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="#93b4ff"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                      <div style="font-size:10px;color:#6b7280;text-align:center">Click to upload<br>GMC Logo</div>
-                    </div>
-                    <input type="file" id="adminLogo2Input" accept="image/*" style="display:none" onchange="adminUploadImg(this,'logo2')">
-                  </div>
-                  <button onclick="adminClearImg('logo2')" style="margin-top:6px;width:100%;padding:5px;border:1px solid #FCA5A5;background:#FEF2F2;color:#dc2626;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">Remove</button>
-                </div>
-
-                <!-- Hospital Photo -->
-                <div>
-                  <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px">Hospital / HD Photo</div>
-                  <div id="adminHdBox" style="width:100%;height:110px;border:2px dashed #C5D5F5;border-radius:14px;background:#F0F5FF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;overflow:hidden;position:relative;transition:border-color 0.2s" onclick="document.getElementById('adminHdInput').click()">
-                    <img id="adminHdImg" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:12px" alt="">
-                    <div id="adminHdPh">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="#93b4ff"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                      <div style="font-size:10px;color:#6b7280;text-align:center">Click to upload<br>Hospital Photo</div>
-                    </div>
-                    <input type="file" id="adminHdInput" accept="image/*" style="display:none" onchange="adminUploadImg(this,'hdPhoto')">
-                  </div>
-                  <button onclick="adminClearImg('hdPhoto')" style="margin-top:6px;width:100%;padding:5px;border:1px solid #FCA5A5;background:#FEF2F2;color:#dc2626;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">Remove</button>
-                </div>
-
-              </div>
-              <div style="background:#E8F0FF;border:1px solid #C5D5F5;border-radius:10px;padding:10px 14px;font-size:11px;color:#1A3DB5;display:flex;align-items:center;gap:8px">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                Images are saved to browser storage and automatically appear on the Landing Page. Upload PNG or JPG. Recommended: Logo 300×300px, Hospital Photo 1920×1080px.
-              </div>
+              <div class="save-row"><button class="btn btn-pri">Save Changes</button></div>
             </div>
           </div>
 
@@ -993,7 +585,7 @@ var ALL_PMJAY_KEYS = [
               <div style="background:#E8F0FF;border:1px solid #C5D5F5;border-radius:8px;padding:8px 12px;font-size:11px;color:#1A3DB5;font-weight:500;margin-top:6px" id="tickerPrev">Preview will appear here...</div>
               <div class="save-row">
                 <button class="btn btn-sec" onclick="document.getElementById('tickerPrev').textContent=document.getElementById('tickerTxt').value">Preview</button>
-                <button class="btn btn-pri" onclick="showToast('Ticker saved successfully ✓','success')">Save Ticker</button>
+                <button class="btn btn-pri">Save Ticker</button>
               </div>
             </div>
           </div>
@@ -1009,7 +601,7 @@ var ALL_PMJAY_KEYS = [
                   <select><option>5:00 PM</option><option>4:00 PM</option><option>6:00 PM</option></select>
                 </div>
               </div>
-              <div class="save-row"><button class="btn btn-pri" onclick="showToast('Settings saved successfully ✓','success')">Save Settings</button></div>
+              <div class="save-row"><button class="btn btn-pri">Save Settings</button></div>
             </div>
           </div>
 
@@ -1028,7 +620,7 @@ var ALL_PMJAY_KEYS = [
               <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>About Us Content</div>
               <div class="sfld"><label>Section Heading</label><input type="text" value="Ayushman Bharat — Pradhan Mantri Jan Arogya Yojana"></div>
               <div class="sfld"><label>About Text</label><textarea style="height:120px">Ayushman Bharat PM-JAY is the world's largest health assurance scheme launched by Government of India. It provides health coverage of Rs 5 lakh per family per year for secondary and tertiary care hospitalization. At GMC & AH Rajouri, our dedicated PMAM team works to ensure every eligible beneficiary receives their entitled healthcare services seamlessly.</textarea></div>
-              <div class="save-row"><button class="btn btn-pri" onclick="saveAboutUs()">Save &amp; Publish</button></div>
+              <div class="save-row"><button class="btn btn-pri">Save About Us</button></div>
             </div>
           </div>
 
@@ -1049,7 +641,6 @@ var ALL_PMJAY_KEYS = [
                 <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
                 Orders Management
                 <button class="btn-add" onclick="document.getElementById('addOrderModal').classList.add('open')" style="margin-left:auto">+ Add Order</button>
-                <button class="btn btn-pri" onclick="saveOrders()" style="margin-left:6px;font-size:11px;height:30px;padding:0 12px">Save &amp; Publish</button>
               </div>
               <div id="ordersList"><div style="color:#9ca3af;font-style:italic;text-align:center;padding:20px">No orders added yet</div></div>
             </div>
@@ -1064,7 +655,7 @@ var ALL_PMJAY_KEYS = [
                 <div class="sfld"><label>Mobile Number</label><input type="text" value="9999999999"></div>
                 <div class="sfld"><label>Email</label><input type="email" value="suresh@gmcrajouri.in"></div>
               </div>
-              <div class="save-row"><button class="btn btn-pri" onclick="saveContactUs()">Save &amp; Publish</button></div>
+              <div class="save-row"><button class="btn btn-pri">Save Contact</button></div>
             </div>
           </div>
 
@@ -1079,110 +670,6 @@ var ALL_PMJAY_KEYS = [
             </div>
           </div>
 
-          <div class="settings-panel" id="panel-leavepolicy">
-            <div class="s-card">
-              <div class="s-card-title">
-                <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
-                Leave Policy Configuration
-              </div>
-              <div style="background:#E8F0FF;border:1px solid #C5D5F5;border-radius:10px;padding:10px 14px;font-size:11px;color:#1A3DB5;margin-bottom:16px">
-                ℹ️ Set the maximum allowed days for each leave type per year. Casual Leave resets every 1st January. Reset cycle for other types is configurable below.
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" id="leavePolicyGrid">
-
-                <!-- Casual Leave -->
-                <div style="background:#F8FAFF;border:1.5px solid rgba(26,61,181,0.12);border-radius:14px;padding:14px">
-                  <div style="font-size:12px;font-weight:700;color:#0F2B8C;margin-bottom:10px">🗓 Casual Leave</div>
-                  <div class="sfld"><label>Max Days / Year</label>
-                    <input type="number" id="lp_casual_days" value="15" min="0" max="365" style="width:100%;padding:7px 10px;border:1.5px solid #C5D5F5;border-radius:8px;font-size:13px;font-weight:700;color:#0F2B8C;outline:none">
-                  </div>
-                  <div class="sfld"><label>Reset Cycle</label>
-                    <select id="lp_casual_reset" style="width:100%;padding:7px 10px;border:1.5px solid #C5D5F5;border-radius:8px;font-size:12px;outline:none">
-                      <option value="jan" selected>1st January every year</option>
-                      <option value="apr">1st April (Financial Year)</option>
-                      <option value="join">Anniversary (Date of Joining)</option>
-                    </select>
-                  </div>
-                  <div style="font-size:10px;color:#6b7280;margin-top:4px">Default: 15 days, resets 1st Jan</div>
-                </div>
-
-                <!-- Medical Leave -->
-                <div style="background:#F8FAFF;border:1.5px solid rgba(26,61,181,0.12);border-radius:14px;padding:14px">
-                  <div style="font-size:12px;font-weight:700;color:#0F2B8C;margin-bottom:10px">🏥 Medical Leave</div>
-                  <div class="sfld"><label>Max Days / Year</label>
-                    <input type="number" id="lp_medical_days" value="10" min="0" max="365" style="width:100%;padding:7px 10px;border:1.5px solid #C5D5F5;border-radius:8px;font-size:13px;font-weight:700;color:#0F2B8C;outline:none">
-                  </div>
-                  <div class="sfld"><label>Reset Cycle</label>
-                    <select id="lp_medical_reset" style="width:100%;padding:7px 10px;border:1.5px solid #C5D5F5;border-radius:8px;font-size:12px;outline:none">
-                      <option value="jan" selected>1st January every year</option>
-                      <option value="apr">1st April (Financial Year)</option>
-                      <option value="join">Anniversary (Date of Joining)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Compensatory Leave -->
-                <div style="background:#F8FAFF;border:1.5px solid rgba(26,61,181,0.12);border-radius:14px;padding:14px">
-                  <div style="font-size:12px;font-weight:700;color:#0F2B8C;margin-bottom:10px">⚖️ Compensatory Leave</div>
-                  <div class="sfld"><label>Max Days / Year</label>
-                    <input type="number" id="lp_comp_days" value="12" min="0" max="365" style="width:100%;padding:7px 10px;border:1.5px solid #C5D5F5;border-radius:8px;font-size:13px;font-weight:700;color:#0F2B8C;outline:none">
-                  </div>
-                  <div class="sfld"><label>Reset Cycle</label>
-                    <select id="lp_comp_reset" style="width:100%;padding:7px 10px;border:1.5px solid #C5D5F5;border-radius:8px;font-size:12px;outline:none">
-                      <option value="jan" selected>1st January every year</option>
-                      <option value="apr">1st April (Financial Year)</option>
-                      <option value="join">Anniversary (Date of Joining)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Maternity Leave -->
-                <div style="background:#F8FAFF;border:1.5px solid rgba(26,61,181,0.12);border-radius:14px;padding:14px">
-                  <div style="font-size:12px;font-weight:700;color:#0F2B8C;margin-bottom:10px">👶 Maternity Leave</div>
-                  <div class="sfld"><label>Max Days / Year</label>
-                    <input type="number" id="lp_maternity_days" value="180" min="0" max="365" style="width:100%;padding:7px 10px;border:1.5px solid #C5D5F5;border-radius:8px;font-size:13px;font-weight:700;color:#0F2B8C;outline:none">
-                  </div>
-                  <div class="sfld"><label>Reset Cycle</label>
-                    <select id="lp_maternity_reset" style="width:100%;padding:7px 10px;border:1.5px solid #C5D5F5;border-radius:8px;font-size:12px;outline:none">
-                      <option value="jan" selected>1st January every year</option>
-                      <option value="apr">1st April (Financial Year)</option>
-                      <option value="join">Anniversary (Date of Joining)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Paternity Leave -->
-                <div style="background:#F8FAFF;border:1.5px solid rgba(26,61,181,0.12);border-radius:14px;padding:14px">
-                  <div style="font-size:12px;font-weight:700;color:#0F2B8C;margin-bottom:10px">👨‍👧 Paternity Leave</div>
-                  <div class="sfld"><label>Max Days / Year</label>
-                    <input type="number" id="lp_paternity_days" value="15" min="0" max="365" style="width:100%;padding:7px 10px;border:1.5px solid #C5D5F5;border-radius:8px;font-size:13px;font-weight:700;color:#0F2B8C;outline:none">
-                  </div>
-                  <div class="sfld"><label>Reset Cycle</label>
-                    <select id="lp_paternity_reset" style="width:100%;padding:7px 10px;border:1.5px solid #C5D5F5;border-radius:8px;font-size:12px;outline:none">
-                      <option value="jan" selected>1st January every year</option>
-                      <option value="apr">1st April (Financial Year)</option>
-                      <option value="join">Anniversary (Date of Joining)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Leave Without Pay -->
-                <div style="background:#FFF8F0;border:1.5px solid rgba(234,88,12,0.15);border-radius:14px;padding:14px">
-                  <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:10px">💰 Leave Without Pay</div>
-                  <div style="font-size:12px;color:#92400e;font-weight:600;padding:10px;background:#FEF3C7;border-radius:8px;text-align:center">
-                    No limit — Always allowed<br>
-                    <span style="font-size:10px;font-weight:400">Salary deducted per day</span>
-                  </div>
-                </div>
-
-              </div>
-              <div class="save-row" style="margin-top:18px">
-                <button class="btn btn-pri" onclick="saveLeavePolicyAdmin()">Save &amp; Publish Policy</button>
-              </div>
-              <div id="lp_msg" style="font-size:12px;text-align:right;margin-top:6px;min-height:16px;color:#166534"></div>
-            </div>
-          </div>
-
           <div class="settings-panel" id="panel-sysinfo">
             <div class="s-card">
               <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z"/></svg>System Information</div>
@@ -1192,8 +679,8 @@ var ALL_PMJAY_KEYS = [
               <div class="info-row"><span class="info-key">Total Entries</span><span class="info-val">—</span></div>
               <div class="info-row"><span class="info-key">Last Backup</span><span class="info-val">Never</span></div>
               <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-                <button class="btn btn-grn" onclick="showToast('Backup initiated. Email will be sent shortly.','success')">Backup Now</button>
-                <button class="btn btn-red" onclick="if(confirm('Are you sure? This will permanently delete ALL portal data. This action cannot be undone.'))showToast('All data cleared successfully.','success')">Clear All Data</button>
+                <button class="btn btn-grn">Backup Now</button>
+                <button class="btn btn-red">Clear All Data</button>
               </div>
             </div>
           </div>
@@ -1264,7 +751,7 @@ var ALL_PMJAY_KEYS = [
     <p style="font-size:13px;color:#374151;margin-bottom:14px">Reset PIN for <strong id="resetName"></strong>? A new OTP will be sent to their email to set a new PIN.</p>
     <div class="modal-footer">
       <button class="mbtn mbtn-sec" onclick="document.getElementById('resetModal').classList.remove('open')">Cancel</button>
-      <button class="mbtn mbtn-pri" onclick="showToast('OTP sent to user email successfully','success')">Send Reset OTP</button>
+      <button class="mbtn mbtn-pri">Send Reset OTP</button>
     </div>
   </div>
 </div>
@@ -1297,31 +784,27 @@ var ALL_PMJAY_KEYS = [
 </div>
 
 <script>
-  // Firebase initialized in head
-
-  // Load all data from Firebase into cache on startup
-  if (typeof fsPreload !== 'undefined' && typeof ALL_PMJAY_KEYS !== 'undefined') {
-    fsPreload(ALL_PMJAY_KEYS, function() { console.log('Firebase data preloaded'); });
-  }
-
-
 // ===== DATA =====
-let pmams=[];
-
-let others=[];
-
+let pmams=[
+  {name:'Tania Manhas',email:'tania@gmail.com',ward:'Female Surgery Ward',status:'active'},
+  {name:'Abrar Choudhary',email:'abrar@gmail.com',ward:'Male Medicine Ward A & B',status:'active'},
+  {name:'Asia Firdose',email:'asia@gmail.com',ward:'Optha',status:'active'},
+  {name:'Payal Sharma',email:'payal@gmail.com',ward:'Gynae',status:'active'},
+  {name:'Rukhsar Akhter',email:'rukhsar@gmail.com',ward:'Female Medicine Ward A',status:'active'},
+  {name:'Gagandeep Singh',email:'gagandeep@gmail.com',ward:'Orthopaedics',status:'active'},
+  {name:'Ambika Thakur',email:'ambika@gmail.com',ward:'Female Medicine Ward B',status:'active'},
+  {name:'Safeer Ahmed',email:'safeer@gmail.com',ward:'Male Surgery Ward',status:'active'},
+  {name:'Vinod Kumar',email:'vinod@gmail.com',ward:'Onco / MICU',status:'active'},
+];
+let others=[
+  {name:'Suresh Kumar',email:'suresh@gmail.com',role:'I/C AB-PMJAY',status:'active'},
+  {name:'Vinod Kumar',email:'aravarya99@gmail.com',role:'Admin',status:'active'},
+];
 let wards=['Orthopaedics','Male Surgery Ward','Female Surgery Ward','Male Medicine Ward A','Male Medicine Ward B','Female Medicine Ward A','Female Medicine Ward B','MICU','SICU','Optha','Onco','Gynae','ENT','Dental','Disaster','Dialysis'];
 let staffData=[
-  {name:'Suresh Kumar',    desig:'I/C AB-PMJAY', ward:'Admin'},
-  {name:'Tania Manhas',    desig:'PMAM',          ward:'Female Surgery Ward'},
-  {name:'Abrar Choudhary', desig:'PMAM',          ward:'Male Medicine Ward A'},
-  {name:'Asia Firdose',    desig:'PMAM',          ward:'Optha'},
-  {name:'Payal Sharma',    desig:'PMAM',          ward:'Gynae'},
-  {name:'Rukhsar Akhter',  desig:'PMAM',          ward:'Female Medicine Ward A'},
-  {name:'Gagandeep Singh', desig:'PMAM',          ward:'Orthopaedics'},
-  {name:'Ambika Thakur',   desig:'PMAM',          ward:'Female Medicine Ward B'},
-  {name:'Safeer Ahmed',    desig:'PMAM',          ward:'Male Surgery Ward'},
-  {name:'Vinod Kumar',     desig:'PMAM',          ward:'Onco'},
+  {name:'Suresh Kumar',desig:'I/C AB-PMJAY',ward:'Admin'},
+  {name:'Tania Manhas',desig:'PMAM',ward:'Female Surgery Ward'},
+  {name:'Gagandeep Singh',desig:'PMAM',ward:'Orthopaedics'},
 ];
 let rosterData=[];
 let holidayData=[];
@@ -1339,32 +822,15 @@ function goSec(id,el){
 }
 
 // ===== DROPDOWN =====
-
-
-function toggleDD(){
-  var dd=document.getElementById('userDD');
-  if(dd.style.display==='block'){
-    dd.style.display='none';
-  }else{
-    var pill=document.querySelector('.user-pill');
-    if(pill){
-      var r=pill.getBoundingClientRect();
-      dd.style.top=(r.bottom+6)+'px';
-      dd.style.left=r.left+'px';
-      dd.style.right='auto';
-    }
-    dd.style.display='block';
-  }
+function toggleDD(){document.getElementById('userDD').classList.toggle('open');}
+function closeDD(){document.getElementById('userDD').classList.remove('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.user-pill'))document.getElementById('userDD').classList.remove('open');});
+function toggleRoleMenu(e){e.stopPropagation();document.getElementById('roleMenu').classList.toggle('open');}
+function switchRole(role){
+  closeDD();
+  if(role==='pmam')window.open('pmam_portal.html','_blank');
+  else if(role==='ic')window.open('ic_portal.html','_blank');
 }
-function closeDD(){document.getElementById('userDD').style.display='none';}
-document.addEventListener('click',function(e){
-  if(!e.target.closest('.user-pill')&&!e.target.closest('#userDD')&&!true){
-    document.getElementById('userDD').classList.remove('open');
-    
-  }
-});
-
-
 function confirmLogout(){
   closeDD();
   if(confirm('Are you sure you want to logout?'))window.location.href='index.html';
@@ -1372,14 +838,6 @@ function confirmLogout(){
 
 // ===== DASHBOARD =====
 function loadDashboard(){
-  // Load real leave count from PMAM submissions
-  try {
-    var leaves = JSON.parse(pmStorage.getItem('pmjay_leave_requests') || '[]');
-    var pending = leaves.filter(function(l){ return l.status==='Pending'; }).length;
-    var el = document.querySelector('.mcard.c6 .mcard-num');
-    if (el) el.textContent = pending;
-  } catch(e) {}
-
   const reportStatus=pmams.map((p,i)=>({
     name:p.name,ward:p.ward,
     status:i<7?'submitted':'pending',
@@ -1409,73 +867,6 @@ function loadDashboard(){
 }
 
 // ===== USERS =====
-
-// ══════════════════════════════════════
-// USER MANAGEMENT — Firebase
-// ══════════════════════════════════════
-var _pendingUsers = [];
-
-function loadAllUsers() {
-  db.collection('users').get().then(function(snap) {
-    pmams = []; others = []; _pendingUsers = [];
-    snap.forEach(function(doc) {
-      var u = doc.data();
-      if (u.email === 'aravarya99@gmail.com') return; // skip admin
-      if (u.status === 'pending') {
-        _pendingUsers.push(u);
-      } else if (u.role === 'PMAM') {
-        pmams.push(u);
-      } else {
-        others.push(u);
-      }
-    });
-    renderPmams();
-    renderOthers();
-    renderPendingUsers();
-    // Update bell badge
-    var badge = document.querySelector('.bell-badge');
-    if (badge) badge.textContent = _pendingUsers.length || '0';
-  }).catch(function(e) { console.error('loadAllUsers error:', e); });
-}
-
-function renderPendingUsers() {
-  var container = document.getElementById('pendingUsersGrid');
-  if (!container) return;
-  if (!_pendingUsers.length) {
-    container.innerHTML = '<div style="color:#9ca3af;font-style:italic;font-size:12px;padding:16px">No pending approvals</div>';
-    return;
-  }
-  container.innerHTML = _pendingUsers.map(function(u) {
-    var ini = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
-    return '<div style="background:#FEF9EC;border:1.5px solid #FDE68A;border-radius:12px;padding:12px 14px;margin-bottom:8px">'
-      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
-      + '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff">'+ini+'</div>'
-      + '<div><div style="font-size:13px;font-weight:700;color:#0F2B8C">'+u.name+'</div>'
-      + '<div style="font-size:11px;color:#6b7280">'+u.email+' &nbsp;|&nbsp; '+u.role+(u.ward?' &nbsp;|&nbsp; '+u.ward:'')+'</div></div></div>'
-      + '<div style="display:flex;gap:8px">'
-      + '<button data-email="'+u.email+'" onclick="approveUser(this.dataset.email)" style="flex:1;background:#166534;color:#fff;border:none;border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer">✓ Approve</button>'
-      + '<button data-email="'+u.email+'" onclick="rejectUser(this.dataset.email)" style="flex:1;background:#dc2626;color:#fff;border:none;border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer">✗ Reject</button>'
-      + '</div></div>';
-  }).join('');
-}
-
-function approveUser(email) {
-  db.collection('users').doc(email).update({ status: 'approved' })
-    .then(function() {
-      showToast('User approved ✓', 'success');
-      loadAllUsers();
-    }).catch(function(e) { showToast('Error: '+e.message,'error'); });
-}
-
-function rejectUser(email) {
-  if (!confirm('Reject and delete account for ' + email + '?')) return;
-  db.collection('users').doc(email).update({ status: 'rejected' })
-    .then(function() {
-      showToast('User rejected', 'success');
-      loadAllUsers();
-    }).catch(function(e) { showToast('Error: '+e.message,'error'); });
-}
-
 function renderPmams(){
   document.getElementById('pmamGrid').innerHTML=pmams.map((u,i)=>`
     <div class="user-card">
@@ -1568,484 +959,27 @@ function renderRoster(){
   </tr>`).join('');
 }
 
-// ===== HOLIDAY MASTER =====
-var holidayMasterData = [];
-try { holidayMasterData = JSON.parse(pmStorage.getItem('pmjay_holidays_master') || '[]'); } catch(e) {}
-
-var HOLIDAY_TYPES = ['Gazetted Holiday','National Holiday','Regional Holiday','Restricted Holiday','Other'];
-
-function addHolidayMaster() {
-  holidayMasterData.push({ name:'', date:'', type:'Gazetted Holiday' });
-  renderHolidayMaster();
-}
-
-function renderHolidayMaster() {
-  var b = document.getElementById('holidayMasterBody');
-  if (!holidayMasterData.length) {
-    b.innerHTML = '<tr><td colspan="5" class="empty-td">No holidays added yet. Click + Add Holiday.</td></tr>';
-    return;
-  }
-  var typeOpts = HOLIDAY_TYPES.map(function(t){
-    return '<option>'+t+'</option>';
-  }).join('');
-  b.innerHTML = holidayMasterData.map(function(h, i) {
-    return '<tr style="vertical-align:middle">'
-      + '<td style="text-align:center;font-weight:700;color:#1A3DB5">'+(i+1)+'</td>'
-      + '<td><input value="'+(h.name||'')+'" placeholder="Holiday Name e.g. Eid ul-Fitr"'
-      + ' style="width:100%;padding:5px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none;font-family:Inter,sans-serif"'
-      + ' data-i="'+i+'" onchange="holidayMasterData[+this.dataset.i].name=this.value"></td>'
-      + '<td><input type="date" value="'+(h.date||'')+'"'
-      + ' style="width:100%;padding:5px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none;font-family:Inter,sans-serif"'
-      + ' data-i="'+i+'" onchange="holidayMasterData[+this.dataset.i].date=this.value"></td>'
-      + '<td><select style="width:100%;padding:5px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none;font-family:Inter,sans-serif"'
-      + ' data-i="'+i+'" onchange="holidayMasterData[+this.dataset.i].type=this.value">'
-      + HOLIDAY_TYPES.map(function(t){ return '<option'+(h.type===t?' selected':'')+'>'+t+'</option>'; }).join('')
-      + '</select></td>'
-      + '<td style="white-space:nowrap">'
-      + '<button data-i="'+i+'" onclick="editHolidayMaster(+this.dataset.i)" style="background:#E8EFFF;color:#1A3DB5;border:none;border-radius:6px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer;margin-right:4px">✏️ Edit</button>'
-      + '<button data-i="'+i+'" onclick="deleteHolidayMaster(+this.dataset.i)" style="background:#FEE2E2;color:#dc2626;border:none;border-radius:6px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer">🗑 Del</button>'
-      + '</td>'
-      + '</tr>';
-  }).join('');
-}
-
-function editHolidayMaster(i) {
-  // Inline editing — row already has inputs, just focus the name field
-  var rows = document.querySelectorAll('#holidayMasterBody tr');
-  if (rows[i]) {
-    var inp = rows[i].querySelector('input[type=text], input:not([type=date])');
-    if (inp) inp.focus();
-  }
-}
-
-function deleteHolidayMaster(i) {
-  if (!confirm('Delete "' + (holidayMasterData[i].name||'this holiday') + '"?')) return;
-  holidayMasterData.splice(i, 1);
-  renderHolidayMaster();
-}
-
-function saveHolidayMaster() {
-  // Validate — all rows need name + date
-  var valid = true;
-  holidayMasterData.forEach(function(h) { if (!h.name || !h.date) valid = false; });
-  if (!valid) {
-    var msg = document.getElementById('holidayMasterMsg');
-    msg.style.color = '#dc2626';
-    msg.textContent = 'Please fill Holiday Name and Date for all rows.';
-    setTimeout(function(){ msg.textContent=''; }, 3000);
-    return;
-  }
-  // Sort by date
-  holidayMasterData.sort(function(a,b){ return a.date.localeCompare(b.date); });
-  pmStorage.setItem('pmjay_holidays_master', JSON.stringify(holidayMasterData));
-  renderHolidayMaster();
-  showToast('Holiday Master List saved & published ✓','success');
-  var msg = document.getElementById('holidayMasterMsg');
-  msg.style.color = '#166534';
-  msg.textContent = 'Published — Holiday Roster and PMAM portal updated.';
-  setTimeout(function(){ msg.textContent=''; }, 3000);
-}
-
-// Load from master into Holiday Roster
-function populateFromMaster() {
-  if (!holidayMasterData.length) {
-    showToast('No holidays in master list. Add holidays first.','error');
-    return;
-  }
-  if (holidayData.length && !confirm('This will replace current Holiday Roster rows with master list. Continue?')) return;
-  holidayData = holidayMasterData.map(function(h) {
-    return { name: h.name, date: h.date, type: h.type, onDuty: [''], pmams: [] };
-  });
-  renderHoliday();
-  showToast('Holiday Roster loaded from master list ✓','success');
-}
-
 // ===== HOLIDAY =====
 function addHolidayRow(){holidayData.push({name:'',date:'',pmams:['']});renderHoliday();}
-// Get PMAM list from staff data
-function getPmamList() {
-  var staff = [];
-  try { staff = JSON.parse(pmStorage.getItem('pmjay_staff_data') || '[]'); } catch(e) {}
-  // Always use default if localStorage empty or has fewer than expected
-  if (!staff.length) staff = staffData;
-  var list = staff.filter(function(s){ return (s.desig||'').toLowerCase() === 'pmam'; }).map(function(s){ return s.name; });
-  // If still empty (e.g. localStorage corrupt) use hardcoded fallback
-  if (!list.length) list = ['Tania Manhas','Abrar Choudhary','Asia Firdose','Payal Sharma','Rukhsar Akhter','Gagandeep Singh','Ambika Thakur','Safeer Ahmed','Vinod Kumar'];
-  return list;
-}
-
-function addHolidayPmamDuty(i) {
-  if (!holidayData[i].onDuty) holidayData[i].onDuty = [];
-  holidayData[i].onDuty.push('');
-  renderHoliday();
-}
-function removeHolidayPmamDuty(i,j) {
-  holidayData[i].onDuty.splice(j,1);
-  renderHoliday();
-}
-
-function renderHoliday() {
-  var b = document.getElementById('holidayBody');
-  if (!holidayData.length) {
-    b.innerHTML = '<tr><td colspan="6" class="empty-td">No holidays added. Click + Add Row or Load from Holiday Master.</td></tr>';
-    return;
-  }
-  var pmamList = getPmamList();
-  var pmamOpts = '<option value="">-- Select PMAM --</option>' + pmamList.map(function(p){
-    return '<option value="'+p+'">'+p+'</option>';
+function addHolidayPmam(i){if(holidayData[i].pmams.length>=7){alert('Max 7 PMAMs');return;}holidayData[i].pmams.push('');renderHoliday();}
+function removeHolidayPmam(i,j){holidayData[i].pmams.splice(j,1);renderHoliday();}
+function renderHoliday(){
+  const b=document.getElementById('holidayBody');
+  if(!holidayData.length){b.innerHTML='<tr><td colspan="5" class="empty-td">No holidays added yet. Click + Add Holiday.</td></tr>';return;}
+  b.innerHTML=holidayData.map((h,i)=>{
+    const pmamHTML=h.pmams.map((p,j)=>`
+      <div style="display:flex;align-items:center;gap:3px;margin-bottom:3px">
+        <input value="${p}" placeholder="PMAM ${j+1}" style="width:140px;padding:3px 7px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px;outline:none" onchange="holidayData[${i}].pmams[${j}]=this.value">
+        ${h.pmams.length>1?`<button onclick="removeHolidayPmam(${i},${j})" style="background:none;border:none;color:#dc2626;font-weight:800;cursor:pointer;font-size:13px">×</button>`:''}
+      </div>`).join('');
+    return`<tr style="vertical-align:top">
+      <td>${i+1}</td>
+      <td><input value="${h.name||''}" placeholder="Holiday Name" style="width:130px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="holidayData[${i}].name=this.value"></td>
+      <td><input type="date" value="${h.date||''}" style="width:130px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="holidayData[${i}].date=this.value"></td>
+      <td>${pmamHTML}${h.pmams.length<7?`<button onclick="addHolidayPmam(${i})" style="background:#dbeafe;color:#1e3a8a;border:none;border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;cursor:pointer;margin-top:3px">+ Add PMAM</button>`:'<span style="font-size:10px;color:#9ca3af">Max 7</span>'}</td>
+      <td><button class="li-btn li-del" onclick="holidayData.splice(${i},1);renderHoliday()">Remove</button></td>
+    </tr>`;
   }).join('');
-
-  b.innerHTML = holidayData.map(function(h, i) {
-    // PMAM on Duty — multi select using dropdowns
-    var onDuty = h.onDuty || [];
-    if (!onDuty.length) onDuty = [''];
-
-    var dutyHTML = onDuty.map(function(p, j) {
-      var opts = '<option value="">-- Select PMAM --</option>' + pmamList.map(function(pm){
-        return '<option value="'+pm+'"'+(pm===p?' selected':'')+'>'+pm+'</option>';
-      }).join('');
-      return '<div style="display:flex;align-items:center;gap:3px;margin-bottom:3px">'
-        + '<select style="width:150px;padding:3px 6px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px;outline:none" data-i="'+i+'" data-j="'+j+'" onchange="holidayData[+this.dataset.i].onDuty[+this.dataset.j]=this.value;renderHoliday()">'+opts+'</select>'
-        + (onDuty.length>1 ? '<button data-i="'+i+'" data-j="'+j+'" onclick="removeHolidayPmamDuty(+this.dataset.i,+this.dataset.j)" style="background:none;border:none;color:#dc2626;font-weight:800;cursor:pointer;font-size:13px">×</button>' : '')
-        + '</div>';
-    }).join('');
-    dutyHTML += '<button data-i="'+i+'" onclick="addHolidayPmamDuty(+this.dataset.i)" style="background:#dcfce7;color:#166534;border:none;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;margin-top:2px">+ Add</button>';
-
-    // PMAM on Holiday = all PMAMs NOT in onDuty
-    var dutySet = onDuty.filter(function(p){ return p; });
-    var onHoliday = pmamList.filter(function(p){ return dutySet.indexOf(p) === -1; });
-    var holidayHTML = onHoliday.length
-      ? onHoliday.map(function(p){
-          return '<span style="background:#E8EFFF;color:#1A3DB5;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;display:inline-block;margin:1px">'+p+'</span>';
-        }).join('')
-      : '<span style="font-size:10px;color:#9ca3af;font-style:italic">All on duty</span>';
-
-    return '<tr style="vertical-align:top">'
-      + '<td style="text-align:center;font-weight:700;color:#1A3DB5">'+(i+1)+'</td>'
-      + '<td><input value="'+(h.name||'')+'" placeholder="Holiday Name" data-i="'+i+'" style="width:130px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="holidayData[+this.dataset.i].name=this.value"></td>'
-      + '<td><input type="date" value="'+(h.date||'')+'" data-i="'+i+'" style="width:130px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="holidayData[+this.dataset.i].date=this.value"></td>'
-      + '<td>'+dutyHTML+'</td>'
-      + '<td style="padding:6px">'+holidayHTML+'</td>'
-      + '<td><button data-i="'+i+'" onclick="holidayData.splice(+this.dataset.i,1);renderHoliday()" class="li-btn li-del">Remove</button></td>'
-      + '</tr>';
-  }).join('');
-}
-
-function addHolidayRow() {
-  holidayData.push({ name:'', date:'', type:'', onDuty:[''], pmams:[''] });
-  renderHoliday();
-}
-
-// ===== WEEKEND ROSTER =====
-// ===== WEEKEND ROSTER =====
-var weekendData = [];
-var weekendHistory = [];
-
-// Load from localStorage
-try { weekendData    = JSON.parse(pmStorage.getItem('pmjay_weekend_roster')  || '[]'); } catch(e) {}
-try { weekendHistory = JSON.parse(pmStorage.getItem('pmjay_weekend_history') || '[]'); } catch(e) {}
-
-// ── Helper: get next upcoming Saturday ──
-function nextSaturday(fromDate) {
-  var d = fromDate ? new Date(fromDate) : new Date();
-  var day = d.getDay(); // 0=Sun, 6=Sat
-  var diff = (6 - day + 7) % 7;
-  if (diff === 0) diff = 7; // if today is Saturday, go to next one
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().split('T')[0];
-}
-function nextSunday(satDate) {
-  var d = new Date(satDate);
-  d.setDate(d.getDate() + 1);
-  return d.toISOString().split('T')[0];
-}
-function addWeeks(dateStr, weeks) {
-  var d = new Date(dateStr);
-  d.setDate(d.getDate() + (weeks * 7));
-  return d.toISOString().split('T')[0];
-}
-
-function buildPmamSel(i, field, cur) {
-  var pmams = getPmamList();
-  var selStyle = 'width:100%;padding:5px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none;font-family:Inter,sans-serif;background:#fff';
-  var opts = '<option value="">-- Select PMAM --</option>' + pmams.map(function(p){
-    return '<option value="'+p+'"'+(p===cur?' selected':'')+'>'+p+'</option>';
-  }).join('');
-  return '<select data-i="'+i+'" data-f="'+field+'" style="'+selStyle+'" onchange="weekendData[+this.dataset.i][this.dataset.f]=this.value">'+opts+'</select>';
-}
-
-// ── Add Row — auto-fills next Saturday/Sunday ──
-function addWeekendRow() {
-  var lastRow = weekendData.length ? weekendData[weekendData.length-1] : null;
-  var sat = lastRow && lastRow.saturday ? addWeeks(lastRow.saturday, 1) : nextSaturday();
-  var sun = nextSunday(sat);
-  weekendData.push({ pmam1:'', pmam2:'', saturday:sat, sunday:sun });
-  renderWeekend();
-}
-
-// ── Render current roster ──
-function renderWeekend() {
-  var b = document.getElementById('weekendBody');
-  if (!weekendData.length) {
-    b.innerHTML = '<tr><td colspan="6" class="empty-td">No rows yet. Click + Add Row.</td></tr>';
-    checkWrCycleStatus();
-    return;
-  }
-  var inpStyle = 'width:100%;padding:5px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none;font-family:Inter,sans-serif';
-  var today = new Date().toISOString().split('T')[0];
-  b.innerHTML = weekendData.map(function(r, i) {
-    var isPast = r.sunday && r.sunday < today;
-    var rowStyle = isPast ? 'opacity:0.5;background:#f8faff' : '';
-    return '<tr style="'+rowStyle+'">'
-      + '<td style="text-align:center;font-weight:700;color:'+(isPast?'#9ca3af':'#1A3DB5')+'">'+(i+1)+(isPast?' ✓':'')+'</td>'
-      + '<td>' + buildPmamSel(i,'pmam1',r.pmam1||'') + '</td>'
-      + '<td>' + buildPmamSel(i,'pmam2',r.pmam2||'') + '</td>'
-      + '<td><input type="date" value="'+(r.saturday||'')+'" data-i="'+i+'" style="'+inpStyle+'" onchange="weekendData[+this.dataset.i].saturday=this.value;weekendData[+this.dataset.i].sunday=nextSunday(this.value);renderWeekend()"></td>'
-      + '<td><input type="date" value="'+(r.sunday||'')+'" data-i="'+i+'" style="'+inpStyle+'" onchange="weekendData[+this.dataset.i].sunday=this.value"></td>'
-      + '<td><button data-i="'+i+'" onclick="weekendData.splice(+this.dataset.i,1);renderWeekend()" class="li-btn li-del">Remove</button></td>'
-      + '</tr>';
-  }).join('');
-  checkWrCycleStatus();
-}
-
-// ── Check if cycle is complete → auto-generate new one ──
-function checkWrCycleStatus() {
-  if (!weekendData.length) return;
-  var lastRow  = weekendData[weekendData.length - 1];
-  var today    = new Date().toISOString().split('T')[0];
-  var alertDiv = document.getElementById('wr-cycle-alert');
-  if (!alertDiv) return;
-
-  if (lastRow.sunday && lastRow.sunday < today) {
-    // Cycle complete — auto-generate new one
-    autoGenerateNewCycle();
-  } else {
-    alertDiv.style.display = 'none';
-  }
-}
-
-// ── Auto-generate new cycle ──
-function autoGenerateNewCycle() {
-  if (!weekendData.length) return;
-
-  // Archive current cycle to history
-  var firstRow = weekendData[0];
-  var lastRow  = weekendData[weekendData.length-1];
-  var cycleNum = weekendHistory.length + 1;
-  weekendHistory.push({
-    cycle:   cycleNum,
-    from:    firstRow.saturday || '',
-    to:      lastRow.sunday    || '',
-    rows:    JSON.parse(JSON.stringify(weekendData)),
-    archived: new Date().toISOString().split('T')[0]
-  });
-  pmStorage.setItem('pmjay_weekend_history', JSON.stringify(weekendHistory));
-  renderWrHistory();
-
-  // Generate new cycle with same PMAM pairs + new dates
-  var sat = nextSaturday();
-  var newData = weekendData.map(function(r) {
-    var newSat = sat;
-    var newSun = nextSunday(sat);
-    sat = addWeeks(sat, 1); // next row = next week
-    return { pmam1: r.pmam1, pmam2: r.pmam2, saturday: newSat, sunday: newSun };
-  });
-  weekendData = newData;
-  pmStorage.setItem('pmjay_weekend_roster', JSON.stringify(weekendData));
-
-  var alertDiv = document.getElementById('wr-cycle-alert');
-  if (alertDiv) {
-    alertDiv.style.display = 'flex';
-    alertDiv.innerHTML = '&#9660; Roster cycle completed &amp; archived to History. New cycle auto-generated with same PMAM pairs. Review dates and click <strong style="margin:0 4px">Save &amp; Publish</strong> to confirm.';
-  }
-  renderWeekend();
-  showToast('New weekend roster cycle auto-generated ✓','success');
-}
-
-// ── Save current roster ──
-function saveWeekendRoster() {
-  var valid = true;
-  weekendData.forEach(function(r){ if(!r.pmam1||!r.saturday) valid=false; });
-  if (!valid) {
-    var msg = document.getElementById('weekendMsg');
-    msg.style.color='#dc2626';
-    msg.textContent='Please fill PMAM 1 and Saturday date for all rows.';
-    setTimeout(function(){ msg.textContent=''; },3000);
-    return;
-  }
-  pmStorage.setItem('pmjay_weekend_roster', JSON.stringify(weekendData));
-  var alertDiv = document.getElementById('wr-cycle-alert');
-  if (alertDiv) alertDiv.style.display = 'none';
-  showToast('Weekend Roster saved & published ✓','success');
-  document.getElementById('weekendMsg').style.color='#166534';
-  document.getElementById('weekendMsg').textContent='Published — landing page updated.';
-  setTimeout(function(){ document.getElementById('weekendMsg').textContent=''; },3000);
-}
-
-// ── Tab switching ──
-function switchWrTab(tab, el) {
-  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
-  el.classList.add('active');
-  document.getElementById('wr-panel-current').style.display  = tab==='current' ? '' : 'none';
-  document.getElementById('wr-panel-history').style.display  = tab==='history' ? '' : 'none';
-  if (tab === 'history') renderWrHistory();
-}
-
-// ── Render history ──
-function renderWrHistory() {
-  var cnt = document.getElementById('wr-hist-cnt');
-  if (cnt) cnt.textContent = weekendHistory.length;
-  var list = document.getElementById('wr-history-list');
-  if (!list) return;
-  if (!weekendHistory.length) {
-    list.innerHTML = '<div style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">No completed cycles yet</div>';
-    return;
-  }
-  list.innerHTML = weekendHistory.slice().reverse().map(function(c) {
-    var fmtD = function(d){ return d?d.split('-').reverse().join('/'):'-'; };
-    var rows = c.rows.map(function(r,i){
-      return '<tr>'
-        + '<td style="text-align:center;font-weight:700;color:#1A3DB5">'+(i+1)+'</td>'
-        + '<td>'+r.pmam1+'</td><td>'+r.pmam2+'</td>'
-        + '<td>'+fmtD(r.saturday)+'</td><td>'+fmtD(r.sunday)+'</td>'
-        + '</tr>';
-    }).join('');
-    return '<div style="border:1.5px solid rgba(26,61,181,0.12);border-radius:14px;margin-bottom:12px;overflow:hidden">'
-      + '<div style="background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center">'
-      + '<div style="font-weight:700;font-size:13px">Cycle '+c.cycle+' &nbsp;|&nbsp; '+fmtD(c.from)+' to '+fmtD(c.to)+'</div>'
-      + '<div style="font-size:10px;opacity:0.75">Archived: '+fmtD(c.archived)+'</div>'
-      + '</div>'
-      + '<div style="padding:0">'
-      + '<table style="width:100%;border-collapse:collapse;font-size:12px">'
-      + '<thead><tr><th style="background:#1A3DB5;color:#fff;padding:7px 10px;width:50px">S.No</th>'
-      + '<th style="background:#1A3DB5;color:#fff;padding:7px 10px">PMAM 1</th>'
-      + '<th style="background:#1A3DB5;color:#fff;padding:7px 10px">PMAM 2</th>'
-      + '<th style="background:#1A3DB5;color:#fff;padding:7px 10px">Saturday</th>'
-      + '<th style="background:#1A3DB5;color:#fff;padding:7px 10px">Sunday</th>'
-      + '</tr></thead>'
-      + '<tbody>'+rows+'</tbody>'
-      + '</table></div></div>';
-  }).join('');
-}
-
-// Render on load + check cycle status
-renderWeekend();
-renderWrHistory();
-
-// ===== LEAVE APPROVAL =====
-var leaveAppData = [];
-
-function loadLeaveApproval() {
-  try { leaveAppData = JSON.parse(pmStorage.getItem('pmjay_leave_requests') || '[]'); } catch(e) { leaveAppData = []; }
-  var tbody = document.getElementById('leaveApprovalBody');
-  if (!leaveAppData.length) {
-    tbody.innerHTML = '<tr><td colspan="11" class="empty-td">No leave requests submitted yet</td></tr>';
-    return;
-  }
-  tbody.innerHTML = leaveAppData.map(function(r, i) {
-    var sc = r.status==='Approved' ? '#166534' : r.status==='Rejected' ? '#dc2626' : '#92400e';
-    var bg = r.status==='Approved' ? '#DCFCE7'  : r.status==='Rejected' ? '#FEE2E2'  : '#FEF3C7';
-    var fmtD = function(d){ return d ? d.split('-').reverse().join('/') : '—'; };
-    return '<tr style="vertical-align:middle">'
-      + '<td style="text-align:center;font-weight:700;color:#1A3DB5">' + (i+1) + '</td>'
-      + '<td><strong>' + (r.name||'—') + '</strong></td>'
-      + '<td><span class="wtag" style="font-size:10px">' + (r.ward||'—') + '</span></td>'
-      + '<td>' + (r.type||'—') + '</td>'
-      + '<td>' + fmtD(r.from) + '</td>'
-      + '<td>' + fmtD(r.to) + '</td>'
-      + '<td style="font-weight:700">' + (r.days||'—') + '</td>'
-      + '<td>' + (r.duty||'—') + '</td>'
-      + '<td style="color:#666;font-size:11px">' + (r.reason||'—') + '</td>'
-      + '<td><span style="background:' + bg + ';color:' + sc + ';padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700">' + (r.status||'Pending') + '</span></td>'
-      + '<td style="white-space:nowrap">'
-      + '<button data-idx="'+i+'" data-st="Approved" onclick="setLeaveStatus(+this.dataset.idx,this.dataset.st)" style="background:#DCFCE7;color:#166534;border:none;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;margin-right:3px">✓ Approve</button>'
-      + '<button data-idx="'+i+'" data-st="Rejected" onclick="setLeaveStatus(+this.dataset.idx,this.dataset.st)" style="background:#FEE2E2;color:#dc2626;border:none;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer">✗ Reject</button>'
-      + '</td>'
-      + '</tr>';
-  }).join('');
-}
-
-function setLeaveStatus(i, status) {
-  if(leaveAppData[i]) leaveAppData[i].status = status;
-  loadLeaveApproval(); // re-render
-}
-
-function publishLeaveStatus() {
-  pmStorage.setItem('pmjay_leave_requests', JSON.stringify(leaveAppData));
-  showToast('Leave status published ✓', 'success');
-  var msg = document.getElementById('leaveApprovalMsg');
-  msg.textContent = 'Status saved & published to PMAM portal.';
-  setTimeout(function(){ msg.textContent=''; }, 3000);
-  // Update dashboard count
-  loadDashboard();
-}
-
-// ===== LEAVE POLICY =====
-var DEFAULT_LEAVE_POLICY = {
-  casual:    { days: 15,  reset: 'jan',  label: 'Casual Leave' },
-  medical:   { days: 10,  reset: 'jan',  label: 'Medical Leave' },
-  comp:      { days: 12,  reset: 'jan',  label: 'Compensatory Leave' },
-  maternity: { days: 180, reset: 'jan',  label: 'Maternity Leave' },
-  paternity: { days: 15,  reset: 'jan',  label: 'Paternity Leave' },
-  lwp:       { days: 999, reset: 'jan',  label: 'Leave Without Pay' }
-};
-
-function loadLeavePolicyPanel() {
-  var saved = {};
-  try { saved = JSON.parse(pmStorage.getItem('pmjay_leave_policy') || '{}'); } catch(e) {}
-  var policy = Object.assign({}, DEFAULT_LEAVE_POLICY, saved);
-  ['casual','medical','comp','maternity','paternity'].forEach(function(t) {
-    var dEl = document.getElementById('lp_'+t+'_days');
-    var rEl = document.getElementById('lp_'+t+'_reset');
-    if (dEl && policy[t]) dEl.value = policy[t].days;
-    if (rEl && policy[t]) rEl.value = policy[t].reset || 'jan';
-  });
-}
-
-function saveLeavePolicyAdmin() {
-  var policy = {};
-  ['casual','medical','comp','maternity','paternity'].forEach(function(t) {
-    var dEl = document.getElementById('lp_'+t+'_days');
-    var rEl = document.getElementById('lp_'+t+'_reset');
-    policy[t] = {
-      days:  dEl ? parseInt(dEl.value)||0 : DEFAULT_LEAVE_POLICY[t].days,
-      reset: rEl ? rEl.value : 'jan',
-      label: DEFAULT_LEAVE_POLICY[t].label
-    };
-  });
-  policy.lwp = { days: 999, reset: 'jan', label: 'Leave Without Pay' };
-  pmStorage.setItem('pmjay_leave_policy', JSON.stringify(policy));
-  showToast('Leave policy saved & published ✓', 'success');
-  var msg = document.getElementById('lp_msg');
-  if (msg) { msg.textContent = 'Policy published — all portals updated.'; setTimeout(function(){ msg.textContent=''; }, 3000); }
-}
-
-// ===== PUBLISH FUNCTIONS =====
-function saveWardRoster(){
-  pmStorage.setItem('pmjay_ward_roster', JSON.stringify(rosterData));
-  showToast('Ward Roster saved & published ✓','success');
-}
-function saveHolidayRoster(){
-  // Compute onHoliday for each row before saving
-  var pmamList = getPmamList();
-  var toSave = holidayData.map(function(h) {
-    var dutySet = (h.onDuty||[]).filter(function(p){ return p; });
-    var onHoliday = pmamList.filter(function(p){ return dutySet.indexOf(p) === -1; });
-    return {
-      name:      h.name,
-      date:      h.date,
-      type:      h.type || '',
-      onDuty:    dutySet,
-      onHoliday: onHoliday,
-      pmams:     dutySet  // keep pmams for backward compat with landing page
-    };
-  });
-  pmStorage.setItem('pmjay_holiday_roster', JSON.stringify(toSave));
-  showToast('Holiday Roster saved & published ✓','success');
-}
-function saveStaffData(){
-  pmStorage.setItem('pmjay_staff_data', JSON.stringify(staffData));
-  showToast('Staff data saved & published ✓','success');
 }
 
 // ===== SETTINGS =====
@@ -2106,73 +1040,6 @@ function renderOrders(){
     </div>`).join('');
 }
 
-// ===== PUBLISH ABOUT / CONTACT / ORDERS =====
-function saveAboutUs(){
-  var heading = document.querySelector('#panel-aboutus input[type=text]');
-  var text    = document.querySelector('#panel-aboutus textarea');
-  pmStorage.setItem('pmjay_about_us', JSON.stringify({
-    heading: heading ? heading.value : '',
-    text:    text    ? text.value    : ''
-  }));
-  showToast('About Us saved & published ✓','success');
-}
-function saveContactUs(){
-  var inputs = document.querySelectorAll('#panel-contactus input');
-  pmStorage.setItem('pmjay_contact_us', JSON.stringify({
-    name:  inputs[0] ? inputs[0].value : '',
-    desig: inputs[1] ? inputs[1].value : '',
-    phone: inputs[2] ? inputs[2].value : '',
-    email: inputs[3] ? inputs[3].value : ''
-  }));
-  showToast('Contact info saved & published ✓','success');
-}
-function saveOrders(){
-  pmStorage.setItem('pmjay_orders', JSON.stringify(ordersData));
-  showToast('Orders saved & published ✓','success');
-}
-
-// ===== TOAST =====
-function showToast(msg,type){
-  let t=document.getElementById('adminToast');
-  if(!t){t=document.createElement('div');t.id='adminToast';t.style.cssText='position:fixed;bottom:28px;right:28px;padding:12px 24px;border-radius:30px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.18);transition:opacity 0.4s';document.body.appendChild(t);}
-  t.style.background=type==='error'?'#FEE2E2':'#DCFCE7';
-  t.style.color=type==='error'?'#dc2626':'#166534';
-  t.textContent=msg;t.style.opacity='1';
-  clearTimeout(t._to);t._to=setTimeout(()=>t.style.opacity='0',3000);
-}
-
-// ===== BRANDING =====
-function adminUploadImg(inp,key){
-  const r=new FileReader();
-  r.onload=e=>{
-    const data=e.target.result;
-    try{pmStorage.setItem('pmjay_'+key,data);}catch(err){showToast('Image too large for storage','error');return;}
-    _showAdminBrandingImg(key,data);
-    showToast('Image saved successfully ✓','success');
-  };
-  r.readAsDataURL(inp.files[0]);
-}
-function adminClearImg(key){
-  if(!confirm('Remove this image?'))return;
-  pmStorage.removeItem('pmjay_'+key);
-  _showAdminBrandingImg(key,null);
-  showToast('Image removed','success');
-}
-function _showAdminBrandingImg(key,data){
-  const map={logo1:['adminLogo1Img','adminLogo1Ph'],logo2:['adminLogo2Img','adminLogo2Ph'],hdPhoto:['adminHdImg','adminHdPh']};
-  if(!map[key])return;
-  const img=document.getElementById(map[key][0]);
-  const ph=document.getElementById(map[key][1]);
-  if(data){img.src=data;img.style.display='block';ph.style.display='none';}
-  else{img.src='';img.style.display='none';ph.style.display='flex';}
-}
-function loadBrandingPanel(){
-  ['logo1','logo2','hdPhoto'].forEach(key=>{
-    const data=pmStorage.getItem('pmjay_'+key);
-    if(data)_showAdminBrandingImg(key,data);
-  });
-}
-
 // ===== INIT =====
 loadDashboard();
 renderPmams();
@@ -2182,54 +1049,9 @@ renderHoliday();
 renderWards();
 renderStaff();
 renderOrders();
-loadBrandingPanel();
-// ── Load shared branding from localStorage (set by Admin) ──
-function loadSharedBranding() {
-  var logo1 = pmStorage.getItem('pmjay_logo1');
-  var logo2 = pmStorage.getItem('pmjay_logo2');
-  var hd    = pmStorage.getItem('pmjay_hdPhoto');
-  // Try to set logo images if img tags exist
-  ['logo1Img','hLogo1','bannerLogo1'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el && logo1) { el.src = logo1; el.style.display = 'block'; }
-  });
-  ['logo2Img','hLogo2','bannerLogo2'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el && logo2) { el.src = logo2; el.style.display = 'block'; }
-  });
-}
-
-// ── Load logged-in user info from sessionStorage ──
-function loadSessionUser() {
-  try {
-    var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
-    if (u.name) {
-      ['hName','userName','userNameDisp'].forEach(function(id) {
-        var el = document.getElementById(id); if (el) el.textContent = u.name;
-      });
-      ['hRole','userRole','userDesig'].forEach(function(id) {
-        var el = document.getElementById(id); if (el) el.textContent = u.role || u.desig || '';
-      });
-      var initials = u.name.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
-      ['hInitials','userInitials','mInitials'].forEach(function(id) {
-        var el = document.getElementById(id); if (el) el.textContent = initials;
-      });
-    }
-  } catch(e) {}
-}
-
-window.addEventListener("DOMContentLoaded",function(){
-  // Force dropdown hidden on every page load
-  var dd=document.getElementById('userDD');
-  var rm=document.getElementById('roleMenu');
-  if(dd) dd.style.display='none';
-  if(rm) rm.style.display='none';
-  loadSharedBranding();
-  loadSessionUser();
-});
 
 // ══════════════════════════════════════
-// FIREBASE + EMAILJS HELPERS
+// FIREBASE HELPERS
 // ══════════════════════════════════════
 function fbSendOTP(email, onSuccess, onError) {
   var otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -2246,54 +1068,15 @@ function fbSendOTP(email, onSuccess, onError) {
 
 function fbVerifyOTP(email, otp, onSuccess, onError) {
   db.collection('otps').doc(email).get().then(function(doc) {
-    if (!doc.exists) return onError('OTP not found. Please request again.');
+    if (!doc.exists) return onError('OTP not found. Request again.');
     var data = doc.data();
-    if (Date.now() > data.expires) return onError('OTP expired. Please request again.');
-    if (data.otp !== otp.trim()) return onError('Invalid OTP. Please try again.');
+    if (Date.now() > data.expires) return onError('OTP expired. Request again.');
+    if (data.otp !== otp.trim()) return onError('Invalid OTP.');
     db.collection('otps').doc(email).delete();
     onSuccess();
   }).catch(onError);
 }
 
-function fbSaveUser(email, userData, onSuccess, onError) {
-  db.collection('users').doc(email).set(userData, { merge: true })
-    .then(onSuccess || function(){}).catch(onError || function(){});
-}
-
-function fbGetUser(email, onSuccess, onError) {
-  db.collection('users').doc(email).get()
-    .then(function(doc) {
-      if (doc.exists) onSuccess(doc.data());
-      else onError('User not found.');
-    }).catch(onError || function(){});
-}
-
-function fbSaveLeave(leaveData, onSuccess, onError) {
-  var docId = leaveData.name.replace(/\s+/g,'_') + '_' + Date.now();
-  db.collection('leave_requests').doc(docId).set(leaveData)
-    .then(onSuccess || function(){}).catch(onError || function(){});
-}
-
-function fbLoadLeaves(onSuccess, onError) {
-  db.collection('leave_requests').orderBy('from','desc').get()
-    .then(function(snap) {
-      var items = [];
-      snap.forEach(function(doc) { items.push(Object.assign({ _id: doc.id }, doc.data())); });
-      onSuccess(items);
-    }).catch(onError || function(){});
-}
-
-function fbUpdateLeave(docId, updates, onSuccess, onError) {
-  db.collection('leave_requests').doc(docId).update(updates)
-    .then(onSuccess || function(){}).catch(onError || function(){});
-}
-
-function fbDeleteLeave(docId, onSuccess, onError) {
-  db.collection('leave_requests').doc(docId).delete()
-    .then(onSuccess || function(){}).catch(onError || function(){});
-}
-
 </script>
-
 </body>
 </html>

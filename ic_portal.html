@@ -11,7 +11,7 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 
 /* ===== BANNER ===== */
 .banner-wrap{
-  width:100%;position:relative;height:82px;overflow:visible;z-index:500;
+  width:100%;position:relative;height:82px;overflow:hidden;
   background:linear-gradient(135deg,#2D1B8E 0%,#3D2AA0 25%,#4A35B5 50%,#5842C8 75%,#6650D8 100%);
   display:flex;align-items:center;padding:0 20px;gap:16px;
 }
@@ -35,7 +35,7 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .brt2{font-size:10px;font-weight:700;color:rgba(255,255,255,0.85);letter-spacing:0.8px;text-transform:uppercase}
 .banner-overlay{
   position:absolute;top:0;right:0;bottom:0;
-  display:flex;align-items:center;padding:0 16px;gap:10px;z-index:1000;
+  display:flex;align-items:center;padding:0 16px;gap:10px;z-index:10;
 }
 .user-pill{
   display:flex;align-items:center;gap:8px;
@@ -51,7 +51,7 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .uname{font-size:11px;font-weight:800;color:#fff;white-space:nowrap}
 .udesig{font-size:9px;color:rgba(255,255,255,0.75);white-space:nowrap;text-transform:uppercase;letter-spacing:0.3px}
 .dd-arrow{font-size:10px;color:rgba(255,255,255,0.7)}
-.user-dropdown{position:fixed;top:80px;right:16px;background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,0.22);min-width:230px;display:none;z-index:999999;}
+.user-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15);min-width:160px;overflow:hidden;display:none;z-index:300}
 .user-dropdown.open{display:block}
 .dd-item{padding:10px 16px;font-size:12px;color:#1e3a8a;font-weight:600;cursor:pointer;border-bottom:1px solid #E8EFFF;display:flex;align-items:center;gap:8px}
 .dd-item:last-child{border-bottom:none;color:#dc2626}
@@ -59,12 +59,12 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .logout-btn{background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.35);color:#fff;border-radius:50px;padding:7px 18px;font-size:11px;font-weight:700;cursor:pointer;font-family:"Inter",sans-serif}
 
 /* TICKER */
-.ticker{background:#E0F7FA;border-bottom:1px solid #B2EBF2;height:28px;overflow:hidden;display:flex;position:relative;z-index:0;align-items:center}
+.ticker{background:#E0F7FA;border-bottom:1px solid #B2EBF2;height:28px;overflow:hidden;display:flex;align-items:center}
 .ticker-inner{white-space:nowrap;animation:tick 35s linear infinite;color:#005F66;font-size:11px;font-weight:500;padding:0 16px}
 @keyframes tick{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
 
 /* LAYOUT */
-.layout{display:flex;min-height:calc(100vh - 110px);position:relative;z-index:1}
+.layout{display:flex;min-height:calc(100vh - 110px)}
 
 /* SIDEBAR */
 .sidebar{
@@ -159,10 +159,6 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 .tab{padding:7px 18px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;color:#6b7280;transition:all 0.2s}
 .tab.active{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;box-shadow:0 3px 10px rgba(15,43,140,0.2)}
 .tab-panel{display:none}.tab-panel.active{display:block}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center}
-.modal-bg.open{display:flex}
-.modal-box{background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(15,43,140,0.18);width:90%;max-width:460px;overflow:hidden}
-.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(90deg,#E8EFFF,#F0F4FF);border-bottom:1px solid #c7d2fe}
 </style>
   <!-- Firebase v10 -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -170,219 +166,26 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script>
-  var firebaseConfig = {
-    apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
-    authDomain: "gmcrajouri-pmam.firebaseapp.com",
-    projectId: "gmcrajouri-pmam",
-    storageBucket: "gmcrajouri-pmam.firebasestorage.app",
-    messagingSenderId: "115490476421",
-    appId: "1:115490476421:web:871a91987e1a92a45f34ec",
-    measurementId: "G-NK9VL87CJC"
-  };
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  var db   = firebase.firestore();
-  var auth = firebase.auth();
-  var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
-  var EMAILJS_SERVICE    = 'service_1x9ecam';
-  var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
-  if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
-</script>
-<script>
-// ══════════════════════════════════════════════════════════
-// FIREBASE BRIDGE — Replaces all localStorage calls
-// Provides same API as localStorage but uses Firestore
-// ══════════════════════════════════════════════════════════
-
-// Keys that stay in localStorage (temp/device-only)
-var LOCAL_ONLY_KEYS = ['pmjay_admin_switch','pmjay_remember','pmjay_user'];
-
-// Keys that are collections (arrays of objects)
-var COLLECTION_KEYS = ['pmjay_leave_requests','pmjay_all_entries'];
-
-// Firestore path mapping
-var FS_PATH = {
-  'pmjay_leave_requests' : { type:'collection', path:'leave_requests'        },
-  'pmjay_all_entries'    : { type:'collection', path:'daily_entries'          },
-  'pmjay_leave_policy'   : { type:'doc',        path:'settings/leave_policy'  },
-  'pmjay_holidays_master': { type:'doc',        path:'settings/holidays_master'},
-  'pmjay_holiday_roster' : { type:'doc',        path:'settings/holiday_roster' },
-  'pmjay_weekend_roster' : { type:'doc',        path:'settings/weekend_roster' },
-  'pmjay_weekend_history': { type:'doc',        path:'settings/weekend_history'},
-  'pmjay_ward_roster'    : { type:'doc',        path:'settings/ward_roster'    },
-  'pmjay_staff_data'     : { type:'doc',        path:'settings/staff_data'     },
-  'pmjay_orders'         : { type:'doc',        path:'settings/orders'         },
-  'pmjay_about_us'       : { type:'doc',        path:'settings/about_us'       },
-  'pmjay_contact_us'     : { type:'doc',        path:'settings/contact_us'     },
-  'pmjay_logo1'          : { type:'doc',        path:'settings/branding'       },
-  'pmjay_logo2'          : { type:'doc',        path:'settings/branding'       },
-  'pmjay_hdPhoto'        : { type:'doc',        path:'settings/branding'       },
-};
-
-// ── Core: set data to Firestore ──
-function fsSet(key, value, callback) {
-  if (LOCAL_ONLY_KEYS.indexOf(key) >= 0) {
-    localStorage.setItem(key, value);
-    if (callback) callback();
-    return;
-  }
-  var map = FS_PATH[key];
-  if (!map) { localStorage.setItem(key, value); if (callback) callback(); return; }
-
-  try {
-    var data = JSON.parse(value);
-    if (map.type === 'collection') {
-      // For collections: save array as batch
-      var batch = db.batch();
-      // Clear old docs first, then write new ones
-      db.collection(map.path).get().then(function(snap) {
-        snap.forEach(function(d) { batch.delete(d.ref); });
-        if (Array.isArray(data)) {
-          data.forEach(function(item, i) {
-            var ref = db.collection(map.path).doc(item._id || ('item_' + i + '_' + Date.now()));
-            batch.set(ref, item);
-          });
-        }
-        return batch.commit();
-      }).then(function() { if (callback) callback(); })
-        .catch(function(e) { console.error('fsSet collection error:', e); localStorage.setItem(key, value); if (callback) callback(); });
-    } else {
-      // For docs: save entire object
-      var parts = map.path.split('/');
-      var ref = parts.length === 2
-        ? db.collection(parts[0]).doc(parts[1])
-        : db.collection(map.path);
-      var saveData = {};
-      saveData[key] = data;
-      ref.set(saveData, { merge: true })
-        .then(function() { if (callback) callback(); })
-        .catch(function(e) { console.error('fsSet doc error:', e); localStorage.setItem(key, value); if (callback) callback(); });
-    }
-  } catch(e) {
-    localStorage.setItem(key, value);
-    if (callback) callback();
-  }
-}
-
-// ── Core: get data from Firestore ──
-function fsGet(key, callback) {
-  if (LOCAL_ONLY_KEYS.indexOf(key) >= 0) {
-    callback(localStorage.getItem(key));
-    return;
-  }
-  var map = FS_PATH[key];
-  if (!map) { callback(localStorage.getItem(key)); return; }
-
-  if (map.type === 'collection') {
-    db.collection(map.path).orderBy('_ts', 'asc').get()
-      .then(function(snap) {
-        var items = [];
-        snap.forEach(function(d) { items.push(Object.assign({ _id: d.id }, d.data())); });
-        callback(JSON.stringify(items));
-      })
-      .catch(function() {
-        // Try without orderBy
-        db.collection(map.path).get()
-          .then(function(snap) {
-            var items = [];
-            snap.forEach(function(d) { items.push(Object.assign({ _id: d.id }, d.data())); });
-            callback(JSON.stringify(items));
-          })
-          .catch(function() { callback(localStorage.getItem(key)); });
-      });
-  } else {
-    var parts = map.path.split('/');
-    var ref = parts.length === 2
-      ? db.collection(parts[0]).doc(parts[1])
-      : null;
-    if (!ref) { callback(localStorage.getItem(key)); return; }
-    ref.get()
-      .then(function(doc) {
-        if (doc.exists) {
-          var d = doc.data();
-          callback(JSON.stringify(d[key] !== undefined ? d[key] : d));
-        } else {
-          callback(localStorage.getItem(key));
-        }
-      })
-      .catch(function() { callback(localStorage.getItem(key)); });
-  }
-}
-
-// ── Override localStorage for pmjay_ keys ──
-// Wrap getItem and setItem to intercept pmjay_ keys
-var _origGetItem = localStorage.getItem.bind(localStorage);
-var _origSetItem = localStorage.setItem.bind(localStorage);
-
-// Synchronous fallback cache (populated on page load)
-var _fsCache = {};
-
-function fsPreload(keys, onDone) {
-  var pending = keys.length;
-  if (!pending) { onDone(); return; }
-  keys.forEach(function(key) {
-    fsGet(key, function(val) {
-      if (val !== null) _fsCache[key] = val;
-      pending--;
-      if (pending === 0) onDone();
-    });
-  });
-}
-
-// ── Public API matching localStorage interface ──
-var pmStorage = {
-  setItem: function(key, value, callback) {
-    _fsCache[key] = value; // update cache immediately
-    if (key.indexOf('pmjay_') === 0) {
-      fsSet(key, value, callback);
-    } else {
-      localStorage.setItem(key, value);
-      if (callback) callback();
-    }
-  },
-  getItem: function(key) {
-    if (key.indexOf('pmjay_') === 0 && LOCAL_ONLY_KEYS.indexOf(key) < 0) {
-      return _fsCache[key] !== undefined ? _fsCache[key] : localStorage.getItem(key);
-    }
-    return localStorage.getItem(key);
-  },
-  removeItem: function(key, callback) {
-    delete _fsCache[key];
-    if (key.indexOf('pmjay_') === 0 && LOCAL_ONLY_KEYS.indexOf(key) < 0) {
-      var map = FS_PATH[key];
-      if (map) {
-        var parts = map.path.split('/');
-        if (parts.length === 2) {
-          db.collection(parts[0]).doc(parts[1]).delete()
-            .then(callback || function(){})
-            .catch(callback || function(){});
-          return;
-        }
-      }
-    }
-    localStorage.removeItem(key);
-    if (callback) callback();
-  }
-};
-
-// ── ALL KEYS TO PRELOAD ON PAGE LOAD ──
-var ALL_PMJAY_KEYS = [
-  'pmjay_leave_requests','pmjay_all_entries','pmjay_leave_policy',
-  'pmjay_holidays_master','pmjay_holiday_roster','pmjay_weekend_roster',
-  'pmjay_weekend_history','pmjay_ward_roster','pmjay_staff_data',
-  'pmjay_orders','pmjay_about_us','pmjay_contact_us',
-  'pmjay_logo1','pmjay_logo2','pmjay_hdPhoto'
-];
-
-</script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec",
+      measurementId: "G-NK9VL87CJC"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
 </head>
 <body>
-<div class="user-dropdown" id="userDD">
-        <div class="dd-item" onclick="openModal('profileModal')">👤 Update Profile</div>
-        
-        <div class="dd-item" onclick="doLogout()">🚪 Logout</div>
-      </div>
-
 
 <!-- ===== BANNER ===== -->
 <div class="banner-wrap">
@@ -414,16 +217,18 @@ var ALL_PMJAY_KEYS = [
   </div>
   <div class="banner-overlay">
     <div class="user-pill" onclick="toggleDD()">
-      <div class="uphoto"><span class="ini" id="hInitials">SK</span></div>
+      <div class="uphoto"><span class="ini">SK</span></div>
       <div>
-        <div class="uname" id="hName">Suresh Kumar</div>
-        <div class="udesig" id="hRole">I/C AB-PMJAY</div>
+        <div class="uname">Suresh Kumar</div>
+        <div class="udesig">I/C AB-PMJAY</div>
       </div>
       <span class="dd-arrow">▾</span>
-      
+      <div class="user-dropdown" id="userDD">
+        <div class="dd-item">👤 Update Profile</div>
+        <div class="dd-item">🚪 Logout</div>
+      </div>
     </div>
-      
-    <button class="logout-btn" onclick="doLogout()">Logout</button>
+    <button class="logout-btn">Logout</button>
   </div>
 </div>
 
@@ -613,10 +418,10 @@ var ALL_PMJAY_KEYS = [
       <div class="card">
         <div class="card-hd">Filter Records</div>
         <div class="frow">
-          <div class="fld"><label>From Date</label><input type="date" id="arFrom" style="width:145px"></div>
-          <div class="fld"><label>To Date</label><input type="date" id="arTo" style="width:145px"></div>
+          <div class="fld"><label>From Date</label><input type="date" style="width:145px"></div>
+          <div class="fld"><label>To Date</label><input type="date" style="width:145px"></div>
           <div class="fld"><label>PMAM</label>
-            <select id="arPmam" style="width:170px">
+            <select style="width:170px">
               <option value="">All PMAMs</option>
               <option>Tania Manhas</option><option>Abrar Choudhary</option>
               <option>Asia Firdose</option><option>Payal Sharma</option>
@@ -626,7 +431,7 @@ var ALL_PMJAY_KEYS = [
             </select>
           </div>
           <div class="fld"><label>Ward</label>
-            <select id="arWard" style="width:170px">
+            <select style="width:170px">
               <option value="">All Wards</option>
               <option>Orthopaedics</option><option>Male Surgery Ward</option>
               <option>Female Surgery Ward</option><option>Gynae</option>
@@ -634,7 +439,7 @@ var ALL_PMJAY_KEYS = [
             </select>
           </div>
           <button class="btn btn-pri" onclick="genAllRecords()">Filter</button>
-          <button class="btn btn-sec" onclick="clearAllRecords()">Clear</button>
+          <button class="btn btn-sec">Clear</button>
           <button class="btn btn-grn" onclick="exportExcel('allTbl','All_Records')">Export Excel</button>
           <button class="btn btn-word" onclick="printReport('All Records Report')">Print / PDF</button>
         </div>
@@ -702,35 +507,10 @@ var ALL_PMJAY_KEYS = [
 </div><!-- end layout -->
 
 <script>
-  // Firebase initialized in head
-
-  // Load all data from Firebase into cache on startup
-  if (typeof fsPreload !== 'undefined' && typeof ALL_PMJAY_KEYS !== 'undefined') {
-    fsPreload(ALL_PMJAY_KEYS, function() { console.log('Firebase data preloaded'); });
-  }
-
-
 // ===== HELPERS =====
 const PMAMS=['Tania Manhas','Abrar Choudhary','Asia Firdose','Payal Sharma','Rukhsar Akhter','Gagandeep Singh','Ambika Thakur','Safeer Ahmed','Vinod Kumar'];
 const WARDS=['Orthopaedics','Male Surgery Ward','Female Surgery Ward','Male Medicine Ward A','Male Medicine Ward B','Female Medicine Ward A','Female Medicine Ward B','MICU','SICU','Optha','Onco','Gynae','ENT','Dental','Disaster','Dialysis'];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-// ── Real data from localStorage ──
-function getRealEntries(filters) {
-  var all = [];
-  try { all = JSON.parse(pmStorage.getItem('pmjay_all_entries') || '[]'); } catch(e) {}
-  if (!all.length) return null; // null = use dummy data
-  filters = filters || {};
-  return all.filter(function(e) {
-    if (filters.month && e.month !== filters.month) return false;
-    if (filters.year  && e.year  !== filters.year)  return false;
-    if (filters.pmam  && e.pmam  !== filters.pmam)  return false;
-    if (filters.ward  && (!e.wards || !e.wards.includes(filters.ward))) return false;
-    if (filters.from  && e.date < filters.from) return false;
-    if (filters.to    && e.date > filters.to)   return false;
-    return true;
-  });
-}
-
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function fmt(n){return Number(n||0).toLocaleString('en-IN');}
 function cv(ipd,reg){return ipd>0?((reg/ipd)*100).toFixed(1)+'%':'—';}
@@ -745,41 +525,8 @@ function goSec(id,el){
   if(id==='monthly')genMonthly();
   else if(id==='leavereq')loadLeaveReq();
 }
-
-document.addEventListener('click',e=>{if(!e.target.closest('.user-pill')&&!e.target.closest('#userDD'))document.getElementById('userDD').classList.remove('open');});
-
-
-
-
-function toggleDD(){
-  var dd=document.getElementById('userDD');
-  var rm=document.getElementById('roleMenu');
-  if(dd.style.display==='block'){
-    dd.style.display='none';
-    if(rm)rm.style.display='none';
-  }else{
-    if(rm)rm.style.display='none';
-    var pill=document.querySelector('.user-pill');
-    if(pill){
-      var r=pill.getBoundingClientRect();
-      dd.style.top=(r.bottom+6)+'px';
-      dd.style.right=(window.innerWidth-r.right)+'px';
-      dd.style.left='auto';
-    }
-    dd.style.display='block';
-  }
-}
-function doLogout(){if(confirm('Logout from I/C AB-PMJAY Portal?'))window.location.href='index.html';}
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(){document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('open'));}
-function showToast(msg,type){
-  let t=document.getElementById('icToast');
-  if(!t){t=document.createElement('div');t.id='icToast';t.style.cssText='position:fixed;bottom:28px;right:28px;padding:12px 22px;border-radius:30px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.18);transition:opacity 0.4s';document.body.appendChild(t);}
-  t.style.background=type==='error'?'#FEE2E2':'#DCFCE7';
-  t.style.color=type==='error'?'#dc2626':'#166534';
-  t.textContent=msg;t.style.opacity='1';
-  clearTimeout(t._to);t._to=setTimeout(()=>t.style.opacity='0',3000);
-}
+function toggleDD(){document.getElementById('userDD').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.user-pill'))document.getElementById('userDD').classList.remove('open');});
 
 // ===== MONTHLY =====
 function genMonthly(){
@@ -919,204 +666,13 @@ function genAllRecords(){
     <td><strong>${r.reg}</strong></td><td>${r.pre}</td>
     <td>${fmt(r.preAmt)}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td>
     <td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td>
-    <td><button class="btn btn-sec" onclick="editRecord(this)" style="height:26px;font-size:10px;padding:0 8px">Edit</button></td>
+    <td><button class="btn btn-sec" style="height:26px;font-size:10px;padding:0 8px">Edit</button></td>
   </tr>`).join('');
   document.getElementById('allFoot').innerHTML=`<tr class="tot-row"><td colspan="3">Total (${data.length})</td><td>${fmt(tIPD)}</td><td>—</td><td>—</td><td>${fmt(tReg)}</td><td>${fmt(tPre)}</td><td>—</td><td>${fmt(tDis)}</td><td>—</td><td>${cv(tIPD,tReg)}</td><td>—</td></tr>`;
 }
 
 // ===== LEAVE =====
 function loadLeaveReq(){
-  // Read real leave requests from localStorage
-  var leaves = [];
-  try { leaves = JSON.parse(pmStorage.getItem('pmjay_leave_requests') || '[]'); } catch(e) {}
-
-  var pending  = leaves.filter(function(l){ return (l.status||'Pending')==='Pending'; });
-  var approved = leaves.filter(function(l){ return l.status==='Approved'; });
-  var rejected = leaves.filter(function(l){ return l.status==='Rejected'; });
-  var today    = new Date().toISOString().split('T')[0];
-  var onLeave  = leaves.filter(function(l){
-    return l.status==='Approved' && l.from <= today && (l.to >= today || !l.to);
-  });
-
-  document.getElementById('lv-pending').textContent  = pending.length;
-  document.getElementById('lv-approved').textContent = approved.length;
-  document.getElementById('lv-rejected').textContent = rejected.length;
-  document.getElementById('lv-onleave').textContent  = onLeave.length;
-  document.getElementById('pendingCnt').textContent  = pending.length;
-
-  // Render pending cards
-  if (!pending.length) {
-    document.getElementById('pendingList').innerHTML = '<div style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">No pending leave requests</div>';
-  } else {
-    document.getElementById('pendingList').innerHTML = pending.map(function(l, i) {
-      // Calculate balance for this PMAM
-      var icPolicy = {};
-      try { icPolicy = JSON.parse(pmStorage.getItem('pmjay_leave_policy') || '{}'); } catch(e) {}
-      var icDefaults = { casual:{days:15,label:'Casual'}, medical:{days:10,label:'Medical'}, comp:{days:12,label:'Compensatory'}, maternity:{days:180,label:'Maternity'}, paternity:{days:15,label:'Paternity'} };
-      Object.keys(icDefaults).forEach(function(k){ if(!icPolicy[k]) icPolicy[k]=icDefaults[k]; });
-      var allLeaves2 = [];
-      try { allLeaves2 = JSON.parse(pmStorage.getItem('pmjay_leave_requests')||'[]'); } catch(e) {}
-      var TYPE_MAP2 = {'Casual':'casual','Compensatory':'comp','Medical Leave':'medical','Maternity Leave':'maternity','Paternity Leave':'paternity'};
-
-      function getBalanceForPmam(name, leaveType) {
-        var key = TYPE_MAP2[leaveType] || null;
-        if (!key || !icPolicy[key]) return null;
-        var maxDays = icPolicy[key].days || 0;
-        var yr = new Date().getFullYear();
-        var used = 0, pending = 0;
-        allLeaves2.forEach(function(lv) {
-          if (lv.name !== name) return;
-          if ((TYPE_MAP2[lv.type]||null) !== key) return;
-          var lvYr = lv.from ? parseInt(lv.from.split('-')[0]) : 0;
-          if (lvYr !== yr) return;
-          var days = parseInt(lv.days)||0;
-          if (lv.status==='Approved') used += days;
-          else if (!lv.status||lv.status==='Pending') pending += days;
-        });
-        var remaining = Math.max(0, maxDays - used - pending);
-        return { max: maxDays, used: used, pending: pending, remaining: remaining, exceeded: (used+pending) >= maxDays };
-      }
-
-      var ini = (l.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
-      var fmtD = function(d){ return d ? d.split('-').reverse().join('/') : '—'; };
-      return '<div class="leave-card" id="lcard'+i+'">'
-        + '<div class="lc-top">'
-        + '<div style="display:flex;align-items:center;gap:10px">'
-        + '<div class="lc-av">'+ini+'</div>'
-        + '<div><div style="font-size:13px;font-weight:800;color:#0F2B8C">'+(l.name||'—')+'</div>'
-        + '<div style="font-size:11px;color:#6b7280">PMAM — '+(l.ward||'—')+'</div></div></div>'
-        + '<span class="badge badge-orange" id="lbadge'+i+'">Pending</span></div>'
-        + (function(){ var bal = getBalanceForPmam(l.name||'', l.type||''); if(!bal) return ''; var cls = bal.exceeded ? 'background:#FEF2F2;border:1px solid #FCA5A5;color:#dc2626' : bal.remaining<=3 ? 'background:#FEF9EC;border:1px solid #FDE68A;color:#92400e' : 'background:#EEF3FF;border:1px solid #C5D5F5;color:#0F2B8C'; return '<div style="'+cls+';border-radius:10px;padding:6px 12px;font-size:11px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px">'+(bal.exceeded?'⛔':'⚠️')+' Leave Balance — '+( l.type||'')+': Used <strong>'+bal.used+'</strong> | Pending <strong>'+bal.pending+'</strong> | Remaining <strong>'+bal.remaining+'</strong> of <strong>'+bal.max+'</strong> days'+(bal.exceeded?' <span style="background:#dc2626;color:#fff;padding:1px 8px;border-radius:8px;font-size:10px">LIMIT EXCEEDED</span>':'')+'</div>'; })()
-        + '<div class="lc-details">'
-        + '<div><div class="ld-key">Leave Type</div><div class="ld-val">'+(l.type||'—')+'</div></div>'
-        + '<div><div class="ld-key">From</div><div class="ld-val">'+fmtD(l.from)+'</div></div>'
-        + '<div><div class="ld-key">To</div><div class="ld-val">'+fmtD(l.to)+'</div></div>'
-        + '<div><div class="ld-key">Days</div><div class="ld-val">'+(l.days||'—')+' Days</div></div>'
-        + '<div><div class="ld-key">Return</div><div class="ld-val">'+fmtD(l.retDate)+'</div></div>'
-        + '<div><div class="ld-key">Duty By</div><div class="ld-val">'+(l.duty||'—')+'</div></div>'
-        + '</div>'
-        + '<div style="background:#FFF8E8;border:1px solid #FDE68A;border-radius:8px;padding:7px 12px;font-size:12px;color:#374151;font-style:italic;margin-bottom:10px">"'+(l.reason||'—')+'"</div>'
-        + '<div class="action-row" id="lactions'+i+'" style="display:flex;align-items:center;gap:10px">'
-        + '<input type="text" class="remark-inp" id="lremark'+i+'" placeholder="Remarks (optional)..." style="flex:1">'
-        + '<div style="display:flex;gap:6px;flex-shrink:0">'
-        + '<button class="btn btn-grn" data-idx="'+i+'" onclick="icApproveLeave(+this.dataset.idx)" style="height:34px;font-size:12px;white-space:nowrap">&#10003; Approve</button>'
-        + '<button class="btn btn-red" data-idx="'+i+'" onclick="icRejectLeave(+this.dataset.idx)" style="height:34px;font-size:12px;white-space:nowrap">&#10007; Reject</button>'
-        + '</div>'
-        + '</div></div>';
-    }).join('');
-  }
-
-  // History table — all leaves
-  var fmtD = function(d){ return d ? d.split('-').reverse().join('/') : '—'; };
-  document.getElementById('lvHistTbody').innerHTML = leaves.length ? leaves.map(function(h){
-    var sc = h.status==='Approved'?'#166534':h.status==='Rejected'?'#dc2626':'#92400e';
-    var bg = h.status==='Approved'?'#DCFCE7':h.status==='Rejected'?'#FEE2E2':'#FEF3C7';
-    return '<tr>'
-      + '<td style="font-weight:600">'+(h.name||'—')+'</td>'
-      + '<td>'+(h.type||'—')+'</td>'
-      + '<td>'+fmtD(h.from)+'</td><td>'+fmtD(h.to)+'</td>'
-      + '<td>'+(h.days||'—')+'</td><td>'+fmtD(h.retDate)+'</td>'
-      + '<td>'+(h.duty||'—')+'</td>'
-      + '<td><span style="background:'+bg+';color:'+sc+';padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700">'+(h.status||'Pending')+'</span></td>'
-      + '<td>'+(h.reason||'—')+'</td>'
-      + '<td>—</td></tr>';
-  }).join('') : '<tr><td colspan="10" class="empty-td">No leave history yet</td></tr>';
-
-  // On Leave Today
-  if (!onLeave.length) {
-    document.getElementById('onLeaveList').innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af;font-style:italic">No PMAMs on leave today</div>';
-  } else {
-    document.getElementById('onLeaveList').innerHTML = onLeave.map(function(l){
-      // Calculate balance for this PMAM
-      var icPolicy = {};
-      try { icPolicy = JSON.parse(pmStorage.getItem('pmjay_leave_policy') || '{}'); } catch(e) {}
-      var icDefaults = { casual:{days:15,label:'Casual'}, medical:{days:10,label:'Medical'}, comp:{days:12,label:'Compensatory'}, maternity:{days:180,label:'Maternity'}, paternity:{days:15,label:'Paternity'} };
-      Object.keys(icDefaults).forEach(function(k){ if(!icPolicy[k]) icPolicy[k]=icDefaults[k]; });
-      var allLeaves2 = [];
-      try { allLeaves2 = JSON.parse(pmStorage.getItem('pmjay_leave_requests')||'[]'); } catch(e) {}
-      var TYPE_MAP2 = {'Casual':'casual','Compensatory':'comp','Medical Leave':'medical','Maternity Leave':'maternity','Paternity Leave':'paternity'};
-
-      function getBalanceForPmam(name, leaveType) {
-        var key = TYPE_MAP2[leaveType] || null;
-        if (!key || !icPolicy[key]) return null;
-        var maxDays = icPolicy[key].days || 0;
-        var yr = new Date().getFullYear();
-        var used = 0, pending = 0;
-        allLeaves2.forEach(function(lv) {
-          if (lv.name !== name) return;
-          if ((TYPE_MAP2[lv.type]||null) !== key) return;
-          var lvYr = lv.from ? parseInt(lv.from.split('-')[0]) : 0;
-          if (lvYr !== yr) return;
-          var days = parseInt(lv.days)||0;
-          if (lv.status==='Approved') used += days;
-          else if (!lv.status||lv.status==='Pending') pending += days;
-        });
-        var remaining = Math.max(0, maxDays - used - pending);
-        return { max: maxDays, used: used, pending: pending, remaining: remaining, exceeded: (used+pending) >= maxDays };
-      }
-
-      var ini = (l.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
-      return '<div class="leave-card"><div class="lc-top">'
-        + '<div style="display:flex;align-items:center;gap:10px">'
-        + '<div class="lc-av">'+ini+'</div>'
-        + '<div><div style="font-size:13px;font-weight:800;color:#0F2B8C">'+(l.name||'—')+'</div>'
-        + '<div style="font-size:11px;color:#6b7280">Ward: '+(l.ward||'—')+' | Returns: '+fmtD(l.retDate)+' | Covered by: '+(l.duty||'—')+'</div>'
-        + '</div></div>'
-        + '<span class="badge badge-orange">On Leave</span></div></div>';
-    }).join('');
-  }
-}
-
-// IC approve/reject — saves back to localStorage
-var icLeaveData = [];
-function icApproveLeave(i) {
-  try { icLeaveData = JSON.parse(pmStorage.getItem('pmjay_leave_requests') || '[]'); } catch(e) {}
-  // Find the i-th PENDING item and update its index in icLeaveData directly
-  var count = -1;
-  for (var j = 0; j < icLeaveData.length; j++) {
-    if ((icLeaveData[j].status || 'Pending') === 'Pending') {
-      count++;
-      if (count === i) {
-        icLeaveData[j].status = 'Approved';
-        break;
-      }
-    }
-  }
-  pmStorage.setItem('pmjay_leave_requests', JSON.stringify(icLeaveData));
-  document.getElementById('lbadge'+i).className = 'badge badge-green';
-  document.getElementById('lbadge'+i).textContent = 'Approved';
-  var r = document.getElementById('lremark'+i) ? document.getElementById('lremark'+i).value : '';
-  document.getElementById('lactions'+i).innerHTML = '<span style="color:#166534;font-size:12px;font-weight:600">&#10003; Leave Approved'+(r?' — '+r:'')+'</span>';
-  showToast('Leave approved and saved to records','success');
-  // Refresh the entire leave section to update all counts and cards
-  setTimeout(function(){ loadLeaveReq(); }, 300);
-}
-function icRejectLeave(i) {
-  var rEl = document.getElementById('lremark'+i);
-  var r = rEl ? rEl.value : '';
-  if (!r) { alert('Please enter rejection reason in Remarks field.'); return; }
-  try { icLeaveData = JSON.parse(pmStorage.getItem('pmjay_leave_requests') || '[]'); } catch(e) {}
-  // Find the i-th PENDING item directly in icLeaveData
-  var count = -1;
-  for (var j = 0; j < icLeaveData.length; j++) {
-    if ((icLeaveData[j].status || 'Pending') === 'Pending') {
-      count++;
-      if (count === i) {
-        icLeaveData[j].status = 'Rejected';
-        break;
-      }
-    }
-  }
-  pmStorage.setItem('pmjay_leave_requests', JSON.stringify(icLeaveData));
-  document.getElementById('lbadge'+i).className = 'badge badge-red';
-  document.getElementById('lbadge'+i).textContent = 'Rejected';
-  document.getElementById('lactions'+i).innerHTML = '<span style="color:#dc2626;font-size:12px;font-weight:600">&#10007; Leave Rejected — '+r+'</span>';
-  showToast('Leave rejected and saved to records','success');
-  // Refresh the entire leave section to update all counts and cards
-  setTimeout(function(){ loadLeaveReq(); }, 300);
-}
-
-function loadLeaveReq_OLD(){
   document.getElementById('lv-pending').textContent=3;
   document.getElementById('lv-approved').textContent=8;
   document.getElementById('lv-rejected').textContent=2;
@@ -1152,7 +708,7 @@ function loadLeaveReq_OLD(){
         <button class="btn btn-grn" onclick="approveLeave(${i})" style="height:34px;font-size:12px">✓ Approve</button>
         <button class="btn btn-red" onclick="rejectLeave(${i})" style="height:34px;font-size:12px">✗ Reject</button>
         <input type="text" class="remark-inp" id="lremark${i}" placeholder="Remarks (optional)...">
-        <button class="btn btn-word" onclick="showToast('Print Sanction feature coming soon','success')" style="height:34px;font-size:11px">🖨 Print Sanction</button>
+        <button class="btn btn-word" style="height:34px;font-size:11px">🖨 Print Sanction</button>
       </div>
     </div>`).join('');
 
@@ -1176,13 +732,13 @@ function loadLeaveReq_OLD(){
     <div class="leave-card"><div class="lc-top"><div style="display:flex;align-items:center;gap:10px"><div class="lc-av">TM</div><div><div style="font-size:13px;font-weight:800;color:#0F2B8C">Tania Manhas</div><div style="font-size:11px;color:#6b7280">Returns: 13 Apr 2026 | Covered by: Abrar Choudhary</div></div></div><span class="badge badge-orange">On Leave</span></div></div>
     <div class="leave-card"><div class="lc-top"><div style="display:flex;align-items:center;gap:10px"><div class="lc-av">GS</div><div><div style="font-size:13px;font-weight:800;color:#0F2B8C">Gagandeep Singh</div><div style="font-size:11px;color:#6b7280">Returns: 17 Apr 2026 | Covered by: Safeer Ahmed</div></div></div><span class="badge badge-orange">On Leave</span></div></div>`;
 }
-function approveLeave_OLD(i){
+function approveLeave(i){
   document.getElementById('lbadge'+i).className='badge badge-green';
   document.getElementById('lbadge'+i).textContent='Approved ✓';
   const r=document.getElementById('lremark'+i).value;
-  document.getElementById('lactions'+i).innerHTML=`<span style="color:#166534;font-size:12px;font-weight:600">✓ Leave Approved${r?' — '+r:''}</span><button class="btn btn-word" onclick="showToast('Print Sanction feature coming soon','success')" style="height:28px;font-size:10px;padding:0 10px;margin-left:8px">🖨 Print Sanction</button>`;
+  document.getElementById('lactions'+i).innerHTML=`<span style="color:#166534;font-size:12px;font-weight:600">✓ Leave Approved${r?' — '+r:''}</span><button class="btn btn-word" style="height:28px;font-size:10px;padding:0 10px;margin-left:8px">🖨 Print Sanction</button>`;
 }
-function rejectLeave_OLD(i){
+function rejectLeave(i){
   const r=document.getElementById('lremark'+i).value;
   if(!r){alert('Please enter rejection reason in Remarks field.');return;}
   document.getElementById('lbadge'+i).className='badge badge-red';
@@ -1194,43 +750,6 @@ function switchLvTab(id,el){
   document.getElementById('lv-tab-'+id).classList.add('active');
   document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  // Refresh data when switching tabs to get latest statuses
-  loadLeaveReq();
-}
-
-function saveIcProfile(){
-  const name=document.getElementById('icName').value.trim();
-  if(name){
-    const ini=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-    document.getElementById('icInitials').textContent=ini;
-    const hName=document.querySelector('.user-pill .user-name');
-    if(hName)hName.textContent=name;
-  }
-  closeModal();
-  showToast('Profile updated successfully ✓','success');
-}
-function updateIcPhoto(inp){
-  const r=new FileReader();
-  r.onload=e=>{
-    const d=document.getElementById('icInitials');
-    d.innerHTML=`<img src="${e.target.result}" style="width:64px;height:64px;border-radius:50%;object-fit:cover">`;
-  };
-  r.readAsDataURL(inp.files[0]);
-}
-function clearAllRecords(){
-  ['arFrom','arTo'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('arPmam').value='';
-  document.getElementById('arWard').value='';
-  genAllRecords();
-}
-function editRecord(btn){
-  const row=btn.closest('tr');
-  const cells=row.querySelectorAll('td');
-  const date=cells[0].textContent.trim();
-  const pmam=cells[1].textContent.trim();
-  const ward=cells[2].textContent.trim();
-  const note=prompt(`Edit record for ${pmam} (${date}, ${ward})\n\nEnter a note or correction (feature — full edit modal coming soon):`);
-  if(note!==null&&note.trim())showToast('Edit noted for '+pmam+' — '+date,'success');
 }
 
 // EXPORT EXCEL
@@ -1248,65 +767,19 @@ function exportExcel(tblId,name){
 }
 
 // PRINT
-function printReport(title){window.print();}
+function printReport(title){
+  window.print();
+}
 
 // INIT — load monthly on start
 window.addEventListener('load',()=>{
-
   genMonthly();
   const today=new Date().toISOString().split('T')[0];
   document.querySelectorAll('input[type=date]').forEach(el=>{if(!el.value)el.value=today;});
 });
 
-// ── Load shared branding from localStorage (set by Admin) ──
-function loadSharedBranding() {
-  var logo1 = pmStorage.getItem('pmjay_logo1');
-  var logo2 = pmStorage.getItem('pmjay_logo2');
-  ['logo1Img','hLogo1','bannerLogo1'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el && logo1) { el.src = logo1; el.style.display = 'block'; }
-  });
-  ['logo2Img','hLogo2','bannerLogo2'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el && logo2) { el.src = logo2; el.style.display = 'block'; }
-  });
-}
-function loadSessionUser() {
-  try {
-    var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
-    if (!u.name) return;
-    var initials = u.name.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
-    // Update by ID
-    ['hName','userName','userNameDisp'].forEach(function(id) {
-      var el = document.getElementById(id); if (el) el.textContent = u.name;
-    });
-    ['hRole','userRole','userDesig'].forEach(function(id) {
-      var el = document.getElementById(id); if (el) el.textContent = u.desig || u.role || '';
-    });
-    ['hInitials','userInitials','mInitials'].forEach(function(id) {
-      var el = document.getElementById(id); if (el) el.textContent = initials;
-    });
-    // Also update by class as fallback
-    var unameEl = document.querySelector('.user-pill .uname');
-    if (unameEl) unameEl.textContent = u.name;
-    var udesigEl = document.querySelector('.user-pill .udesig');
-    if (udesigEl) udesigEl.textContent = u.desig || u.role || '';
-    var iniEl = document.querySelector('.user-pill .ini');
-    if (iniEl) iniEl.textContent = initials;
-    // Update dd-header too
-    var ddName = document.querySelector('.dd-hname');
-    if (ddName) ddName.textContent = u.name;
-    var ddRole = document.querySelector('.dd-hrole');
-    if (ddRole) ddRole.textContent = (u.desig||u.role||'') + ' — GMC Rajouri';
-    var ddAv = document.querySelector('.dd-av');
-    if (ddAv) ddAv.textContent = initials;
-  } catch(e) {}
-}
-window.addEventListener('DOMContentLoaded', function(){ loadSharedBranding(); loadSessionUser(); });
-
-
 // ══════════════════════════════════════
-// FIREBASE + EMAILJS HELPERS
+// FIREBASE HELPERS
 // ══════════════════════════════════════
 function fbSendOTP(email, onSuccess, onError) {
   var otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -1323,88 +796,15 @@ function fbSendOTP(email, onSuccess, onError) {
 
 function fbVerifyOTP(email, otp, onSuccess, onError) {
   db.collection('otps').doc(email).get().then(function(doc) {
-    if (!doc.exists) return onError('OTP not found. Please request again.');
+    if (!doc.exists) return onError('OTP not found. Request again.');
     var data = doc.data();
-    if (Date.now() > data.expires) return onError('OTP expired. Please request again.');
-    if (data.otp !== otp.trim()) return onError('Invalid OTP. Please try again.');
+    if (Date.now() > data.expires) return onError('OTP expired. Request again.');
+    if (data.otp !== otp.trim()) return onError('Invalid OTP.');
     db.collection('otps').doc(email).delete();
     onSuccess();
   }).catch(onError);
 }
 
-function fbSaveUser(email, userData, onSuccess, onError) {
-  db.collection('users').doc(email).set(userData, { merge: true })
-    .then(onSuccess || function(){}).catch(onError || function(){});
-}
-
-function fbGetUser(email, onSuccess, onError) {
-  db.collection('users').doc(email).get()
-    .then(function(doc) {
-      if (doc.exists) onSuccess(doc.data());
-      else onError('User not found.');
-    }).catch(onError || function(){});
-}
-
-function fbSaveLeave(leaveData, onSuccess, onError) {
-  var docId = leaveData.name.replace(/\s+/g,'_') + '_' + Date.now();
-  db.collection('leave_requests').doc(docId).set(leaveData)
-    .then(onSuccess || function(){}).catch(onError || function(){});
-}
-
-function fbLoadLeaves(onSuccess, onError) {
-  db.collection('leave_requests').orderBy('from','desc').get()
-    .then(function(snap) {
-      var items = [];
-      snap.forEach(function(doc) { items.push(Object.assign({ _id: doc.id }, doc.data())); });
-      onSuccess(items);
-    }).catch(onError || function(){});
-}
-
-function fbUpdateLeave(docId, updates, onSuccess, onError) {
-  db.collection('leave_requests').doc(docId).update(updates)
-    .then(onSuccess || function(){}).catch(onError || function(){});
-}
-
-function fbDeleteLeave(docId, onSuccess, onError) {
-  db.collection('leave_requests').doc(docId).delete()
-    .then(onSuccess || function(){}).catch(onError || function(){});
-}
-
 </script>
-
-<!-- UPDATE PROFILE MODAL -->
-<div class="modal-bg" id="profileModal">
-  <div class="modal-box" style="max-width:400px">
-    <div class="modal-hd">
-      <span style="font-weight:800;font-size:15px;color:#0F2B8C">👤 Update Profile</span>
-      <span onclick="closeModal()" style="cursor:pointer;font-size:18px;color:#6b7280;line-height:1">✕</span>
-    </div>
-    <div style="padding:18px 20px 20px">
-      <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:16px">
-        <div id="icInitials" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#0F2B8C,#1A3DB5);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800">SK</div>
-        <label style="margin-top:8px;font-size:11px;color:#1A3DB5;font-weight:700;cursor:pointer">
-          Change Photo <input type="file" accept="image/*" style="display:none" onchange="updateIcPhoto(this)">
-        </label>
-      </div>
-      <div class="fld" style="margin-bottom:10px">
-        <label style="font-size:11px;font-weight:700;color:#374151">Full Name</label>
-        <input type="text" id="icName" value="Suresh Kumar" style="width:100%;margin-top:4px;padding:8px 12px;border:1.5px solid #c7d2fe;border-radius:8px;font-size:13px;font-family:Inter,sans-serif">
-      </div>
-      <div class="fld" style="margin-bottom:10px">
-        <label style="font-size:11px;font-weight:700;color:#374151">Designation</label>
-        <input type="text" id="icDesig" value="I/C AB-PMJAY" style="width:100%;margin-top:4px;padding:8px 12px;border:1.5px solid #c7d2fe;border-radius:8px;font-size:13px;font-family:Inter,sans-serif">
-      </div>
-      <div class="fld" style="margin-bottom:16px">
-        <label style="font-size:11px;font-weight:700;color:#374151">Email</label>
-        <input type="email" id="icEmail" value="suresh@gmail.com" style="width:100%;margin-top:4px;padding:8px 12px;border:1.5px solid #c7d2fe;border-radius:8px;font-size:13px;font-family:Inter,sans-serif">
-      </div>
-      <div style="display:flex;gap:10px;justify-content:flex-end">
-        <button onclick="closeModal()" style="padding:8px 18px;border-radius:20px;border:1.5px solid #c7d2fe;background:#fff;color:#374151;font-size:12px;font-weight:700;cursor:pointer">Cancel</button>
-        <button onclick="saveIcProfile()" style="padding:8px 20px;border-radius:20px;background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer">Save Changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
