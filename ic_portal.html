@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I/C AB-PMJAY Portal — GMC Rajouri</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F0FF 0%,#C8DCFF 50%,#D6EAFF 100%);min-height:100vh;overflow-x:hidden}
+
+/* ===== BANNER ===== */
+.banner-wrap{
+  width:100%;position:relative;height:82px;overflow:hidden;
+  background:linear-gradient(135deg,#2D1B8E 0%,#3D2AA0 25%,#4A35B5 50%,#5842C8 75%,#6650D8 100%);
+  display:flex;align-items:center;padding:0 20px;gap:16px;
+}
+.banner-logo{
+  width:56px;height:56px;border-radius:50%;background:#fff;
+  border:3px solid rgba(255,255,255,0.5);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.banner-titles{flex:0 0 auto;display:flex;flex-direction:column;gap:2px;max-width:360px}
+.banner-line1{font-size:11px;font-weight:800;color:#FF9933;letter-spacing:0.8px;text-transform:uppercase}
+.banner-line2{font-size:17px;font-weight:900;color:#4ade80;letter-spacing:0.5px;text-transform:uppercase;line-height:1.15}
+.banner-line3{font-size:10px;font-weight:600;color:rgba(255,255,255,0.75);font-style:italic;opacity:1}
+.banner-right-text{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  flex:1;padding:0 20px;margin-right:200px;
+}
+.brt-bars{display:flex;align-items:center;gap:10px}
+.brt-bar{width:5px;height:38px;background:#fff;border-radius:3px;flex-shrink:0}
+.brt-main{display:flex;flex-direction:column;align-items:center;gap:3px}
+.brt1{font-size:17px;font-weight:900;color:#fff;text-align:center;letter-spacing:1.5px;text-transform:uppercase}
+.brt2{font-size:10px;font-weight:700;color:rgba(255,255,255,0.85);letter-spacing:0.8px;text-transform:uppercase}
+.banner-overlay{
+  position:absolute;top:0;right:0;bottom:0;
+  display:flex;align-items:center;padding:0 16px;gap:10px;z-index:10;
+}
+.user-pill{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.35);
+  border-radius:50px;padding:5px 12px 5px 5px;cursor:pointer;position:relative;
+}
+.uphoto{
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.5);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;
+}
+.uphoto .ini{font-size:13px;font-weight:800;color:#fff}
+.uname{font-size:11px;font-weight:800;color:#fff;white-space:nowrap}
+.udesig{font-size:9px;color:rgba(255,255,255,0.75);white-space:nowrap;text-transform:uppercase;letter-spacing:0.3px}
+.dd-arrow{font-size:10px;color:rgba(255,255,255,0.7)}
+.user-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15);min-width:160px;overflow:hidden;display:none;z-index:300}
+.user-dropdown.open{display:block}
+.dd-item{padding:10px 16px;font-size:12px;color:#1e3a8a;font-weight:600;cursor:pointer;border-bottom:1px solid #E8EFFF;display:flex;align-items:center;gap:8px}
+.dd-item:last-child{border-bottom:none;color:#dc2626}
+.dd-item:hover{background:#EFF6FF}
+.logout-btn{background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.35);color:#fff;border-radius:50px;padding:7px 18px;font-size:11px;font-weight:700;cursor:pointer;font-family:"Inter",sans-serif}
+
+/* TICKER */
+.ticker{background:#E0F7FA;border-bottom:1px solid #B2EBF2;height:28px;overflow:hidden;display:flex;align-items:center}
+.ticker-inner{white-space:nowrap;animation:tick 35s linear infinite;color:#005F66;font-size:11px;font-weight:500;padding:0 16px}
+@keyframes tick{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 110px)}
+
+/* SIDEBAR */
+.sidebar{
+  width:76px;background:#fff;border-right:1.5px solid #E0E8FF;
+  display:flex;flex-direction:column;align-items:center;
+  padding:10px 0;gap:2px;flex-shrink:0;
+  box-shadow:2px 0 8px rgba(26,61,181,0.06);
+}
+.sbi{
+  width:66px;display:flex;flex-direction:column;align-items:center;
+  gap:3px;padding:9px 4px;border-radius:10px;cursor:pointer;transition:all 0.15s;
+}
+.sbi:hover{background:#F0F5FF}
+.sbi.active{background:linear-gradient(135deg,#0F2B8C,#1A3DB5);box-shadow:0 3px 10px rgba(15,43,140,0.25)}
+.sbi svg{width:22px;height:22px}
+.sbi.active svg{fill:#fff}
+.sbi:not(.active) svg{fill:#1A3DB5}
+.sbl{font-size:8px;font-weight:700;text-align:center;line-height:1.3;color:#666;text-transform:uppercase;letter-spacing:0.3px}
+.sbi.active .sbl{color:#fff}
+.sb-div{width:44px;height:1px;background:#E0E8FF;margin:4px 0}
+
+/* CONTENT */
+.content{flex:1;padding:18px;overflow-y:auto}
+.sec{display:none}.sec.active{display:block}
+.page-hd{font-size:20px;font-weight:800;color:#0F2B8C;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.page-hd::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,#1A3DB5,transparent)}
+
+/* CARDS */
+.card{background:rgba(255,255,255,0.65);backdrop-filter:blur(12px);border-radius:20px;border:1.5px solid rgba(255,255,255,0.85);padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 16px rgba(30,80,200,0.06)}
+.card-hd{font-size:13px;font-weight:800;color:#0F2B8C;margin-bottom:12px;padding-bottom:8px;border-bottom:1.5px solid rgba(26,61,181,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.mcard{border-radius:16px;padding:12px 14px;background:#fff;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(30,80,200,0.06);position:relative;overflow:hidden}
+.mcard::before{content:"";position:absolute;bottom:0;left:0;right:0;height:4px;border-radius:0 0 14px 14px}
+.mcard.c1::before{background:linear-gradient(90deg,#1A3DB5,#2952D9)}
+.mcard.c2::before{background:linear-gradient(90deg,#166534,#16a34a)}
+.mcard.c3::before{background:linear-gradient(90deg,#C94000,#E65800)}
+.mcard.c4::before{background:linear-gradient(90deg,#005F52,#00897B)}
+.mcard.c5::before{background:linear-gradient(90deg,#6A1B9A,#9C27B0)}
+.mcard.c6::before{background:linear-gradient(90deg,#0F1F6E,#1A3DB5)}
+.mcard-num{font-size:26px;font-weight:800;color:#0F2B8C;line-height:1;margin-bottom:4px}
+.mcard-label{font-size:10px;color:#666;font-weight:600}
+
+/* FORM ROW */
+.frow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.fld{display:flex;flex-direction:column;gap:3px}
+.fld label{font-size:10px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.3px}
+.fld input,.fld select{height:36px;padding:0 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px;color:#0F2B8C;background:rgba(255,255,255,0.9);outline:none;font-family:"Inter",sans-serif}
+
+/* BUTTONS */
+.btn{height:36px;padding:0 18px;border-radius:50px;font-size:12px;cursor:pointer;font-weight:700;border:none;transition:all 0.15s;font-family:"Inter",sans-serif}
+.btn-pri{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff}
+.btn-sec{background:#F0F4FF;color:#1A3DB5;border:1.5px solid rgba(26,61,181,0.2)}
+.btn-grn{background:linear-gradient(90deg,#166534,#16a34a);color:#fff}
+.btn-word{background:#1D4ED8;color:#fff}
+.btn-red{background:linear-gradient(90deg,#991b1b,#dc2626);color:#fff}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid rgba(26,61,181,0.1)}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:600px}
+th{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;padding:9px 12px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;white-space:nowrap}
+th:first-child{border-radius:10px 0 0 0}
+th:last-child{border-radius:0 10px 0 0}
+td{padding:8px 12px;border-bottom:1px solid rgba(26,61,181,0.05);background:#fff;vertical-align:middle}
+tr:nth-child(even) td{background:#F8FAFF}
+tr:hover td{background:#EEF3FF}
+tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:#fff;font-weight:700}
+.empty-td{text-align:center;padding:24px!important;color:#BDBDBD;font-style:italic}
+.wtag{background:#E8EFFF;color:#1A3DB5;font-size:10px;padding:2px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;margin:2px;font-weight:600}
+.ptag{background:#EDE7F6;color:#4A148C;font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600}
+
+/* BADGES */
+.badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-green{background:#DCFCE7;color:#166534}
+.badge-orange{background:#FEF3C7;color:#92400e}
+.badge-red{background:#FEE2E2;color:#dc2626}
+.badge-blue{background:#E8EFFF;color:#1A3DB5}
+
+/* LEAVE CARD */
+.leave-card{background:#fff;border-radius:14px;padding:14px 16px;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 6px rgba(26,61,181,0.05);margin-bottom:10px}
+.lc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.lc-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#0F2B8C,#1A3DB5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;flex-shrink:0}
+.lc-details{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px;background:#F8FAFF;border-radius:10px;margin-bottom:10px}
+.ld-key{font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase}
+.ld-val{font-size:12px;font-weight:600;color:#374151;margin-top:1px}
+.action-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.remark-inp{flex:1;min-width:150px;height:34px;padding:0 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:50px;font-size:12px;font-family:"Inter",sans-serif;outline:none;background:#fff}
+
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:14px;background:rgba(255,255,255,0.5);padding:5px;border-radius:50px;width:fit-content}
+.tab{padding:7px 18px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;color:#6b7280;transition:all 0.2s}
+.tab.active{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;box-shadow:0 3px 10px rgba(15,43,140,0.2)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+</style>
+  <!-- Firebase v10 -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec",
+      measurementId: "G-NK9VL87CJC"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
+</head>
+<body>
+
+<!-- ===== BANNER ===== -->
+<div class="banner-wrap">
+  <div class="banner-logo">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="#4A35B5" stroke="#FFD700" stroke-width="3"/>
+      <text x="50" y="30" text-anchor="middle" font-size="7.5" fill="#FFD700" font-weight="bold" font-family="Arial">Pradhan Mantri</text>
+      <text x="50" y="40" text-anchor="middle" font-size="7" fill="#fff" font-family="Arial">Jan Arogya</text>
+      <text x="50" y="50" text-anchor="middle" font-size="7" fill="#fff" font-family="Arial">Yojana</text>
+      <circle cx="50" cy="65" r="10" fill="#138808" opacity="0.85"/>
+      <text x="50" y="69" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold" font-family="Arial">AB</text>
+      <text x="50" y="85" text-anchor="middle" font-size="7" fill="#FFD700" font-family="Arial">PM-JAY</text>
+    </svg>
+  </div>
+  <div class="banner-titles">
+    <div class="banner-line1">Ayushman Bharat — PM-JAY</div>
+    <div class="banner-line2">Management Information System</div>
+    <div class="banner-line3">Government Medical College &amp; Associated Hospital, Rajouri</div>
+  </div>
+  <div class="banner-right-text">
+    <div class="brt-bars">
+      <div class="brt-bar"></div>
+      <div class="brt-main">
+        <div class="brt1">GMC &amp; AH RAJOURI</div>
+        <div class="brt2">I/C AB-PMJAY PORTAL</div>
+      </div>
+      <div class="brt-bar"></div>
+    </div>
+  </div>
+  <div class="banner-overlay">
+    <div class="user-pill" onclick="toggleDD()">
+      <div class="uphoto"><span class="ini" id="ini">IC</span></div>
+      <div>
+        <div class="uname" id="userName">I/C Admin</div>
+        <div class="udesig" id="userDesig">I/C AB-PMJAY</div>
+      </div>
+      <span class="dd-arrow">▾</span>
+      <div class="user-dropdown" id="userDD">
+        <div class="dd-item">👤 Update Profile</div>
+        <div class="dd-item" onclick="confirmLogout()">🚪 Logout</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="confirmLogout()">Logout</button>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">Ayushman Bharat PMJAY — All PMAMs are requested to fill daily reports before 5:00 PM &nbsp;&nbsp;&nbsp;&nbsp; For any queries contact: VINOD KUMAR (7006213517) &nbsp;&nbsp;&nbsp;&nbsp; Ayushman Bharat PMJAY — All PMAMs are requested to fill daily reports before 5:00 PM &nbsp;&nbsp;&nbsp;&nbsp; For any queries contact: VINOD KUMAR (7006213517)</div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sbi active" onclick="goSec('monthly',this)" title="Monthly Report">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+      <div class="sbl">Monthly</div>
+    </div>
+    <div class="sbi" onclick="goSec('annual',this)" title="Annual Report">
+      <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+      <div class="sbl">Annual</div>
+    </div>
+    <div class="sbi" onclick="goSec('ward',this)" title="Ward Wise Report">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+      <div class="sbl">Ward Wise</div>
+    </div>
+    <div class="sbi" onclick="goSec('pmamwise',this)" title="PMAM Wise Report">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      <div class="sbl">PMAM Wise</div>
+    </div>
+    <div class="sb-div"></div>
+    <div class="sbi" onclick="goSec('allrecords',this)" title="All Records">
+      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      <div class="sbl">All Records</div>
+    </div>
+    <div class="sbi" onclick="goSec('leavereq',this)" title="Leave Requests">
+      <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+      <div class="sbl">Leave Req</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ===== MONTHLY REPORT ===== -->
+    <div class="sec active" id="sec-monthly">
+      <div class="page-hd">Monthly Report</div>
+      <div class="card">
+        <div class="card-hd">PMAM Performance — Monthly</div>
+        <div class="frow">
+          <div class="fld"><label>Month</label>
+            <select id="rMonth" style="width:140px">
+              <option>January</option><option>February</option><option>March</option>
+              <option selected>April</option><option>May</option><option>June</option>
+              <option>July</option><option>August</option><option>September</option>
+              <option>October</option><option>November</option><option>December</option>
+            </select>
+          </div>
+          <div class="fld"><label>Year</label><select style="width:100px"><option>2026</option><option>2025</option></select></div>
+          <button class="btn btn-pri" onclick="genMonthly()">Generate</button>
+          <button class="btn btn-grn" onclick="exportExcel('monthlyTbl','Monthly_Report')">Export Excel</button>
+          <button class="btn btn-word" onclick="printReport('Monthly PMAM Performance Report')">Print / PDF</button>
+        </div>
+      </div>
+      <div class="metrics-grid" id="monthlyMetrics"></div>
+      <div class="card">
+        <div class="card-hd" id="monthlyTitle">PMAM-wise Summary — April 2026</div>
+        <div class="tbl-wrap">
+          <table id="monthlyTbl">
+            <thead><tr><th>S.No</th><th>PMAM Name</th><th>Wards</th><th>IPD</th><th>Med</th><th>Surg</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <tbody id="monthlyTbody"><tr><td colspan="12" class="empty-td">Click Generate to load data</td></tr></tbody>
+            <tfoot id="monthlyFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ANNUAL REPORT ===== -->
+    <div class="sec" id="sec-annual">
+      <div class="page-hd">Annual Report</div>
+      <div class="card">
+        <div class="card-hd">Annual PMAM Performance</div>
+        <div class="frow">
+          <div class="fld"><label>Year</label><select style="width:110px"><option>2026</option><option>2025</option></select></div>
+          <button class="btn btn-pri" onclick="genAnnual()">Generate</button>
+          <button class="btn btn-grn" onclick="exportExcel('annualTbl','Annual_Report')">Export Excel</button>
+          <button class="btn btn-word" onclick="printReport('Annual PMAM Performance Report')">Print / PDF</button>
+        </div>
+      </div>
+      <div class="metrics-grid" id="annualMetrics"></div>
+      <div class="card">
+        <div class="card-hd">Month-wise Summary — 2026</div>
+        <div class="tbl-wrap">
+          <table id="annualTbl">
+            <thead><tr><th>Month</th><th>IPD</th><th>Med</th><th>Surg</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <tbody id="annualTbody"><tr><td colspan="10" class="empty-td">Click Generate to load data</td></tr></tbody>
+            <tfoot id="annualFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd">PMAM-wise Annual Ranking</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Rank</th><th>PMAM</th><th>IPD</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <tbody id="annualPmamTbody"><tr><td colspan="8" class="empty-td">—</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== WARD WISE REPORT ===== -->
+    <div class="sec" id="sec-ward">
+      <div class="page-hd">Ward Wise Report</div>
+      <div class="card">
+        <div class="card-hd">Ward Performance</div>
+        <div class="frow">
+          <div class="fld"><label>Select Ward</label>
+            <select id="wrWard" style="width:200px">
+              <option value="">All Wards</option>
+              <option>Orthopaedics</option><option>Male Surgery Ward</option>
+              <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
+              <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
+              <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
+              <option>Optha</option><option>Onco</option><option>Gynae</option>
+              <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
+            </select>
+          </div>
+          <div class="fld"><label>Month</label>
+            <select style="width:130px"><option selected>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option><option>January</option><option>February</option><option>March</option></select>
+          </div>
+          <div class="fld"><label>Year</label><select style="width:100px"><option>2026</option><option>2025</option></select></div>
+          <button class="btn btn-pri" onclick="genWard()">Generate</button>
+          <button class="btn btn-grn" onclick="exportExcel('wardTbl','Ward_Report')">Export Excel</button>
+          <button class="btn btn-word" onclick="printReport('Ward Wise Performance Report')">Print / PDF</button>
+        </div>
+      </div>
+      <div class="metrics-grid" id="wardMetrics"></div>
+      <div class="card">
+        <div class="card-hd">All Wards Comparison — Ranked by Conv%</div>
+        <div class="tbl-wrap">
+          <table id="wardTbl">
+            <thead><tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <tbody id="wardTbody"><tr><td colspan="9" class="empty-td">Click Generate to load data</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PMAM WISE REPORT ===== -->
+    <div class="sec" id="sec-pmamwise">
+      <div class="page-hd">PMAM Wise Report</div>
+      <div class="card">
+        <div class="card-hd">Individual PMAM Performance</div>
+        <div class="frow">
+          <div class="fld"><label>Select PMAM</label>
+            <select id="prPmam" style="width:200px">
+              <option value="">-- Select PMAM --</option>
+            </select>
+          </div>
+          <div class="fld"><label>Year</label><select style="width:100px"><option>2026</option><option>2025</option></select></div>
+          <button class="btn btn-pri" onclick="genPmam()">Generate</button>
+          <button class="btn btn-grn" onclick="exportExcel('pmamTbl','PMAM_Report')">Export Excel</button>
+          <button class="btn btn-word" onclick="printReport('PMAM Wise Performance Report')">Print / PDF</button>
+        </div>
+      </div>
+      <div class="metrics-grid" id="pmamMetrics"></div>
+      <div class="card">
+        <div class="card-hd" id="pmamTitle">Monthly Trend</div>
+        <div class="tbl-wrap">
+          <table id="pmamTbl">
+            <thead><tr><th>Month</th><th>IPD</th><th>Med</th><th>Surg</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <tbody id="pmamTbody"><tr><td colspan="10" class="empty-td">Select PMAM and click Generate</td></tr></tbody>
+            <tfoot id="pmamFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ALL RECORDS ===== -->
+    <div class="sec" id="sec-allrecords">
+      <div class="page-hd">All Records</div>
+      <div class="card">
+        <div class="card-hd">Filter Records</div>
+        <div class="frow">
+          <div class="fld"><label>From Date</label><input type="date" style="width:145px"></div>
+          <div class="fld"><label>To Date</label><input type="date" style="width:145px"></div>
+          <div class="fld"><label>PMAM</label>
+            <select style="width:170px">
+              <option value="">All PMAMs</option>
+            </select>
+          </div>
+          <div class="fld"><label>Ward</label>
+            <select style="width:170px">
+              <option value="">All Wards</option>
+              <option>Orthopaedics</option><option>Male Surgery Ward</option>
+              <option>Female Surgery Ward</option><option>Gynae</option>
+              <option>Optha</option><option>Onco</option><option>ENT</option>
+            </select>
+          </div>
+          <button class="btn btn-pri" onclick="genAllRecords()">Filter</button>
+          <button class="btn btn-sec">Clear</button>
+          <button class="btn btn-grn" onclick="exportExcel('allTbl','All_Records')">Export Excel</button>
+          <button class="btn btn-word" onclick="printReport('All Records Report')">Print / PDF</button>
+        </div>
+      </div>
+      <div class="metrics-grid" id="arMetrics"></div>
+      <div class="card">
+        <div class="card-hd">All Entries <span id="arCount" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
+        <div class="tbl-wrap">
+          <table id="allTbl">
+            <thead><tr><th>Date</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Med</th><th>Surg</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Action</th></tr></thead>
+            <tbody id="allTbody"><tr><td colspan="13" class="empty-td">Click Filter to load records</td></tr></tbody>
+            <tfoot id="allFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LEAVE REQUESTS ===== -->
+    <div class="sec" id="sec-leavereq">
+      <div class="page-hd">Leave Requests</div>
+
+      <!-- STATS -->
+      <div class="metrics-grid" style="grid-template-columns:repeat(auto-fill,minmax(110px,1fr))">
+        <div class="mcard c3"><div class="mcard-num" id="lv-pending">0</div><div class="mcard-label">Pending</div></div>
+        <div class="mcard c2"><div class="mcard-num" id="lv-approved">0</div><div class="mcard-label">Approved</div></div>
+        <div class="mcard c1"><div class="mcard-num" id="lv-rejected">0</div><div class="mcard-label">Rejected</div></div>
+        <div class="mcard c6"><div class="mcard-num" id="lv-onleave">0</div><div class="mcard-label">On Leave Today</div></div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <div class="tab active" onclick="switchLvTab('pending',this)">Pending (<span id="pendingCnt">3</span>)</div>
+        <div class="tab" onclick="switchLvTab('history',this)">All History</div>
+        <div class="tab" onclick="switchLvTab('onleave',this)">On Leave Today</div>
+      </div>
+
+      <!-- PENDING -->
+      <div class="tab-panel active" id="lv-tab-pending">
+        <div id="pendingList"></div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="tab-panel" id="lv-tab-history">
+        <div class="card">
+          <div class="card-hd">All Leave History</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>PMAM</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Return</th><th>Replaced By</th><th>Status</th><th>Remarks</th><th>Action</th></tr></thead>
+              <tbody id="lvHistTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ON LEAVE -->
+      <div class="tab-panel" id="lv-tab-onleave">
+        <div class="card">
+          <div class="card-hd">PMAMs Currently on Leave</div>
+          <div id="onLeaveList"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+</div><!-- end layout -->
+
+<script>
+// ===== HELPERS =====
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function fmt(n){return Number(n||0).toLocaleString('en-IN');}
+function cv(ipd,reg){return ipd>0?((reg/ipd)*100).toFixed(1)+'%':'—';}
+function cvN(ipd,reg){return ipd>0?(reg/ipd)*100:0;}
+function cvColor(ipd,reg){return cvN(ipd,reg)>=60?'#166534':'#92400e';}
+
+function goSec(id,el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.sbi').forEach(s=>s.classList.remove('active'));
+  if(el)el.classList.add('active');
+  if(id==='monthly')genMonthly();
+  else if(id==='leavereq')loadLeaveReq();
+}
+function toggleDD(){document.getElementById('userDD').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.user-pill'))document.getElementById('userDD').classList.remove('open');});
+
+// ===== MONTHLY =====
+function genMonthly(){
+  const month=document.getElementById('rMonth').value;
+  document.getElementById('monthlyTitle').textContent=`PMAM-wise Summary — ${month} 2026`;
+  document.getElementById('monthlyMetrics').innerHTML='';
+  document.getElementById('monthlyTbody').innerHTML=`<tr><td colspan="12" class="empty-td">No data available for the selected month.</td></tr>`;
+  document.getElementById('monthlyFoot').innerHTML='';
+}
+
+// ===== ANNUAL =====
+function genAnnual(){
+  document.getElementById('annualTbody').innerHTML='<tr><td colspan="10" class="empty-td">No data available.</td></tr>';
+  document.getElementById('annualFoot').innerHTML='';
+  document.getElementById('annualMetrics').innerHTML='';
+  document.getElementById('annualPmamTbody').innerHTML='<tr><td colspan="8" class="empty-td">No data available.</td></tr>';
+}
+
+// ===== WARD =====
+function genWard(){
+  document.getElementById('wardMetrics').innerHTML='';
+  document.getElementById('wardTbody').innerHTML='<tr><td colspan="9" class="empty-td">No data available.</td></tr>';
+}
+
+// ===== PMAM WISE =====
+function genPmam(){
+  const pmam=document.getElementById('prPmam').value;
+  if(!pmam){alert('Please select a PMAM');return;}
+  document.getElementById('pmamTitle').textContent=pmam+' — Monthly Trend 2026';
+  document.getElementById('pmamTbody').innerHTML='<tr><td colspan="10" class="empty-td">No data available.</td></tr>';
+  document.getElementById('pmamFoot').innerHTML='';
+  document.getElementById('pmamMetrics').innerHTML='';
+}
+
+// ===== ALL RECORDS =====
+function genAllRecords(){
+  document.getElementById('arMetrics').innerHTML='';
+  document.getElementById('arCount').textContent='0 entries';
+  document.getElementById('allTbody').innerHTML='<tr><td colspan="13" class="empty-td">No records found.</td></tr>';
+  document.getElementById('allFoot').innerHTML='';
+}
+
+// ===== LEAVE =====
+function loadLeaveReq(){
+  document.getElementById('lv-pending').textContent=0;
+  document.getElementById('lv-approved').textContent=0;
+  document.getElementById('lv-rejected').textContent=0;
+  document.getElementById('lv-onleave').textContent=0;
+  document.getElementById('pendingList').innerHTML='<div style="padding:20px;text-align:center;color:#6b7280;font-size:12px">No pending leave requests.</div>';
+  document.getElementById('lvHistTbody').innerHTML='<tr><td colspan="10" class="empty-td">No leave history available.</td></tr>';
+  document.getElementById('onLeaveList').innerHTML='<div style="padding:20px;text-align:center;color:#6b7280;font-size:12px">No PMAMs currently on leave.</div>';
+}
+function approveLeave(i){
+  document.getElementById('lbadge'+i).className='badge badge-green';
+  document.getElementById('lbadge'+i).textContent='Approved ✓';
+  const r=document.getElementById('lremark'+i).value;
+  document.getElementById('lactions'+i).innerHTML=`<span style="color:#166534;font-size:12px;font-weight:600">✓ Leave Approved${r?' — '+r:''}</span><button class="btn btn-word" style="height:28px;font-size:10px;padding:0 10px;margin-left:8px">🖨 Print Sanction</button>`;
+}
+function rejectLeave(i){
+  const r=document.getElementById('lremark'+i).value;
+  if(!r){alert('Please enter rejection reason in Remarks field.');return;}
+  document.getElementById('lbadge'+i).className='badge badge-red';
+  document.getElementById('lbadge'+i).textContent='Rejected ✗';
+  document.getElementById('lactions'+i).innerHTML=`<span style="color:#dc2626;font-size:12px;font-weight:600">✗ Leave Rejected — ${r}</span>`;
+}
+function switchLvTab(id,el){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('lv-tab-'+id).classList.add('active');
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// EXPORT EXCEL
+function exportExcel(tblId,name){
+  const tbl=document.getElementById(tblId);if(!tbl)return;
+  let csv='';
+  tbl.querySelectorAll('tr').forEach(tr=>{
+    const row=Array.from(tr.querySelectorAll('th,td')).map(td=>'"'+td.textContent.trim().replace(/"/g,'""')+'"');
+    csv+=row.join(',')+'\n';
+  });
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download=name+'_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+}
+
+// PRINT
+function printReport(title){
+  window.print();
+}
+
+// INIT — load monthly on start
+window.addEventListener('load',()=>{
+  genMonthly();
+  const today=new Date().toISOString().split('T')[0];
+  document.querySelectorAll('input[type=date]').forEach(el=>{if(!el.value)el.value=today;});
+});
+
+// ══════════════════════════════════════
+// FIREBASE HELPERS
+// ══════════════════════════════════════
+function fbSendOTP(email, onSuccess, onError) {
+  var otp = Math.floor(100000 + Math.random() * 900000).toString();
+  var expires = Date.now() + 10 * 60 * 1000;
+  db.collection('otps').doc(email).set({ otp: otp, expires: expires })
+    .then(function() {
+      if (typeof emailjs !== 'undefined') {
+        emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+          to_email: email, otp_code: otp, hospital: 'GMC & AH Rajouri'
+        }).then(onSuccess).catch(onError);
+      } else { onSuccess(); }
+    }).catch(onError);
+}
+
+function fbVerifyOTP(email, otp, onSuccess, onError) {
+  db.collection('otps').doc(email).get().then(function(doc) {
+    if (!doc.exists) return onError('OTP not found. Request again.');
+    var data = doc.data();
+    if (Date.now() > data.expires) return onError('OTP expired. Request again.');
+    if (data.otp !== otp.trim()) return onError('Invalid OTP.');
+    db.collection('otps').doc(email).delete();
+    onSuccess();
+  }).catch(onError);
+}
+
+
+// ══════════════════════════════════════
+// SESSION + LOGOUT
+// ══════════════════════════════════════
+function loadSessionUser() {
+  try {
+    var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+    if (!u.email) return;
+    var name = u.name || '';
+    var role = u.desig || u.role || '';
+    var ini  = name.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+    // Update all name/role/initials elements
+    ['hName','userName','userNameDisp'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.textContent=name;
+    });
+    ['hRole','userRole','userDesig'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.textContent=role;
+    });
+    ['hInitials','userInitials','mInitials','ini'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.textContent=ini;
+    });
+    // By class
+    var uname=document.querySelector('.uname'); if(uname) uname.textContent=name;
+    var udesig=document.querySelector('.udesig'); if(udesig) udesig.textContent=role;
+    var iniEl=document.querySelector('.ini'); if(iniEl) iniEl.textContent=ini;
+    var ddAv=document.querySelector('.dd-av'); if(ddAv) ddAv.textContent=ini;
+    var ddName=document.querySelector('.dd-hname'); if(ddName) ddName.textContent=name;
+    var ddRole=document.querySelector('.dd-hrole'); if(ddRole) ddRole.textContent=role+' — GMC Rajouri';
+  } catch(e) { console.error('loadSessionUser:',e); }
+}
+
+function confirmLogout() {
+  if (confirm('Are you sure you want to logout?'))
+    window.location.href = 'index.html';
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  loadSessionUser();
+});
+
+</script>
+</body>
+</html>
