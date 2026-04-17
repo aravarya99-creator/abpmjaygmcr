@@ -11,7 +11,7 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 
 /* ===== BANNER ===== */
 .banner-wrap{
-  width:100%;position:relative;height:82px;overflow:hidden;
+  width:100%;position:sticky;top:0;z-index:1000;position:relative;height:82px;overflow:visible;
   background:linear-gradient(135deg,#2D1B8E 0%,#3D2AA0 25%,#4A35B5 50%,#5842C8 75%,#6650D8 100%);
   display:flex;align-items:center;padding:0 20px;gap:16px;
 }
@@ -51,7 +51,7 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .uname{font-size:11px;font-weight:800;color:#fff;white-space:nowrap}
 .udesig{font-size:9px;color:rgba(255,255,255,0.75);white-space:nowrap;text-transform:uppercase;letter-spacing:0.3px}
 .dd-arrow{font-size:10px;color:rgba(255,255,255,0.7)}
-.user-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15);min-width:160px;overflow:hidden;display:none;z-index:300}
+.user-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.2);min-width:185px;overflow:hidden;display:none;z-index:9999}
 .user-dropdown.open{display:block}
 .dd-item{padding:10px 16px;font-size:12px;color:#1e3a8a;font-weight:600;cursor:pointer;border-bottom:1px solid #E8EFFF;display:flex;align-items:center;gap:8px}
 .dd-item:last-child{border-bottom:none;color:#dc2626}
@@ -511,6 +511,7 @@ function goSec(id,el){
   if(el)el.classList.add('active');
   if(id==='monthly')genMonthly();
   else if(id==='leavereq')loadLeaveReq();
+  else if(id==='all')genAllRecords();
 }
 function toggleDD(){document.getElementById('userDD').classList.toggle('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('.user-pill'))document.getElementById('userDD').classList.remove('open');});

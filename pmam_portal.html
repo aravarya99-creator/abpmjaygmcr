@@ -12,8 +12,10 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 /* ===== PMAM BANNER HEADER ===== */
 .pmam-header{
   width:100%;
-  position:relative;
-  overflow:hidden;
+  position:sticky;
+  top:0;
+  z-index:1000;
+  overflow:visible;
   display:flex;
   flex-direction:column;
   max-width:100vw;
@@ -24,7 +26,7 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
   width:100%;
   position:relative;
   height:82px;
-  overflow:hidden;
+  overflow:visible;
   background:linear-gradient(135deg,#2D1B8E 0%,#3D2AA0 25%,#4A35B5 50%,#5842C8 75%,#6650D8 100%);
   display:flex;
   align-items:center;
@@ -145,8 +147,8 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .user-dropdown{
   position:absolute;top:calc(100% + 8px);right:0;
   background:#fff;border-radius:10px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.15);
-  min-width:170px;overflow:hidden;display:none;z-index:300;
+  box-shadow:0 8px 30px rgba(0,0,0,0.2);
+  min-width:185px;overflow:hidden;display:none;z-index:9999;
 }
 .user-dropdown.open{display:block}
 .dd-item{
@@ -889,8 +891,16 @@ function saveEntry() {
   var dis    = parseInt(document.getElementById('eDis').value)    || 0;
   var clm    = parseInt(document.getElementById('eClm').value)    || 0;
   var conv   = ipd > 0 ? ((reg / ipd) * 100).toFixed(1) + '%' : '—';
-  var entry  = { date:date, wards:selWards.slice(), ipd:ipd, med:med, surg:surg, reg:reg, pre:pre, preAmt:preAmt, dis:dis, clm:clm, conv:conv };
+  var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+  var entry  = {
+    date:date, wards:selWards.slice(), ipd:ipd, med:med, surg:surg,
+    reg:reg, pre:pre, preAmt:preAmt, dis:dis, clm:clm, conv:conv,
+    email: u.email || 'unknown',
+    name: u.name || 'PMAM User',
+    timestamp: Date.now()
+  };
   allEntries.push(entry);
+
   // Add row to fill report table
   var tb = document.getElementById('entryTbody');
   if (tb.querySelector('.empty-td')) tb.innerHTML = '';
@@ -903,14 +913,32 @@ function saveEntry() {
     + '<td>' + dis + '</td><td>' + clm.toLocaleString('en-IN') + '</td>'
     + '<td style="font-weight:700;color:' + (parseFloat(conv)>=60?'#166534':'#92400e') + '">' + conv + '</td>';
   tb.appendChild(tr);
-  document.getElementById('fillBadge').textContent = '✅ Submitted';
+
+  // Hide the 'not filled yet' alert and update the badge
+  var dashAlertEl = document.getElementById('dashAlert');
+  if (dashAlertEl) dashAlertEl.style.display = 'none';
+  var badge = document.getElementById('fillBadge');
+  if (badge) { badge.className = 'badge-success'; badge.textContent = '✓ Filled Today'; }
+
   msg.style.color = '#166534';
-  msg.textContent = '✅ Entry saved for ' + date + '!';
-  setTimeout(function(){ msg.textContent=''; }, 3000);
+  msg.textContent = 'Saving to database…';
+
   updateDashboard();
   selWards = [];
   renderSelWards();
   ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].forEach(function(id){ document.getElementById(id).value=''; });
+
+  // Save to Firebase
+  db.collection('daily_reports').add(entry)
+    .then(function() {
+      msg.style.color='#166534';
+      msg.textContent='✅ Entry saved to database for ' + date + '!';
+      setTimeout(function(){ msg.textContent=''; }, 3000);
+    })
+    .catch(function(e) {
+      msg.style.color='#dc2626';
+      msg.textContent='Error saving: ' + e.message;
+    });
 }
 
 // ══════════════════════════════════════
@@ -1095,23 +1123,37 @@ function submitLeave() {
   var rEl  = document.querySelector('input[name=lvReason]:checked');
   var tEl  = document.querySelector('input[name=lvType]:checked');
   var reason = rEl ? (rEl.value==='other' ? document.getElementById('lvOther').value : rEl.value) : '—';
-  leaveRequests.push({
-    name:  document.getElementById('lvName').value,
+  var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+  var req = {
+    name:  name,
+    email: u.email || 'unknown',
     ward:  getLvWard() || '—',
-    type:  tEl ? tEl.value : '—',
-    from:  document.getElementById('lvFrom').value,
-    to:    document.getElementById('lvTo').value,
+    ltype:  tEl ? tEl.value : '—',
+    fromDt:  document.getElementById('lvFrom').value,
+    toDt:    document.getElementById('lvTo').value,
     days:  document.getElementById('lvDays').value || '—',
-    retDate: document.getElementById('lvReturn').value,
+    ret: document.getElementById('lvReturn').value,
     duty:  document.getElementById('lvDuty').value,
     reason: reason,
-    status: 'Pending'
-  });
-  msg.style.color = '#166534';
-  msg.textContent = '✅ Leave request submitted! I/C AB-PMJAY has been notified.';
-  setTimeout(function(){ msg.textContent=''; }, 4000);
-  renderLeaveHistory();
-  document.getElementById('leaveHistCard').style.display = 'block';
+    status: 'Pending',
+    desig: 'PMAM',
+    timestamp: Date.now()
+  };
+  leaveRequests.push({type: req.ltype, name: req.name, ward: req.ward, from: req.fromDt, to: req.toDt, days: req.days, retDate: req.ret, duty: req.duty, reason: req.reason, status: 'Pending'});
+  msg.style.color = '#1A3DB5';
+  msg.textContent = 'Submitting leave request…';
+  db.collection('leave_requests').add(req)
+    .then(function() {
+      msg.style.color = '#166534';
+      msg.textContent = '✅ Leave request submitted! I/C AB-PMJAY has been notified.';
+      setTimeout(function(){ msg.textContent=''; }, 4000);
+      renderLeaveHistory();
+      document.getElementById('leaveHistCard').style.display = 'block';
+    })
+    .catch(function(e) {
+      msg.style.color = '#dc2626';
+      msg.textContent = 'Error submitting: ' + e.message;
+    });
 }
 function clearLeaveForm() {
   ['lvDesig','lvFrom','lvTo','lvDays','lvReturn','lvOther'].forEach(function(id){
@@ -1187,20 +1229,41 @@ function printLeaveForm() {
       + '<thead><tr><th style="border:1px solid #000;padding:5px 7px;width:12mm">S.No</th><th style="border:1px solid #000;padding:5px 7px">Date on Duty</th><th style="border:1px solid #000;padding:5px 7px">Holiday</th><th style="border:1px solid #000;padding:5px 7px">Leave Date Requested</th></tr></thead>'
       + '<tbody>' + cRows + '</tbody></table>';
   }
-  var page = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Leave Application</title>'
-    + '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;width:210mm;margin:0 auto}'
-    + 'img.lh{width:100%;display:block}.body{padding:5mm 14mm 10mm}'
-    + 'h2{text-align:center;font-size:13pt;font-weight:700;text-decoration:underline;margin:5mm 0 6mm}'
-    + 'table{width:100%;border-collapse:collapse;font-size:10pt}td,th{border:1px solid #000;padding:5px 8px;vertical-align:middle}'
-    + '.lbl{font-weight:700;width:65mm}.gap{margin-top:4mm}'
-    + '.under{font-size:9.5pt;line-height:1.7;margin:7mm 0}'
-    + '@media print{body{margin:0}@page{size:A4 portrait;margin:0}}</style></head><body>'
-    + '<img class="lh" src="' + LH + '" alt="Letterhead">'
-    + '<div class="body"><h2>LEAVE APPLICATION FORM</h2>'
+  var today = new Date();
+  var todayStr = today.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+  var refNo   = 'GMC/PMJAY/' + today.getFullYear() + '/' + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0') + '-' + String(Math.floor(Math.random()*9000)+1000);
+  var page = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Leave Application — AB-PMJAY</title>'
+    + '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Times New Roman",Times,serif;background:#fff;width:210mm;margin:0 auto;font-size:11pt}'
+    + '.page{padding:10mm 16mm 8mm}'
+    + '.official-header{text-align:center;border-bottom:3px double #000;padding-bottom:6mm;margin-bottom:5mm}'
+    + '.gov-title{font-size:14pt;font-weight:700;text-transform:uppercase;letter-spacing:1px}'
+    + '.gov-sub{font-size:12pt;font-weight:700;margin:3px 0}'
+    + '.gov-dept{font-size:10.5pt;color:#333;margin:2px 0}'
+    + '.ref-row{display:flex;justify-content:space-between;font-size:9.5pt;margin:4mm 0 5mm}'
+    + 'h2{text-align:center;font-size:13pt;font-weight:700;text-decoration:underline;margin:5mm 0 7mm;text-transform:uppercase;letter-spacing:1.5px}'
+    + 'table{width:100%;border-collapse:collapse;font-size:10.5pt}td,th{border:1px solid #000;padding:5px 9px;vertical-align:middle}'
+    + '.lbl{font-weight:700;width:68mm;background:#f7f7f7}.gap{margin-top:5mm}'
+    + '.under{font-size:10pt;line-height:1.8;margin:7mm 0;font-style:italic}'
+    + '.sig-row{display:flex;justify-content:space-between;margin-top:15mm}'
+    + '.sig-box{width:44%}.sig-box.right{text-align:right}'
+    + '.sig-line{border-top:1px solid #000;margin-top:16mm;padding-top:2mm;font-weight:700;font-size:10pt}'
+    + '.sig-desig{font-size:9.5pt;font-weight:normal}'
+    + '.footer{border-top:2px solid #000;margin-top:10mm;padding-top:4mm;display:flex;justify-content:space-between;font-size:9pt;color:#333}'
+    + '.stamp-box{width:36mm;height:28mm;border:1.5px dashed #999;display:flex;align-items:center;justify-content:center;font-size:8.5pt;color:#aaa;margin-top:2mm}'
+    + '@media print{body{margin:0}@page{size:A4 portrait;margin:10mm 12mm}}</style></head><body>'
+    + '<div class="page">'
+    + (LH ? '<div style="text-align:center;margin-bottom:6mm"><img src="'+LH+'" style="max-width:100%;max-height:45mm" alt="Letterhead"></div>' : '')
+    + '<div class="official-header">'
+    + '<div class="gov-title">Government of Jammu &amp; Kashmir</div>'
+    + '<div class="gov-sub">Government Medical College &amp; Associated Hospital, Rajouri</div>'
+    + '<div class="gov-dept">AB — Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) Cell</div>'
+    + '</div>'
+    + '<div class="ref-row"><span><strong>Ref No.:</strong> ' + refNo + '</span><span><strong>Date:</strong> ' + todayStr + '</span></div>'
+    + '<h2>Leave Application Form</h2>'
     + '<table>'
     + '<tr><td class="lbl">Name of the Official</td><td>' + name   + '</td></tr>'
     + '<tr><td class="lbl">Designation</td><td>'          + desig  + '</td></tr>'
-    + '<tr><td class="lbl">Ward</td><td>'                 + ward   + '</td></tr>'
+    + '<tr><td class="lbl">Ward / Unit</td><td>'          + ward   + '</td></tr>'
     + '<tr><td class="lbl">Reason for Leave</td><td>'     + reason + '</td></tr>'
     + '<tr><td class="lbl">Type of Leave</td><td>'        + ltype  + '</td></tr>'
     + '</table>'
@@ -1210,15 +1273,22 @@ function printLeaveForm() {
     + '<tr><td class="lbl">Return Date</td><td>'                 + (fmtDate(ret)||'—') + '</td></tr>'
     + '<tr><td class="lbl">Duty Assigned To</td><td>'           + duty             + '</td></tr>'
     + '</table>'
-    + '<p class="under">I hereby undertake that during his/her leave period, I shall assume full responsibility for all duties, work, and responsibilities assigned to him/her.</p>'
-    + '<div style="display:flex;justify-content:space-between;margin-top:16mm">'
-    + '<div style="width:44%"><div style="border-top:1px solid #000;margin-top:18mm;padding-top:2mm;font-weight:700;font-size:10pt">Signature of PMAM on Leave</div></div>'
-    + '<div style="width:44%;text-align:right"><div style="border-top:1px solid #000;margin-top:18mm;padding-top:2mm;font-weight:700;font-size:10pt">Signature of Substitute PMAM</div></div>'
+    + '<p class="under">I hereby undertake that during my leave period, the colleague named above shall assume full responsibility for all duties, work, and responsibilities assigned to me. I further certify that the information furnished above is true to the best of my knowledge.</p>'
+    + '<div class="sig-row">'
+    + '<div class="sig-box"><div class="sig-line">Signature of PMAM (Applicant)<div class="sig-desig">' + name + '<br>PMAM — ' + ward + '</div></div></div>'
+    + '<div class="sig-box right"><div class="sig-line">Signature of Substitute PMAM<div class="sig-desig">' + duty + '<br>PMAM</div></div></div>'
     + '</div>'
-    + '<div style="display:flex;justify-content:space-between;margin-top:12mm">'
-    + '<div><div style="height:14mm"></div><div style="font-weight:700;font-size:10pt">I/C ABPMJAY</div><div style="font-size:10pt">GMC &amp; AH Rajouri</div></div>'
-    + '<div style="text-align:right"><div style="height:14mm"></div><div style="font-weight:700;font-size:10pt">Medical Superintendent</div><div style="font-size:10pt">GMC &amp; AH Rajouri</div></div>'
-    + '</div></div>'
+    + '<div class="sig-row" style="margin-top:12mm">'
+    + '<div class="sig-box"><div class="sig-line">I/C AB-PMJAY<div class="sig-desig">GMC &amp; AH, Rajouri</div></div></div>'
+    + '<div class="sig-box"><div style="text-align:center"><div class="stamp-box">Office Seal / Stamp</div></div></div>'
+    + '<div class="sig-box right"><div class="sig-line">Medical Superintendent<div class="sig-desig">GMC &amp; AH, Rajouri</div></div></div>'
+    + '</div>'
+    + '<div class="footer">'
+    + '<span>Application Date: ' + todayStr + '</span>'
+    + '<span>Ref: ' + refNo + '</span>'
+    + '<span>AB-PMJAY Cell — GMC &amp; AH Rajouri</span>'
+    + '</div>'
+    + '</div>'
     + '<script>window.onload=function(){window.print();};<\/script>'
     + '</body></html>';
   var pw = window.open('','_blank','width=900,height=700');

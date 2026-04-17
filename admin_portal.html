@@ -446,7 +446,8 @@ tr:hover td{background:#EEF3FF}
           </table>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <button class="btn btn-pri">Save Roster</button>
+          <span id="rosterSaveMsg" style="font-size:11px;font-weight:600;margin-right:12px;align-self:center"></span>
+          <button class="btn btn-pri" onclick="saveRosterToDb()">Save Roster</button>
         </div>
       </div>
     </div>
@@ -468,7 +469,8 @@ tr:hover td{background:#EEF3FF}
           </table>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <button class="btn btn-pri">Save Holiday Roster</button>
+          <span id="holidaySaveMsg" style="font-size:11px;font-weight:600;margin-right:12px;align-self:center"></span>
+          <button class="btn btn-pri" onclick="saveHolidayToDb()">Save Holiday Roster</button>
         </div>
       </div>
     </div>
@@ -506,6 +508,11 @@ tr:hover td{background:#EEF3FF}
           </div>
           <div class="sbs-item" onclick="showPanel('contactus',this)">
             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Contact Us
+          </div>
+          <div class="sbs-divider"></div>
+          <div class="sbs-section-label">Quick Links</div>
+          <div class="sbs-item" onclick="showPanel('quicklinks',this)">
+            <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>Quick Links
           </div>
           <div class="sbs-divider"></div>
           <div class="sbs-section-label">System</div>
@@ -622,6 +629,23 @@ tr:hover td{background:#EEF3FF}
             </div>
           </div>
 
+          <!-- QUICK LINKS PANEL -->
+          <div class="settings-panel" id="panel-quicklinks">
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>Quick Links Management</div>
+              <div style="font-size:11px;color:#6b7280;margin-bottom:12px">Edit portal links shown on the landing page. Paste direct URLs to each portal.</div>
+              <div class="form-grid">
+                <div class="sfld"><label>PMAM Portal URL</label><input type="url" id="qlPmam" placeholder="https://..." value="pmam_portal.html"></div>
+                <div class="sfld"><label>I/C Portal URL</label><input type="url" id="qlIc" placeholder="https://..." value="ic_portal.html"></div>
+                <div class="sfld"><label>Admin Portal URL</label><input type="url" id="qlAdmin" placeholder="https://..." value="admin_portal.html"></div>
+                <div class="sfld"><label>NHA Portal URL (optional)</label><input type="url" id="qlNha" placeholder="https://hospitalmis.nhp.gov.in"></div>
+                <div class="sfld"><label>Link 5 Label</label><input type="text" id="qlLink5Label" placeholder="e.g. Ayushman Portal"></div>
+                <div class="sfld"><label>Link 5 URL</label><input type="url" id="qlLink5Url" placeholder="https://..."></div>
+              </div>
+              <div id="qlSaveMsg" style="font-size:11px;font-weight:600;color:#166534;margin-bottom:8px"></div>
+              <div class="save-row"><button class="btn btn-pri" onclick="saveQuickLinks()">Save Quick Links</button></div>
+            </div>
+          </div>
           <div class="settings-panel" id="panel-wards">
             <div class="s-card">
               <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>Ward Management</div>
@@ -1026,6 +1050,54 @@ function sendResetOtpFromAdmin(){
   var name = document.getElementById('resetName').textContent || 'this user';
   alert('Reset OTP sent to ' + name + '.');
   document.getElementById('resetModal').classList.remove('open');
+}
+
+function saveRosterToDb() {
+  var rows = [];
+  document.querySelectorAll('#rosterBody tr').forEach(function(tr) {
+    var cells = tr.querySelectorAll('input,select');
+    if (cells.length >= 2) {
+      rows.push({ pmam: cells[0] ? cells[0].value : '', ward: cells[1] ? cells[1].value : '' });
+    }
+  });
+  var msg = document.getElementById('rosterSaveMsg');
+  msg.style.color = '#1A3DB5';
+  msg.textContent = 'Saving…';
+  db.collection('settings').doc('roster').set({ rows: rows, updatedAt: Date.now() }, { merge: true })
+    .then(function() { msg.style.color='#166534'; msg.textContent='✅ Roster saved!'; setTimeout(function(){msg.textContent='';},3000); })
+    .catch(function(e) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; });
+}
+
+function saveHolidayToDb() {
+  var rows = [];
+  document.querySelectorAll('#holidayBody tr').forEach(function(tr) {
+    var cells = tr.querySelectorAll('input');
+    if (cells.length >= 2) {
+      rows.push({ name: cells[0] ? cells[0].value : '', date: cells[1] ? cells[1].value : '' });
+    }
+  });
+  var msg = document.getElementById('holidaySaveMsg');
+  msg.style.color = '#1A3DB5';
+  msg.textContent = 'Saving…';
+  db.collection('settings').doc('holidays').set({ rows: rows, updatedAt: Date.now() }, { merge: true })
+    .then(function() { msg.style.color='#166534'; msg.textContent='✅ Holiday roster saved!'; setTimeout(function(){msg.textContent='';},3000); })
+    .catch(function(e) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; });
+}
+
+function saveQuickLinks() {
+  var links = {
+    pmam:  document.getElementById('qlPmam').value.trim(),
+    ic:    document.getElementById('qlIc').value.trim(),
+    admin: document.getElementById('qlAdmin').value.trim(),
+    nha:   document.getElementById('qlNha').value.trim(),
+    link5Label: document.getElementById('qlLink5Label').value.trim(),
+    link5Url:   document.getElementById('qlLink5Url').value.trim()
+  };
+  var msg = document.getElementById('qlSaveMsg');
+  msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…';
+  db.collection('settings').doc('quicklinks').set(links, { merge: true })
+    .then(function() { msg.style.color='#166534'; msg.textContent='✅ Quick links saved!'; setTimeout(function(){msg.textContent='';},3000); })
+    .catch(function(e) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; });
 }
 function renderOrders(){
   const d=document.getElementById('ordersList');
