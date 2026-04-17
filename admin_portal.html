@@ -548,7 +548,7 @@ tr:hover td{background:#EEF3FF}
               <div style="background:#E8F0FF;border:1px solid #C5D5F5;border-radius:8px;padding:8px 12px;font-size:11px;color:#1A3DB5;font-weight:500;margin-top:6px" id="tickerPrev">Preview will appear here...</div>
               <div class="save-row">
                 <button class="btn btn-sec" onclick="document.getElementById('tickerPrev').textContent=document.getElementById('tickerTxt').value">Preview</button>
-                <button class="btn btn-pri">Save Ticker</button>
+                <button class="btn btn-pri" onclick="saveTicker()">Save Ticker</button>
               </div>
             </div>
           </div>
@@ -916,18 +916,28 @@ function toggleWardField(){
   document.getElementById('wardFieldWrap').style.display=document.getElementById('newRole').value==='PMAM'?'block':'none';
 }
 function addUser(){
-  const name=document.getElementById('newName').value.trim();
-  if(!name)return;
-  const role=document.getElementById('newRole').value;
-  if(role==='PMAM'){
-    pmams.push({name,email:document.getElementById('newEmail').value,ward:document.getElementById('newWardSel').value,status:'active'});
-    renderPmams();
-  }else{
-    others.push({name,email:document.getElementById('newEmail').value,role,status:'active'});
-    renderOthers();
-  }
-  document.getElementById('addModal').classList.remove('open');
-  ['newName','newEmail'].forEach(id=>document.getElementById(id).value='');
+  const name = document.getElementById('newName').value.trim();
+  const email = document.getElementById('newEmail').value.trim().toLowerCase();
+  const role = document.getElementById('newRole').value;
+  const ward = document.getElementById('newWardSel').value;
+  if(!name || !email) return showToast('Name and email required', 'error');
+
+  fbSendOTP(email, function() {
+    db.collection('users').doc(email).set({
+      name: name,
+      email: email,
+      role: role,
+      ward: role === 'PMAM' ? ward : '',
+      status: 'approved'
+    }).then(function() {
+      showToast('User added & OTP sent to email!', 'success');
+      document.getElementById('addModal').classList.remove('open');
+      ['newName','newEmail'].forEach(id=>document.getElementById(id).value='');
+      loadAllUsers();
+    });
+  }, function(err) {
+    showToast('Failed to send OTP: ' + err, 'error');
+  });
 }
 
 // ===== ROSTER =====
@@ -1030,6 +1040,14 @@ function renderOrders(){
     </div>`).join('');
 }
 
+function saveTicker() {
+  const txt = document.getElementById('tickerTxt').value.trim();
+  if(!txt) return showToast('Please enter a ticker message', 'error');
+  db.collection('settings').doc('portal').set({ tickerMessage: txt }, { merge: true })
+    .then(function() { showToast('Ticker saved successfully', 'success'); })
+    .catch(function(e) { showToast('Error: ' + e.message, 'error'); });
+}
+
 async function savePortalInfo() {
   const msg = document.getElementById('uploadStatusMsg');
   msg.textContent = 'Saving changes...';
@@ -1041,28 +1059,25 @@ async function savePortalInfo() {
   
   let updates = {};
   
+  const toBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+  
   try {
-    const storage = firebase.storage();
-    
     if (logo1File) {
       msg.textContent = 'Uploading Primary Logo...';
-      const ref = storage.ref(`portalImages/${logo1File.name}`);
-      await ref.put(logo1File);
-      updates.logo1 = await ref.getDownloadURL();
+      updates.logo1 = await toBase64(logo1File);
     }
-    
     if (logo2File) {
       msg.textContent = 'Uploading Secondary Logo...';
-      const ref = storage.ref(`portalImages/${logo2File.name}`);
-      await ref.put(logo2File);
-      updates.logo2 = await ref.getDownloadURL();
+      updates.logo2 = await toBase64(logo2File);
     }
-    
     if (bgImgFile) {
       msg.textContent = 'Uploading Background Image...';
-      const ref = storage.ref(`portalImages/${bgImgFile.name}`);
-      await ref.put(bgImgFile);
-      updates.bgImage = await ref.getDownloadURL();
+      updates.bgImage = await toBase64(bgImgFile);
     }
     
     msg.textContent = 'Saving to database...';

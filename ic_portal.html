@@ -224,11 +224,11 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       </div>
       <span class="dd-arrow">▾</span>
       <div class="user-dropdown" id="userDD">
-        <div class="dd-item">👤 Update Profile</div>
+        <div class="dd-item" onclick="openModal('profileModal');event.stopPropagation()">👤 Update Profile</div>
         <div class="dd-item" onclick="confirmLogout()">🚪 Logout</div>
       </div>
     </div>
-    <button class="logout-btn" onclick="confirmLogout()">Logout</button>
+  </div>
   </div>
 </div>
 
@@ -550,34 +550,92 @@ function genPmam(){
 
 // ===== ALL RECORDS =====
 function genAllRecords(){
-  document.getElementById('arMetrics').innerHTML='';
-  document.getElementById('arCount').textContent='0 entries';
-  document.getElementById('allTbody').innerHTML='<tr><td colspan="13" class="empty-td">No records found.</td></tr>';
-  document.getElementById('allFoot').innerHTML='';
+  document.getElementById('arCount').textContent = allReports.length + ' entries';
+  if(!allReports.length) {
+    document.getElementById('allTbody').innerHTML='<tr><td colspan="13" class="empty-td">No records found.</td></tr>';
+    return;
+  }
+  document.getElementById('allTbody').innerHTML = allReports.map((r, i) => `
+    <tr>
+      <td>${r.date||''}</td>
+      <td><span class="user-pill" style="font-weight:700;color:#0F2B8C">${r.name||''}</span></td>
+      <td>${(r.wards||[]).join(', ')}</td>
+      <td>${r.ipd||0}</td>
+      <td>${r.med||0}</td>
+      <td>${r.surg||0}</td>
+      <td><strong>${r.reg||0}</strong></td>
+      <td>${r.pre||0}</td>
+      <td>${fmt(r.preAmt)}</td>
+      <td>${r.dis||0}</td>
+      <td>${fmt(r.clm)}</td>
+      <td>${r.conv||'—'}</td>
+      <td><button class="btn btn-word" style="font-size:10px;padding:3px 8px">Print</button></td>
+    </tr>
+  `).join('');
 }
 
 // ===== LEAVE =====
 function loadLeaveReq(){
-  document.getElementById('lv-pending').textContent=0;
-  document.getElementById('lv-approved').textContent=0;
-  document.getElementById('lv-rejected').textContent=0;
-  document.getElementById('lv-onleave').textContent=0;
-  document.getElementById('pendingList').innerHTML='<div style="padding:20px;text-align:center;color:#6b7280;font-size:12px">No pending leave requests.</div>';
-  document.getElementById('lvHistTbody').innerHTML='<tr><td colspan="10" class="empty-td">No leave history available.</td></tr>';
-  document.getElementById('onLeaveList').innerHTML='<div style="padding:20px;text-align:center;color:#6b7280;font-size:12px">No PMAMs currently on leave.</div>';
+  const pending = leaveRequests.filter(l => l.status === 'Pending');
+  const history = leaveRequests.filter(l => l.status !== 'Pending');
+  
+  document.getElementById('lv-pending').textContent = pending.length;
+  document.getElementById('lv-approved').textContent = history.filter(l=>l.status==='Approved').length;
+  document.getElementById('lv-rejected').textContent = history.filter(l=>l.status==='Rejected').length;
+  
+  if(!pending.length) {
+    document.getElementById('pendingList').innerHTML='<div style="padding:20px;text-align:center;color:#6b7280;font-size:12px">No pending leave requests.</div>';
+  } else {
+    document.getElementById('pendingList').innerHTML = pending.map(l => `
+      <div style="background:#fff;border:1px solid #c7d2e8;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(30,80,200,0.05)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">
+          <div style="font-weight:700;font-size:14px;color:#0F2B8C">${l.name} <span style="color:#6b7280;font-size:11px;font-weight:600;margin-left:6px">${l.desig}</span></div>
+          <div style="font-size:11px;color:#9ca3af">${new Date(l.timestamp).toLocaleDateString()}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin-bottom:12px">
+          <div><span style="color:#6b7280;font-weight:600">Ward:</span> ${l.ward||'—'}</div>
+          <div><span style="color:#6b7280;font-weight:600">Leave Type:</span> ${l.ltype||'—'}</div>
+          <div><span style="color:#6b7280;font-weight:600">Dates:</span> ${l.fromDt||'—'} to ${l.toDt||'—'} (${l.days||0} days)</div>
+          <div><span style="color:#6b7280;font-weight:600">Substitute:</span> ${l.duty||'—'}</div>
+          <div style="grid-column:1/-1"><span style="color:#6b7280;font-weight:600">Reason:</span> ${l.reason||'—'}</div>
+        </div>
+        <div style="display:flex;gap:8px" id="lactions_${l.id}">
+          <input type="text" id="lremark_${l.id}" placeholder="Remarks (optional)" style="flex:1;padding:6px 10px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px">
+          <button style="background:#166534;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer" onclick="approveLeaveFb('${l.id}')">✓ Approve</button>
+          <button style="background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer" onclick="rejectLeaveFb('${l.id}')">✗ Reject</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  if(!history.length) {
+    document.getElementById('lvHistTbody').innerHTML='<tr><td colspan="10" class="empty-td">No leave history available.</td></tr>';
+  } else {
+    document.getElementById('lvHistTbody').innerHTML = history.map(l => `
+      <tr>
+        <td>${new Date(l.timestamp).toLocaleDateString()}</td>
+        <td><strong>${l.name}</strong></td>
+        <td>${l.desig}</td>
+        <td>${l.ltype}</td>
+        <td>${l.fromDt}</td>
+        <td>${l.toDt}</td>
+        <td>${l.days}</td>
+        <td>${l.duty}</td>
+        <td><span class="badge badge-${l.status==='Approved'?'green':'red'}">${l.status}</span></td>
+        <td>${l.remark||'—'}</td>
+      </tr>
+    `).join('');
+  }
 }
-function approveLeave(i){
-  document.getElementById('lbadge'+i).className='badge badge-green';
-  document.getElementById('lbadge'+i).textContent='Approved ✓';
-  const r=document.getElementById('lremark'+i).value;
-  document.getElementById('lactions'+i).innerHTML=`<span style="color:#166534;font-size:12px;font-weight:600">✓ Leave Approved${r?' — '+r:''}</span><button class="btn btn-word" style="height:28px;font-size:10px;padding:0 10px;margin-left:8px">🖨 Print Sanction</button>`;
+
+function approveLeaveFb(id) {
+  var remark = document.getElementById('lremark_'+id).value;
+  db.collection('leave_requests').doc(id).update({ status: 'Approved', remark: remark });
 }
-function rejectLeave(i){
-  const r=document.getElementById('lremark'+i).value;
-  if(!r){alert('Please enter rejection reason in Remarks field.');return;}
-  document.getElementById('lbadge'+i).className='badge badge-red';
-  document.getElementById('lbadge'+i).textContent='Rejected ✗';
-  document.getElementById('lactions'+i).innerHTML=`<span style="color:#dc2626;font-size:12px;font-weight:600">✗ Leave Rejected — ${r}</span>`;
+function rejectLeaveFb(id) {
+  var remark = document.getElementById('lremark_'+id).value;
+  if(!remark) return alert('Remarks required for rejection');
+  db.collection('leave_requests').doc(id).update({ status: 'Rejected', remark: remark });
 }
 function switchLvTab(id,el){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -606,11 +664,28 @@ function printReport(title){
 }
 
 // INIT — load monthly on start
+let allReports = [];
+let leaveRequests = [];
+
 window.addEventListener('load',()=>{
   genMonthly();
   const today=new Date().toISOString().split('T')[0];
   document.querySelectorAll('input[type=date]').forEach(el=>{if(!el.value)el.value=today;});
+  fetchFirebaseData();
 });
+
+function fetchFirebaseData() {
+  db.collection('daily_reports').orderBy('timestamp', 'desc').onSnapshot(snap => {
+    allReports = [];
+    snap.forEach(doc => allReports.push({ id: doc.id, ...doc.data() }));
+    if(document.getElementById('sec-all').classList.contains('active')) genAllRecords();
+  });
+  db.collection('leave_requests').orderBy('timestamp', 'desc').onSnapshot(snap => {
+    leaveRequests = [];
+    snap.forEach(doc => leaveRequests.push({ id: doc.id, ...doc.data() }));
+    if(document.getElementById('sec-leavereq').classList.contains('active')) loadLeaveReq();
+  });
+}
 
 // ══════════════════════════════════════
 // FIREBASE HELPERS
@@ -679,8 +754,61 @@ function confirmLogout() {
 
 window.addEventListener('DOMContentLoaded', function() {
   loadSessionUser();
+  // Fetch from Firebase logic would go here if not already loading via other means
 });
 
+function toggleDD() {
+  var dd = document.getElementById('userDD');
+  if (dd) dd.classList.toggle('open');
+}
+function closeDD() {
+  var dd = document.getElementById('userDD');
+  if (dd) dd.classList.remove('open');
+}
+function openModal(id) {
+  var m = document.getElementById(id);
+  if (m) m.classList.add('open');
+}
+function closeModal() {
+  document.querySelectorAll('.modal-bg').forEach(m => m.classList.remove('open'));
+}
+function saveProfile() {
+  var name = document.getElementById('mName').value.trim();
+  if (name) {
+    document.getElementById('userName').textContent = name;
+    var initials = name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+    document.getElementById('ini').textContent = initials;
+  }
+  closeModal();
+  alert('Profile updated! (Local preview only, implement Firebase save if needed)');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.user-pill')) {
+    closeDD();
+  }
+});
+
+</script>
+<!-- PROFILE MODAL -->
+<div class="modal-bg" id="profileModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:9999;">
+  <div class="modal" style="background:#fff;border-radius:12px;width:300px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.2)">
+    <div style="background:#0F2B8C;color:#fff;padding:12px 16px;font-size:14px;font-weight:700">Update Profile</div>
+    <div style="padding:16px">
+      <div style="margin-bottom:12px">
+        <label style="display:block;margin-bottom:6px;font-size:12px;font-weight:700;color:#374151">Name</label>
+        <input type="text" id="mName" style="width:100%;padding:8px;border:1px solid #c7d2e8;border-radius:6px;outline:none">
+      </div>
+      <div style="text-align:right">
+        <button style="padding:6px 12px;border-radius:6px;background:#f3f4f6;border:none;cursor:pointer;margin-right:6px" onclick="closeModal()">Cancel</button>
+        <button style="padding:6px 12px;border-radius:6px;background:#1A3DB5;color:#fff;border:none;cursor:pointer" onclick="saveProfile()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.modal-bg.open { display:flex !important; }
+</style>
 </script>
 </body>
 </html>

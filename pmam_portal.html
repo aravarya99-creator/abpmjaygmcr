@@ -369,7 +369,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           </div>
         </div>
       </div>
-      <button class="logout-btn" onclick="doLogout()">Logout</button>
+      </div>
     </div>
   </div>
 
@@ -825,7 +825,10 @@ function toggleDD() {
   document.getElementById('userDD').classList.toggle('open');
 }
 function doLogout() {
-  if (confirm('Logout from PMAM Portal?')) window.location.href = 'index.html';
+  if (confirm('Are you sure you want to logout?')) {
+    sessionStorage.removeItem('pmjay_user');
+    window.location.href = 'index.html';
+  }
 }
 function openModal(id) {
   document.getElementById(id).classList.add('open');
@@ -1291,6 +1294,22 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+<!-- PROFILE MODAL -->
+<div class="modal-bg" id="profileModal">
+  <div class="modal">
+    <div class="modal-hd">Update Profile</div>
+    <div style="padding:16px">
+      <div style="margin-bottom:12px">
+        <label style="display:block;margin-bottom:6px;font-size:12px;font-weight:700">Name</label>
+        <input type="text" id="mName" style="width:100%;padding:8px;border:1px solid #c7d2e8;border-radius:6px">
+      </div>
+      <div style="text-align:right">
+        <button class="btn btn-sec" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-pri" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
