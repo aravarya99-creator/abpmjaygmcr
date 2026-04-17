@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Portal — GMC & AH Rajouri</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F0FF 0%,#C8DCFF 50%,#D6EAFF 100%);min-height:100vh;overflow-x:hidden}
+
+/* ===== BANNER ===== */
+.banner-wrap{width:100%;position:relative;height:82px;overflow:hidden;background:linear-gradient(135deg,#2D1B8E 0%,#3D2AA0 25%,#4A35B5 50%,#5842C8 75%,#6650D8 100%);display:flex;align-items:center;padding:0 20px;gap:16px}
+.banner-logo{width:56px;height:56px;border-radius:50%;background:#fff;border:3px solid rgba(255,255,255,0.5);overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.banner-titles{flex:0 0 auto;display:flex;flex-direction:column;gap:2px;max-width:360px}
+.banner-line1{font-size:11px;font-weight:800;color:#FF9933;letter-spacing:0.8px;text-transform:uppercase}
+.banner-line2{font-size:17px;font-weight:900;color:#4ade80;letter-spacing:0.5px;text-transform:uppercase;line-height:1.15}
+.banner-line3{font-size:10px;font-weight:600;color:rgba(255,255,255,0.75);font-style:italic}
+.banner-right-text{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;padding:0 20px;margin-right:200px}
+.brt-bars{display:flex;align-items:center;gap:10px}
+.brt-bar{width:5px;height:38px;background:#fff;border-radius:3px;flex-shrink:0}
+.brt-main{display:flex;flex-direction:column;align-items:center;gap:3px}
+.brt1{font-size:17px;font-weight:900;color:#fff;text-align:center;letter-spacing:1.5px;text-transform:uppercase}
+.brt2{font-size:10px;font-weight:700;color:rgba(255,255,255,0.85);letter-spacing:0.8px;text-transform:uppercase}
+.banner-overlay{position:absolute;top:0;right:0;bottom:0;display:flex;align-items:center;padding:0 16px;gap:10px;z-index:10}
+.bell-wrap{position:relative;cursor:pointer}
+.bell-wrap svg{width:22px;height:22px;fill:#fff;opacity:0.85}
+.bell-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:800;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center}
+.user-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.35);border-radius:50px;padding:5px 12px 5px 5px;cursor:pointer;position:relative}
+.uphoto{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.uphoto .ini{font-size:13px;font-weight:800;color:#fff}
+.uname{font-size:11px;font-weight:800;color:#fff;white-space:nowrap}
+.udesig{font-size:9px;color:rgba(255,255,255,0.75);white-space:nowrap;text-transform:uppercase;letter-spacing:0.3px}
+.dd-arrow{font-size:10px;color:rgba(255,255,255,0.7)}
+.user-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);min-width:200px;overflow:hidden;display:none;z-index:300}
+.user-dropdown.open{display:block}
+.dd-header{padding:12px 16px;background:linear-gradient(135deg,#0F2B8C,#1A3DB5);display:flex;align-items:center;gap:10px}
+.dd-av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff}
+.dd-hname{font-size:12px;font-weight:800;color:#fff}
+.dd-hrole{font-size:9px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.3px}
+.dd-item{padding:10px 16px;font-size:12px;color:#1e3a8a;font-weight:600;cursor:pointer;border-bottom:1px solid #EEF3FF;display:flex;align-items:center;gap:10px;transition:background 0.15s}
+.dd-item:hover{background:#EFF6FF}
+.dd-item.danger{color:#dc2626;border-bottom:none}
+.dd-item.danger:hover{background:#FFF0F0}
+.dd-item svg{width:14px;height:14px;flex-shrink:0}
+.role-submenu{background:#F8FAFF;border-top:1px solid #EEF3FF;border-bottom:1px solid #EEF3FF;display:none}
+.role-submenu.open{display:block}
+.role-opt{padding:8px 16px 8px 36px;font-size:11px;font-weight:600;cursor:pointer;color:#374151;transition:background 0.15s;display:flex;align-items:center;gap:8px}
+.role-opt:hover{background:#EFF6FF;color:#1A3DB5}
+.role-opt.current{color:#1A3DB5;font-weight:800}
+.role-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* TICKER */
+.ticker{background:#E0F7FA;border-bottom:1px solid #B2EBF2;height:28px;overflow:hidden;display:flex;align-items:center}
+.ticker-inner{white-space:nowrap;animation:tick 35s linear infinite;color:#005F66;font-size:11px;font-weight:500;padding:0 16px}
+@keyframes tick{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 110px)}
+
+/* SIDEBAR */
+.sidebar{width:76px;background:#fff;border-right:1.5px solid #E0E8FF;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:2px;flex-shrink:0;box-shadow:2px 0 8px rgba(26,61,181,0.06)}
+.sbi{width:66px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px;border-radius:10px;cursor:pointer;transition:all 0.15s}
+.sbi:hover{background:#F0F5FF}
+.sbi.active{background:linear-gradient(135deg,#0F2B8C,#1A3DB5);box-shadow:0 3px 10px rgba(15,43,140,0.25)}
+.sbi svg{width:22px;height:22px}
+.sbi.active svg{fill:#fff}
+.sbi:not(.active) svg{fill:#1A3DB5}
+.sbl{font-size:8px;font-weight:700;text-align:center;line-height:1.3;color:#666;text-transform:uppercase;letter-spacing:0.3px}
+.sbi.active .sbl{color:#fff}
+.sb-div{width:44px;height:1px;background:#E0E8FF;margin:4px 0}
+
+/* CONTENT */
+.content{flex:1;padding:18px;overflow-y:auto}
+.sec{display:none}.sec.active{display:block}
+.page-hd{font-size:20px;font-weight:800;color:#0F2B8C;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.page-hd::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,#1A3DB5,transparent)}
+
+/* CARDS */
+.card{background:rgba(255,255,255,0.65);backdrop-filter:blur(12px);border-radius:20px;border:1.5px solid rgba(255,255,255,0.85);padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 16px rgba(30,80,200,0.06)}
+.card-hd{font-size:13px;font-weight:800;color:#0F2B8C;margin-bottom:12px;padding-bottom:8px;border-bottom:1.5px solid rgba(26,61,181,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.mcard{border-radius:16px;padding:12px 14px;background:#fff;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(30,80,200,0.06);position:relative;overflow:hidden}
+.mcard::before{content:"";position:absolute;bottom:0;left:0;right:0;height:4px;border-radius:0 0 14px 14px}
+.mcard.c1::before{background:linear-gradient(90deg,#1A3DB5,#2952D9)}
+.mcard.c2::before{background:linear-gradient(90deg,#166534,#16a34a)}
+.mcard.c3::before{background:linear-gradient(90deg,#C94000,#E65800)}
+.mcard.c4::before{background:linear-gradient(90deg,#7c3aed,#9333ea)}
+.mcard.c5::before{background:linear-gradient(90deg,#005F52,#00897B)}
+.mcard.c6::before{background:linear-gradient(90deg,#0F1F6E,#1A3DB5)}
+.mcard-num{font-size:26px;font-weight:800;color:#0F2B8C;line-height:1;margin-bottom:4px}
+.mcard-label{font-size:10px;color:#666;font-weight:600}
+
+/* BUTTONS */
+.btn{height:36px;padding:0 18px;border-radius:50px;font-size:12px;cursor:pointer;font-weight:700;border:none;transition:all 0.15s;font-family:"Inter",sans-serif}
+.btn-pri{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff}
+.btn-sec{background:#F0F4FF;color:#1A3DB5;border:1.5px solid rgba(26,61,181,0.2)}
+.btn-grn{background:linear-gradient(90deg,#166534,#16a34a);color:#fff}
+.btn-red{background:linear-gradient(90deg,#991b1b,#dc2626);color:#fff}
+.btn-org{background:linear-gradient(90deg,#92400e,#d97706);color:#fff}
+.btn-add{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;height:34px;padding:0 14px;border-radius:50px;font-size:11px;font-weight:700;border:none;cursor:pointer}
+
+/* FORM */
+.frow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.fld{display:flex;flex-direction:column;gap:3px}
+.fld label{font-size:10px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.3px}
+.fld input,.fld select{height:36px;padding:0 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px;color:#0F2B8C;background:rgba(255,255,255,0.9);outline:none;font-family:"Inter",sans-serif}
+
+/* ===== DASHBOARD QUICK ACTIONS ===== */
+.qa-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:14px}
+.qa-card{background:#fff;border-radius:16px;padding:16px;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(26,61,181,0.06);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:12px}
+.qa-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(26,61,181,0.12);border-color:rgba(26,61,181,0.3)}
+.qa-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qa-icon svg{width:20px;height:20px}
+.qa-label{font-size:12px;font-weight:700;color:#0F2B8C}
+.qa-sub{font-size:10px;color:#6b7280;margin-top:2px}
+
+/* ACTIVITY FEED */
+.act-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid rgba(26,61,181,0.06)}
+.act-item:last-child{border-bottom:none}
+.act-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.act-text{font-size:12px;color:#374151;flex:1}
+.act-time{font-size:10px;color:#9ca3af;white-space:nowrap}
+
+/* STATUS BADGE */
+.sbadge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;display:inline-block}
+.sbadge-active{background:#DCFCE7;color:#166534}
+.sbadge-inactive{background:#FEE2E2;color:#dc2626}
+.sbadge-pending{background:#FEF3C7;color:#92400e}
+
+/* ===== USER MANAGEMENT ===== */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:16px;padding:14px 16px;border:1.5px solid rgba(100,150,255,0.15);box-shadow:0 2px 8px rgba(26,61,181,0.07);display:flex;align-items:center;gap:12px}
+.stat-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon svg{width:20px;height:20px}
+.stat-num{font-size:22px;font-weight:800;color:#0F2B8C;line-height:1}
+.stat-lbl{font-size:10px;color:#6b7280;margin-top:2px;font-weight:500}
+.section-wrap{background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);border-radius:20px;border:1.5px solid rgba(255,255,255,0.8);padding:16px 20px;margin-bottom:14px}
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.section-title{font-size:13px;font-weight:700;color:#0F2B8C;display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';width:4px;height:16px;background:#1A3DB5;border-radius:2px}
+.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.user-card{background:#fff;border-radius:16px;padding:16px;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(26,61,181,0.06);display:flex;align-items:center;gap:12px}
+.user-av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.av-pmam{background:linear-gradient(135deg,#1A3DB5,#2952D9)}
+.av-ic{background:linear-gradient(135deg,#166534,#16a34a)}
+.av-admin{background:linear-gradient(135deg,#7c3aed,#9333ea)}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:700;color:#0F2B8C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-email{font-size:10px;color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:9px;padding:2px 8px;border-radius:10px;font-weight:700;display:inline-block;margin-top:4px}
+.role-pmam{background:#E8EFFF;color:#1A3DB5}
+.role-ic{background:#DCFCE7;color:#166534}
+.role-admin{background:#F3E8FF;color:#7c3aed}
+.user-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.act-btn{padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:none;font-family:"Inter",sans-serif}
+.act-edit{background:#E8EFFF;color:#1A3DB5}
+.act-reset{background:#FEF3C7;color:#92400e}
+.act-disable{background:#FEE2E2;color:#dc2626}
+.act-enable{background:#DCFCE7;color:#166534}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.dot-active{background:#16a34a}
+.dot-inactive{background:#dc2626}
+
+/* ===== ROSTER / HOLIDAY ===== */
+.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid rgba(26,61,181,0.1)}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:500px}
+th{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;padding:9px 12px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;white-space:nowrap}
+th:first-child{border-radius:10px 0 0 0}
+th:last-child{border-radius:0 10px 0 0}
+td{padding:8px 12px;border-bottom:1px solid rgba(26,61,181,0.05);background:#fff;vertical-align:middle}
+tr:nth-child(even) td{background:#F8FAFF}
+tr:hover td{background:#EEF3FF}
+.empty-td{text-align:center;padding:24px!important;color:#BDBDBD;font-style:italic}
+.pmam-chip{display:inline-flex;align-items:center;gap:3px;background:#E8EFFF;color:#1A3DB5;font-size:10px;padding:2px 7px;border-radius:10px;margin:1px;font-weight:600}
+
+/* ===== SETTINGS ===== */
+.settings-layout{display:flex;gap:16px;align-items:flex-start}
+.settings-sidebar{width:220px;flex-shrink:0;background:rgba(255,255,255,0.7);backdrop-filter:blur(12px);border-radius:20px;border:1.5px solid rgba(255,255,255,0.8);padding:12px;position:sticky;top:20px}
+.sbs-title{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.8px;padding:6px 8px 10px;border-bottom:1px solid rgba(26,61,181,0.08);margin-bottom:6px}
+.sbs-item{padding:9px 12px;border-radius:10px;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.sbs-item:hover{background:#EEF3FF;color:#1A3DB5}
+.sbs-item.active{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff}
+.sbs-item svg{width:14px;height:14px;flex-shrink:0}
+.sbs-item.active svg{fill:#fff}
+.sbs-item:not(.active) svg{fill:#6b7280}
+.sbs-divider{height:1px;background:rgba(26,61,181,0.08);margin:8px 0}
+.sbs-section-label{font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.6px;padding:4px 12px}
+.settings-content{flex:1;min-width:0}
+.settings-panel{display:none}.settings-panel.active{display:block}
+.s-card{background:rgba(255,255,255,0.75);backdrop-filter:blur(12px);border-radius:20px;border:1.5px solid rgba(255,255,255,0.8);padding:20px;box-shadow:0 4px 24px rgba(30,80,200,0.07);margin-bottom:14px}
+.s-card-title{font-size:13px;font-weight:800;color:#0F2B8C;margin-bottom:14px;display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1.5px solid rgba(26,61,181,0.08)}
+.s-card-title svg{width:16px;height:16px;fill:#1A3DB5}
+.sfld{margin-bottom:12px}
+.sfld label{display:block;font-size:10px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px}
+.sfld input,.sfld select,.sfld textarea{width:100%;padding:9px 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:"Inter",sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#0F2B8C;transition:all 0.2s}
+.sfld input:focus,.sfld select:focus,.sfld textarea:focus{border-color:#1A3DB5;box-shadow:0 0 0 3px rgba(26,61,181,0.08)}
+.sfld textarea{resize:none}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.save-row{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid rgba(26,61,181,0.06)}
+.toggle-row:last-child{border-bottom:none}
+.tog{width:40px;height:22px;background:#cbd5e1;border-radius:11px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0}
+.tog.on{background:#1A3DB5}
+.tog-knob{width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.tog.on .tog-knob{left:20px}
+.list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F8FAFF;border-radius:8px;margin-bottom:6px;border:1px solid rgba(100,150,255,0.1);gap:8px}
+.li-text{font-size:12px;font-weight:500;color:#0F2B8C;flex:1;min-width:0}
+.li-sub{font-size:10px;color:#6b7280;margin-top:1px}
+.li-actions{display:flex;gap:4px;flex-shrink:0}
+.li-btn{padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:none;font-family:"Inter",sans-serif}
+.li-edit{background:#E8EFFF;color:#1A3DB5}
+.li-del{background:#FEE2E2;color:#dc2626}
+.add-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.add-input{flex:1;min-width:120px;height:34px;padding:0 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px;font-family:"Inter",sans-serif;outline:none;background:#fff}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid rgba(26,61,181,0.06)}
+.info-row:last-child{border-bottom:none}
+.info-key{font-size:11px;color:#6b7280}
+.info-val{font-size:12px;font-weight:600;color:#0F2B8C}
+.staff-mini-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.staff-mini-card{background:#F8FAFF;border-radius:12px;padding:12px;border:1px solid rgba(100,150,255,0.12);display:flex;align-items:center;gap:10px}
+.staff-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1A3DB5,#2952D9);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;flex-shrink:0}
+.staff-mini-info{flex:1;min-width:0}
+.staff-mini-name{font-size:11px;font-weight:700;color:#0F2B8C}
+.staff-mini-desig{font-size:10px;color:#6b7280}
+.holiday-tbl th:first-child{border-radius:8px 0 0 0}
+.holiday-tbl th:last-child{border-radius:0 8px 0 0}
+
+/* ===== MODAL ===== */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal-box{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:460px;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.modal-title{font-size:15px;font-weight:800;color:#1e3a8a;margin-bottom:16px}
+.mfld{margin-bottom:12px}
+.mfld label{display:block;font-size:10px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px}
+.mfld input,.mfld select{width:100%;padding:9px 12px;border:1.5px solid #e0e8ff;border-radius:10px;font-size:13px;font-family:"Inter",sans-serif;outline:none}
+.mfld input:focus,.mfld select:focus{border-color:#1A3DB5}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.mbtn{padding:8px 20px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:"Inter",sans-serif;border:none}
+.mbtn-pri{background:linear-gradient(90deg,#1e3a8a,#1A3DB5);color:#fff}
+.mbtn-sec{background:#f1f5ff;color:#1e3a8a;border:1px solid #e0e8ff}
+.mbtn-red{background:#dc2626;color:#fff}
+</style>
+  <!-- Firebase v10 -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec",
+      measurementId: "G-NK9VL87CJC"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
+</head>
+<body>
+
+<!-- ===== BANNER ===== -->
+<div class="banner-wrap">
+  <div class="banner-logo">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="#4A35B5" stroke="#FFD700" stroke-width="3"/>
+      <text x="50" y="30" text-anchor="middle" font-size="7.5" fill="#FFD700" font-weight="bold" font-family="Arial">Pradhan Mantri</text>
+      <text x="50" y="40" text-anchor="middle" font-size="7" fill="#fff" font-family="Arial">Jan Arogya</text>
+      <text x="50" y="50" text-anchor="middle" font-size="7" fill="#fff" font-family="Arial">Yojana</text>
+      <circle cx="50" cy="65" r="10" fill="#138808" opacity="0.85"/>
+      <text x="50" y="69" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold" font-family="Arial">AB</text>
+      <text x="50" y="85" text-anchor="middle" font-size="7" fill="#FFD700" font-family="Arial">PM-JAY</text>
+    </svg>
+  </div>
+  <div class="banner-titles">
+    <div class="banner-line1">Ayushman Bharat — PM-JAY</div>
+    <div class="banner-line2">Management Information System</div>
+    <div class="banner-line3">Government Medical College &amp; Associated Hospital, Rajouri</div>
+  </div>
+  <div class="banner-right-text">
+    <div class="brt-bars">
+      <div class="brt-bar"></div>
+      <div class="brt-main">
+        <div class="brt1">GMC &amp; AH RAJOURI</div>
+        <div class="brt2">ADMIN PORTAL</div>
+      </div>
+      <div class="brt-bar"></div>
+    </div>
+  </div>
+  <div class="banner-overlay">
+    <div class="bell-wrap">
+      <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+      <div class="bell-badge">3</div>
+    </div>
+    <div class="user-pill" onclick="toggleDD()">
+      <div class="uphoto"><span class="ini">VK</span></div>
+      <div>
+        <div class="uname">Vinod Kumar</div>
+        <div class="udesig">Admin</div>
+      </div>
+      <span class="dd-arrow">▾</span>
+      <div class="user-dropdown" id="userDD">
+        <div class="dd-header">
+          <div class="dd-av">VK</div>
+          <div><div class="dd-hname">Vinod Kumar</div><div class="dd-hrole">Admin — GMC Rajouri</div></div>
+        </div>
+        <div class="dd-item" onclick="closeDD()">
+          <svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          Update Profile
+        </div>
+        <div class="dd-item" onclick="toggleRoleMenu(event)">
+          <svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/></svg>
+          Change Role ▸
+        </div>
+        <div class="role-submenu" id="roleMenu">
+          <div class="role-opt" onclick="switchRole('pmam')"><span class="role-dot" style="background:#1A3DB5"></span>PMAM Portal</div>
+          <div class="role-opt" onclick="switchRole('ic')"><span class="role-dot" style="background:#166534"></span>I/C AB-PMJAY Portal</div>
+          <div class="role-opt current" onclick="switchRole('admin')"><span class="role-dot" style="background:#7c3aed"></span>Admin Portal ✓</div>
+        </div>
+        <div class="dd-item danger" onclick="confirmLogout()">
+          <svg viewBox="0 0 24 24" fill="#dc2626"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+          Logout
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">Ayushman Bharat PMJAY — All PMAMs are requested to fill daily reports before 5:00 PM &nbsp;&nbsp;&nbsp;&nbsp; For any queries contact: VINOD KUMAR (7006213517) &nbsp;&nbsp;&nbsp;&nbsp; Ayushman Bharat PMJAY — All PMAMs are requested to fill daily reports before 5:00 PM &nbsp;&nbsp;&nbsp;&nbsp; For any queries contact: VINOD KUMAR (7006213517)</div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sbi active" onclick="goSec('dashboard',this)" title="Dashboard">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      <div class="sbl">Dashboard</div>
+    </div>
+    <div class="sbi" onclick="goSec('users',this)" title="User Management">
+      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      <div class="sbl">Users</div>
+    </div>
+    <div class="sbi" onclick="goSec('roster',this)" title="Ward Roster">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+      <div class="sbl">Roster</div>
+    </div>
+    <div class="sbi" onclick="goSec('holiday',this)" title="Holiday Duty">
+      <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+      <div class="sbl">Holiday</div>
+    </div>
+    <div class="sb-div"></div>
+    <div class="sbi" onclick="goSec('settings',this)" title="Settings">
+      <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg>
+      <div class="sbl">Settings</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="sec active" id="sec-dashboard">
+      <div class="page-hd">Admin Dashboard</div>
+
+      <!-- STAT CARDS -->
+      <div class="metrics-grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
+        <div class="mcard c1"><div class="mcard-num">11</div><div class="mcard-label">Total Users</div></div>
+        <div class="mcard c2"><div class="mcard-num">9</div><div class="mcard-label">Active PMAMs</div></div>
+        <div class="mcard c3"><div class="mcard-num" id="dash-submitted">7</div><div class="mcard-label">Reports Submitted</div></div>
+        <div class="mcard c4"><div class="mcard-num" id="dash-pending">2</div><div class="mcard-label">Reports Pending</div></div>
+        <div class="mcard c5"><div class="mcard-num">0</div><div class="mcard-label">Locked Accounts</div></div>
+        <div class="mcard c6"><div class="mcard-num">2</div><div class="mcard-label">On Leave Today</div></div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="card">
+        <div class="card-hd">Quick Actions</div>
+        <div class="qa-grid">
+          <div class="qa-card" onclick="goSec('users',document.querySelector('.sbi:nth-child(2)'))">
+            <div class="qa-icon" style="background:#E8EFFF"><svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+            <div><div class="qa-label">Add New User</div><div class="qa-sub">Create PMAM / I/C account</div></div>
+          </div>
+          <div class="qa-card" onclick="goSec('roster',document.querySelectorAll('.sbi')[2])">
+            <div class="qa-icon" style="background:#DCFCE7"><svg viewBox="0 0 24 24" fill="#166534"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg></div>
+            <div><div class="qa-label">Ward Roster</div><div class="qa-sub">Manage PMAM assignments</div></div>
+          </div>
+          <div class="qa-card" onclick="goSec('holiday',document.querySelectorAll('.sbi')[3])">
+            <div class="qa-icon" style="background:#FEF3C7"><svg viewBox="0 0 24 24" fill="#92400e"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
+            <div><div class="qa-label">Holiday Duty</div><div class="qa-sub">Assign holiday roster</div></div>
+          </div>
+          <div class="qa-card" onclick="goSec('settings',document.querySelectorAll('.sbi')[4])">
+            <div class="qa-icon" style="background:#F3E8FF"><svg viewBox="0 0 24 24" fill="#7c3aed"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg></div>
+            <div><div class="qa-label">Settings</div><div class="qa-sub">Portal configuration</div></div>
+          </div>
+          <div class="qa-card" onclick="switchRole('pmam')">
+            <div class="qa-icon" style="background:#E8EFFF"><svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/></svg></div>
+            <div><div class="qa-label">Open PMAM Portal</div><div class="qa-sub">Switch to PMAM view</div></div>
+          </div>
+          <div class="qa-card" onclick="switchRole('ic')">
+            <div class="qa-icon" style="background:#DCFCE7"><svg viewBox="0 0 24 24" fill="#166534"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/></svg></div>
+            <div><div class="qa-label">Open I/C Portal</div><div class="qa-sub">Switch to I/C view</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORT STATUS THIS MONTH -->
+      <div class="card">
+        <div class="card-hd">Report Status — April 2026</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>PMAM</th><th>Ward</th><th>Status</th><th>Last Submitted</th></tr></thead>
+            <tbody id="dashReportTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RECENT ACTIVITY -->
+      <div class="card">
+        <div class="card-hd">Recent Activity</div>
+        <div id="activityFeed"></div>
+      </div>
+    </div>
+
+    <!-- ===== USER MANAGEMENT ===== -->
+    <div class="sec" id="sec-users">
+      <div class="page-hd">User Management</div>
+
+      <!-- PENDING APPROVALS -->
+      <div class="card" style="margin-bottom:16px;border:2px solid #FDE68A;background:#FFFBEB">
+        <div class="card-hd" style="color:#92400e">
+          ⏳ Pending Approvals
+          <span id="pendingCntBadge" style="background:#F59E0B;color:#fff;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-left:8px">0</span>
+          <button onclick="loadAllUsers()" style="margin-left:auto;background:#EEF3FF;border:none;color:#1A3DB5;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer">🔄 Refresh</button>
+        </div>
+        <div id="pendingUsersGrid">
+          <div style="color:#9ca3af;font-style:italic;font-size:12px;padding:16px">Loading...</div>
+        </div>
+      </div>
+
+      <!-- REJECTED USERS -->
+      <div class="card" style="margin-bottom:14px;border:2px solid #FECACA;background:#FFF5F5">
+        <div class="card-hd" style="color:#991b1b">✗ Rejected Users</div>
+        <div id="rejectedUsersGrid"><div style="color:#9ca3af;font-style:italic;font-size:12px;padding:16px">Loading...</div></div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#E8EFFF"><svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
+          <div><div class="stat-num">9</div><div class="stat-lbl">Total PMAMs</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#DCFCE7"><svg viewBox="0 0 24 24" fill="#166534"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+          <div><div class="stat-num">9</div><div class="stat-lbl">Active Users</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#FEE2E2"><svg viewBox="0 0 24 24" fill="#dc2626"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
+          <div><div class="stat-num">0</div><div class="stat-lbl">Locked Accounts</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#F3E8FF"><svg viewBox="0 0 24 24" fill="#7c3aed"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></div>
+          <div><div class="stat-num">11</div><div class="stat-lbl">Total Users</div></div>
+        </div>
+      </div>
+
+      <div class="section-wrap">
+        <div class="section-hd">
+          <div class="section-title">PMAM Users</div>
+          <button class="btn btn-pri" onclick="document.getElementById('addModal').classList.add('open')">+ Add User</button>
+        </div>
+        <div class="users-grid" id="pmamGrid"></div>
+      </div>
+
+      <div class="section-wrap">
+        <div class="section-hd"><div class="section-title">Admin &amp; I/C Users</div></div>
+        <div class="users-grid" id="otherGrid"></div>
+      </div>
+    </div>
+
+    <!-- ===== WARD ROSTER ===== -->
+    <div class="sec" id="sec-roster">
+      <div class="page-hd">Ward Roster</div>
+      <div class="card">
+        <div class="card-hd">
+          PMAM Ward Assignments
+          <button class="btn-add" onclick="addRosterRow()">+ Add Row</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th style="width:50px">S.No</th>
+              <th>PMAM Name</th>
+              <th>Ward Assigned</th>
+              <th style="width:90px">Action</th>
+            </tr></thead>
+            <tbody id="rosterBody"></tbody>
+          </table>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px">
+          <button class="btn btn-pri">Save Roster</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== HOLIDAY DUTY ===== -->
+    <div class="sec" id="sec-holiday">
+      <div class="page-hd">Holiday Duty Roster</div>
+      <div class="card">
+        <div class="card-hd">
+          Holiday Assignments
+          <button class="btn-add" onclick="addHolidayRow()">+ Add Holiday</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="holiday-tbl">
+            <thead><tr>
+              <th>S.No</th><th>Holiday Name</th><th>Date</th><th>PMAMs on Duty (Max 7)</th><th>Action</th>
+            </tr></thead>
+            <tbody id="holidayBody"></tbody>
+          </table>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px">
+          <button class="btn btn-pri">Save Holiday Roster</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS ===== -->
+    <div class="sec" id="sec-settings">
+      <div class="page-hd">Settings</div>
+      <div class="settings-layout">
+
+        <div class="settings-sidebar">
+          <div class="sbs-title">Settings Menu</div>
+          <div class="sbs-section-label">Portal</div>
+          <div class="sbs-item active" onclick="showPanel('portal',this)">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Portal Info
+          </div>
+          <div class="sbs-item" onclick="showPanel('ticker',this)">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>Ticker Message
+          </div>
+          <div class="sbs-item" onclick="showPanel('report',this)">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>Report Settings
+          </div>
+          <div class="sbs-item" onclick="showPanel('features',this)">
+            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg>Features
+          </div>
+          <div class="sbs-divider"></div>
+          <div class="sbs-section-label">Nav Bar Sections</div>
+          <div class="sbs-item" onclick="showPanel('aboutus',this)">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>About Us
+          </div>
+          <div class="sbs-item" onclick="showPanel('staff',this)">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Staff
+          </div>
+          <div class="sbs-item" onclick="showPanel('orders',this)">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>Orders
+          </div>
+          <div class="sbs-item" onclick="showPanel('contactus',this)">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Contact Us
+          </div>
+          <div class="sbs-divider"></div>
+          <div class="sbs-section-label">System</div>
+          <div class="sbs-item" onclick="showPanel('wards',this)">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>Ward Management
+          </div>
+          <div class="sbs-item" onclick="showPanel('sysinfo',this)">
+            <svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z"/></svg>System Info
+          </div>
+        </div>
+
+        <div class="settings-content">
+
+          <div class="settings-panel active" id="panel-portal">
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Portal Information</div>
+              <div class="form-grid">
+                <div class="sfld"><label>Hospital Name</label><input type="text" value="Government Medical College & Associated Hospital Rajouri"></div>
+                <div class="sfld"><label>Hospital Code</label><input type="text" value="HOSP1G10293"></div>
+                <div class="sfld"><label>Contact Email</label><input type="email" value="Ayushman@gmail.com"></div>
+                <div class="sfld"><label>Contact Phone</label><input type="text" value="+91 99999 99999"></div>
+              </div>
+              <div class="save-row"><button class="btn btn-pri">Save Changes</button></div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="panel-ticker">
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>Ticker / Notice Message</div>
+              <div class="sfld"><label>Ticker Text</label><textarea id="tickerTxt" style="height:80px">Ayushman Bharat PMJAY — All PMAMs are requested to fill daily reports before 5:00 PM. For any queries contact: VINOD KUMAR (7006213517)</textarea></div>
+              <div style="background:#E8F0FF;border:1px solid #C5D5F5;border-radius:8px;padding:8px 12px;font-size:11px;color:#1A3DB5;font-weight:500;margin-top:6px" id="tickerPrev">Preview will appear here...</div>
+              <div class="save-row">
+                <button class="btn btn-sec" onclick="document.getElementById('tickerPrev').textContent=document.getElementById('tickerTxt').value">Preview</button>
+                <button class="btn btn-pri">Save Ticker</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="panel-report">
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>Report Settings</div>
+              <div class="form-grid">
+                <div class="sfld"><label>Signatory Name</label><input type="text" value="Dr Shamim Ahmed"></div>
+                <div class="sfld"><label>Designation</label><input type="text" value="Medical Superintendent"></div>
+                <div class="sfld"><label>Institution</label><input type="text" value="GMC & AH Rajouri"></div>
+                <div class="sfld"><label>Daily Report Deadline</label>
+                  <select><option>5:00 PM</option><option>4:00 PM</option><option>6:00 PM</option></select>
+                </div>
+              </div>
+              <div class="save-row"><button class="btn btn-pri">Save Settings</button></div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="panel-features">
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg>Portal Features</div>
+              <div class="toggle-row"><div><div style="font-size:12px;font-weight:500;color:#374151">Daily Report Reminder</div><div style="font-size:10px;color:#9ca3af">Alert if report not filled by deadline</div></div><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
+              <div class="toggle-row"><div><div style="font-size:12px;font-weight:500;color:#374151">Leave Apply Feature</div><div style="font-size:10px;color:#9ca3af">Allow PMAMs to apply leave online</div></div><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
+              <div class="toggle-row"><div><div style="font-size:12px;font-weight:500;color:#374151">Auto Monthly Backup</div><div style="font-size:10px;color:#9ca3af">Email backup on 1st of each month</div></div><div class="tog" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
+              <div class="toggle-row"><div><div style="font-size:12px;font-weight:500;color:#374151">Ticker Notice Bar</div><div style="font-size:10px;color:#9ca3af">Show scrolling notice on portal</div></div><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="panel-aboutus">
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>About Us Content</div>
+              <div class="sfld"><label>Section Heading</label><input type="text" value="Ayushman Bharat — Pradhan Mantri Jan Arogya Yojana"></div>
+              <div class="sfld"><label>About Text</label><textarea style="height:120px">Ayushman Bharat PM-JAY is the world's largest health assurance scheme launched by Government of India. It provides health coverage of Rs 5 lakh per family per year for secondary and tertiary care hospitalization. At GMC & AH Rajouri, our dedicated PMAM team works to ensure every eligible beneficiary receives their entitled healthcare services seamlessly.</textarea></div>
+              <div class="save-row"><button class="btn btn-pri">Save About Us</button></div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="panel-staff">
+            <div class="s-card">
+              <div class="s-card-title">
+                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                Staff Management
+                <button class="btn-add" onclick="document.getElementById('addStaffModal').classList.add('open')" style="margin-left:auto">+ Add Staff</button>
+              </div>
+              <div class="staff-mini-grid" id="staffGrid"></div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="panel-orders">
+            <div class="s-card">
+              <div class="s-card-title">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
+                Orders Management
+                <button class="btn-add" onclick="document.getElementById('addOrderModal').classList.add('open')" style="margin-left:auto">+ Add Order</button>
+              </div>
+              <div id="ordersList"><div style="color:#9ca3af;font-style:italic;text-align:center;padding:20px">No orders added yet</div></div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="panel-contactus">
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Contact Us Settings</div>
+              <div class="form-grid">
+                <div class="sfld"><label>I/C Name</label><input type="text" value="Suresh Kumar"></div>
+                <div class="sfld"><label>Designation</label><input type="text" value="I/C AB-PMJAY"></div>
+                <div class="sfld"><label>Mobile Number</label><input type="text" value="9999999999"></div>
+                <div class="sfld"><label>Email</label><input type="email" value="suresh@gmcrajouri.in"></div>
+              </div>
+              <div class="save-row"><button class="btn btn-pri">Save Contact</button></div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="panel-wards">
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>Ward Management</div>
+              <div id="wardList"></div>
+              <div class="add-row">
+                <input type="text" class="add-input" id="newWard" placeholder="Type new ward name">
+                <button class="btn btn-pri" onclick="addWard()">+ Add Ward</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="panel-sysinfo">
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z"/></svg>System Information</div>
+              <div class="info-row"><span class="info-key">Portal Version</span><span class="info-val">v1.0.0</span></div>
+              <div class="info-row"><span class="info-key">Firebase Project</span><span class="info-val">gmcrajouri-pmam</span></div>
+              <div class="info-row"><span class="info-key">Hosted On</span><span class="info-val">Netlify</span></div>
+              <div class="info-row"><span class="info-key">Total Entries</span><span class="info-val">—</span></div>
+              <div class="info-row"><span class="info-key">Last Backup</span><span class="info-val">Never</span></div>
+              <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+                <button class="btn btn-grn">Backup Now</button>
+                <button class="btn btn-red">Clear All Data</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD USER MODAL -->
+<div class="modal-bg" id="addModal">
+  <div class="modal-box">
+    <div class="modal-title">Add New User</div>
+    <div class="mfld"><label>Full Name</label><input type="text" id="newName" placeholder="Enter full name"></div>
+    <div class="mfld"><label>Email Address</label><input type="email" id="newEmail" placeholder="Enter email"></div>
+    <div class="mfld"><label>Role</label>
+      <select id="newRole" onchange="toggleWardField()">
+        <option>PMAM</option><option>I/C AB-PMJAY</option><option>Admin</option>
+      </select>
+    </div>
+    <div class="mfld" id="wardFieldWrap"><label>Ward Assigned</label>
+      <select id="newWardSel">
+        <option value="">-- Select Ward --</option>
+        <option>Orthopaedics</option><option>Male Surgery Ward</option>
+        <option>Female Surgery Ward</option><option>Gynae</option>
+        <option>Optha</option><option>Onco</option><option>Male Medicine Ward A</option>
+        <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
+        <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="mbtn mbtn-sec" onclick="document.getElementById('addModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn mbtn-pri" onclick="addUser()">Add &amp; Send OTP</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-bg" id="editModal">
+  <div class="modal-box">
+    <div class="modal-title">Edit User</div>
+    <div class="mfld"><label>Full Name</label><input type="text" id="editName"></div>
+    <div class="mfld"><label>Email Address</label><input type="email" id="editEmail"></div>
+    <div class="mfld"><label>Ward Assigned</label>
+      <select id="editWard">
+        <option value="">-- Select Ward --</option>
+        <option>Orthopaedics</option><option>Male Surgery Ward</option>
+        <option>Female Surgery Ward</option><option>Gynae</option>
+        <option>Optha</option><option>Onco</option><option>Male Medicine Ward A</option>
+        <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
+        <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
+      </select>
+    </div>
+    <input type="hidden" id="editIndex">
+    <div class="modal-footer">
+      <button class="mbtn mbtn-sec" onclick="document.getElementById('editModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn mbtn-pri" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PIN MODAL -->
+<div class="modal-bg" id="resetModal">
+  <div class="modal-box">
+    <div class="modal-title">Reset PIN</div>
+    <p style="font-size:13px;color:#374151;margin-bottom:14px">Reset PIN for <strong id="resetName"></strong>? A new OTP will be sent to their email to set a new PIN.</p>
+    <div class="modal-footer">
+      <button class="mbtn mbtn-sec" onclick="document.getElementById('resetModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn mbtn-pri">Send Reset OTP</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD STAFF MODAL -->
+<div class="modal-bg" id="addStaffModal">
+  <div class="modal-box">
+    <div class="modal-title">Add Staff Member</div>
+    <div class="mfld"><label>Full Name</label><input type="text" id="sName" placeholder="Enter full name"></div>
+    <div class="mfld"><label>Designation</label><input type="text" id="sDesig" placeholder="e.g. PMAM, MTS, Principal"></div>
+    <div class="mfld"><label>Ward / Department</label><input type="text" id="sWard" placeholder="e.g. Orthopaedics, Admin"></div>
+    <div class="modal-footer">
+      <button class="mbtn mbtn-sec" onclick="document.getElementById('addStaffModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn mbtn-pri" onclick="addStaff()">Add Staff</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD ORDER MODAL -->
+<div class="modal-bg" id="addOrderModal">
+  <div class="modal-box">
+    <div class="modal-title">Add Order</div>
+    <div class="mfld"><label>Order Name / Title</label><input type="text" id="oName" placeholder="Enter order title"></div>
+    <div class="mfld"><label>Google Drive Link</label><input type="text" id="oLink" placeholder="Paste Google Drive PDF link"></div>
+    <div class="modal-footer">
+      <button class="mbtn mbtn-sec" onclick="document.getElementById('addOrderModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn mbtn-pri" onclick="addOrder()">Add Order</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+let pmams=[];
+
+let others=[];
+
+let wards=['Orthopaedics','Male Surgery Ward','Female Surgery Ward','Male Medicine Ward A','Male Medicine Ward B','Female Medicine Ward A','Female Medicine Ward B','MICU','SICU','Optha','Onco','Gynae','ENT','Dental','Disaster','Dialysis'];
+let staffData=[
+  {name:'Suresh Kumar',desig:'I/C AB-PMJAY',ward:'Admin'},
+  {name:'Tania Manhas',desig:'PMAM',ward:'Female Surgery Ward'},
+  {name:'Gagandeep Singh',desig:'PMAM',ward:'Orthopaedics'},
+];
+let rosterData=[];
+let holidayData=[];
+let ordersData=[];
+
+function ini(name){return name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
+function statusDot(s){return `<span class="status-dot dot-${s}" title="${s}"></span>`;}
+
+// ===== NAV =====
+function goSec(id,el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.sidebar .sbi').forEach(s=>s.classList.remove('active'));
+  if(el)el.classList.add('active');
+}
+
+// ===== DROPDOWN =====
+function toggleDD(){document.getElementById('userDD').classList.toggle('open');}
+function closeDD(){document.getElementById('userDD').classList.remove('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.user-pill'))document.getElementById('userDD').classList.remove('open');});
+function toggleRoleMenu(e){e.stopPropagation();document.getElementById('roleMenu').classList.toggle('open');}
+function switchRole(role){
+  closeDD();
+  if(role==='pmam')window.open('pmam_portal.html','_blank');
+  else if(role==='ic')window.open('ic_portal.html','_blank');
+}
+function confirmLogout(){
+  closeDD();
+  if(confirm('Are you sure you want to logout?'))window.location.href='index.html';
+}
+
+// ===== DASHBOARD =====
+function loadDashboard(){
+  const reportStatus=pmams.map((p,i)=>({
+    name:p.name,ward:p.ward,
+    status:i<7?'submitted':'pending',
+    date:i<7?'Apr 0'+(i+1)+', 2026':'—'
+  }));
+  document.getElementById('dashReportTbody').innerHTML=reportStatus.map(r=>`<tr>
+    <td style="font-weight:700;color:#0F2B8C">${r.name}</td>
+    <td><span style="background:#E8EFFF;color:#1A3DB5;font-size:10px;padding:2px 8px;border-radius:6px;font-weight:600">${r.ward}</span></td>
+    <td><span class="sbadge ${r.status==='submitted'?'sbadge-active':'sbadge-pending'}">${r.status==='submitted'?'Submitted':'Pending'}</span></td>
+    <td style="font-size:11px;color:#6b7280">${r.date}</td>
+  </tr>`).join('');
+
+  const acts=[
+    {text:'Tania Manhas submitted April report',time:'2h ago',color:'#16a34a'},
+    {text:'Gagandeep Singh submitted April report',time:'3h ago',color:'#16a34a'},
+    {text:'New user added: Asia Firdose',time:'1d ago',color:'#1A3DB5'},
+    {text:'PIN reset for Payal Sharma',time:'2d ago',color:'#92400e'},
+    {text:'Ward roster updated by Admin',time:'3d ago',color:'#7c3aed'},
+    {text:'Holiday duty assigned for Eid',time:'4d ago',color:'#1A3DB5'},
+  ];
+  document.getElementById('activityFeed').innerHTML=acts.map(a=>`
+    <div class="act-item">
+      <div class="act-dot" style="background:${a.color}"></div>
+      <div class="act-text">${a.text}</div>
+      <div class="act-time">${a.time}</div>
+    </div>`).join('');
+}
+
+// ===== USERS =====
+function renderPmams(){
+  document.getElementById('pmamGrid').innerHTML=pmams.map((u,i)=>`
+    <div class="user-card">
+      <div class="user-av av-pmam">${ini(u.name)}</div>
+      <div class="user-info">
+        <div class="user-name">${u.name}</div>
+        <div class="user-email">${u.email}</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
+          ${statusDot(u.status)}
+          <span class="user-role role-pmam">PMAM</span>
+          <span style="font-size:9px;color:#6b7280;margin-left:2px">${u.ward}</span>
+        </div>
+      </div>
+      <div class="user-actions">
+        <button class="act-btn act-edit" onclick="openEdit(${i},'pmam')">Edit</button>
+        <button class="act-btn act-reset" onclick="openReset('${u.name}')">Reset PIN</button>
+        <button class="act-btn ${u.status==='active'?'act-disable':'act-enable'}" onclick="toggleUser(${i},'pmam')">${u.status==='active'?'Disable':'Enable'}</button>
+      </div>
+    </div>`).join('');
+}
+function renderOthers(){
+  document.getElementById('otherGrid').innerHTML=others.map((u,i)=>`
+    <div class="user-card">
+      <div class="user-av ${u.role==='Admin'?'av-admin':'av-ic'}">${ini(u.name)}</div>
+      <div class="user-info">
+        <div class="user-name">${u.name}</div>
+        <div class="user-email">${u.email}</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
+          ${statusDot(u.status)}
+          <span class="user-role ${u.role==='Admin'?'role-admin':'role-ic'}">${u.role}</span>
+        </div>
+      </div>
+      <div class="user-actions">
+        <button class="act-btn act-reset" onclick="openReset('${u.name}')">Reset PIN</button>
+      </div>
+    </div>`).join('');
+}
+function openEdit(i,type){
+  const u=type==='pmam'?pmams[i]:others[i];
+  document.getElementById('editName').value=u.name;
+  document.getElementById('editEmail').value=u.email;
+  document.getElementById('editWard').value=u.ward||'';
+  document.getElementById('editIndex').value=i+'|'+type;
+  document.getElementById('editModal').classList.add('open');
+}
+function saveEdit(){
+  const[i,type]=document.getElementById('editIndex').value.split('|');
+  const u=type==='pmam'?pmams[parseInt(i)]:others[parseInt(i)];
+  u.name=document.getElementById('editName').value;
+  u.email=document.getElementById('editEmail').value;
+  if(type==='pmam')u.ward=document.getElementById('editWard').value;
+  document.getElementById('editModal').classList.remove('open');
+  renderPmams();renderOthers();
+}
+function toggleUser(i,type){
+  if(type==='pmam'){pmams[i].status=pmams[i].status==='active'?'inactive':'active';renderPmams();}
+}
+function openReset(name){
+  document.getElementById('resetName').textContent=name;
+  document.getElementById('resetModal').classList.add('open');
+}
+function toggleWardField(){
+  document.getElementById('wardFieldWrap').style.display=document.getElementById('newRole').value==='PMAM'?'block':'none';
+}
+function addUser(){
+  const name=document.getElementById('newName').value.trim();
+  if(!name)return;
+  const role=document.getElementById('newRole').value;
+  if(role==='PMAM'){
+    pmams.push({name,email:document.getElementById('newEmail').value,ward:document.getElementById('newWardSel').value,status:'active'});
+    renderPmams();
+  }else{
+    others.push({name,email:document.getElementById('newEmail').value,role,status:'active'});
+    renderOthers();
+  }
+  document.getElementById('addModal').classList.remove('open');
+  ['newName','newEmail'].forEach(id=>document.getElementById(id).value='');
+}
+
+// ===== ROSTER =====
+function addRosterRow(){rosterData.push({name:'',ward:''});renderRoster();}
+function renderRoster(){
+  const b=document.getElementById('rosterBody');
+  if(!rosterData.length){b.innerHTML='<tr><td colspan="4" class="empty-td">No rows yet. Click + Add Row.</td></tr>';return;}
+  b.innerHTML=rosterData.map((r,i)=>`<tr>
+    <td>${i+1}</td>
+    <td><input value="${r.name||''}" placeholder="PMAM Name" style="width:150px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="rosterData[${i}].name=this.value"></td>
+    <td><input value="${r.ward||''}" placeholder="Ward Assigned" style="width:190px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="rosterData[${i}].ward=this.value"></td>
+    <td><button class="li-btn li-del" onclick="rosterData.splice(${i},1);renderRoster()">Remove</button></td>
+  </tr>`).join('');
+}
+
+// ===== HOLIDAY =====
+function addHolidayRow(){holidayData.push({name:'',date:'',pmams:['']});renderHoliday();}
+function addHolidayPmam(i){if(holidayData[i].pmams.length>=7){alert('Max 7 PMAMs');return;}holidayData[i].pmams.push('');renderHoliday();}
+function removeHolidayPmam(i,j){holidayData[i].pmams.splice(j,1);renderHoliday();}
+function renderHoliday(){
+  const b=document.getElementById('holidayBody');
+  if(!holidayData.length){b.innerHTML='<tr><td colspan="5" class="empty-td">No holidays added yet. Click + Add Holiday.</td></tr>';return;}
+  b.innerHTML=holidayData.map((h,i)=>{
+    const pmamHTML=h.pmams.map((p,j)=>`
+      <div style="display:flex;align-items:center;gap:3px;margin-bottom:3px">
+        <input value="${p}" placeholder="PMAM ${j+1}" style="width:140px;padding:3px 7px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px;outline:none" onchange="holidayData[${i}].pmams[${j}]=this.value">
+        ${h.pmams.length>1?`<button onclick="removeHolidayPmam(${i},${j})" style="background:none;border:none;color:#dc2626;font-weight:800;cursor:pointer;font-size:13px">×</button>`:''}
+      </div>`).join('');
+    return`<tr style="vertical-align:top">
+      <td>${i+1}</td>
+      <td><input value="${h.name||''}" placeholder="Holiday Name" style="width:130px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="holidayData[${i}].name=this.value"></td>
+      <td><input type="date" value="${h.date||''}" style="width:130px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="holidayData[${i}].date=this.value"></td>
+      <td>${pmamHTML}${h.pmams.length<7?`<button onclick="addHolidayPmam(${i})" style="background:#dbeafe;color:#1e3a8a;border:none;border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;cursor:pointer;margin-top:3px">+ Add PMAM</button>`:'<span style="font-size:10px;color:#9ca3af">Max 7</span>'}</td>
+      <td><button class="li-btn li-del" onclick="holidayData.splice(${i},1);renderHoliday()">Remove</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== SETTINGS =====
+function showPanel(id,el){
+  document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.sbs-item').forEach(s=>s.classList.remove('active'));
+  if(el)el.classList.add('active');
+}
+function renderWards(){
+  document.getElementById('wardList').innerHTML=wards.map((w,i)=>`
+    <div class="list-item">
+      <span class="li-text">${w}</span>
+      <div class="li-actions">
+        <button class="li-btn li-del" onclick="wards.splice(${i},1);renderWards()">Remove</button>
+      </div>
+    </div>`).join('');
+}
+function addWard(){const v=document.getElementById('newWard').value.trim();if(!v)return;wards.push(v);document.getElementById('newWard').value='';renderWards();}
+function renderStaff(){
+  document.getElementById('staffGrid').innerHTML=staffData.map((s,i)=>`
+    <div class="staff-mini-card">
+      <div class="staff-av">${ini(s.name)}</div>
+      <div class="staff-mini-info">
+        <div class="staff-mini-name">${s.name}</div>
+        <div class="staff-mini-desig">${s.desig} — ${s.ward}</div>
+      </div>
+      <button class="li-btn li-del" onclick="staffData.splice(${i},1);renderStaff()">×</button>
+    </div>`).join('');
+}
+function addStaff(){
+  const n=document.getElementById('sName').value.trim();
+  if(!n)return;
+  staffData.push({name:n,desig:document.getElementById('sDesig').value,ward:document.getElementById('sWard').value});
+  document.getElementById('addStaffModal').classList.remove('open');
+  ['sName','sDesig','sWard'].forEach(id=>document.getElementById(id).value='');
+  renderStaff();
+}
+function addOrder(){
+  const n=document.getElementById('oName').value.trim();
+  const l=document.getElementById('oLink').value.trim();
+  if(!n||!l)return;
+  ordersData.push({name:n,link:l});
+  document.getElementById('addOrderModal').classList.remove('open');
+  document.getElementById('oName').value='';document.getElementById('oLink').value='';
+  renderOrders();
+}
+function renderOrders(){
+  const d=document.getElementById('ordersList');
+  if(!ordersData.length){d.innerHTML='<div style="color:#9ca3af;font-style:italic;text-align:center;padding:20px">No orders added yet</div>';return;}
+  d.innerHTML=ordersData.map((o,i)=>`
+    <div class="list-item">
+      <div><div class="li-text">${o.name}</div><div class="li-sub">${o.link.substring(0,45)}...</div></div>
+      <div class="li-actions">
+        <a href="${o.link}" target="_blank" style="background:#E8EFFF;color:#1A3DB5;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;text-decoration:none">Open</a>
+        <button class="li-btn li-del" onclick="ordersData.splice(${i},1);renderOrders()">Remove</button>
+      </div>
+    </div>`).join('');
+}
+
+// ===== INIT =====
+loadDashboard();
+renderPmams();
+renderOthers();
+renderRoster();
+renderHoliday();
+renderWards();
+renderStaff();
+renderOrders();
+
+// ══════════════════════════════════════
+// FIREBASE HELPERS
+// ══════════════════════════════════════
+function fbSendOTP(email, onSuccess, onError) {
+  var otp = Math.floor(100000 + Math.random() * 900000).toString();
+  var expires = Date.now() + 10 * 60 * 1000;
+  db.collection('otps').doc(email).set({ otp: otp, expires: expires })
+    .then(function() {
+      if (typeof emailjs !== 'undefined') {
+        emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+          to_email: email, otp_code: otp, hospital: 'GMC & AH Rajouri'
+        }).then(onSuccess).catch(onError);
+      } else { onSuccess(); }
+    }).catch(onError);
+}
+
+function fbVerifyOTP(email, otp, onSuccess, onError) {
+  db.collection('otps').doc(email).get().then(function(doc) {
+    if (!doc.exists) return onError('OTP not found. Request again.');
+    var data = doc.data();
+    if (Date.now() > data.expires) return onError('OTP expired. Request again.');
+    if (data.otp !== otp.trim()) return onError('Invalid OTP.');
+    db.collection('otps').doc(email).delete();
+    onSuccess();
+  }).catch(onError);
+}
+
+
+// ══════════════════════════════════════
+// USER MANAGEMENT — Firebase
+// ══════════════════════════════════════
+function loadAllUsers() {
+  db.collection('users').get().then(function(snap) {
+    var pendingUsers = [];
+    var pmamUsers = [];
+    var otherUsers = [];
+
+    snap.forEach(function(doc) {
+      var u = doc.data();
+      if (u.email === 'aravarya99@gmail.com') return; // skip admin
+      if (u.status === 'pending') {
+        pendingUsers.push(u);
+      } else if (u.role === 'PMAM') {
+        pmamUsers.push(u);
+      } else {
+        otherUsers.push(u);
+      }
+    });
+
+    // Update pending count badge
+    var badge = document.getElementById('pendingCntBadge');
+    if (badge) badge.textContent = pendingUsers.length || '0';
+    var bellBadge = document.querySelector('.bell-badge');
+    if (bellBadge) bellBadge.textContent = pendingUsers.length || '0';
+
+    // Render pending users
+    var pendingGrid = document.getElementById('pendingUsersGrid');
+    if (pendingGrid) {
+      if (!pendingUsers.length) {
+        pendingGrid.innerHTML = '<div style="color:#9ca3af;font-style:italic;font-size:12px;padding:16px">No pending approvals</div>';
+      } else {
+        pendingGrid.innerHTML = pendingUsers.map(function(u) {
+          var ini = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+          return '<div style="background:#fff;border:1px solid #FDE68A;border-radius:10px;padding:12px;margin-bottom:8px">'
+            + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+            + '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff">' + ini + '</div>'
+            + '<div><div style="font-size:13px;font-weight:700;color:#0F2B8C">' + (u.name||'') + '</div>'
+            + '<div style="font-size:11px;color:#6b7280">' + (u.email||'') + ' | ' + (u.role||'') + (u.ward?' | '+u.ward:'') + '</div></div></div>'
+            + '<div style="display:flex;gap:8px">'
+            + '<button data-email="' + u.email + '" onclick="approveUser(this.dataset.email)" style="flex:1;background:#166534;color:#fff;border:none;border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer">✓ Approve</button>'
+            + '<button data-email="' + u.email + '" onclick="rejectUser(this.dataset.email)" style="flex:1;background:#dc2626;color:#fff;border:none;border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer">✗ Reject</button>'
+            + '</div></div>';
+        }).join('');
+      }
+    }
+
+    // Render approved PMAMs
+    var pmamGrid = document.getElementById('pmamGrid');
+    if (pmamGrid) {
+      if (!pmamUsers.length) {
+        pmamGrid.innerHTML = '<div style="color:#9ca3af;font-style:italic;font-size:12px;padding:8px">No approved PMAMs yet</div>';
+      } else {
+        pmamGrid.innerHTML = pmamUsers.map(function(u) {
+          var ini = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+          return '<div class="user-card">'
+            + '<div class="uc-av">' + ini + '</div>'
+            + '<div class="user-name">' + (u.name||'') + '</div>'
+            + '<div class="user-email">' + (u.email||'') + '</div>'
+            + '<div style="font-size:10px;color:#6b7280;margin-top:2px">' + (u.ward||'') + '</div>'
+            + '<span class="status-badge ' + (u.status==='approved'?'badge-active':'badge-inactive') + '">' + (u.status||'pending') + '</span>'
+            + '</div>';
+        }).join('');
+      }
+    }
+
+    // Render I/C users
+    var otherGrid = document.getElementById('otherGrid');
+    if (otherGrid) {
+      if (!otherUsers.length) {
+        otherGrid.innerHTML = '<div style="color:#9ca3af;font-style:italic;font-size:12px;padding:8px">No other users yet</div>';
+      } else {
+        otherGrid.innerHTML = otherUsers.map(function(u) {
+          var ini = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+          return '<div class="user-card">'
+            + '<div class="uc-av">' + ini + '</div>'
+            + '<div class="user-name">' + (u.name||'') + '</div>'
+            + '<div class="user-email">' + (u.email||'') + '</div>'
+            + '<div style="font-size:10px;color:#6b7280;margin-top:2px">' + (u.role||'') + '</div>'
+            + '<span class="status-badge ' + (u.status==='approved'?'badge-active':'badge-inactive') + '">' + (u.status||'pending') + '</span>'
+            + '</div>';
+        }).join('');
+      }
+    }
+
+  }).catch(function(e) { console.error('loadAllUsers error:', e); });
+}
+
+function approveUser(email) {
+  if (!confirm('Approve account for ' + email + '?')) return;
+  db.collection('users').doc(email).update({ status: 'approved' })
+    .then(function() {
+      showToast('User approved ✓', 'success');
+      loadAllUsers();
+    }).catch(function(e) { showToast('Error: ' + e.message, 'error'); });
+}
+
+function rejectUser(email) {
+  if (!confirm('Reject account for ' + email + '?')) return;
+  db.collection('users').doc(email).update({ status: 'rejected' })
+    .then(function() {
+      showToast('User rejected', 'success');
+      loadAllUsers();
+    }).catch(function(e) { showToast('Error: ' + e.message, 'error'); });
+}
+
+
+function renderRejectedUsers(list) {
+  var grid = document.getElementById('rejectedUsersGrid');
+  if (!grid) return;
+  if (!list || !list.length) {
+    grid.innerHTML = '<div style="color:#9ca3af;font-style:italic;font-size:12px;padding:16px">No rejected users</div>';
+    return;
+  }
+  grid.innerHTML = list.map(function(u) {
+    var ini = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+    return '<div style="background:#fff;border:1px solid #FECACA;border-radius:10px;padding:12px;margin-bottom:8px">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+      + '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#b91c1c);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff">'+ini+'</div>'
+      + '<div><div style="font-size:13px;font-weight:700;color:#0F2B8C">'+(u.name||'')+'</div>'
+      + '<div style="font-size:11px;color:#6b7280">'+(u.email||'')+' | '+(u.role||'')+'</div></div></div>'
+      + '<div style="display:flex;gap:8px">'
+      + '<button data-email="'+u.email+'" onclick="reviewUser(this.dataset.email)" style="flex:1;background:#1d4ed8;color:#fff;border:none;border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer">🔄 Review</button>'
+      + '<button data-email="'+u.email+'" onclick="deleteUser(this.dataset.email)" style="flex:1;background:#6b7280;color:#fff;border:none;border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer">🗑 Delete</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function reviewUser(email) {
+  if (!confirm('Move ' + email + ' back to Pending for review?')) return;
+  db.collection('users').doc(email).update({ status: 'pending' })
+    .then(function() { showToast('Moved to pending for review','success'); loadAllUsers(); })
+    .catch(function(e) { showToast('Error: '+e.message,'error'); });
+}
+
+function deleteUser(email) {
+  if (!confirm('Permanently delete account for ' + email + '?')) return;
+  db.collection('users').doc(email).delete()
+    .then(function() { showToast('User deleted','success'); loadAllUsers(); })
+    .catch(function(e) { showToast('Error: '+e.message,'error'); });
+}
+
+</script>
+</body>
+</html>
