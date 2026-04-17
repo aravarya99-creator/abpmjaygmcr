@@ -425,18 +425,18 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         </div>
       </div>
       <div class="metrics-grid">
-        <div class="mcard c1"><div class="mcard-num">0</div><div class="mcard-label">Total Ward IPD</div></div>
-        <div class="mcard c2"><div class="mcard-num">0</div><div class="mcard-label">Total Register</div></div>
-        <div class="mcard c3"><div class="mcard-num">0</div><div class="mcard-label">Total Preauth</div></div>
-        <div class="mcard c4"><div class="mcard-num">0</div><div class="mcard-label">Total Discharge</div></div>
-        <div class="mcard c5"><div class="mcard-num">₹0</div><div class="mcard-label">Total Claim</div></div>
-        <div class="mcard c6"><div class="mcard-num">—</div><div class="mcard-label">Overall Conv%</div></div>
+        <div class="mcard c1"><div class="mcard-num" id="dIPD">0</div><div class="mcard-label">Total Ward IPD</div></div>
+        <div class="mcard c2"><div class="mcard-num" id="dReg">0</div><div class="mcard-label">Total Register</div></div>
+        <div class="mcard c3"><div class="mcard-num" id="dPre">0</div><div class="mcard-label">Total Preauth</div></div>
+        <div class="mcard c4"><div class="mcard-num" id="dDis">0</div><div class="mcard-label">Total Discharge</div></div>
+        <div class="mcard c5"><div class="mcard-num" id="dClm">₹0</div><div class="mcard-label">Total Claim</div></div>
+        <div class="mcard c6"><div class="mcard-num" id="dConv">—</div><div class="mcard-label">Overall Conv%</div></div>
       </div>
       <div class="card">
         <div class="card-hd">All My Entries</div>
         <div class="tbl-wrap">
           <table><thead><tr><th>Date</th><th>Wards</th><th>IPD</th><th>Med</th><th>Surg</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th></tr></thead>
-          <tbody><tr><td colspan="11" class="empty-td">No entries yet — fill your first daily report</td></tr></tbody></table>
+          <tbody id="dashTbody"><tr><td colspan="11" class="empty-td">No entries yet — fill your first daily report</td></tr></tbody></table>
         </div>
       </div>
     </div>
@@ -918,9 +918,33 @@ function updateDashboard() {
   allEntries.forEach(function(e) { totIPD+=e.ipd; totReg+=e.reg; totPre+=e.pre; totDis+=e.dis; totClm+=e.clm; });
   var setEl = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
   setEl('dIPD',totIPD); setEl('dReg',totReg); setEl('dPre',totPre); setEl('dDis',totDis);
-  setEl('dClm', totClm ? '₹'+(totClm/100000).toFixed(1)+'L' : '0');
+  setEl('dClm', totClm ? '₹'+(totClm).toLocaleString('en-IN') : '0');
   setEl('dConv', totIPD>0 ? ((totReg/totIPD)*100).toFixed(1)+'%' : '0%');
-  setEl('dEntries', allEntries.length);
+  
+  var dtb = document.getElementById('dashTbody');
+  if (dtb) {
+    if (allEntries.length === 0) {
+      dtb.innerHTML = '<tr><td colspan="11" class="empty-td">No entries yet — fill your first daily report</td></tr>';
+    } else {
+      dtb.innerHTML = allEntries.map(function(e) {
+        return '<tr><td>' + e.date + '</td>'
+          + '<td>' + e.wards.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('') + '</td>'
+          + '<td>' + e.ipd + '</td><td>' + e.med + '</td><td>' + e.surg + '</td>'
+          + '<td><strong>' + e.reg + '</strong></td><td>' + e.pre + '</td>'
+          + '<td>' + e.preAmt.toLocaleString('en-IN') + '</td>'
+          + '<td>' + e.dis + '</td><td>' + e.clm.toLocaleString('en-IN') + '</td>'
+          + '<td style="font-weight:700;color:' + (parseFloat(e.conv)>=60?'#166534':'#92400e') + '">' + e.conv + '</td></tr>';
+      }).join('');
+    }
+  }
+}
+
+function doLogout() {
+  closeDD();
+  if (confirm('Are you sure you want to logout?')) {
+    sessionStorage.removeItem('pmjay_user');
+    window.location.href = 'index.html';
+  }
 }
 
 // ══════════════════════════════════════
@@ -1236,6 +1260,14 @@ window.addEventListener('DOMContentLoaded', function() {
       var n = u.name || u.email || 'PMAM User';
       var initials = n.substring(0, 2).toUpperCase();
       
+      var hNameEl = document.getElementById('hName');
+      if(hNameEl) hNameEl.textContent = n.toUpperCase();
+      var hInitEl = document.getElementById('hInitials');
+      if(hInitEl) hInitEl.textContent = initials;
+      var dashNameEl = document.getElementById('dashName');
+      if(dashNameEl) dashNameEl.textContent = n;
+      var ePmamEl = document.getElementById('ePmam');
+      if(ePmamEl) ePmamEl.value = n;
       var unEl = document.getElementById('userName');
       if(unEl) unEl.textContent = n.toUpperCase();
       var uiEl = document.getElementById('userInitials');

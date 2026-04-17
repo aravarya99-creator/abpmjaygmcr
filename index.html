@@ -228,7 +228,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',Arial,sans-serif;backg
               <option value="">-- Select Your Role --</option>
               <option value="PMAM">PMAM</option>
               <option value="I/C AB-PMJAY">I/C AB-PMJAY</option>
-              <option value="MTS">MTS (Patient Services)</option>
+              <option value="DEO">DEO</option>
             </select>
           </div>
           <button class="login-btn" id="suBtn1" onclick="signupStep1()">Send Verification OTP →</button>
@@ -420,7 +420,7 @@ function doLogin() {
     setTimeout(function(){
       if (email===ADMIN_EMAIL)           window.location.href='admin_portal.html';
       else if (u.role==='I/C AB-PMJAY')  window.location.href='ic_portal.html';
-      else if (u.role==='MTS')           window.location.href='patient_services_portal.html';
+      else if (u.role==='DEO')           window.location.href='patient_services_portal.html';
       else                               window.location.href='pmam_portal.html';
     }, 800);
   }).catch(function(e){ setMsg('loginMsg','Connection error: '+e.message,'#f87171'); });
@@ -526,7 +526,7 @@ window.addEventListener('DOMContentLoaded', function() {
     if (sess.email) {
       if (sess.email===ADMIN_EMAIL)          window.location.href='admin_portal.html';
       else if (sess.role==='I/C AB-PMJAY')   window.location.href='ic_portal.html';
-      else if (sess.role==='MTS')            window.location.href='patient_services_portal.html';
+      else if (sess.role==='DEO')            window.location.href='patient_services_portal.html';
       else                                   window.location.href='pmam_portal.html';
     }
   } catch(e){}

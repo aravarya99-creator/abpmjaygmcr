@@ -318,7 +318,7 @@ tr:hover td{background:#EEF3FF}
           <div class="dd-av">VK</div>
           <div><div class="dd-hname">Vinod Kumar</div><div class="dd-hrole">Admin — GMC Rajouri</div></div>
         </div>
-        <div class="dd-item" onclick="closeDD()">
+        <div class="dd-item" onclick="closeDD(); alert('Admin profile settings can be configured via Firebase. Please see Portal Settings for other updates.');">
           <svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
           Update Profile
         </div>
@@ -763,7 +763,10 @@ function closeDD(){document.getElementById('userDD').classList.remove('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('.user-pill'))document.getElementById('userDD').classList.remove('open');});
 function confirmLogout(){
   closeDD();
-  if(confirm('Are you sure you want to logout?'))window.location.href='index.html';
+  if(confirm('Are you sure you want to logout?')) {
+    sessionStorage.removeItem('pmjay_user');
+    window.location.href='index.html';
+  }
 }
 
 // ===== DASHBOARD =====
@@ -862,10 +865,16 @@ function renderOthers(){
     </div>`).join('');
 }
 function deleteUser(i,type){
-  if(confirm('do you really want to delete this user')){
-    if(type==='pmam') pmams.splice(i,1);
-    else others.splice(i,1);
-    renderPmams();renderOthers();
+  if(confirm('Do you really want to delete this user? Cannot be undone.')){
+    const email = type === 'pmam' ? pmams[i].email : others[i].email;
+    db.collection('users').doc(email).delete().then(function() {
+      if(type==='pmam') pmams.splice(i,1);
+      else others.splice(i,1);
+      renderPmams();renderOthers();
+      showToast('User deleted successfully', 'success');
+    }).catch(function(e) {
+      showToast('Error: ' + e.message, 'error');
+    });
   }
 }
 function openEdit(i,type){
@@ -878,14 +887,26 @@ function openEdit(i,type){
 function saveEdit(){
   const[i,type]=document.getElementById('editIndex').value.split('|');
   const u=type==='pmam'?pmams[parseInt(i)]:others[parseInt(i)];
-  u.name=document.getElementById('editName').value;
-  u.email=document.getElementById('editEmail').value;
-  document.getElementById('editModal').classList.remove('open');
-  renderPmams();renderOthers();
+  const newName=document.getElementById('editName').value;
+  db.collection('users').doc(u.email).update({ name: newName }).then(function() {
+    u.name=newName;
+    document.getElementById('editModal').classList.remove('open');
+    renderPmams();renderOthers();
+    showToast('User updated', 'success');
+  }).catch(function(e) {
+    showToast('Error: ' + e.message, 'error');
+  });
 }
 function toggleUser(i,type){
-  if(type==='pmam'){pmams[i].status=pmams[i].status==='active'?'inactive':'active';renderPmams();}
-  else{others[i].status=others[i].status==='active'?'inactive':'active';renderOthers();}
+  const u = type==='pmam' ? pmams[i] : others[i];
+  const newStatus = u.status==='active' ? 'inactive' : 'active';
+  db.collection('users').doc(u.email).update({ status: newStatus }).then(function() {
+    u.status=newStatus;
+    renderPmams();renderOthers();
+    showToast('User status updated', 'success');
+  }).catch(function(e) {
+    showToast('Error: ' + e.message, 'error');
+  });
 }
 function openReset(name){
   document.getElementById('resetName').textContent=name;
