@@ -104,7 +104,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',Arial,sans-serif;backg
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     var firebaseConfig = {
@@ -113,8 +112,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',Arial,sans-serif;backg
       projectId: "gmcrajouri-pmam",
       storageBucket: "gmcrajouri-pmam.firebasestorage.app",
       messagingSenderId: "115490476421",
-      appId: "1:115490476421:web:871a91987e1a92a45f34ec",
-      measurementId: "G-NK9VL87CJC"
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec"
     };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     var db   = firebase.firestore();
@@ -219,72 +217,86 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',Arial,sans-serif;backg
             <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNext(this,5)" onkeydown="pinBack(event,this,5)">
           </div>
         </div>
-        <button class="login-btn" onclick="doLogin()">Login to Portal →</button>
+        <button class="login-btn" id="loginBtn" onclick="doLogin()">Login to Portal →</button>
         <div class="bottom-links">
           <span class="bottom-link" onclick="showForm('forgotForm')">Forgot PIN?</span>
         </div>
-        <div id="loginMsg" style="min-height:16px;font-size:12px;text-align:center;color:#FFD700;font-weight:600;margin-top:6px"></div>
-      <div class="form-note">New staff? <span style="color:#FFD700;font-weight:700;cursor:pointer" onclick="showForm('signupForm')">Sign Up Here</span><br>Access restricted to authorised personnel only.</div>
+        <div id="loginMsg" style="min-height:18px;font-size:12px;text-align:center;font-weight:600;margin:8px 0;color:#fbbf24"></div>
+        <div class="form-note">New staff? <span onclick="showForm('signupForm')" style="color:#fbbf24;font-weight:700;cursor:pointer;text-decoration:underline">Sign Up Here</span><br>Access restricted to authorised personnel only.</div>
       </div>
 
       <!-- FORGOT PIN FORM -->
+      
+      <!-- SIGNUP FORM -->
       <div class="auth-form" id="signupForm">
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" id="suName" placeholder="Enter your full name">
-        </div>
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" id="suEmail" placeholder="Enter your email">
-        </div>
-        <div class="form-group">
-          <label>Role</label>
-          <select id="suRole">
-            <option value="">-- Select Role --</option>
-            <option value="PMAM">PMAM</option>
-            <option value="I/C AB-PMJAY">I/C AB-PMJAY</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Ward</label>
-          <input type="text" id="suWard" placeholder="Enter your ward">
-        </div>
-        <div id="suOtpSection" style="display:none">
+
+        <!-- Step 1: Details -->
+        <div id="su-step1">
           <div class="form-group">
-            <label>Enter OTP sent to your email</label>
-            <input type="text" id="suOtp" placeholder="6-digit OTP" maxlength="6" inputmode="numeric">
+            <label>Full Name</label>
+            <input type="text" id="suName" placeholder="Enter your full name">
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="suEmail" placeholder="Enter your email address">
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <select id="suRole">
+              <option value="">-- Select Your Role --</option>
+              <option value="PMAM">PMAM</option>
+              <option value="I/C AB-PMJAY">I/C AB-PMJAY</option>
+              <option value="MTS">MTS (Patient Services)</option>
+            </select>
+          </div>
+          <button class="login-btn" id="suBtn1" onclick="signupStep1()">Send Verification OTP →</button>
+        </div>
+
+        <!-- Step 2: OTP -->
+        <div id="su-step2" style="display:none">
+          <div class="form-group">
+            <label>OTP sent to <span id="suEmailDisp" style="color:#fbbf24"></span></label>
+            <input type="text" id="suOtp" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric" style="text-align:center;font-size:20px;font-weight:700;letter-spacing:6px">
+          </div>
+          <button class="login-btn" id="suBtn2" onclick="signupStep2()">Verify OTP →</button>
+          <div style="text-align:center;margin-top:8px">
+            <span onclick="signupResend()" style="font-size:12px;color:rgba(255,255,255,0.6);cursor:pointer;text-decoration:underline">Resend OTP</span>
           </div>
         </div>
-        <div id="suPinSection" style="display:none">
-          <div class="form-group">
+
+        <!-- Step 3: Set PIN -->
+        <div id="su-step3" style="display:none">
+          <div class="form-group" style="margin-bottom:8px">
             <label>Set 6-Digit PIN</label>
             <div class="pin-row" id="suPinRow">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,0)" onkeydown="pinBackId('suPin',event,this,0)">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,1)" onkeydown="pinBackId('suPin',event,this,1)">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,2)" onkeydown="pinBackId('suPin',event,this,2)">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,3)" onkeydown="pinBackId('suPin',event,this,3)">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,4)" onkeydown="pinBackId('suPin',event,this,4)">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin',this,5)" onkeydown="pinBackId('suPin',event,this,5)">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,0,'suPinRow')" onkeydown="pb(event,this,0,'suPinRow')">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,1,'suPinRow')" onkeydown="pb(event,this,1,'suPinRow')">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,2,'suPinRow')" onkeydown="pb(event,this,2,'suPinRow')">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,3,'suPinRow')" onkeydown="pb(event,this,3,'suPinRow')">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,4,'suPinRow')" onkeydown="pb(event,this,4,'suPinRow')">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,5,'suPinRow')" onkeydown="pb(event,this,5,'suPinRow')">
             </div>
           </div>
           <div class="form-group">
             <label>Confirm PIN</label>
             <div class="pin-row" id="suPin2Row">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,0)" onkeydown="pinBackId('suPin2',event,this,0)">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,1)" onkeydown="pinBackId('suPin2',event,this,1)">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,2)" onkeydown="pinBackId('suPin2',event,this,2)">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,3)" onkeydown="pinBackId('suPin2',event,this,3)">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,4)" onkeydown="pinBackId('suPin2',event,this,4)">
-              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pinNextId('suPin2',this,5)" onkeydown="pinBackId('suPin2',event,this,5)">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,0,'suPin2Row')" onkeydown="pb(event,this,0,'suPin2Row')">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,1,'suPin2Row')" onkeydown="pb(event,this,1,'suPin2Row')">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,2,'suPin2Row')" onkeydown="pb(event,this,2,'suPin2Row')">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,3,'suPin2Row')" onkeydown="pb(event,this,3,'suPin2Row')">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,4,'suPin2Row')" onkeydown="pb(event,this,4,'suPin2Row')">
+              <input class="pin-input" maxlength="1" type="password" inputmode="numeric" oninput="pn(this,5,'suPin2Row')" onkeydown="pb(event,this,5,'suPin2Row')">
             </div>
           </div>
+          <button class="login-btn" id="suBtn3" onclick="signupStep3()">Complete Registration →</button>
         </div>
-        <button class="login-btn" id="suBtn" onclick="doSignupStep()">Send OTP</button>
-        <div id="suMsg" style="min-height:16px;font-size:12px;text-align:center;color:#FFD700;font-weight:600;margin-top:6px"></div>
-        <div class="bottom-links">
-          <span class="bottom-link" onclick="showForm('loginForm')">← Back to Login</span>
+
+        <div id="suMsg" style="min-height:18px;font-size:12px;text-align:center;font-weight:600;margin:8px 0;color:#fbbf24"></div>
+        <div style="text-align:center;margin-top:10px">
+          <span onclick="showForm('loginForm')" style="font-size:12px;color:rgba(255,255,255,0.6);cursor:pointer">← Back to Login</span>
         </div>
       </div>
+
       <div class="auth-form" id="forgotForm">
         <div class="form-group">
           <label>Registered Email Address</label>
@@ -316,238 +328,225 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',Arial,sans-serif;backg
 </div>
 
 <script>
-function showForm(id){
-  document.querySelectorAll('.auth-form').forEach(f=>f.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function pinNext(el,idx){
-  el.value=el.value.replace(/\D/g,'');
-  el.classList.toggle('filled',el.value!=='');
-  const inputs=el.closest('.pin-row').querySelectorAll('.pin-input');
-  if(el.value&&idx<5)inputs[idx+1].focus();
-}
-function pinBack(e,el,idx){
-  if(e.key==='Backspace'&&!el.value&&idx>0){
-    const inputs=el.closest('.pin-row').querySelectorAll('.pin-input');
-    inputs[idx-1].focus();
-    inputs[idx-1].value='';
-    inputs[idx-1].classList.remove('filled');
-  }
-}
-function loadLoginImg(inp){
-  const r=new FileReader();
-  r.onload=e=>{
-    const img=document.getElementById('loginImg');
-    const ph=document.getElementById('loginImgPh');
-    img.src=e.target.result;
-    img.style.display='block';
-    ph.style.display='none';
-  };
-  r.readAsDataURL(inp.files[0]);
-}
-function loadLogo(inp,imgId,placeholder){
-  const r=new FileReader();
-  r.onload=e=>{
-    const img=document.getElementById(imgId);
-    img.src=e.target.result;
-    img.style.display='block';
-    if(placeholder)placeholder.style.display='none';
-  };
-  r.readAsDataURL(inp.files[0]);
-}
-function loadHD(inp){
-  const r=new FileReader();
-  r.onload=e=>{
-    const img=document.getElementById('hdPhoto');
-    const ph=document.getElementById('photoPh');
-    img.src=e.target.result;
-    img.style.display='block';
-    ph.style.display='none';
-  };
-  r.readAsDataURL(inp.files[0]);
-}
-
 // ══════════════════════════════════════
-// FIREBASE HELPERS
-// ══════════════════════════════════════
-function fbSendOTP(email, onSuccess, onError) {
-  var otp = Math.floor(100000 + Math.random() * 900000).toString();
-  var expires = Date.now() + 10 * 60 * 1000;
-  db.collection('otps').doc(email).set({ otp: otp, expires: expires })
-    .then(function() {
-      if (typeof emailjs !== 'undefined') {
-        emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-          to_email: email, otp_code: otp, hospital: 'GMC & AH Rajouri'
-        }).then(onSuccess).catch(onError);
-      } else { onSuccess(); }
-    }).catch(onError);
-}
-
-function fbVerifyOTP(email, otp, onSuccess, onError) {
-  db.collection('otps').doc(email).get().then(function(doc) {
-    if (!doc.exists) return onError('OTP not found. Request again.');
-    var data = doc.data();
-    if (Date.now() > data.expires) return onError('OTP expired. Request again.');
-    if (data.otp !== otp.trim()) return onError('Invalid OTP.');
-    db.collection('otps').doc(email).delete();
-    onSuccess();
-  }).catch(onError);
-}
-
-
-// ══════════════════════════════════════
-// AUTH — Firebase Login + Signup
+// CONSTANTS
 // ══════════════════════════════════════
 var ADMIN_EMAIL = 'aravarya99@gmail.com';
-var _suStep = 'info';
-var _fgtStep = 'email';
 
+// SHOW/HIDE FORMS
 function showForm(id) {
   document.querySelectorAll('.auth-form').forEach(function(f){ f.classList.remove('active'); });
   var el = document.getElementById(id);
   if (el) el.classList.add('active');
 }
+var _suEmail = '';
+var _fgtEmail = '';
 
-function pinNextId(rowId, el, idx) {
+// ══════════════════════════════════════
+// PIN HELPERS
+// ══════════════════════════════════════
+function pn(el, idx, rowId) {
   if (el.value && idx < 5) {
-    var inputs = document.getElementById(rowId+'Row').querySelectorAll('.pin-input');
+    var inputs = document.getElementById(rowId).querySelectorAll('.pin-input');
     if (inputs[idx+1]) inputs[idx+1].focus();
   }
 }
-function pinBackId(rowId, e, el, idx) {
+function pb(e, el, idx, rowId) {
   if (e.key==='Backspace' && !el.value && idx > 0) {
-    var inputs = document.getElementById(rowId+'Row').querySelectorAll('.pin-input');
+    var inputs = document.getElementById(rowId).querySelectorAll('.pin-input');
     if (inputs[idx-1]) inputs[idx-1].focus();
   }
 }
-function getPinVal(rowId) {
-  return Array.from(document.getElementById(rowId+'Row').querySelectorAll('.pin-input'))
+function getPin(rowId) {
+  return Array.from(document.getElementById(rowId).querySelectorAll('.pin-input'))
     .map(function(i){ return i.value; }).join('');
 }
+function clearPin(rowId) {
+  document.getElementById(rowId).querySelectorAll('.pin-input')
+    .forEach(function(i){ i.value=''; });
+}
 
+// ══════════════════════════════════════
+// EXISTING PIN HELPERS (keep for login form)
+// ══════════════════════════════════════
+function pinNext(el, idx) {
+  if (el.value && idx < 5) {
+    var inputs = el.closest('.pin-row').querySelectorAll('.pin-input');
+    if (inputs[idx+1]) inputs[idx+1].focus();
+  }
+}
+function pinBack(e, el, idx) {
+  if (e.key==='Backspace' && !el.value && idx > 0) {
+    var inputs = el.closest('.pin-row').querySelectorAll('.pin-input');
+    if (inputs[idx-1]) inputs[idx-1].focus();
+  }
+}
+
+// ══════════════════════════════════════
+// MSG HELPERS
+// ══════════════════════════════════════
+function setMsg(id, text, color) {
+  var el = document.getElementById(id);
+  if (el) { el.textContent = text; el.style.color = color||'#fbbf24'; }
+}
+
+// ══════════════════════════════════════
+// OTP
+// ══════════════════════════════════════
+function sendOTP(email, onSuccess, onError) {
+  var otp = Math.floor(100000 + Math.random() * 900000).toString();
+  db.collection('otps').doc(email).set({ otp: otp, expires: Date.now() + 600000 })
+    .then(function() {
+      emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+        to_email: email, otp_code: otp, hospital: 'GMC & AH Rajouri'
+      }).then(onSuccess).catch(onError);
+    }).catch(onError);
+}
+function verifyOTP(email, otp, onSuccess, onError) {
+  db.collection('otps').doc(email).get().then(function(doc) {
+    if (!doc.exists) return onError('OTP not found. Request again.');
+    var d = doc.data();
+    if (Date.now() > d.expires) return onError('OTP expired. Request again.');
+    if (d.otp !== otp.trim()) return onError('Invalid OTP. Try again.');
+    db.collection('otps').doc(email).delete();
+    onSuccess();
+  }).catch(function(){ onError('Verification failed.'); });
+}
+
+// ══════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════
 function doLogin() {
   var email = (document.getElementById('loginEmail').value||'').trim().toLowerCase();
   var pin   = Array.from(document.querySelectorAll('#loginForm .pin-input')).map(function(i){return i.value;}).join('');
-  var msg   = document.getElementById('loginMsg');
-  if (!email) { msg.textContent='Please enter your email.'; return; }
-  if (pin.length < 6) { msg.textContent='Please enter your 6-digit PIN.'; return; }
-  msg.textContent = 'Verifying...';
+  if (!email)         { setMsg('loginMsg','Please enter your email.','#f87171'); return; }
+  if (pin.length < 6) { setMsg('loginMsg','Please enter your 6-digit PIN.','#f87171'); return; }
+  setMsg('loginMsg','Verifying...','#fbbf24');
   db.collection('users').doc(email).get().then(function(doc) {
-    if (!doc.exists) { msg.textContent='Email not registered. Please sign up first.'; return; }
+    if (!doc.exists) { setMsg('loginMsg','Email not registered. Please sign up first.','#f87171'); return; }
     var u = doc.data();
-    if (u.pin !== pin) { msg.textContent='Incorrect PIN. Please try again.'; return; }
+    if (u.pin !== pin) { setMsg('loginMsg','Incorrect PIN. Please try again.','#f87171'); return; }
     if (email !== ADMIN_EMAIL && u.status !== 'approved') {
-      msg.textContent = u.status==='rejected' ? 'Account rejected. Contact Admin.' : 'Account pending Admin approval.';
+      setMsg('loginMsg', u.status==='rejected' ? 'Account rejected. Contact Admin.' : 'Account pending Admin approval.', '#f87171');
       return;
     }
-    sessionStorage.setItem('pmjay_user', JSON.stringify({
-      email:email, name:u.name||'', role:u.role||'PMAM', desig:u.role||'PMAM', ward:u.ward||''
-    }));
-    msg.textContent = 'Login successful! Redirecting...';
-    msg.style.color = '#90EE90';
+    sessionStorage.setItem('pmjay_user', JSON.stringify({ email:email, name:u.name||'', role:u.role||'', desig:u.role||'', ward:u.ward||'' }));
+    if (document.getElementById('rememberMe') && document.getElementById('rememberMe').checked)
+      localStorage.setItem('pmjay_remember', email);
+    setMsg('loginMsg','Login successful! Redirecting...','#86efac');
     setTimeout(function(){
-      if (email===ADMIN_EMAIL) window.location.href='admin_portal.html';
-      else if (u.role==='I/C AB-PMJAY') window.location.href='ic_portal.html';
-      else window.location.href='pmam_portal.html';
+      if (email===ADMIN_EMAIL)           window.location.href='admin_portal.html';
+      else if (u.role==='I/C AB-PMJAY')  window.location.href='ic_portal.html';
+      else if (u.role==='MTS')           window.location.href='patient_services_portal.html';
+      else                               window.location.href='pmam_portal.html';
     }, 800);
-  }).catch(function(e){ msg.textContent='Connection error: '+e.message; });
+  }).catch(function(e){ setMsg('loginMsg','Connection error: '+e.message,'#f87171'); });
 }
 
-function doSignupStep() {
-  if (_suStep==='info') _signupSendOTP();
-  else if (_suStep==='otp') _signupVerifyOTP();
-  else if (_suStep==='pin') _signupSetPin();
-}
-
-function _signupSendOTP() {
-  var name=document.getElementById('suName').value.trim();
-  var email=(document.getElementById('suEmail').value||'').trim().toLowerCase();
-  var role=document.getElementById('suRole').value;
-  var ward=(document.getElementById('suWard').value||'').trim();
-  var msg=document.getElementById('suMsg');
-  if (!name){msg.textContent='Enter your name.';return;}
-  if (!email){msg.textContent='Enter your email.';return;}
-  if (!role){msg.textContent='Select your role.';return;}
-  if (email===ADMIN_EMAIL){msg.textContent='This email is reserved.';return;}
-  msg.textContent='Checking...';
+// ══════════════════════════════════════
+// SIGNUP
+// ══════════════════════════════════════
+function signupStep1() {
+  var name  = (document.getElementById('suName').value||'').trim();
+  var email = (document.getElementById('suEmail').value||'').trim().toLowerCase();
+  var role  = document.getElementById('suRole').value;
+  if (!name)  { setMsg('suMsg','Please enter your full name.'); return; }
+  if (!email) { setMsg('suMsg','Please enter your email.'); return; }
+  if (!role)  { setMsg('suMsg','Please select your role.'); return; }
+  if (email===ADMIN_EMAIL) { setMsg('suMsg','This email is reserved.','#f87171'); return; }
+  setMsg('suMsg','Checking...','#fbbf24');
   db.collection('users').doc(email).get().then(function(doc){
-    if (doc.exists&&doc.data().pin){msg.textContent='Email already registered. Please login.';return;}
-    msg.textContent='Sending OTP...';
-    fbSendOTP(email,function(){
-      document.getElementById('suOtpSection').style.display='block';
-      document.getElementById('suBtn').textContent='Verify OTP';
-      msg.textContent='OTP sent to '+email+'. Check inbox/spam.';
-      _suStep='otp';
-    },function(e){msg.textContent='Failed to send OTP. Try again.';console.error(e);});
-  }).catch(function(){msg.textContent='Connection error.';});
+    if (doc.exists && doc.data().pin) { setMsg('suMsg','Email already registered. Please login.','#f87171'); return; }
+    setMsg('suMsg','Sending OTP...','#fbbf24');
+    sendOTP(email, function(){
+      _suEmail = email;
+      document.getElementById('suEmailDisp').textContent = email;
+      document.getElementById('su-step1').style.display='none';
+      document.getElementById('su-step2').style.display='block';
+      setMsg('suMsg','OTP sent! Check inbox/spam.','#86efac');
+    }, function(){ setMsg('suMsg','Failed to send OTP. Try again.','#f87171'); });
+  }).catch(function(){ setMsg('suMsg','Connection error.','#f87171'); });
 }
 
-function _signupVerifyOTP() {
-  var email=(document.getElementById('suEmail').value||'').trim().toLowerCase();
-  var otp=(document.getElementById('suOtp').value||'').trim();
-  var msg=document.getElementById('suMsg');
-  if (!otp||otp.length<6){msg.textContent='Enter 6-digit OTP.';return;}
-  msg.textContent='Verifying...';
-  fbVerifyOTP(email,otp,function(){
-    document.getElementById('suOtpSection').style.display='none';
-    document.getElementById('suPinSection').style.display='block';
-    document.getElementById('suBtn').textContent='Complete Registration';
-    msg.textContent='Email verified! Set your PIN.';
-    _suStep='pin';
-  },function(e){msg.textContent=e||'Invalid OTP.';});
+function signupStep2() {
+  var otp = (document.getElementById('suOtp').value||'').trim();
+  if (!otp||otp.length<6) { setMsg('suMsg','Enter 6-digit OTP.'); return; }
+  setMsg('suMsg','Verifying...','#fbbf24');
+  verifyOTP(_suEmail, otp, function(){
+    document.getElementById('su-step2').style.display='none';
+    document.getElementById('su-step3').style.display='block';
+    setMsg('suMsg','Email verified! Set your PIN.','#86efac');
+  }, function(e){ setMsg('suMsg',e,'#f87171'); });
 }
 
-function _signupSetPin() {
-  var email=(document.getElementById('suEmail').value||'').trim().toLowerCase();
-  var name=document.getElementById('suName').value.trim();
-  var role=document.getElementById('suRole').value;
-  var ward=(document.getElementById('suWard').value||'').trim();
-  var pin=getPinVal('suPin');
-  var pin2=getPinVal('suPin2');
-  var msg=document.getElementById('suMsg');
-  if (pin.length<6){msg.textContent='Enter 6-digit PIN.';return;}
-  if (pin!==pin2){msg.textContent='PINs do not match.';return;}
-  msg.textContent='Creating account...';
-  db.collection('users').doc(email).set({
-    email:email,name:name,role:role,ward:ward,pin:pin,
-    status:'pending',createdAt:new Date().toISOString()
+function signupResend() {
+  if (!_suEmail) return;
+  setMsg('suMsg','Resending...','#fbbf24');
+  sendOTP(_suEmail, function(){ setMsg('suMsg','OTP resent!','#86efac'); },
+    function(){ setMsg('suMsg','Failed to resend.','#f87171'); });
+}
+
+function signupStep3() {
+  var pin  = getPin('suPinRow');
+  var pin2 = getPin('suPin2Row');
+  var name = document.getElementById('suName').value.trim();
+  var role = document.getElementById('suRole').value;
+  if (pin.length<6)  { setMsg('suMsg','Enter 6-digit PIN.'); return; }
+  if (pin!==pin2)    { setMsg('suMsg','PINs do not match.','#f87171'); clearPin('suPin2Row'); return; }
+  setMsg('suMsg','Creating account...','#fbbf24');
+  db.collection('users').doc(_suEmail).set({
+    email:_suEmail, name:name, role:role, pin:pin,
+    status:'pending', createdAt:new Date().toISOString()
   }).then(function(){
-    msg.textContent='Account created! Awaiting Admin approval.';
-    msg.style.color='#90EE90';
-    db.collection('notifications').add({type:'new_user',email:email,name:name,role:role,ward:ward,ts:new Date().toISOString(),read:false});
-    setTimeout(function(){showForm('loginForm');_suStep='info';},3000);
-  }).catch(function(){msg.textContent='Error. Try again.';});
+    db.collection('notifications').add({ type:'new_signup', email:_suEmail, name:name, role:role, ts:new Date().toISOString(), read:false });
+    setMsg('suMsg','Account created! Awaiting Admin approval.','#86efac');
+    setTimeout(function(){
+      showForm('loginForm');
+      document.getElementById('su-step1').style.display='block';
+      document.getElementById('su-step2').style.display='none';
+      document.getElementById('su-step3').style.display='none';
+      ['suName','suEmail','suOtp'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('suRole').value='';
+      clearPin('suPinRow'); clearPin('suPin2Row');
+      _suEmail='';
+    }, 3000);
+  }).catch(function(){ setMsg('suMsg','Error. Try again.','#f87171'); });
 }
 
+// ══════════════════════════════════════
+// FORGOT PIN
+// ══════════════════════════════════════
 function doForgot() {
-  var email=(document.getElementById('forgotEmail').value||'').trim().toLowerCase();
-  var msg=document.getElementById('forgotMsg');
-  if (!email){msg.textContent='Enter your email.';return;}
-  msg.textContent='Sending OTP...';
+  var email = (document.getElementById('forgotEmail').value||'').trim().toLowerCase();
+  if (!email) { setMsg('forgotMsg','Enter your email.','#f87171'); return; }
+  setMsg('forgotMsg','Checking...','#fbbf24');
   db.collection('users').doc(email).get().then(function(doc){
-    if (!doc.exists){msg.textContent='Email not registered.';return;}
-    fbSendOTP(email,function(){
-      msg.textContent='OTP sent to '+email;
-      _fgtStep='otp';
-    },function(){msg.textContent='Failed to send OTP.';});
-  });
+    if (!doc.exists) { setMsg('forgotMsg','Email not registered.','#f87171'); return; }
+    sendOTP(email, function(){
+      _fgtEmail = email;
+      setMsg('forgotMsg','OTP sent to '+email,'#86efac');
+    }, function(){ setMsg('forgotMsg','Failed to send OTP.','#f87171'); });
+  }).catch(function(){ setMsg('forgotMsg','Connection error.','#f87171'); });
 }
 
-function checkRemembered() {
-  try {
-    var rem = localStorage.getItem('pmjay_remember');
-    if (rem) {
-      var r = JSON.parse(rem);
-      if (r.email) {
-        var el = document.getElementById('loginEmail');
-        if (el) el.value = r.email;
-      }
-    }
-  } catch(e) {}
-}
-
+// ══════════════════════════════════════
+// ON LOAD
+// ══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', function() {
-  checkRemembered();
+  var rem = localStorage.getItem('pmjay_remember');
+  if (rem) {
+    var el = document.getElementById('loginEmail');
+    if (el) el.value = rem;
+  }
+  try {
+    var sess = JSON.parse(sessionStorage.getItem('pmjay_user')||'{}');
+    if (sess.email) {
+      if (sess.email===ADMIN_EMAIL)          window.location.href='admin_portal.html';
+      else if (sess.role==='I/C AB-PMJAY')   window.location.href='ic_portal.html';
+      else if (sess.role==='MTS')            window.location.href='patient_services_portal.html';
+      else                                   window.location.href='pmam_portal.html';
+    }
+  } catch(e){}
 });
 
 </script>
