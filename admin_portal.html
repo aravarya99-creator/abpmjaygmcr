@@ -439,6 +439,19 @@ tr:hover td{background:#EEF3FF}
     <!-- ===== USER MANAGEMENT ===== -->
     <div class="sec" id="sec-users">
       <div class="page-hd">User Management</div>
+
+      <!-- PENDING APPROVALS -->
+      <div class="card" style="margin-bottom:16px;border:2px solid #FDE68A;background:#FFFBEB">
+        <div class="card-hd" style="color:#92400e">
+          ⏳ Pending Approvals
+          <span id="pendingCntBadge" style="background:#F59E0B;color:#fff;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-left:8px">0</span>
+          <button onclick="loadAllUsers()" style="margin-left:auto;background:#EEF3FF;border:none;color:#1A3DB5;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer">🔄 Refresh</button>
+        </div>
+        <div id="pendingUsersGrid">
+          <div style="color:#9ca3af;font-style:italic;font-size:12px;padding:16px">Loading...</div>
+        </div>
+      </div>
+
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-icon" style="background:#E8EFFF"><svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
@@ -1075,6 +1088,114 @@ function fbVerifyOTP(email, otp, onSuccess, onError) {
     db.collection('otps').doc(email).delete();
     onSuccess();
   }).catch(onError);
+}
+
+
+// ══════════════════════════════════════
+// USER MANAGEMENT — Firebase
+// ══════════════════════════════════════
+function loadAllUsers() {
+  db.collection('users').get().then(function(snap) {
+    var pendingUsers = [];
+    var pmamUsers = [];
+    var otherUsers = [];
+
+    snap.forEach(function(doc) {
+      var u = doc.data();
+      if (u.email === 'aravarya99@gmail.com') return; // skip admin
+      if (u.status === 'pending') {
+        pendingUsers.push(u);
+      } else if (u.role === 'PMAM') {
+        pmamUsers.push(u);
+      } else {
+        otherUsers.push(u);
+      }
+    });
+
+    // Update pending count badge
+    var badge = document.getElementById('pendingCntBadge');
+    if (badge) badge.textContent = pendingUsers.length || '0';
+    var bellBadge = document.querySelector('.bell-badge');
+    if (bellBadge) bellBadge.textContent = pendingUsers.length || '0';
+
+    // Render pending users
+    var pendingGrid = document.getElementById('pendingUsersGrid');
+    if (pendingGrid) {
+      if (!pendingUsers.length) {
+        pendingGrid.innerHTML = '<div style="color:#9ca3af;font-style:italic;font-size:12px;padding:16px">No pending approvals</div>';
+      } else {
+        pendingGrid.innerHTML = pendingUsers.map(function(u) {
+          var ini = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+          return '<div style="background:#fff;border:1px solid #FDE68A;border-radius:10px;padding:12px;margin-bottom:8px">'
+            + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+            + '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff">' + ini + '</div>'
+            + '<div><div style="font-size:13px;font-weight:700;color:#0F2B8C">' + (u.name||'') + '</div>'
+            + '<div style="font-size:11px;color:#6b7280">' + (u.email||'') + ' | ' + (u.role||'') + (u.ward?' | '+u.ward:'') + '</div></div></div>'
+            + '<div style="display:flex;gap:8px">'
+            + '<button data-email="' + u.email + '" onclick="approveUser(this.dataset.email)" style="flex:1;background:#166534;color:#fff;border:none;border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer">✓ Approve</button>'
+            + '<button data-email="' + u.email + '" onclick="rejectUser(this.dataset.email)" style="flex:1;background:#dc2626;color:#fff;border:none;border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer">✗ Reject</button>'
+            + '</div></div>';
+        }).join('');
+      }
+    }
+
+    // Render approved PMAMs
+    var pmamGrid = document.getElementById('pmamGrid');
+    if (pmamGrid) {
+      if (!pmamUsers.length) {
+        pmamGrid.innerHTML = '<div style="color:#9ca3af;font-style:italic;font-size:12px;padding:8px">No approved PMAMs yet</div>';
+      } else {
+        pmamGrid.innerHTML = pmamUsers.map(function(u) {
+          var ini = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+          return '<div class="user-card">'
+            + '<div class="uc-av">' + ini + '</div>'
+            + '<div class="user-name">' + (u.name||'') + '</div>'
+            + '<div class="user-email">' + (u.email||'') + '</div>'
+            + '<div style="font-size:10px;color:#6b7280;margin-top:2px">' + (u.ward||'') + '</div>'
+            + '<span class="status-badge ' + (u.status==='approved'?'badge-active':'badge-inactive') + '">' + (u.status||'pending') + '</span>'
+            + '</div>';
+        }).join('');
+      }
+    }
+
+    // Render I/C users
+    var otherGrid = document.getElementById('otherGrid');
+    if (otherGrid) {
+      if (!otherUsers.length) {
+        otherGrid.innerHTML = '<div style="color:#9ca3af;font-style:italic;font-size:12px;padding:8px">No other users yet</div>';
+      } else {
+        otherGrid.innerHTML = otherUsers.map(function(u) {
+          var ini = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+          return '<div class="user-card">'
+            + '<div class="uc-av">' + ini + '</div>'
+            + '<div class="user-name">' + (u.name||'') + '</div>'
+            + '<div class="user-email">' + (u.email||'') + '</div>'
+            + '<div style="font-size:10px;color:#6b7280;margin-top:2px">' + (u.role||'') + '</div>'
+            + '<span class="status-badge ' + (u.status==='approved'?'badge-active':'badge-inactive') + '">' + (u.status||'pending') + '</span>'
+            + '</div>';
+        }).join('');
+      }
+    }
+
+  }).catch(function(e) { console.error('loadAllUsers error:', e); });
+}
+
+function approveUser(email) {
+  if (!confirm('Approve account for ' + email + '?')) return;
+  db.collection('users').doc(email).update({ status: 'approved' })
+    .then(function() {
+      showToast('User approved ✓', 'success');
+      loadAllUsers();
+    }).catch(function(e) { showToast('Error: ' + e.message, 'error'); });
+}
+
+function rejectUser(email) {
+  if (!confirm('Reject account for ' + email + '?')) return;
+  db.collection('users').doc(email).update({ status: 'rejected' })
+    .then(function() {
+      showToast('User rejected', 'success');
+      loadAllUsers();
+    }).catch(function(e) { showToast('Error: ' + e.message, 'error'); });
 }
 
 </script>
