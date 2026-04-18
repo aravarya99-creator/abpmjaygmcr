@@ -286,7 +286,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
               <option>October</option><option>November</option><option>December</option>
             </select>
           </div>
-          <div class="fld"><label>Year</label><select style="width:100px"><option>2026</option><option>2025</option></select></div>
+          <div class="fld"><label>Year</label><select id="rYearMonth" style="width:100px"></select></div>
           <button class="btn btn-pri" onclick="genMonthly()">Generate</button>
           <button class="btn btn-grn" onclick="exportExcel('monthlyTbl','Monthly_Report')">Export Excel</button>
           <button class="btn btn-word" onclick="printReport('Monthly PMAM Performance Report')">Print / PDF</button>
@@ -311,7 +311,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <div class="card">
         <div class="card-hd">Annual PMAM Performance</div>
         <div class="frow">
-          <div class="fld"><label>Year</label><select style="width:110px"><option>2026</option><option>2025</option></select></div>
+          <div class="fld"><label>Year</label><select id="rYearAnnual" style="width:110px"></select></div>
           <button class="btn btn-pri" onclick="genAnnual()">Generate</button>
           <button class="btn btn-grn" onclick="exportExcel('annualTbl','Annual_Report')">Export Excel</button>
           <button class="btn btn-word" onclick="printReport('Annual PMAM Performance Report')">Print / PDF</button>
@@ -359,7 +359,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           <div class="fld"><label>Month</label>
             <select style="width:130px"><option selected>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option><option>January</option><option>February</option><option>March</option></select>
           </div>
-          <div class="fld"><label>Year</label><select style="width:100px"><option>2026</option><option>2025</option></select></div>
+          <div class="fld"><label>Year</label><select id="rYearWard" style="width:100px"></select></div>
           <button class="btn btn-pri" onclick="genWard()">Generate</button>
           <button class="btn btn-grn" onclick="exportExcel('wardTbl','Ward_Report')">Export Excel</button>
           <button class="btn btn-word" onclick="printReport('Ward Wise Performance Report')">Print / PDF</button>
@@ -388,7 +388,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
               <option value="">-- Select PMAM --</option>
             </select>
           </div>
-          <div class="fld"><label>Year</label><select style="width:100px"><option>2026</option><option>2025</option></select></div>
+          <div class="fld"><label>Year</label><select id="rYearPmam" style="width:100px"></select></div>
           <button class="btn btn-pri" onclick="genPmam()">Generate</button>
           <button class="btn btn-grn" onclick="exportExcel('pmamTbl','PMAM_Report')">Export Excel</button>
           <button class="btn btn-word" onclick="printReport('PMAM Wise Performance Report')">Print / PDF</button>
@@ -413,23 +413,20 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <div class="card">
         <div class="card-hd">Filter Records</div>
         <div class="frow">
-          <div class="fld"><label>From Date</label><input type="date" style="width:145px"></div>
-          <div class="fld"><label>To Date</label><input type="date" style="width:145px"></div>
+          <div class="fld"><label>From Date</label><input type="date" id="arFrom" style="width:145px"></div>
+          <div class="fld"><label>To Date</label><input type="date" id="arTo" style="width:145px"></div>
           <div class="fld"><label>PMAM</label>
-            <select style="width:170px">
+            <select id="arPmam" style="width:170px">
               <option value="">All PMAMs</option>
             </select>
           </div>
           <div class="fld"><label>Ward</label>
-            <select style="width:170px">
+            <select id="arWard" style="width:170px">
               <option value="">All Wards</option>
-              <option>Orthopaedics</option><option>Male Surgery Ward</option>
-              <option>Female Surgery Ward</option><option>Gynae</option>
-              <option>Optha</option><option>Onco</option><option>ENT</option>
             </select>
           </div>
           <button class="btn btn-pri" onclick="genAllRecords()">Filter</button>
-          <button class="btn btn-sec">Clear</button>
+          <button class="btn btn-sec" onclick="clearAllRecordsFilter()">Clear</button>
           <button class="btn btn-grn" onclick="exportExcel('allTbl','All_Records')">Export Excel</button>
           <button class="btn btn-word" onclick="printReport('All Records Report')">Print / PDF</button>
         </div>
@@ -511,55 +508,233 @@ function goSec(id,el){
   if(el)el.classList.add('active');
   if(id==='monthly')genMonthly();
   else if(id==='leavereq')loadLeaveReq();
-  else if(id==='all')genAllRecords();
+  else if(id==='allrecords')genAllRecords();
 }
 function toggleDD(){document.getElementById('userDD').classList.toggle('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('.user-pill'))document.getElementById('userDD').classList.remove('open');});
 
 // ===== MONTHLY =====
 function genMonthly(){
-  const month=document.getElementById('rMonth').value;
-  document.getElementById('monthlyTitle').textContent=`PMAM-wise Summary — ${month} 2026`;
-  document.getElementById('monthlyMetrics').innerHTML='';
-  document.getElementById('monthlyTbody').innerHTML=`<tr><td colspan="12" class="empty-td">No data available for the selected month.</td></tr>`;
-  document.getElementById('monthlyFoot').innerHTML='';
+  const monthSel=document.getElementById('rMonth');
+  const month=monthSel?monthSel.value:MONTHS[new Date().getMonth()];
+  const yearSel=document.getElementById('rYearMonth');
+  const year=yearSel?parseInt(yearSel.value):new Date().getFullYear();
+  document.getElementById('monthlyTitle').textContent=`PMAM-wise Summary — ${month} ${year}`;
+
+  // Filter allReports by selected month and year
+  const filtered=allReports.filter(r=>{
+    if(!r.date)return false;
+    const d=new Date(r.date);
+    return MONTHS[d.getMonth()]===month && d.getFullYear()===year;
+  });
+
+  if(!filtered.length){
+    document.getElementById('monthlyMetrics').innerHTML='';
+    document.getElementById('monthlyTbody').innerHTML=`<tr><td colspan="12" class="empty-td">No data available for ${month}.</td></tr>`;
+    document.getElementById('monthlyFoot').innerHTML='';
+    return;
+  }
+
+  // Aggregate by PMAM name
+  const byPmam={};
+  filtered.forEach(r=>{
+    const nm=r.name||r.email||'Unknown';
+    if(!byPmam[nm])byPmam[nm]={name:nm,ipd:0,med:0,surg:0,reg:0,pre:0,preAmt:0,dis:0,clm:0};
+    const p=byPmam[nm];
+    p.ipd+=Number(r.ipd||0);p.med+=Number(r.med||0);p.surg+=Number(r.surg||0);
+    p.reg+=Number(r.reg||0);p.pre+=Number(r.pre||0);p.preAmt+=Number(r.preAmt||0);
+    p.dis+=Number(r.dis||0);p.clm+=Number(r.clm||0);
+  });
+
+  const rows=Object.values(byPmam).sort((a,b)=>b.reg-a.reg);
+  let totIPD=0,totReg=0,totPre=0,totDis=0,totClm=0;
+  rows.forEach(r=>{totIPD+=r.ipd;totReg+=r.reg;totPre+=r.pre;totDis+=r.dis;totClm+=r.clm;});
+
+  // Metrics
+  document.getElementById('monthlyMetrics').innerHTML=[
+    {c:'c1',n:totIPD,l:'Total IPD'},
+    {c:'c2',n:totReg,l:'Registered'},
+    {c:'c3',n:totPre,l:'Pre-Auth'},
+    {c:'c4',n:totDis,l:'Discharged'},
+    {c:'c5',n:'₹'+fmt(totClm),l:'Claim Amt'},
+    {c:'c6',n:cv(totIPD,totReg),l:'Conv%'}
+  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+
+  document.getElementById('monthlyTbody').innerHTML=rows.map((r,i)=>`
+    <tr>
+      <td>${i+1}</td><td><strong>${r.name}</strong></td>
+      <td>${r.ipd}</td><td>${r.med}</td><td>${r.surg}</td>
+      <td><strong>${r.reg}</strong></td><td>${r.pre}</td>
+      <td>${fmt(r.preAmt)}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td>
+      <td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td>
+    </tr>
+  `).join('');
+  document.getElementById('monthlyFoot').innerHTML=`<tr class="tot-row"><td colspan="2">TOTAL</td><td>${totIPD}</td><td>—</td><td>—</td><td>${totReg}</td><td>${totPre}</td><td>—</td><td>${totDis}</td><td>${fmt(totClm)}</td><td>${cv(totIPD,totReg)}</td></tr>`;
 }
 
 // ===== ANNUAL =====
 function genAnnual(){
-  document.getElementById('annualTbody').innerHTML='<tr><td colspan="10" class="empty-td">No data available.</td></tr>';
-  document.getElementById('annualFoot').innerHTML='';
-  document.getElementById('annualMetrics').innerHTML='';
-  document.getElementById('annualPmamTbody').innerHTML='<tr><td colspan="8" class="empty-td">No data available.</td></tr>';
+  const yearSel = document.getElementById('rYearAnnual');
+  const year = yearSel ? parseInt(yearSel.value) : new Date().getFullYear();
+  const filtered = allReports.filter(r => r.date && new Date(r.date).getFullYear() === year);
+  
+  if(!filtered.length){
+    document.getElementById('annualTbody').innerHTML='<tr><td colspan="10" class="empty-td">No data available for ' + year + '</td></tr>';
+    document.getElementById('annualFoot').innerHTML='';
+    document.getElementById('annualMetrics').innerHTML='';
+    return;
+  }
+
+  const byMonth = {};
+  filtered.forEach(r => {
+    const m = MONTHS[new Date(r.date).getMonth()];
+    if(!byMonth[m]) byMonth[m] = {name:m, ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0};
+    const row = byMonth[m];
+    row.ipd+=Number(r.ipd||0); row.med+=Number(r.med||0); row.surg+=Number(r.surg||0);
+    row.reg+=Number(r.reg||0); row.pre+=Number(r.pre||0); row.preAmt+=Number(r.preAmt||0);
+    row.dis+=Number(r.dis||0); row.clm+=Number(r.clm||0);
+  });
+
+  const monthsOrdered = MONTHS.filter(m => byMonth[m]);
+  let tIPD=0, tReg=0, tPre=0, tDis=0, tClm=0;
+
+  document.getElementById('annualTbody').innerHTML = monthsOrdered.map(m => {
+    const r = byMonth[m];
+    tIPD+=r.ipd; tReg+=r.reg; tPre+=r.pre; tDis+=r.dis; tClm+=r.clm;
+    return `<tr><td>${m}</td><td>${r.ipd}</td><td>${r.med}</td><td>${r.surg}</td><td><strong>${r.reg}</strong></td><td>${r.pre}</td><td>${fmt(r.preAmt)}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td></tr>`;
+  }).join('');
+
+  document.getElementById('annualFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>—</td><td>—</td><td>${tReg}</td><td>${tPre}</td><td>—</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
+  
+  // Ranking by PMAM
+  const pmamTotals = {};
+  filtered.forEach(r => {
+    const nm = r.name || 'Unknown';
+    if(!pmamTotals[nm]) pmamTotals[nm] = {name:nm, ipd:0, reg:0, pre:0, dis:0, clm:0};
+    pmamTotals[nm].ipd+=Number(r.ipd||0); pmamTotals[nm].reg+=Number(r.reg||0);
+    pmamTotals[nm].pre+=Number(r.pre||0); pmamTotals[nm].dis+=Number(r.dis||0); pmamTotals[nm].clm+=Number(r.clm||0);
+  });
+  const ranked = Object.values(pmamTotals).sort((a,b) => cvN(b.ipd,b.reg) - cvN(a.ipd,a.reg));
+  document.getElementById('annualPmamTbody').innerHTML = ranked.map((r,i) => `
+    <tr><td>${i+1}</td><td><strong>${r.name}</strong></td><td>${r.ipd}</td><td>${r.reg}</td><td>${r.pre}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td>${cv(r.ipd,r.reg)}</td></tr>
+  `).join('');
+
+  document.getElementById('annualMetrics').innerHTML = [
+    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
+  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 // ===== WARD =====
 function genWard(){
-  document.getElementById('wardMetrics').innerHTML='';
-  document.getElementById('wardTbody').innerHTML='<tr><td colspan="9" class="empty-td">No data available.</td></tr>';
+  const yearSel = document.getElementById('rYearWard');
+  const year = yearSel ? parseInt(yearSel.value) : new Date().getFullYear();
+  const ward = document.getElementById('wrWard').value;
+  const filtered = allReports.filter(r => {
+    if(!r.date || new Date(r.date).getFullYear() !== year) return false;
+    if(!r.wards) return false;
+    return ward === "" || r.wards.includes(ward);
+  });
+
+  if(!filtered.length){
+    document.getElementById('wardMetrics').innerHTML='';
+    document.getElementById('wardTbody').innerHTML='<tr><td colspan="9" class="empty-td">No data available.</td></tr>';
+    return;
+  }
+
+  const wardData = {};
+  filtered.forEach(r => {
+    (r.wards||[]).forEach(w => {
+      if(ward !== "" && w !== ward) return;
+      if(!wardData[w]) wardData[w] = {name:w, pmams:new Set(), ipd:0, reg:0, pre:0, dis:0, clm:0};
+      const d = wardData[w];
+      d.pmams.add(r.name);
+      d.ipd+=Number(r.ipd||0); d.reg+=Number(r.reg||0); d.pre+=Number(r.pre||0); d.dis+=Number(r.dis||0); d.clm+=Number(r.clm||0);
+    });
+  });
+
+  const rows = Object.values(wardData).sort((a,b) => cvN(b.ipd,b.reg) - cvN(a.ipd,a.reg));
+  document.getElementById('wardTbody').innerHTML = rows.map((r,i) => `
+    <tr><td>${i+1}</td><td><strong>${r.name}</strong></td><td>${Array.from(r.pmams).join(', ')}</td><td>${r.ipd}</td><td>${r.reg}</td><td>${r.pre}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td></tr>
+  `).join('');
+
+  let tIPD=0, tReg=0, tPre=0, tDis=0, tClm=0;
+  rows.forEach(r => { tIPD+=r.ipd; tReg+=r.reg; tPre+=r.pre; tDis+=r.dis; tClm+=r.clm; });
+  document.getElementById('wardMetrics').innerHTML = [
+    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
+  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 // ===== PMAM WISE =====
 function genPmam(){
-  const pmam=document.getElementById('prPmam').value;
-  if(!pmam){alert('Please select a PMAM');return;}
-  document.getElementById('pmamTitle').textContent=pmam+' — Monthly Trend 2026';
-  document.getElementById('pmamTbody').innerHTML='<tr><td colspan="10" class="empty-td">No data available.</td></tr>';
-  document.getElementById('pmamFoot').innerHTML='';
-  document.getElementById('pmamMetrics').innerHTML='';
+  const pmam = document.getElementById('prPmam').value;
+  if(!pmam){ alert('Please select a PMAM'); return; }
+  const yearSel = document.getElementById('rYearPmam');
+  const year = yearSel ? parseInt(yearSel.value) : new Date().getFullYear();
+  document.getElementById('pmamTitle').textContent = pmam + ' — Monthly Trend ' + year;
+  
+  const filtered = allReports.filter(r => (r.name === pmam || r.email === pmam) && (r.date && new Date(r.date).getFullYear() === year));
+  if(!filtered.length){
+    document.getElementById('pmamTbody').innerHTML='<tr><td colspan="10" class="empty-td">No trend data available for ' + pmam + '</td></tr>';
+    document.getElementById('pmamFoot').innerHTML='';
+    document.getElementById('pmamMetrics').innerHTML='';
+    return;
+  }
+
+  const byMonth = {};
+  let tIPD=0, tReg=0, tPre=0, tDis=0, tClm=0;
+  filtered.forEach(r => {
+    const m = MONTHS[new Date(r.date).getMonth()];
+    if(!byMonth[m]) byMonth[m] = {name:m, ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0};
+    const row = byMonth[m];
+    row.ipd+=Number(r.ipd||0); row.med+=Number(r.med||0); row.surg+=Number(r.surg||0);
+    row.reg+=Number(r.reg||0); row.pre+=Number(r.pre||0); row.preAmt+=Number(r.preAmt||0);
+    row.dis+=Number(r.dis||0); row.clm+=Number(r.clm||0);
+  });
+  
+  const monthsOrdered = MONTHS.filter(m => byMonth[m]);
+  document.getElementById('pmamTbody').innerHTML = monthsOrdered.map(m => {
+    const r = byMonth[m];
+    tIPD+=r.ipd; tReg+=r.reg; tPre+=r.pre; tDis+=r.dis; tClm+=r.clm;
+    return `<tr><td>${m}</td><td>${r.ipd}</td><td>${r.med}</td><td>${r.surg}</td><td><strong>${r.reg}</strong></td><td>${r.pre}</td><td>${fmt(r.preAmt)}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td></tr>`;
+  }).join('');
+  
+  document.getElementById('pmamFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>—</td><td>—</td><td>${tReg}</td><td>${tPre}</td><td>—</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
+  
+  document.getElementById('pmamMetrics').innerHTML = [
+    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c3',n:tReg,l:'Registered'}, {c:'c2',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
+  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 // ===== ALL RECORDS =====
 function genAllRecords(){
-  document.getElementById('arCount').textContent = allReports.length + ' entries';
-  if(!allReports.length) {
-    document.getElementById('allTbody').innerHTML='<tr><td colspan="13" class="empty-td">No records found.</td></tr>';
+  const from = document.getElementById('arFrom').value;
+  const to = document.getElementById('arTo').value;
+  const pmam = document.getElementById('arPmam').value;
+  const ward = document.getElementById('arWard').value;
+
+  const filtered = allReports.filter(r => {
+    if(from && r.date < from) return false;
+    if(to && r.date > to) return false;
+    if(pmam && (r.name !== pmam)) return false;
+    if(ward && (!r.wards || !r.wards.includes(ward))) return false;
+    return true;
+  });
+
+  document.getElementById('arCount').textContent = filtered.length + ' entries';
+  if(!filtered.length) {
+    document.getElementById('allTbody').innerHTML='<tr><td colspan="13" class="empty-td">No records found matching criteria.</td></tr>';
+    document.getElementById('allFoot').innerHTML='';
+    document.getElementById('arMetrics').innerHTML='';
     return;
   }
-  document.getElementById('allTbody').innerHTML = allReports.map((r, i) => `
+
+  let tIPD=0, tReg=0, tPre=0, tDis=0, tClm=0;
+  document.getElementById('allTbody').innerHTML = filtered.map((r, i) => {
+    tIPD+=Number(r.ipd||0); tReg+=Number(r.reg||0); tPre+=Number(r.pre||0); tDis+=Number(r.dis||0); tClm+=Number(r.clm||0);
+    return `
     <tr>
       <td>${r.date||''}</td>
-      <td><span class="user-pill" style="font-weight:700;color:#0F2B8C">${r.name||''}</span></td>
+      <td><strong>${r.name||''}</strong></td>
       <td>${(r.wards||[]).join(', ')}</td>
       <td>${r.ipd||0}</td>
       <td>${r.med||0}</td>
@@ -570,9 +745,63 @@ function genAllRecords(){
       <td>${r.dis||0}</td>
       <td>${fmt(r.clm)}</td>
       <td>${r.conv||'—'}</td>
-      <td><button class="btn btn-word" style="font-size:10px;padding:3px 8px">Print</button></td>
+      <td><button class="btn btn-word" style="font-size:10px;padding:3px 8px" onclick="window.print()">Print</button></td>
     </tr>
-  `).join('');
+  `}).join('');
+
+  document.getElementById('allFoot').innerHTML = `<tr class="tot-row"><td colspan="3">TOTAL</td><td>${tIPD}</td><td>—</td><td>—</td><td>${tReg}</td><td>${tPre}</td><td>—</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td><td></td></tr>`;
+  
+  document.getElementById('arMetrics').innerHTML = [
+    {c:'c1',n:tIPD,l:'Filtered IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Overall Conv%'}
+  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+}
+
+function clearAllRecordsFilter() {
+  ['arFrom','arTo','arPmam','arWard'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  genAllRecords();
+}
+
+function populateFilters() {
+  const pmams = new Set();
+  const wards = new Set();
+  const years = new Set();
+  allReports.forEach(r => {
+    if(r.name) pmams.add(r.name);
+    if(r.wards && Array.isArray(r.wards)) r.wards.forEach(w => wards.add(w));
+    if(r.date) years.add(new Date(r.date).getFullYear());
+  });
+
+  const pmamArr = Array.from(pmams).sort();
+  const wardArr = Array.from(wards).sort();
+  const yearArr = Array.from(years).sort((a,b)=>b-a);
+  if(!yearArr.length) yearArr.push(new Date().getFullYear());
+
+  ['rYearMonth', 'rYearAnnual', 'rYearWard', 'rYearPmam'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      const cur = el.value;
+      el.innerHTML = yearArr.map(y => `<option value="${y}" ${y==cur?'selected':''}>${y}</option>`).join('');
+    }
+  });
+
+  ['prPmam', 'arPmam'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      const cur = el.value;
+      el.innerHTML = `<option value="">-- All / Select --</option>` + pmamArr.map(p => `<option value="${p}" ${p===cur?'selected':''}>${p}</option>`).join('');
+    }
+  });
+
+  ['wrWard', 'arWard'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      const cur = el.value;
+      el.innerHTML = `<option value="">All Wards</option>` + wardArr.map(w => `<option value="${w}" ${w===cur?'selected':''}>${w}</option>`).join('');
+    }
+  });
 }
 
 // ===== LEAVE =====
@@ -679,12 +908,18 @@ function fetchFirebaseData() {
   db.collection('daily_reports').orderBy('timestamp', 'desc').onSnapshot(snap => {
     allReports = [];
     snap.forEach(doc => allReports.push({ id: doc.id, ...doc.data() }));
-    if(document.getElementById('sec-all').classList.contains('active')) genAllRecords();
+    populateFilters();
+    // Refresh whichever section is currently active
+    if(document.getElementById('sec-allrecords') && document.getElementById('sec-allrecords').classList.contains('active')) genAllRecords();
+    if(document.getElementById('sec-monthly') && document.getElementById('sec-monthly').classList.contains('active')) genMonthly();
+    if(document.getElementById('sec-annual') && document.getElementById('sec-annual').classList.contains('active')) genAnnual();
+    if(document.getElementById('sec-ward') && document.getElementById('sec-ward').classList.contains('active')) genWard();
+    if(document.getElementById('sec-pmamwise') && document.getElementById('sec-pmamwise').classList.contains('active')) genPmam();
   });
   db.collection('leave_requests').orderBy('timestamp', 'desc').onSnapshot(snap => {
     leaveRequests = [];
     snap.forEach(doc => leaveRequests.push({ id: doc.id, ...doc.data() }));
-    if(document.getElementById('sec-leavereq').classList.contains('active')) loadLeaveReq();
+    if(document.getElementById('sec-leavereq') && document.getElementById('sec-leavereq').classList.contains('active')) loadLeaveReq();
   });
 }
 

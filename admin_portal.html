@@ -371,10 +371,18 @@ tr:hover td{background:#EEF3FF}
     <div class="sec active" id="sec-dashboard">
       <div class="page-hd">Admin Dashboard</div>
 
+      <!-- DASHBOARD STATS -->
+      <div class="metrics-grid">
+        <div class="mcard c1"><div class="mcard-num" id="stat-totIPD">0</div><div class="mcard-label">Total IPD (All Time)</div></div>
+        <div class="mcard c2"><div class="mcard-num" id="stat-totReports">0</div><div class="mcard-label">Daily Reports</div></div>
+        <div class="mcard c3"><div class="mcard-num" id="stat-pendingLeaves">0</div><div class="mcard-label">Pending Leaves</div></div>
+        <div class="mcard c4"><div class="mcard-num" id="stat-totUsers">0</div><div class="mcard-label">Total Users</div></div>
+      </div>
+
       <!-- RECENT ACTIVITY -->
       <div class="card">
-        <div class="card-hd">Recent Activity</div>
-        <div id="activityFeed"></div>
+        <div class="card-hd">Recent Activity (Daily Reports)</div>
+        <div id="activityFeed"><div style="color:#9ca3af;font-style:italic;padding:10px">Loading activity...</div></div>
       </div>
     </div>
 
@@ -795,9 +803,52 @@ function confirmLogout(){
 
 // ===== DASHBOARD =====
 function loadDashboard(){
-  const acts=[];
-  document.getElementById('activityFeed').innerHTML=acts.map(a=>`
-    <div class="act-item">
+  // Reports Listener
+  db.collection('daily_reports').orderBy('timestamp', 'desc').limit(10).onSnapshot(snap => {
+    let totIPD = 0;
+    let reports = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      totIPD += Number(d.ipd || 0);
+      reports.push(d);
+    });
+    
+    const feed = document.getElementById('activityFeed');
+    if (feed) {
+      if (!reports.length) feed.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:10px">No recent reports found</div>';
+      else feed.innerHTML = reports.map(r => `
+        <div class="act-item">
+          <div class="act-dot" style="background:#16a34a"></div>
+          <div class="act-text"><strong>${r.name || 'PMAM'}</strong> filled report for <strong>${r.date}</strong> (IPD: ${r.ipd})</div>
+          <div class="act-time">${new Date(r.timestamp).toLocaleTimeString()}</div>
+        </div>
+      `).join('');
+    }
+    
+    // Summary count (Note: for true total reports count we might need a separate counter or fetch all, 
+    // but for the dashboard we can just use the snap size if we didn't limit, or fetch total count)
+    const statIPD = document.getElementById('stat-totIPD');
+    if (statIPD) statIPD.textContent = totIPD;
+  });
+
+  // Leave Requests Listener for Dashboard
+  db.collection('leave_requests').where('status', '==', 'Pending').onSnapshot(snap => {
+    const el = document.getElementById('stat-pendingLeaves');
+    if (el) el.textContent = snap.size;
+  });
+  
+  // Total Reports Count (Separate fetch for total)
+  db.collection('daily_reports').get().then(snap => {
+    const el = document.getElementById('stat-totReports');
+    if (el) el.textContent = snap.size;
+  });
+
+  // Total Users Count
+  db.collection('users').get().then(snap => {
+    const el = document.getElementById('stat-totUsers');
+    if (el) el.textContent = snap.size;
+  });
+}
       <div class="act-dot" style="background:${a.color}"></div>
       <div class="act-text">${a.text}</div>
       <div class="act-time">${a.time}</div>

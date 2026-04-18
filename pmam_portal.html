@@ -826,7 +826,12 @@ function goSec(id, el) {
 function toggleDD() {
   document.getElementById('userDD').classList.toggle('open');
 }
+function closeDD() {
+  var dd = document.getElementById('userDD');
+  if (dd) dd.classList.remove('open');
+}
 function doLogout() {
+  closeDD();
   if (confirm('Are you sure you want to logout?')) {
     sessionStorage.removeItem('pmjay_user');
     window.location.href = 'index.html';
@@ -970,13 +975,7 @@ function updateDashboard() {
   }
 }
 
-function doLogout() {
-  closeDD();
-  if (confirm('Are you sure you want to logout?')) {
-    sessionStorage.removeItem('pmjay_user');
-    window.location.href = 'index.html';
-  }
-}
+// doLogout is defined above near toggleDD — no duplicate needed
 
 // ══════════════════════════════════════
 // MY RECORDS
@@ -1034,6 +1033,7 @@ function deleteRecord(i) {
 var lvSelWards = [];
 
 function initWardWidget() { /* no-op — ward uses addWard pattern */ }
+
 
 function lvAddWard() {
   var s = document.getElementById('lvWardSel');
@@ -1113,6 +1113,30 @@ function fmtDate(d) {
 // LEAVE — SUBMIT & CLEAR
 // ══════════════════════════════════════
 var leaveRequests = [];
+
+function fetchPmamLeaves() {
+  var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+  if (!u.email) return;
+  db.collection('leave_requests')
+    .where('email', '==', u.email)
+    .orderBy('timestamp', 'desc')
+    .onSnapshot(function(snap) {
+      leaveRequests = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        leaveRequests.push({
+          type: d.ltype, name: d.name, ward: d.ward, from: d.fromDt, 
+          to: d.toDt, days: d.days, retDate: d.ret, duty: d.duty, 
+          reason: d.reason, status: d.status
+        });
+      });
+      renderLeaveHistory();
+      if (leaveRequests.length > 0) {
+        document.getElementById('leaveHistCard').style.display = 'block';
+      }
+    });
+}
+// Call this when page loads or navigation reaches Leave section
 function submitLeave() {
   var msg  = document.getElementById('leaveMsg');
   var name = document.getElementById('lvName').value;
@@ -1326,6 +1350,7 @@ function updatePhoto(input) {
 // INIT SESSION USER
 // ══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', function() {
+  fetchPmamLeaves();
   var ustr = sessionStorage.getItem('pmjay_user');
   if (ustr) {
     try {
