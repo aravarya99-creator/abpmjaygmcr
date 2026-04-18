@@ -921,7 +921,7 @@ function saveEntry() {
   var dis    = parseInt(document.getElementById('eDis').value)    || 0;
   var clm    = parseInt(document.getElementById('eClm').value)    || 0;
   var conv   = ipd > 0 ? ((reg / ipd) * 100).toFixed(1) + '%' : '—';
-  var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+  var u = getPmjayUser();
   var entry  = {
     date:date, wards:selWards.slice(), ipd:ipd, med:med, surg:surg,
     reg:reg, pre:pre, preAmt:preAmt, dis:dis, clm:clm, conv:conv,
@@ -1137,24 +1137,41 @@ function fmtDate(d) {
 var leaveRequests = [];
 
 function fetchPmamLeaves() {
-  var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+  var u = getPmjayUser();
   if (!u.email) return;
+  // NOTE: We deliberately DO NOT use .orderBy('timestamp','desc') here,
+  // because combining .where('email','==',...) with .orderBy() requires
+  // a Firestore composite index. Without that index, the query fails
+  // silently in the background and the leave history never appears.
+  // Instead we sort client-side after receiving the snapshot.
   db.collection('leave_requests')
     .where('email', '==', u.email)
-    .orderBy('timestamp', 'desc')
     .onSnapshot(function(snap) {
       leaveRequests = [];
       snap.forEach(function(doc) {
         var d = doc.data();
         leaveRequests.push({
-          type: d.ltype, name: d.name, ward: d.ward, from: d.fromDt, 
-          to: d.toDt, days: d.days, retDate: d.ret, duty: d.duty, 
-          reason: d.reason, status: d.status, remark: d.remark || ''
+          id: doc.id,
+          type: d.ltype, name: d.name, ward: d.ward, from: d.fromDt,
+          to: d.toDt, days: d.days, retDate: d.ret, duty: d.duty,
+          reason: d.reason, status: d.status, remark: d.remark || '',
+          timestamp: d.timestamp || 0
         });
       });
+      // Sort newest first, client-side
+      leaveRequests.sort(function(a,b){ return (b.timestamp||0) - (a.timestamp||0); });
       renderLeaveHistory();
       if (leaveRequests.length > 0) {
-        document.getElementById('leaveHistCard').style.display = 'block';
+        var card = document.getElementById('leaveHistCard');
+        if (card) card.style.display = 'block';
+      }
+    }, function(err) {
+      // Surface any Firestore error visibly instead of failing silently.
+      console.error('Leave history load error:', err);
+      var msg = document.getElementById('leaveMsg');
+      if (msg) {
+        msg.style.color = '#dc2626';
+        msg.textContent = 'Could not load leave history: ' + err.message;
       }
     });
 }
@@ -1169,7 +1186,7 @@ function submitLeave() {
   var rEl  = document.querySelector('input[name=lvReason]:checked');
   var tEl  = document.querySelector('input[name=lvType]:checked');
   var reason = rEl ? (rEl.value==='other' ? document.getElementById('lvOther').value : rEl.value) : '—';
-  var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+  var u = getPmjayUser();
   var req = {
     name:  name,
     email: u.email || 'unknown',
@@ -1358,40 +1375,105 @@ function printLeaveForm() {
 // PROFILE MODAL
 // ══════════════════════════════════════
 function saveProfile() {
-  var name = document.getElementById('mName').value.trim();
-  if (name) {
-    document.getElementById('userName').textContent = name;
-    var initials = name.split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase();
-    document.getElementById('userInitials').textContent = initials;
+  var mNameEl = document.getElementById('mName');
+  if (!mNameEl) { closeModal(); return; }
+  var name = (mNameEl.value || '').trim();
+  if (!name) {
+    alert('Please enter your name.');
+    return;
   }
-  closeModal();
-  var t = document.getElementById('toast');
-  if (t) { t.textContent='✅ Profile updated!'; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2500); }
+  var initials = name.split(/\s+/).map(function(n){ return n[0] || ''; }).join('').substring(0,2).toUpperCase();
+  var u = getPmjayUser();
+  if (!u.email) { closeModal(); return; }
+
+  // 1. Update visible header + dashboard immediately (null-safe).
+  var setText = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+  setText('hName', name.toUpperCase());
+  setText('hInitials', initials);
+  setText('dashName', name);
+  setText('mInitials', initials);
+  setText('userName', name.toUpperCase());
+  setText('userInitials', initials);
+
+  // 2. Update sessionStorage so the change survives navigation in this tab.
+  u.name = name;
+  try { sessionStorage.setItem('pmjay_user', JSON.stringify(u)); } catch(e) {}
+
+  // 3. Persist to Firestore so the change survives across sessions/devices.
+  db.collection('users').doc(u.email).set(
+    { name: name, updatedAt: new Date().toISOString() },
+    { merge: true }
+  ).then(function() {
+    closeModal();
+    var t = document.getElementById('toast');
+    if (t) {
+      t.textContent = '✅ Profile updated!';
+      t.classList.add('show');
+      setTimeout(function(){ t.classList.remove('show'); }, 2500);
+    } else {
+      // No toast element — use a lightweight fallback
+      var msgId = 'entryMsg';
+      var msgEl = document.getElementById(msgId);
+      if (msgEl) {
+        msgEl.style.color = '#166534';
+        msgEl.textContent = '✅ Profile updated!';
+        setTimeout(function(){ msgEl.textContent = ''; }, 3000);
+      }
+    }
+  }).catch(function(err) {
+    alert('Error saving profile: ' + err.message);
+  });
 }
 function updatePhoto(input) {
   if (input.files && input.files[0]) {
     var reader = new FileReader();
     reader.onload = function(e) {
       var photo = document.getElementById('mPhoto');
-      if (photo) { photo.src=e.target.result; photo.style.display='block'; }
-      document.getElementById('mInitials').style.display='none';
+      if (photo) { photo.src = e.target.result; photo.style.display = 'block'; }
+      var mi = document.getElementById('mInitials');
+      if (mi) mi.style.display = 'none';
     };
     reader.readAsDataURL(input.files[0]);
   }
 }
 // ══════════════════════════════════════
-// SESSION GUARD — redirect to login if not authenticated
+// PRODUCTION SESSION GUARD
+// If the user is not logged in, redirect immediately to the login
+// page. Also detect and fix incorrect role routing so that an admin
+// or I/C who somehow lands here is redirected to the right portal.
 // ══════════════════════════════════════
+function getPmjayUser() {
+  try {
+    var raw = sessionStorage.getItem('pmjay_user');
+    if (raw) {
+      var u = JSON.parse(raw);
+      if (u && u.email) return u;
+    }
+  } catch(e) {}
+  return {};
+}
+
 (function sessionGuard() {
-  var ustr = sessionStorage.getItem('pmjay_user');
-  if (!ustr) {
-    window.location.href = 'index.html';
+  var ADMIN_EMAIL = 'aravarya99@gmail.com';
+  var u = getPmjayUser();
+  if (!u || !u.email) {
+    window.location.replace('index.html');
     return;
   }
-  try {
-    var u = JSON.parse(ustr);
-    if (!u.email) window.location.href = 'index.html';
-  } catch(e) { window.location.href = 'index.html'; }
+  // Route guard: only PMAM should be here. Admin → admin_portal,
+  // I/C → ic_portal, DEO → patient_services_portal. Otherwise stay.
+  if (u.email === ADMIN_EMAIL) {
+    window.location.replace('admin_portal.html');
+    return;
+  }
+  if (u.role === 'I/C AB-PMJAY') {
+    window.location.replace('ic_portal.html');
+    return;
+  }
+  if (u.role === 'DEO') {
+    window.location.replace('patient_services_portal.html');
+    return;
+  }
 })();
 
 // ══════════════════════════════════════
@@ -1400,7 +1482,7 @@ function updatePhoto(input) {
 // across refreshes and auto-update when entries are saved.
 // ══════════════════════════════════════
 function fetchPmamReports() {
-  var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+  var u = getPmjayUser();
   if (!u.email) return;
   db.collection('daily_reports')
     .where('email', '==', u.email)
@@ -1486,22 +1568,6 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
-<!-- PROFILE MODAL -->
-<div class="modal-bg" id="profileModal">
-  <div class="modal">
-    <div class="modal-hd">Update Profile</div>
-    <div style="padding:16px">
-      <div style="margin-bottom:12px">
-        <label style="display:block;margin-bottom:6px;font-size:12px;font-weight:700">Name</label>
-        <input type="text" id="mName" style="width:100%;padding:8px;border:1px solid #c7d2e8;border-radius:6px">
-      </div>
-      <div style="text-align:right">
-        <button class="btn btn-sec" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-pri" onclick="saveProfile()">Save Changes</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>

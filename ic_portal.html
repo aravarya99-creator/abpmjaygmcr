@@ -910,27 +910,17 @@ let allReports = [];
 let leaveRequests = [];
 
 window.addEventListener('load',()=>{
-  // Session soft-check — if no session, enter demo mode with a banner
-  // so the page still renders. Real users always arrive here via
-  // index.html → login, which sets the session correctly.
-  var needsDemo = false;
-  try {
-    var _u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
-    if (!_u.email) needsDemo = true;
-  } catch(e) { needsDemo = true; }
-  if (needsDemo) {
-    sessionStorage.setItem('pmjay_user', JSON.stringify({
-      email: 'demo.ic@gmcrajouri.local',
-      name: 'Demo I/C',
-      role: 'I/C AB-PMJAY',
-      desig: 'I/C AB-PMJAY',
-      ward: ''
-    }));
-    var b = document.createElement('div');
-    b.style.cssText = 'position:sticky;top:0;z-index:9999;background:#FEF3C7;color:#92400e;padding:10px 16px;text-align:center;font-size:12px;font-weight:700;border-bottom:2px solid #F59E0B;font-family:Inter,Arial,sans-serif';
-    b.innerHTML = '⚠ DEMO MODE — You are not logged in. '
-      + '<a href="index.html" style="color:#7C2D12;text-decoration:underline;margin-left:8px">Login for real access →</a>';
-    document.body.insertBefore(b, document.body.firstChild);
+  // Production session guard — only authenticated I/C AB-PMJAY or Admin
+  // may view this portal. Unauthenticated users are sent to login.
+  var ADMIN_EMAIL = 'aravarya99@gmail.com';
+  var u;
+  try { u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); } catch(e) { u = {}; }
+  if (!u || !u.email) { window.location.replace('index.html'); return; }
+  if (u.email !== ADMIN_EMAIL && u.role !== 'I/C AB-PMJAY') {
+    // Wrong role for this portal → send to the correct one.
+    if (u.role === 'DEO') window.location.replace('patient_services_portal.html');
+    else                  window.location.replace('pmam_portal.html');
+    return;
   }
 
   genMonthly();
@@ -950,6 +940,8 @@ function fetchFirebaseData() {
     if(document.getElementById('sec-annual') && document.getElementById('sec-annual').classList.contains('active')) genAnnual();
     if(document.getElementById('sec-ward') && document.getElementById('sec-ward').classList.contains('active')) genWard();
     if(document.getElementById('sec-pmamwise') && document.getElementById('sec-pmamwise').classList.contains('active')) genPmam();
+  }, err => {
+    console.error('daily_reports listener error:', err);
   });
   db.collection('leave_requests').orderBy('timestamp', 'desc').onSnapshot(snap => {
     leaveRequests = [];
@@ -959,6 +951,8 @@ function fetchFirebaseData() {
     updateLeaveBadges();
     // If viewing the Leave Requests section, also re-render the lists.
     if(document.getElementById('sec-leavereq') && document.getElementById('sec-leavereq').classList.contains('active')) loadLeaveReq();
+  }, err => {
+    console.error('leave_requests listener error:', err);
   });
 }
 
@@ -1065,14 +1059,37 @@ function closeModal() {
   document.querySelectorAll('.modal-bg').forEach(m => m.classList.remove('open'));
 }
 function saveProfile() {
-  var name = document.getElementById('mName').value.trim();
-  if (name) {
-    document.getElementById('userName').textContent = name;
-    var initials = name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-    document.getElementById('ini').textContent = initials;
-  }
-  closeModal();
-  alert('Profile updated! (Local preview only, implement Firebase save if needed)');
+  var mNameEl = document.getElementById('mName');
+  if (!mNameEl) { closeModal(); return; }
+  var name = (mNameEl.value || '').trim();
+  if (!name) { alert('Please enter your name.'); return; }
+  var initials = name.split(/\s+/).map(function(n){ return n[0] || ''; }).join('').substring(0,2).toUpperCase();
+
+  var u;
+  try { u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); } catch(e) { u = {}; }
+  if (!u.email) { closeModal(); return; }
+
+  // Update visible DOM elements null-safely (IDs vary across layout)
+  var setText = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+  ['hName','userName','userNameDisp','uname'].forEach(function(id){ setText(id, name); });
+  ['hInitials','userInitials','mInitials','ini'].forEach(function(id){ setText(id, initials); });
+  document.querySelectorAll('.uname').forEach(function(el){ el.textContent = name; });
+  document.querySelectorAll('.ini').forEach(function(el){ el.textContent = initials; });
+
+  // Persist in session so navigation within the tab keeps the change
+  u.name = name;
+  try { sessionStorage.setItem('pmjay_user', JSON.stringify(u)); } catch(e) {}
+
+  // Persist to Firestore so it survives across sessions/devices
+  db.collection('users').doc(u.email).set(
+    { name: name, updatedAt: new Date().toISOString() },
+    { merge: true }
+  ).then(function() {
+    closeModal();
+    alert('✅ Profile updated successfully.');
+  }).catch(function(err) {
+    alert('Error saving profile: ' + err.message);
+  });
 }
 
 document.addEventListener('click', function(e) {

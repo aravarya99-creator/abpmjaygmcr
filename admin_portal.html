@@ -1408,6 +1408,16 @@ goSec = function(id, el) {
 
 // ── Init ──
 window.addEventListener('DOMContentLoaded', function() {
+  // Production session guard — only the admin email may access this portal.
+  var u;
+  try { u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); } catch(e) { u = {}; }
+  if (!u || !u.email) { window.location.replace('index.html'); return; }
+  if (u.email !== ADMIN_EMAIL) {
+    if (u.role === 'I/C AB-PMJAY') window.location.replace('ic_portal.html');
+    else if (u.role === 'DEO')     window.location.replace('patient_services_portal.html');
+    else                           window.location.replace('pmam_portal.html');
+    return;
+  }
   loadSessionUser();
   setTimeout(loadAllUsers, 500);
 });
