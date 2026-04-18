@@ -4,6 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PMAM Portal — GMC Rajouri</title>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FIREBASE v10 — Required for saving daily reports and leave
+     requests to Firestore so they reflect on the I/C portal in
+     real-time via onSnapshot listeners. Without these scripts,
+     db.collection(...) calls throw ReferenceError and nothing
+     is ever persisted.
+     ═══════════════════════════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+    authDomain: "gmcrajouri-pmam.firebaseapp.com",
+    projectId: "gmcrajouri-pmam",
+    storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+    messagingSenderId: "115490476421",
+    appId: "1:115490476421:web:871a91987e1a92a45f34ec"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  var db   = firebase.firestore();
+  var auth = firebase.auth();
+</script>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -904,40 +929,24 @@ function saveEntry() {
     name: u.name || 'PMAM User',
     timestamp: Date.now()
   };
-  allEntries.push(entry);
-
-  // Add row to fill report table
-  var tb = document.getElementById('entryTbody');
-  if (tb.querySelector('.empty-td')) tb.innerHTML = '';
-  var tr = document.createElement('tr');
-  tr.innerHTML = '<td>' + date + '</td>'
-    + '<td>' + selWards.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('') + '</td>'
-    + '<td>' + ipd + '</td><td>' + med + '</td><td>' + surg + '</td>'
-    + '<td><strong>' + reg + '</strong></td><td>' + pre + '</td>'
-    + '<td>' + preAmt.toLocaleString('en-IN') + '</td>'
-    + '<td>' + dis + '</td><td>' + clm.toLocaleString('en-IN') + '</td>'
-    + '<td style="font-weight:700;color:' + (parseFloat(conv)>=60?'#166534':'#92400e') + '">' + conv + '</td>';
-  tb.appendChild(tr);
-
-  // Hide the 'not filled yet' alert and update the badge
-  var dashAlertEl = document.getElementById('dashAlert');
-  if (dashAlertEl) dashAlertEl.style.display = 'none';
-  var badge = document.getElementById('fillBadge');
-  if (badge) { badge.className = 'badge-success'; badge.textContent = '✓ Filled Today'; }
 
   msg.style.color = '#166534';
   msg.textContent = 'Saving to database…';
 
-  updateDashboard();
-  selWards = [];
-  renderSelWards();
-  ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].forEach(function(id){ document.getElementById(id).value=''; });
-
-  // Save to Firebase
+  // Save to Firebase — the onSnapshot listener (fetchPmamReports) will
+  // automatically pick up this new entry and re-render the dashboard,
+  // My Records table, badge, and alert. DO NOT push locally or append
+  // a row here, or the entry will appear twice on the next snapshot.
   db.collection('daily_reports').add(entry)
     .then(function() {
       msg.style.color='#166534';
       msg.textContent='✅ Entry saved to database for ' + date + '!';
+      // Clear the form
+      selWards = [];
+      renderSelWards();
+      ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].forEach(function(id){
+        var el = document.getElementById(id); if (el) el.value='';
+      });
       setTimeout(function(){ msg.textContent=''; }, 3000);
     })
     .catch(function(e) {
@@ -956,22 +965,29 @@ function updateDashboard() {
   setEl('dIPD',totIPD); setEl('dReg',totReg); setEl('dPre',totPre); setEl('dDis',totDis);
   setEl('dClm', totClm ? '₹'+(totClm).toLocaleString('en-IN') : '0');
   setEl('dConv', totIPD>0 ? ((totReg/totIPD)*100).toFixed(1)+'%' : '0%');
-  
+
+  // Build row HTML once, use for both dashboard + fill-report recent list
+  var rowsHtml = allEntries.map(function(e) {
+    return '<tr><td>' + e.date + '</td>'
+      + '<td>' + (e.wards||[]).map(function(w){return '<span class="wtag">'+w+'</span>';}).join('') + '</td>'
+      + '<td>' + e.ipd + '</td><td>' + e.med + '</td><td>' + e.surg + '</td>'
+      + '<td><strong>' + e.reg + '</strong></td><td>' + e.pre + '</td>'
+      + '<td>' + e.preAmt.toLocaleString('en-IN') + '</td>'
+      + '<td>' + e.dis + '</td><td>' + e.clm.toLocaleString('en-IN') + '</td>'
+      + '<td style="font-weight:700;color:' + (parseFloat(e.conv)>=60?'#166534':'#92400e') + '">' + e.conv + '</td></tr>';
+  }).join('');
+
   var dtb = document.getElementById('dashTbody');
   if (dtb) {
-    if (allEntries.length === 0) {
-      dtb.innerHTML = '<tr><td colspan="11" class="empty-td">No entries yet — fill your first daily report</td></tr>';
-    } else {
-      dtb.innerHTML = allEntries.map(function(e) {
-        return '<tr><td>' + e.date + '</td>'
-          + '<td>' + e.wards.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('') + '</td>'
-          + '<td>' + e.ipd + '</td><td>' + e.med + '</td><td>' + e.surg + '</td>'
-          + '<td><strong>' + e.reg + '</strong></td><td>' + e.pre + '</td>'
-          + '<td>' + e.preAmt.toLocaleString('en-IN') + '</td>'
-          + '<td>' + e.dis + '</td><td>' + e.clm.toLocaleString('en-IN') + '</td>'
-          + '<td style="font-weight:700;color:' + (parseFloat(e.conv)>=60?'#166534':'#92400e') + '">' + e.conv + '</td></tr>';
-      }).join('');
-    }
+    dtb.innerHTML = allEntries.length === 0
+      ? '<tr><td colspan="11" class="empty-td">No entries yet — fill your first daily report</td></tr>'
+      : rowsHtml;
+  }
+  var etb = document.getElementById('entryTbody');
+  if (etb) {
+    etb.innerHTML = allEntries.length === 0
+      ? '<tr><td colspan="11" class="empty-td">No entries yet — fill your first daily report</td></tr>'
+      : rowsHtml;
   }
 }
 
@@ -1019,12 +1035,18 @@ function renderRecords(data) {
       + '<td>' + e.preAmt.toLocaleString('en-IN') + '</td>'
       + '<td>' + e.dis + '</td><td>' + e.clm.toLocaleString('en-IN') + '</td>'
       + '<td style="font-weight:700;color:' + (parseFloat(e.conv)>=60?'#166534':'#92400e') + '">' + e.conv + '</td>'
-      + '<td><button onclick="deleteRecord(' + allEntries.indexOf(e) + ')" style="background:#FEE2E2;color:#dc2626;border:none;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer">Del</button></td>'
+      + '<td><button onclick="deleteRecord(\'' + (e.id||'') + '\')" style="background:#FEE2E2;color:#dc2626;border:none;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer">Del</button></td>'
       + '</tr>';
   }).join('');
 }
-function deleteRecord(i) {
-  if (confirm('Delete this record?')) { allEntries.splice(i,1); renderRecords(allEntries); }
+function deleteRecord(id) {
+  if (!id) { alert('Cannot delete: missing record id.'); return; }
+  if (!confirm('Delete this record? This will remove it from the database and the I/C portal view.')) return;
+  db.collection('daily_reports').doc(id).delete()
+    .then(function() {
+      // onSnapshot will auto-refresh the UI; no manual splice needed.
+    })
+    .catch(function(e) { alert('Error deleting: ' + e.message); });
 }
 
 // ══════════════════════════════════════
@@ -1127,7 +1149,7 @@ function fetchPmamLeaves() {
         leaveRequests.push({
           type: d.ltype, name: d.name, ward: d.ward, from: d.fromDt, 
           to: d.toDt, days: d.days, retDate: d.ret, duty: d.duty, 
-          reason: d.reason, status: d.status
+          reason: d.reason, status: d.status, remark: d.remark || ''
         });
       });
       renderLeaveHistory();
@@ -1163,16 +1185,18 @@ function submitLeave() {
     desig: 'PMAM',
     timestamp: Date.now()
   };
-  leaveRequests.push({type: req.ltype, name: req.name, ward: req.ward, from: req.fromDt, to: req.toDt, days: req.days, retDate: req.ret, duty: req.duty, reason: req.reason, status: 'Pending'});
   msg.style.color = '#1A3DB5';
   msg.textContent = 'Submitting leave request…';
+  // Note: fetchPmamLeaves() onSnapshot will refresh leaveRequests[] + re-render
+  // automatically once Firestore acknowledges this write. Do NOT push locally
+  // or the entry will appear twice on the next snapshot.
   db.collection('leave_requests').add(req)
     .then(function() {
       msg.style.color = '#166534';
       msg.textContent = '✅ Leave request submitted! I/C AB-PMJAY has been notified.';
       setTimeout(function(){ msg.textContent=''; }, 4000);
-      renderLeaveHistory();
       document.getElementById('leaveHistCard').style.display = 'block';
+      clearLeaveForm();
     })
     .catch(function(e) {
       msg.style.color = '#dc2626';
@@ -1198,8 +1222,17 @@ function clearLeaveForm() {
 }
 function renderLeaveHistory() {
   document.getElementById('leaveTbody').innerHTML = leaveRequests.map(function(r) {
+    var statusBg, statusFg;
+    if (r.status === 'Pending')       { statusBg = '#FEF3C7'; statusFg = '#92400e'; }
+    else if (r.status === 'Approved') { statusBg = '#DCFCE7'; statusFg = '#166534'; }
+    else if (r.status === 'Rejected') { statusBg = '#FEE2E2'; statusFg = '#991b1b'; }
+    else                              { statusBg = '#E5E7EB'; statusFg = '#374151'; }
+    var statusHtml = '<span style="background:' + statusBg + ';color:' + statusFg + ';padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700">' + (r.status||'—') + '</span>';
+    if (r.remark) {
+      statusHtml += '<div style="font-size:10px;color:#6b7280;margin-top:4px;font-style:italic">“' + r.remark + '”</div>';
+    }
     return '<tr>'
-      + '<td>' + r.type + '</td>'
+      + '<td>' + (r.type||'—') + '</td>'
       + '<td>' + (r.name||'—') + '</td>'
       + '<td>' + (r.ward||'—') + '</td>'
       + '<td>' + (r.from?fmtDate(r.from):'—') + '</td>'
@@ -1208,7 +1241,7 @@ function renderLeaveHistory() {
       + '<td>' + (r.retDate?fmtDate(r.retDate):'—') + '</td>'
       + '<td>' + (r.duty||'—') + '</td>'
       + '<td>' + (r.reason||'—') + '</td>'
-      + '<td><span style="background:' + (r.status==='Pending'?'#FEF3C7':'#DCFCE7') + ';color:' + (r.status==='Pending'?'#92400e':'#166534') + ';padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700">' + r.status + '</span></td>'
+      + '<td>' + statusHtml + '</td>'
       + '</tr>';
   }).join('');
 }
@@ -1347,10 +1380,74 @@ function updatePhoto(input) {
   }
 }
 // ══════════════════════════════════════
+// SESSION GUARD — redirect to login if not authenticated
+// ══════════════════════════════════════
+(function sessionGuard() {
+  var ustr = sessionStorage.getItem('pmjay_user');
+  if (!ustr) {
+    window.location.href = 'index.html';
+    return;
+  }
+  try {
+    var u = JSON.parse(ustr);
+    if (!u.email) window.location.href = 'index.html';
+  } catch(e) { window.location.href = 'index.html'; }
+})();
+
+// ══════════════════════════════════════
+// LOAD THIS PMAM'S HISTORICAL DAILY REPORTS FROM FIRESTORE
+// Real-time listener so the dashboard + My Records persist
+// across refreshes and auto-update when entries are saved.
+// ══════════════════════════════════════
+function fetchPmamReports() {
+  var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+  if (!u.email) return;
+  db.collection('daily_reports')
+    .where('email', '==', u.email)
+    .onSnapshot(function(snap) {
+      allEntries = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        allEntries.push({
+          id: doc.id,
+          date: d.date, wards: d.wards || [],
+          ipd: d.ipd||0, med: d.med||0, surg: d.surg||0,
+          reg: d.reg||0, pre: d.pre||0, preAmt: d.preAmt||0,
+          dis: d.dis||0, clm: d.clm||0, conv: d.conv || '—',
+          email: d.email, name: d.name, timestamp: d.timestamp||0
+        });
+      });
+      // Sort by timestamp desc (newest first) — doing it client-side
+      // avoids needing a composite Firestore index for where+orderBy.
+      allEntries.sort(function(a,b){ return (b.timestamp||0) - (a.timestamp||0); });
+
+      // If user filled a report today, hide the "not filled yet" alert
+      var today = new Date().toISOString().split('T')[0];
+      var filledToday = allEntries.some(function(e){ return e.date === today; });
+      var dashAlertEl = document.getElementById('dashAlert');
+      if (dashAlertEl) dashAlertEl.style.display = filledToday ? 'none' : '';
+      var badge = document.getElementById('fillBadge');
+      if (badge) {
+        if (filledToday) { badge.className = 'badge-success'; badge.textContent = '✓ Filled Today'; }
+        else             { badge.className = 'badge-warn';    badge.textContent = '⚠ Pending Today'; }
+      }
+
+      updateDashboard();
+      if (document.getElementById('sec-myRecords') &&
+          document.getElementById('sec-myRecords').classList.contains('active')) {
+        renderRecords(allEntries);
+      }
+    }, function(err) {
+      console.error('Error loading daily reports:', err);
+    });
+}
+
+// ══════════════════════════════════════
 // INIT SESSION USER
 // ══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', function() {
   fetchPmamLeaves();
+  fetchPmamReports();
   var ustr = sessionStorage.getItem('pmjay_user');
   if (ustr) {
     try {

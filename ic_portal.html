@@ -859,13 +859,25 @@ function loadLeaveReq(){
 }
 
 function approveLeaveFb(id) {
-  var remark = document.getElementById('lremark_'+id).value;
-  db.collection('leave_requests').doc(id).update({ status: 'Approved', remark: remark });
+  var remark = document.getElementById('lremark_'+id).value || '';
+  var btnGroup = document.getElementById('lactions_'+id);
+  if (btnGroup) btnGroup.style.opacity = '0.5';
+  db.collection('leave_requests').doc(id).update({ status: 'Approved', remark: remark })
+    .catch(function(e) {
+      if (btnGroup) btnGroup.style.opacity = '1';
+      alert('Error approving: ' + e.message);
+    });
 }
 function rejectLeaveFb(id) {
   var remark = document.getElementById('lremark_'+id).value;
   if(!remark) return alert('Remarks required for rejection');
-  db.collection('leave_requests').doc(id).update({ status: 'Rejected', remark: remark });
+  var btnGroup = document.getElementById('lactions_'+id);
+  if (btnGroup) btnGroup.style.opacity = '0.5';
+  db.collection('leave_requests').doc(id).update({ status: 'Rejected', remark: remark })
+    .catch(function(e) {
+      if (btnGroup) btnGroup.style.opacity = '1';
+      alert('Error rejecting: ' + e.message);
+    });
 }
 function switchLvTab(id,el){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -898,6 +910,29 @@ let allReports = [];
 let leaveRequests = [];
 
 window.addEventListener('load',()=>{
+  // Session soft-check — if no session, enter demo mode with a banner
+  // so the page still renders. Real users always arrive here via
+  // index.html → login, which sets the session correctly.
+  var needsDemo = false;
+  try {
+    var _u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+    if (!_u.email) needsDemo = true;
+  } catch(e) { needsDemo = true; }
+  if (needsDemo) {
+    sessionStorage.setItem('pmjay_user', JSON.stringify({
+      email: 'demo.ic@gmcrajouri.local',
+      name: 'Demo I/C',
+      role: 'I/C AB-PMJAY',
+      desig: 'I/C AB-PMJAY',
+      ward: ''
+    }));
+    var b = document.createElement('div');
+    b.style.cssText = 'position:sticky;top:0;z-index:9999;background:#FEF3C7;color:#92400e;padding:10px 16px;text-align:center;font-size:12px;font-weight:700;border-bottom:2px solid #F59E0B;font-family:Inter,Arial,sans-serif';
+    b.innerHTML = '⚠ DEMO MODE — You are not logged in. '
+      + '<a href="index.html" style="color:#7C2D12;text-decoration:underline;margin-left:8px">Login for real access →</a>';
+    document.body.insertBefore(b, document.body.firstChild);
+  }
+
   genMonthly();
   const today=new Date().toISOString().split('T')[0];
   document.querySelectorAll('input[type=date]').forEach(el=>{if(!el.value)el.value=today;});
@@ -919,8 +954,29 @@ function fetchFirebaseData() {
   db.collection('leave_requests').orderBy('timestamp', 'desc').onSnapshot(snap => {
     leaveRequests = [];
     snap.forEach(doc => leaveRequests.push({ id: doc.id, ...doc.data() }));
+    // Always refresh the badge counts + sidebar pill so the I/C sees
+    // new pending requests even while viewing other sections.
+    updateLeaveBadges();
+    // If viewing the Leave Requests section, also re-render the lists.
     if(document.getElementById('sec-leavereq') && document.getElementById('sec-leavereq').classList.contains('active')) loadLeaveReq();
   });
+}
+
+// Keep the counter badges in sync across all sections.
+function updateLeaveBadges() {
+  var pending  = leaveRequests.filter(l => l.status === 'Pending').length;
+  var approved = leaveRequests.filter(l => l.status === 'Approved').length;
+  var rejected = leaveRequests.filter(l => l.status === 'Rejected').length;
+  var set = (id, v) => { var el = document.getElementById(id); if (el) el.textContent = v; };
+  set('lv-pending',  pending);
+  set('lv-approved', approved);
+  set('lv-rejected', rejected);
+  // Optional sidebar badge on the Leave Requests nav item (if one exists).
+  var sideBadge = document.getElementById('navLeaveBadge');
+  if (sideBadge) {
+    sideBadge.textContent = pending;
+    sideBadge.style.display = pending > 0 ? 'inline-block' : 'none';
+  }
 }
 
 // ══════════════════════════════════════
