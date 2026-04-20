@@ -712,6 +712,16 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div id="leaveMsg" style="font-size:12px;text-align:right;margin-top:8px;min-height:18px;color:#166534"></div>
       </div>
 
+      <!-- MANAGE MY REQUESTS CARD (Pending only — Modify / Delete) -->
+      <div class="card" id="manageReqCard" style="display:none">
+        <div class="card-hd">Manage My Requests <span style="font-weight:400;font-size:11px;color:#6b7280;margin-left:6px">(pending requests only)</span></div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Type</th><th>Ward</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th style="width:140px">Action</th></tr></thead>
+          <tbody id="manageReqTbody"></tbody></table>
+        </div>
+        <div id="manageReqMsg" style="font-size:11px;color:#6b7280;margin-top:8px;min-height:16px"></div>
+      </div>
+
       <!-- LEAVE HISTORY CARD -->
       <div class="card" id="leaveHistCard" style="display:none">
         <div class="card-hd">My Leave History</div>
@@ -1209,6 +1219,13 @@ function submitLeave() {
   // or the entry will appear twice on the next snapshot.
   db.collection('leave_requests').add(req)
     .then(function() {
+      if (window._editingLeaveId) {
+        var oldId = window._editingLeaveId;
+        window._editingLeaveId = null;
+        db.collection('leave_requests').doc(oldId).delete().catch(function(e){
+          console.warn('Could not remove old pending entry after modify:', e);
+        });
+      }
       msg.style.color = '#166534';
       msg.textContent = '✅ Leave request submitted! I/C AB-PMJAY has been notified.';
       setTimeout(function(){ msg.textContent=''; }, 4000);
@@ -1261,6 +1278,105 @@ function renderLeaveHistory() {
       + '<td>' + statusHtml + '</td>'
       + '</tr>';
   }).join('');
+
+  // ── Also render the "Manage My Requests" table (Pending only) ──
+  var pending = leaveRequests.filter(function(r){ return r.status === 'Pending'; });
+  var manageBody = document.getElementById('manageReqTbody');
+  var manageCard = document.getElementById('manageReqCard');
+  if (manageBody) {
+    if (pending.length === 0) {
+      manageBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#6b7280;padding:14px;font-size:12px">No pending requests to manage.</td></tr>';
+    } else {
+      manageBody.innerHTML = pending.map(function(r){
+        var btn = 'padding:5px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-right:4px';
+        return '<tr>'
+          + '<td>' + (r.type||'—') + '</td>'
+          + '<td>' + (r.ward||'—') + '</td>'
+          + '<td>' + (r.from?fmtDate(r.from):'—') + '</td>'
+          + '<td>' + (r.to?fmtDate(r.to):'—') + '</td>'
+          + '<td>' + (r.days||'—') + '</td>'
+          + '<td>' + (r.reason||'—') + '</td>'
+          + '<td><span style="background:#FEF3C7;color:#92400e;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700">Pending</span></td>'
+          + '<td>'
+          +   '<button onclick="modifyLeaveRequest(\'' + r.id + '\')" style="' + btn + ';background:#1A3DB5;color:#fff" title="Load this request back into the form and re-submit">✏️ Modify</button>'
+          +   '<button onclick="deleteLeaveRequest(\'' + r.id + '\')" style="' + btn + ';background:#dc2626;color:#fff" title="Delete this pending request">🗑️ Delete</button>'
+          + '</td>'
+          + '</tr>';
+      }).join('');
+    }
+    if (manageCard) manageCard.style.display = pending.length > 0 ? 'block' : 'none';
+  }
+}
+
+// ══════════════════════════════════════
+// LEAVE — DELETE / MODIFY PENDING REQUEST
+// (Only the owner's PENDING requests can be modified or deleted.
+//  Approved / Rejected requests are frozen in Leave History.)
+// ══════════════════════════════════════
+function deleteLeaveRequest(id) {
+  if (!id) return;
+  var r = leaveRequests.find(function(x){ return x.id === id; });
+  if (!r) { alert('Request not found.'); return; }
+  if (r.status !== 'Pending') { alert('Only Pending requests can be deleted.'); return; }
+  if (!confirm('Delete this pending leave request?\n\nType : ' + (r.type||'—') + '\nFrom : ' + (r.from?fmtDate(r.from):'—') + '\nTo   : ' + (r.to?fmtDate(r.to):'—') + '\n\nThis cannot be undone.')) return;
+  var msg = document.getElementById('manageReqMsg');
+  if (msg) { msg.style.color='#1A3DB5'; msg.textContent='Deleting request…'; }
+  db.collection('leave_requests').doc(id).delete()
+    .then(function(){
+      if (msg) { msg.style.color='#166534'; msg.textContent='✅ Request deleted.'; setTimeout(function(){ msg.textContent=''; }, 3000); }
+    })
+    .catch(function(e){
+      if (msg) { msg.style.color='#dc2626'; msg.textContent='Error deleting: ' + e.message; }
+    });
+}
+
+function modifyLeaveRequest(id) {
+  if (!id) return;
+  var r = leaveRequests.find(function(x){ return x.id === id; });
+  if (!r) { alert('Request not found.'); return; }
+  if (r.status !== 'Pending') { alert('Only Pending requests can be modified.'); return; }
+  if (!confirm('Load this request back into the form for editing?\n\nThe original pending entry will be DELETED once you re-submit the edited request.')) return;
+
+  var setVal = function(id,v){ var el=document.getElementById(id); if(el) el.value = v||''; };
+  setVal('lvName',   r.name);
+  setVal('lvDesig',  'PMAM');
+  setVal('lvFrom',   r.from);
+  setVal('lvTo',     r.to);
+  setVal('lvDays',   r.days);
+  setVal('lvReturn', r.retDate);
+  setVal('lvDuty',   r.duty);
+
+  if (typeof lvSelWards !== 'undefined') {
+    lvSelWards = r.ward ? String(r.ward).split(/\s*,\s*/).filter(Boolean) : [];
+    if (typeof lvRenderTags === 'function') lvRenderTags();
+  }
+
+  var tRadios = document.querySelectorAll('input[name=lvType]');
+  tRadios.forEach(function(rd){ rd.checked = (rd.value === r.type); });
+  var compSec = document.getElementById('compSection');
+  if (compSec) compSec.style.display = (r.type && r.type.toLowerCase().indexOf('comp') >= 0) ? 'block' : 'none';
+
+  var reasonVal = r.reason || '';
+  var matched = false;
+  document.querySelectorAll('input[name=lvReason]').forEach(function(rd){
+    if (rd.value === reasonVal) { rd.checked = true; matched = true; }
+  });
+  if (!matched && reasonVal) {
+    var otherRadio = document.querySelector('input[name=lvReason][value="other"]');
+    if (otherRadio) otherRadio.checked = true;
+    var otherBox = document.getElementById('lvOther');
+    if (otherBox) otherBox.value = reasonVal.replace(/^Any Other:\s*/i, '');
+  }
+
+  window._editingLeaveId = id;
+
+  var msg = document.getElementById('leaveMsg');
+  if (msg) {
+    msg.style.color = '#1A3DB5';
+    msg.textContent = '✏️ Editing pending request — make changes and click “Submit Request”. The old entry will be replaced.';
+  }
+  var formCard = document.querySelector('.card');
+  if (formCard && formCard.scrollIntoView) formCard.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 // ══════════════════════════════════════
@@ -1326,13 +1442,12 @@ function printLeaveForm() {
     + '.stamp-box{width:36mm;height:28mm;border:1.5px dashed #999;display:flex;align-items:center;justify-content:center;font-size:8.5pt;color:#aaa;margin-top:2mm}'
     + '@media print{body{margin:0}@page{size:A4 portrait;margin:10mm 12mm}}</style></head><body>'
     + '<div class="page">'
-    + (LH ? '<div style="text-align:center;margin-bottom:6mm"><img src="'+LH+'" style="max-width:100%;max-height:45mm" alt="Letterhead"></div>' : '')
     + '<div class="official-header">'
     + '<div class="gov-title">Government of Jammu &amp; Kashmir</div>'
     + '<div class="gov-sub">Government Medical College &amp; Associated Hospital, Rajouri</div>'
     + '<div class="gov-dept">AB — Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) Cell</div>'
     + '</div>'
-    + '<div class="ref-row"><span><strong>Ref No.:</strong> ' + refNo + '</span><span><strong>Date:</strong> ' + todayStr + '</span></div>'
+    + '<div class="ref-row" style="justify-content:flex-end"><span><strong>Date:</strong> ' + todayStr + '</span></div>'
     + '<h2>Leave Application Form</h2>'
     + '<table>'
     + '<tr><td class="lbl">Name of the Official</td><td>' + name   + '</td></tr>'
@@ -1359,7 +1474,6 @@ function printLeaveForm() {
     + '</div>'
     + '<div class="footer">'
     + '<span>Application Date: ' + todayStr + '</span>'
-    + '<span>Ref: ' + refNo + '</span>'
     + '<span>AB-PMJAY Cell — GMC &amp; AH Rajouri</span>'
     + '</div>'
     + '</div>'
