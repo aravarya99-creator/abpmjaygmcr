@@ -521,6 +521,9 @@ tr:hover td{background:#EEF3FF}
           </div>
           <div class="sbs-divider"></div>
           <div class="sbs-section-label">Nav Bar Sections</div>
+          <div class="sbs-item" onclick="showPanel('navbarEditor',this)" style="background:#F0F9FF;border-left:3px solid #0EA5E9">
+            <svg viewBox="0 0 24 24"><path d="M4 10h16V8H4v2zm0 4h16v-2H4v2zm0 4h16v-2H4v2zm0-12h16V4H4v2z"/></svg>🎯 Nav Bar Editor
+          </div>
           <div class="sbs-item" onclick="showPanel('aboutus',this)">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>About Us
           </div>
@@ -606,6 +609,63 @@ tr:hover td{background:#EEF3FF}
               <div class="toggle-row"><div><div style="font-size:12px;font-weight:500;color:#374151">Leave Apply Feature</div><div style="font-size:10px;color:#9ca3af">Allow PMAMs to apply leave online</div></div><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
               <div class="toggle-row"><div><div style="font-size:12px;font-weight:500;color:#374151">Auto Monthly Backup</div><div style="font-size:10px;color:#9ca3af">Email backup on 1st of each month</div></div><div class="tog" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
               <div class="toggle-row"><div><div style="font-size:12px;font-weight:500;color:#374151">Ticker Notice Bar</div><div style="font-size:10px;color:#9ca3af">Show scrolling notice on portal</div></div><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
+            </div>
+          </div>
+
+          <!-- NAV BAR EDITOR PANEL — admin controls landing page navigation -->
+          <div class="settings-panel" id="panel-navbarEditor">
+            <div class="s-card">
+              <div class="s-card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+                <span><svg viewBox="0 0 24 24"><path d="M4 10h16V8H4v2zm0 4h16v-2H4v2zm0 4h16v-2H4v2zm0-12h16V4H4v2z"/></svg>🎯 Navigation Bar Editor</span>
+                <div style="display:flex;gap:6px">
+                  <button class="btn" style="background:#F3F4F6;color:#374151;padding:6px 12px;font-size:11px" onclick="nbReset()">🔄 Reset to Defaults</button>
+                  <button class="btn btn-pri" style="padding:6px 12px;font-size:11px" onclick="nbAddItem()">+ Add Nav Item</button>
+                </div>
+              </div>
+              <div style="font-size:11px;color:#6b7280;margin-bottom:12px;line-height:1.6">
+                Add, remove, rename, and reorder nav items that appear on your public landing page.<br>
+                <strong>Link format:</strong> Use <code>#section-id</code> to scroll to a section on the landing page, or <code>https://...</code> for external links.
+              </div>
+
+              <div id="nbItemsList" style="display:flex;flex-direction:column;gap:10px">
+                <div style="color:#9ca3af;font-style:italic;padding:20px;text-align:center">Loading…</div>
+              </div>
+
+              <div id="nbSaveMsg" style="font-size:11px;font-weight:600;min-height:16px;margin:10px 0"></div>
+
+              <div class="save-row" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+                <button class="btn" style="background:#F3F4F6;color:#374151" onclick="loadNavBar()">↶ Discard Changes</button>
+                <button class="btn btn-pri" onclick="saveNavBar()">💾 Save Nav Bar</button>
+              </div>
+
+              <!-- How to wire landing page - collapsible instructions -->
+              <details style="margin-top:18px;background:#EFF6FF;border:1px solid #DBEAFE;border-radius:10px;padding:10px 14px">
+                <summary style="cursor:pointer;font-size:12px;font-weight:700;color:#1E40AF">📘 How to display this nav on your landing page (click to expand)</summary>
+                <div style="font-size:11px;color:#374151;line-height:1.7;margin-top:10px">
+                  Your landing page (e.g., <code>index.html</code>) needs a small code snippet to fetch and render the nav bar. Add the following anywhere <strong>before the closing <code>&lt;/body&gt;</code> tag</strong>:<br><br>
+                  <pre style="background:#fff;border:1px solid #CBD5E1;border-radius:6px;padding:10px;overflow-x:auto;font-size:10px;color:#0F172A">&lt;!-- PMAM Portal: Dynamic Nav Bar --&gt;
+&lt;script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"&gt;&lt;/script&gt;
+&lt;script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+(function(){
+  var cfg = { apiKey: "YOUR_API_KEY", projectId: "gmcrajouri-pmam" /* ...other config... */ };
+  if (!firebase.apps.length) firebase.initializeApp(cfg);
+  firebase.firestore().collection('settings').doc('navbar').get().then(function(doc){
+    if (!doc.exists) return;
+    var items = (doc.data().items || []).filter(function(i){ return i.visible !== false; });
+    items.sort(function(a,b){ return (a.order||0) - (b.order||0); });
+    var navEl = document.querySelector('nav') || document.getElementById('mainNav');
+    if (!navEl) return;
+    navEl.innerHTML = items.map(function(i){
+      return '&lt;a href="'+i.link+'" class="nav-link"&gt;'+i.label+'&lt;/a&gt;';
+    }).join('');
+  });
+})();
+&lt;/script&gt;</pre>
+                  Make sure your landing page has a <code>&lt;nav&gt;</code> element or <code>&lt;div id="mainNav"&gt;</code> where the items will be injected.<br>
+                  Upload your <code>index.html</code> file to me and I can wire it for you automatically.
+                </div>
+              </details>
             </div>
           </div>
 
@@ -1411,6 +1471,7 @@ function showPanel(id,el){
   if (id === 'quicklinks' && typeof loadQuickLinks === 'function') loadQuickLinks();
   if (id === 'contactus' && typeof loadContactUs === 'function') loadContactUs();
   if (id === 'sysinfo' && typeof refreshSysStats === 'function') refreshSysStats();
+  if (id === 'navbarEditor' && typeof loadNavBar === 'function') loadNavBar();
 }
 function renderWards(){
   document.getElementById('wardList').innerHTML=wards.map((w,i)=>`
@@ -2597,6 +2658,169 @@ function saveAddLeave(){
   }).catch(function(e){
     err.style.color = '#dc2626';
     err.textContent = 'Error: '+e.message;
+  });
+}
+
+// ══════════════════════════════════════
+// NAV BAR EDITOR — admin controls landing page navigation
+// Data lives in Firestore at settings/navbar as { items: [...] }
+// Each item: { id, label, icon, link, visible, order }
+// ══════════════════════════════════════
+
+var NB_ICONS = [
+  { v:'info',     label:'ℹ️ Info' },
+  { v:'users',    label:'👥 Users' },
+  { v:'document', label:'📄 Document' },
+  { v:'phone',    label:'📞 Phone' },
+  { v:'home',     label:'🏠 Home' },
+  { v:'settings', label:'⚙️ Settings' },
+  { v:'star',     label:'⭐ Star' },
+  { v:'heart',    label:'❤️ Heart' },
+  { v:'calendar', label:'📅 Calendar' },
+  { v:'book',     label:'📖 Book' },
+  { v:'download', label:'⬇️ Download' },
+  { v:'upload',   label:'⬆️ Upload' },
+  { v:'link',     label:'🔗 Link' },
+  { v:'chart',    label:'📊 Chart' },
+  { v:'hospital', label:'🏥 Hospital' },
+  { v:'shield',   label:'🛡️ Shield' },
+  { v:'flag',     label:'🚩 Flag' },
+  { v:'mail',     label:'✉️ Mail' },
+  { v:'help',     label:'❓ Help' },
+  { v:'none',     label:'— None —' }
+];
+
+var NB_DEFAULTS = [
+  { id:'about',   label:'About Us',   icon:'info',     link:'#about',   visible:true, order:0 },
+  { id:'staff',   label:'Staff',      icon:'users',    link:'#staff',   visible:true, order:1 },
+  { id:'orders',  label:'Orders',     icon:'document', link:'#orders',  visible:true, order:2 },
+  { id:'contact', label:'Contact Us', icon:'phone',    link:'#contact', visible:true, order:3 }
+];
+
+var _nbItems = [];   // working copy being edited
+var _nbLoaded = false;
+
+function loadNavBar(){
+  var list = document.getElementById('nbItemsList');
+  if (list) list.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:20px;text-align:center">Loading…</div>';
+  db.collection('settings').doc('navbar').get().then(function(doc){
+    if (doc.exists && doc.data() && Array.isArray(doc.data().items) && doc.data().items.length) {
+      _nbItems = doc.data().items.slice();
+    } else {
+      _nbItems = JSON.parse(JSON.stringify(NB_DEFAULTS));
+    }
+    _nbItems.sort(function(a,b){ return (a.order||0) - (b.order||0); });
+    _nbLoaded = true;
+    nbRender();
+  }).catch(function(e){
+    console.warn('loadNavBar:', e);
+    _nbItems = JSON.parse(JSON.stringify(NB_DEFAULTS));
+    nbRender();
+    var msg = document.getElementById('nbSaveMsg');
+    if (msg) { msg.style.color = '#92400e'; msg.textContent = '⚠️ Could not load saved nav — starting from defaults.'; }
+  });
+}
+
+function nbRender(){
+  var list = document.getElementById('nbItemsList');
+  if (!list) return;
+  if (_nbItems.length === 0) {
+    list.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:20px;text-align:center;background:#F9FAFB;border-radius:10px">No nav items yet. Click "+ Add Nav Item" or "Reset to Defaults" to get started.</div>';
+    return;
+  }
+  var iconOpts = NB_ICONS.map(function(ic){ return '<option value="'+ic.v+'">'+ic.label+'</option>'; }).join('');
+  list.innerHTML = _nbItems.map(function(it, i){
+    var selectedIcon = iconOpts.replace('value="'+(it.icon||'info')+'"','value="'+(it.icon||'info')+'" selected');
+    var vis = it.visible !== false;
+    return '<div style="background:#fff;border:1.5px solid rgba(100,150,255,0.25);border-radius:10px;padding:12px;display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:start">'
+      + '<div style="font-size:18px;color:#9ca3af;text-align:center;padding-top:8px;font-weight:700;user-select:none">'+(i+1)+'</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +   '<div class="sfld" style="margin:0"><label style="font-size:10px">Label</label><input type="text" value="'+(it.label||'').replace(/"/g,'&quot;')+'" onchange="nbUpdate('+i+',\'label\',this.value)"></div>'
+      +   '<div class="sfld" style="margin:0"><label style="font-size:10px">Icon</label><select onchange="nbUpdate('+i+',\'icon\',this.value)">'+selectedIcon+'</select></div>'
+      +   '<div class="sfld" style="margin:0;grid-column:1/-1"><label style="font-size:10px">Link (use <code>#section-id</code> or <code>https://...</code>)</label><input type="text" value="'+(it.link||'').replace(/"/g,'&quot;')+'" placeholder="#section-id or https://..." onchange="nbUpdate('+i+',\'link\',this.value)"></div>'
+      +   '<div style="grid-column:1/-1;display:flex;gap:10px;align-items:center;font-size:11px">'
+      +     '<label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" '+(vis?'checked':'')+' onchange="nbUpdate('+i+',\'visible\',this.checked)"> <span>Visible on landing page</span></label>'
+      +     (vis ? '' : '<span style="background:#F3F4F6;color:#6b7280;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700">HIDDEN</span>')
+      +   '</div>'
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:4px">'
+      +   '<button class="dm-act-btn" style="background:#E5E7EB;color:#374151" onclick="nbMove('+i+',-1)" title="Move up" '+(i===0?'disabled':'')+'>↑</button>'
+      +   '<button class="dm-act-btn" style="background:#E5E7EB;color:#374151" onclick="nbMove('+i+',1)" title="Move down" '+(i===_nbItems.length-1?'disabled':'')+'>↓</button>'
+      +   '<button class="dm-act-btn" style="background:#FEE2E2;color:#991b1b" onclick="nbRemove('+i+')" title="Delete">🗑️</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function nbUpdate(i, field, value){
+  if (!_nbItems[i]) return;
+  _nbItems[i][field] = value;
+  _nbItems[i].order = i; // keep order in sync with array index
+}
+
+function nbAddItem(){
+  var newId = 'item_' + Date.now();
+  _nbItems.push({ id:newId, label:'New Item', icon:'info', link:'#new', visible:true, order:_nbItems.length });
+  nbRender();
+}
+
+function nbRemove(i){
+  if (!confirm('Remove this nav item?\n\nLabel: '+(_nbItems[i].label||'—'))) return;
+  _nbItems.splice(i, 1);
+  _nbItems.forEach(function(it, idx){ it.order = idx; });
+  nbRender();
+}
+
+function nbMove(i, dir){
+  var j = i + dir;
+  if (j < 0 || j >= _nbItems.length) return;
+  var tmp = _nbItems[i];
+  _nbItems[i] = _nbItems[j];
+  _nbItems[j] = tmp;
+  _nbItems.forEach(function(it, idx){ it.order = idx; });
+  nbRender();
+}
+
+function nbReset(){
+  if (!confirm('Reset the nav bar to default items (About Us, Staff, Orders, Contact Us)?\n\nYour unsaved changes will be lost. Saved Firebase data is NOT overwritten until you click "Save Nav Bar".')) return;
+  _nbItems = JSON.parse(JSON.stringify(NB_DEFAULTS));
+  nbRender();
+  var msg = document.getElementById('nbSaveMsg');
+  if (msg) { msg.style.color = '#1A3DB5'; msg.textContent = '↻ Reset to defaults in editor. Click "Save Nav Bar" to persist.'; }
+}
+
+function saveNavBar(){
+  // Validate
+  var msg = document.getElementById('nbSaveMsg');
+  if (!_nbItems || _nbItems.length === 0) {
+    if (msg) { msg.style.color = '#dc2626'; msg.textContent = '⚠️ Nav bar is empty. Add at least 1 item before saving.'; }
+    return;
+  }
+  for (var i = 0; i < _nbItems.length; i++) {
+    if (!_nbItems[i].label || !String(_nbItems[i].label).trim()) {
+      if (msg) { msg.style.color = '#dc2626'; msg.textContent = '⚠️ Item #'+(i+1)+' has no label.'; }
+      return;
+    }
+  }
+  // Normalize order
+  _nbItems.forEach(function(it, idx){ it.order = idx; });
+  if (msg) { msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…'; }
+  var payload = {
+    items: _nbItems,
+    _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
+    _updatedAt: Date.now(),
+    _updatedAtReadable: new Date().toLocaleString('en-IN')
+  };
+  db.collection('settings').doc('navbar').set(payload).then(function(){
+    if (msg) {
+      msg.style.color = '#166534';
+      msg.textContent = '✅ Nav bar saved ('+_nbItems.length+' items). Landing page will pick up changes on next page load.';
+      setTimeout(function(){ msg.textContent = ''; }, 5000);
+    }
+    if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/navbar', 'navbar', { itemCount: _nbItems.length, items: _nbItems.map(function(i){ return { label:i.label, link:i.link, visible:i.visible }; }) });
+    showToast('✅ Nav bar saved', 'success');
+  }).catch(function(e){
+    if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Error: '+e.message; }
   });
 }
 
