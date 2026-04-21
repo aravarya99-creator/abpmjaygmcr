@@ -244,6 +244,13 @@ tr:hover td{background:#EEF3FF}
 .mbtn-pri{background:linear-gradient(90deg,#1e3a8a,#1A3DB5);color:#fff}
 .mbtn-sec{background:#f1f5ff;color:#1e3a8a;border:1px solid #e0e8ff}
 .mbtn-red{background:#dc2626;color:#fff}
+/* ── Data Management sub-tabs ── */
+.dm-tab{padding:7px 14px !important;font-size:12px !important;border-radius:8px !important;border:none !important;cursor:pointer;font-weight:600}
+.dm-tab-active{background:#1A3DB5 !important;color:#fff !important}
+.btn-red{background:#dc2626;color:#fff}
+.btn-red:hover{background:#b91c1c}
+.dm-act-btn{padding:5px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-right:4px}
+
 </style>
   <!-- Firebase v10 -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -356,6 +363,15 @@ tr:hover td{background:#EEF3FF}
     <div class="sbi" onclick="goSec('holiday',this)" title="Holiday Duty">
       <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
       <div class="sbl">Holiday</div>
+    </div>
+    <div class="sb-div"></div>
+    <div class="sbi" data-goto="datamgmt" onclick="goSec('datamgmt',this)" title="Data Management (Admin Tools)">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 4.48 2 7.5v9C2 19.52 6.48 22 12 22s10-2.48 10-5.5v-9C22 4.48 17.52 2 12 2zm0 2c4.42 0 8 1.79 8 4s-3.58 4-8 4-8-1.79-8-4 3.58-4 8-4zm0 16c-4.42 0-8-1.79-8-4v-2.55c1.76 1.52 4.74 2.55 8 2.55s6.24-1.03 8-2.55V16c0 2.21-3.58 4-8 4zm0-6c-4.42 0-8-1.79-8-4V7.5c1.76 1.52 4.74 2.55 8 2.55s6.24-1.03 8-2.55V10c0 2.21-3.58 4-8 4z"/></svg>
+      <div class="sbl">Data</div>
+    </div>
+    <div class="sbi" data-goto="auditlog" onclick="goSec('auditlog',this)" title="Audit Log">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 12h8v2H8zm0 4h5v2H8z"/></svg>
+      <div class="sbl">Audit</div>
     </div>
     <div class="sb-div"></div>
     <div class="sbi" onclick="goSec('settings',this)" title="Settings">
@@ -668,14 +684,14 @@ tr:hover td{background:#EEF3FF}
           <div class="settings-panel" id="panel-sysinfo">
             <div class="s-card">
               <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z"/></svg>System Information</div>
-              <div class="info-row"><span class="info-key">Portal Version</span><span class="info-val">v1.0.0</span></div>
+              <div class="info-row"><span class="info-key">Portal Version</span><span class="info-val">v1.1.0</span></div>
               <div class="info-row"><span class="info-key">Firebase Project</span><span class="info-val">gmcrajouri-pmam</span></div>
               <div class="info-row"><span class="info-key">Hosted On</span><span class="info-val">Netlify</span></div>
-              <div class="info-row"><span class="info-key">Total Entries</span><span class="info-val">—</span></div>
-              <div class="info-row"><span class="info-key">Last Backup</span><span class="info-val">Never</span></div>
+              <div class="info-row"><span class="info-key">Total Entries</span><span class="info-val" id="sysTotalEntries">—</span></div>
+              <div class="info-row"><span class="info-key">Last Backup</span><span class="info-val">Manual (Firebase Console)</span></div>
               <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-                <button class="btn btn-grn">Backup Now</button>
-                <button class="btn btn-red">Clear All Data</button>
+                <button class="btn btn-pri" onclick="goSec('datamgmt',document.querySelector('[data-goto=datamgmt]'))">📊 Manage Data</button>
+                <button class="btn btn-pri" onclick="goSec('auditlog',document.querySelector('[data-goto=auditlog]'))">📜 Audit Log</button>
               </div>
             </div>
           </div>
@@ -684,6 +700,243 @@ tr:hover td{background:#EEF3FF}
       </div>
     </div>
 
+    <!-- ===== DATA MANAGEMENT (ADMIN) ===== -->
+    <div class="sec" id="sec-datamgmt">
+      <div class="page-hd" style="justify-content:space-between">
+        <span>📊 Data Management <span style="font-size:12px;font-weight:400;color:#6b7280;margin-left:8px">View / Edit / Delete any PMAM portal data</span></span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="adminLockStatus" style="font-size:11px;padding:5px 12px;border-radius:20px;background:#FEE2E2;color:#991b1b;font-weight:700">🔒 Locked</span>
+          <button class="btn btn-pri" id="adminUnlockBtn" onclick="adminUnlockStart()">🔓 Unlock Admin Tools</button>
+        </div>
+      </div>
+
+      <!-- Sub-tabs -->
+      <div class="card" style="padding:10px;margin-bottom:14px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-pri dm-tab dm-tab-active" data-tab="reports" onclick="dmShowTab('reports',this)">📋 Monthly Reports</button>
+          <button class="btn dm-tab" data-tab="leaves" onclick="dmShowTab('leaves',this)" style="background:#F3F4F6;color:#374151">🏥 Leave Requests</button>
+          <button class="btn dm-tab" data-tab="bulk" onclick="dmShowTab('bulk',this)" style="background:#FEE2E2;color:#991b1b">🚨 Bulk Clear (Danger Zone)</button>
+        </div>
+      </div>
+
+      <!-- TAB: REPORTS -->
+      <div class="dm-pane" id="dm-pane-reports">
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end">
+            <div class="fld"><label style="font-size:11px;color:#6b7280;font-weight:600">From Date</label><input type="date" id="dmRepFrom" style="width:100%;padding:7px 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px"></div>
+            <div class="fld"><label style="font-size:11px;color:#6b7280;font-weight:600">To Date</label><input type="date" id="dmRepTo" style="width:100%;padding:7px 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px"></div>
+            <div class="fld"><label style="font-size:11px;color:#6b7280;font-weight:600">PMAM</label>
+              <select id="dmRepPmam" style="width:100%;padding:7px 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px"><option value="">All PMAMs</option></select>
+            </div>
+            <div class="fld"><label style="font-size:11px;color:#6b7280;font-weight:600">Ward</label>
+              <select id="dmRepWard" style="width:100%;padding:7px 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px"><option value="">All Wards</option></select>
+            </div>
+            <button class="btn btn-pri" onclick="dmLoadReports()">🔍 Load</button>
+          </div>
+          <div id="dmRepStatus" style="font-size:11px;color:#6b7280;margin-top:10px"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">PMAM Monthly Reports <span id="dmRepCount" style="font-weight:400;color:#6b7280;font-size:12px;margin-left:8px"></span></div>
+          <div class="tbl-wrap" style="max-height:560px;overflow:auto">
+            <table>
+              <thead><tr>
+                <th>Date</th><th>PMAM</th><th>Ward</th><th>OPD</th><th>IPD</th><th>Reg</th><th>Pre-Auth</th><th>Discharged</th><th>Claims</th><th style="width:160px">Actions</th>
+              </tr></thead>
+              <tbody id="dmRepTbody"><tr><td colspan="10" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">Click "Load" to fetch reports…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: LEAVES -->
+      <div class="dm-pane" id="dm-pane-leaves" style="display:none">
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
+            <div class="fld"><label style="font-size:11px;color:#6b7280;font-weight:600">PMAM</label>
+              <select id="dmLvPmam" style="width:100%;padding:7px 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px"><option value="">All PMAMs</option></select>
+            </div>
+            <div class="fld"><label style="font-size:11px;color:#6b7280;font-weight:600">Status</label>
+              <select id="dmLvStatus" style="width:100%;padding:7px 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px">
+                <option value="">All Statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option>
+              </select>
+            </div>
+            <div class="fld"><label style="font-size:11px;color:#6b7280;font-weight:600">Type</label>
+              <select id="dmLvType" style="width:100%;padding:7px 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px">
+                <option value="">All Types</option><option>Casual</option><option>Earned</option><option>Medical</option><option>Compensatory</option>
+              </select>
+            </div>
+            <button class="btn btn-pri" onclick="dmLoadLeaves()">🔍 Load</button>
+          </div>
+          <div id="dmLvStatusTxt" style="font-size:11px;color:#6b7280;margin-top:10px"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">Leave Requests <span id="dmLvCount" style="font-weight:400;color:#6b7280;font-size:12px;margin-left:8px"></span></div>
+          <div class="tbl-wrap" style="max-height:560px;overflow:auto">
+            <table>
+              <thead><tr>
+                <th>Type</th><th>PMAM</th><th>Ward</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th style="width:170px">Actions</th>
+              </tr></thead>
+              <tbody id="dmLvTbody"><tr><td colspan="9" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">Click "Load" to fetch leave requests…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: BULK CLEAR -->
+      <div class="dm-pane" id="dm-pane-bulk" style="display:none">
+        <div class="card" style="border:2px solid #dc2626;background:#FEF2F2">
+          <div class="card-hd" style="color:#991b1b">🚨 DANGER ZONE — Bulk Clear</div>
+          <div style="padding:10px 0;font-size:12px;color:#374151;line-height:1.7">
+            <strong style="color:#991b1b">⚠️ These actions are PERMANENT and CANNOT be undone.</strong><br>
+            Use this for initial cleanup of dummy/test data. Each bulk action requires:<br>
+            1. Admin Unlock (OTP verified)<br>
+            2. Type "DELETE" in the confirmation box<br>
+            3. Final email OTP at execution<br><br>
+            <strong>Strong recommendation:</strong> Export a Firebase backup BEFORE running any bulk clear.
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+            <div style="padding:14px;background:#fff;border-radius:10px;border:1px solid #FECACA">
+              <div style="font-weight:700;color:#991b1b;font-size:13px">Clear all PMAM Monthly Reports</div>
+              <div id="bulkRepCount" style="font-size:11px;color:#6b7280;margin:6px 0">Count: —</div>
+              <button class="btn btn-red" onclick="bulkClear('pmam_reports','All Monthly Reports')">🗑️ Clear Reports</button>
+            </div>
+            <div style="padding:14px;background:#fff;border-radius:10px;border:1px solid #FECACA">
+              <div style="font-weight:700;color:#991b1b;font-size:13px">Clear all Leave Requests</div>
+              <div id="bulkLvCount" style="font-size:11px;color:#6b7280;margin:6px 0">Count: —</div>
+              <button class="btn btn-red" onclick="bulkClear('leave_requests','All Leave Requests')">🗑️ Clear Leaves</button>
+            </div>
+            <div style="padding:14px;background:#fff;border-radius:10px;border:1px solid #FECACA">
+              <div style="font-weight:700;color:#991b1b;font-size:13px">Clear all Audit Log entries</div>
+              <div id="bulkAuditCount" style="font-size:11px;color:#6b7280;margin:6px 0">Count: —</div>
+              <button class="btn btn-red" onclick="bulkClear('admin_audit_log','Audit Log')">🗑️ Clear Audit Log</button>
+            </div>
+            <div style="padding:14px;background:#fff;border-radius:10px;border:1px solid #FECACA">
+              <div style="font-weight:700;color:#991b1b;font-size:13px">Clear expired OTP records</div>
+              <div id="bulkOtpCount" style="font-size:11px;color:#6b7280;margin:6px 0">Count: —</div>
+              <button class="btn btn-red" onclick="bulkClear('otps','Expired OTPs')">🗑️ Clear OTPs</button>
+            </div>
+          </div>
+          <button class="btn" onclick="refreshBulkCounts()" style="background:#F3F4F6;color:#374151;margin-top:12px">🔄 Refresh Counts</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== AUDIT LOG ===== -->
+    <div class="sec" id="sec-auditlog">
+      <div class="page-hd" style="justify-content:space-between">
+        📜 Audit Log
+        <button class="btn btn-pri" onclick="loadAuditLog()">🔄 Refresh</button>
+      </div>
+      <div class="card">
+        <div class="card-hd">Admin Actions History <span id="auditCount" style="font-weight:400;color:#6b7280;font-size:12px;margin-left:8px"></span></div>
+        <div class="tbl-wrap" style="max-height:640px;overflow:auto">
+          <table>
+            <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Collection</th><th>Record</th><th>Details</th></tr></thead>
+            <tbody id="auditTbody"><tr><td colspan="6" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADMIN OTP UNLOCK MODAL -->
+<div class="modal-bg" id="adminOtpModal">
+  <div class="modal-box">
+    <div class="modal-title">🔐 Admin Tools Unlock</div>
+    <div id="adminOtpStep1">
+      <div style="font-size:12px;color:#374151;line-height:1.6;margin-bottom:14px">
+        For security, all destructive admin actions (edit/delete/bulk) require OTP verification.<br>
+        An OTP will be emailed to <strong id="adminOtpEmail">—</strong>.<br>
+        Once verified, admin tools stay unlocked until you logout or close the browser.
+      </div>
+      <div class="modal-footer">
+        <button class="mbtn mbtn-sec" onclick="adminOtpClose()">Cancel</button>
+        <button class="mbtn mbtn-pri" id="adminOtpSendBtn" onclick="adminOtpSend()">Send OTP</button>
+      </div>
+    </div>
+    <div id="adminOtpStep2" style="display:none">
+      <div style="font-size:12px;color:#374151;margin-bottom:10px">Enter the 6-digit OTP sent to <strong id="adminOtpEmail2">—</strong>:</div>
+      <div class="mfld"><input type="text" id="adminOtpInput" maxlength="6" placeholder="______" style="text-align:center;letter-spacing:8px;font-size:18px;font-weight:700"></div>
+      <div id="adminOtpErr" style="font-size:11px;color:#dc2626;min-height:16px"></div>
+      <div class="modal-footer">
+        <button class="mbtn mbtn-sec" onclick="adminOtpClose()">Cancel</button>
+        <button class="mbtn mbtn-pri" onclick="adminOtpVerify()">Verify &amp; Unlock</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="modal-bg" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-title" id="confirmTitle">⚠️ Confirm Action</div>
+    <div id="confirmBody" style="font-size:12px;color:#374151;line-height:1.7;margin-bottom:14px">—</div>
+    <div id="confirmTypeWrap" style="display:none;margin-bottom:12px">
+      <div style="font-size:11px;color:#6b7280;margin-bottom:4px">Type <strong>DELETE</strong> to confirm:</div>
+      <input type="text" id="confirmTypeInput" placeholder="Type DELETE" style="width:100%;padding:9px 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:13px">
+      <div id="confirmTypeErr" style="font-size:11px;color:#dc2626;min-height:14px;margin-top:4px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="mbtn mbtn-sec" onclick="confirmModalClose()">Cancel</button>
+      <button class="mbtn mbtn-pri" id="confirmOkBtn" onclick="confirmModalOk()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT REPORT MODAL -->
+<div class="modal-bg" id="editRepModal">
+  <div class="modal-box" style="max-width:620px">
+    <div class="modal-title">✏️ Edit PMAM Report</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="mfld"><label>PMAM Name</label><input type="text" id="erName" readonly style="background:#F3F4F6"></div>
+      <div class="mfld"><label>Date</label><input type="date" id="erDate"></div>
+      <div class="mfld"><label>Ward</label><input type="text" id="erWard"></div>
+      <div class="mfld"><label>OPD</label><input type="number" id="erOpd" min="0"></div>
+      <div class="mfld"><label>IPD</label><input type="number" id="erIpd" min="0"></div>
+      <div class="mfld"><label>Registrations</label><input type="number" id="erReg" min="0"></div>
+      <div class="mfld"><label>Pre-Authorizations</label><input type="number" id="erPre" min="0"></div>
+      <div class="mfld"><label>Discharged</label><input type="number" id="erDis" min="0"></div>
+      <div class="mfld"><label>Claims Submitted</label><input type="number" id="erClaims" min="0"></div>
+    </div>
+    <div id="editRepErr" style="font-size:11px;color:#dc2626;min-height:14px"></div>
+    <div class="modal-footer">
+      <button class="mbtn mbtn-sec" onclick="document.getElementById('editRepModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn mbtn-pri" onclick="saveEditReport()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT LEAVE MODAL -->
+<div class="modal-bg" id="editLvModal">
+  <div class="modal-box" style="max-width:620px">
+    <div class="modal-title">✏️ Edit Leave Request</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="mfld"><label>PMAM Name</label><input type="text" id="elName" readonly style="background:#F3F4F6"></div>
+      <div class="mfld"><label>Type</label>
+        <select id="elType"><option>Casual</option><option>Earned</option><option>Medical</option><option>Compensatory</option></select>
+      </div>
+      <div class="mfld"><label>Ward</label><input type="text" id="elWard"></div>
+      <div class="mfld"><label>Duty Assigned To</label><input type="text" id="elDuty"></div>
+      <div class="mfld"><label>From Date</label><input type="date" id="elFrom"></div>
+      <div class="mfld"><label>To Date</label><input type="date" id="elTo"></div>
+      <div class="mfld"><label>Days</label><input type="number" id="elDays" min="0" step="0.5"></div>
+      <div class="mfld"><label>Return Date</label><input type="date" id="elReturn"></div>
+      <div class="mfld" style="grid-column:1/-1"><label>Reason</label><input type="text" id="elReason"></div>
+      <div class="mfld"><label>Status</label>
+        <select id="elStatus"><option>Pending</option><option>Approved</option><option>Rejected</option></select>
+      </div>
+      <div class="mfld"><label>Remark (optional)</label><input type="text" id="elRemark" placeholder="Note visible to PMAM"></div>
+    </div>
+    <div id="editLvErr" style="font-size:11px;color:#dc2626;min-height:14px"></div>
+    <div class="modal-footer">
+      <button class="mbtn mbtn-sec" onclick="document.getElementById('editLvModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn mbtn-pri" onclick="saveEditLeave()">Save Changes</button>
+    </div>
   </div>
 </div>
 
@@ -1395,10 +1648,507 @@ function permDeleteUser(email) {
 }
 
 // ── Hook goSec to load users when tab opens ──
+// ══════════════════════════════════════════════════════════════════════════
+// ADMIN DATA MANAGEMENT — view / edit / delete any PMAM portal data
+// Security model:
+//   • Admin Unlock: OTP sent to admin email, verified, session-scoped (sessionStorage)
+//   • Once unlocked, admin can edit/delete until logout or tab close
+//   • Every action (edit/delete/bulk) is written to admin_audit_log
+//   • Bulk clear requires: unlock + typed "DELETE" confirmation
+// ══════════════════════════════════════════════════════════════════════════
+
+// --- Session-scoped admin unlock ---
+function isAdminUnlocked(){ return sessionStorage.getItem('pmjay_admin_unlocked') === '1'; }
+function setAdminUnlocked(v){
+  if (v) sessionStorage.setItem('pmjay_admin_unlocked','1');
+  else sessionStorage.removeItem('pmjay_admin_unlocked');
+  var badge = document.getElementById('adminLockStatus');
+  var btn = document.getElementById('adminUnlockBtn');
+  if (badge) {
+    if (v) { badge.style.background='#DCFCE7'; badge.style.color='#166534'; badge.textContent='🔓 Unlocked'; }
+    else   { badge.style.background='#FEE2E2'; badge.style.color='#991b1b'; badge.textContent='🔒 Locked'; }
+  }
+  if (btn) btn.style.display = v ? 'none' : 'inline-block';
+}
+function requireAdminUnlock(action){
+  if (isAdminUnlocked()) return true;
+  showToast('Please unlock admin tools first', 'error');
+  adminUnlockStart(action);
+  return false;
+}
+
+// --- Admin OTP flow ---
+function adminUnlockStart(){
+  document.getElementById('adminOtpEmail').textContent = ADMIN_EMAIL;
+  document.getElementById('adminOtpEmail2').textContent = ADMIN_EMAIL;
+  document.getElementById('adminOtpStep1').style.display = 'block';
+  document.getElementById('adminOtpStep2').style.display = 'none';
+  document.getElementById('adminOtpInput').value = '';
+  document.getElementById('adminOtpErr').textContent = '';
+  document.getElementById('adminOtpModal').classList.add('open');
+}
+function adminOtpClose(){ document.getElementById('adminOtpModal').classList.remove('open'); }
+function adminOtpSend(){
+  var btn = document.getElementById('adminOtpSendBtn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  fbSendOTP(ADMIN_EMAIL, function(){
+    btn.disabled = false; btn.textContent = 'Send OTP';
+    document.getElementById('adminOtpStep1').style.display = 'none';
+    document.getElementById('adminOtpStep2').style.display = 'block';
+    document.getElementById('adminOtpInput').focus();
+    showToast('OTP sent to ' + ADMIN_EMAIL, 'success');
+  }, function(err){
+    btn.disabled = false; btn.textContent = 'Send OTP';
+    showToast('Failed to send OTP: ' + err, 'error');
+  });
+}
+function adminOtpVerify(){
+  var otp = document.getElementById('adminOtpInput').value.trim();
+  var err = document.getElementById('adminOtpErr');
+  if (!/^\d{6}$/.test(otp)) { err.textContent = 'Enter a 6-digit OTP.'; return; }
+  err.textContent = 'Verifying…'; err.style.color = '#6b7280';
+  fbVerifyOTP(ADMIN_EMAIL, otp, function(){
+    setAdminUnlocked(true);
+    adminOtpClose();
+    writeAudit('UNLOCK', '—', '—', { note: 'Admin tools unlocked' });
+    showToast('✅ Admin tools unlocked for this session', 'success');
+  }, function(msg){
+    err.style.color = '#dc2626';
+    err.textContent = msg || 'Verification failed.';
+  });
+}
+
+// --- Generic confirm modal (with optional "type DELETE" guard) ---
+var _confirmCb = null;
+function confirmModal(opts){
+  // opts: { title, body, okLabel, okColor, requireType, onOk }
+  _confirmCb = opts.onOk || null;
+  document.getElementById('confirmTitle').innerHTML = opts.title || '⚠️ Confirm Action';
+  document.getElementById('confirmBody').innerHTML = opts.body || '';
+  var okBtn = document.getElementById('confirmOkBtn');
+  okBtn.textContent = opts.okLabel || 'Confirm';
+  okBtn.style.background = opts.okColor || '#1A3DB5';
+  var typeWrap = document.getElementById('confirmTypeWrap');
+  var typeInp = document.getElementById('confirmTypeInput');
+  var typeErr = document.getElementById('confirmTypeErr');
+  typeErr.textContent = '';
+  if (opts.requireType) {
+    typeWrap.style.display = 'block';
+    typeInp.value = '';
+  } else {
+    typeWrap.style.display = 'none';
+  }
+  document.getElementById('confirmModal').classList.add('open');
+}
+function confirmModalClose(){
+  document.getElementById('confirmModal').classList.remove('open');
+  _confirmCb = null;
+}
+function confirmModalOk(){
+  var typeWrap = document.getElementById('confirmTypeWrap');
+  if (typeWrap.style.display !== 'none') {
+    var v = document.getElementById('confirmTypeInput').value.trim();
+    if (v !== 'DELETE') {
+      document.getElementById('confirmTypeErr').textContent = 'You must type exactly: DELETE';
+      return;
+    }
+  }
+  var cb = _confirmCb;
+  confirmModalClose();
+  if (typeof cb === 'function') cb();
+}
+
+// --- Audit log writer ---
+function writeAudit(action, collection, recordId, details){
+  try {
+    var entry = {
+      ts: Date.now(),
+      tsReadable: new Date().toLocaleString('en-IN'),
+      adminEmail: ADMIN_EMAIL,
+      action: action,
+      collection: collection || '—',
+      recordId: recordId || '—',
+      details: details || {}
+    };
+    db.collection('admin_audit_log').add(entry).catch(function(e){
+      console.warn('Audit log write failed:', e);
+    });
+  } catch(e) { console.warn('Audit log error:', e); }
+}
+
+// --- Tab switcher ---
+function dmShowTab(tab, el){
+  document.querySelectorAll('.dm-tab').forEach(function(b){
+    b.classList.remove('dm-tab-active');
+    if (b.dataset.tab === 'reports' || b.dataset.tab === 'leaves') {
+      b.style.background = '#F3F4F6'; b.style.color = '#374151';
+    } else if (b.dataset.tab === 'bulk') {
+      b.style.background = '#FEE2E2'; b.style.color = '#991b1b';
+    }
+  });
+  el.classList.add('dm-tab-active');
+  el.style.background = '#1A3DB5'; el.style.color = '#fff';
+  document.querySelectorAll('.dm-pane').forEach(function(p){ p.style.display='none'; });
+  var pane = document.getElementById('dm-pane-' + tab);
+  if (pane) pane.style.display = 'block';
+  if (tab === 'bulk') refreshBulkCounts();
+}
+
+// --- Load filter dropdowns (PMAMs and Wards) from existing users collection ---
+var _dmPmamList = [];
+var _dmWardList = [];
+function dmLoadFilters(){
+  db.collection('users').where('role','==','PMAM').get().then(function(s){
+    _dmPmamList = [];
+    s.forEach(function(d){ var u = d.data(); if (u.email) _dmPmamList.push({ email: u.email, name: u.name || u.email }); });
+    _dmPmamList.sort(function(a,b){ return a.name.localeCompare(b.name); });
+    ['dmRepPmam','dmLvPmam'].forEach(function(id){
+      var sel = document.getElementById(id); if (!sel) return;
+      sel.innerHTML = '<option value="">All PMAMs</option>' + _dmPmamList.map(function(u){ return '<option value="'+u.email+'">'+u.name+'</option>'; }).join('');
+    });
+  });
+  _dmWardList = ['Orthopaedics','Male Surgery Ward','Female Surgery Ward','Male Medicine Ward A','Male Medicine Ward B','Female Medicine Ward A','Female Medicine Ward B','MICU','SICU','Optha','Onco','Gynae','ENT','Dental','Disaster','Dialysis'];
+  var wsel = document.getElementById('dmRepWard');
+  if (wsel) wsel.innerHTML = '<option value="">All Wards</option>' + _dmWardList.map(function(w){ return '<option>'+w+'</option>'; }).join('');
+}
+
+// ══════════════════════════════════════
+// REPORTS — load / edit / delete
+// ══════════════════════════════════════
+var _dmReports = [];
+function dmLoadReports(){
+  var fromD = document.getElementById('dmRepFrom').value;
+  var toD   = document.getElementById('dmRepTo').value;
+  var pmam  = document.getElementById('dmRepPmam').value;
+  var ward  = document.getElementById('dmRepWard').value;
+  var statusEl = document.getElementById('dmRepStatus');
+  statusEl.textContent = 'Loading…'; statusEl.style.color = '#6b7280';
+
+  // Try common collection names used by the portal
+  var collNames = ['pmam_reports','daily_reports','reports'];
+  var found = null;
+  function tryNext(i){
+    if (i >= collNames.length) { statusEl.textContent = '⚠️ No report collection found (checked: '+collNames.join(', ')+')'; statusEl.style.color = '#dc2626'; _dmReports=[]; dmRenderReports(); return; }
+    db.collection(collNames[i]).limit(1).get().then(function(s){
+      if (!s.empty) { found = collNames[i]; loadFrom(found); }
+      else tryNext(i+1);
+    }).catch(function(){ tryNext(i+1); });
+  }
+  function loadFrom(coll){
+    window._dmReportsColl = coll;
+    var q = db.collection(coll);
+    q.get().then(function(s){
+      _dmReports = [];
+      s.forEach(function(d){ var r = d.data(); r._id = d.id; _dmReports.push(r); });
+      // Client-side filter
+      _dmReports = _dmReports.filter(function(r){
+        var d = r.date || r.reportDate || '';
+        if (fromD && d < fromD) return false;
+        if (toD && d > toD) return false;
+        if (pmam && (r.email||r.pmamEmail) !== pmam) return false;
+        if (ward && (r.ward||'') !== ward) return false;
+        return true;
+      });
+      _dmReports.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+      statusEl.textContent = '✅ Loaded '+_dmReports.length+' records from "'+coll+'"';
+      statusEl.style.color = '#166534';
+      dmRenderReports();
+    }).catch(function(e){
+      statusEl.textContent = 'Error: '+e.message; statusEl.style.color = '#dc2626';
+    });
+  }
+  tryNext(0);
+}
+function dmRenderReports(){
+  var tb = document.getElementById('dmRepTbody');
+  document.getElementById('dmRepCount').textContent = '('+_dmReports.length+' records)';
+  if (_dmReports.length === 0) {
+    tb.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">No reports match the filter.</td></tr>';
+    return;
+  }
+  tb.innerHTML = _dmReports.map(function(r){
+    var n = (r.name || r.pmamName || r.email || '—');
+    return '<tr>'
+      + '<td>'+(r.date||r.reportDate||'—')+'</td>'
+      + '<td>'+n+'</td>'
+      + '<td>'+(r.ward||'—')+'</td>'
+      + '<td>'+(r.opd!=null?r.opd:'—')+'</td>'
+      + '<td>'+(r.ipd!=null?r.ipd:'—')+'</td>'
+      + '<td>'+(r.registrations!=null?r.registrations:(r.reg!=null?r.reg:'—'))+'</td>'
+      + '<td>'+(r.preauth!=null?r.preauth:(r.preAuth!=null?r.preAuth:'—'))+'</td>'
+      + '<td>'+(r.discharged!=null?r.discharged:'—')+'</td>'
+      + '<td>'+(r.claims!=null?r.claims:'—')+'</td>'
+      + '<td>'
+      +   '<button class="dm-act-btn" style="background:#1A3DB5;color:#fff" onclick="dmEditReport(\''+r._id+'\')">✏️</button>'
+      +   '<button class="dm-act-btn" style="background:#dc2626;color:#fff" onclick="dmDeleteReport(\''+r._id+'\')">🗑️</button>'
+      + '</td></tr>';
+  }).join('');
+}
+function dmEditReport(id){
+  if (!requireAdminUnlock()) return;
+  var r = _dmReports.find(function(x){ return x._id === id; });
+  if (!r) { showToast('Record not found', 'error'); return; }
+  var setV = function(id,v){ var el=document.getElementById(id); if(el) el.value = (v==null?'':v); };
+  setV('erName', r.name || r.pmamName || r.email || '');
+  setV('erDate', r.date || r.reportDate || '');
+  setV('erWard', r.ward || '');
+  setV('erOpd', r.opd);
+  setV('erIpd', r.ipd);
+  setV('erReg', r.registrations!=null?r.registrations:r.reg);
+  setV('erPre', r.preauth!=null?r.preauth:r.preAuth);
+  setV('erDis', r.discharged);
+  setV('erClaims', r.claims);
+  document.getElementById('editRepErr').textContent = '';
+  window._editingRepId = id;
+  document.getElementById('editRepModal').classList.add('open');
+}
+function saveEditReport(){
+  if (!requireAdminUnlock()) return;
+  var id = window._editingRepId; if (!id) return;
+  var coll = window._dmReportsColl || 'pmam_reports';
+  var patch = {
+    date: document.getElementById('erDate').value,
+    ward: document.getElementById('erWard').value,
+    opd: parseInt(document.getElementById('erOpd').value)||0,
+    ipd: parseInt(document.getElementById('erIpd').value)||0,
+    registrations: parseInt(document.getElementById('erReg').value)||0,
+    preauth: parseInt(document.getElementById('erPre').value)||0,
+    discharged: parseInt(document.getElementById('erDis').value)||0,
+    claims: parseInt(document.getElementById('erClaims').value)||0,
+    _lastEditedBy: ADMIN_EMAIL,
+    _lastEditedAt: Date.now()
+  };
+  db.collection(coll).doc(id).update(patch).then(function(){
+    writeAudit('EDIT', coll, id, patch);
+    document.getElementById('editRepModal').classList.remove('open');
+    showToast('✅ Report updated', 'success');
+    dmLoadReports();
+  }).catch(function(e){
+    document.getElementById('editRepErr').textContent = 'Error: '+e.message;
+  });
+}
+function dmDeleteReport(id){
+  if (!requireAdminUnlock()) return;
+  var r = _dmReports.find(function(x){ return x._id === id; });
+  if (!r) return;
+  var coll = window._dmReportsColl || 'pmam_reports';
+  var n = r.name || r.pmamName || r.email || '—';
+  confirmModal({
+    title: '🗑️ Delete PMAM Report',
+    body: '<strong style="color:#991b1b">This is permanent and will be logged.</strong><br><br>PMAM: <strong>'+n+'</strong><br>Date: <strong>'+(r.date||'—')+'</strong><br>Ward: <strong>'+(r.ward||'—')+'</strong>',
+    okLabel: 'Delete Permanently', okColor: '#dc2626',
+    onOk: function(){
+      db.collection(coll).doc(id).delete().then(function(){
+        writeAudit('DELETE', coll, id, { name:n, date:r.date, ward:r.ward });
+        showToast('✅ Report deleted', 'success');
+        dmLoadReports();
+      }).catch(function(e){ showToast('Error: '+e.message, 'error'); });
+    }
+  });
+}
+
+// ══════════════════════════════════════
+// LEAVES — load / edit / delete
+// ══════════════════════════════════════
+var _dmLeaves = [];
+function dmLoadLeaves(){
+  var pmam = document.getElementById('dmLvPmam').value;
+  var st   = document.getElementById('dmLvStatus').value;
+  var tp   = document.getElementById('dmLvType').value;
+  var statusEl = document.getElementById('dmLvStatusTxt');
+  statusEl.textContent = 'Loading…'; statusEl.style.color = '#6b7280';
+  db.collection('leave_requests').get().then(function(s){
+    _dmLeaves = [];
+    s.forEach(function(d){ var r = d.data(); r._id = d.id; _dmLeaves.push(r); });
+    _dmLeaves = _dmLeaves.filter(function(r){
+      if (pmam && (r.email||r.pmamEmail) !== pmam) return false;
+      if (st && r.status !== st) return false;
+      if (tp && r.type !== tp) return false;
+      return true;
+    });
+    _dmLeaves.sort(function(a,b){ return (b.timestamp||0) - (a.timestamp||0); });
+    statusEl.textContent = '✅ Loaded '+_dmLeaves.length+' leave requests';
+    statusEl.style.color = '#166534';
+    dmRenderLeaves();
+  }).catch(function(e){ statusEl.textContent = 'Error: '+e.message; statusEl.style.color = '#dc2626'; });
+}
+function dmRenderLeaves(){
+  var tb = document.getElementById('dmLvTbody');
+  document.getElementById('dmLvCount').textContent = '('+_dmLeaves.length+' records)';
+  if (_dmLeaves.length === 0) {
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">No leave requests match the filter.</td></tr>';
+    return;
+  }
+  tb.innerHTML = _dmLeaves.map(function(r){
+    var statusColor = {Pending:['#FEF3C7','#92400e'],Approved:['#DCFCE7','#166534'],Rejected:['#FEE2E2','#991b1b']}[r.status]||['#E5E7EB','#374151'];
+    return '<tr>'
+      + '<td>'+(r.type||'—')+'</td>'
+      + '<td>'+(r.name||'—')+'</td>'
+      + '<td>'+(r.ward||'—')+'</td>'
+      + '<td>'+(r.from||'—')+'</td>'
+      + '<td>'+(r.to||'—')+'</td>'
+      + '<td>'+(r.days||'—')+'</td>'
+      + '<td>'+(r.reason||'—')+'</td>'
+      + '<td><span style="background:'+statusColor[0]+';color:'+statusColor[1]+';padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700">'+(r.status||'—')+'</span></td>'
+      + '<td>'
+      +   '<button class="dm-act-btn" style="background:#1A3DB5;color:#fff" onclick="dmEditLeave(\''+r._id+'\')">✏️</button>'
+      +   '<button class="dm-act-btn" style="background:#dc2626;color:#fff" onclick="dmDeleteLeave(\''+r._id+'\')">🗑️</button>'
+      + '</td></tr>';
+  }).join('');
+}
+function dmEditLeave(id){
+  if (!requireAdminUnlock()) return;
+  var r = _dmLeaves.find(function(x){ return x._id === id; });
+  if (!r) return;
+  var setV = function(id,v){ var el=document.getElementById(id); if(el) el.value = (v==null?'':v); };
+  setV('elName', r.name);
+  setV('elType', r.type);
+  setV('elWard', r.ward);
+  setV('elDuty', r.duty);
+  setV('elFrom', r.from);
+  setV('elTo', r.to);
+  setV('elDays', r.days);
+  setV('elReturn', r.retDate);
+  setV('elReason', r.reason);
+  setV('elStatus', r.status);
+  setV('elRemark', r.remark);
+  document.getElementById('editLvErr').textContent = '';
+  window._editingLvId = id;
+  document.getElementById('editLvModal').classList.add('open');
+}
+function saveEditLeave(){
+  if (!requireAdminUnlock()) return;
+  var id = window._editingLvId; if (!id) return;
+  var patch = {
+    type: document.getElementById('elType').value,
+    ward: document.getElementById('elWard').value,
+    duty: document.getElementById('elDuty').value,
+    from: document.getElementById('elFrom').value,
+    to:   document.getElementById('elTo').value,
+    days: parseFloat(document.getElementById('elDays').value)||0,
+    retDate: document.getElementById('elReturn').value,
+    reason: document.getElementById('elReason').value,
+    status: document.getElementById('elStatus').value,
+    remark: document.getElementById('elRemark').value,
+    _lastEditedBy: ADMIN_EMAIL,
+    _lastEditedAt: Date.now()
+  };
+  db.collection('leave_requests').doc(id).update(patch).then(function(){
+    writeAudit('EDIT', 'leave_requests', id, patch);
+    document.getElementById('editLvModal').classList.remove('open');
+    showToast('✅ Leave request updated', 'success');
+    dmLoadLeaves();
+  }).catch(function(e){ document.getElementById('editLvErr').textContent = 'Error: '+e.message; });
+}
+function dmDeleteLeave(id){
+  if (!requireAdminUnlock()) return;
+  var r = _dmLeaves.find(function(x){ return x._id === id; });
+  if (!r) return;
+  confirmModal({
+    title: '🗑️ Delete Leave Request',
+    body: '<strong style="color:#991b1b">This is permanent and will be logged.</strong><br><br>PMAM: <strong>'+(r.name||'—')+'</strong><br>Type: <strong>'+(r.type||'—')+'</strong><br>Period: <strong>'+(r.from||'—')+' → '+(r.to||'—')+'</strong><br>Status: <strong>'+(r.status||'—')+'</strong>',
+    okLabel: 'Delete Permanently', okColor: '#dc2626',
+    onOk: function(){
+      db.collection('leave_requests').doc(id).delete().then(function(){
+        writeAudit('DELETE', 'leave_requests', id, { name:r.name, type:r.type, from:r.from, to:r.to, status:r.status });
+        showToast('✅ Leave request deleted', 'success');
+        dmLoadLeaves();
+      }).catch(function(e){ showToast('Error: '+e.message, 'error'); });
+    }
+  });
+}
+
+// ══════════════════════════════════════
+// BULK CLEAR
+// ══════════════════════════════════════
+function refreshBulkCounts(){
+  [['pmam_reports','bulkRepCount'],['leave_requests','bulkLvCount'],['admin_audit_log','bulkAuditCount'],['otps','bulkOtpCount']].forEach(function(pair){
+    db.collection(pair[0]).get().then(function(s){
+      var el = document.getElementById(pair[1]);
+      if (el) el.textContent = 'Count: ' + s.size + ' records';
+    }).catch(function(){
+      var el = document.getElementById(pair[1]);
+      if (el) el.textContent = 'Count: (unable to read)';
+    });
+  });
+}
+function bulkClear(coll, label){
+  if (!requireAdminUnlock()) return;
+  confirmModal({
+    title: '🚨 BULK DELETE — ' + label,
+    body: '<strong style="color:#991b1b">This will PERMANENTLY DELETE every record in <code>'+coll+'</code>.</strong><br><br>There is no undo. Records are gone forever.<br><br>Before continuing, we strongly recommend:<br>1. You have exported a Firebase backup<br>2. You are certain you want to wipe ALL records in this collection',
+    okLabel: 'I understand — Continue', okColor: '#dc2626',
+    requireType: true,
+    onOk: function(){
+      var btn = null;
+      showToast('Deleting… this may take a moment', 'info');
+      db.collection(coll).get().then(function(s){
+        var total = s.size;
+        if (total === 0) { showToast('Collection is already empty', 'info'); return; }
+        var batch = db.batch();
+        var batchCount = 0, deleted = 0, batches = [];
+        s.forEach(function(doc){
+          batch.delete(doc.ref);
+          batchCount++;
+          if (batchCount >= 400) {
+            batches.push(batch);
+            batch = db.batch();
+            batchCount = 0;
+          }
+        });
+        if (batchCount > 0) batches.push(batch);
+        // Commit all batches
+        Promise.all(batches.map(function(b){ return b.commit(); })).then(function(){
+          writeAudit('BULK_DELETE', coll, '*', { total: total, label: label });
+          showToast('✅ Bulk clear complete: '+total+' records deleted from '+coll, 'success');
+          refreshBulkCounts();
+        }).catch(function(e){ showToast('Partial failure: '+e.message, 'error'); });
+      }).catch(function(e){ showToast('Error: '+e.message, 'error'); });
+    }
+  });
+}
+
+// ══════════════════════════════════════
+// AUDIT LOG
+// ══════════════════════════════════════
+function loadAuditLog(){
+  var tb = document.getElementById('auditTbody');
+  tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#9ca3af;font-style:italic">Loading…</td></tr>';
+  db.collection('admin_audit_log').get().then(function(s){
+    var rows = [];
+    s.forEach(function(d){ var a = d.data(); rows.push(a); });
+    rows.sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
+    document.getElementById('auditCount').textContent = '('+rows.length+' entries)';
+    if (rows.length === 0) {
+      tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">No audit entries yet.</td></tr>';
+      return;
+    }
+    tb.innerHTML = rows.map(function(a){
+      var actBg = {EDIT:'#DBEAFE',DELETE:'#FEE2E2',BULK_DELETE:'#FCA5A5',UNLOCK:'#FEF3C7'}[a.action]||'#F3F4F6';
+      var actFg = {EDIT:'#1E40AF',DELETE:'#991b1b',BULK_DELETE:'#7f1d1d',UNLOCK:'#92400e'}[a.action]||'#374151';
+      var det = '';
+      try { det = typeof a.details === 'string' ? a.details : JSON.stringify(a.details).substring(0,200); } catch(e) { det = '—'; }
+      return '<tr>'
+        + '<td style="font-size:10px">'+(a.tsReadable || new Date(a.ts||0).toLocaleString('en-IN'))+'</td>'
+        + '<td>'+(a.adminEmail||'—')+'</td>'
+        + '<td><span style="background:'+actBg+';color:'+actFg+';padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">'+(a.action||'—')+'</span></td>'
+        + '<td><code style="font-size:10px">'+(a.collection||'—')+'</code></td>'
+        + '<td><code style="font-size:10px">'+(a.recordId||'—')+'</code></td>'
+        + '<td style="font-size:10px;max-width:260px;word-break:break-word">'+det+'</td>'
+        + '</tr>';
+    }).join('');
+  }).catch(function(e){
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#dc2626">Error: '+e.message+'</td></tr>';
+  });
+}
+
+
 var _goSecOrig = goSec;
 goSec = function(id, el) {
   _goSecOrig(id, el);
   if (id === 'users') loadAllUsers();
+  if (id === 'datamgmt') { dmLoadFilters(); setAdminUnlocked(isAdminUnlocked()); }
+  if (id === 'auditlog') loadAuditLog();
 };
 
 // ── Init ──
@@ -1415,6 +2165,8 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   loadSessionUser();
   setTimeout(loadAllUsers, 500);
+  // Restore admin unlock state indicator if visiting datamgmt
+  setTimeout(function(){ setAdminUnlocked(isAdminUnlocked()); }, 800);
 });
 
 </script>
