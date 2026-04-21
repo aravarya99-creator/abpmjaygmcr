@@ -579,7 +579,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
       <!-- FORM CARD -->
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:13px;font-weight:700;color:#0F2B8C;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(26,61,181,0.1)">Fill Leave Application</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">
 
           <!-- Name -->
           <div class="fld"><label>Name of the Official</label>
@@ -591,11 +591,11 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             <input type="text" id="lvDesig" value="PMAM" style="width:100%;padding:9px 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#0F2B8C">
           </div>
 
-          <!-- Ward — left column, same pattern as Fill Report -->
+          <!-- Ward — third column in single row -->
           <div class="fld">
             <label>Ward(s)</label>
             <div style="display:flex;align-items:center;gap:6px">
-              <select id="lvWardSel" style="flex:1;height:34px;padding:0 8px;border:1.5px solid rgba(100,150,255,0.3);border-radius:50px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.8);color:#0F2B8C">
+              <select id="lvWardSel" style="flex:1;min-width:0;height:34px;padding:0 8px;border:1.5px solid rgba(100,150,255,0.3);border-radius:50px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.8);color:#0F2B8C">
                 <option value="">-- Select Ward --</option>
                 <option>Orthopaedics</option><option>Male Surgery Ward</option>
                 <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
@@ -604,14 +604,14 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
                 <option>Optha</option><option>Onco</option><option>Gynae</option>
                 <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
               </select>
-              <button class="btn btn-pri" onclick="lvAddWard()" style="height:34px;padding:0 12px;font-size:11px;border-radius:50px;white-space:nowrap">+ Add</button>
+              <button class="btn btn-pri" onclick="lvAddWard()" style="height:34px;padding:0 10px;font-size:11px;border-radius:50px;white-space:nowrap">+ Add</button>
             </div>
             <div id="lvWardTags" style="display:flex;flex-wrap:wrap;gap:4px;min-height:22px;margin-top:5px;align-items:center">
               <span id="lvWardPlaceholder" style="font-size:11px;color:#BDBDBD;font-style:italic">No wards selected</span>
             </div>
           </div>
 
-          <!-- Duty Assigned To — right column, same row as Ward -->
+          <!-- Duty Assigned To — fourth column -->
           <div class="fld"><label>Duty Assigned To</label>
             <select id="lvDuty" style="width:100%;height:34px;padding:0 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#0F2B8C">
               <option value="">-- Select Substitute PMAM --</option>
@@ -712,6 +712,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div id="leaveMsg" style="font-size:12px;text-align:right;margin-top:8px;min-height:18px;color:#166534"></div>
       </div>
 
+      <!-- LEAVE HISTORY CARD -->
       <!-- MANAGE MY REQUESTS CARD (Pending only — Modify / Delete) -->
       <div class="card" id="manageReqCard" style="display:none">
         <div class="card-hd">Manage My Requests <span style="font-weight:400;font-size:11px;color:#6b7280;margin-left:6px">(pending requests only)</span></div>
@@ -722,7 +723,6 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div id="manageReqMsg" style="font-size:11px;color:#6b7280;margin-top:8px;min-height:16px"></div>
       </div>
 
-      <!-- LEAVE HISTORY CARD -->
       <div class="card" id="leaveHistCard" style="display:none">
         <div class="card-hd">My Leave History</div>
         <div class="tbl-wrap">
@@ -844,6 +844,37 @@ window.addEventListener('DOMContentLoaded', function() {
       if (wdd) wdd.style.display = 'none';
     }
   });
+
+  // ── Make the ENTIRE date-input cell open the calendar picker
+  // (Chrome/Edge support showPicker(); we guard with feature detection and fallback)
+  function enhanceDatePickers(){
+    var dates = document.querySelectorAll('input[type="date"]');
+    dates.forEach(function(inp){
+      if (inp.dataset.pickerEnhanced === '1') return;
+      inp.dataset.pickerEnhanced = '1';
+      inp.style.cursor = 'pointer';
+      var open = function(ev){
+        try {
+          if (typeof inp.showPicker === 'function') {
+            inp.showPicker();
+          } else {
+            inp.focus();
+            inp.click();
+          }
+        } catch(err) {
+          // Some browsers throw if the input isn't in the user-activation path — ignore
+          inp.focus();
+        }
+      };
+      inp.addEventListener('click', open);
+      inp.addEventListener('focus', open);
+    });
+  }
+  enhanceDatePickers();
+  // Re-scan every time a hash route / section changes — cheap & covers dynamic DOM
+  window.addEventListener('hashchange', enhanceDatePickers);
+  // Expose so other handlers can call it after injecting new date inputs
+  window._enhanceDatePickers = enhanceDatePickers;
 });
 
 // ══════════════════════════════════════
@@ -1279,7 +1310,7 @@ function renderLeaveHistory() {
       + '</tr>';
   }).join('');
 
-  // ── Also render the "Manage My Requests" table (Pending only) ──
+  // ── Render "Manage My Requests" table (Pending only) ──
   var pending = leaveRequests.filter(function(r){ return r.status === 'Pending'; });
   var manageBody = document.getElementById('manageReqTbody');
   var manageCard = document.getElementById('manageReqCard');
@@ -1298,7 +1329,7 @@ function renderLeaveHistory() {
           + '<td>' + (r.reason||'—') + '</td>'
           + '<td><span style="background:#FEF3C7;color:#92400e;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700">Pending</span></td>'
           + '<td>'
-          +   '<button onclick="modifyLeaveRequest(\'' + r.id + '\')" style="' + btn + ';background:#1A3DB5;color:#fff" title="Load this request back into the form and re-submit">✏️ Modify</button>'
+          +   '<button onclick="modifyLeaveRequest(\'' + r.id + '\')" style="' + btn + ';background:#1A3DB5;color:#fff" title="Load back into form for editing">✏️ Modify</button>'
           +   '<button onclick="deleteLeaveRequest(\'' + r.id + '\')" style="' + btn + ';background:#dc2626;color:#fff" title="Delete this pending request">🗑️ Delete</button>'
           + '</td>'
           + '</tr>';
@@ -1310,8 +1341,8 @@ function renderLeaveHistory() {
 
 // ══════════════════════════════════════
 // LEAVE — DELETE / MODIFY PENDING REQUEST
-// (Only the owner's PENDING requests can be modified or deleted.
-//  Approved / Rejected requests are frozen in Leave History.)
+// Only the owner's PENDING requests can be modified/deleted.
+// Approved/Rejected requests stay frozen in Leave History.
 // ══════════════════════════════════════
 function deleteLeaveRequest(id) {
   if (!id) return;
@@ -1439,13 +1470,12 @@ function printLeaveForm() {
     + '.sig-line{border-top:1px solid #000;margin-top:16mm;padding-top:2mm;font-weight:700;font-size:10pt}'
     + '.sig-desig{font-size:9.5pt;font-weight:normal}'
     + '.footer{border-top:2px solid #000;margin-top:10mm;padding-top:4mm;display:flex;justify-content:space-between;font-size:9pt;color:#333}'
-    + '.stamp-box{width:36mm;height:28mm;border:1.5px dashed #999;display:flex;align-items:center;justify-content:center;font-size:8.5pt;color:#aaa;margin-top:2mm}'
     + '@media print{body{margin:0}@page{size:A4 portrait;margin:10mm 12mm}}</style></head><body>'
     + '<div class="page">'
     + '<div class="official-header">'
     + '<div class="gov-title">Government of Jammu &amp; Kashmir</div>'
     + '<div class="gov-sub">Government Medical College &amp; Associated Hospital, Rajouri</div>'
-    + '<div class="gov-dept">AB — Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) Cell</div>'
+    + '<div class="gov-dept">AB — Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) Unit</div>'
     + '</div>'
     + '<div class="ref-row" style="justify-content:flex-end"><span><strong>Date:</strong> ' + todayStr + '</span></div>'
     + '<h2>Leave Application Form</h2>'
@@ -1469,12 +1499,11 @@ function printLeaveForm() {
     + '</div>'
     + '<div class="sig-row" style="margin-top:12mm">'
     + '<div class="sig-box"><div class="sig-line">I/C AB-PMJAY<div class="sig-desig">GMC &amp; AH, Rajouri</div></div></div>'
-    + '<div class="sig-box"><div style="text-align:center"><div class="stamp-box">Office Seal / Stamp</div></div></div>'
     + '<div class="sig-box right"><div class="sig-line">Medical Superintendent<div class="sig-desig">GMC &amp; AH, Rajouri</div></div></div>'
     + '</div>'
     + '<div class="footer">'
     + '<span>Application Date: ' + todayStr + '</span>'
-    + '<span>AB-PMJAY Cell — GMC &amp; AH Rajouri</span>'
+    + '<span>AB-PMJAY Unit — GMC &amp; AH Rajouri</span>'
     + '</div>'
     + '</div>'
     + '<script>window.onload=function(){window.print();};<\/script>'
