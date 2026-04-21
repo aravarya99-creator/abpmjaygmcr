@@ -643,13 +643,16 @@ tr:hover td{background:#EEF3FF}
           <div class="settings-panel" id="panel-contactus">
             <div class="s-card">
               <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Contact Us Settings</div>
+              <div style="font-size:11px;color:#6b7280;margin-bottom:12px">These details appear in the landing page "Contact Us" section.</div>
               <div class="form-grid">
-                <div class="sfld"><label>I/C Name</label><input type="text" value=""></div>
-                <div class="sfld"><label>Designation</label><input type="text" value="I/C AB-PMJAY"></div>
-                <div class="sfld"><label>Mobile Number</label><input type="text" value="9999999999"></div>
-                <div class="sfld"><label>Email</label><input type="email" value="suresh@gmcrajouri.in"></div>
+                <div class="sfld"><label>I/C Name</label><input type="text" id="cuName" placeholder="Full name"></div>
+                <div class="sfld"><label>Designation</label><input type="text" id="cuDesig" placeholder="e.g. I/C AB-PMJAY" value="I/C AB-PMJAY"></div>
+                <div class="sfld"><label>Mobile Number</label><input type="text" id="cuMobile" placeholder="10-digit number"></div>
+                <div class="sfld"><label>Email</label><input type="email" id="cuEmail" placeholder="email@example.com"></div>
+                <div class="sfld" style="grid-column:1/-1"><label>Office Address (optional)</label><input type="text" id="cuAddr" placeholder="e.g. AB-PMJAY Unit, GMC & AH Rajouri"></div>
               </div>
-              <div class="save-row"><button class="btn btn-pri">Save Contact</button></div>
+              <div id="cuSaveMsg" style="font-size:11px;font-weight:600;color:#166534;margin-bottom:8px"></div>
+              <div class="save-row"><button class="btn btn-pri" onclick="saveContactUs()">Save Contact</button></div>
             </div>
           </div>
 
@@ -657,14 +660,18 @@ tr:hover td{background:#EEF3FF}
           <div class="settings-panel" id="panel-quicklinks">
             <div class="s-card">
               <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>Quick Links Management</div>
-              <div style="font-size:11px;color:#6b7280;margin-bottom:12px">Edit portal links shown on the landing page. Paste direct URLs to each portal.</div>
+              <div style="font-size:11px;color:#6b7280;margin-bottom:12px">Edit portal links shown on the landing page. Both <strong>label</strong> and <strong>URL</strong> are editable — landing page uses whatever you set here.</div>
               <div class="form-grid">
-                <div class="sfld"><label>PMAM Portal URL</label><input type="url" id="qlPmam" placeholder="https://..." value="pmam_portal.html"></div>
-                <div class="sfld"><label>I/C Portal URL</label><input type="url" id="qlIc" placeholder="https://..." value="ic_portal.html"></div>
-                <div class="sfld"><label>Admin Portal URL</label><input type="url" id="qlAdmin" placeholder="https://..." value="admin_portal.html"></div>
-                <div class="sfld"><label>NHA Portal URL (optional)</label><input type="url" id="qlNha" placeholder="https://hospitalmis.nhp.gov.in"></div>
-                <div class="sfld"><label>Link 5 Label</label><input type="text" id="qlLink5Label" placeholder="e.g. Ayushman Portal"></div>
-                <div class="sfld"><label>Link 5 URL</label><input type="url" id="qlLink5Url" placeholder="https://..."></div>
+                <div class="sfld"><label>Link 1 — Label</label><input type="text" id="qlPmamLabel" placeholder="e.g. PMAM Portal" value="PMAM Portal"></div>
+                <div class="sfld"><label>Link 1 — URL</label><input type="url" id="qlPmam" placeholder="https://..." value="pmam_portal.html"></div>
+                <div class="sfld"><label>Link 2 — Label</label><input type="text" id="qlIcLabel" placeholder="e.g. I/C Portal" value="I/C Portal"></div>
+                <div class="sfld"><label>Link 2 — URL</label><input type="url" id="qlIc" placeholder="https://..." value="ic_portal.html"></div>
+                <div class="sfld"><label>Link 3 — Label</label><input type="text" id="qlAdminLabel" placeholder="e.g. Admin Portal" value="Admin Portal"></div>
+                <div class="sfld"><label>Link 3 — URL</label><input type="url" id="qlAdmin" placeholder="https://..." value="admin_portal.html"></div>
+                <div class="sfld"><label>Link 4 — Label</label><input type="text" id="qlNhaLabel" placeholder="e.g. NHA Portal" value="NHA Portal"></div>
+                <div class="sfld"><label>Link 4 — URL</label><input type="url" id="qlNha" placeholder="https://hospitalmis.nhp.gov.in"></div>
+                <div class="sfld"><label>Link 5 — Label</label><input type="text" id="qlLink5Label" placeholder="e.g. Ayushman Portal"></div>
+                <div class="sfld"><label>Link 5 — URL</label><input type="url" id="qlLink5Url" placeholder="https://..."></div>
               </div>
               <div id="qlSaveMsg" style="font-size:11px;font-weight:600;color:#166534;margin-bottom:8px"></div>
               <div class="save-row"><button class="btn btn-pri" onclick="saveQuickLinks()">Save Quick Links</button></div>
@@ -684,11 +691,25 @@ tr:hover td{background:#EEF3FF}
           <div class="settings-panel" id="panel-sysinfo">
             <div class="s-card">
               <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z"/></svg>System Information</div>
-              <div class="info-row"><span class="info-key">Portal Version</span><span class="info-val">v1.1.0</span></div>
+              <div class="info-row"><span class="info-key">Portal Version</span><span class="info-val">v1.2.0</span></div>
               <div class="info-row"><span class="info-key">Firebase Project</span><span class="info-val">gmcrajouri-pmam</span></div>
               <div class="info-row"><span class="info-key">Hosted On</span><span class="info-val">Netlify</span></div>
               <div class="info-row"><span class="info-key">Total Entries</span><span class="info-val" id="sysTotalEntries">—</span></div>
-              <div class="info-row"><span class="info-key">Last Backup</span><span class="info-val">Manual (Firebase Console)</span></div>
+              <div class="info-row"><span class="info-key">Last Backup</span><span class="info-val" id="sysLastBackup">—</span></div>
+
+              <div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:10px;padding:12px;margin-top:14px">
+                <div style="font-size:12px;font-weight:700;color:#1E40AF;margin-bottom:6px">💾 Backup Your Data</div>
+                <div style="font-size:11px;color:#374151;line-height:1.6">
+                  Click to download a complete JSON backup of ALL Firebase collections (users, reports, leaves, settings, etc.) to your computer.<br>
+                  <strong>Recommendation:</strong> Do this before any bulk delete, and save the file to Google Drive for safekeeping.
+                </div>
+                <div id="backupProgress" style="font-size:11px;color:#6b7280;margin-top:8px;min-height:16px"></div>
+                <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+                  <button class="btn btn-grn" onclick="backupNow()">💾 Backup Now</button>
+                  <button class="btn btn-pri" onclick="refreshSysStats()">🔄 Refresh Stats</button>
+                </div>
+              </div>
+
               <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
                 <button class="btn btn-pri" onclick="goSec('datamgmt',document.querySelector('[data-goto=datamgmt]'))">📊 Manage Data</button>
                 <button class="btn btn-pri" onclick="goSec('auditlog',document.querySelector('[data-goto=auditlog]'))">📜 Audit Log</button>
@@ -737,7 +758,10 @@ tr:hover td{background:#EEF3FF}
         </div>
 
         <div class="card">
-          <div class="card-hd">PMAM Monthly Reports <span id="dmRepCount" style="font-weight:400;color:#6b7280;font-size:12px;margin-left:8px"></span></div>
+          <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+            <span>PMAM Monthly Reports <span id="dmRepCount" style="font-weight:400;color:#6b7280;font-size:12px;margin-left:8px"></span></span>
+            <button class="btn btn-pri" onclick="openAddReport()" style="padding:6px 12px;font-size:11px">➕ Add Report (Backdated)</button>
+          </div>
           <div class="tbl-wrap" style="max-height:560px;overflow:auto">
             <table>
               <thead><tr>
@@ -772,7 +796,10 @@ tr:hover td{background:#EEF3FF}
         </div>
 
         <div class="card">
-          <div class="card-hd">Leave Requests <span id="dmLvCount" style="font-weight:400;color:#6b7280;font-size:12px;margin-left:8px"></span></div>
+          <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+            <span>Leave Requests <span id="dmLvCount" style="font-weight:400;color:#6b7280;font-size:12px;margin-left:8px"></span></span>
+            <button class="btn btn-pri" onclick="openAddLeave()" style="padding:6px 12px;font-size:11px">➕ Add Leave (Backdated)</button>
+          </div>
           <div class="tbl-wrap" style="max-height:560px;overflow:auto">
             <table>
               <thead><tr>
@@ -884,6 +911,81 @@ tr:hover td{background:#EEF3FF}
     <div class="modal-footer">
       <button class="mbtn mbtn-sec" onclick="confirmModalClose()">Cancel</button>
       <button class="mbtn mbtn-pri" id="confirmOkBtn" onclick="confirmModalOk()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD REPORT MODAL (Admin backdated entry) -->
+<div class="modal-bg" id="addRepModal">
+  <div class="modal-box" style="max-width:680px">
+    <div class="modal-title">➕ Add PMAM Report <span style="font-size:11px;font-weight:400;color:#6b7280;margin-left:8px">(Admin backdated entry)</span></div>
+    <div style="font-size:11px;color:#92400e;background:#FEF3C7;padding:8px 12px;border-radius:8px;margin-bottom:12px;line-height:1.5">
+      ⚠️ This record will be marked as admin-entered in the database. Duplicate check runs before save. A reason is required for audit.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="mfld"><label>PMAM</label>
+        <select id="arPmam"><option value="">-- Select PMAM --</option></select>
+      </div>
+      <div class="mfld"><label>Date</label><input type="date" id="arDate"></div>
+      <div class="mfld"><label>Ward</label>
+        <select id="arWard"><option value="">-- Select Ward --</option></select>
+      </div>
+      <div class="mfld"><label style="display:block">&nbsp;</label><span style="font-size:11px;color:#6b7280;font-style:italic">Fill the daily stats below</span></div>
+      <div class="mfld"><label>OPD</label><input type="number" id="arOpd" min="0" value="0"></div>
+      <div class="mfld"><label>IPD</label><input type="number" id="arIpd" min="0" value="0"></div>
+      <div class="mfld"><label>Registrations</label><input type="number" id="arReg" min="0" value="0"></div>
+      <div class="mfld"><label>Pre-Authorizations</label><input type="number" id="arPre" min="0" value="0"></div>
+      <div class="mfld"><label>Discharged</label><input type="number" id="arDis" min="0" value="0"></div>
+      <div class="mfld"><label>Claims Submitted</label><input type="number" id="arClaims" min="0" value="0"></div>
+      <div class="mfld" style="grid-column:1/-1"><label>Reason for backdated entry <span style="color:#dc2626">*</span></label>
+        <input type="text" id="arReason" placeholder="e.g. PMAM was on leave, forgot to submit, network outage, audit correction, etc.">
+      </div>
+    </div>
+    <div id="addRepErr" style="font-size:11px;color:#dc2626;min-height:14px"></div>
+    <div class="modal-footer">
+      <button class="mbtn mbtn-sec" onclick="document.getElementById('addRepModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn mbtn-pri" onclick="saveAddReport()">Save Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD LEAVE REQUEST MODAL (Admin backdated entry) -->
+<div class="modal-bg" id="addLvModal">
+  <div class="modal-box" style="max-width:680px">
+    <div class="modal-title">➕ Add Leave Request <span style="font-size:11px;font-weight:400;color:#6b7280;margin-left:8px">(Admin backdated entry)</span></div>
+    <div style="font-size:11px;color:#92400e;background:#FEF3C7;padding:8px 12px;border-radius:8px;margin-bottom:12px;line-height:1.5">
+      ⚠️ This record will be marked as admin-entered in the database. A reason is required for audit.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="mfld"><label>PMAM</label>
+        <select id="alPmam"><option value="">-- Select PMAM --</option></select>
+      </div>
+      <div class="mfld"><label>Type</label>
+        <select id="alType"><option>Casual</option><option>Earned</option><option>Medical</option><option>Compensatory</option></select>
+      </div>
+      <div class="mfld"><label>Ward</label>
+        <select id="alWard"><option value="">-- Select Ward --</option></select>
+      </div>
+      <div class="mfld"><label>Duty Assigned To</label><input type="text" id="alDuty" placeholder="Substitute PMAM name"></div>
+      <div class="mfld"><label>From Date</label><input type="date" id="alFrom"></div>
+      <div class="mfld"><label>To Date</label><input type="date" id="alTo"></div>
+      <div class="mfld"><label>Days</label><input type="number" id="alDays" min="0" step="0.5" value="1"></div>
+      <div class="mfld"><label>Return Date</label><input type="date" id="alReturn"></div>
+      <div class="mfld" style="grid-column:1/-1"><label>Leave Reason</label>
+        <input type="text" id="alLeaveReason" placeholder="e.g. Family emergency, Medical, Personal">
+      </div>
+      <div class="mfld"><label>Status</label>
+        <select id="alStatus"><option>Approved</option><option>Pending</option><option>Rejected</option></select>
+      </div>
+      <div class="mfld"><label>Remark (optional)</label><input type="text" id="alRemark" placeholder="Note visible to PMAM"></div>
+      <div class="mfld" style="grid-column:1/-1"><label>Reason for backdated entry <span style="color:#dc2626">*</span></label>
+        <input type="text" id="alAdminReason" placeholder="e.g. Regularizing historical leave, audit correction, etc.">
+      </div>
+    </div>
+    <div id="addLvErr" style="font-size:11px;color:#dc2626;min-height:14px"></div>
+    <div class="modal-footer">
+      <button class="mbtn mbtn-sec" onclick="document.getElementById('addLvModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn mbtn-pri" onclick="saveAddLeave()">Save Leave</button>
     </div>
   </div>
 </div>
@@ -1305,6 +1407,10 @@ function showPanel(id,el){
   document.getElementById('panel-'+id).classList.add('active');
   document.querySelectorAll('.sbs-item').forEach(s=>s.classList.remove('active'));
   if(el)el.classList.add('active');
+  // Auto-load data when the user opens these panels
+  if (id === 'quicklinks' && typeof loadQuickLinks === 'function') loadQuickLinks();
+  if (id === 'contactus' && typeof loadContactUs === 'function') loadContactUs();
+  if (id === 'sysinfo' && typeof refreshSysStats === 'function') refreshSysStats();
 }
 function renderWards(){
   document.getElementById('wardList').innerHTML=wards.map((w,i)=>`
@@ -1385,19 +1491,202 @@ function saveHolidayToDb() {
 
 function saveQuickLinks() {
   var links = {
-    pmam:  document.getElementById('qlPmam').value.trim(),
-    ic:    document.getElementById('qlIc').value.trim(),
-    admin: document.getElementById('qlAdmin').value.trim(),
-    nha:   document.getElementById('qlNha').value.trim(),
-    link5Label: document.getElementById('qlLink5Label').value.trim(),
-    link5Url:   document.getElementById('qlLink5Url').value.trim()
+    pmam:        document.getElementById('qlPmam').value.trim(),
+    pmamLabel:   document.getElementById('qlPmamLabel').value.trim() || 'PMAM Portal',
+    ic:          document.getElementById('qlIc').value.trim(),
+    icLabel:     document.getElementById('qlIcLabel').value.trim() || 'I/C Portal',
+    admin:       document.getElementById('qlAdmin').value.trim(),
+    adminLabel:  document.getElementById('qlAdminLabel').value.trim() || 'Admin Portal',
+    nha:         document.getElementById('qlNha').value.trim(),
+    nhaLabel:    document.getElementById('qlNhaLabel').value.trim() || 'NHA Portal',
+    link5Label:  document.getElementById('qlLink5Label').value.trim(),
+    link5Url:    document.getElementById('qlLink5Url').value.trim(),
+    _updatedBy:  (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
+    _updatedAt:  Date.now()
   };
   var msg = document.getElementById('qlSaveMsg');
   msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…';
   db.collection('settings').doc('quicklinks').set(links, { merge: true })
-    .then(function() { msg.style.color='#166534'; msg.textContent='✅ Quick links saved!'; setTimeout(function(){msg.textContent='';},3000); })
+    .then(function() {
+      msg.style.color='#166534'; msg.textContent='✅ Quick links saved! Landing page will pick up changes on next refresh.';
+      if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/quicklinks', 'quicklinks', links);
+      setTimeout(function(){msg.textContent='';},4000);
+    })
     .catch(function(e) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; });
 }
+
+function loadQuickLinks() {
+  db.collection('settings').doc('quicklinks').get().then(function(doc){
+    if (!doc.exists) return;
+    var d = doc.data() || {};
+    var set = function(id,v){ var el=document.getElementById(id); if(el && v!=null) el.value=v; };
+    set('qlPmam',       d.pmam);       set('qlPmamLabel',  d.pmamLabel);
+    set('qlIc',         d.ic);         set('qlIcLabel',    d.icLabel);
+    set('qlAdmin',      d.admin);      set('qlAdminLabel', d.adminLabel);
+    set('qlNha',        d.nha);        set('qlNhaLabel',   d.nhaLabel);
+    set('qlLink5Label', d.link5Label); set('qlLink5Url',   d.link5Url);
+  }).catch(function(e){ console.warn('loadQuickLinks:', e); });
+}
+
+// ══════════════════════════════════════
+// CONTACT US — save / load
+// ══════════════════════════════════════
+function saveContactUs() {
+  var data = {
+    name:        document.getElementById('cuName').value.trim(),
+    designation: document.getElementById('cuDesig').value.trim(),
+    mobile:      document.getElementById('cuMobile').value.trim(),
+    email:       document.getElementById('cuEmail').value.trim(),
+    address:     document.getElementById('cuAddr').value.trim(),
+    _updatedBy:  (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
+    _updatedAt:  Date.now()
+  };
+  var msg = document.getElementById('cuSaveMsg');
+  msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…';
+  db.collection('settings').doc('contactus').set(data, { merge: true })
+    .then(function() {
+      msg.style.color = '#166534'; msg.textContent = '✅ Contact info saved! Landing page will pick up changes on next refresh.';
+      if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/contactus', 'contactus', data);
+      setTimeout(function(){msg.textContent='';},4000);
+    })
+    .catch(function(e) { msg.style.color = '#dc2626'; msg.textContent = 'Error: '+e.message; });
+}
+
+function loadContactUs() {
+  db.collection('settings').doc('contactus').get().then(function(doc){
+    if (!doc.exists) return;
+    var d = doc.data() || {};
+    var set = function(id,v){ var el=document.getElementById(id); if(el && v!=null) el.value=v; };
+    set('cuName', d.name);
+    set('cuDesig', d.designation);
+    set('cuMobile', d.mobile);
+    set('cuEmail', d.email);
+    set('cuAddr', d.address);
+  }).catch(function(e){ console.warn('loadContactUs:', e); });
+}
+
+// ══════════════════════════════════════
+// BACKUP — downloads a JSON of ALL Firebase collections to admin's computer
+// Uses no Firebase storage. Writes "last backup" timestamp to settings/system.
+// ══════════════════════════════════════
+var BACKUP_COLLECTIONS = [
+  'users', 'pmam_reports', 'daily_reports', 'reports',
+  'leave_requests', 'settings', 'admin_audit_log',
+  'wards', 'roster', 'holidays', 'staff', 'orders',
+  'otps', 'user_requests', 'tickers'
+];
+
+function backupNow() {
+  var progress = document.getElementById('backupProgress');
+  progress.style.color = '#1A3DB5';
+  progress.textContent = '⏳ Reading collections from Firebase…';
+  var backup = {
+    _meta: {
+      generatedAt: new Date().toISOString(),
+      generatedAtReadable: new Date().toLocaleString('en-IN'),
+      generatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
+      firebaseProject: 'gmcrajouri-pmam',
+      portalVersion: 'v1.2.0',
+      totalCollections: 0,
+      totalDocuments: 0
+    },
+    collections: {}
+  };
+
+  var promises = BACKUP_COLLECTIONS.map(function(coll){
+    return db.collection(coll).get()
+      .then(function(snap){
+        var docs = {};
+        snap.forEach(function(d){ docs[d.id] = d.data(); });
+        backup.collections[coll] = docs;
+        backup._meta.totalDocuments += snap.size;
+        if (snap.size > 0) backup._meta.totalCollections++;
+        progress.textContent = '⏳ Reading… '+coll+' ('+snap.size+' docs)';
+      })
+      .catch(function(e){
+        // Collection might not exist — record as empty, not fatal
+        backup.collections[coll] = { _error: 'not_readable: '+e.message };
+      });
+  });
+
+  Promise.all(promises).then(function(){
+    progress.textContent = '✅ Read complete. Preparing download…';
+    try {
+      var json = JSON.stringify(backup, null, 2);
+      var blob = new Blob([json], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var ts = new Date().toISOString().replace(/[:.]/g,'-').substring(0,19);
+      var filename = 'pmjay_backup_' + ts + '.json';
+      var a = document.createElement('a');
+      a.href = url; a.download = filename; a.style.display = 'none';
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+
+      // Update last backup timestamp
+      var ts2 = Date.now();
+      db.collection('settings').doc('system').set({
+        lastBackupAt: ts2,
+        lastBackupReadable: new Date(ts2).toLocaleString('en-IN'),
+        lastBackupBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
+        lastBackupFilename: filename,
+        lastBackupDocCount: backup._meta.totalDocuments
+      }, { merge: true });
+      if (typeof writeAudit === 'function') writeAudit('BACKUP', 'all', '*', {
+        totalDocs: backup._meta.totalDocuments,
+        filename: filename
+      });
+      var kb = Math.round(json.length / 1024);
+      progress.style.color = '#166534';
+      progress.textContent = '✅ Backup downloaded: '+filename+' ('+kb+' KB, '+backup._meta.totalDocuments+' documents)';
+      showToast('✅ Backup downloaded to your computer', 'success');
+      refreshSysStats();
+    } catch(e){
+      progress.style.color = '#dc2626';
+      progress.textContent = 'Error generating file: '+e.message;
+    }
+  }).catch(function(e){
+    progress.style.color = '#dc2626';
+    progress.textContent = 'Backup failed: '+e.message;
+  });
+}
+
+function refreshSysStats() {
+  // Count total entries across known collections
+  var total = 0;
+  var done = 0;
+  var keyCollections = ['users','pmam_reports','leave_requests','admin_audit_log'];
+  keyCollections.forEach(function(coll){
+    db.collection(coll).get().then(function(s){
+      total += s.size; done++;
+      if (done === keyCollections.length) {
+        var el = document.getElementById('sysTotalEntries');
+        if (el) el.textContent = total + ' documents (in key collections)';
+      }
+    }).catch(function(){
+      done++;
+      if (done === keyCollections.length) {
+        var el = document.getElementById('sysTotalEntries');
+        if (el) el.textContent = total + ' documents (partial)';
+      }
+    });
+  });
+  // Load last backup
+  db.collection('settings').doc('system').get().then(function(doc){
+    var el = document.getElementById('sysLastBackup');
+    if (!el) return;
+    if (!doc.exists) { el.textContent = 'Never'; return; }
+    var d = doc.data() || {};
+    if (d.lastBackupReadable) {
+      el.textContent = d.lastBackupReadable + ' (' + (d.lastBackupDocCount||0) + ' docs)';
+    } else {
+      el.textContent = 'Never';
+    }
+  }).catch(function(){
+    var el = document.getElementById('sysLastBackup');
+    if (el) el.textContent = '—';
+  });
+}
+
 function renderOrders(){
   const d=document.getElementById('ordersList');
   if(!ordersData.length){d.innerHTML='<div style="color:#9ca3af;font-style:italic;text-align:center;padding:20px">No orders added yet</div>';return;}
@@ -2109,6 +2398,209 @@ function bulkClear(coll, label){
 }
 
 // ══════════════════════════════════════
+// ADMIN — ADD BACKDATED RECORDS
+// Admin can create reports/leaves on behalf of a PMAM for historical dates.
+// Records are marked _createdByAdmin:true + _adminReason so they remain
+// distinguishable in audit and admin-management views, but display normally
+// in PMAM-facing history. Duplicate checks prevent accidental double-entry.
+// ══════════════════════════════════════
+
+function _populatePmamSelect(selId){
+  var sel = document.getElementById(selId);
+  if (!sel) return;
+  var html = '<option value="">-- Select PMAM --</option>';
+  _dmPmamList.forEach(function(u){
+    html += '<option value="'+u.email+'" data-name="'+u.name+'">'+u.name+' ('+u.email+')</option>';
+  });
+  sel.innerHTML = html;
+}
+function _populateWardSelect(selId){
+  var sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">-- Select Ward --</option>' + _dmWardList.map(function(w){ return '<option>'+w+'</option>'; }).join('');
+}
+
+// --- Add Report ---
+function openAddReport(){
+  if (!requireAdminUnlock()) return;
+  if (_dmPmamList.length === 0) { showToast('Loading PMAM list…', 'info'); dmLoadFilters(); setTimeout(openAddReport, 800); return; }
+  _populatePmamSelect('arPmam');
+  _populateWardSelect('arWard');
+  ['arDate','arOpd','arIpd','arReg','arPre','arDis','arClaims','arReason'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el && (el.type==='number')) el.value = 0;
+    else if (el) el.value = '';
+  });
+  document.getElementById('addRepErr').textContent = '';
+  document.getElementById('addRepModal').classList.add('open');
+}
+function saveAddReport(){
+  if (!requireAdminUnlock()) return;
+  var err = document.getElementById('addRepErr');
+  err.textContent = '';
+
+  var pmamSel = document.getElementById('arPmam');
+  var pmamEmail = pmamSel.value;
+  var pmamName = pmamSel.options[pmamSel.selectedIndex] ? pmamSel.options[pmamSel.selectedIndex].getAttribute('data-name') : '';
+  var date = document.getElementById('arDate').value;
+  var ward = document.getElementById('arWard').value;
+  var reason = document.getElementById('arReason').value.trim();
+
+  if (!pmamEmail) { err.textContent = 'Please select a PMAM.'; return; }
+  if (!date)      { err.textContent = 'Please select a date.'; return; }
+  if (!ward)      { err.textContent = 'Please select a ward.'; return; }
+  if (!reason || reason.length < 5) { err.textContent = 'Reason is required (min 5 chars) for audit.'; return; }
+
+  var rec = {
+    email: pmamEmail,
+    name: pmamName,
+    pmamName: pmamName,
+    date: date,
+    reportDate: date,
+    ward: ward,
+    opd: parseInt(document.getElementById('arOpd').value)||0,
+    ipd: parseInt(document.getElementById('arIpd').value)||0,
+    registrations: parseInt(document.getElementById('arReg').value)||0,
+    preauth: parseInt(document.getElementById('arPre').value)||0,
+    discharged: parseInt(document.getElementById('arDis').value)||0,
+    claims: parseInt(document.getElementById('arClaims').value)||0,
+    timestamp: Date.now(),
+    _createdByAdmin: true,
+    _createdByAdminEmail: ADMIN_EMAIL,
+    _adminReason: reason,
+    _createdAt: Date.now()
+  };
+
+  var coll = window._dmReportsColl || 'pmam_reports';
+  err.textContent = 'Checking for duplicates…'; err.style.color = '#6b7280';
+
+  // Duplicate check: same PMAM + date + ward
+  db.collection(coll)
+    .where('email','==',pmamEmail)
+    .where('date','==',date)
+    .where('ward','==',ward)
+    .get()
+    .then(function(s){
+      if (!s.empty) {
+        err.style.color = '#dc2626';
+        err.textContent = '⚠️ A report already exists for this PMAM/Date/Ward. Delete or edit the existing one instead.';
+        return;
+      }
+      // Proceed to save
+      db.collection(coll).add(rec).then(function(docRef){
+        writeAudit('ADD_RECORD', coll, docRef.id, {
+          pmam: pmamName, email: pmamEmail, date: date, ward: ward, reason: reason
+        });
+        document.getElementById('addRepModal').classList.remove('open');
+        showToast('✅ Backdated report added for '+pmamName, 'success');
+        dmLoadReports();
+      }).catch(function(e){
+        err.style.color = '#dc2626';
+        err.textContent = 'Error: '+e.message;
+      });
+    })
+    .catch(function(e){
+      // If composite-index is missing, fall back to client-side dup check
+      console.warn('Composite dup-check failed, falling back:', e);
+      db.collection(coll).where('email','==',pmamEmail).get().then(function(s){
+        var dup = false;
+        s.forEach(function(d){ var r = d.data(); if (r.date===date && r.ward===ward) dup = true; });
+        if (dup) {
+          err.style.color = '#dc2626';
+          err.textContent = '⚠️ A report already exists for this PMAM/Date/Ward. Delete or edit the existing one instead.';
+          return;
+        }
+        db.collection(coll).add(rec).then(function(docRef){
+          writeAudit('ADD_RECORD', coll, docRef.id, {
+            pmam: pmamName, email: pmamEmail, date: date, ward: ward, reason: reason
+          });
+          document.getElementById('addRepModal').classList.remove('open');
+          showToast('✅ Backdated report added for '+pmamName, 'success');
+          dmLoadReports();
+        }).catch(function(e2){
+          err.style.color = '#dc2626';
+          err.textContent = 'Error: '+e2.message;
+        });
+      });
+    });
+}
+
+// --- Add Leave Request ---
+function openAddLeave(){
+  if (!requireAdminUnlock()) return;
+  if (_dmPmamList.length === 0) { showToast('Loading PMAM list…', 'info'); dmLoadFilters(); setTimeout(openAddLeave, 800); return; }
+  _populatePmamSelect('alPmam');
+  _populateWardSelect('alWard');
+  ['alFrom','alTo','alReturn','alDuty','alLeaveReason','alRemark','alAdminReason'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('alDays').value = 1;
+  document.getElementById('alType').value = 'Casual';
+  document.getElementById('alStatus').value = 'Approved';
+  document.getElementById('addLvErr').textContent = '';
+  document.getElementById('addLvModal').classList.add('open');
+}
+function saveAddLeave(){
+  if (!requireAdminUnlock()) return;
+  var err = document.getElementById('addLvErr');
+  err.textContent = '';
+
+  var pmamSel = document.getElementById('alPmam');
+  var pmamEmail = pmamSel.value;
+  var pmamName = pmamSel.options[pmamSel.selectedIndex] ? pmamSel.options[pmamSel.selectedIndex].getAttribute('data-name') : '';
+  var type = document.getElementById('alType').value;
+  var ward = document.getElementById('alWard').value;
+  var duty = document.getElementById('alDuty').value.trim();
+  var fromD = document.getElementById('alFrom').value;
+  var toD = document.getElementById('alTo').value;
+  var days = parseFloat(document.getElementById('alDays').value)||0;
+  var retDate = document.getElementById('alReturn').value;
+  var lvReason = document.getElementById('alLeaveReason').value.trim();
+  var status = document.getElementById('alStatus').value;
+  var remark = document.getElementById('alRemark').value.trim();
+  var adminReason = document.getElementById('alAdminReason').value.trim();
+
+  if (!pmamEmail) { err.textContent = 'Please select a PMAM.'; return; }
+  if (!ward)      { err.textContent = 'Please select a ward.'; return; }
+  if (!fromD || !toD) { err.textContent = 'Please set From and To dates.'; return; }
+  if (fromD > toD)    { err.textContent = 'From date cannot be after To date.'; return; }
+  if (!lvReason)  { err.textContent = 'Please enter a leave reason.'; return; }
+  if (!adminReason || adminReason.length < 5) { err.textContent = 'Admin reason is required (min 5 chars) for audit.'; return; }
+
+  var rec = {
+    email: pmamEmail,
+    name: pmamName,
+    type: type,
+    ward: ward,
+    duty: duty,
+    from: fromD,
+    to: toD,
+    days: days,
+    retDate: retDate,
+    reason: lvReason,
+    status: status,
+    remark: remark,
+    timestamp: Date.now(),
+    _createdByAdmin: true,
+    _createdByAdminEmail: ADMIN_EMAIL,
+    _adminReason: adminReason,
+    _createdAt: Date.now()
+  };
+
+  db.collection('leave_requests').add(rec).then(function(docRef){
+    writeAudit('ADD_RECORD', 'leave_requests', docRef.id, {
+      pmam: pmamName, email: pmamEmail, type: type, from: fromD, to: toD, status: status, reason: adminReason
+    });
+    document.getElementById('addLvModal').classList.remove('open');
+    showToast('✅ Backdated leave added for '+pmamName, 'success');
+    dmLoadLeaves();
+  }).catch(function(e){
+    err.style.color = '#dc2626';
+    err.textContent = 'Error: '+e.message;
+  });
+}
+
+// ══════════════════════════════════════
 // AUDIT LOG
 // ══════════════════════════════════════
 function loadAuditLog(){
@@ -2124,8 +2616,8 @@ function loadAuditLog(){
       return;
     }
     tb.innerHTML = rows.map(function(a){
-      var actBg = {EDIT:'#DBEAFE',DELETE:'#FEE2E2',BULK_DELETE:'#FCA5A5',UNLOCK:'#FEF3C7'}[a.action]||'#F3F4F6';
-      var actFg = {EDIT:'#1E40AF',DELETE:'#991b1b',BULK_DELETE:'#7f1d1d',UNLOCK:'#92400e'}[a.action]||'#374151';
+      var actBg = {EDIT:'#DBEAFE',DELETE:'#FEE2E2',BULK_DELETE:'#FCA5A5',UNLOCK:'#FEF3C7',ADD_RECORD:'#DCFCE7',BACKUP:'#E0E7FF'}[a.action]||'#F3F4F6';
+      var actFg = {EDIT:'#1E40AF',DELETE:'#991b1b',BULK_DELETE:'#7f1d1d',UNLOCK:'#92400e',ADD_RECORD:'#166534',BACKUP:'#3730A3'}[a.action]||'#374151';
       var det = '';
       try { det = typeof a.details === 'string' ? a.details : JSON.stringify(a.details).substring(0,200); } catch(e) { det = '—'; }
       return '<tr>'
