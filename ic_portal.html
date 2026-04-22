@@ -242,7 +242,11 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="sbi active" onclick="goSec('monthly',this)" title="Monthly Report">
+    <div class="sbi active" onclick="goSec('daily',this)" title="Daily Report">
+      <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+      <div class="sbl">Daily</div>
+    </div>
+    <div class="sbi" onclick="goSec('monthly',this)" title="Monthly Report">
       <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
       <div class="sbl">Monthly</div>
     </div>
@@ -272,8 +276,44 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
   <!-- CONTENT -->
   <div class="content">
 
+    <!-- ===== DAILY REPORT ===== -->
+    <div class="sec active" id="sec-daily">
+      <div class="page-hd">Daily Report</div>
+      <div class="card">
+        <div class="card-hd">PMAM Performance — Daily</div>
+        <div class="frow">
+          <div class="fld"><label>Mode</label>
+            <select id="dailyMode" style="width:150px" onchange="dailyToggleRange()">
+              <option value="single">Single Date</option>
+              <option value="range">Date Range</option>
+            </select>
+          </div>
+          <div class="fld" id="dailyDateWrap"><label>Date</label><input type="date" id="dailyDate" style="width:160px"></div>
+          <div class="fld" id="dailyFromWrap" style="display:none"><label>From</label><input type="date" id="dailyFrom" style="width:150px"></div>
+          <div class="fld" id="dailyToWrap" style="display:none"><label>To</label><input type="date" id="dailyTo" style="width:150px"></div>
+          <button class="btn btn-pri" onclick="genDaily()">Generate</button>
+          <button class="btn btn-grn" onclick="exportExcel('dailyTbl','Daily_Report')">Export Excel</button>
+          <button class="btn btn-word" onclick="printReportOrient('dailyReportArea','Daily Report','portrait')">Print / PDF</button>
+        </div>
+        <div style="font-size:11px;color:#6b7280;margin-top:6px">Multiple ward entries by the same PMAM are merged into one row with wards comma-separated and values summed. PMAMs who didn't submit are included with 0 values.</div>
+      </div>
+
+      <div class="metrics-grid" id="dailyMetrics"></div>
+
+      <div class="card" id="dailyReportArea">
+        <div class="card-hd" id="dailyTitle">Daily Summary</div>
+        <div class="tbl-wrap">
+          <table id="dailyTbl">
+            <thead><tr><th>S.No</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Register</th><th>Preauth Initiated</th><th>Preauth Amt (₹)</th><th>Discharge</th><th>Claim Amt (₹)</th></tr></thead>
+            <tbody id="dailyTbody"><tr><td colspan="9" class="empty-td">Select date and click Generate</td></tr></tbody>
+            <tfoot id="dailyFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- ===== MONTHLY REPORT ===== -->
-    <div class="sec active" id="sec-monthly">
+    <div class="sec" id="sec-monthly">
       <div class="page-hd">Monthly Report</div>
       <div class="card">
         <div class="card-hd">PMAM Performance — Monthly</div>
@@ -289,7 +329,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           <div class="fld"><label>Year</label><select id="rYearMonth" style="width:100px"></select></div>
           <button class="btn btn-pri" onclick="genMonthly()">Generate</button>
           <button class="btn btn-grn" onclick="exportExcel('monthlyTbl','Monthly_Report')">Export Excel</button>
-          <button class="btn btn-word" onclick="printReport('Monthly PMAM Performance Report')">Print / PDF</button>
+          <button class="btn btn-word" onclick="printReportOrient('sec-monthly','Monthly PMAM Performance Report','landscape')">Print / PDF</button>
         </div>
       </div>
       <div class="metrics-grid" id="monthlyMetrics"></div>
@@ -297,7 +337,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd" id="monthlyTitle">PMAM-wise Summary — April 2026</div>
         <div class="tbl-wrap">
           <table id="monthlyTbl">
-            <thead><tr><th>S.No</th><th>PMAM Name</th><th>Wards</th><th>IPD</th><th>Med</th><th>Surg</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <thead><tr><th>S.No</th><th>PMAM Name</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
             <tbody id="monthlyTbody"><tr><td colspan="12" class="empty-td">Click Generate to load data</td></tr></tbody>
             <tfoot id="monthlyFoot"></tfoot>
           </table>
@@ -314,7 +354,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           <div class="fld"><label>Year</label><select id="rYearAnnual" style="width:110px"></select></div>
           <button class="btn btn-pri" onclick="genAnnual()">Generate</button>
           <button class="btn btn-grn" onclick="exportExcel('annualTbl','Annual_Report')">Export Excel</button>
-          <button class="btn btn-word" onclick="printReport('Annual PMAM Performance Report')">Print / PDF</button>
+          <button class="btn btn-word" onclick="printReportOrient('sec-annual','Annual PMAM Performance Report','landscape')">Print / PDF</button>
         </div>
       </div>
       <div class="metrics-grid" id="annualMetrics"></div>
@@ -322,7 +362,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd">Month-wise Summary — 2026</div>
         <div class="tbl-wrap">
           <table id="annualTbl">
-            <thead><tr><th>Month</th><th>IPD</th><th>Med</th><th>Surg</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <thead><tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
             <tbody id="annualTbody"><tr><td colspan="10" class="empty-td">Click Generate to load data</td></tr></tbody>
             <tfoot id="annualFoot"></tfoot>
           </table>
@@ -362,7 +402,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           <div class="fld"><label>Year</label><select id="rYearWard" style="width:100px"></select></div>
           <button class="btn btn-pri" onclick="genWard()">Generate</button>
           <button class="btn btn-grn" onclick="exportExcel('wardTbl','Ward_Report')">Export Excel</button>
-          <button class="btn btn-word" onclick="printReport('Ward Wise Performance Report')">Print / PDF</button>
+          <button class="btn btn-word" onclick="printReportOrient('sec-ward','Ward-Wise Performance Report','landscape')">Print / PDF</button>
         </div>
       </div>
       <div class="metrics-grid" id="wardMetrics"></div>
@@ -391,7 +431,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           <div class="fld"><label>Year</label><select id="rYearPmam" style="width:100px"></select></div>
           <button class="btn btn-pri" onclick="genPmam()">Generate</button>
           <button class="btn btn-grn" onclick="exportExcel('pmamTbl','PMAM_Report')">Export Excel</button>
-          <button class="btn btn-word" onclick="printReport('PMAM Wise Performance Report')">Print / PDF</button>
+          <button class="btn btn-word" onclick="printReportOrient('sec-pmamwise','PMAM-Wise Performance Report','landscape')">Print / PDF</button>
         </div>
       </div>
       <div class="metrics-grid" id="pmamMetrics"></div>
@@ -399,7 +439,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd" id="pmamTitle">Monthly Trend</div>
         <div class="tbl-wrap">
           <table id="pmamTbl">
-            <thead><tr><th>Month</th><th>IPD</th><th>Med</th><th>Surg</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <thead><tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
             <tbody id="pmamTbody"><tr><td colspan="10" class="empty-td">Select PMAM and click Generate</td></tr></tbody>
             <tfoot id="pmamFoot"></tfoot>
           </table>
@@ -436,7 +476,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd">All Entries <span id="arCount" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
         <div class="tbl-wrap">
           <table id="allTbl">
-            <thead><tr><th>Date</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Med</th><th>Surg</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Action</th></tr></thead>
+            <thead><tr><th>Date</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Action</th></tr></thead>
             <tbody id="allTbody"><tr><td colspan="13" class="empty-td">Click Filter to load records</td></tr></tbody>
             <tfoot id="allFoot"></tfoot>
           </table>
@@ -900,8 +940,229 @@ function exportExcel(tblId,name){
   a.click();
 }
 
-// PRINT
+// ══════════════════════════════════════
+// ENHANCED PRINT — supports orientation + government letterhead
+// ══════════════════════════════════════
+function inrFmt(n){
+  n = Math.round(Number(n)||0);
+  if (n === 0) return '₹0';
+  var s = String(Math.abs(n));
+  // Indian formatting: last 3 digits, then groups of 2
+  var last3 = s.slice(-3);
+  var rest = s.slice(0, -3);
+  if (rest) {
+    rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+    s = rest + ',' + last3;
+  } else {
+    s = last3;
+  }
+  return '₹' + (n < 0 ? '-' : '') + s;
+}
+
 function printReport(title){
+  // Default to portrait for backward compatibility with older call sites
+  printReportOrient(null, title || 'Report', 'portrait');
+}
+
+function printReportOrient(areaId, title, orientation){
+  var orient = orientation === 'landscape' ? 'landscape' : 'portrait';
+  var dateStr = new Date().toLocaleString('en-IN', { dateStyle:'long', timeStyle:'short' });
+  // Pull the content — either a specific area or the active section
+  var sourceEl = areaId ? document.getElementById(areaId) : null;
+  if (!sourceEl) {
+    var activeSec = document.querySelector('.sec.active');
+    sourceEl = activeSec || document.body;
+  }
+  var contentHTML = sourceEl.innerHTML;
+
+  var w = window.open('', '_blank', 'width=1200,height=900');
+  if (!w) { alert('Popup blocked — please allow popups for this site to print.'); return; }
+
+  var css = ''
+    + '*{box-sizing:border-box;margin:0;padding:0}'
+    + 'body{font-family:"Inter","Segoe UI",Arial,sans-serif;padding:10mm 12mm;color:#000;background:#fff;font-size:10pt}'
+    + '.phead{text-align:center;border-bottom:2px solid #000;padding-bottom:6mm;margin-bottom:4mm}'
+    + '.phead .state{font-size:11pt;font-weight:700}'
+    + '.phead .hosp{font-size:13pt;font-weight:800;margin-top:1mm}'
+    + '.phead .unit{font-size:10pt;color:#333;margin-top:1mm}'
+    + '.phead .title{font-size:12pt;font-weight:800;margin-top:3mm;text-decoration:underline}'
+    + '.meta-row{display:flex;justify-content:space-between;align-items:center;font-size:9pt;margin:3mm 0 5mm 0;padding:0 2mm}'
+    + 'table{width:100%;border-collapse:collapse;margin-top:2mm;font-size:9pt}'
+    + 'th,td{border:1px solid #000;padding:3px 5px;text-align:center;vertical-align:middle}'
+    + 'th{background:#E5EAF4;font-weight:700;font-size:8.5pt}'
+    + 'td.txt,th.txt{text-align:left}'
+    + 'tfoot tr{background:#F0F0F0;font-weight:800}'
+    + '.noreport{color:#000;font-style:italic}'
+    + '.sig-row{display:flex;justify-content:space-between;margin-top:20mm;font-size:9pt}'
+    + '.sig-box{text-align:center;min-width:55mm}'
+    + '.sig-line{border-top:1px solid #000;padding-top:2mm;margin-top:10mm;font-weight:700}'
+    + '.sig-desig{font-size:8pt;color:#555;margin-top:1mm}'
+    + '.footer-note{text-align:center;font-size:8pt;color:#666;margin-top:8mm;border-top:1px solid #999;padding-top:2mm}'
+    + '.card-hd,.btn,.frow,.metrics-grid,.empty-td{display:none !important}'
+    + '.tbl-wrap{overflow:visible;max-height:none}'
+    + '@page{size:A4 '+orient+';margin:10mm 10mm}'
+    + '@media print{body{padding:0}}';
+
+  var periodHtml = document.querySelector('#dailyTitle, #monthlyTitle, #wardTitle, #pmamTitle');
+  var periodText = periodHtml ? (periodHtml.textContent || '') : '';
+
+  var html = '<!doctype html><html><head><meta charset="utf-8"><title>'+title+'</title><style>'+css+'</style></head><body>'
+    + '<div class="phead">'
+    +   '<div class="state">Government of Jammu &amp; Kashmir</div>'
+    +   '<div class="hosp">Government Medical College &amp; Associated Hospital, Rajouri</div>'
+    +   '<div class="unit">AB — Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) Unit</div>'
+    +   '<div class="title">'+title+'</div>'
+    + '</div>'
+    + '<div class="meta-row"><span><strong>Period:</strong> '+periodText+'</span><span><strong>Generated:</strong> '+dateStr+'</span></div>'
+    + contentHTML
+    + '<div class="sig-row">'
+    +   '<div class="sig-box"><div class="sig-line">I/C AB-PMJAY<div class="sig-desig">GMC &amp; AH, Rajouri</div></div></div>'
+    +   '<div class="sig-box"><div class="sig-line">Medical Superintendent<div class="sig-desig">GMC &amp; AH, Rajouri</div></div></div>'
+    + '</div>'
+    + '<div class="footer-note">This is a computer-generated report — AB-PMJAY Unit, GMC &amp; AH Rajouri</div>'
+    + '<script>window.onload=function(){setTimeout(function(){window.print();}, 300);};<\/script>'
+    + '</body></html>';
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+// ══════════════════════════════════════
+// PMAM LIST — pulled from users collection, cached for daily report
+// ══════════════════════════════════════
+var _allPmams = []; // [{name, email}]
+function fetchPmamList(cb){
+  if (_allPmams.length > 0 && cb) { cb(_allPmams); return; }
+  db.collection('users').where('role','==','PMAM').get().then(function(snap){
+    _allPmams = [];
+    snap.forEach(function(d){
+      var u = d.data();
+      _allPmams.push({ name: u.name || u.email || 'Unknown', email: u.email || '' });
+    });
+    _allPmams.sort(function(a,b){ return a.name.localeCompare(b.name); });
+    if (cb) cb(_allPmams);
+  }).catch(function(e){
+    console.warn('fetchPmamList:', e);
+    if (cb) cb([]);
+  });
+}
+
+// ══════════════════════════════════════
+// DAILY REPORT — generate
+// Merges multiple entries per PMAM on the same date. Includes missing PMAMs with 0 values.
+// ══════════════════════════════════════
+function dailyToggleRange(){
+  var mode = document.getElementById('dailyMode').value;
+  document.getElementById('dailyDateWrap').style.display = (mode === 'single') ? 'flex' : 'none';
+  document.getElementById('dailyFromWrap').style.display = (mode === 'range')  ? 'flex' : 'none';
+  document.getElementById('dailyToWrap').style.display   = (mode === 'range')  ? 'flex' : 'none';
+}
+
+function genDaily(){
+  var mode = document.getElementById('dailyMode').value;
+  var dateFrom, dateTo, title;
+  if (mode === 'single') {
+    var d = document.getElementById('dailyDate').value;
+    if (!d) { alert('Please select a date.'); return; }
+    dateFrom = d; dateTo = d;
+    title = 'Daily Summary — ' + new Date(d).toLocaleDateString('en-IN', { dateStyle:'long' });
+  } else {
+    dateFrom = document.getElementById('dailyFrom').value;
+    dateTo   = document.getElementById('dailyTo').value;
+    if (!dateFrom || !dateTo) { alert('Please select both From and To dates.'); return; }
+    if (dateFrom > dateTo) { alert('From date cannot be after To date.'); return; }
+    title = 'Daily Summary — ' + new Date(dateFrom).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + ' to ' + new Date(dateTo).toLocaleDateString('en-IN',{dateStyle:'long'});
+  }
+  document.getElementById('dailyTitle').textContent = title;
+  document.getElementById('dailyTbody').innerHTML = '<tr><td colspan="9" class="empty-td">Loading…</td></tr>';
+
+  // Filter records for the date(s)
+  var filtered = allReports.filter(function(r){
+    if (!r.date) return false;
+    return r.date >= dateFrom && r.date <= dateTo;
+  });
+
+  // Merge by PMAM (multiple entries merge)
+  fetchPmamList(function(pmamList){
+    var byPmam = {};
+    // Seed with all known PMAMs (even if no report)
+    pmamList.forEach(function(p){
+      byPmam[p.email || p.name] = {
+        name: p.name, email: p.email,
+        wards: [], ipd:0, reg:0, pre:0, preAmt:0, dis:0, clm:0,
+        hasReport: false
+      };
+    });
+    filtered.forEach(function(r){
+      var key = r.email || r.name || 'unknown';
+      if (!byPmam[key]) {
+        byPmam[key] = { name: r.name || r.email || 'Unknown', email: r.email || '', wards:[], ipd:0, reg:0, pre:0, preAmt:0, dis:0, clm:0, hasReport:false };
+      }
+      var p = byPmam[key];
+      p.hasReport = true;
+      var wards = Array.isArray(r.wards) ? r.wards : (r.ward ? [r.ward] : []);
+      wards.forEach(function(w){ if (w && p.wards.indexOf(w) === -1) p.wards.push(w); });
+      p.ipd   += Number(r.ipd||0);
+      p.reg   += Number(r.reg||0);
+      p.pre   += Number(r.pre||0);
+      p.preAmt+= Number(r.preAmt||0);
+      p.dis   += Number(r.dis||0);
+      p.clm   += Number(r.clm||0);
+    });
+
+    var rows = Object.values(byPmam).sort(function(a,b){
+      // PMAMs with reports first, then alphabetical
+      if (a.hasReport !== b.hasReport) return a.hasReport ? -1 : 1;
+      return (a.name||'').localeCompare(b.name||'');
+    });
+
+    var reportedCount = rows.filter(function(r){ return r.hasReport; }).length;
+    var totalCount    = rows.length;
+
+    var totals = { ipd:0, reg:0, pre:0, preAmt:0, dis:0, clm:0 };
+    var html = rows.map(function(r, i){
+      totals.ipd+=r.ipd; totals.reg+=r.reg; totals.pre+=r.pre; totals.preAmt+=r.preAmt; totals.dis+=r.dis; totals.clm+=r.clm;
+      var wardsStr = r.wards.length ? r.wards.join(', ') : '—';
+      return '<tr>'
+        + '<td>'+(i+1)+'</td>'
+        + '<td class="txt">'+(r.name||'—')+'</td>'
+        + '<td class="txt">'+wardsStr+'</td>'
+        + '<td>'+r.ipd+'</td>'
+        + '<td>'+r.reg+'</td>'
+        + '<td>'+r.pre+'</td>'
+        + '<td>'+inrFmt(r.preAmt)+'</td>'
+        + '<td>'+r.dis+'</td>'
+        + '<td>'+inrFmt(r.clm)+'</td>'
+        + '</tr>';
+    }).join('');
+
+    document.getElementById('dailyTbody').innerHTML = html || '<tr><td colspan="9" class="empty-td">No PMAMs found.</td></tr>';
+    document.getElementById('dailyFoot').innerHTML =
+      '<tr><td colspan="3" style="text-align:right"><strong>TOTAL</strong></td>'
+      + '<td><strong>'+totals.ipd+'</strong></td>'
+      + '<td><strong>'+totals.reg+'</strong></td>'
+      + '<td><strong>'+totals.pre+'</strong></td>'
+      + '<td><strong>'+inrFmt(totals.preAmt)+'</strong></td>'
+      + '<td><strong>'+totals.dis+'</strong></td>'
+      + '<td><strong>'+inrFmt(totals.clm)+'</strong></td></tr>'
+      + '<tr><td colspan="9" style="text-align:center;font-style:italic;background:#F0F9FF;color:#0F2B8C"><strong>'+reportedCount+' / '+totalCount+' PMAMs reported</strong></td></tr>';
+
+    // Metrics
+    document.getElementById('dailyMetrics').innerHTML = [
+      { c:'c1', n:totals.ipd, l:'Total IPD' },
+      { c:'c2', n:totals.reg, l:'Registered' },
+      { c:'c3', n:totals.pre, l:'Preauth Init' },
+      { c:'c4', n:inrFmt(totals.preAmt), l:'Preauth Amt' },
+      { c:'c5', n:totals.dis, l:'Discharged' },
+      { c:'c6', n:inrFmt(totals.clm), l:'Claim Amt' }
+    ].map(function(m){
+      return '<div class="mcard '+m.c+'"><div class="mcard-num">'+m.n+'</div><div class="mcard-label">'+m.l+'</div></div>';
+    }).join('');
+  });
+}
+
+// PRINT
+function printReport_DEPRECATED(title){
   window.print();
 }
 
@@ -923,10 +1184,14 @@ window.addEventListener('load',()=>{
     return;
   }
 
-  genMonthly();
+  // Default: show Daily report first (active section in sidebar)
   const today=new Date().toISOString().split('T')[0];
   document.querySelectorAll('input[type=date]').forEach(el=>{if(!el.value)el.value=today;});
+  fetchPmamList(function(){}); // warm up cache for Daily report
   fetchFirebaseData();
+
+  // Also seed Monthly dropdowns (kept for users who switch to Monthly section)
+  genMonthly();
 });
 
 function fetchFirebaseData() {
@@ -935,6 +1200,7 @@ function fetchFirebaseData() {
     snap.forEach(doc => allReports.push({ id: doc.id, ...doc.data() }));
     populateFilters();
     // Refresh whichever section is currently active
+    if(document.getElementById('sec-daily') && document.getElementById('sec-daily').classList.contains('active')) genDaily();
     if(document.getElementById('sec-allrecords') && document.getElementById('sec-allrecords').classList.contains('active')) genAllRecords();
     if(document.getElementById('sec-monthly') && document.getElementById('sec-monthly').classList.contains('active')) genMonthly();
     if(document.getElementById('sec-annual') && document.getElementById('sec-annual').classList.contains('active')) genAnnual();

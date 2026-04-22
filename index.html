@@ -146,8 +146,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',Arial,sans-serif;backg
       </div>
     </div>
 
-    <div class="nav-area" id="mainNav">
-      <!-- Fallback nav items (shown only if Firebase fetch fails or nav is empty in admin) -->
+    <div class="nav-area">
       <a class="nav-item active" href="#">Home</a>
       <a class="nav-item" href="#">About Us <span class="nav-arrow">▾</span></a>
       <a class="nav-item" href="#">Staff <span class="nav-arrow">▾</span></a>
@@ -297,18 +296,16 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',Arial,sans-serif;backg
   </div>
 
   <div class="footer-bar">
-    <div class="footer-links" id="footerLinksWrap">
+    <div class="footer-links">
       <span class="footer-lbl">Quick Links:</span>
-      <span id="footerQuickLinks">
-        <a class="footer-link" href="https://tms.pmjay.gov.in" target="_blank">TMS Portal</a>
-        <a class="footer-link" href="https://bis.pmjay.gov.in" target="_blank">BIS Portal</a>
-        <a class="footer-link" href="https://ump.pmjay.gov.in" target="_blank">UMP Portal</a>
-        <a class="footer-link" href="https://hem.pmjay.gov.in" target="_blank">HEM Portal</a>
-      </span>
+      <a class="footer-link" href="https://tms.pmjay.gov.in" target="_blank">TMS Portal</a>
+      <a class="footer-link" href="https://bis.pmjay.gov.in" target="_blank">BIS Portal</a>
+      <a class="footer-link" href="https://ump.pmjay.gov.in" target="_blank">UMP Portal</a>
+      <a class="footer-link" href="https://hem.pmjay.gov.in" target="_blank">HEM Portal</a>
       <span class="footer-lbl" style="margin-left:8px">Contact:</span>
-      <a class="footer-link" href="mailto:pmam.gmcrajouri@gov.in" id="footerContactLink">pmam.gmcrajouri@gov.in</a>
+      <a class="footer-link" href="mailto:pmam.gmcrajouri@gov.in">pmam.gmcrajouri@gov.in</a>
     </div>
-    <div class="footer-copy">&copy; <span id="footerYear">2026</span> <span>GMC &amp; AH Rajouri — AB PM-JAY MIS</span></div>
+    <div class="footer-copy">&copy; 2026 <span>GMC &amp; AH Rajouri — AB PM-JAY MIS</span></div>
   </div>
 
 </div>
@@ -534,12 +531,6 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   } catch(e){}
 
-  // Auto-update copyright year
-  try {
-    var yEl = document.getElementById('footerYear');
-    if (yEl) yEl.textContent = new Date().getFullYear();
-  } catch(e) {}
-
   // Load saved images from Firebase
   db.collection('settings').doc('portal').get().then(function(doc) {
     if (doc.exists) {
@@ -559,80 +550,6 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   }).catch(function(e) {
     console.error('Error loading portal images:', e);
-  });
-
-  // ══════════════════════════════════════════════════════════
-  // Load NAV BAR from settings/navbar (admin-controlled)
-  // Falls back silently to hardcoded items on any error/missing data
-  // ══════════════════════════════════════════════════════════
-  db.collection('settings').doc('navbar').get().then(function(doc) {
-    if (!doc.exists) return;
-    var data = doc.data() || {};
-    if (!Array.isArray(data.items) || data.items.length === 0) return;
-    var items = data.items
-      .filter(function(i){ return i && i.label && i.visible !== false; })
-      .slice()
-      .sort(function(a,b){ return (a.order||0) - (b.order||0); });
-    if (items.length === 0) return;
-    var nav = document.getElementById('mainNav');
-    if (!nav) return;
-    // Escape helper
-    var esc = function(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
-    nav.innerHTML = items.map(function(it, idx){
-      var cls = 'nav-item' + (idx === 0 ? ' active' : '');
-      var href = it.link && String(it.link).trim() ? esc(it.link) : '#';
-      var isExternal = /^https?:\/\//i.test(href);
-      var target = isExternal ? ' target="_blank" rel="noopener"' : '';
-      return '<a class="'+cls+'" href="'+href+'"'+target+'>'+esc(it.label)+'</a>';
-    }).join('');
-  }).catch(function(e) {
-    console.warn('Nav bar load failed, using fallback:', e && e.message);
-  });
-
-  // ══════════════════════════════════════════════════════════
-  // Load QUICK LINKS from settings/quicklinks (footer)
-  // Falls back silently to hardcoded links
-  // ══════════════════════════════════════════════════════════
-  db.collection('settings').doc('quicklinks').get().then(function(doc) {
-    if (!doc.exists) return;
-    var d = doc.data() || {};
-    var links = [
-      { url: d.pmam,  label: d.pmamLabel  || 'PMAM Portal'  },
-      { url: d.ic,    label: d.icLabel    || 'I/C Portal'   },
-      { url: d.admin, label: d.adminLabel || 'Admin Portal' },
-      { url: d.nha,   label: d.nhaLabel   || 'NHA Portal'   },
-      { url: d.link5Url, label: d.link5Label }
-    ].filter(function(l){ return l.url && String(l.url).trim() && l.label && String(l.label).trim(); });
-    if (links.length === 0) return;
-    var wrap = document.getElementById('footerQuickLinks');
-    if (!wrap) return;
-    var esc = function(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
-    wrap.innerHTML = links.map(function(l){
-      var href = esc(l.url);
-      var isExternal = /^https?:\/\//i.test(href);
-      var target = isExternal ? ' target="_blank" rel="noopener"' : '';
-      return '<a class="footer-link" href="'+href+'"'+target+'>'+esc(l.label)+'</a>';
-    }).join('');
-  }).catch(function(e) {
-    console.warn('Quick links load failed, using fallback:', e && e.message);
-  });
-
-  // ══════════════════════════════════════════════════════════
-  // Load CONTACT US from settings/contactus (footer email)
-  // Falls back silently to hardcoded email
-  // ══════════════════════════════════════════════════════════
-  db.collection('settings').doc('contactus').get().then(function(doc) {
-    if (!doc.exists) return;
-    var d = doc.data() || {};
-    if (d.email && String(d.email).trim()) {
-      var el = document.getElementById('footerContactLink');
-      if (el) {
-        el.href = 'mailto:' + d.email.trim();
-        el.textContent = d.email.trim();
-      }
-    }
-  }).catch(function(e) {
-    console.warn('Contact us load failed, using fallback:', e && e.message);
   });
 });
 
