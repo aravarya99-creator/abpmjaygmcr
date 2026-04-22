@@ -498,7 +498,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 
       <!-- TABS -->
       <div class="tabs">
-        <div class="tab active" onclick="switchLvTab('pending',this)">Pending (<span id="pendingCnt">3</span>)</div>
+        <div class="tab active" onclick="switchLvTab('pending',this)">Pending (<span id="pendingCnt">0</span>)</div>
         <div class="tab" onclick="switchLvTab('history',this)">All History</div>
         <div class="tab" onclick="switchLvTab('onleave',this)">On Leave Today</div>
       </div>
@@ -1227,10 +1227,21 @@ function updateLeaveBadges() {
   var pending  = leaveRequests.filter(l => l.status === 'Pending').length;
   var approved = leaveRequests.filter(l => l.status === 'Approved').length;
   var rejected = leaveRequests.filter(l => l.status === 'Rejected').length;
+  // "On Leave Today" — Approved requests whose date range includes today
+  var today = new Date().toISOString().split('T')[0];
+  var onLeaveToday = leaveRequests.filter(function(l){
+    return l.status === 'Approved' && l.from && l.to && l.from <= today && l.to >= today;
+  }).length;
+
   var set = (id, v) => { var el = document.getElementById(id); if (el) el.textContent = v; };
   set('lv-pending',  pending);
   set('lv-approved', approved);
   set('lv-rejected', rejected);
+  set('lv-onleave',  onLeaveToday);
+
+  // Tab counter (previously hardcoded to 3 — now live)
+  set('pendingCnt', pending);
+
   // Optional sidebar badge on the Leave Requests nav item (if one exists).
   var sideBadge = document.getElementById('navLeaveBadge');
   if (sideBadge) {
