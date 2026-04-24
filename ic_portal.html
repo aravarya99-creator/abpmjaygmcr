@@ -579,8 +579,9 @@ function genMonthly(){
   const byPmam={};
   filtered.forEach(r=>{
     const nm=r.name||r.email||'Unknown';
-    if(!byPmam[nm])byPmam[nm]={name:nm,ipd:0,med:0,surg:0,reg:0,pre:0,preAmt:0,dis:0,clm:0};
+    if(!byPmam[nm])byPmam[nm]={name:nm,wardsSet:new Set(),ipd:0,med:0,surg:0,reg:0,pre:0,preAmt:0,dis:0,clm:0};
     const p=byPmam[nm];
+    if(Array.isArray(r.wards))r.wards.forEach(w=>{ if(w)p.wardsSet.add(w); });
     p.ipd+=Number(r.ipd||0);p.med+=Number(r.med||0);p.surg+=Number(r.surg||0);
     p.reg+=Number(r.reg||0);p.pre+=Number(r.pre||0);p.preAmt+=Number(r.preAmt||0);
     p.dis+=Number(r.dis||0);p.clm+=Number(r.clm||0);
@@ -600,16 +601,22 @@ function genMonthly(){
     {c:'c6',n:cv(totIPD,totReg),l:'Conv%'}
   ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 
-  document.getElementById('monthlyTbody').innerHTML=rows.map((r,i)=>`
+  document.getElementById('monthlyTbody').innerHTML=rows.map((r,i)=>{
+    const wardsArr=Array.from(r.wardsSet||[]);
+    const wardsDisplay=wardsArr.length?wardsArr.join(', '):'—';
+    const wardsTitle=wardsArr.length?wardsArr.join(', '):'No wards recorded';
+    return `
     <tr>
       <td>${i+1}</td><td><strong>${r.name}</strong></td>
+      <td title="${wardsTitle}" style="font-size:11px;max-width:180px;white-space:normal;word-wrap:break-word">${wardsDisplay}</td>
       <td>${r.ipd}</td><td>${r.med}</td><td>${r.surg}</td>
       <td><strong>${r.reg}</strong></td><td>${r.pre}</td>
       <td>${fmt(r.preAmt)}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td>
       <td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td>
     </tr>
-  `).join('');
-  document.getElementById('monthlyFoot').innerHTML=`<tr class="tot-row"><td colspan="2">TOTAL</td><td>${totIPD}</td><td>—</td><td>—</td><td>${totReg}</td><td>${totPre}</td><td>—</td><td>${totDis}</td><td>${fmt(totClm)}</td><td>${cv(totIPD,totReg)}</td></tr>`;
+  `;
+  }).join('');
+  document.getElementById('monthlyFoot').innerHTML=`<tr class="tot-row"><td colspan="2">TOTAL</td><td>—</td><td>${totIPD}</td><td>—</td><td>—</td><td>${totReg}</td><td>${totPre}</td><td>—</td><td>${totDis}</td><td>${fmt(totClm)}</td><td>${cv(totIPD,totReg)}</td></tr>`;
 }
 
 // ===== ANNUAL =====
