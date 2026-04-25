@@ -506,8 +506,13 @@ tr:hover td{background:#EEF3FF}
 
         <div class="settings-sidebar">
           <div class="sbs-title">Settings Menu</div>
+          <div class="sbs-section-label">📍 Landing Page</div>
+          <div class="sbs-item active" onclick="showPanel('landingPageEditor',this)" style="background:linear-gradient(90deg,#fef3c7,#fef9c3);border-left:3px solid #f59e0b;font-weight:700">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/></svg>🎨 Landing Page Editor
+          </div>
+
           <div class="sbs-section-label">Portal</div>
-          <div class="sbs-item active" onclick="showPanel('portal',this)">
+          <div class="sbs-item" onclick="showPanel('portal',this)">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Portal Info
           </div>
           <div class="sbs-item" onclick="showPanel('ticker',this)">
@@ -553,7 +558,68 @@ tr:hover td{background:#EEF3FF}
 
         <div class="settings-content">
 
-          <div class="settings-panel active" id="panel-portal">
+          <!-- ════════════════════════════════════════════════════════════════
+               🎨 LANDING PAGE EDITOR — single panel controlling 4 landing sections
+               ════════════════════════════════════════════════════════════════ -->
+          <div class="settings-panel active" id="panel-landingPageEditor">
+            <div class="s-card" style="background:linear-gradient(135deg,#fffbeb,#fef9c3);border:1px solid #fde68a">
+              <div class="s-card-title" style="color:#92400e">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/></svg>
+                Landing Page Editor
+                <span id="lpe-status" style="margin-left:auto;font-size:11px;color:#6b7280;font-weight:500"></span>
+              </div>
+              <div style="font-size:12px;color:#78350f;line-height:1.6;margin-bottom:8px">
+                Edit all elements that appear on the public landing page (<code>index.html</code>). Changes save to Firebase and appear on the landing page <strong>immediately</strong> via real-time sync.
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-pri" onclick="lpeSaveAll()" style="background:linear-gradient(135deg,#f59e0b,#d97706)">💾 Save All Changes</button>
+                <button class="btn" onclick="lpeReload()" style="background:#fff;border:1px solid #f59e0b;color:#92400e">↻ Discard / Reload</button>
+                <button class="btn" onclick="lpeResetToDefaults()" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5">⚠️ Reset to Defaults</button>
+              </div>
+            </div>
+
+            <!-- ── SECTION 1: NAV BAR ── -->
+            <div class="s-card">
+              <div class="s-card-title" style="display:flex;justify-content:space-between;align-items:center">
+                <span><svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>Navigation Bar Items</span>
+                <button class="btn btn-pri" onclick="lpeAdd('navBar')" style="padding:5px 12px;font-size:11px">+ Add Nav Item</button>
+              </div>
+              <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Top navigation bar shown on landing page. Drag handle (☰) to reorder.</div>
+              <div id="lpe-navBar-list" style="display:flex;flex-direction:column;gap:6px"></div>
+            </div>
+
+            <!-- ── SECTION 2: QUICK LINKS ── -->
+            <div class="s-card">
+              <div class="s-card-title" style="display:flex;justify-content:space-between;align-items:center">
+                <span><svg viewBox="0 0 24 24"><path d="M10.59 13.41a1 1 0 010-1.41l3-3a1 1 0 011.41 1.41l-3 3a1 1 0 01-1.41 0z"/><path d="M14 7l3-3a4 4 0 015.66 5.66l-3 3a4 4 0 01-5.66 0M10 17l-3 3a4 4 0 01-5.66-5.66l3-3a4 4 0 015.66 0"/></svg>Quick Links</span>
+                <button class="btn btn-pri" onclick="lpeAdd('quickLinks')" style="padding:5px 12px;font-size:11px">+ Add Quick Link</button>
+              </div>
+              <div style="font-size:11px;color:#6b7280;margin-bottom:10px">External portal links shown as cards on landing page (TMS / BIS / UMP / HEM etc.).</div>
+              <div id="lpe-quickLinks-list" style="display:flex;flex-direction:column;gap:6px"></div>
+            </div>
+
+            <!-- ── SECTION 3: GET IN TOUCH ── -->
+            <div class="s-card">
+              <div class="s-card-title" style="display:flex;justify-content:space-between;align-items:center">
+                <span><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>Get in Touch</span>
+                <button class="btn btn-pri" onclick="lpeAdd('getInTouch')" style="padding:5px 12px;font-size:11px">+ Add Contact</button>
+              </div>
+              <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Contact details shown at the bottom of landing page.</div>
+              <div id="lpe-getInTouch-list" style="display:flex;flex-direction:column;gap:6px"></div>
+            </div>
+
+            <!-- ── SECTION 4: IMPORTANT LINKS ── -->
+            <div class="s-card">
+              <div class="s-card-title" style="display:flex;justify-content:space-between;align-items:center">
+                <span><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Important Links</span>
+                <button class="btn btn-pri" onclick="lpeAdd('importantLinks')" style="padding:5px 12px;font-size:11px">+ Add Link</button>
+              </div>
+              <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Footer links — Privacy Policy, Terms of Use, Disclaimer, etc.</div>
+              <div id="lpe-importantLinks-list" style="display:flex;flex-direction:column;gap:6px"></div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="panel-portal">
             <div class="s-card">
               <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Portal Information</div>
               <div class="form-grid">
@@ -1472,6 +1538,7 @@ function showPanel(id,el){
   if (id === 'contactus' && typeof loadContactUs === 'function') loadContactUs();
   if (id === 'sysinfo' && typeof refreshSysStats === 'function') refreshSysStats();
   if (id === 'navbarEditor' && typeof loadNavBar === 'function') loadNavBar();
+  if (id === 'landingPageEditor' && typeof lpeLoad === 'function') lpeLoad();
 }
 function renderWards(){
   document.getElementById('wardList').innerHTML=wards.map((w,i)=>`
@@ -2824,8 +2891,259 @@ function saveNavBar(){
   });
 }
 
-// ══════════════════════════════════════
-// AUDIT LOG
+// ══════════════════════════════════════════════════════════════════════
+// LANDING PAGE EDITOR — full CRUD for nav, quick links, contact, important links
+// Saves to settings/landing_page in Firestore. Uses real-time onSnapshot
+// so admin can see live updates and landing page picks up changes immediately.
+// ══════════════════════════════════════════════════════════════════════
+
+var _lpeData = {
+  navBar: [],
+  quickLinks: [],
+  getInTouch: [],
+  importantLinks: []
+};
+
+var LPE_DEFAULTS = {
+  navBar: [
+    { id:'home',     label:'Home',         url:'#home',     active:true,  order:0, visible:true },
+    { id:'about',    label:'About Us',     url:'#about',    active:false, order:1, visible:true },
+    { id:'staff',    label:'Staff',        url:'#staff',    active:false, order:2, visible:true },
+    { id:'roster',   label:'Ward Roster',  url:'#roster',   active:false, order:3, visible:true },
+    { id:'holiday',  label:'Holiday Duty', url:'#holiday',  active:false, order:4, visible:true },
+    { id:'leave',    label:'Leave',        url:'#leave',    active:false, order:5, visible:true },
+    { id:'orders',   label:'Orders',       url:'#orders',   active:false, order:6, visible:true },
+    { id:'contact',  label:'Contact Us',   url:'#contact',  active:false, order:7, visible:true }
+  ],
+  quickLinks: [
+    { id:'tms', label:'TMS Portal', url:'https://tms.pmjay.gov.in', color:'green',  order:0 },
+    { id:'bis', label:'BIS Portal', url:'https://bis.pmjay.gov.in', color:'blue',   order:1 },
+    { id:'ump', label:'UMP Portal', url:'https://ump.pmjay.gov.in', color:'purple', order:2 },
+    { id:'hem', label:'HEM Portal', url:'https://hem.pmjay.gov.in', color:'orange', order:3 }
+  ],
+  getInTouch: [
+    { id:'phone',    type:'phone',    value:'+91 01962 265027',     order:0 },
+    { id:'email',    type:'email',    value:'pmam.gmcrajouri@gov.in', order:1 },
+    { id:'location', type:'location', value:'GMC Rajouri',          order:2 }
+  ],
+  importantLinks: [
+    { id:'privacy',    label:'Privacy Policy', url:'#', order:0 },
+    { id:'terms',      label:'Terms of Use',   url:'#', order:1 },
+    { id:'disclaimer', label:'Disclaimer',     url:'#', order:2 }
+  ]
+};
+
+// Field schemas — what each section's items look like
+var LPE_SCHEMA = {
+  navBar: {
+    fields: [
+      { key:'label',   label:'Label',     type:'text',    placeholder:'e.g. Home' },
+      { key:'url',     label:'Link/URL',  type:'text',    placeholder:'e.g. #home or https://...' },
+      { key:'active',  label:'Highlighted', type:'checkbox', default:false },
+      { key:'visible', label:'Visible',   type:'checkbox', default:true }
+    ]
+  },
+  quickLinks: {
+    fields: [
+      { key:'label', label:'Label',  type:'text',   placeholder:'e.g. TMS Portal' },
+      { key:'url',   label:'URL',    type:'text',   placeholder:'https://...' },
+      { key:'color', label:'Color',  type:'select', options:['green','blue','purple','orange','red','teal','indigo','pink'] }
+    ]
+  },
+  getInTouch: {
+    fields: [
+      { key:'type',  label:'Type',  type:'select', options:['phone','email','location','website','other'] },
+      { key:'value', label:'Value', type:'text',   placeholder:'e.g. +91... / email / address' }
+    ]
+  },
+  importantLinks: {
+    fields: [
+      { key:'label', label:'Label', type:'text', placeholder:'e.g. Privacy Policy' },
+      { key:'url',   label:'URL',   type:'text', placeholder:'https://... or # for anchor' }
+    ]
+  }
+};
+
+// ── Render a section's list of editable items ──
+function lpeRenderSection(sectionKey){
+  var listEl = document.getElementById('lpe-' + sectionKey + '-list');
+  if (!listEl) return;
+  var items = _lpeData[sectionKey] || [];
+  // sort by order
+  items.sort(function(a,b){ return (a.order||0) - (b.order||0); });
+
+  if (items.length === 0) {
+    listEl.innerHTML = '<div style="padding:14px;background:#f9fafb;border:1px dashed #d1d5db;border-radius:8px;text-align:center;color:#6b7280;font-size:12px;font-style:italic">No items yet. Click "+ Add" above to create one.</div>';
+    return;
+  }
+
+  var schema = LPE_SCHEMA[sectionKey];
+  listEl.innerHTML = items.map(function(it, idx){
+    var fieldsHtml = schema.fields.map(function(f){
+      var v = it[f.key];
+      if (f.type === 'text') {
+        return '<div style="flex:1;min-width:120px"><label style="font-size:9.5px;color:#6b7280;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:2px">'+f.label+'</label>'
+          + '<input type="text" value="'+escAttr(v||'')+'" placeholder="'+(f.placeholder||'')+'" '
+          + 'onchange="lpeUpdate(\''+sectionKey+'\','+idx+',\''+f.key+'\',this.value)" '
+          + 'style="width:100%;padding:6px 9px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit"></div>';
+      } else if (f.type === 'select') {
+        var opts = f.options.map(function(o){
+          return '<option value="'+o+'"'+(v===o?' selected':'')+'>'+o+'</option>';
+        }).join('');
+        return '<div style="flex:0 0 110px"><label style="font-size:9.5px;color:#6b7280;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:2px">'+f.label+'</label>'
+          + '<select onchange="lpeUpdate(\''+sectionKey+'\','+idx+',\''+f.key+'\',this.value)" '
+          + 'style="width:100%;padding:6px 9px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;cursor:pointer">'+opts+'</select></div>';
+      } else if (f.type === 'checkbox') {
+        var checked = (v === true || v === 'true');
+        return '<div style="flex:0 0 auto;display:flex;align-items:flex-end;padding-bottom:6px">'
+          + '<label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#374151;font-weight:600;cursor:pointer;white-space:nowrap">'
+          + '<input type="checkbox" '+(checked?'checked':'')+' onchange="lpeUpdate(\''+sectionKey+'\','+idx+',\''+f.key+'\',this.checked)" '
+          + 'style="width:14px;height:14px;cursor:pointer;accent-color:#7c3aed">'+f.label+'</label></div>';
+      }
+      return '';
+    }).join('');
+
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;display:flex;align-items:flex-start;gap:10px">'
+      + '<div style="flex:0 0 auto;font-size:18px;color:#9ca3af;cursor:grab;padding-top:18px;user-select:none" title="Drag to reorder (use ↑↓ buttons below)">☰</div>'
+      + '<div style="flex:1;min-width:0;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">'+fieldsHtml+'</div>'
+      + '<div style="flex:0 0 auto;display:flex;flex-direction:column;gap:2px;padding-top:14px">'
+      +   '<button onclick="lpeMove(\''+sectionKey+'\','+idx+',-1)" '+(idx===0?'disabled':'')+' title="Move up" style="width:24px;height:20px;border:1px solid #e5e7eb;background:#f9fafb;cursor:'+(idx===0?'not-allowed':'pointer')+';border-radius:4px;font-size:9px;color:#6b7280">▲</button>'
+      +   '<button onclick="lpeMove(\''+sectionKey+'\','+idx+',1)" '+(idx===items.length-1?'disabled':'')+' title="Move down" style="width:24px;height:20px;border:1px solid #e5e7eb;background:#f9fafb;cursor:'+(idx===items.length-1?'not-allowed':'pointer')+';border-radius:4px;font-size:9px;color:#6b7280">▼</button>'
+      +   '<button onclick="lpeDelete(\''+sectionKey+'\','+idx+')" title="Delete" style="width:24px;height:20px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;border-radius:4px;font-size:11px;color:#dc2626;margin-top:2px">✕</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function escAttr(s){ return String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+// ── Update a field on an item ──
+function lpeUpdate(sectionKey, idx, field, value){
+  if (!_lpeData[sectionKey] || !_lpeData[sectionKey][idx]) return;
+  _lpeData[sectionKey][idx][field] = value;
+  lpeMarkDirty();
+}
+
+// ── Add a new blank item ──
+function lpeAdd(sectionKey){
+  var schema = LPE_SCHEMA[sectionKey];
+  var newItem = { id: sectionKey + '_' + Date.now(), order: (_lpeData[sectionKey] || []).length };
+  schema.fields.forEach(function(f){
+    if (f.type === 'checkbox') newItem[f.key] = (f.default !== undefined ? f.default : true);
+    else if (f.type === 'select') newItem[f.key] = f.options[0];
+    else newItem[f.key] = '';
+  });
+  if (!_lpeData[sectionKey]) _lpeData[sectionKey] = [];
+  _lpeData[sectionKey].push(newItem);
+  lpeRenderSection(sectionKey);
+  lpeMarkDirty();
+}
+
+// ── Delete an item ──
+function lpeDelete(sectionKey, idx){
+  if (!_lpeData[sectionKey] || !_lpeData[sectionKey][idx]) return;
+  if (!confirm('Delete this '+sectionKey+' item?\n\nThis affects the live landing page after Save.')) return;
+  _lpeData[sectionKey].splice(idx, 1);
+  // Re-number order
+  _lpeData[sectionKey].forEach(function(it,i){ it.order = i; });
+  lpeRenderSection(sectionKey);
+  lpeMarkDirty();
+}
+
+// ── Move an item up/down ──
+function lpeMove(sectionKey, idx, dir){
+  var arr = _lpeData[sectionKey];
+  if (!arr) return;
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= arr.length) return;
+  var tmp = arr[idx]; arr[idx] = arr[newIdx]; arr[newIdx] = tmp;
+  arr.forEach(function(it,i){ it.order = i; });
+  lpeRenderSection(sectionKey);
+  lpeMarkDirty();
+}
+
+// ── Mark unsaved changes ──
+function lpeMarkDirty(){
+  var st = document.getElementById('lpe-status');
+  if (st) { st.textContent = '● Unsaved changes — click Save'; st.style.color = '#dc2626'; }
+}
+function lpeMarkSaved(){
+  var st = document.getElementById('lpe-status');
+  if (st) { st.textContent = '✓ Saved · live on landing page'; st.style.color = '#166534'; }
+}
+function lpeMarkLoading(){
+  var st = document.getElementById('lpe-status');
+  if (st) { st.textContent = 'Loading…'; st.style.color = '#6b7280'; }
+}
+
+// ── Save all sections to Firebase ──
+function lpeSaveAll(){
+  // Re-number order for each section just in case
+  ['navBar','quickLinks','getInTouch','importantLinks'].forEach(function(k){
+    if (_lpeData[k]) _lpeData[k].forEach(function(it,i){ it.order = i; });
+  });
+  var payload = Object.assign({}, _lpeData, {
+    _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
+    _updatedAt: Date.now(),
+    _updatedAtReadable: new Date().toLocaleString('en-IN')
+  });
+  var st = document.getElementById('lpe-status');
+  if (st) { st.textContent = 'Saving…'; st.style.color = '#6b7280'; }
+  db.collection('settings').doc('landing_page').set(payload).then(function(){
+    lpeMarkSaved();
+    if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/landing_page', 'landing_page', {
+      navBarCount: (_lpeData.navBar||[]).length,
+      quickLinksCount: (_lpeData.quickLinks||[]).length,
+      getInTouchCount: (_lpeData.getInTouch||[]).length,
+      importantLinksCount: (_lpeData.importantLinks||[]).length
+    });
+    if (typeof showToast === 'function') showToast('✅ Landing page saved · changes are now live', 'success');
+  }).catch(function(e){
+    if (st) { st.textContent = 'Error: '+e.message; st.style.color = '#dc2626'; }
+  });
+}
+
+// ── Load from Firebase (or fall back to defaults) ──
+function lpeLoad(){
+  lpeMarkLoading();
+  db.collection('settings').doc('landing_page').get().then(function(doc){
+    if (doc.exists && doc.data()) {
+      var d = doc.data();
+      _lpeData = {
+        navBar:        Array.isArray(d.navBar)        && d.navBar.length        ? d.navBar.slice()        : LPE_DEFAULTS.navBar.slice(),
+        quickLinks:    Array.isArray(d.quickLinks)    && d.quickLinks.length    ? d.quickLinks.slice()    : LPE_DEFAULTS.quickLinks.slice(),
+        getInTouch:    Array.isArray(d.getInTouch)    && d.getInTouch.length    ? d.getInTouch.slice()    : LPE_DEFAULTS.getInTouch.slice(),
+        importantLinks:Array.isArray(d.importantLinks)&& d.importantLinks.length? d.importantLinks.slice(): LPE_DEFAULTS.importantLinks.slice()
+      };
+    } else {
+      _lpeData = JSON.parse(JSON.stringify(LPE_DEFAULTS));
+    }
+    ['navBar','quickLinks','getInTouch','importantLinks'].forEach(lpeRenderSection);
+    lpeMarkSaved();
+  }).catch(function(e){
+    console.warn('lpeLoad failed:', e);
+    _lpeData = JSON.parse(JSON.stringify(LPE_DEFAULTS));
+    ['navBar','quickLinks','getInTouch','importantLinks'].forEach(lpeRenderSection);
+    var st = document.getElementById('lpe-status');
+    if (st) { st.textContent = '⚠️ Loaded defaults (Firebase fetch failed)'; st.style.color = '#92400e'; }
+  });
+}
+
+// ── Reload from Firebase (discards in-memory changes) ──
+function lpeReload(){
+  if (!confirm('Discard all unsaved changes and reload from Firebase?')) return;
+  lpeLoad();
+}
+
+// ── Reset to factory defaults (without saving) ──
+function lpeResetToDefaults(){
+  if (!confirm('Reset all 4 sections to factory defaults?\n\nThis will REPLACE all current items with default values. You must click Save to persist.')) return;
+  _lpeData = JSON.parse(JSON.stringify(LPE_DEFAULTS));
+  ['navBar','quickLinks','getInTouch','importantLinks'].forEach(lpeRenderSection);
+  lpeMarkDirty();
+}
+
+
 // ══════════════════════════════════════
 function loadAuditLog(){
   var tb = document.getElementById('auditTbody');
@@ -2883,6 +3201,8 @@ window.addEventListener('DOMContentLoaded', function() {
   setTimeout(loadAllUsers, 500);
   // Restore admin unlock state indicator if visiting datamgmt
   setTimeout(function(){ setAdminUnlocked(isAdminUnlocked()); }, 800);
+  // Auto-load Landing Page Editor since it's the default active panel
+  setTimeout(function(){ if (typeof lpeLoad === 'function') lpeLoad(); }, 1000);
 });
 
 </script>
