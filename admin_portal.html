@@ -506,53 +506,31 @@ tr:hover td{background:#EEF3FF}
 
         <div class="settings-sidebar">
           <div class="sbs-title">Settings Menu</div>
-          <div class="sbs-section-label">📍 Landing Page</div>
+
+          <div class="sbs-section-label">🌐 Landing Page</div>
           <div class="sbs-item active" onclick="showPanel('landingPageEditor',this)" style="background:linear-gradient(90deg,#fef3c7,#fef9c3);border-left:3px solid #f59e0b;font-weight:700">
             <svg viewBox="0 0 24 24"><path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/></svg>🎨 Landing Page Editor
           </div>
+          <div class="sbs-item" onclick="showPanel('branding',this)">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>🖼️ Branding &amp; Logos
+          </div>
 
-          <div class="sbs-section-label">Portal</div>
-          <div class="sbs-item" onclick="showPanel('portal',this)">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Portal Info
-          </div>
-          <div class="sbs-item" onclick="showPanel('ticker',this)">
-            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>Ticker Message
-          </div>
-          <div class="sbs-item" onclick="showPanel('report',this)">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>Report Settings
-          </div>
-          <div class="sbs-item" onclick="showPanel('features',this)">
-            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg>Features
-          </div>
           <div class="sbs-divider"></div>
-          <div class="sbs-section-label">Nav Bar Sections</div>
-          <div class="sbs-item" onclick="showPanel('navbarEditor',this)" style="background:#F0F9FF;border-left:3px solid #0EA5E9">
-            <svg viewBox="0 0 24 24"><path d="M4 10h16V8H4v2zm0 4h16v-2H4v2zm0 4h16v-2H4v2zm0-12h16V4H4v2z"/></svg>🎯 Nav Bar Editor
+          <div class="sbs-section-label">📢 Announcements</div>
+          <div class="sbs-item" onclick="showPanel('tickers',this)">
+            <svg viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg>📣 Ticker Messages
           </div>
-          <div class="sbs-item" onclick="showPanel('aboutus',this)">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>About Us
-          </div>
-          <div class="sbs-item" onclick="showPanel('staff',this)">
-            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Staff
-          </div>
-          <div class="sbs-item" onclick="showPanel('orders',this)">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>Orders
-          </div>
-          <div class="sbs-item" onclick="showPanel('contactus',this)">
-            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Contact Us
-          </div>
+
           <div class="sbs-divider"></div>
-          <div class="sbs-section-label">Quick Links</div>
-          <div class="sbs-item" onclick="showPanel('quicklinks',this)">
-            <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>Quick Links
-          </div>
-          <div class="sbs-divider"></div>
-          <div class="sbs-section-label">System</div>
+          <div class="sbs-section-label">📋 Operations</div>
           <div class="sbs-item" onclick="showPanel('wards',this)">
-            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>Ward Management
+            <svg viewBox="0 0 24 24"><path d="M19 21V9l-7-5-7 5v12"/><path d="M9 21v-6h6v6"/></svg>🏥 Ward Management
           </div>
+
+          <div class="sbs-divider"></div>
+          <div class="sbs-section-label">⚙️ System</div>
           <div class="sbs-item" onclick="showPanel('sysinfo',this)">
-            <svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z"/></svg>System Info
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>🛡️ System Info &amp; Backup
           </div>
         </div>
 
@@ -619,190 +597,162 @@ tr:hover td{background:#EEF3FF}
             </div>
           </div>
 
-          <div class="settings-panel" id="panel-portal">
+
+          <!-- ════════════════════════════════════════════════════════════════
+               🖼️ BRANDING & LOGOS — logos, hero background, hospital info
+               ════════════════════════════════════════════════════════════════ -->
+          <div class="settings-panel" id="panel-branding">
+            <div class="s-card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe">
+              <div class="s-card-title" style="color:#1e3a8a">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                Branding &amp; Visuals
+                <span id="brandingStatus" style="margin-left:auto;font-size:11px;color:#6b7280;font-weight:500"></span>
+              </div>
+              <div style="font-size:12px;color:#1e3a8a;line-height:1.6">
+                Manage logos, landing-page background image, and hospital identity. Saved to <code>settings/portal</code> in Firebase. Changes apply to landing page on next refresh.
+              </div>
+            </div>
+
+            <!-- ── HOSPITAL IDENTITY ── -->
             <div class="s-card">
-              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Portal Information</div>
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M19 21V9l-7-5-7 5v12"/><path d="M9 21v-6h6v6"/></svg>Hospital Identity</div>
               <div class="form-grid">
-                <div class="sfld"><label>Hospital Name</label><input type="text" value="Government Medical College & Associated Hospital Rajouri"></div>
-                <div class="sfld"><label>Hospital Code</label><input type="text" value="HOSP1G10293"></div>
-                <div class="sfld"><label>Contact Email</label><input type="email" value="Ayushman@gmail.com"></div>
-                <div class="sfld"><label>Contact Phone</label><input type="text" value="+91 99999 99999"></div>
+                <div class="sfld"><label>Hospital Name</label><input type="text" id="brHospitalName" placeholder="Government Medical College &amp; Associated Hospital Rajouri"></div>
+                <div class="sfld"><label>Hospital Short Name</label><input type="text" id="brHospitalShort" placeholder="GMC &amp; AH Rajouri"></div>
+                <div class="sfld"><label>Hospital Code</label><input type="text" id="brHospitalCode" placeholder="HOSP1G10293"></div>
+                <div class="sfld"><label>Institution Type</label><input type="text" id="brInstitutionType" placeholder="Government Medical College"></div>
               </div>
+            </div>
 
-              <div class="s-card-title" style="margin-top:20px;padding-bottom:5px;border-bottom:1.5px solid rgba(26,61,181,0.08);font-size:12px;display:flex;align-items:center;gap:8px">Visual Settings (Landing Page)</div>
-              <div class="form-grid" style="margin-top:10px">
-                <div class="sfld"><label>Primary Logo (PM-JAY)</label><input type="file" id="setLogo1" accept="image/*"></div>
-                <div class="sfld"><label>Secondary Logo (Hospital)</label><input type="file" id="setLogo2" accept="image/*"></div>
-                <div class="sfld"><label>Landing Page Background Image</label><input type="file" id="setBgImg" accept="image/*"></div>
+            <!-- ── PRIMARY LOGO (PM-JAY) ── -->
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>Primary Logo (PM-JAY)</div>
+              <div style="font-size:12px;color:#6b7280;margin-bottom:10px">Top-left logo on the landing page header. Recommended: 80×80px, transparent PNG.</div>
+              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                <div id="brLogo1Preview" style="width:64px;height:64px;border-radius:8px;border:1.5px dashed #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9ca3af;overflow:hidden">No logo</div>
+                <div style="flex:1;min-width:200px">
+                  <input type="file" id="brLogo1File" accept="image/*" onchange="brHandleFile(this,'logo1')" style="font-size:11px;padding:6px;border:1px solid #d1d5db;border-radius:6px;width:100%;background:#fff">
+                  <div style="font-size:11px;color:#6b7280;margin-top:4px">Choose a file (max ~500KB) — image will be embedded in Firebase as base64.</div>
+                </div>
+                <button class="btn" onclick="brClear('logo1')" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5">🗑 Remove</button>
               </div>
-              <div id="uploadStatusMsg" style="color:#1A3DB5;font-weight:bold;font-size:11px;margin-bottom:10px;text-align:right"></div>
+            </div>
 
-              <div class="save-row"><button class="btn btn-pri" onclick="savePortalInfo()">Save Changes</button></div>
+            <!-- ── SECONDARY LOGO (HOSPITAL) ── -->
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M19 21V9l-7-5-7 5v12"/><path d="M9 21v-6h6v6"/></svg>Secondary Logo (Hospital)</div>
+              <div style="font-size:12px;color:#6b7280;margin-bottom:10px">Secondary logo (e.g., hospital crest) — shown on landing page header. Recommended: 80×80px.</div>
+              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                <div id="brLogo2Preview" style="width:64px;height:64px;border-radius:8px;border:1.5px dashed #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9ca3af;overflow:hidden">No logo</div>
+                <div style="flex:1;min-width:200px">
+                  <input type="file" id="brLogo2File" accept="image/*" onchange="brHandleFile(this,'logo2')" style="font-size:11px;padding:6px;border:1px solid #d1d5db;border-radius:6px;width:100%;background:#fff">
+                  <div style="font-size:11px;color:#6b7280;margin-top:4px">Choose a file (max ~500KB).</div>
+                </div>
+                <button class="btn" onclick="brClear('logo2')" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5">🗑 Remove</button>
+              </div>
+            </div>
+
+            <!-- ── HERO BACKGROUND IMAGE ── -->
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Landing Page Background Image</div>
+              <div style="font-size:12px;color:#6b7280;margin-bottom:10px">Hospital photo shown behind the welcome text on the landing page. Recommended: 1200×900px, JPG (max ~800KB).</div>
+              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                <div id="brBgPreview" style="width:128px;height:80px;border-radius:8px;border:1.5px dashed #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9ca3af;overflow:hidden">No image</div>
+                <div style="flex:1;min-width:200px">
+                  <input type="file" id="brBgFile" accept="image/*" onchange="brHandleFile(this,'bgImage')" style="font-size:11px;padding:6px;border:1px solid #d1d5db;border-radius:6px;width:100%;background:#fff">
+                  <div style="font-size:11px;color:#6b7280;margin-top:4px">Choose a file (max ~800KB). Larger files will be rejected to keep Firestore document under 1MB limit.</div>
+                </div>
+                <button class="btn" onclick="brClear('bgImage')" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5">🗑 Remove</button>
+              </div>
+            </div>
+
+            <!-- ── SAVE BAR ── -->
+            <div class="s-card" style="background:#f0f9ff;border:1px solid #bae6fd;text-align:right">
+              <button class="btn btn-pri" onclick="brSaveAll()" style="padding:10px 20px;font-size:13px;font-weight:700">💾 Save All Branding</button>
+              <button class="btn" onclick="brLoad()" style="padding:10px 16px;font-size:12px;background:#fff;border:1px solid #bae6fd">↻ Reload</button>
             </div>
           </div>
 
-          <div class="settings-panel" id="panel-ticker">
-            <div class="s-card">
-              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>Ticker / Notice Message</div>
-              <div class="sfld"><label>Ticker Text</label><textarea id="tickerTxt" style="height:80px">Ayushman Bharat PMJAY — All PMAMs are requested to fill daily reports before 5:00 PM. For any queries contact: VINOD KUMAR (7006213517)</textarea></div>
-              <div style="background:#E8F0FF;border:1px solid #C5D5F5;border-radius:8px;padding:8px 12px;font-size:11px;color:#1A3DB5;font-weight:500;margin-top:6px" id="tickerPrev">Preview will appear here...</div>
-              <div class="save-row">
-                <button class="btn btn-sec" onclick="document.getElementById('tickerPrev').textContent=document.getElementById('tickerTxt').value">Preview</button>
-                <button class="btn btn-pri" onclick="saveTicker()">Save Ticker</button>
+          <!-- ════════════════════════════════════════════════════════════════
+               📣 TICKER MESSAGES — 3 tabs: PMAM / I/C / Patient Services
+               ════════════════════════════════════════════════════════════════ -->
+          <div class="settings-panel" id="panel-tickers">
+            <div class="s-card" style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #fcd34d">
+              <div class="s-card-title" style="color:#78350f">
+                <svg viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/></svg>
+                Ticker Messages — Per Portal
+                <span id="tkStatus" style="margin-left:auto;font-size:11px;color:#6b7280;font-weight:500"></span>
+              </div>
+              <div style="font-size:12px;color:#78350f;line-height:1.6">
+                Set scrolling announcement messages shown to users after they log in. Each portal has its own ticker (admin portal does not display a ticker). Saved to <code>settings/tickers</code>.
               </div>
             </div>
-          </div>
 
-          <div class="settings-panel" id="panel-report">
+            <!-- ── TAB BUTTONS ── -->
+            <div class="s-card" style="padding:8px">
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button id="tk-tab-pmam"     class="tk-tab-btn tk-tab-active" onclick="tkSwitchTab('pmam')">👩‍⚕️ PMAM Portal</button>
+                <button id="tk-tab-ic"       class="tk-tab-btn"               onclick="tkSwitchTab('ic')">👨‍💼 I/C AB-PMJAY</button>
+                <button id="tk-tab-patient"  class="tk-tab-btn"               onclick="tkSwitchTab('patient')">🏥 Patient Services</button>
+              </div>
+            </div>
+
+            <!-- ── TAB CONTENT (single block, content swaps based on active tab) ── -->
             <div class="s-card">
-              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>Report Settings</div>
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+                <span id="tkPortalName">PMAM Portal</span> Ticker
+              </div>
+
               <div class="form-grid">
-                <div class="sfld"><label>Signatory Name</label><input type="text" value="Dr Shamim Ahmed"></div>
-                <div class="sfld"><label>Designation</label><input type="text" value="Medical Superintendent"></div>
-                <div class="sfld"><label>Institution</label><input type="text" value="GMC & AH Rajouri"></div>
-                <div class="sfld"><label>Daily Report Deadline</label>
-                  <select><option>5:00 PM</option><option>4:00 PM</option><option>6:00 PM</option></select>
+                <div class="sfld" style="flex:0 0 auto">
+                  <label>Status</label>
+                  <label style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:8px;cursor:pointer;font-weight:600">
+                    <input type="checkbox" id="tkEnabled" style="width:16px;height:16px;cursor:pointer;accent-color:#7c3aed">
+                    <span id="tkEnabledLabel">Enabled — show ticker</span>
+                  </label>
+                </div>
+                <div class="sfld" style="flex:0 0 200px">
+                  <label>Severity / Color</label>
+                  <select id="tkSeverity">
+                    <option value="info">ℹ️ Info (blue)</option>
+                    <option value="success">✅ Success (green)</option>
+                    <option value="warning">⚠️ Warning (orange)</option>
+                    <option value="danger">🚨 Critical (red)</option>
+                  </select>
                 </div>
               </div>
-              <div class="save-row"><button class="btn btn-pri">Save Settings</button></div>
-            </div>
-          </div>
 
-          <div class="settings-panel" id="panel-features">
-            <div class="s-card">
-              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg>Portal Features</div>
-              <div class="toggle-row"><div><div style="font-size:12px;font-weight:500;color:#374151">Daily Report Reminder</div><div style="font-size:10px;color:#9ca3af">Alert if report not filled by deadline</div></div><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
-              <div class="toggle-row"><div><div style="font-size:12px;font-weight:500;color:#374151">Leave Apply Feature</div><div style="font-size:10px;color:#9ca3af">Allow PMAMs to apply leave online</div></div><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
-              <div class="toggle-row"><div><div style="font-size:12px;font-weight:500;color:#374151">Auto Monthly Backup</div><div style="font-size:10px;color:#9ca3af">Email backup on 1st of each month</div></div><div class="tog" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
-              <div class="toggle-row"><div><div style="font-size:12px;font-weight:500;color:#374151">Ticker Notice Bar</div><div style="font-size:10px;color:#9ca3af">Show scrolling notice on portal</div></div><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-knob"></div></div></div>
-            </div>
-          </div>
-
-          <!-- NAV BAR EDITOR PANEL — admin controls landing page navigation -->
-          <div class="settings-panel" id="panel-navbarEditor">
-            <div class="s-card">
-              <div class="s-card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-                <span><svg viewBox="0 0 24 24"><path d="M4 10h16V8H4v2zm0 4h16v-2H4v2zm0 4h16v-2H4v2zm0-12h16V4H4v2z"/></svg>🎯 Navigation Bar Editor</span>
-                <div style="display:flex;gap:6px">
-                  <button class="btn" style="background:#F3F4F6;color:#374151;padding:6px 12px;font-size:11px" onclick="nbReset()">🔄 Reset to Defaults</button>
-                  <button class="btn btn-pri" style="padding:6px 12px;font-size:11px" onclick="nbAddItem()">+ Add Nav Item</button>
-                </div>
-              </div>
-              <div style="font-size:11px;color:#6b7280;margin-bottom:12px;line-height:1.6">
-                Add, remove, rename, and reorder nav items that appear on your public landing page.<br>
-                <strong>Link format:</strong> Use <code>#section-id</code> to scroll to a section on the landing page, or <code>https://...</code> for external links.
+              <div class="sfld">
+                <label>Message Text</label>
+                <textarea id="tkMessage" rows="3" placeholder="Enter the announcement message users will see..." style="width:100%;padding:10px 14px;border:1.5px solid #ddd6fe;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+                <div style="font-size:11px;color:#6b7280;margin-top:4px"><span id="tkCharCount">0</span> characters · keep under 200 for best display</div>
               </div>
 
-              <div id="nbItemsList" style="display:flex;flex-direction:column;gap:10px">
-                <div style="color:#9ca3af;font-style:italic;padding:20px;text-align:center">Loading…</div>
-              </div>
-
-              <div id="nbSaveMsg" style="font-size:11px;font-weight:600;min-height:16px;margin:10px 0"></div>
-
-              <div class="save-row" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-                <button class="btn" style="background:#F3F4F6;color:#374151" onclick="loadNavBar()">↶ Discard Changes</button>
-                <button class="btn btn-pri" onclick="saveNavBar()">💾 Save Nav Bar</button>
-              </div>
-
-              <!-- How to wire landing page - collapsible instructions -->
-              <details style="margin-top:18px;background:#EFF6FF;border:1px solid #DBEAFE;border-radius:10px;padding:10px 14px">
-                <summary style="cursor:pointer;font-size:12px;font-weight:700;color:#1E40AF">📘 How to display this nav on your landing page (click to expand)</summary>
-                <div style="font-size:11px;color:#374151;line-height:1.7;margin-top:10px">
-                  Your landing page (e.g., <code>index.html</code>) needs a small code snippet to fetch and render the nav bar. Add the following anywhere <strong>before the closing <code>&lt;/body&gt;</code> tag</strong>:<br><br>
-                  <pre style="background:#fff;border:1px solid #CBD5E1;border-radius:6px;padding:10px;overflow-x:auto;font-size:10px;color:#0F172A">&lt;!-- PMAM Portal: Dynamic Nav Bar --&gt;
-&lt;script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"&gt;&lt;/script&gt;
-&lt;script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"&gt;&lt;/script&gt;
-&lt;script&gt;
-(function(){
-  var cfg = { apiKey: "YOUR_API_KEY", projectId: "gmcrajouri-pmam" /* ...other config... */ };
-  if (!firebase.apps.length) firebase.initializeApp(cfg);
-  firebase.firestore().collection('settings').doc('navbar').get().then(function(doc){
-    if (!doc.exists) return;
-    var items = (doc.data().items || []).filter(function(i){ return i.visible !== false; });
-    items.sort(function(a,b){ return (a.order||0) - (b.order||0); });
-    var navEl = document.querySelector('nav') || document.getElementById('mainNav');
-    if (!navEl) return;
-    navEl.innerHTML = items.map(function(i){
-      return '&lt;a href="'+i.link+'" class="nav-link"&gt;'+i.label+'&lt;/a&gt;';
-    }).join('');
-  });
-})();
-&lt;/script&gt;</pre>
-                  Make sure your landing page has a <code>&lt;nav&gt;</code> element or <code>&lt;div id="mainNav"&gt;</code> where the items will be injected.<br>
-                  Upload your <code>index.html</code> file to me and I can wire it for you automatically.
-                </div>
-              </details>
-            </div>
-          </div>
-
-          <div class="settings-panel" id="panel-aboutus">
-            <div class="s-card">
-              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>About Us Content</div>
-              <div class="sfld"><label>Section Heading</label><input type="text" value="Ayushman Bharat — Pradhan Mantri Jan Arogya Yojana"></div>
-              <div class="sfld"><label>About Text</label><textarea style="height:120px">Ayushman Bharat PM-JAY is the world's largest health assurance scheme launched by Government of India. It provides health coverage of Rs 5 lakh per family per year for secondary and tertiary care hospitalization. At GMC & AH Rajouri, our dedicated PMAM team works to ensure every eligible beneficiary receives their entitled healthcare services seamlessly.</textarea></div>
-              <div class="save-row"><button class="btn btn-pri">Save About Us</button></div>
-            </div>
-          </div>
-
-          <div class="settings-panel" id="panel-staff">
-            <div class="s-card">
-              <div class="s-card-title">
-                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-                Staff Management
-                <button class="btn-add" onclick="document.getElementById('addStaffModal').classList.add('open')" style="margin-left:auto">+ Add Staff</button>
-              </div>
-              <div class="staff-mini-grid" id="staffGrid"></div>
-            </div>
-          </div>
-
-          <div class="settings-panel" id="panel-orders">
-            <div class="s-card">
-              <div class="s-card-title">
-                <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
-                Orders Management
-                <button class="btn-add" onclick="document.getElementById('addOrderModal').classList.add('open')" style="margin-left:auto">+ Add Order</button>
-              </div>
-              <div id="ordersList"><div style="color:#9ca3af;font-style:italic;text-align:center;padding:20px">No orders added yet</div></div>
-            </div>
-          </div>
-
-          <div class="settings-panel" id="panel-contactus">
-            <div class="s-card">
-              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Contact Us Settings</div>
-              <div style="font-size:11px;color:#6b7280;margin-bottom:12px">These details appear in the landing page "Contact Us" section.</div>
               <div class="form-grid">
-                <div class="sfld"><label>I/C Name</label><input type="text" id="cuName" placeholder="Full name"></div>
-                <div class="sfld"><label>Designation</label><input type="text" id="cuDesig" placeholder="e.g. I/C AB-PMJAY" value="I/C AB-PMJAY"></div>
-                <div class="sfld"><label>Mobile Number</label><input type="text" id="cuMobile" placeholder="10-digit number"></div>
-                <div class="sfld"><label>Email</label><input type="email" id="cuEmail" placeholder="email@example.com"></div>
-                <div class="sfld" style="grid-column:1/-1"><label>Office Address (optional)</label><input type="text" id="cuAddr" placeholder="e.g. AB-PMJAY Unit, GMC & AH Rajouri"></div>
+                <div class="sfld"><label>Optional Link URL</label><input type="text" id="tkLink" placeholder="e.g. https://... or leave blank"></div>
+                <div class="sfld"><label>Link Label</label><input type="text" id="tkLinkLabel" placeholder="e.g. Read more"></div>
               </div>
-              <div id="cuSaveMsg" style="font-size:11px;font-weight:600;color:#166534;margin-bottom:8px"></div>
-              <div class="save-row"><button class="btn btn-pri" onclick="saveContactUs()">Save Contact</button></div>
+
+              <!-- Live Preview -->
+              <div style="margin-top:12px;padding:10px 14px;border-radius:8px;background:#f9fafb;border:1px dashed #d1d5db">
+                <div style="font-size:10.5px;color:#6b7280;font-weight:600;margin-bottom:4px;letter-spacing:0.5px;text-transform:uppercase">Preview</div>
+                <div id="tkPreview" style="font-size:13px;color:#1e293b">—</div>
+              </div>
+
+              <!-- Save -->
+              <div class="save-row" style="margin-top:14px;display:flex;gap:8px">
+                <button class="btn btn-pri" onclick="tkSave()" style="background:linear-gradient(135deg,#f59e0b,#d97706)">💾 Save This Portal&apos;s Ticker</button>
+                <button class="btn" onclick="tkClear()" style="background:#fef2f2;color:#991b1b;border:1px solid #fca5a5">Clear</button>
+              </div>
             </div>
           </div>
 
-          <!-- QUICK LINKS PANEL -->
-          <div class="settings-panel" id="panel-quicklinks">
-            <div class="s-card">
-              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>Quick Links Management</div>
-              <div style="font-size:11px;color:#6b7280;margin-bottom:12px">Edit portal links shown on the landing page. Both <strong>label</strong> and <strong>URL</strong> are editable — landing page uses whatever you set here.</div>
-              <div class="form-grid">
-                <div class="sfld"><label>Link 1 — Label</label><input type="text" id="qlPmamLabel" placeholder="e.g. PMAM Portal" value="PMAM Portal"></div>
-                <div class="sfld"><label>Link 1 — URL</label><input type="url" id="qlPmam" placeholder="https://..." value="pmam_portal.html"></div>
-                <div class="sfld"><label>Link 2 — Label</label><input type="text" id="qlIcLabel" placeholder="e.g. I/C Portal" value="I/C Portal"></div>
-                <div class="sfld"><label>Link 2 — URL</label><input type="url" id="qlIc" placeholder="https://..." value="ic_portal.html"></div>
-                <div class="sfld"><label>Link 3 — Label</label><input type="text" id="qlAdminLabel" placeholder="e.g. Admin Portal" value="Admin Portal"></div>
-                <div class="sfld"><label>Link 3 — URL</label><input type="url" id="qlAdmin" placeholder="https://..." value="admin_portal.html"></div>
-                <div class="sfld"><label>Link 4 — Label</label><input type="text" id="qlNhaLabel" placeholder="e.g. NHA Portal" value="NHA Portal"></div>
-                <div class="sfld"><label>Link 4 — URL</label><input type="url" id="qlNha" placeholder="https://hospitalmis.nhp.gov.in"></div>
-                <div class="sfld"><label>Link 5 — Label</label><input type="text" id="qlLink5Label" placeholder="e.g. Ayushman Portal"></div>
-                <div class="sfld"><label>Link 5 — URL</label><input type="url" id="qlLink5Url" placeholder="https://..."></div>
-              </div>
-              <div id="qlSaveMsg" style="font-size:11px;font-weight:600;color:#166534;margin-bottom:8px"></div>
-              <div class="save-row"><button class="btn btn-pri" onclick="saveQuickLinks()">Save Quick Links</button></div>
-            </div>
-          </div>
+          <style>
+            .tk-tab-btn{padding:8px 14px;border:1.5px solid #e5e7eb;background:#fff;color:#475569;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+            .tk-tab-btn:hover{background:#f9fafb;border-color:#cbd5e1}
+            .tk-tab-active{background:linear-gradient(135deg,#fef3c7,#fde68a)!important;color:#78350f!important;border-color:#fcd34d!important;box-shadow:0 2px 6px rgba(245,158,11,0.2)}
+          </style>
+
           <div class="settings-panel" id="panel-wards">
             <div class="s-card">
               <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>Ward Management</div>
@@ -1530,15 +1480,15 @@ function renderHoliday(){
 // ===== SETTINGS =====
 function showPanel(id,el){
   document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
+  var panel = document.getElementById('panel-'+id);
+  if (panel) panel.classList.add('active');
   document.querySelectorAll('.sbs-item').forEach(s=>s.classList.remove('active'));
   if(el)el.classList.add('active');
   // Auto-load data when the user opens these panels
-  if (id === 'quicklinks' && typeof loadQuickLinks === 'function') loadQuickLinks();
-  if (id === 'contactus' && typeof loadContactUs === 'function') loadContactUs();
-  if (id === 'sysinfo' && typeof refreshSysStats === 'function') refreshSysStats();
-  if (id === 'navbarEditor' && typeof loadNavBar === 'function') loadNavBar();
-  if (id === 'landingPageEditor' && typeof lpeLoad === 'function') lpeLoad();
+  if (id === 'sysinfo'           && typeof refreshSysStats === 'function') refreshSysStats();
+  if (id === 'landingPageEditor' && typeof lpeLoad === 'function')         lpeLoad();
+  if (id === 'branding'          && typeof brLoad === 'function')          brLoad();
+  if (id === 'tickers'           && typeof tkLoadAll === 'function')       tkLoadAll();
 }
 function renderWards(){
   document.getElementById('wardList').innerHTML=wards.map((w,i)=>`
@@ -2890,6 +2840,262 @@ function saveNavBar(){
     if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Error: '+e.message; }
   });
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// 🖼️ BRANDING & LOGOS — manage logos and hero background image
+// Saves to settings/portal in Firestore (logo1, logo2, bgImage as base64)
+// ══════════════════════════════════════════════════════════════════════
+
+var _brData = { logo1: '', logo2: '', bgImage: '', hospitalName: '', hospitalShort: '', hospitalCode: '', institutionType: '' };
+
+function brSetStatus(msg, color){
+  var el = document.getElementById('brandingStatus');
+  if (el) { el.textContent = msg; el.style.color = color || '#6b7280'; }
+}
+
+// Render image preview from base64 data string
+function brRenderPreview(field, dataUrl){
+  var prevId = field === 'logo1' ? 'brLogo1Preview' : (field === 'logo2' ? 'brLogo2Preview' : 'brBgPreview');
+  var prev = document.getElementById(prevId);
+  if (!prev) return;
+  if (dataUrl && typeof dataUrl === 'string' && dataUrl.length > 30) {
+    prev.innerHTML = '<img src="'+dataUrl+'" style="width:100%;height:100%;object-fit:cover;border-radius:7px">';
+  } else {
+    prev.innerHTML = (field==='bgImage'?'No image':'No logo');
+    prev.style.color = '#9ca3af';
+  }
+}
+
+// File picker handler — convert to base64, validate size, store in memory
+function brHandleFile(input, field){
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var maxBytes = (field === 'bgImage') ? 800000 : 500000; // 800KB for bg, 500KB for logos
+  if (file.size > maxBytes) {
+    alert('⚠️ File too large.\n\n' + (file.size/1024).toFixed(0) + 'KB exceeds the ' + (maxBytes/1024) + 'KB limit.\n\nPlease compress the image (try TinyPNG.com) and try again.');
+    input.value = '';
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    _brData[field] = e.target.result;
+    brRenderPreview(field, e.target.result);
+    brSetStatus('● Unsaved — click Save to apply', '#dc2626');
+  };
+  reader.onerror = function(){ alert('Error reading file'); };
+  reader.readAsDataURL(file);
+}
+
+// Clear an image
+function brClear(field){
+  if (!confirm('Remove the current ' + (field==='bgImage'?'background image':'logo') + '?\n\n(You still need to click Save to persist this change.)')) return;
+  _brData[field] = '';
+  brRenderPreview(field, '');
+  var fileInput = document.getElementById(field === 'logo1' ? 'brLogo1File' : (field === 'logo2' ? 'brLogo2File' : 'brBgFile'));
+  if (fileInput) fileInput.value = '';
+  brSetStatus('● Unsaved — click Save to apply', '#dc2626');
+}
+
+// Load branding from Firebase
+function brLoad(){
+  brSetStatus('Loading…', '#6b7280');
+  db.collection('settings').doc('portal').get().then(function(doc){
+    var d = doc.exists ? (doc.data() || {}) : {};
+    _brData = {
+      logo1:           d.logo1 || '',
+      logo2:           d.logo2 || '',
+      bgImage:         d.bgImage || '',
+      hospitalName:    d.hospitalName || '',
+      hospitalShort:   d.hospitalShort || '',
+      hospitalCode:    d.hospitalCode || '',
+      institutionType: d.institutionType || ''
+    };
+    var $ = function(id){ return document.getElementById(id); };
+    if ($('brHospitalName'))    $('brHospitalName').value    = _brData.hospitalName;
+    if ($('brHospitalShort'))   $('brHospitalShort').value   = _brData.hospitalShort;
+    if ($('brHospitalCode'))    $('brHospitalCode').value    = _brData.hospitalCode;
+    if ($('brInstitutionType')) $('brInstitutionType').value = _brData.institutionType;
+    brRenderPreview('logo1', _brData.logo1);
+    brRenderPreview('logo2', _brData.logo2);
+    brRenderPreview('bgImage', _brData.bgImage);
+    brSetStatus('✓ Loaded', '#166534');
+  }).catch(function(e){
+    brSetStatus('Error loading: '+e.message, '#dc2626');
+  });
+}
+
+// Save all branding to Firebase
+function brSaveAll(){
+  // Read text fields
+  var $ = function(id){ return document.getElementById(id); };
+  _brData.hospitalName    = ($('brHospitalName')    || {}).value || '';
+  _brData.hospitalShort   = ($('brHospitalShort')   || {}).value || '';
+  _brData.hospitalCode    = ($('brHospitalCode')    || {}).value || '';
+  _brData.institutionType = ($('brInstitutionType') || {}).value || '';
+
+  brSetStatus('Saving…', '#6b7280');
+  var payload = Object.assign({}, _brData, {
+    _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
+    _updatedAt: Date.now()
+  });
+  db.collection('settings').doc('portal').set(payload, { merge: true }).then(function(){
+    brSetStatus('✓ Saved · live on landing page after refresh', '#166534');
+    if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/portal', 'portal', {
+      hasLogo1: !!_brData.logo1, hasLogo2: !!_brData.logo2, hasBgImage: !!_brData.bgImage,
+      hospitalName: _brData.hospitalName
+    });
+  }).catch(function(e){
+    brSetStatus('Error saving: '+e.message, '#dc2626');
+    if (e.message && e.message.indexOf('exceeds') > -1) {
+      alert('⚠️ Image too large for Firebase.\n\nFirestore documents must be under 1MB. Please compress your images more.');
+    }
+  });
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// 📣 TICKER MESSAGES — per-portal tickers (PMAM / I/C / Patient Services)
+// Saves to settings/tickers in Firestore.
+// Each portal reads its own ticker and renders it after login.
+// ══════════════════════════════════════════════════════════════════════
+
+var _tkData = {
+  pmam:    { enabled:false, message:'', severity:'info', link:'', linkLabel:'' },
+  ic:      { enabled:false, message:'', severity:'info', link:'', linkLabel:'' },
+  patient: { enabled:false, message:'', severity:'info', link:'', linkLabel:'' }
+};
+var _tkActiveTab = 'pmam';
+
+var TK_PORTAL_NAMES = { pmam:'PMAM Portal', ic:'I/C AB-PMJAY', patient:'Patient Services' };
+var TK_SEVERITY_COLORS = {
+  info:    { bg:'#dbeafe', fg:'#1e3a8a', border:'#93c5fd' },
+  success: { bg:'#dcfce7', fg:'#166534', border:'#86efac' },
+  warning: { bg:'#fef3c7', fg:'#78350f', border:'#fcd34d' },
+  danger:  { bg:'#fee2e2', fg:'#991b1b', border:'#fca5a5' }
+};
+
+function tkSetStatus(msg, color){
+  var el = document.getElementById('tkStatus');
+  if (el) { el.textContent = msg; el.style.color = color || '#6b7280'; }
+}
+
+// Switch active tab
+function tkSwitchTab(tab){
+  // Save current form values to in-memory data first
+  tkCaptureFormToData(_tkActiveTab);
+  _tkActiveTab = tab;
+  // Update tab button styles
+  ['pmam','ic','patient'].forEach(function(t){
+    var btn = document.getElementById('tk-tab-'+t);
+    if (btn) {
+      if (t === tab) btn.classList.add('tk-tab-active');
+      else btn.classList.remove('tk-tab-active');
+    }
+  });
+  // Update form display
+  var nameEl = document.getElementById('tkPortalName');
+  if (nameEl) nameEl.textContent = TK_PORTAL_NAMES[tab];
+  tkLoadFormFromData(tab);
+}
+
+// Read current form values into _tkData[tab]
+function tkCaptureFormToData(tab){
+  var $ = function(id){ return document.getElementById(id); };
+  if (!_tkData[tab]) _tkData[tab] = {};
+  _tkData[tab].enabled    = !!(($('tkEnabled')   || {}).checked);
+  _tkData[tab].message    = ($('tkMessage')      || {}).value || '';
+  _tkData[tab].severity   = ($('tkSeverity')     || {}).value || 'info';
+  _tkData[tab].link       = ($('tkLink')         || {}).value || '';
+  _tkData[tab].linkLabel  = ($('tkLinkLabel')    || {}).value || '';
+}
+
+// Push _tkData[tab] values into form
+function tkLoadFormFromData(tab){
+  var d = _tkData[tab] || {};
+  var $ = function(id){ return document.getElementById(id); };
+  if ($('tkEnabled'))   $('tkEnabled').checked   = !!d.enabled;
+  if ($('tkMessage'))   $('tkMessage').value     = d.message || '';
+  if ($('tkSeverity'))  $('tkSeverity').value    = d.severity || 'info';
+  if ($('tkLink'))      $('tkLink').value        = d.link || '';
+  if ($('tkLinkLabel')) $('tkLinkLabel').value   = d.linkLabel || '';
+  tkUpdatePreview();
+}
+
+// Live preview update
+function tkUpdatePreview(){
+  var $ = function(id){ return document.getElementById(id); };
+  var msg = ($('tkMessage') || {}).value || '';
+  var sev = ($('tkSeverity') || {}).value || 'info';
+  var link = ($('tkLink') || {}).value || '';
+  var linkLabel = ($('tkLinkLabel') || {}).value || '';
+  var charEl = $('tkCharCount');
+  if (charEl) charEl.textContent = msg.length;
+  var prev = $('tkPreview');
+  if (!prev) return;
+  if (!msg.trim()) { prev.innerHTML = '<em style="color:#9ca3af">(empty — nothing will show)</em>'; return; }
+  var c = TK_SEVERITY_COLORS[sev] || TK_SEVERITY_COLORS.info;
+  var linkHtml = link ? ' <a href="'+link.replace(/"/g,'&quot;')+'" target="_blank" style="color:'+c.fg+';font-weight:700;text-decoration:underline">'+(linkLabel || 'Read more')+' →</a>' : '';
+  prev.innerHTML = '<div style="background:'+c.bg+';color:'+c.fg+';border:1px solid '+c.border+';padding:8px 14px;border-radius:8px;font-weight:500;font-size:13px">📣 '+msg.replace(/</g,'&lt;')+linkHtml+'</div>';
+}
+
+// Save current tab's data to Firebase
+function tkSave(){
+  tkCaptureFormToData(_tkActiveTab);
+  tkSetStatus('Saving…', '#6b7280');
+  var payload = Object.assign({}, _tkData, {
+    _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
+    _updatedAt: Date.now()
+  });
+  db.collection('settings').doc('tickers').set(payload).then(function(){
+    tkSetStatus('✓ Saved — live on '+TK_PORTAL_NAMES[_tkActiveTab]+' immediately', '#166534');
+    if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/tickers', _tkActiveTab, {
+      portal: _tkActiveTab,
+      enabled: _tkData[_tkActiveTab].enabled,
+      messageLength: (_tkData[_tkActiveTab].message || '').length
+    });
+  }).catch(function(e){
+    tkSetStatus('Error: '+e.message, '#dc2626');
+  });
+}
+
+// Clear current tab's ticker
+function tkClear(){
+  if (!confirm('Clear the ticker for '+TK_PORTAL_NAMES[_tkActiveTab]+'?\n\n(You still need to click Save to apply this change.)')) return;
+  _tkData[_tkActiveTab] = { enabled:false, message:'', severity:'info', link:'', linkLabel:'' };
+  tkLoadFormFromData(_tkActiveTab);
+  tkSetStatus('● Cleared — click Save to apply', '#dc2626');
+}
+
+// Load all 3 tickers from Firebase
+function tkLoadAll(){
+  tkSetStatus('Loading…', '#6b7280');
+  db.collection('settings').doc('tickers').get().then(function(doc){
+    var d = doc.exists ? (doc.data() || {}) : {};
+    ['pmam','ic','patient'].forEach(function(p){
+      _tkData[p] = Object.assign({ enabled:false, message:'', severity:'info', link:'', linkLabel:'' }, d[p] || {});
+    });
+    tkLoadFormFromData(_tkActiveTab);
+    tkSetStatus('✓ Loaded', '#166534');
+  }).catch(function(e){
+    tkSetStatus('Error loading: '+e.message, '#dc2626');
+  });
+}
+
+// Wire live preview updates on form changes
+window.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    ['tkMessage','tkSeverity','tkLink','tkLinkLabel'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', tkUpdatePreview);
+      if (el) el.addEventListener('change', tkUpdatePreview);
+    });
+    var enabled = document.getElementById('tkEnabled');
+    if (enabled) enabled.addEventListener('change', function(){
+      var lbl = document.getElementById('tkEnabledLabel');
+      if (lbl) lbl.textContent = enabled.checked ? 'Enabled — show ticker' : 'Disabled — hide ticker';
+    });
+  }, 1500);
+});
 
 // ══════════════════════════════════════════════════════════════════════
 // LANDING PAGE EDITOR — full CRUD for nav, quick links, contact, important links
