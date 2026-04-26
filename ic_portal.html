@@ -1130,9 +1130,21 @@ function genDaily(){
     var html = rows.map(function(r, i){
       totals.ipd+=r.ipd; totals.reg+=r.reg; totals.pre+=r.pre; totals.preAmt+=r.preAmt; totals.dis+=r.dis; totals.clm+=r.clm;
       var wardsStr = r.wards.length ? r.wards.join(', ') : '—';
-      return '<tr>'
+      // Check if any report for this PMAM in the date range is flagged
+      var flagged = filtered.some(function(rep){
+        return (rep.email === r.email || rep.name === r.name)
+          && rep._flag && rep._flag.flagged;
+      });
+      var disputed = flagged && filtered.some(function(rep){
+        return (rep.email === r.email || rep.name === r.name)
+          && rep._flag && rep._flag.disputed;
+      });
+      var flagIcon = disputed
+        ? ' <span title="PMAM has disputed this flag — awaiting admin review" style="cursor:help">⚠️</span>'
+        : (flagged ? ' <span title="This report has been flagged by admin for review" style="cursor:help">🚩</span>' : '');
+      return '<tr'+(flagged ? ' style="background:#fff8f8"' : '')+'>'
         + '<td>'+(i+1)+'</td>'
-        + '<td class="txt">'+(r.name||'—')+'</td>'
+        + '<td class="txt">'+(r.name||'—')+flagIcon+'</td>'
         + '<td class="txt">'+wardsStr+'</td>'
         + '<td>'+r.ipd+'</td>'
         + '<td>'+r.reg+'</td>'

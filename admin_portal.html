@@ -841,9 +841,9 @@ tr:hover td{background:#EEF3FF}
           <div class="tbl-wrap" style="max-height:560px;overflow:auto">
             <table>
               <thead><tr>
-                <th>Date</th><th>PMAM</th><th>Ward</th><th>OPD</th><th>IPD</th><th>Reg</th><th>Pre-Auth</th><th>Discharged</th><th>Claims</th><th style="width:160px">Actions</th>
+                <th>Date</th><th>PMAM</th><th>Ward</th><th>OPD</th><th>IPD</th><th>Reg</th><th>Pre-Auth</th><th>Discharged</th><th>Claims</th><th>Status</th><th style="width:130px">Actions</th>
               </tr></thead>
-              <tbody id="dmRepTbody"><tr><td colspan="10" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">Click "Load" to fetch reports…</td></tr></tbody>
+              <tbody id="dmRepTbody"><tr><td colspan="11" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">Click "Load" to fetch reports…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -1085,6 +1085,42 @@ tr:hover td{background:#EEF3FF}
     <div class="modal-footer">
       <button class="mbtn mbtn-sec" onclick="document.getElementById('editRepModal').classList.remove('open')">Cancel</button>
       <button class="mbtn mbtn-pri" onclick="saveEditReport()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- FLAG REPORT MODAL -->
+<div class="modal-bg" id="flagRepModal">
+  <div class="modal-box" style="max-width:560px">
+    <div class="modal-title" style="color:#dc2626">🚩 Flag Report for Review</div>
+    <div id="flagRepInfo" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;color:#1e293b;line-height:1.6"></div>
+
+    <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;letter-spacing:0.3px">SELECT REASON(S) — shown to PMAM:</div>
+    <div id="flagReasonsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+      <!-- Rendered by JS -->
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:5px">Additional Note (optional)</label>
+      <textarea id="flagNote" rows="2" placeholder="e.g. Please check the ward register for 24-Apr and verify IPD count..." style="width:100%;padding:9px 12px;border:1.5px solid #fca5a5;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="mbtn mbtn-sec" onclick="closeFlagModal()">Cancel</button>
+      <button class="mbtn mbtn-pri" style="background:linear-gradient(135deg,#dc2626,#b91c1c)" onclick="submitFlag()">🚩 Flag Report &amp; Notify PMAM</button>
+    </div>
+    <div id="flagRepErr" style="color:#dc2626;font-size:12px;margin-top:8px;min-height:16px"></div>
+  </div>
+</div>
+
+<!-- VIEW/CLEAR FLAG MODAL -->
+<div class="modal-bg" id="viewFlagModal">
+  <div class="modal-box" style="max-width:560px">
+    <div class="modal-title">🚩 Flagged Report Details</div>
+    <div id="viewFlagContent" style="margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="mbtn mbtn-sec" onclick="document.getElementById('viewFlagModal').classList.remove('open')">Close</button>
+      <button class="mbtn mbtn-pri" style="background:linear-gradient(135deg,#16a34a,#15803d)" onclick="clearFlag()">✅ Clear Flag (Resolved)</button>
     </div>
   </div>
 </div>
@@ -2241,11 +2277,28 @@ function dmRenderReports(){
   var tb = document.getElementById('dmRepTbody');
   document.getElementById('dmRepCount').textContent = '('+_dmReports.length+' records)';
   if (_dmReports.length === 0) {
-    tb.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">No reports match the filter.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">No reports match the filter.</td></tr>';
     return;
   }
   tb.innerHTML = _dmReports.map(function(r){
     var n = (r.name || r.pmamName || r.email || '—');
+    // Flag status
+    var flagStatus = '';
+    var flagBadge = '';
+    if (r._flag && r._flag.flagged) {
+      if (r._flag.disputed) {
+        flagStatus = 'disputed';
+        flagBadge = '<span style="background:#fef3c7;color:#78350f;border:1px solid #fcd34d;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:700">⚠️ Disputed</span>';
+      } else {
+        flagStatus = 'flagged';
+        flagBadge = '<span style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:700">🚩 Flagged</span>';
+      }
+    } else {
+      flagBadge = '<span style="color:#9ca3af;font-size:11px">—</span>';
+    }
+    var flagBtn = (flagStatus === 'flagged' || flagStatus === 'disputed')
+      ? '<button class="dm-act-btn" style="background:#f59e0b;color:#fff" title="Edit or clear flag" onclick="dmEditFlag(\''+r._id+'\')">🚩</button>'
+      : '<button class="dm-act-btn" style="background:#6b7280;color:#fff" title="Flag this report" onclick="dmFlagReport(\''+r._id+'\')">🚩</button>';
     return '<tr>'
       + '<td>'+(r.date||r.reportDate||'—')+'</td>'
       + '<td>'+n+'</td>'
@@ -2256,8 +2309,10 @@ function dmRenderReports(){
       + '<td>'+(r.preauth!=null?r.preauth:(r.preAuth!=null?r.preAuth:'—'))+'</td>'
       + '<td>'+(r.discharged!=null?r.discharged:'—')+'</td>'
       + '<td>'+(r.claims!=null?r.claims:'—')+'</td>'
+      + '<td>'+flagBadge+'</td>'
       + '<td>'
       +   '<button class="dm-act-btn" style="background:#1A3DB5;color:#fff" onclick="dmEditReport(\''+r._id+'\')">✏️</button>'
+      +   flagBtn
       +   '<button class="dm-act-btn" style="background:#dc2626;color:#fff" onclick="dmDeleteReport(\''+r._id+'\')">🗑️</button>'
       + '</td></tr>';
   }).join('');
@@ -2325,9 +2380,184 @@ function dmDeleteReport(id){
   });
 }
 
-// ══════════════════════════════════════
-// LEAVES — load / edit / delete
-// ══════════════════════════════════════
+function dmDeleteReport(id){
+  if (!requireAdminUnlock()) return;
+  var r = _dmReports.find(function(x){ return x._id === id; });
+  if (!r) return;
+  var coll = window._dmReportsColl || 'pmam_reports';
+  var n = r.name || r.pmamName || r.email || '—';
+  confirmModal({
+    title: '🗑️ Delete PMAM Report',
+    body: '<strong style="color:#991b1b">This is permanent and will be logged.</strong><br><br>PMAM: <strong>'+n+'</strong><br>Date: <strong>'+(r.date||'—')+'</strong><br>Ward: <strong>'+(r.ward||'—')+'</strong>',
+    okLabel: 'Delete Permanently', okColor: '#dc2626',
+    onOk: function(){
+      db.collection(coll).doc(id).delete().then(function(){
+        writeAudit('DELETE', coll, id, { name:n, date:r.date, ward:r.ward });
+        showToast('✅ Report deleted', 'success');
+        dmLoadReports();
+      }).catch(function(e){ showToast('Error: '+e.message, 'error'); });
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// 🚩 FLAG REPORT SYSTEM
+// Admin flags suspicious reports → PMAM sees alert → edits or disputes
+// Saves to the report document's _flag field in Firestore
+// ══════════════════════════════════════════════════════════════════════
+
+var FLAG_REASONS = [
+  { id:'ipd',       icon:'📊', text:'IPD count seems incorrect' },
+  { id:'conserv',   icon:'💊', text:'Conservative cases mismatch' },
+  { id:'surgery',   icon:'🔪', text:'Surgery cases mismatch' },
+  { id:'preauth',   icon:'📋', text:'Pre-auth count seems wrong' },
+  { id:'preamount', icon:'💰', text:'Pre-auth amount seems wrong' },
+  { id:'discharge', icon:'🏥', text:'Discharge count seems wrong' },
+  { id:'claims',    icon:'📝', text:'Claim amount seems wrong' },
+  { id:'date',      icon:'📅', text:'Wrong date submitted' },
+  { id:'duplicate', icon:'❌', text:'Report seems duplicate' },
+  { id:'zeros',     icon:'⚠️', text:'All fields are zero / empty' }
+];
+
+var _flaggingReportId = null;
+var _viewingFlagId    = null;
+
+function dmFlagReport(id){
+  if (!requireAdminUnlock()) return;
+  var r = _dmReports.find(function(x){ return x._id === id; });
+  if (!r) { showToast('Record not found', 'error'); return; }
+  _flaggingReportId = id;
+
+  // Populate info card
+  var n    = r.name || r.pmamName || r.email || '—';
+  var date = r.date || r.reportDate || '—';
+  var ward = r.ward || '—';
+  document.getElementById('flagRepInfo').innerHTML =
+    '<strong>PMAM:</strong> '+n+' &nbsp;|&nbsp; <strong>Date:</strong> '+date+' &nbsp;|&nbsp; <strong>Ward:</strong> '+ward
+    +'<br><small style="color:#6b7280">PMAM will receive an email notification and see an alert after login.</small>';
+
+  // Render reason checkboxes
+  document.getElementById('flagReasonsList').innerHTML = FLAG_REASONS.map(function(r){
+    return '<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:1.5px solid #fecaca;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:background 0.15s" '
+      + 'onmouseover="this.style.background=\'#fef2f2\'" onmouseout="this.style.background=\'#fff\'">'
+      + '<input type="checkbox" value="'+r.id+'" style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626">'
+      + ' '+r.icon+' '+r.text
+      + '</label>';
+  }).join('');
+
+  document.getElementById('flagNote').value = '';
+  document.getElementById('flagRepErr').textContent = '';
+  document.getElementById('flagRepModal').classList.add('open');
+}
+
+function closeFlagModal(){
+  document.getElementById('flagRepModal').classList.remove('open');
+  _flaggingReportId = null;
+}
+
+function submitFlag(){
+  if (!_flaggingReportId) return;
+  // Collect selected reasons
+  var checkboxes = document.getElementById('flagReasonsList').querySelectorAll('input[type=checkbox]:checked');
+  var reasons = [];
+  checkboxes.forEach(function(cb){
+    var found = FLAG_REASONS.find(function(r){ return r.id === cb.value; });
+    if (found) reasons.push(found.icon + ' ' + found.text);
+  });
+  if (reasons.length === 0) {
+    document.getElementById('flagRepErr').textContent = 'Please select at least one reason.';
+    return;
+  }
+  var note = (document.getElementById('flagNote').value || '').trim();
+  var r    = _dmReports.find(function(x){ return x._id === _flaggingReportId; });
+  var coll = window._dmReportsColl || 'daily_reports';
+  var n    = r ? (r.name || r.pmamName || r.email || '') : '';
+  var pmamEmail = r ? (r.email || '') : '';
+  var date = r ? (r.date || r.reportDate || '') : '';
+
+  var flagData = {
+    flagged:   true,
+    disputed:  false,
+    reasons:   reasons,
+    note:      note,
+    flaggedBy: ADMIN_EMAIL,
+    flaggedAt: Date.now(),
+    pmamEmail: pmamEmail,
+    pmamName:  n,
+    date:      date
+  };
+
+  document.getElementById('flagRepErr').textContent = 'Saving…';
+
+  db.collection(coll).doc(_flaggingReportId).update({ _flag: flagData }).then(function(){
+    // Send email notification to PMAM
+    if (pmamEmail && typeof emailjs !== 'undefined') {
+      var reasonsText = reasons.join('\n• ');
+      var msgBody = 'Dear '+n+',\n\nYour daily report for '+date+' has been flagged for review by the admin.\n\nReason(s):\n• '+reasonsText+(note ? '\n\nNote: "'+note+'"' : '')+'\n\nPlease login to the PMAM portal and correct your report.\n\nPortal: '+window.location.origin+'/pmam_portal.html';
+      emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+        to_email:  pmamEmail,
+        otp_code:  '—',
+        hospital:  'GMC & AH Rajouri',
+        subject:   'Action Required — Your Daily Report ('+date+') Has Been Flagged',
+        message:   msgBody
+      }).catch(function(e){ console.warn('Flag email failed:', e); });
+    }
+    writeAudit('FLAG', coll, _flaggingReportId, { pmam:n, date:date, reasons:reasons, note:note });
+    showToast('🚩 Report flagged — PMAM notified', 'success');
+    closeFlagModal();
+    dmLoadReports();
+  }).catch(function(e){
+    document.getElementById('flagRepErr').textContent = 'Error: '+e.message;
+  });
+}
+
+function dmEditFlag(id){
+  var r = _dmReports.find(function(x){ return x._id === id; });
+  if (!r || !r._flag) return;
+  _viewingFlagId = id;
+  var f = r._flag;
+  var statusLabel = f.disputed
+    ? '<span style="background:#fef3c7;color:#78350f;border:1px solid #fcd34d;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700">⚠️ DISPUTED by PMAM</span>'
+    : '<span style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700">🚩 FLAGGED</span>';
+  var reasonsHtml = (f.reasons || []).map(function(r){ return '<li>'+r+'</li>'; }).join('');
+  var disputeHtml = f.disputed && f.disputeNote
+    ? '<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px;margin-top:10px"><strong style="color:#78350f">PMAM Response:</strong><br><em>"'+f.disputeNote+'"</em></div>'
+    : '';
+  document.getElementById('viewFlagContent').innerHTML =
+    '<div style="margin-bottom:8px">'+statusLabel+'</div>'
+    + '<div style="font-size:13px;line-height:1.8;color:#1e293b">'
+    + '<strong>PMAM:</strong> '+(f.pmamName||'—')+'<br>'
+    + '<strong>Date:</strong> '+(f.date||'—')+'<br>'
+    + '<strong>Flagged by:</strong> '+(f.flaggedBy||'—')+'<br>'
+    + '<strong>Flagged at:</strong> '+new Date(f.flaggedAt||0).toLocaleString('en-IN')+'<br>'
+    + '<strong>Reasons:</strong><ul style="margin:4px 0 4px 18px;padding:0">'+reasonsHtml+'</ul>'
+    + (f.note ? '<strong>Note:</strong> "'+f.note+'"' : '')
+    + '</div>'
+    + disputeHtml;
+  document.getElementById('viewFlagModal').classList.add('open');
+}
+
+function clearFlag(){
+  if (!_viewingFlagId) return;
+  var r    = _dmReports.find(function(x){ return x._id === _viewingFlagId; });
+  var coll = window._dmReportsColl || 'daily_reports';
+  var n    = r ? (r.name || r.pmamName || '') : '';
+  var date = r ? (r.date || '') : '';
+  db.collection(coll).doc(_viewingFlagId).update({
+    '_flag.flagged':  false,
+    '_flag.resolved': true,
+    '_flag.resolvedBy': ADMIN_EMAIL,
+    '_flag.resolvedAt': Date.now()
+  }).then(function(){
+    writeAudit('UNFLAG', coll, _viewingFlagId, { pmam:n, date:date, note:'Cleared by admin' });
+    showToast('✅ Flag cleared — report resolved', 'success');
+    document.getElementById('viewFlagModal').classList.remove('open');
+    _viewingFlagId = null;
+    dmLoadReports();
+  }).catch(function(e){ showToast('Error: '+e.message, 'error'); });
+}
+
+
 var _dmLeaves = [];
 function dmLoadLeaves(){
   var pmam = document.getElementById('dmLvPmam').value;
