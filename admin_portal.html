@@ -1562,8 +1562,9 @@ function renderWards(){
 }
 function addWard(){const v=document.getElementById('newWard').value.trim();if(!v)return;wards.push(v);document.getElementById('newWard').value='';renderWards();}
 function renderStaff(){
-  document.getElementById('staffGrid').innerHTML=staffData.map((s,i)=>`
-    <div class="staff-mini-card">
+  var el = document.getElementById('staffGrid');
+  if (!el) return;
+  el.innerHTML=staffData.map((s,i)=>`
       <div class="staff-av">${ini(s.name)}</div>
       <div class="staff-mini-info">
         <div class="staff-mini-name">${s.name}</div>
@@ -2480,12 +2481,16 @@ function submitFlag(){
   var pmamEmail = r ? (r.email || '') : '';
   var date = r ? (r.date || r.reportDate || '') : '';
 
+  var flaggedByEmail = ADMIN_EMAIL || (function(){
+    try { return JSON.parse(sessionStorage.getItem('pmjay_user')||'{}').email || 'admin'; } catch(e){ return 'admin'; }
+  })();
+
   var flagData = {
     flagged:   true,
     disputed:  false,
     reasons:   reasons,
     note:      note,
-    flaggedBy: ADMIN_EMAIL,
+    flaggedBy: flaggedByEmail,
     flaggedAt: Date.now(),
     pmamEmail: pmamEmail,
     pmamName:  n,
@@ -2549,10 +2554,13 @@ function clearFlag(){
   var coll = window._dmReportsColl || 'daily_reports';
   var n    = r ? (r.name || r.pmamName || '') : '';
   var date = r ? (r.date || '') : '';
+  var adminEm = ADMIN_EMAIL || (function(){
+    try { return JSON.parse(sessionStorage.getItem('pmjay_user')||'{}').email || 'admin'; } catch(e){ return 'admin'; }
+  })();
   var clearedFlag = {
     flagged:    false,
     resolved:   true,
-    resolvedBy: ADMIN_EMAIL,
+    resolvedBy: adminEm,
     resolvedAt: Date.now()
   };
   db.collection(coll).doc(_viewingFlagId).set({ _flag: clearedFlag }, { merge: true }).then(function(){
