@@ -1097,25 +1097,42 @@ tr:hover td{background:#EEF3FF}
 
 <!-- FLAG REPORT MODAL -->
 <div class="modal-bg" id="flagRepModal">
-  <div class="modal-box" style="max-width:560px">
+  <div class="modal-box" style="max-width:500px">
     <div class="modal-title" style="color:#dc2626">🚩 Flag Report for Review</div>
-    <div id="flagRepInfo" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;color:#1e293b;line-height:1.6"></div>
 
-    <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;letter-spacing:0.3px">SELECT REASON(S) — shown to PMAM:</div>
-    <div id="flagReasonsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
-      <!-- Rendered by JS -->
+    <!-- Report info -->
+    <div id="flagRepInfo" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:12px;color:#1e293b;line-height:1.6"></div>
+
+    <!-- Compact dropdown multi-select -->
+    <div style="margin-bottom:10px">
+      <label style="font-size:11px;font-weight:700;color:#374151;letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:5px">Reason(s) — shown to PMAM:</label>
+      <select id="flagReasonsSelect" multiple size="5"
+        style="width:100%;border:1.5px solid #fca5a5;border-radius:8px;font-size:13px;font-family:inherit;padding:4px;background:#fff;color:#1e293b;outline:none">
+        <option value="IPD count seems incorrect">IPD count seems incorrect</option>
+        <option value="Conservative cases mismatch">Conservative cases mismatch</option>
+        <option value="Surgery cases mismatch">Surgery cases mismatch</option>
+        <option value="Pre-auth count seems wrong">Pre-auth count seems wrong</option>
+        <option value="Pre-auth amount seems wrong">Pre-auth amount seems wrong</option>
+        <option value="Discharge count seems wrong">Discharge count seems wrong</option>
+        <option value="Claim amount seems wrong">Claim amount seems wrong</option>
+        <option value="Wrong date submitted">Wrong date submitted</option>
+        <option value="Report seems duplicate">Report seems duplicate</option>
+        <option value="All fields are zero or empty">All fields are zero or empty</option>
+      </select>
+      <div style="font-size:10.5px;color:#9ca3af;margin-top:3px">Hold Ctrl (Windows) or Cmd (Mac) to select multiple</div>
     </div>
 
-    <div style="margin-bottom:14px">
-      <label style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:5px">Additional Note (optional)</label>
-      <textarea id="flagNote" rows="2" placeholder="e.g. Please check the ward register for 24-Apr and verify IPD count..." style="width:100%;padding:9px 12px;border:1.5px solid #fca5a5;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+    <!-- Note -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:#374151;letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:4px">Additional Note (optional)</label>
+      <textarea id="flagNote" rows="2" placeholder="e.g. Please check the ward register and verify IPD count..." style="width:100%;padding:8px 10px;border:1.5px solid #fca5a5;border-radius:8px;font-size:12px;font-family:inherit;resize:none"></textarea>
     </div>
 
     <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
       <button class="mbtn mbtn-sec" onclick="closeFlagModal()">Cancel</button>
-      <button class="mbtn mbtn-pri" style="background:linear-gradient(135deg,#dc2626,#b91c1c)" onclick="submitFlag()">🚩 Flag Report &amp; Notify PMAM</button>
+      <button class="mbtn mbtn-pri" style="background:linear-gradient(135deg,#dc2626,#b91c1c)" onclick="submitFlag()">🚩 Flag &amp; Notify PMAM</button>
     </div>
-    <div id="flagRepErr" style="color:#dc2626;font-size:12px;margin-top:8px;min-height:16px"></div>
+    <div id="flagRepErr" style="color:#dc2626;font-size:12px;margin-top:6px;min-height:14px"></div>
   </div>
 </div>
 
@@ -2411,20 +2428,6 @@ var _viewingFlagId    = null;
 
 function dmFlagReport(id){
   try {
-    // Define reasons INLINE — no dependency on external variable
-    var reasons = [
-      'IPD count seems incorrect',
-      'Conservative cases mismatch',
-      'Surgery cases mismatch',
-      'Pre-auth count seems wrong',
-      'Pre-auth amount seems wrong',
-      'Discharge count seems wrong',
-      'Claim amount seems wrong',
-      'Wrong date submitted',
-      'Report seems duplicate',
-      'All fields are zero or empty'
-    ];
-
     var r = _dmReports.find(function(x){ return x._id === id; });
     if (!r) { showToast('Record not found: '+id, 'error'); return; }
     _flaggingReportId = id;
@@ -2435,32 +2438,18 @@ function dmFlagReport(id){
 
     var infoEl = document.getElementById('flagRepInfo');
     if (infoEl) infoEl.innerHTML =
-      '<strong>PMAM:</strong> '+n+' | <strong>Date:</strong> '+date+' | <strong>Ward:</strong> '+ward
-      +'<br><small style="color:#6b7280">PMAM will receive an email notification and see an alert after login.</small>';
+      '<strong>PMAM:</strong> '+n+' &nbsp;|&nbsp; <strong>Date:</strong> '+date+' &nbsp;|&nbsp; <strong>Ward:</strong> '+ward;
 
-    var listEl = document.getElementById('flagReasonsList');
-    if (listEl) {
-      var html = '';
-      for (var i = 0; i < reasons.length; i++) {
-        html += '<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:1.5px solid #fecaca;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;margin-bottom:4px">'
-          + '<input type="checkbox" value="'+i+'" style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626"> '
-          + reasons[i]
-          + '</label>';
-      }
-      listEl.innerHTML = html;
-    }
-
+    // Reset select and note
+    var sel = document.getElementById('flagReasonsSelect');
+    if (sel) { for (var i=0; i<sel.options.length; i++) sel.options[i].selected = false; }
     var noteEl = document.getElementById('flagNote');
     if (noteEl) noteEl.value = '';
     var errEl = document.getElementById('flagRepErr');
     if (errEl) errEl.textContent = '';
 
     var modal = document.getElementById('flagRepModal');
-    if (modal) {
-      modal.classList.add('open');
-    } else {
-      alert('Flag modal missing from DOM');
-    }
+    if (modal) modal.classList.add('open');
   } catch(e) {
     showToast('Flag error: '+e.message, 'error');
     console.error('dmFlagReport error:', e);
@@ -2474,17 +2463,12 @@ function closeFlagModal(){
 
 function submitFlag(){
   if (!_flaggingReportId) return;
-  // Collect selected reasons — read text directly from DOM labels
-  var checkboxes = document.getElementById('flagReasonsList').querySelectorAll('input[type=checkbox]:checked');
+  // Collect selected reasons from the multi-select dropdown
+  var sel = document.getElementById('flagReasonsSelect');
   var reasons = [];
-  checkboxes.forEach(function(cb){
-    var label = cb.parentElement;
-    if (label) {
-      // Get text content of label minus the checkbox text
-      var txt = label.textContent.trim();
-      if (txt) reasons.push(txt);
-    }
-  });
+  for (var i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].selected) reasons.push(sel.options[i].value);
+  }
   if (reasons.length === 0) {
     document.getElementById('flagRepErr').textContent = 'Please select at least one reason.';
     return;
