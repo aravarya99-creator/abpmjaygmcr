@@ -2047,13 +2047,16 @@ function requireAdminUnlock(action){
 // --- Admin OTP flow ---
 function adminUnlockStart(){
   document.getElementById('adminOtpEmail').textContent = ADMIN_EMAIL;
-  document.getElementById('adminOtpEmail2').textContent = ADMIN_EMAIL;
+  var em2 = document.getElementById('adminOtpEmail2');
+  if (em2) em2.textContent = ADMIN_EMAIL;
   document.getElementById('adminOtpStep1').style.display = 'block';
   document.getElementById('adminOtpStep2').style.display = 'none';
   document.getElementById('adminOtpInput').value = '';
   document.getElementById('adminOtpErr').textContent = '';
   document.getElementById('adminOtpModal').classList.add('open');
 }
+// Alias kept for backward compatibility
+function adminOtpOpen(){ adminUnlockStart(); }
 function adminOtpClose(){ document.getElementById('adminOtpModal').classList.remove('open'); }
 function adminOtpSend(){
   var btn = document.getElementById('adminOtpSendBtn');
@@ -2066,7 +2069,15 @@ function adminOtpSend(){
     showToast('OTP sent to ' + ADMIN_EMAIL, 'success');
   }, function(err){
     btn.disabled = false; btn.textContent = 'Send OTP';
-    showToast('Failed to send OTP: ' + err, 'error');
+    // Convert any error type to a readable string
+    var msg = 'Unknown error';
+    if (typeof err === 'string')         msg = err;
+    else if (err && err.text)            msg = err.text;
+    else if (err && err.message)         msg = err.message;
+    else if (err && err.status)          msg = 'EmailJS error ' + err.status + (err.text ? ': ' + err.text : '');
+    else if (err)                        { try { msg = JSON.stringify(err); } catch(_) {} }
+    showToast('Failed to send OTP: ' + msg, 'error');
+    console.error('OTP send error:', err);
   });
 }
 function adminOtpVerify(){
