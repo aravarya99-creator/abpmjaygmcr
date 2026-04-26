@@ -1924,6 +1924,20 @@ function fbVerifyOTP(email, otp, onSuccess, onError) {
 // ══════════════════════════════════════
 var ADMIN_EMAIL = 'aravarya99@gmail.com';
 
+// FLAG_REASONS — defined at top level so always available (no emoji to avoid charset issues)
+var FLAG_REASONS = [
+  { id:'ipd',       icon:'&#128202;', text:'IPD count seems incorrect' },
+  { id:'conserv',   icon:'&#128138;', text:'Conservative cases mismatch' },
+  { id:'surgery',   icon:'&#9986;',   text:'Surgery cases mismatch' },
+  { id:'preauth',   icon:'&#128203;', text:'Pre-auth count seems wrong' },
+  { id:'preamount', icon:'&#128176;', text:'Pre-auth amount seems wrong' },
+  { id:'discharge', icon:'&#127973;', text:'Discharge count seems wrong' },
+  { id:'claims',    icon:'&#128221;', text:'Claim amount seems wrong' },
+  { id:'date',      icon:'&#128197;', text:'Wrong date submitted' },
+  { id:'duplicate', icon:'&#10060;',  text:'Report seems duplicate' },
+  { id:'zeros',     icon:'&#9888;',   text:'All fields are zero / empty' }
+];
+
 function loadSessionUser() {
   try {
     var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
@@ -2391,19 +2405,6 @@ function dmDeleteReport(id){
 // Admin flags suspicious reports → PMAM sees alert → edits or disputes
 // Saves to the report document's _flag field in Firestore
 // ══════════════════════════════════════════════════════════════════════
-
-var FLAG_REASONS = [
-  { id:'ipd',       icon:'📊', text:'IPD count seems incorrect' },
-  { id:'conserv',   icon:'💊', text:'Conservative cases mismatch' },
-  { id:'surgery',   icon:'🔪', text:'Surgery cases mismatch' },
-  { id:'preauth',   icon:'📋', text:'Pre-auth count seems wrong' },
-  { id:'preamount', icon:'💰', text:'Pre-auth amount seems wrong' },
-  { id:'discharge', icon:'🏥', text:'Discharge count seems wrong' },
-  { id:'claims',    icon:'📝', text:'Claim amount seems wrong' },
-  { id:'date',      icon:'📅', text:'Wrong date submitted' },
-  { id:'duplicate', icon:'❌', text:'Report seems duplicate' },
-  { id:'zeros',     icon:'⚠️', text:'All fields are zero / empty' }
-];
 
 var _flaggingReportId = null;
 var _viewingFlagId    = null;
