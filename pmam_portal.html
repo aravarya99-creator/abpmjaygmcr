@@ -489,6 +489,11 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           Fill Today's Report
           <span class="badge-warn" id="fillBadge">⚠️ Not filled yet</span>
         </div>
+        <!-- Correction banner — shown when editing a flagged report -->
+        <div id="flagCorrectionBanner" style="display:none;background:#fef3c7;border:1.5px solid #fcd34d;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#78350f;font-weight:600">
+          ✏️ You are correcting a flagged report for <span id="flagCorrectionDate"></span>.
+          The original values are pre-filled — correct the wrong fields and click Submit.
+        </div>
         <div class="sec-lbl">Basic Information</div>
         <div class="frow">
           <div class="fld"><label>Date</label><input type="date" id="eDate" style="width:145px"></div>
@@ -1577,9 +1582,6 @@ window.addEventListener('DOMContentLoaded', function() {
       if(mNameEl) mNameEl.value = n;
       var mInitEl = document.getElementById('mInitials');
       if(mInitEl) mInitEl.textContent = initials;
-
-      // ── Check for flagged reports for this PMAM ──
-      if (u.email) checkFlaggedReports(u.email);
     } catch(e) {}
   }
 });
@@ -1626,143 +1628,263 @@ window.addEventListener('DOMContentLoaded', function(){
 
 </script>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     FLAGGED REPORT MODAL — appears on login if admin has flagged reports
-     ═══════════════════════════════════════════════════════════════ -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     FLAGGED REPORT MODAL
+     ═══════════════════════════════════════════════════════════ -->
 <div id="flaggedModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,0.3)">
-    <!-- Header -->
-    <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:18px 22px;border-radius:16px 16px 0 0">
-      <div style="font-size:18px;font-weight:800;color:#fff">⚠️ Action Required</div>
+  <div style="background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,0.3)">
+    <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:16px 20px;border-radius:16px 16px 0 0">
+      <div style="font-size:17px;font-weight:800;color:#fff">⚠️ Action Required</div>
       <div style="font-size:12px;color:rgba(255,255,255,0.85);margin-top:2px">Admin has flagged your report(s) for review</div>
     </div>
-    <!-- Content -->
-    <div id="flaggedModalContent" style="padding:18px 22px"></div>
-    <!-- Footer -->
-    <div style="padding:14px 22px;border-top:1px solid #f1f5f9;display:flex;gap:8px;justify-content:flex-end">
-      <button onclick="dismissFlagModal()" style="padding:9px 18px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#374151;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Remind me later</button>
+    <div id="flaggedModalContent" style="padding:16px 20px"></div>
+    <div style="padding:12px 20px;border-top:1px solid #f1f5f9;display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="dismissFlagModal()" style="padding:8px 16px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#374151;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Remind me later</button>
     </div>
   </div>
 </div>
 
 <style>
-  .flag-card{background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:14px 16px;margin-bottom:12px}
-  .flag-card.disputed{background:#fef3c7;border-color:#fcd34d}
-  .flag-reason-tag{display:inline-block;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:600;margin:2px}
-  .flag-btn-primary{padding:8px 16px;background:linear-gradient(135deg,#1A3DB5,#2563eb);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
-  .flag-btn-secondary{padding:8px 16px;background:#f9fafb;border:1.5px solid #e5e7eb;color:#374151;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
-  .dispute-box{background:#fff;border:1.5px solid #fcd34d;border-radius:8px;padding:10px;margin-top:10px}
-  .dispute-box textarea{width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;margin-top:6px}
+  .flag-card{background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .flag-reason-tag{display:inline-block;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;margin:2px}
+  .flag-act-btn{padding:7px 14px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  .dispute-area{background:#fff;border:1.5px solid #fcd34d;border-radius:8px;padding:10px;margin-top:8px;display:none}
+  .dispute-area textarea{width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;margin-top:4px}
 </style>
 
 <script>
-// ══════════════════════════════════════════════════════════════════════
-// FLAGGED REPORT CHECKER — runs on login
-// Reads daily_reports where _flag.flagged=true AND _flag.pmamEmail=email
-// Shows modal popup so PMAM can correct or dispute
-// ══════════════════════════════════════════════════════════════════════
-var _flaggedReports = [];
+// ══════════════════════════════════════════════════════════════
+// PMAM — FLAGGED REPORT SYSTEM
+// ══════════════════════════════════════════════════════════════
 
+var _flaggedReports  = [];       // list of flagged report docs for this PMAM
+var _editingFlagDoc  = null;     // doc being corrected (for update on resubmit)
+
+// Simple notification helper (PMAM portal uses entryMsg, not showToast)
+function pmamNotify(msg, color){
+  var el = document.getElementById('entryMsg');
+  if (el) { el.style.color = color||'#166534'; el.textContent = msg; setTimeout(function(){ el.textContent=''; }, 4000); }
+}
+
+// Called from session init — check for flagged reports for this PMAM
 function checkFlaggedReports(pmamEmail){
-  // Check both possible collection names
-  var colls = ['daily_reports', 'pmam_reports'];
-  var found = [];
-  var checked = 0;
-  colls.forEach(function(coll){
-    db.collection(coll).where('_flag.flagged','==',true).where('_flag.pmamEmail','==',pmamEmail)
-      .get().then(function(snap){
-        snap.forEach(function(d){
-          var r = d.data(); r._id = d.id; r._coll = coll;
-          found.push(r);
-        });
-        checked++;
-        if (checked === colls.length && found.length > 0) {
-          _flaggedReports = found;
-          showFlaggedModal();
+  db.collection('daily_reports')
+    .where('email','==', pmamEmail)
+    .get().then(function(snap){
+      var flagged = [];
+      snap.forEach(function(d){
+        var r = d.data();
+        if (r._flag && r._flag.flagged) {
+          r._docId = d.id;
+          flagged.push(r);
         }
-      }).catch(function(){
-        checked++;
       });
-  });
+      if (flagged.length > 0){
+        _flaggedReports = flagged;
+        showFlaggedModal();
+      }
+    }).catch(function(e){ console.warn('Flag check error:', e); });
 }
 
 function showFlaggedModal(){
   var content = _flaggedReports.map(function(r, idx){
     var f = r._flag || {};
-    var date = r.date || r.reportDate || '—';
-    var isDisputed = !!f.disputed;
-    var reasonsHtml = (f.reasons || []).map(function(reason){
-      return '<span class="flag-reason-tag">'+reason+'</span>';
+    var date = r.date || '—';
+    var reasonsHtml = (f.reasons || []).map(function(rs){
+      return '<span class="flag-reason-tag">'+rs+'</span>';
     }).join('');
     var noteHtml = f.note
-      ? '<div style="font-size:12px;color:#6b7280;margin-top:6px;font-style:italic">💬 Admin note: "'+f.note+'"</div>'
+      ? '<div style="font-size:11px;color:#6b7280;margin-top:5px;font-style:italic">Admin note: "'+f.note+'"</div>'
       : '';
-    var disputeSection = isDisputed
-      ? '<div style="font-size:12px;color:#78350f;margin-top:8px;font-weight:600">✓ You have disputed this flag. Admin will review your response.</div>'
-      : '<div class="dispute-box" id="disputeBox_'+idx+'" style="display:none">'
-        + '<div style="font-size:12px;font-weight:700;color:#78350f">Your explanation (why your data is correct):</div>'
-        + '<textarea id="disputeNote_'+idx+'" rows="2" placeholder="e.g. I checked the ward register and my IPD count of 42 is correct. The discrepancy is due to..."></textarea>'
-        + '<button class="flag-btn-primary" style="margin-top:6px;background:linear-gradient(135deg,#d97706,#b45309)" onclick="submitDispute('+idx+')">Submit — My Data is Correct</button>'
-        + '</div>';
-    return '<div class="flag-card'+(isDisputed?' disputed':'')+'">'
-      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
-      + '  <div><span style="font-size:13px;font-weight:800;color:#1e293b">📅 '+date+'</span></div>'
-      + '  <span style="font-size:10px;color:#9ca3af">'+new Date(f.flaggedAt||0).toLocaleDateString('en-IN')+'</span>'
+    var isDisputed = !!f.disputed;
+    var disputedMsg = isDisputed
+      ? '<div style="font-size:12px;color:#78350f;margin-top:6px;font-weight:600">✓ You disputed this — admin is reviewing your response.</div>'
+      : '';
+    return '<div class="flag-card">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      + '  <strong style="font-size:13px;color:#1e293b">📅 Report for: '+date+'</strong>'
       + '</div>'
       + '<div style="margin-bottom:6px">'+reasonsHtml+'</div>'
       + noteHtml
-      + '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
-      + '  <button class="flag-btn-primary" onclick="goEditFlaggedReport(\''+date+'\')">✏️ Edit &amp; Resubmit</button>'
-      + (isDisputed ? '' : '  <button class="flag-btn-secondary" onclick="toggleDisputeBox('+idx+')">✅ My Data is Correct</button>')
-      + '</div>'
-      + disputeSection
+      + disputedMsg
+      + (!isDisputed
+          ? '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
+            + '<button class="flag-act-btn" style="background:#1A3DB5;color:#fff" onclick="editFlaggedReport('+idx+')">✏️ Edit &amp; Resubmit</button>'
+            + '<button class="flag-act-btn" style="background:#f9fafb;border:1.5px solid #e5e7eb;color:#374151" onclick="toggleDisputeArea('+idx+')">✅ My Data is Correct</button>'
+            + '</div>'
+            + '<div class="dispute-area" id="disputeArea_'+idx+'">'
+            + '  <div style="font-size:12px;font-weight:700;color:#78350f">Explain why your data is correct:</div>'
+            + '  <textarea id="disputeNote_'+idx+'" rows="2" placeholder="e.g. I verified with the ward register — IPD count of 42 is correct because..."></textarea>'
+            + '  <button class="flag-act-btn" style="background:#f59e0b;color:#fff;margin-top:6px" onclick="submitDispute('+idx+')">Submit Explanation</button>'
+            + '  <div id="disputeErr_'+idx+'" style="font-size:11px;color:#dc2626;margin-top:4px"></div>'
+            + '</div>'
+          : '')
       + '</div>';
   }).join('');
+
   document.getElementById('flaggedModalContent').innerHTML =
-    '<div style="font-size:13px;color:#6b7280;margin-bottom:14px">Please review and correct or explain the following flagged report(s):</div>'
+    '<div style="font-size:12px;color:#6b7280;margin-bottom:12px">Please review the flagged report(s) below and take action:</div>'
     + content;
-  var modal = document.getElementById('flaggedModal');
-  modal.style.display = 'flex';
+  document.getElementById('flaggedModal').style.display = 'flex';
 }
 
 function dismissFlagModal(){
   document.getElementById('flaggedModal').style.display = 'none';
 }
 
-function toggleDisputeBox(idx){
-  var box = document.getElementById('disputeBox_'+idx);
-  if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+function toggleDisputeArea(idx){
+  var el = document.getElementById('disputeArea_'+idx);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
-function goEditFlaggedReport(date){
+// ── EDIT & RESUBMIT: pre-fill Fill Report with flagged report data ──
+function editFlaggedReport(idx){
+  var r = _flaggedReports[idx];
+  if (!r) return;
   dismissFlagModal();
-  // Navigate to My Records section, filter by that date
-  var sbi = document.querySelector('.sbi[data-goto="myRecords"]');
-  if (sbi) sbi.click();
-  // Try pre-filling date filter
-  var dateFilter = document.getElementById('filterDate');
-  if (dateFilter) { dateFilter.value = date; }
-  showToast('Please find your report for '+date+' and correct it, then resubmit.', 'info');
+
+  // Navigate to Fill Report section
+  var sbi = document.querySelector('.sbi[data-goto="fillReport"]');
+  if (sbi) goSec('fillReport', sbi);
+  else goSec('fillReport', null);
+
+  // Show correction banner
+  var banner = document.getElementById('flagCorrectionBanner');
+  var dateSpan = document.getElementById('flagCorrectionDate');
+  if (banner) banner.style.display = 'block';
+  if (dateSpan) dateSpan.textContent = r.date || '—';
+
+  // Pre-fill form with existing (wrong) values so PMAM can see and correct
+  setTimeout(function(){
+    var setVal = function(id, val){
+      var el = document.getElementById(id);
+      if (el) el.value = (val != null && val !== undefined) ? val : '';
+    };
+    setVal('eDate',   r.date || '');
+    setVal('eIPD',    r.ipd);
+    setVal('eMed',    r.med);
+    setVal('eSurg',   r.surg);
+    setVal('eReg',    r.reg);
+    setVal('ePre',    r.pre);
+    setVal('ePreAmt', r.preAmt);
+    setVal('eDis',    r.dis);
+    setVal('eClm',    r.clm);
+
+    // Pre-fill wards
+    selWards = Array.isArray(r.wards) ? r.wards.slice() : (r.ward ? [r.ward] : []);
+    if (typeof renderSelWards === 'function') renderSelWards();
+
+    // Store the doc ID so saveEntry knows to UPDATE not ADD
+    _editingFlagDoc = { id: r._docId, idx: idx };
+  }, 150);
 }
 
+// ── DISPUTE: PMAM says their data is correct ──
 function submitDispute(idx){
   var r = _flaggedReports[idx];
   if (!r) return;
-  var note = (document.getElementById('disputeNote_'+idx)||{}).value || '';
-  if (!note.trim()) { alert('Please enter an explanation before submitting.'); return; }
-  var coll = r._coll || 'daily_reports';
-  db.collection(coll).doc(r._id).update({
-    '_flag.disputed':     true,
-    '_flag.disputeNote':  note.trim(),
-    '_flag.disputedAt':   Date.now()
-  }).then(function(){
-    showToast('✅ Your response has been submitted. Admin will review it.', 'success');
-    // Refresh the modal
-    _flaggedReports[idx]._flag.disputed = true;
-    _flaggedReports[idx]._flag.disputeNote = note.trim();
-    showFlaggedModal();
-  }).catch(function(e){ alert('Error submitting: '+e.message); });
+  var noteEl = document.getElementById('disputeNote_'+idx);
+  var errEl  = document.getElementById('disputeErr_'+idx);
+  var note   = noteEl ? noteEl.value.trim() : '';
+  if (!note) {
+    if (errEl) errEl.textContent = 'Please enter an explanation.';
+    return;
+  }
+  if (errEl) errEl.textContent = 'Submitting…';
+  db.collection('daily_reports').doc(r._docId).set({
+    _flag: {
+      flagged:     true,
+      disputed:    true,
+      disputeNote: note,
+      disputedAt:  Date.now()
+    }
+  }, { merge: true }).then(function(){
+    _flaggedReports[idx]._flag.disputed    = true;
+    _flaggedReports[idx]._flag.disputeNote = note;
+    pmamNotify('Your explanation has been submitted. Admin will review it.', '#166534');
+    showFlaggedModal(); // re-render with disputed state
+  }).catch(function(e){
+    if (errEl) errEl.textContent = 'Error: '+e.message;
+  });
 }
+
+// ── HOOK into saveEntry: if editing a flagged report, UPDATE instead of ADD ──
+(function patchSaveEntry(){
+  var _origSaveEntry = saveEntry;
+  window.saveEntry = function(){
+    if (!_editingFlagDoc) {
+      // Normal new entry
+      _origSaveEntry();
+      return;
+    }
+    // Correcting a flagged report — UPDATE existing doc
+    var msg = document.getElementById('entryMsg');
+    var date = document.getElementById('eDate').value;
+    if (!selWards.length) { msg.style.color='#dc2626'; msg.textContent='Please add at least one ward.'; return; }
+    if (!date) { msg.style.color='#dc2626'; msg.textContent='Please select a date.'; return; }
+
+    var u = getPmjayUser();
+    var patch = {
+      date:    date,
+      wards:   selWards.slice(),
+      ipd:     parseInt(document.getElementById('eIPD').value)    || 0,
+      med:     parseInt(document.getElementById('eMed').value)    || 0,
+      surg:    parseInt(document.getElementById('eSurg').value)   || 0,
+      reg:     parseInt(document.getElementById('eReg').value)    || 0,
+      pre:     parseInt(document.getElementById('ePre').value)    || 0,
+      preAmt:  parseInt(document.getElementById('ePreAmt').value) || 0,
+      dis:     parseInt(document.getElementById('eDis').value)    || 0,
+      clm:     parseInt(document.getElementById('eClm').value)    || 0,
+      email:   u.email || '',
+      name:    u.name  || '',
+      _correctedAt: Date.now(),
+      _correctedBy: u.email || '',
+      // Clear the flag
+      '_flag.flagged':  false,
+      '_flag.resolved': true,
+      '_flag.resolvedAt': Date.now(),
+      '_flag.resolvedBy': u.email || ''
+    };
+
+    msg.style.color = '#166534';
+    msg.textContent = 'Saving correction…';
+
+    db.collection('daily_reports').doc(_editingFlagDoc.id)
+      .update(patch)
+      .then(function(){
+        msg.style.color  = '#166534';
+        msg.textContent  = '✅ Report corrected successfully for ' + date + '!';
+        // Hide correction banner
+        var banner = document.getElementById('flagCorrectionBanner');
+        if (banner) banner.style.display = 'none';
+        // Reset editing state
+        _editingFlagDoc = null;
+        // Clear form
+        selWards = [];
+        if (typeof renderSelWards === 'function') renderSelWards();
+        ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].forEach(function(id){
+          var el = document.getElementById(id); if (el) el.value = '';
+        });
+        document.getElementById('eDate').value = new Date().toISOString().split('T')[0];
+        setTimeout(function(){ msg.textContent = ''; }, 3000);
+      })
+      .catch(function(e){
+        msg.style.color = '#dc2626';
+        msg.textContent = 'Error saving correction: ' + e.message;
+      });
+  };
+})();
+
+// Hook into session init to check flags
+window.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    try {
+      var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+      if (u && u.email) checkFlaggedReports(u.email);
+    } catch(e){}
+  }, 1500); // wait for Firebase to be ready
+});
 </script>
 
 </body>
