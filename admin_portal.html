@@ -2318,7 +2318,6 @@ function dmRenderReports(){
   }).join('');
 }
 function dmEditReport(id){
-  if (!requireAdminUnlock()) return;
   var r = _dmReports.find(function(x){ return x._id === id; });
   if (!r) { showToast('Record not found', 'error'); return; }
   var setV = function(id,v){ var el=document.getElementById(id); if(el) el.value = (v==null?'':v); };
@@ -2336,7 +2335,6 @@ function dmEditReport(id){
   document.getElementById('editRepModal').classList.add('open');
 }
 function saveEditReport(){
-  if (!requireAdminUnlock()) return;
   var id = window._editingRepId; if (!id) return;
   var coll = window._dmReportsColl || 'pmam_reports';
   var patch = {
@@ -2361,7 +2359,6 @@ function saveEditReport(){
   });
 }
 function dmDeleteReport(id){
-  if (!requireAdminUnlock()) return;
   var r = _dmReports.find(function(x){ return x._id === id; });
   if (!r) return;
   var coll = window._dmReportsColl || 'pmam_reports';
@@ -2381,7 +2378,6 @@ function dmDeleteReport(id){
 }
 
 function dmDeleteReport(id){
-  if (!requireAdminUnlock()) return;
   var r = _dmReports.find(function(x){ return x._id === id; });
   if (!r) return;
   var coll = window._dmReportsColl || 'pmam_reports';
@@ -2423,7 +2419,6 @@ var _flaggingReportId = null;
 var _viewingFlagId    = null;
 
 function dmFlagReport(id){
-  if (!requireAdminUnlock()) return;
   var r = _dmReports.find(function(x){ return x._id === id; });
   if (!r) { showToast('Record not found', 'error'); return; }
   _flaggingReportId = id;
@@ -2605,7 +2600,6 @@ function dmRenderLeaves(){
   }).join('');
 }
 function dmEditLeave(id){
-  if (!requireAdminUnlock()) return;
   var r = _dmLeaves.find(function(x){ return x._id === id; });
   if (!r) return;
   var setV = function(id,v){ var el=document.getElementById(id); if(el) el.value = (v==null?'':v); };
@@ -2625,7 +2619,6 @@ function dmEditLeave(id){
   document.getElementById('editLvModal').classList.add('open');
 }
 function saveEditLeave(){
-  if (!requireAdminUnlock()) return;
   var id = window._editingLvId; if (!id) return;
   var patch = {
     type: document.getElementById('elType').value,
@@ -2649,7 +2642,6 @@ function saveEditLeave(){
   }).catch(function(e){ document.getElementById('editLvErr').textContent = 'Error: '+e.message; });
 }
 function dmDeleteLeave(id){
-  if (!requireAdminUnlock()) return;
   var r = _dmLeaves.find(function(x){ return x._id === id; });
   if (!r) return;
   confirmModal({
@@ -2741,7 +2733,6 @@ function _populateWardSelect(selId){
 
 // --- Add Report ---
 function openAddReport(){
-  if (!requireAdminUnlock()) return;
   if (_dmPmamList.length === 0) { showToast('Loading PMAM list…', 'info'); dmLoadFilters(); setTimeout(openAddReport, 800); return; }
   _populatePmamSelect('arPmam');
   _populateWardSelect('arWard');
@@ -2754,7 +2745,6 @@ function openAddReport(){
   document.getElementById('addRepModal').classList.add('open');
 }
 function saveAddReport(){
-  if (!requireAdminUnlock()) return;
   var err = document.getElementById('addRepErr');
   err.textContent = '';
 
@@ -2846,7 +2836,6 @@ function saveAddReport(){
 
 // --- Add Leave Request ---
 function openAddLeave(){
-  if (!requireAdminUnlock()) return;
   if (_dmPmamList.length === 0) { showToast('Loading PMAM list…', 'info'); dmLoadFilters(); setTimeout(openAddLeave, 800); return; }
   _populatePmamSelect('alPmam');
   _populateWardSelect('alWard');
@@ -2860,7 +2849,6 @@ function openAddLeave(){
   document.getElementById('addLvModal').classList.add('open');
 }
 function saveAddLeave(){
-  if (!requireAdminUnlock()) return;
   var err = document.getElementById('addLvErr');
   err.textContent = '';
 
