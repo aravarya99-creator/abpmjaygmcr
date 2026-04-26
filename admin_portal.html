@@ -2377,25 +2377,6 @@ function dmDeleteReport(id){
   });
 }
 
-function dmDeleteReport(id){
-  var r = _dmReports.find(function(x){ return x._id === id; });
-  if (!r) return;
-  var coll = window._dmReportsColl || 'pmam_reports';
-  var n = r.name || r.pmamName || r.email || '—';
-  confirmModal({
-    title: '🗑️ Delete PMAM Report',
-    body: '<strong style="color:#991b1b">This is permanent and will be logged.</strong><br><br>PMAM: <strong>'+n+'</strong><br>Date: <strong>'+(r.date||'—')+'</strong><br>Ward: <strong>'+(r.ward||'—')+'</strong>',
-    okLabel: 'Delete Permanently', okColor: '#dc2626',
-    onOk: function(){
-      db.collection(coll).doc(id).delete().then(function(){
-        writeAudit('DELETE', coll, id, { name:n, date:r.date, ward:r.ward });
-        showToast('✅ Report deleted', 'success');
-        dmLoadReports();
-      }).catch(function(e){ showToast('Error: '+e.message, 'error'); });
-    }
-  });
-}
-
 // ══════════════════════════════════════════════════════════════════════
 // 🚩 FLAG REPORT SYSTEM
 // Admin flags suspicious reports → PMAM sees alert → edits or disputes
