@@ -2409,30 +2409,43 @@ var _flaggingReportId = null;
 var _viewingFlagId    = null;
 
 function dmFlagReport(id){
-  var r = _dmReports.find(function(x){ return x._id === id; });
-  if (!r) { showToast('Record not found', 'error'); return; }
-  _flaggingReportId = id;
+  try {
+    var r = _dmReports.find(function(x){ return x._id === id; });
+    if (!r) { showToast('Record not found: '+id, 'error'); return; }
+    _flaggingReportId = id;
 
-  // Populate info card
-  var n    = r.name || r.pmamName || r.email || '—';
-  var date = r.date || r.reportDate || '—';
-  var ward = r.ward || '—';
-  document.getElementById('flagRepInfo').innerHTML =
-    '<strong>PMAM:</strong> '+n+' &nbsp;|&nbsp; <strong>Date:</strong> '+date+' &nbsp;|&nbsp; <strong>Ward:</strong> '+ward
-    +'<br><small style="color:#6b7280">PMAM will receive an email notification and see an alert after login.</small>';
+    var n    = r.name || r.pmamName || r.email || '—';
+    var date = r.date || r.reportDate || '—';
+    var ward = r.ward || '—';
 
-  // Render reason checkboxes
-  document.getElementById('flagReasonsList').innerHTML = FLAG_REASONS.map(function(r){
-    return '<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:1.5px solid #fecaca;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:background 0.15s" '
-      + 'onmouseover="this.style.background=\'#fef2f2\'" onmouseout="this.style.background=\'#fff\'">'
-      + '<input type="checkbox" value="'+r.id+'" style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626">'
-      + ' '+r.icon+' '+r.text
-      + '</label>';
-  }).join('');
+    var infoEl = document.getElementById('flagRepInfo');
+    if (infoEl) infoEl.innerHTML =
+      '<strong>PMAM:</strong> '+n+' &nbsp;|&nbsp; <strong>Date:</strong> '+date+' &nbsp;|&nbsp; <strong>Ward:</strong> '+ward
+      +'<br><small style="color:#6b7280">PMAM will receive an email notification and see an alert after login.</small>';
 
-  document.getElementById('flagNote').value = '';
-  document.getElementById('flagRepErr').textContent = '';
-  document.getElementById('flagRepModal').classList.add('open');
+    var listEl = document.getElementById('flagReasonsList');
+    if (listEl) listEl.innerHTML = FLAG_REASONS.map(function(fr){
+      return '<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:1.5px solid #fecaca;border-radius:8px;cursor:pointer;font-size:13px;background:#fff">'
+        + '<input type="checkbox" value="'+fr.id+'" style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626">'
+        + ' '+fr.icon+' '+fr.text
+        + '</label>';
+    }).join('');
+
+    var noteEl = document.getElementById('flagNote');
+    if (noteEl) noteEl.value = '';
+    var errEl = document.getElementById('flagRepErr');
+    if (errEl) errEl.textContent = '';
+
+    var modal = document.getElementById('flagRepModal');
+    if (modal) {
+      modal.classList.add('open');
+    } else {
+      showToast('Flag modal not found in DOM', 'error');
+    }
+  } catch(e) {
+    showToast('Flag error: '+e.message, 'error');
+    console.error('dmFlagReport error:', e);
+  }
 }
 
 function closeFlagModal(){
