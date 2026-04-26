@@ -2494,25 +2494,26 @@ function submitFlag(){
 
   document.getElementById('flagRepErr').textContent = 'Saving…';
 
-  db.collection(coll).doc(_flaggingReportId).update({ _flag: flagData }).then(function(){
+  // Use set+merge so it works even if _flag field doesn't exist yet
+  var coll2 = window._dmReportsColl || 'daily_reports';
+  db.collection(coll2).doc(_flaggingReportId).set({ _flag: flagData }, { merge: true }).then(function(){
     // Send email notification to PMAM
     if (pmamEmail && typeof emailjs !== 'undefined') {
       var reasonsText = reasons.join('\n• ');
-      var msgBody = 'Dear '+n+',\n\nYour daily report for '+date+' has been flagged for review by the admin.\n\nReason(s):\n• '+reasonsText+(note ? '\n\nNote: "'+note+'"' : '')+'\n\nPlease login to the PMAM portal and correct your report.\n\nPortal: '+window.location.origin+'/pmam_portal.html';
+      var msgBody = 'Dear '+n+',\n\nYour daily report for '+date+' has been flagged for review by the admin.\n\nReason(s):\n• '+reasonsText+(note ? '\n\nNote: "'+note+'"' : '')+'\n\nPlease login to the PMAM portal and correct your report.';
       emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-        to_email:  pmamEmail,
-        otp_code:  '—',
-        hospital:  'GMC & AH Rajouri',
-        subject:   'Action Required — Your Daily Report ('+date+') Has Been Flagged',
-        message:   msgBody
+        to_email: pmamEmail,
+        otp_code: 'FLAG NOTICE',
+        hospital: 'GMC & AH Rajouri'
       }).catch(function(e){ console.warn('Flag email failed:', e); });
     }
-    writeAudit('FLAG', coll, _flaggingReportId, { pmam:n, date:date, reasons:reasons, note:note });
-    showToast('🚩 Report flagged — PMAM notified', 'success');
+    writeAudit('FLAG', coll2, _flaggingReportId, { pmam:n, date:date, reasons:reasons, note:note });
+    showToast('Report flagged successfully', 'success');
     closeFlagModal();
     dmLoadReports();
   }).catch(function(e){
     document.getElementById('flagRepErr').textContent = 'Error: '+e.message;
+    console.error('Flag save error:', e);
   });
 }
 
@@ -2548,14 +2549,15 @@ function clearFlag(){
   var coll = window._dmReportsColl || 'daily_reports';
   var n    = r ? (r.name || r.pmamName || '') : '';
   var date = r ? (r.date || '') : '';
-  db.collection(coll).doc(_viewingFlagId).update({
-    '_flag.flagged':  false,
-    '_flag.resolved': true,
-    '_flag.resolvedBy': ADMIN_EMAIL,
-    '_flag.resolvedAt': Date.now()
-  }).then(function(){
+  var clearedFlag = {
+    flagged:    false,
+    resolved:   true,
+    resolvedBy: ADMIN_EMAIL,
+    resolvedAt: Date.now()
+  };
+  db.collection(coll).doc(_viewingFlagId).set({ _flag: clearedFlag }, { merge: true }).then(function(){
     writeAudit('UNFLAG', coll, _viewingFlagId, { pmam:n, date:date, note:'Cleared by admin' });
-    showToast('✅ Flag cleared — report resolved', 'success');
+    showToast('Flag cleared — report resolved', 'success');
     document.getElementById('viewFlagModal').classList.remove('open');
     _viewingFlagId = null;
     dmLoadReports();
