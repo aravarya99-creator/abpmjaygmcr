@@ -1097,35 +1097,31 @@ tr:hover td{background:#EEF3FF}
 
 <!-- FLAG REPORT MODAL -->
 <div class="modal-bg" id="flagRepModal">
-  <div class="modal-box" style="max-width:500px">
+  <div class="modal-box" style="max-width:480px">
     <div class="modal-title" style="color:#dc2626">🚩 Flag Report for Review</div>
 
     <!-- Report info -->
     <div id="flagRepInfo" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:12px;color:#1e293b;line-height:1.6"></div>
 
-    <!-- Compact dropdown multi-select -->
-    <div style="margin-bottom:10px">
-      <label style="font-size:11px;font-weight:700;color:#374151;letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:5px">Reason(s) — shown to PMAM:</label>
-      <select id="flagReasonsSelect" multiple size="5"
-        style="width:100%;border:1.5px solid #fca5a5;border-radius:8px;font-size:13px;font-family:inherit;padding:4px;background:#fff;color:#1e293b;outline:none">
-        <option value="IPD count seems incorrect">IPD count seems incorrect</option>
-        <option value="Conservative cases mismatch">Conservative cases mismatch</option>
-        <option value="Surgery cases mismatch">Surgery cases mismatch</option>
-        <option value="Pre-auth count seems wrong">Pre-auth count seems wrong</option>
-        <option value="Pre-auth amount seems wrong">Pre-auth amount seems wrong</option>
-        <option value="Discharge count seems wrong">Discharge count seems wrong</option>
-        <option value="Claim amount seems wrong">Claim amount seems wrong</option>
-        <option value="Wrong date submitted">Wrong date submitted</option>
-        <option value="Report seems duplicate">Report seems duplicate</option>
-        <option value="All fields are zero or empty">All fields are zero or empty</option>
-      </select>
-      <div style="font-size:10.5px;color:#9ca3af;margin-top:3px">Hold Ctrl (Windows) or Cmd (Mac) to select multiple</div>
+    <!-- Tick-based checkboxes -->
+    <div style="font-size:11px;font-weight:700;color:#374151;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px">Select Reason(s) — shown to PMAM:</div>
+    <div id="flagReasonsList" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px">
+      <label class="flag-chk-row"><input type="checkbox" value="Date seems incorrect"> Date seems incorrect</label>
+      <label class="flag-chk-row"><input type="checkbox" value="Ward name seems wrong"> Ward name seems wrong</label>
+      <label class="flag-chk-row"><input type="checkbox" value="Ward IPD count seems wrong"> Ward IPD count seems wrong</label>
+      <label class="flag-chk-row"><input type="checkbox" value="Conservative cases count seems wrong"> Conservative cases count seems wrong</label>
+      <label class="flag-chk-row"><input type="checkbox" value="Surgery cases count seems wrong"> Surgery cases count seems wrong</label>
+      <label class="flag-chk-row"><input type="checkbox" value="Register count seems wrong"> Register count seems wrong</label>
+      <label class="flag-chk-row"><input type="checkbox" value="Pre-auth initiated count seems wrong"> Pre-auth initiated count seems wrong</label>
+      <label class="flag-chk-row"><input type="checkbox" value="Pre-auth amount seems wrong"> Pre-auth amount seems wrong</label>
+      <label class="flag-chk-row"><input type="checkbox" value="Discharge count seems wrong"> Discharge count seems wrong</label>
+      <label class="flag-chk-row"><input type="checkbox" value="Claim amount seems wrong"> Claim amount seems wrong</label>
     </div>
 
     <!-- Note -->
     <div style="margin-bottom:12px">
       <label style="font-size:11px;font-weight:700;color:#374151;letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:4px">Additional Note (optional)</label>
-      <textarea id="flagNote" rows="2" placeholder="e.g. Please check the ward register and verify IPD count..." style="width:100%;padding:8px 10px;border:1.5px solid #fca5a5;border-radius:8px;font-size:12px;font-family:inherit;resize:none"></textarea>
+      <textarea id="flagNote" rows="2" placeholder="e.g. Please check the ward register and verify the counts..." style="width:100%;padding:8px 10px;border:1.5px solid #fca5a5;border-radius:8px;font-size:12px;font-family:inherit;resize:none"></textarea>
     </div>
 
     <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
@@ -1135,6 +1131,12 @@ tr:hover td{background:#EEF3FF}
     <div id="flagRepErr" style="color:#dc2626;font-size:12px;margin-top:6px;min-height:14px"></div>
   </div>
 </div>
+
+<style>
+  .flag-chk-row{display:flex;align-items:center;gap:9px;padding:7px 10px;border:1.5px solid #fecaca;border-radius:8px;cursor:pointer;font-size:12.5px;color:#1e293b;background:#fff;transition:background 0.15s;user-select:none}
+  .flag-chk-row:hover{background:#fef2f2}
+  .flag-chk-row input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#dc2626;flex-shrink:0}
+</style>
 
 <!-- VIEW/CLEAR FLAG MODAL -->
 <div class="modal-bg" id="viewFlagModal">
@@ -2441,9 +2443,9 @@ function dmFlagReport(id){
     if (infoEl) infoEl.innerHTML =
       '<strong>PMAM:</strong> '+n+' &nbsp;|&nbsp; <strong>Date:</strong> '+date+' &nbsp;|&nbsp; <strong>Ward:</strong> '+ward;
 
-    // Reset select and note
-    var sel = document.getElementById('flagReasonsSelect');
-    if (sel) { for (var i=0; i<sel.options.length; i++) sel.options[i].selected = false; }
+    // Reset checkboxes and note
+    var checkboxes = document.querySelectorAll('#flagReasonsList input[type=checkbox]');
+    checkboxes.forEach(function(cb){ cb.checked = false; });
     var noteEl = document.getElementById('flagNote');
     if (noteEl) noteEl.value = '';
     var errEl = document.getElementById('flagRepErr');
@@ -2464,12 +2466,10 @@ function closeFlagModal(){
 
 function submitFlag(){
   if (!_flaggingReportId) return;
-  // Collect selected reasons from the multi-select dropdown
-  var sel = document.getElementById('flagReasonsSelect');
+  // Collect checked reasons
+  var checked = document.querySelectorAll('#flagReasonsList input[type=checkbox]:checked');
   var reasons = [];
-  for (var i = 0; i < sel.options.length; i++) {
-    if (sel.options[i].selected) reasons.push(sel.options[i].value);
-  }
+  checked.forEach(function(cb){ reasons.push(cb.value); });
   if (reasons.length === 0) {
     document.getElementById('flagRepErr').textContent = 'Please select at least one reason.';
     return;
