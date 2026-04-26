@@ -2411,6 +2411,20 @@ var _viewingFlagId    = null;
 
 function dmFlagReport(id){
   try {
+    // Define reasons INLINE — no dependency on external variable
+    var reasons = [
+      'IPD count seems incorrect',
+      'Conservative cases mismatch',
+      'Surgery cases mismatch',
+      'Pre-auth count seems wrong',
+      'Pre-auth amount seems wrong',
+      'Discharge count seems wrong',
+      'Claim amount seems wrong',
+      'Wrong date submitted',
+      'Report seems duplicate',
+      'All fields are zero or empty'
+    ];
+
     var r = _dmReports.find(function(x){ return x._id === id; });
     if (!r) { showToast('Record not found: '+id, 'error'); return; }
     _flaggingReportId = id;
@@ -2421,16 +2435,20 @@ function dmFlagReport(id){
 
     var infoEl = document.getElementById('flagRepInfo');
     if (infoEl) infoEl.innerHTML =
-      '<strong>PMAM:</strong> '+n+' &nbsp;|&nbsp; <strong>Date:</strong> '+date+' &nbsp;|&nbsp; <strong>Ward:</strong> '+ward
+      '<strong>PMAM:</strong> '+n+' | <strong>Date:</strong> '+date+' | <strong>Ward:</strong> '+ward
       +'<br><small style="color:#6b7280">PMAM will receive an email notification and see an alert after login.</small>';
 
     var listEl = document.getElementById('flagReasonsList');
-    if (listEl) listEl.innerHTML = FLAG_REASONS.map(function(fr){
-      return '<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:1.5px solid #fecaca;border-radius:8px;cursor:pointer;font-size:13px;background:#fff">'
-        + '<input type="checkbox" value="'+fr.id+'" style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626">'
-        + ' ' + fr.text
-        + '</label>';
-    }).join('');
+    if (listEl) {
+      var html = '';
+      for (var i = 0; i < reasons.length; i++) {
+        html += '<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:1.5px solid #fecaca;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;margin-bottom:4px">'
+          + '<input type="checkbox" value="'+i+'" style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626"> '
+          + reasons[i]
+          + '</label>';
+      }
+      listEl.innerHTML = html;
+    }
 
     var noteEl = document.getElementById('flagNote');
     if (noteEl) noteEl.value = '';
@@ -2441,7 +2459,7 @@ function dmFlagReport(id){
     if (modal) {
       modal.classList.add('open');
     } else {
-      showToast('Flag modal not found in DOM', 'error');
+      alert('Flag modal missing from DOM');
     }
   } catch(e) {
     showToast('Flag error: '+e.message, 'error');
@@ -2456,12 +2474,16 @@ function closeFlagModal(){
 
 function submitFlag(){
   if (!_flaggingReportId) return;
-  // Collect selected reasons
+  // Collect selected reasons — read text directly from DOM labels
   var checkboxes = document.getElementById('flagReasonsList').querySelectorAll('input[type=checkbox]:checked');
   var reasons = [];
   checkboxes.forEach(function(cb){
-    var found = FLAG_REASONS.find(function(r){ return r.id === cb.value; });
-    if (found) reasons.push(found.text);
+    var label = cb.parentElement;
+    if (label) {
+      // Get text content of label minus the checkbox text
+      var txt = label.textContent.trim();
+      if (txt) reasons.push(txt);
+    }
   });
   if (reasons.length === 0) {
     document.getElementById('flagRepErr').textContent = 'Please select at least one reason.';
