@@ -1097,42 +1097,47 @@ tr:hover td{background:#EEF3FF}
 
 <!-- FLAG REPORT MODAL -->
 <div class="modal-bg" id="flagRepModal">
-  <div class="modal-box" style="max-width:480px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">
-    <div class="modal-title" style="color:#dc2626;flex-shrink:0">🚩 Flag Report for Review</div>
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:460px;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.2);overflow:hidden">
 
-    <!-- Report info -->
-    <div id="flagRepInfo" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:7px 12px;font-size:12px;margin-bottom:10px;color:#1e293b;line-height:1.5;flex-shrink:0"></div>
-
-    <!-- Scrollable reasons list -->
-    <div style="font-size:11px;font-weight:700;color:#374151;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;flex-shrink:0">Select Reason(s):</div>
-    <div id="flagReasonsList" style="display:flex;flex-direction:column;gap:4px;overflow-y:auto;max-height:260px;padding-right:4px;flex:1;min-height:0">
-      <label class="flag-chk-row"><input type="checkbox" value="Date seems incorrect"> Date seems incorrect</label>
-      <label class="flag-chk-row"><input type="checkbox" value="Ward name seems wrong"> Ward name seems wrong</label>
-      <label class="flag-chk-row"><input type="checkbox" value="Ward IPD count seems wrong"> Ward IPD count seems wrong</label>
-      <label class="flag-chk-row"><input type="checkbox" value="Conservative cases count seems wrong"> Conservative cases count seems wrong</label>
-      <label class="flag-chk-row"><input type="checkbox" value="Surgery cases count seems wrong"> Surgery cases count seems wrong</label>
-      <label class="flag-chk-row"><input type="checkbox" value="Register count seems wrong"> Register count seems wrong</label>
-      <label class="flag-chk-row"><input type="checkbox" value="Pre-auth initiated count seems wrong"> Pre-auth initiated count seems wrong</label>
-      <label class="flag-chk-row"><input type="checkbox" value="Pre-auth amount seems wrong"> Pre-auth amount seems wrong</label>
-      <label class="flag-chk-row"><input type="checkbox" value="Discharge count seems wrong"> Discharge count seems wrong</label>
-      <label class="flag-chk-row"><input type="checkbox" value="Claim amount seems wrong"> Claim amount seems wrong</label>
+    <!-- Fixed header -->
+    <div style="padding:16px 20px 12px;border-bottom:1px solid #f1f5f9;flex-shrink:0">
+      <div style="font-size:15px;font-weight:800;color:#dc2626">🚩 Flag Report for Review</div>
+      <div id="flagRepInfo" style="background:#fef2f2;border:1px solid #fecaca;border-radius:7px;padding:7px 10px;font-size:12px;margin-top:8px;color:#1e293b;line-height:1.5"></div>
     </div>
 
-    <!-- Note + buttons (always visible at bottom) -->
-    <div style="flex-shrink:0;margin-top:10px">
-      <label style="font-size:11px;font-weight:700;color:#374151;letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:4px">Additional Note (optional)</label>
-      <textarea id="flagNote" rows="2" placeholder="e.g. Please check the ward register and verify..." style="width:100%;padding:7px 10px;border:1.5px solid #fca5a5;border-radius:8px;font-size:12px;font-family:inherit;resize:none"></textarea>
-      <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:10px">
+    <!-- Scrollable middle: reasons list -->
+    <div style="flex:1;overflow-y:auto;padding:12px 20px;min-height:0">
+      <div style="font-size:10.5px;font-weight:700;color:#374151;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:7px">Select Reason(s) — shown to PMAM:</div>
+      <div id="flagReasonsList" style="display:flex;flex-direction:column;gap:5px">
+        <label class="flag-chk-row"><input type="checkbox" value="Date seems incorrect"> Date seems incorrect</label>
+        <label class="flag-chk-row"><input type="checkbox" value="Ward name seems wrong"> Ward name seems wrong</label>
+        <label class="flag-chk-row"><input type="checkbox" value="Ward IPD count seems wrong"> Ward IPD count seems wrong</label>
+        <label class="flag-chk-row"><input type="checkbox" value="Conservative cases count seems wrong"> Conservative cases count seems wrong</label>
+        <label class="flag-chk-row"><input type="checkbox" value="Surgery cases count seems wrong"> Surgery cases count seems wrong</label>
+        <label class="flag-chk-row"><input type="checkbox" value="Register count seems wrong"> Register count seems wrong</label>
+        <label class="flag-chk-row"><input type="checkbox" value="Pre-auth initiated count seems wrong"> Pre-auth initiated count seems wrong</label>
+        <label class="flag-chk-row"><input type="checkbox" value="Pre-auth amount seems wrong"> Pre-auth amount seems wrong</label>
+        <label class="flag-chk-row"><input type="checkbox" value="Discharge count seems wrong"> Discharge count seems wrong</label>
+        <label class="flag-chk-row"><input type="checkbox" value="Claim amount seems wrong"> Claim amount seems wrong</label>
+      </div>
+    </div>
+
+    <!-- Fixed footer: note + buttons -->
+    <div style="padding:10px 20px 16px;border-top:1px solid #f1f5f9;flex-shrink:0">
+      <label style="font-size:10.5px;font-weight:700;color:#374151;letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:4px">Additional Note (optional)</label>
+      <textarea id="flagNote" rows="2" placeholder="e.g. Please check the ward register and verify..." style="width:100%;padding:7px 10px;border:1.5px solid #fca5a5;border-radius:8px;font-size:12px;font-family:inherit;resize:none;box-sizing:border-box"></textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
         <button class="mbtn mbtn-sec" onclick="closeFlagModal()">Cancel</button>
         <button class="mbtn mbtn-pri" style="background:linear-gradient(135deg,#dc2626,#b91c1c)" onclick="submitFlag()">🚩 Flag &amp; Notify PMAM</button>
       </div>
-      <div id="flagRepErr" style="color:#dc2626;font-size:12px;margin-top:6px;min-height:14px"></div>
+      <div id="flagRepErr" style="color:#dc2626;font-size:12px;margin-top:5px;min-height:14px"></div>
     </div>
+
   </div>
 </div>
 
 <style>
-  .flag-chk-row{display:flex;align-items:center;gap:9px;padding:6px 10px;border:1.5px solid #fecaca;border-radius:8px;cursor:pointer;font-size:12.5px;color:#1e293b;background:#fff;transition:background 0.15s;user-select:none}
+  .flag-chk-row{display:flex;align-items:center;gap:9px;padding:7px 10px;border:1.5px solid #fecaca;border-radius:8px;cursor:pointer;font-size:12.5px;color:#1e293b;background:#fff;transition:background 0.15s;user-select:none}
   .flag-chk-row:hover{background:#fef2f2}
   .flag-chk-row input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#dc2626;flex-shrink:0}
 </style>
