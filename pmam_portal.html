@@ -898,6 +898,26 @@ function addWard() {
   var s = document.getElementById('eWard');
   var v = s.value;
   if (!v || selWards.includes(v)) return;
+
+  // Block if already has a ward selected
+  if (selWards.length >= 1) {
+    var msg = document.getElementById('entryMsg');
+    // Check if any data has been entered
+    var hasData = ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].some(function(id){
+      var el = document.getElementById(id);
+      return el && String(el.value).trim() !== '' && parseInt(el.value) > 0;
+    });
+    msg.style.color = '#dc2626';
+    if (hasData) {
+      msg.textContent = 'Please click "Save Entry" for "' + selWards[0] + '" first, then you can add the next ward.';
+    } else {
+      msg.textContent = 'One ward at a time. Fill and save "' + selWards[0] + '" first before selecting another ward.';
+    }
+    setTimeout(function(){ msg.textContent = ''; }, 4000);
+    s.value = '';
+    return;
+  }
+
   selWards.push(v);
   s.value = '';
   renderSelWards();
