@@ -156,6 +156,7 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .role-ic{background:#DCFCE7;color:#166534}
 .role-admin{background:#F3E8FF;color:#7c3aed}
 .role-deo{background:#FEF3C7;color:#92400e}
+.role-accountant{background:#D1FAE5;color:#065F46}
 .user-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
 .act-btn{padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:none;font-family:"Inter",sans-serif}
 .act-edit{background:#E8EFFF;color:#1A3DB5}
@@ -440,8 +441,13 @@ tr:hover td{background:#EEF3FF}
       </div>
 
       <div class="section-wrap">
-        <div class="section-hd"><div class="section-title">DEO Users</div></div>
+        <div class="section-hd"><div class="section-title">DEO Users (Patient Services)</div></div>
         <div class="users-grid" id="deoGrid"></div>
+      </div>
+
+      <div class="section-wrap">
+        <div class="section-hd"><div class="section-title">Accountant Users (Finance)</div></div>
+        <div class="users-grid" id="accountantGrid"></div>
       </div>
 
       <div class="section-wrap">
@@ -1372,6 +1378,7 @@ function renderOthers(){
   const adminUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'Admin');
   const icUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'I/C AB-PMJAY');
   const deoUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'DEO' || x.u.role === 'MTS(patient services )' || x.u.role === 'MTS(patient services)' || x.u.role === 'MTS');
+  const accountantUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'Accountant');
 
   document.getElementById('adminGrid').innerHTML=adminUsers.map(({u,i})=>`
     <div class="user-card">
@@ -1411,7 +1418,7 @@ function renderOthers(){
       </div>
     </div>`).join('');
 
-  document.getElementById('deoGrid').innerHTML=deoUsers.map(({u,i})=>`
+  document.getElementById('deoGrid').innerHTML=deoUsers.length ? deoUsers.map(({u,i})=>`
     <div class="user-card">
       <div class="user-av av-deo">${ini(u.name)}</div>
       <div class="user-info">
@@ -1428,7 +1435,26 @@ function renderOthers(){
         <button class="act-btn ${u.status==='active'?'act-disable':'act-enable'}" onclick="toggleUser(${i},'other')">${u.status==='active'?'Disable':'Enable'}</button>
         <button class="act-btn" style="background:#fee2e2;color:#991b1b" onclick="deleteUser(${i},'other')">Delete</button>
       </div>
-    </div>`).join('');
+    </div>`).join('') : '<div style="color:#9ca3af;font-style:italic;font-size:12px">No DEO users registered</div>';
+
+  document.getElementById('accountantGrid').innerHTML=accountantUsers.length ? accountantUsers.map(({u,i})=>`
+    <div class="user-card">
+      <div class="user-av" style="background:linear-gradient(135deg,#059669,#047857);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0">${ini(u.name)}</div>
+      <div class="user-info">
+        <div class="user-name">${u.name}</div>
+        <div class="user-email">${u.email}</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
+          ${statusDot(u.status)}
+          <span class="user-role role-accountant">Accountant</span>
+        </div>
+      </div>
+      <div class="user-actions">
+        <button class="act-btn act-edit" onclick="openEdit(${i},'other')">Edit</button>
+        <button class="act-btn act-reset" onclick="openReset('${u.name}')">Reset PIN</button>
+        <button class="act-btn ${u.status==='active'?'act-disable':'act-enable'}" onclick="toggleUser(${i},'other')">${u.status==='active'?'Disable':'Enable'}</button>
+        <button class="act-btn" style="background:#fee2e2;color:#991b1b" onclick="deleteUser(${i},'other')">Delete</button>
+      </div>
+    </div>`).join('') : '<div style="color:#9ca3af;font-style:italic;font-size:12px">No Accountant users registered</div>';
 }
 function deleteUser(i,type){
   if(confirm('Do you really want to delete this user? Cannot be undone.')){
@@ -3652,7 +3678,8 @@ window.addEventListener('DOMContentLoaded', function() {
   if (!u || !u.email) { window.location.replace('index.html'); return; }
   if (u.email !== ADMIN_EMAIL) {
     if (u.role === 'I/C AB-PMJAY') window.location.replace('ic_portal.html');
-    else if (u.role === 'DEO')     window.location.replace('patient_services_portal.html');
+    else if (u.role === 'DEO')         window.location.replace('patient_service_portal.html');
+      else if (u.role === 'Accountant') window.location.replace('finance.html');
     else                           window.location.replace('pmam_portal.html');
     return;
   }

@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Finance Portal — Fixed Reports & Expenditure</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script>
+    // ── FIREBASE INIT ──────────────────────────────────────────
+    var firebaseConfig = {
+      apiKey: "AIzaSyCT0UFqpCgB2FkWN1Mm2EQKVMGCf-frNaE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "461043895749",
+      appId: "1:461043895749:web:b07bfe0b37b0ef4d0b0daa"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
+
+    // ── SESSION GUARD ──────────────────────────────────────────
+    (function() {
+      var sess = null;
+      try { sess = JSON.parse(sessionStorage.getItem('pmjay_user')); } catch(e) {}
+      if (!sess || !sess.email) { window.location.href = 'index.html'; return; }
+      if (sess.role !== 'Accountant') { window.location.href = 'index.html'; return; }
+    })();
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700;800&display=swap');
+    :root{--blue:#8b5cf6;--red:#dc2626;--green:#16a34a;--bg:linear-gradient(135deg, #c9b1eb 0%, #e8c6f5 50%, #f3dafc 100%);--panel:rgba(255, 255, 255, 0.5);--text:#4c1d95;--border:rgba(255, 255, 255, 0.6);--muted:#7c3aed;}
+    *{box-sizing:border-box;margin:0;padding:0} 
+    body{display:flex;min-height:100vh;background:var(--bg);background-attachment:fixed;font-family:'Roboto',sans-serif;color:var(--text);}
+    
+    .sidebar{width:180px;background:rgba(255, 255, 255, 0.6);backdrop-filter:blur(24px);height:calc(100vh - 80px);padding-top:20px;position:fixed;left:0;top:80px;border-radius:0;text-align:left;z-index:10;border-right:1px solid rgba(255,255,255,0.8);box-shadow:4px 0 24px rgba(0, 0, 0, 0.02);}
+    .brand{display:none;}
+    .sidebar ul{list-style:none;padding:0;margin:0}
+    .sidebar li{padding:0 12px;margin-bottom:8px}
+    .sidebar a{color:#4b5563;font-weight:700;text-transform:none;text-decoration:none;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;cursor:pointer;padding:12px 16px;border-radius:12px;transition:all .2s;font-size:14px}
+    .sidebar a .icon{font-size:20px;margin-bottom:0;display:block;}
+    .sidebar a:hover{background:rgba(255,255,255,0.8);color:var(--blue);}
+    .sidebar a.active-nav{background:var(--blue);color:#fff;font-weight:700;}
+    
+    main{margin-left:180px;margin-top:80px;padding:32px;flex:1}
+    .panel{background:var(--panel);backdrop-filter:blur(24px);padding:32px;border-radius:12px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(31, 38, 135, 0.05);margin-bottom:24px}
+    
+    .top-nav { position: fixed; top: 0; left: 0; width: 100%; height: 80px; z-index: 50; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(24px); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; border-radius: 0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border-bottom: 1px solid rgba(255,255,255,0.8); }
+    .nav-left { display: flex; align-items: center; gap: 16px; }
+    .logo-circle { width: 56px; height: 56px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; border: 3px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .logo-circle-inner { width: 44px; height: 44px; border-radius: 50%; background: #25166b; border: 2px solid #eab308; }
+    .nav-titles { display: flex; flex-direction: column; justify-content: center; }
+    .title-orange { color: #f59e0b; font-weight: 800; font-size: 11px; letter-spacing: 0.5px; margin-bottom: -2px; }
+    .title-green { color: #16a34a; font-weight: 900; font-size: 26px; letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.4); line-height: 1; margin-bottom: 2px; }
+    .title-white { color: #fff; font-style: italic; font-size: 11px; font-weight: 600; opacity: 0.9; }
+
+    .nav-middle { display: flex; align-items: center; gap: 16px; }
+    .nav-divider { width: 2px; height: 36px; background: #e5e7eb; border-radius: 2px; }
+    .mid-text { text-align: center; }
+    .hosp-name { color: #ea580c; font-weight: 800; font-size: 14px; letter-spacing: 0.5px; }
+    .portal-sub { color: var(--blue); font-weight: 900; font-size: 22px; letter-spacing: 1px; margin-top: 2px; text-transform: uppercase; }
+
+    .nav-right { display: flex; align-items: center; }
+    .profile-pill { display: flex; align-items: center; gap: 12px; border: 1px solid rgba(0,0,0,0.1); padding: 6px 16px 6px 6px; border-radius: 40px; background: rgba(255,255,255,0.8); }
+    .prof-icon { width: 36px; height: 36px; border-radius: 50%; background: #eff6ff; border: 1px solid #bfdbfe; display: flex; align-items: center; justify-content: center; color: var(--blue); font-weight: 800; font-size: 14px; }
+    .prof-info { display: flex; flex-direction: column; justify-content: center; margin-right: 8px; }
+    .prof-name { color: var(--text); font-weight: 700; font-size: 13px; }
+    .prof-role { color: var(--muted); font-size: 10px; font-weight: 600; opacity: 0.8; }
+
+    .section-title { background: #ef4444; color: #fff; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; text-transform: uppercase; display: inline-block; margin-bottom: 24px; margin-top: 8px; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2); }
+    .section-title::before { display: none; }
+    
+    form label{display:block;margin-top:16px;color:var(--blue);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:6px;}
+    form label .req { color: var(--red); margin-left: 4px; }
+    form input, form select{width:100%;padding:12px;border:2px solid #d8b4fe;border-radius:8px;background:#faf5ff;color:#4c1d95;font-weight:600;font-family:inherit;font-size:14px;outline:none;transition:all 0.2s;}
+    form input:focus, form select:focus{border-color:#9333ea;box-shadow:0 0 0 4px rgba(147, 51, 234, 0.15);background:#fff;}
+    .input-green { border-color: #22c55e !important; }
+    
+    .row{display:flex;gap:12px;flex-wrap:wrap;}
+    .row > div{flex:1;min-width:140px;}
+    
+    .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
+    .btn{padding:10px 24px;background:var(--blue);color:#fff;border-radius:24px;border:none;cursor:pointer;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:8px;transition:0.2s;}
+    .btn:hover{background:#152c6e;}
+    .btn.secondary{background:#fff;color:var(--blue);border:1px solid #d1d5db;}
+    .btn.secondary:hover{background:#f9fafb;border-color:var(--blue);}
+    
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; border-radius: 8px 8px 0 0; overflow: hidden; border:1px solid var(--border); }
+    th { padding: 12px 16px; background: var(--blue); color: #fff; font-weight: 600; text-align: left; font-size: 13px; border-bottom: none; }
+    td { padding: 12px 16px; text-align: left; font-size: 14px; color: var(--text); border-bottom: 1px solid var(--border); }
+    tbody tr:nth-child(even) { background-color: #f9fafb; }
+    tbody tr:nth-child(odd) { background-color: #ffffff; }
+    tbody tr:hover { background-color: #eff6ff; }
+    
+    .report-tabs{display:flex;gap:12px;margin-bottom:24px;border:none;padding:0;}
+    .report-tab{padding:10px 20px;background:#fff;border-radius:8px;cursor:pointer;border:1px solid var(--border);font-size:14px;font-weight:600;color:#4b5563;transition:all .2s;display:flex;align-items:center;gap:8px;}
+    .report-tab:hover{background:#f9fafb;}
+    .report-tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+    
+    .dash-card { background-color: var(--panel); backdrop-filter: blur(24px); border:1px solid var(--border); display: flex; flex-direction: row; align-items: center; height: 100px; border-radius: 12px; gap: 16px; padding: 20px; flex: 1; min-width: 220px; box-shadow:0 8px 32px rgba(31, 38, 135, 0.05); }
+    .dash-icon { width: 48px; height: 48px; border-radius: 50%; background-color: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; color: var(--blue); }
+    .dash-info { display: flex; flex-direction: column; }
+    .dash-info .small { font-size: 13px; color: #6b7280; font-weight: 600; margin-bottom: 4px; }
+    .dash-info .val { font-size: 22px; font-weight: 700; color: var(--blue); }
+    .small{font-size:12px;color:var(--muted)}
+    @media (max-width:980px){.sidebar{display:none}main{margin-left:0}}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">FINANCE</div>
+    <ul>
+      <li><a class="nav" data-tab="dashboard"><span class="icon">⊞</span>Dashboard</a></li>
+      <li><a class="nav" data-tab="claims"><span class="icon">📥</span>Claims</a></li>
+      <li><a class="nav" data-tab="expenditure"><span class="icon">💸</span>Expense</a></li>
+      <li><a class="nav" data-tab="reports"><span class="icon">📊</span>Reports</a></li>
+      <li><a class="nav" data-tab="ledger"><span class="icon">📒</span>Ledger</a></li>
+      <li><a class="nav" data-tab="stats"><span class="icon">🏥</span>Stats</a></li>
+      <li><a class="nav" data-tab="settings"><span class="icon">⚙</span>Settings</a></li>
+    </ul>
+  </aside>
+
+  <header class="top-nav">
+    <div class="nav-left">
+      <img src="" id="fin-logo" alt="PMJAY Logo" style="height:64px;width:64px;object-fit:contain;margin-right:8px;background:#fff;border-radius:50%;padding:2px;">
+      <div class="nav-titles">
+        <div style="color:#8b5cf6;font-size:15px;font-weight:900;">MANAGEMENT INFORMATION SYSTEM</div>
+        <div style="color:#16a34a;font-size:13px;font-weight:800;">AYUSHMAN BHARAT — PM-JAY</div>
+        <div style="color:#ea580c;font-size:11px;font-weight:700;">Government Medical College & Associated Hospital, Rajouri</div>
+      </div>
+    </div>
+    <div class="nav-middle">
+      <div class="nav-divider"></div>
+      <div class="mid-text">
+        <div style="color:#0ea5e9;font-size:24px;font-weight:900;letter-spacing:1px;text-transform:uppercase;">ACCOUNTING PORTAL</div>
+      </div>
+      <div class="nav-divider"></div>
+    </div>
+    <div class="nav-right" style="display:flex;align-items:center;gap:12px;">
+      <div class="profile-pill">
+        <div class="prof-icon" id="fin-avatar">AC</div>
+        <div class="prof-info">
+          <div class="prof-name" id="fin-name">Accountant</div>
+          <div class="prof-role" id="fin-role">ACCOUNTANT</div>
+        </div>
+      </div>
+      <button onclick="finLogout()" style="border:1px solid #ddd6fe;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;background:rgba(139,92,246,0.08);color:#7c3aed;display:flex;align-items:center;gap:6px;font-family:'Roboto',sans-serif;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </button>
+    </div>
+  </header>
+  <script>
+    // Populate profile pill from session
+    (function() {
+      var sess = null;
+      try { sess = JSON.parse(sessionStorage.getItem('pmjay_user')); } catch(e) {}
+      if (!sess) return;
+      var name = sess.name || 'Accountant';
+      var initials = name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2) || 'AC';
+      document.getElementById('fin-avatar').textContent = initials;
+      document.getElementById('fin-name').textContent = name;
+      document.getElementById('fin-role').textContent = sess.role || 'ACCOUNTANT';
+    })();
+    function finLogout() {
+      sessionStorage.removeItem('pmjay_user');
+      window.location.href = 'index.html';
+    }
+  </script>
+
+  <!-- LOADING OVERLAY -->
+  <div id="fin-loading" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+    <div style="width:48px;height:48px;border:5px solid #ede9fe;border-top-color:#8b5cf6;border-radius:50%;animation:fin-spin 0.8s linear infinite;"></div>
+    <div style="font-size:14px;font-weight:700;color:#7c3aed;">Loading data from server...</div>
+  </div>
+  <style>@keyframes fin-spin{to{transform:rotate(360deg)}}</style>
+
+  <main>
+    <div style="max-width:1200px;margin:0 auto">
+
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="tab-screen">
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <div class="dash-card">
+            <div class="dash-icon">💰</div>
+            <div class="dash-info">
+              <div class="small">Opening Balance</div>
+              <div class="val" id="allOpening">0</div>
+            </div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon">📥</div>
+            <div class="dash-info">
+              <div class="small">Claim Received</div>
+              <div class="val" id="allClaim">0</div>
+            </div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon">💸</div>
+            <div class="dash-info">
+              <div class="small">Total Expenditure</div>
+              <div class="val" id="allExpense">0</div>
+            </div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon">🏦</div>
+            <div class="dash-info">
+              <div class="small">Closing Balance</div>
+              <div class="val" id="allClosing">0</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLAIMS RECEIVED -->
+      <section id="claims" class="panel tab-screen" style="display:none">
+        <div class="section-title">NEW INCOME ENTRY</div>
+        <form id="claimsForm">
+          <div class="row">
+            <div><label>Financial Year <span class="req">*</span></label><select id="claimsFy" required></select></div>
+            <div><label>Month <span class="req">*</span></label><select id="claimsMonth" required></select></div>
+            <div><label>Claim Received (₹) <span class="req">*</span></label><input id="claimsClaim" type="number" min="0" step="0.01" required></div>
+            <div><label>Interest Received (₹) <span class="req">*</span></label><input id="claimsInterest" class="input-green" type="number" min="0" step="0.01" required></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-end;margin-top:16px;">
+            <div style="flex:1;"><label>Remarks</label><input id="claimsRemarks" type="text" placeholder="optional"></div>
+            <div style="padding-bottom:2px;"><button class="btn" type="submit" style="height:45px;margin-bottom:0;">💾 Save</button></div>
+          </div>
+        </form>
+
+        <div style="height:32px;"></div>
+        <hr style="border:none; border-top:4px dashed #d8b4fe; margin-bottom:32px;">
+
+        <div class="section-title">INCOME ENTRIES LIST</div>
+        <table id="claimsTable">
+          <thead><tr><th>FY</th><th>Month</th><th>Claim</th><th>Interest</th><th>Total</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        
+        <div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end;">
+          <button class="btn" onclick="exportActiveTable('print')" style="background:#4b5563;">🖨 Print / PDF</button>
+          <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
+          <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
+        </div>
+      </section>
+
+      <!-- EXPENDITURE -->
+      <section id="expenditure" class="panel tab-screen" style="display:none">
+        <div class="section-title">ADD EXPENDITURE</div>
+        <form id="expForm">
+          <div class="row">
+            <div><label>Date <span class="req">*</span></label><input id="expDate" type="date" required></div>
+            <div><label>Amount (₹) <span class="req">*</span></label><input id="expAmount" type="number" min="0" step="0.01" required></div>
+            <div><label>Invoice No</label><input id="expInvoice" type="text" placeholder="invoice no"></div>
+            <div>
+              <label>Category <span class="req">*</span></label>
+              <select id="expCategory">
+                <option value="Drugs">Drugs</option>
+                <option value="Consumables">Consumables</option>
+                <option value="Machinery & Equipment">Machinery & Equipment</option>
+                <option value="Hospital Development">Hospital Development</option>
+                <option value="Laboratory Development">Laboratory Development</option>
+                <option value="SHA Share Deposited">SHA Share Deposited</option>
+                <option value="Salary to Arogya Mitras">Salary to Arogya Mitras</option>
+                <option value="Incentives Disbursed">Incentives Disbursed</option>
+                <option value="Misc. Expenses">Misc. Expenses</option>
+              </select>
+            </div>
+            <div><label>Sub Category</label><input id="expSub" type="text" placeholder="sub category"></div>
+            <div><label>Description</label><input id="expDesc" type="text" placeholder="description"></div>
+            <div><label>Firm / Agency</label><input id="expFirm" type="text" placeholder="firm or agency"></div>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:flex-end;margin-top:16px;">
+            <div style="flex:1;"><label>Remarks</label><input id="expRemarks" type="text" placeholder="optional"></div>
+            <div style="padding-bottom:2px;"><button class="btn" type="submit" style="height:45px;margin-bottom:0;">💾 Save</button></div>
+          </div>
+        </form>
+
+        <div style="height:32px;"></div>
+        <hr style="border:none; border-top:4px dashed #d8b4fe; margin-bottom:32px;">
+
+        <div class="section-title">EXPENDITURE LIST</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <select id="filterFyExp"><option value="">All FY</option></select>
+          <select id="filterMonthExp"><option value="">All Month</option></select>
+          <select id="filterCategoryExp"><option value="">All Category</option></select>
+          <button class="btn" id="applyExpFilters">Apply</button>
+        </div>
+        <table id="expTable">
+          <thead><tr><th>Date</th><th>FY</th><th>Month</th><th>Category</th><th>Sub Category</th><th>Description</th><th>Firm</th><th>Amount</th><th>Invoice No</th><th>Remarks</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        
+        <div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end;">
+          <button class="btn" onclick="exportActiveTable('print')" style="background:#4b5563;">🖨 Print / PDF</button>
+          <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
+          <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section id="reports" class="panel tab-screen" style="display:none">
+        <div class="report-tabs" id="reportsMenu">
+          <div class="report-tab active" id="btnSha" data-report="sha">SHA Report</div>
+          <div class="report-tab" id="btnShaShare" data-report="shashare">SHA Share</div>
+        </div>
+
+        <div id="rep-sha" style="overflow-x:auto;">
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <select id="shaFyFilter"></select>
+            <button class="btn" id="applyShaFilter">Apply FY Filter</button>
+          </div>
+          <table id="repShaNewTable">
+            <thead>
+              <tr><th colspan="5" style="background:#fef08a;color:#000;"></th><th colspan="9" style="text-align:center;background:#fde047;color:#000;">Head-wise Expenditure of Funds</th><th colspan="1" style="background:#fef08a;color:#000;"></th></tr>
+              <tr style="background:#fde047;color:#000;"><th>Month-FY</th><th>Opening Balance</th><th>Claim Amount received</th><th>Interest accrued</th><th>Total Claim Amount</th><th>Drugs/<br>Consumables</th><th>Machinery_<br>Equipment</th><th>Hospital Development</th><th>Laboratory Development</th><th>SHA Share deposited</th><th>Salary to Arogya Mitras</th><th>Incentives disbursed</th><th>Misc.<br>Expenses</th><th>Total Expenditure</th><th>Closing Balance</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div id="rep-shashare" style="display:none">
+          <table id="repFundTable" style="margin-top:12px">
+            <thead><tr><th>Component</th><th>% of Total</th><th>₹ Amount</th></tr></thead>
+            <tbody>
+              <tr><td>Total Amount</td><td>100%</td><td id="fundTotal">0</td></tr>
+              <tr><td>Tied (RKS Funds)</td><td>75%</td><td id="fundTied">0</td></tr>
+              <tr><td>Untied Funds</td><td>25%</td><td id="fundUntied">0</td></tr>
+              <tr><td>→ Incentive Part</td><td>20%</td><td id="fundIncentive">0</td></tr>
+              <tr><td>→ SHA Share</td><td>5%</td><td id="fundShaShare">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end;">
+          <button class="btn" onclick="exportActiveTable('print')" style="background:#4b5563;">🖨 Print / PDF</button>
+          <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
+          <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
+        </div>
+      </section>
+
+      <!-- LEDGER -->
+      <section id="ledger" class="panel tab-screen" style="display:none">
+        <div class="report-tabs" id="ledgerMenu">
+          <div class="report-tab active" id="btnMonthly" data-report="monthly">Monthly Report</div>
+          <div class="report-tab" id="btnAnnual" data-report="annual">Annual Report</div>
+          <div class="report-tab" id="btnCumulative" data-report="cumulative">Cumulative All FY</div>
+          <div class="report-tab" id="btnDetailed" data-report="detailed">Detailed Expenditure Report</div>
+          <div class="report-tab" id="btnFySummary" data-report="fysummary">FY Expenditure Summary</div>
+        </div>
+
+        <div id="rep-monthly">
+          <label>Financial Year</label>
+          <select id="repFy"></select>
+          <table id="repMonthlyTable">
+            <thead><tr><th>Month</th><th>Opening Balance</th><th>Claim Received</th><th>Interest Received</th><th>Total Received</th><th>Expenditure</th><th>Closing Balance</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div id="rep-annual" style="display:none">
+          <table id="repAnnualTable">
+            <thead><tr><th>Financial Year</th><th>Opening Balance</th><th>Claim Received</th><th>Interest Received</th><th>Total Received</th><th>Expenditure</th><th>Closing Balance</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div id="rep-cumulative" style="display:none">
+          <table id="repCumTable">
+            <thead><tr><th>Metric</th><th>Amount (₹)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div id="rep-detailed" style="display:none">
+          <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+            <select id="detFy"><option value="">All FY</option></select>
+            <select id="detMonth"><option value="">All Month</option></select>
+            <select id="detCategory"><option value="">All Category</option></select>
+            <input id="detSub" placeholder="Sub Category">
+            <input id="detFirm" placeholder="Firm/Agency">
+            <button class="btn" id="detApply">Apply</button>
+          </div>
+          <table id="repDetailedTable">
+            <thead><tr><th>Date</th><th>FY</th><th>Month</th><th>Category</th><th>Sub Category</th><th>Description</th><th>Firm</th><th>Amount</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div id="rep-fysummary" style="display:none; overflow-x:auto;">
+          <table id="repFySummaryTable">
+            <thead>
+              <tr><th colspan="10" style="text-align:center;background:#fbbf24;color:#000;">Head-wise Expenditure of Funds</th></tr>
+              <tr style="background:#fde047;color:#000;"><th>FY</th><th>Drugs/Consumables</th><th>Machinery_Equipment</th><th>Hospital Development</th><th>Laboratory Development</th><th>SHA Share deposited</th><th>Salary to Arogya Mitras</th><th>Incentives disbursed</th><th>Misc.Expenses</th><th>Total Expenditure</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        
+        <div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end;">
+          <button class="btn" onclick="exportActiveTable('print')" style="background:#4b5563;">🖨 Print / PDF</button>
+          <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
+          <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
+        </div>
+      </section>
+
+      <!-- STATS -->
+      <section id="stats" class="panel tab-screen" style="display:none">
+        <div class="report-tabs" id="statsMenu">
+          <div class="report-tab active" id="btnStatsEntry" data-report="stats-entry">Data Entry</div>
+          <div class="report-tab" id="btnStatsReport" data-report="stats-report">FY Report</div>
+        </div>
+
+        <div id="rep-stats-entry">
+          <div class="section-title">ADD MONTHLY STATISTICS</div>
+          <form id="statsForm">
+            <div class="row">
+              <div><label>Financial Year <span class="req">*</span></label><select id="statsFy" required></select></div>
+              <div><label>Month <span class="req">*</span></label><select id="statsMonth" required></select></div>
+              <div><label>Patients Treated <span class="req">*</span></label><input id="statsPatients" type="number" min="0" required></div>
+              <div><label>Golden Cards Generated <span class="req">*</span></label><input id="statsCards" type="number" min="0" required></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+              <button class="btn" type="submit" style="height:45px;margin-bottom:0;">💾 Save</button>
+            </div>
+          </form>
+
+          <div style="height:32px;"></div>
+          <hr style="border:none; border-top:4px dashed #d8b4fe; margin-bottom:32px;">
+
+          <div class="section-title">MONTHLY ENTRIES</div>
+          <table id="statsEntryTable">
+            <thead><tr><th>FY</th><th>Month</th><th>Patients Treated</th><th>Golden Cards</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div id="rep-stats-report" style="display:none;">
+          <div class="section-title">PATIENT TREATED AND GOLDEN CARD GENERATED</div>
+          <table id="statsReportTable" style="margin-top:16px;">
+            <thead>
+              <tr style="background:#8b5cf6;color:#fff;"><th>S NO</th><th>SESSION (FY)</th><th>PATIENT TREATED</th><th>GOLDEN CARD GENERATED</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end;">
+            <button class="btn" onclick="exportActiveTable('print')" style="background:#4b5563;">🖨 Print / PDF</button>
+            <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
+            <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settings" class="panel tab-screen" style="display:none">
+        <div class="small">Set initial opening balance for the first FY month (applies when computing opening balances).</div>
+        <label>Financial Year</label>
+        <select id="setFy"></select>
+        <label>Month</label>
+        <select id="setMonth"></select>
+        <label>Opening Balance (₹)</label>
+        <input id="setOpening" type="number" min="0" step="0.01">
+        <button class="btn" id="saveOpening">Save Opening</button>
+        
+        <hr style="margin:24px 0; border:none; border-top:1px solid #ccc;">
+        
+        <div class="section-title">LOCK / UNLOCK MONTHS</div>
+        <div class="small" style="margin-bottom:8px;">Prevent accidental edits or deletions in completed months. Unlocking requires manual action here.</div>
+        <label>Select Month to Toggle Lock Status</label>
+        <div style="display:flex;gap:8px;">
+          <select id="lockMonthSel"></select>
+          <button class="btn" id="toggleLockBtn" style="background:#ef4444;">Toggle Lock</button>
+        </div>
+        <div id="lockedList" style="margin-top:12px; font-weight:bold; color:#b91c1c;"></div>
+
+        <hr style="margin:24px 0; border:none; border-top:1px solid #ccc;">
+        
+        <div class="section-title" style="color:#0ea5e9;">BULK EXCEL IMPORT</div>
+        
+        <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:12px;">
+          <div style="flex:1;min-width:300px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #cbd5e1;">
+            <div style="font-weight:bold;margin-bottom:8px;">1. Income Import</div>
+            <div class="small">Paste columns: <b>Month | Interest Received | Claim Received</b><br>(e.g. <i>April-25 &nbsp; 0 &nbsp; 1473902</i>)</div>
+            <textarea id="importIncomeArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
+            <label class="small" style="display:block;margin-top:4px;">Select Financial Year for this data:</label>
+            <select id="importIncomeFy"></select>
+            <button class="btn" id="btnImportIncome" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Income</button>
+          </div>
+
+          <div style="flex:1;min-width:300px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #cbd5e1;">
+            <div style="font-weight:bold;margin-bottom:8px;">2. Expenditure Import</div>
+            <div class="small">Paste columns: <b>Category | Sub Category | Amount | Month</b><br><span style="color:#b91c1c;">(Skip the 'S NO' column)</span><br>(e.g. <i>SHA Share &nbsp; SHA Share 5%... &nbsp; 73695 &nbsp; May-25</i>)</div>
+            <textarea id="importExpArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
+            <button class="btn" id="btnImportExp" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Expenditure</button>
+          </div>
+
+          <div style="flex:1;min-width:300px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #cbd5e1;">
+            <div style="font-weight:bold;margin-bottom:8px;">3. Hospital Stats Import</div>
+            <div class="small">Paste columns: <b>Session (FY) | Patient Treated | Golden Card</b><br>(e.g. <i>2018-19 &nbsp; 500 &nbsp; 1200</i>)</div>
+            <textarea id="importStatsArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
+            <button class="btn" id="btnImportStats" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Stats</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // Utilities
+    const $ = id => document.getElementById(id);
+    const fmt = v => '₹ ' + Number(v||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+
+    // ── FIRESTORE DATA LAYER ─────────────────────────────────────────
+    // All data stored in Firestore under collection 'entries'
+    // Documents: fin_income, fin_expense, fin_stats, fin_meta, fin_locked, fin_fys
+    // In-memory cache for fast UI — synced from Firestore on load
+    // ─────────────────────────────────────────────────────────────────
+    var _cache = { income:[], expense:[], stats:[], meta:{}, locked:[], fys:[] };
+    var _loaded = false;
+
+    // Show/hide global loading indicator
+    function setLoading(on) {
+      var el = document.getElementById('fin-loading');
+      if(el) el.style.display = on ? 'flex' : 'none';
+    }
+
+    // Save a named document to Firestore entries collection
+    function fsSave(key, value) {
+      return db.collection('entries').doc(key).set({ data: JSON.stringify(value) });
+    }
+
+    // Load all finance data from Firestore into _cache, then render
+    function fsLoadAll(callback) {
+      setLoading(true);
+      db.collection('entries').get().then(function(snap) {
+        snap.forEach(function(doc) {
+          try {
+            var val = JSON.parse(doc.data().data);
+            if(doc.id === 'fin_income')  _cache.income  = val || [];
+            if(doc.id === 'fin_expense') _cache.expense = val || [];
+            if(doc.id === 'fin_stats')   _cache.stats   = val || [];
+            if(doc.id === 'fin_meta')    _cache.meta    = val || {};
+            if(doc.id === 'fin_locked')  _cache.locked  = val || [];
+            if(doc.id === 'fin_fys')     _cache.fys     = val || [];
+          } catch(e) {}
+        });
+        // Default FYs if none stored
+        if(!_cache.fys || _cache.fys.length === 0) {
+          var start = 2018; var now = new Date(); var cy = now.getFullYear(); var arr = [];
+          for(var y = start; y <= cy; y++) arr.push({name: y + '-' + String(y+1).slice(-2)});
+          _cache.fys = arr;
+          fsSave('fin_fys', arr);
+        }
+        _loaded = true;
+        setLoading(false);
+        if(callback) callback();
+      }).catch(function(e) {
+        setLoading(false);
+        console.error('Firestore load error:', e);
+        alert('Could not load data from server. Check your connection.');
+      });
+    }
+
+    // ── Compatibility shim — load/save now use _cache + Firestore ──
+    var LS = { INCOME:'fin_income', EXPENSE:'fin_expense', FYS:'fin_fys', META:'fin_meta', LOCKED:'fin_locked', STATS:'fin_stats' };
+
+    function load(k, fallback) {
+      if(k === LS.INCOME  || k === 'fp_income')  return _cache.income.length  ? _cache.income  : (fallback||[]);
+      if(k === LS.EXPENSE || k === 'fp_expense') return _cache.expense.length ? _cache.expense : (fallback||[]);
+      if(k === LS.STATS   || k === 'fp_stats')   return _cache.stats.length   ? _cache.stats   : (fallback||[]);
+      if(k === LS.META    || k === 'fp_meta')    return Object.keys(_cache.meta).length ? _cache.meta : (fallback||{});
+      if(k === LS.LOCKED  || k === 'fp_locked')  return _cache.locked;
+      if(k === LS.FYS     || k === 'fp_fys')     return _cache.fys.length ? _cache.fys : (fallback||[]);
+      return fallback;
+    }
+
+    function save(k, v) {
+      if(k === LS.INCOME  || k === 'fp_income')  { _cache.income  = v; fsSave('fin_income',  v); }
+      if(k === LS.EXPENSE || k === 'fp_expense') { _cache.expense = v; fsSave('fin_expense', v); }
+      if(k === LS.STATS   || k === 'fp_stats')   { _cache.stats   = v; fsSave('fin_stats',   v); }
+      if(k === LS.META    || k === 'fp_meta')    { _cache.meta    = v; fsSave('fin_meta',    v); }
+      if(k === LS.LOCKED  || k === 'fp_locked')  { _cache.locked  = v; fsSave('fin_locked',  v); }
+      if(k === LS.FYS     || k === 'fp_fys')     { _cache.fys     = v; fsSave('fin_fys',     v); }
+    }
+
+    function isLocked(monthKey) {
+      return _cache.locked.includes(monthKey);
+    }
+
+    // Export utilities
+    function exportActiveTable(format) {
+      const tables = Array.from(document.querySelectorAll('main section[style=""]:not([style*="display: none"]) table')).filter(t => t.offsetParent !== null && t.id);
+      if(tables.length === 0) { alert('No visible table to export.'); return; }
+      const table = tables[0]; 
+
+      if(format === 'print') {
+        window.print();
+      } else if(format === 'excel') {
+        const uri = 'data:application/vnd.ms-excel;base64,';
+        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body><table border="1">${table.innerHTML}</table></body></html>`;
+        const link = document.createElement('a'); link.href = uri + btoa(unescape(encodeURIComponent(html))); link.download = table.id + '.xls'; link.click();
+      } else if(format === 'word') {
+        const uri = 'data:application/vnd.ms-word;base64,';
+        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body><table border="1">${table.innerHTML}</table></body></html>`;
+        const link = document.createElement('a'); link.href = uri + btoa(unescape(encodeURIComponent(html))); link.download = table.id + '.doc'; link.click();
+      }
+    }
+
+    // init defaults — now handled by fsLoadAll on page load
+
+    // month helpers (Apr->Mar)
+    const monthNames = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+    function monthsForFy(fyName){
+      const y = parseInt(fyName.split('-')[0],10);
+      const months = [];
+      for(let i=0;i<12;i++){
+        const year = (i<9)? y : y+1;
+        const mnum = ((i+4)<=12)? (i+4) : (i-8);
+        months.push({key:`${year}-${String(mnum).padStart(2,'0')}`, label:`${monthNames[i]}-${year}`});
+      }
+      return months;
+    }
+
+    // populate FY selects
+    function populateFyAll(){
+      const fys = load(LS.FYS, []);
+      ['claimsFy','repFy','setFy','filterFyExp','detFy','importIncomeFy', 'shaFyFilter', 'statsFy'].forEach(id=>{
+        const el = $(id); if(!el) return; el.innerHTML=''; fys.forEach(f=> el.insertAdjacentHTML('beforeend', `<option value="${f.name}">${f.name}</option>`)); el.value = fys[fys.length-1].name;
+      });
+      populateMonths('claimsFy','claimsMonth');
+      populateMonths('setFy','setMonth');
+      populateMonths('statsFy','statsMonth');
+      
+      const allMonths = [];
+      fys.forEach(f => monthsForFy(f.name).forEach(m => allMonths.push(m)));
+      const lockSel = $('lockMonthSel');
+      if (lockSel) {
+        lockSel.innerHTML = '';
+        allMonths.forEach(m => lockSel.insertAdjacentHTML('beforeend', `<option value="${m.key}">${m.label}</option>`));
+      }
+      renderLockedList();
+
+      populateExpFilters();
+      populateDetFilters();
+    }
+    
+    function renderLockedList() {
+      const locked = load(LS.LOCKED, []);
+      const el = $('lockedList');
+      if(!el) return;
+      if(locked.length === 0) el.innerText = 'No months are currently locked.';
+      else el.innerText = 'Currently Locked: ' + locked.sort().join(', ');
+    }
+    
+    $('toggleLockBtn')?.addEventListener('click', () => {
+      const m = $('lockMonthSel').value;
+      if(!m) return;
+      let locked = load(LS.LOCKED, []);
+      if(locked.includes(m)) {
+        locked = locked.filter(x => x !== m);
+        alert(m + ' unlocked successfully.');
+      } else {
+        locked.push(m);
+        alert(m + ' locked successfully.');
+      }
+      save(LS.LOCKED, locked);
+      renderLockedList();
+    });
+    function populateMonths(fySelectId, monthSelectId){
+      const fy = $(fySelectId).value;
+      const sel = $(monthSelectId);
+      if(!sel) return;
+      sel.innerHTML = '';
+      monthsForFy(fy).forEach(m => sel.insertAdjacentHTML('beforeend', `<option value="${m.key}">${m.label}</option>`));
+    }
+
+    // Tab navigation
+    function showTab(tab){
+      document.querySelectorAll('.nav').forEach(t=> t.classList.toggle('active-nav', t.dataset.tab===tab));
+      document.querySelectorAll('.tab-screen').forEach(s=> s.style.display = (s.id===tab)?'':'none');
+      if(tab==='dashboard') renderDashboard();
+      if(tab==='claims') renderClaims();
+      if(tab==='expenditure') renderExpenditure();
+      if(tab==='reports') renderReports();
+      if(tab==='ledger') renderLedger();
+      if(tab==='stats') renderStats();
+      if(tab==='settings') renderSettings();
+    }
+    document.querySelectorAll('.nav').forEach(el=> el.addEventListener('click', ()=> showTab(el.dataset.tab)));
+
+    // Ensure DOM-ready binding for reports menu buttons
+    function bindReportsMenu(){
+      const mapLed = {
+        btnMonthly: 'monthly',
+        btnAnnual: 'annual',
+        btnCumulative: 'cumulative',
+        btnDetailed: 'detailed',
+        btnFySummary: 'fysummary'
+      };
+      Object.keys(mapLed).forEach(id=>{
+        const btn = $(id); if(!btn) return;
+        btn.addEventListener('click', ()=>{
+          Object.keys(mapLed).forEach(k=> { const b = $(k); if(b) b.classList.toggle('active', k===id); });
+          Object.values(mapLed).forEach(k=>{
+            const el = document.getElementById('rep-'+k);
+            if(el) el.style.display = (mapLed[id]===k) ? '' : 'none';
+          });
+          if(mapLed[id] === 'monthly') renderMonthlyReport();
+          if(mapLed[id] === 'annual') renderAnnualReport();
+          if(mapLed[id] === 'cumulative') renderCumulativeReport();
+          if(mapLed[id] === 'detailed') renderDetailedReport();
+          if(mapLed[id] === 'fysummary') renderFySummaryReport();
+        });
+      });
+      
+      const mapRep = {
+        btnSha: 'sha',
+        btnShaShare: 'shashare'
+      };
+      Object.keys(mapRep).forEach(id=>{
+        const btn = $(id); if(!btn) return;
+        btn.addEventListener('click', ()=>{
+          Object.keys(mapRep).forEach(k=> { const b = $(k); if(b) b.classList.toggle('active', k===id); });
+          Object.values(mapRep).forEach(k=>{
+            const el = document.getElementById('rep-'+k);
+            if(el) el.style.display = (mapRep[id]===k) ? '' : 'none';
+          });
+          if(mapRep[id] === 'sha') renderShaReport();
+          if(mapRep[id] === 'shashare') renderShaShareReport();
+        });
+      });
+    }
+
+    // initial populate and render — now called inside fsLoadAll callback below
+
+    // ---------- DASHBOARD ----------
+    function renderDashboard(){
+      const incomes = load(LS.INCOME, []);
+      const expenses = load(LS.EXPENSE, []);
+      const meta = load(LS.META, {});
+      const opening = meta.initialOpening ? Number(meta.initialOpening.amount||0) : 0;
+      const totalClaim = incomes.reduce((s,i)=> s + Number(i.claim||0), 0);
+      const totalInterest = incomes.reduce((s,i)=> s + Number(i.interest||0), 0);
+      const totalIncome = totalClaim + totalInterest;
+      const totalExpense = expenses.reduce((s,e)=> s + Number(e.amount||0), 0);
+      const closing = opening + totalIncome - totalExpense;
+      $('allOpening').innerText = fmt(opening);
+      $('allClaim').innerText = fmt(totalIncome);
+      $('allExpense').innerText = fmt(totalExpense);
+      $('allClosing').innerText = fmt(closing);
+    }
+
+    // ---------- CLAIMS RECEIVED ----------
+    $('claimsForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const fy = $('claimsFy').value;
+      const monthKey = $('claimsMonth').value;
+      if (isLocked(monthKey)) { alert('Cannot modify: ' + monthKey + ' is locked.'); return; }
+      
+      const claim = Number($('claimsClaim').value||0);
+      const interest = Number($('claimsInterest').value||0);
+      const incomes = load(LS.INCOME, []);
+      const existing = incomes.find(x=> x.fy===fy && x.monthKey===monthKey);
+      if(existing){ alert('Duplicate entry blocked: Claim for this FY and Month already exists.'); return; }
+      incomes.push({fy, monthKey, claim, interest, remarks: $('claimsRemarks').value||'', createdAt: new Date().toISOString()});
+      save(LS.INCOME, incomes);
+      this.reset();
+      renderClaims();
+    });
+    function renderClaims(){
+      populateMonths('claimsFy','claimsMonth');
+      const tbody = document.querySelector('#claimsTable tbody'); tbody.innerHTML = '';
+      const incomes = load(LS.INCOME, []);
+      if(incomes.length===0){ tbody.innerHTML = '<tr><td colspan="5" class="small">No income entries yet</td></tr>'; return; }
+      incomes.sort((a,b)=> a.monthKey.localeCompare(b.monthKey));
+      incomes.forEach(i=>{
+        const total = Number(i.claim||0) + Number(i.interest||0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i.fy}</td><td>${i.monthKey}</td><td>${fmt(i.claim)}</td><td>${fmt(i.interest)}</td><td>${fmt(total)}</td>
+          <td><button class="btn" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editClaim('${i.createdAt}')">Edit</button><button class="btn" style="padding:4px 8px;font-size:11px;background:#ef4444;" onclick="delClaim('${i.createdAt}')">Del</button></td>`;
+        tbody.appendChild(tr);
+      });
+      renderDashboard();
+    }
+    
+    function delClaim(id) {
+      const incomes = load(LS.INCOME, []);
+      const item = incomes.find(x => x.createdAt === id);
+      if(item && isLocked(item.monthKey)) { alert('Cannot delete: ' + item.monthKey + ' is locked.'); return; }
+      if(!confirm('Delete this entry?')) return;
+      save(LS.INCOME, incomes.filter(x => x.createdAt !== id));
+      renderClaims();
+    }
+    function editClaim(id) {
+      const incomes = load(LS.INCOME, []);
+      const item = incomes.find(x => x.createdAt === id);
+      if(!item) return;
+      if(isLocked(item.monthKey)) { alert('Cannot edit: ' + item.monthKey + ' is locked.'); return; }
+      
+      $('claimsFy').value = item.fy;
+      populateMonths('claimsFy','claimsMonth');
+      $('claimsMonth').value = item.monthKey;
+      $('claimsClaim').value = item.claim;
+      $('claimsInterest').value = item.interest;
+      $('claimsRemarks').value = item.remarks || '';
+      save(LS.INCOME, incomes.filter(x => x.createdAt !== id));
+      renderClaims();
+      window.scrollTo(0,0);
+    }
+
+    // ---------- EXPENDITURE ----------
+    $('expForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const date = $('expDate').value;
+      if(!date){ alert('Select date'); return; }
+      const d = new Date(date);
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      if (isLocked(monthKey)) { alert('Cannot modify: ' + monthKey + ' is locked.'); return; }
+      
+      const fy = (d.getMonth()+1 >=4) ? d.getFullYear() : d.getFullYear()-1;
+      const fyName = `${fy}-${String(fy+1).slice(-2)}`;
+      const amount = Number($('expAmount').value||0);
+      const invoice = $('expInvoice').value || '';
+      const category = $('expCategory').value;
+      const sub = $('expSub').value || '';
+      const desc = $('expDesc').value || '';
+      const firm = $('expFirm').value || '';
+      const remarks = $('expRemarks').value || '';
+      const expenses = load(LS.EXPENSE, []);
+      expenses.push({date, fy:fyName, monthKey, category, sub, description: desc, firm, invoice, amount, remarks, createdAt: new Date().toISOString()});
+      save(LS.EXPENSE, expenses);
+      this.reset();
+      renderExpenditure();
+    });
+
+    function populateExpFilters(){
+      const fys = load(LS.FYS, []);
+      const prevFy = $('filterFyExp').value;
+      const fySel = $('filterFyExp'); fySel.innerHTML = '<option value="">All FY</option>'; fys.forEach(f=> fySel.insertAdjacentHTML('beforeend', `<option value="${f.name}">${f.name}</option>`));
+      fySel.value = prevFy;
+      
+      const prevMonth = $('filterMonthExp').value;
+      const monthSel = $('filterMonthExp'); monthSel.innerHTML = '<option value="">All Month</option>';
+      if (fySel.value) {
+        monthsForFy(fySel.value).forEach(m => monthSel.insertAdjacentHTML('beforeend', `<option value="${m.key}">${m.key}</option>`));
+      } else {
+        const expenses = load(LS.EXPENSE, []);
+        const months = [...new Set(expenses.map(e=> e.monthKey))].sort();
+        months.forEach(m=> monthSel.insertAdjacentHTML('beforeend', `<option value="${m}">${m}</option>`));
+      }
+      monthSel.value = prevMonth;
+      
+      const expenses = load(LS.EXPENSE, []);
+      const prevCat = $('filterCategoryExp').value;
+      const cats = [...new Set(expenses.map(e=> e.category))].sort();
+      const catSel = $('filterCategoryExp'); catSel.innerHTML = '<option value="">All Category</option>'; cats.forEach(c=> catSel.insertAdjacentHTML('beforeend', `<option value="${c}">${c}</option>`));
+      catSel.value = prevCat;
+    }
+
+    function renderExpenditure(){
+      populateExpFilters();
+      const tbody = document.querySelector('#expTable tbody'); tbody.innerHTML = '';
+      const expenses = load(LS.EXPENSE, []);
+      if(expenses.length===0){ tbody.innerHTML = '<tr><td colspan="7" class="small">No expense entries yet</td></tr>'; return; }
+      const fyFilter = $('filterFyExp').value;
+      const monthFilter = $('filterMonthExp').value;
+      const catFilter = $('filterCategoryExp').value;
+      const filtered = expenses.filter(e=>{
+        if(fyFilter && e.fy !== fyFilter) return false;
+        if(monthFilter && e.monthKey !== monthFilter) return false;
+        if(catFilter && e.category !== catFilter) return false;
+        return true;
+      });
+      filtered.sort((a,b)=> new Date(b.date) - new Date(a.date));
+      filtered.forEach(e=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${e.date}</td><td>${e.fy}</td><td>${e.monthKey}</td><td>${e.category}</td><td>${e.sub||''}</td><td>${e.description||''}</td><td>${e.firm||''}</td><td>${fmt(e.amount)}</td><td>${e.invoice||''}</td><td>${e.remarks||''}</td>
+          <td><button class="btn" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editExp('${e.createdAt}')">Edit</button><button class="btn" style="padding:4px 8px;font-size:11px;background:#ef4444;" onclick="delExp('${e.createdAt}')">Del</button></td>`;
+        tbody.appendChild(tr);
+      });
+      renderDashboard();
+    }
+    
+    function delExp(id) {
+      const expenses = load(LS.EXPENSE, []);
+      const item = expenses.find(x => x.createdAt === id);
+      if(item && isLocked(item.monthKey)) { alert('Cannot delete: ' + item.monthKey + ' is locked.'); return; }
+      if(!confirm('Delete this entry?')) return;
+      save(LS.EXPENSE, expenses.filter(x => x.createdAt !== id));
+      renderExpenditure();
+    }
+    function editExp(id) {
+      const exps = load(LS.EXPENSE, []);
+      const item = exps.find(x => x.createdAt === id);
+      if(!item) return;
+      if(isLocked(item.monthKey)) { alert('Cannot edit: ' + item.monthKey + ' is locked.'); return; }
+      
+      $('expDate').value = item.date;
+      $('expAmount').value = item.amount;
+      $('expInvoice').value = item.invoice || '';
+      $('expCategory').value = item.category;
+      $('expSub').value = item.sub || '';
+      $('expDesc').value = item.description || '';
+      $('expFirm').value = item.firm || '';
+      $('expRemarks').value = item.remarks || '';
+      save(LS.EXPENSE, exps.filter(x => x.createdAt !== id));
+      renderExpenditure();
+      window.scrollTo(0,0);
+    }
+    
+    $('applyExpFilters').addEventListener('click', renderExpenditure);
+    $('filterFyExp').addEventListener('change', populateExpFilters);
+
+    // ---------- REPORTS & LEDGER ----------
+    function renderLedger() {
+      const fys = load(LS.FYS, []);
+      const repFy = $('repFy'); 
+      if(repFy && !repFy.value) repFy.value = fys[fys.length-1]?.name;
+      
+      const detFy = $('detFy'); 
+      if(detFy && !detFy.value) detFy.value = fys[fys.length-1]?.name;
+      
+      populateDetFilters();
+      const activeBtn = document.querySelector('#ledgerMenu .report-tab.active') || $('btnMonthly');
+      if(activeBtn) activeBtn.click();
+    }
+
+    function renderReports(){
+      const shaFyFilter = $('shaFyFilter');
+      const fys = load(LS.FYS, []);
+      if(shaFyFilter && !shaFyFilter.value) shaFyFilter.value = fys[fys.length-1]?.name;
+      
+      const activeBtn = document.querySelector('#reportsMenu .report-tab.active') || $('btnSha');
+      if(activeBtn) activeBtn.click();
+    }
+
+    function computeFyRows(fyName, startingOpening){
+      const months = monthsForFy(fyName);
+      const incomes = load(LS.INCOME, []);
+      const expenses = load(LS.EXPENSE, []);
+      const meta = load(LS.META, {});
+      let opening = (startingOpening !== undefined) ? startingOpening : 0;
+      const init = meta.initialOpening;
+      const rows = [];
+      months.forEach(m=>{
+        if(init && init.fy===fyName && init.monthKey===m.key) opening = Number(init.amount||0);
+        const incRec = incomes.find(x=> x.fy===fyName && x.monthKey===m.key) || {claim:0, interest:0};
+        const claim = Number(incRec.claim||0);
+        const interest = Number(incRec.interest||0);
+        const incomeTotal = claim + interest;
+        const expTotal = expenses.filter(e=> e.fy===fyName && e.monthKey===m.key).reduce((s,x)=> s + Number(x.amount||0), 0);
+        const closing = opening + incomeTotal - expTotal;
+        rows.push({monthKey:m.key, label:m.label, opening, claim, interest, incomeTotal, expTotal, closing});
+        opening = closing;
+      });
+      return rows;
+    }
+
+    function getCarryOpening(upToFy){
+      const fys = load(LS.FYS, []);
+      let carry = 0;
+      for(const f of fys){
+        if(f.name === upToFy) break;
+        const rows = computeFyRows(f.name, carry);
+        if(rows.length > 0) carry = rows[rows.length-1].closing;
+      }
+      return carry;
+    }
+
+    function renderMonthlyReport(){
+      const fy = $('repFy').value;
+      const tbody = document.querySelector('#repMonthlyTable tbody'); tbody.innerHTML = '';
+      const carry = getCarryOpening(fy);
+      const rows = computeFyRows(fy, carry);
+      
+      let totClaim=0, totInt=0, totInc=0, totExp=0;
+      rows.forEach(r=>{
+        totClaim+=r.claim; totInt+=r.interest; totInc+=r.incomeTotal; totExp+=r.expTotal;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.label}</td><td>${fmt(r.opening)}</td><td>${fmt(r.claim)}</td><td>${fmt(r.interest)}</td><td>${fmt(r.incomeTotal)}</td><td>${fmt(r.expTotal)}</td><td>${fmt(r.closing)}</td>`;
+        tbody.appendChild(tr);
+      });
+      if(rows.length>0) {
+        tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td>TOTAL</td><td>-</td><td>${fmt(totClaim)}</td><td>${fmt(totInt)}</td><td>${fmt(totInc)}</td><td>${fmt(totExp)}</td><td>${fmt(rows[rows.length-1].closing)}</td></tr>`);
+      }
+    }
+    
+    $('repFy')?.addEventListener('change', renderMonthlyReport);
+
+    function renderAnnualReport(){
+      const fys = load(LS.FYS, []);
+      const tbody = document.querySelector('#repAnnualTable tbody'); tbody.innerHTML = '';
+      let carryOpening = 0;
+      
+      let totClaim=0, totInt=0, totInc=0, totExp=0;
+      let lastClosing=0;
+      
+      fys.forEach(f=>{
+        const rows = computeFyRows(f.name, carryOpening);
+        if(rows.length>0){
+          const opening = rows[0].opening;
+          const claim = rows.reduce((s,r)=> s + r.claim, 0);
+          const interest = rows.reduce((s,r)=> s + r.interest, 0);
+          const income = claim + interest;
+          const exp = rows.reduce((s,r)=> s + r.expTotal, 0);
+          const closing = rows[rows.length-1].closing;
+          
+          totClaim+=claim; totInt+=interest; totInc+=income; totExp+=exp; lastClosing=closing;
+          
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${f.name}</td><td>${fmt(opening)}</td><td>${fmt(claim)}</td><td>${fmt(interest)}</td><td>${fmt(income)}</td><td>${fmt(exp)}</td><td>${fmt(closing)}</td>`;
+          tbody.appendChild(tr);
+          carryOpening = closing;
+        }
+      });
+      if(totClaim || totInt || totExp) {
+        tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td>TOTAL</td><td>-</td><td>${fmt(totClaim)}</td><td>${fmt(totInt)}</td><td>${fmt(totInc)}</td><td>${fmt(totExp)}</td><td>${fmt(lastClosing)}</td></tr>`);
+      }
+    }
+
+    function renderCumulativeReport(){
+      const incomes = load(LS.INCOME, []);
+      const expenses = load(LS.EXPENSE, []);
+      const meta = load(LS.META, {});
+      const opening = meta.initialOpening ? Number(meta.initialOpening.amount||0) : 0;
+      const totalClaim = incomes.reduce((s,i)=> s + Number(i.claim||0), 0);
+      const totalInterest = incomes.reduce((s,i)=> s + Number(i.interest||0), 0);
+      const totalIncome = totalClaim + totalInterest;
+      const totalExpense = expenses.reduce((s,e)=> s + Number(e.amount||0), 0);
+      const closing = opening + totalIncome - totalExpense;
+      const tbody = document.querySelector('#repCumTable tbody'); tbody.innerHTML = '';
+      tbody.insertAdjacentHTML('beforeend', `<tr><td>Opening Balance</td><td>${fmt(opening)}</td></tr>`);
+      tbody.insertAdjacentHTML('beforeend', `<tr><td>Total Claim Received</td><td>${fmt(totalClaim)}</td></tr>`);
+      tbody.insertAdjacentHTML('beforeend', `<tr><td>Total Interest Received</td><td>${fmt(totalInterest)}</td></tr>`);
+      tbody.insertAdjacentHTML('beforeend', `<tr><td>Total Received</td><td>${fmt(totalIncome)}</td></tr>`);
+      tbody.insertAdjacentHTML('beforeend', `<tr><td>Total Expenditure</td><td>${fmt(totalExpense)}</td></tr>`);
+      tbody.insertAdjacentHTML('beforeend', `<tr><td>Closing Balance</td><td>${fmt(closing)}</td></tr>`);
+    }
+
+    // Detailed expenditure filters
+    function populateDetFilters(){
+      const prevMonth = $('detMonth') ? $('detMonth').value : '';
+      const detMonth = $('detMonth'); 
+      const detFy = $('detFy');
+      if(detMonth && detFy){ 
+        detMonth.innerHTML = '<option value="">All Month</option>'; 
+        if (detFy.value) {
+          monthsForFy(detFy.value).forEach(m => detMonth.insertAdjacentHTML('beforeend', `<option value="${m.key}">${m.key}</option>`));
+        } else {
+          const expenses = load(LS.EXPENSE, []);
+          const months = [...new Set(expenses.map(e=> e.monthKey))].sort();
+          months.forEach(m=> detMonth.insertAdjacentHTML('beforeend', `<option value="${m}">${m}</option>`));
+        }
+        detMonth.value = prevMonth; 
+      }
+      const expenses = load(LS.EXPENSE, []);
+      const prevCat = $('detCategory') ? $('detCategory').value : '';
+      const cats = [...new Set(expenses.map(e=> e.category))].sort();
+      const detCat = $('detCategory'); if(detCat){ detCat.innerHTML = '<option value="">All Category</option>'; cats.forEach(c=> detCat.insertAdjacentHTML('beforeend', `<option value="${c}">${c}</option>`)); detCat.value = prevCat; }
+      const prevFy = $('detFy') ? $('detFy').value : '';
+      const fys = load(LS.FYS, []); if(detFy){ detFy.innerHTML = '<option value="">All FY</option>'; fys.forEach(f=> detFy.insertAdjacentHTML('beforeend', `<option value="${f.name}">${f.name}</option>`)); detFy.value = prevFy; }
+    }
+    $('detApply').addEventListener('click', renderDetailedReport);
+    $('detFy').addEventListener('change', populateDetFilters);
+
+    function renderDetailedReport(){
+      const fy = $('detFy').value;
+      const month = $('detMonth').value;
+      const cat = $('detCategory').value;
+      const sub = $('detSub').value.trim().toLowerCase();
+      const firm = $('detFirm').value.trim().toLowerCase();
+      const tbody = document.querySelector('#repDetailedTable tbody'); tbody.innerHTML = '';
+      const expenses = load(LS.EXPENSE, []);
+      const filtered = expenses.filter(e=>{
+        if(fy && e.fy !== fy) return false;
+        if(month && e.monthKey !== month) return false;
+        if(cat && e.category !== cat) return false;
+        if(sub && !(e.sub||'').toLowerCase().includes(sub)) return false;
+        if(firm && !(e.firm||'').toLowerCase().includes(firm)) return false;
+        return true;
+      });
+      if(filtered.length===0){ tbody.innerHTML = '<tr><td colspan="8" class="small">No records</td></tr>'; return; }
+      filtered.sort((a,b)=> new Date(b.date) - new Date(a.date));
+      let tot = 0;
+      filtered.forEach(e=>{
+        tot += Number(e.amount||0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${e.date}</td><td>${e.fy}</td><td>${e.monthKey}</td><td>${e.category}</td><td>${e.sub||''}</td><td>${e.description||''}</td><td>${e.firm||''}</td><td>${fmt(e.amount)}</td>`;
+        tbody.appendChild(tr);
+      });
+      tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td colspan="7" style="text-align:right;padding-right:16px;">TOTAL EXPENDITURE</td><td>${fmt(tot)}</td></tr>`);
+    }
+
+    function renderFySummaryReport() {
+      const fys = load(LS.FYS, []);
+      const expenses = load(LS.EXPENSE, []);
+      const tbody = document.querySelector('#repFySummaryTable tbody'); tbody.innerHTML = '';
+      
+      let tDrugs=0, tMach=0, tHosp=0, tLab=0, tSha=0, tSal=0, tInc=0, tMisc=0, tTot=0;
+      
+      fys.forEach(f => {
+        const fyExps = expenses.filter(e => e.fy === f.name);
+        if(fyExps.length === 0) return;
+        const amt = cat => fyExps.filter(e => (e.category||'').toLowerCase().includes(cat.toLowerCase())).reduce((s,e)=> s+Number(e.amount||0), 0);
+        const drugs = amt('Drugs') + amt('Consumables');
+        const mach = amt('Machinery');
+        const hosp = amt('Hospital Development');
+        const lab = amt('Laboratory');
+        const sha = amt('SHA Share');
+        const salary = amt('Salary');
+        const inc = amt('Incentives');
+        const misc = amt('Misc');
+        const total = fyExps.reduce((s,e)=> s+Number(e.amount||0), 0);
+        
+        tDrugs+=drugs; tMach+=mach; tHosp+=hosp; tLab+=lab; tSha+=sha; tSal+=salary; tInc+=inc; tMisc+=misc; tTot+=total;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${f.name}</td><td>${fmt(drugs)}</td><td>${fmt(mach)}</td><td>${fmt(hosp)}</td><td>${fmt(lab)}</td><td>${fmt(sha)}</td><td>${fmt(salary)}</td><td>${fmt(inc)}</td><td>${fmt(misc)}</td><td>${fmt(total)}</td>`;
+        tbody.appendChild(tr);
+      });
+      
+      if(tTot > 0) {
+        tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td>TOTAL</td><td>${fmt(tDrugs)}</td><td>${fmt(tMach)}</td><td>${fmt(tHosp)}</td><td>${fmt(tLab)}</td><td>${fmt(tSha)}</td><td>${fmt(tSal)}</td><td>${fmt(tInc)}</td><td>${fmt(tMisc)}</td><td>${fmt(tTot)}</td></tr>`);
+      }
+    }
+
+    function renderShaReport() {
+      const fys = load(LS.FYS, []);
+      const expenses = load(LS.EXPENSE, []);
+      const tbody = document.querySelector('#repShaNewTable tbody'); tbody.innerHTML = '';
+      
+      const shaFySel = $('shaFyFilter');
+      if (shaFySel.children.length === 0) {
+        shaFySel.innerHTML = '<option value="">All FY</option>';
+        fys.forEach(f => shaFySel.insertAdjacentHTML('beforeend', `<option value="${f.name}">${f.name}</option>`));
+      }
+      const selectedFy = shaFySel.value;
+      
+      let carryOpening = 0;
+      
+      let tClaim=0, tInt=0, tIncTotal=0, tDrugs=0, tMach=0, tHosp=0, tLab=0, tSha=0, tSal=0, tInc=0, tMisc=0, tExpTot=0;
+      let lastClosing=0;
+      let hasData=false;
+      
+      fys.forEach(f => {
+        const rows = computeFyRows(f.name, carryOpening);
+        if(rows.length > 0) carryOpening = rows[rows.length-1].closing;
+        
+        if (selectedFy && f.name !== selectedFy) return; // skip if filtered out
+        
+        rows.forEach(r => {
+          const mExps = expenses.filter(e => e.monthKey === r.monthKey);
+          const amt = cat => mExps.filter(e => (e.category||'').toLowerCase().includes(cat.toLowerCase())).reduce((s,e)=> s+Number(e.amount||0), 0);
+          const drugs = amt('Drugs') + amt('Consumables');
+          const mach = amt('Machinery');
+          const hosp = amt('Hospital Development');
+          const lab = amt('Laboratory');
+          const sha = amt('SHA Share');
+          const salary = amt('Salary');
+          const inc = amt('Incentives');
+          const misc = amt('Misc');
+          
+          if(r.incomeTotal === 0 && r.expTotal === 0 && r.opening === 0) return;
+          hasData=true;
+          
+          tClaim+=r.claim; tInt+=r.interest; tIncTotal+=r.incomeTotal; tDrugs+=drugs; tMach+=mach; tHosp+=hosp; tLab+=lab; tSha+=sha; tSal+=salary; tInc+=inc; tMisc+=misc; tExpTot+=r.expTotal; lastClosing=r.closing;
+          
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${r.label}</td><td>${fmt(r.opening)}</td><td>${fmt(r.claim)}</td><td>${fmt(r.interest)}</td><td>${fmt(r.incomeTotal)}</td><td>${fmt(drugs)}</td><td>${fmt(mach)}</td><td>${fmt(hosp)}</td><td>${fmt(lab)}</td><td>${fmt(sha)}</td><td>${fmt(salary)}</td><td>${fmt(inc)}</td><td>${fmt(misc)}</td><td>${fmt(r.expTotal)}</td><td>${fmt(r.closing)}</td>`;
+          tbody.appendChild(tr);
+        });
+      });
+      
+      if(hasData) {
+        tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td>TOTAL</td><td>-</td><td>${fmt(tClaim)}</td><td>${fmt(tInt)}</td><td>${fmt(tIncTotal)}</td><td>${fmt(tDrugs)}</td><td>${fmt(tMach)}</td><td>${fmt(tHosp)}</td><td>${fmt(tLab)}</td><td>${fmt(tSha)}</td><td>${fmt(tSal)}</td><td>${fmt(tInc)}</td><td>${fmt(tMisc)}</td><td>${fmt(tExpTot)}</td><td>${fmt(lastClosing)}</td></tr>`);
+      }
+    }
+    $('applyShaFilter').addEventListener('click', renderShaReport);
+
+    // BULK IMPORT LOGIC
+    function parseMonthToKey(str, defaultFy) {
+      const s = str.trim().toLowerCase();
+      const mNames = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+      let mIdx = mNames.findIndex(m => s.startsWith(m));
+      if (mIdx === -1) return null;
+      
+      let yearPart = s.match(/\d{2,4}/);
+      let year;
+      if (yearPart) {
+        let y = parseInt(yearPart[0], 10);
+        year = y < 100 ? 2000 + y : y;
+      } else {
+        let fYear = parseInt(defaultFy.split('-')[0], 10); 
+        year = mIdx < 3 ? fYear + 1 : fYear; 
+      }
+      return `${year}-${String(mIdx+1).padStart(2,'0')}`;
+    }
+
+    $('btnImportIncome')?.addEventListener('click', () => {
+      const text = $('importIncomeArea').value.trim();
+      if(!text) return;
+      const fy = $('importIncomeFy').value;
+      const lines = text.split('\n');
+      let count = 0;
+      let incomes = load(LS.INCOME, []);
+      for(const line of lines) {
+        if(!line.trim()) continue;
+        const cols = line.split('\t');
+        if(cols.length < 3) continue;
+        
+        let monthKey = parseMonthToKey(cols[0], fy);
+        if(!monthKey) continue;
+        if (isLocked(monthKey)) continue;
+        
+        let interest = parseFloat(cols[1].replace(/,/g, '').trim()) || 0;
+        let claim = parseFloat(cols[2].replace(/,/g, '').trim()) || 0;
+        
+        incomes.push({
+          createdAt: Date.now() + Math.random().toString(),
+          fy: fy,
+          monthKey: monthKey,
+          claim: claim,
+          interest: interest
+        });
+        count++;
+      }
+      save(LS.INCOME, incomes);
+      alert(`Imported ${count} income records successfully!`);
+      $('importIncomeArea').value = '';
+    });
+
+    $('btnImportExp')?.addEventListener('click', () => {
+      const text = $('importExpArea').value.trim();
+      if(!text) return;
+      const lines = text.split('\n');
+      let count = 0;
+      let exps = load(LS.EXPENSE, []);
+      for(const line of lines) {
+        if(!line.trim()) continue;
+        const cols = line.split('\t');
+        if(cols.length < 4) continue;
+        
+        let cat = cols[0].trim();
+        let sub = cols[1].trim();
+        let amt = parseFloat(cols[2].replace(/,/g, '').trim()) || 0;
+        let mStr = cols[3].trim();
+        
+        let monthKey = parseMonthToKey(mStr, "2020-21");
+        if(!monthKey && cols.length >= 5) {
+          cat = cols[1].trim();
+          sub = cols[2].trim();
+          amt = parseFloat(cols[3].replace(/,/g, '').trim()) || 0;
+          mStr = cols[4].trim();
+          monthKey = parseMonthToKey(mStr, "2020-21");
+        }
+        
+        if(!monthKey) continue;
+        if (isLocked(monthKey)) continue;
+        
+        let d = new Date(monthKey + '-01'); 
+        let fyYear = (d.getMonth() + 1 >= 4) ? d.getFullYear() : d.getFullYear() - 1;
+        let expFy = `${fyYear}-${String(fyYear + 1).slice(-2)}`;
+        
+        exps.push({
+          createdAt: Date.now() + Math.random().toString(),
+          date: monthKey + '-01',
+          fy: expFy,
+          monthKey: monthKey,
+          category: cat,
+          sub: sub,
+          amount: amt,
+          description: '',
+          firm: '',
+          invoice: '',
+          remarks: 'Imported Bulk'
+        });
+        count++;
+      }
+      save(LS.EXPENSE, exps);
+      alert(`Imported ${count} expenditure records successfully!`);
+      $('importExpArea').value = '';
+    });
+
+    // STATS REPORTS & IMPORT LOGIC
+    $('btnStatsEntry')?.addEventListener('click', () => {
+      $('btnStatsEntry').classList.add('active');
+      $('btnStatsReport').classList.remove('active');
+      $('rep-stats-entry').style.display = '';
+      $('rep-stats-report').style.display = 'none';
+      renderStatsEntryTable();
+    });
+    $('btnStatsReport')?.addEventListener('click', () => {
+      $('btnStatsReport').classList.add('active');
+      $('btnStatsEntry').classList.remove('active');
+      $('rep-stats-report').style.display = '';
+      $('rep-stats-entry').style.display = 'none';
+      renderStatsReportTable();
+    });
+    $('statsFy')?.addEventListener('change', () => populateMonths('statsFy','statsMonth'));
+
+    $('statsForm')?.addEventListener('submit', function(e){
+      e.preventDefault();
+      const fy = $('statsFy').value;
+      const monthKey = $('statsMonth').value;
+      if (isLocked(monthKey)) { alert('Cannot modify: ' + monthKey + ' is locked.'); return; }
+      const patients = Number($('statsPatients').value||0);
+      const cards = Number($('statsCards').value||0);
+      
+      const stats = load(LS.STATS, []);
+      const existing = stats.find(x => x.fy === fy && x.monthKey === monthKey);
+      if(existing){ alert('Duplicate entry blocked: Data for this FY and Month already exists.'); return; }
+      
+      stats.push({fy, monthKey, patients, cards, createdAt: new Date().toISOString()});
+      save(LS.STATS, stats);
+      this.reset();
+      populateFyAll(); // resets dropdowns
+      renderStatsEntryTable();
+    });
+
+    function renderStats() {
+      const activeBtn = document.querySelector('#statsMenu .report-tab.active') || $('btnStatsEntry');
+      if(activeBtn) activeBtn.click();
+    }
+    
+    function delStat(id) {
+      const stats = load(LS.STATS, []);
+      const item = stats.find(x => x.createdAt === id);
+      if(item && item.monthKey !== 'YEARLY' && isLocked(item.monthKey)) { alert('Cannot delete: ' + item.monthKey + ' is locked.'); return; }
+      if(!confirm('Delete this entry?')) return;
+      save(LS.STATS, stats.filter(x => x.createdAt !== id));
+      renderStatsEntryTable();
+    }
+
+    function renderStatsEntryTable(){
+      const tbody = document.querySelector('#statsEntryTable tbody'); if(!tbody) return;
+      tbody.innerHTML = '';
+      const stats = load(LS.STATS, []);
+      if(stats.length===0){ tbody.innerHTML = '<tr><td colspan="5" class="small">No entries yet</td></tr>'; return; }
+      stats.sort((a,b)=> b.monthKey.localeCompare(a.monthKey));
+      stats.forEach(s=>{
+        const isYearly = s.monthKey.includes('YEARLY');
+        const mLabel = isYearly ? 'Aggregate/Yearly' : s.monthKey;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${s.fy}</td><td>${mLabel}</td><td>${s.patients}</td><td>${s.cards}</td>
+          <td><button class="btn" style="padding:4px 8px;font-size:11px;background:#ef4444;" onclick="delStat('${s.createdAt}')">Del</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderStatsReportTable(){
+      const fys = load(LS.FYS, []);
+      const tbody = document.querySelector('#statsReportTable tbody'); if(!tbody) return;
+      tbody.innerHTML = '';
+      const stats = load(LS.STATS, []);
+      let sno = 1;
+      let totPat = 0, totCards = 0;
+      fys.forEach(f => {
+        const pat = stats.filter(x => x.fy === f.name).reduce((s, x) => s + Number(x.patients||0), 0);
+        const card = stats.filter(x => x.fy === f.name).reduce((s, x) => s + Number(x.cards||0), 0);
+        totPat += pat; totCards += card;
+        tbody.insertAdjacentHTML('beforeend', `<tr><td>${sno++}</td><td>${f.name}</td><td>${pat}</td><td>${card}</td></tr>`);
+      });
+      tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td>TOTAL</td><td>-</td><td>${totPat}</td><td>${totCards}</td></tr>`);
+    }
+
+    $('btnImportStats')?.addEventListener('click', () => {
+      const text = $('importStatsArea').value.trim();
+      if(!text) return;
+      const lines = text.split('\n');
+      let count = 0;
+      let stats = load(LS.STATS, []);
+      for(const line of lines) {
+        if(!line.trim()) continue;
+        const cols = line.split('\t');
+        if(cols.length < 3) continue;
+        
+        // Expected: FY | PATIENT TREATED | GOLDEN CARD
+        let fy = cols[0].trim();
+        let pat = parseInt(cols[1].replace(/,/g, '').trim()) || 0;
+        let card = parseInt(cols[2].replace(/,/g, '').trim()) || 0;
+        
+        if(!fy.includes('-')) continue; // skip header or invalid
+        
+        let monthKey = fy + '-YEARLY';
+        
+        stats.push({
+          createdAt: Date.now() + Math.random().toString(),
+          fy: fy,
+          monthKey: monthKey,
+          patients: pat,
+          cards: card
+        });
+        count++;
+      }
+      save(LS.STATS, stats);
+      alert(`Imported ${count} stats records successfully!`);
+      $('importStatsArea').value = '';
+    });
+
+    // INIT — handled by fsLoadAll callback
+    function renderShaShareReport(){
+      const incomes = load(LS.INCOME, []);
+      const totalClaim = incomes.reduce((s,i)=> s + Number(i.claim||0), 0);
+      const totalInterest = incomes.reduce((s,i)=> s + Number(i.interest||0), 0);
+      const totalAmount = totalClaim + totalInterest;
+      const tied = totalAmount * 0.75;
+      const untied = totalAmount * 0.25;
+      const incentive = totalAmount * 0.20;
+      const shashare = totalAmount * 0.05;
+      $('fundTotal').innerText = fmt(totalAmount);
+      $('fundTied').innerText = fmt(tied);
+      $('fundUntied').innerText = fmt(untied);
+      $('fundIncentive').innerText = fmt(incentive);
+      $('fundShaShare').innerText = fmt(shashare);
+    }
+
+    // ---------- LEDGER ----------
+    function renderLedger(){
+      const tbody = document.querySelector('#ledgerTable tbody'); tbody.innerHTML = '';
+      const incomes = load(LS.INCOME, []);
+      const expenses = load(LS.EXPENSE, []);
+      const combined = [];
+      incomes.forEach(i=> combined.push({date: i.monthKey + '-01', type:'Income', label:i.monthKey, amount: Number(i.claim||0)+Number(i.interest||0)}));
+      expenses.forEach(e=> combined.push({date: e.date, type:'Expense', label:e.category, amount: Number(e.amount||0)}));
+      combined.sort((a,b)=> new Date(b.date) - new Date(a.date));
+      if(combined.length===0){ tbody.innerHTML = '<tr><td colspan="4" class="small">No ledger entries</td></tr>'; return; }
+      combined.forEach(c=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${c.date}</td><td>${c.type}</td><td>${c.label}</td><td>${fmt(c.amount)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ---------- SETTINGS ----------
+    function renderSettings(){
+      const fys = load(LS.FYS, []);
+      const selFy = $('setFy'); selFy.innerHTML = ''; fys.forEach(f=> selFy.insertAdjacentHTML('beforeend', `<option value="${f.name}">${f.name}</option>`));
+      selFy.value = fys[fys.length-1].name;
+      populateMonths('setFy','setMonth');
+      const meta = load(LS.META, {});
+      if(meta.initialOpening){ $('setFy').value = meta.initialOpening.fy; populateMonths('setFy','setMonth'); $('setMonth').value = meta.initialOpening.monthKey; $('setOpening').value = meta.initialOpening.amount; }
+    }
+    $('saveOpening').addEventListener('click', ()=>{
+      const fy = $('setFy').value; const monthKey = $('setMonth').value; const amt = Number($('setOpening').value||0);
+      const meta = load(LS.META, {}); meta.initialOpening = {fy, monthKey, amount: amt}; save(LS.META, meta);
+      alert('Initial opening saved.');
+      renderDashboard();
+    });
+
+    // ---------- Initial render — load from Firestore first ----------
+    fsLoadAll(function() {
+      populateFyAll();
+      bindReportsMenu();
+      renderDashboard();
+      showTab('dashboard');
+    });
+
+    // 4C: AUTO SESSION TIMEOUT — 2 hours inactivity
+    var _SESSION_TIMEOUT = 2 * 60 * 60 * 1000;
+    var _sessionTimer;
+    function resetSessionTimer() {
+      clearTimeout(_sessionTimer);
+      _sessionTimer = setTimeout(function() {
+        sessionStorage.removeItem('pmjay_user');
+        alert('Session expired due to inactivity. Please login again.');
+        window.location.href = 'index.html';
+      }, _SESSION_TIMEOUT);
+    }
+    document.addEventListener('mousemove', resetSessionTimer);
+    document.addEventListener('keypress', resetSessionTimer);
+    document.addEventListener('click', resetSessionTimer);
+    resetSessionTimer();
+
+  </script>
+</body>
+</html>
