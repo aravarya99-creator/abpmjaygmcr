@@ -791,6 +791,31 @@
     const $ = id => document.getElementById(id);
     const fmt = v => '₹ ' + Number(v||0).toLocaleString('en-IN',{maximumFractionDigits:2});
 
+    // Canonical category names — always stored in this exact form
+    const CANONICAL_CATS = [
+      'Drugs', 'Consumables', 'Machinery & Equipment',
+      'Hospital Development', 'Laboratory Development',
+      'SHA Share Deposited', 'Salary to Arogya Mitras',
+      'Incentives Disbursed', 'Misc. Expenses'
+    ];
+    // Normalise any category string to canonical form (case-insensitive match)
+    function normCat(raw) {
+      if(!raw) return raw;
+      const r = raw.trim();
+      const lower = r.toLowerCase();
+      // Try exact canonical match ignoring case
+      const found = CANONICAL_CATS.find(c => c.toLowerCase() === lower);
+      if(found) return found;
+      // Try partial match (e.g. "LABORATORY DEVELOPMENTS" -> "Laboratory Development")
+      const partial = CANONICAL_CATS.find(c => {
+        const cl = c.toLowerCase();
+        return lower.startsWith(cl.slice(0,6)) || cl.startsWith(lower.slice(0,6));
+      });
+      if(partial) return partial;
+      // Fallback: title-case the raw value
+      return r.charAt(0).toUpperCase() + r.slice(1).toLowerCase();
+    }
+
     // ── FIRESTORE DATA LAYER ─────────────────────────────────────────
     // All data stored in Firestore under collection 'entries'
     // Documents: fin_income, fin_expense, fin_stats, fin_meta, fin_locked, fin_fys
@@ -832,6 +857,13 @@
           _cache.fys = arr;
           fsSave('fin_fys', arr);
         }
+        // One-time normalize: fix mixed-case categories in existing expense records
+        var _needSave = false;
+        (_cache.expense||[]).forEach(function(e){
+          var norm = normCat(e.category);
+          if(e.category && norm !== e.category){ e.category = norm; _needSave = true; }
+        });
+        if(_needSave) fsSave('fin_expense', _cache.expense);
         _loaded = true;
         setLoading(false);
         if(callback) callback();
@@ -1125,7 +1157,7 @@
       const firm = $('expFirm').value || '';
       const remarks = $('expRemarks').value || '';
       const expenses = load(LS.EXPENSE, []);
-      expenses.push({date, fy:fyName, monthKey, category, sub, description: desc, firm, invoice, amount, remarks, createdAt: new Date().toISOString()});
+      expenses.push({date, fy:fyName, monthKey, category: normCat(category), sub, description: desc, firm, invoice, amount, remarks, createdAt: new Date().toISOString()});
       save(LS.EXPENSE, expenses);
       this.reset();
       renderExpenditure();
@@ -1150,9 +1182,11 @@
       
       const expenses = load(LS.EXPENSE, []);
       const prevCat = $('filterCategoryExp').value;
-      const cats = [...new Set(expenses.map(e=> e.category))].sort();
+      // Normalise + deduplicate categories
+      const catSet = new Set(expenses.map(e=> normCat(e.category)));
+      const cats = [...catSet].sort();
       const catSel = $('filterCategoryExp'); catSel.innerHTML = '<option value="">All Category</option>'; cats.forEach(c=> catSel.insertAdjacentHTML('beforeend', `<option value="${c}">${c}</option>`));
-      catSel.value = prevCat;
+      catSel.value = cats.includes(prevCat) ? prevCat : '';
     }
 
     function renderExpenditure(){
@@ -1166,13 +1200,13 @@
       const filtered = expenses.filter(e=>{
         if(fyFilter && e.fy !== fyFilter) return false;
         if(monthFilter && e.monthKey !== monthFilter) return false;
-        if(catFilter && e.category !== catFilter) return false;
+        if(catFilter && normCat(e.category) !== catFilter) return false;
         return true;
       });
       filtered.sort((a,b)=> new Date(b.date) - new Date(a.date));
       filtered.forEach(e=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${e.date}</td><td>${e.fy}</td><td>${monthKeyToLabel(e.monthKey)}</td><td>${e.category}</td><td>${e.sub||''}</td><td>${e.description||''}</td><td>${e.firm||''}</td><td>${fmt(e.amount)}</td><td>${e.invoice||''}</td><td>${e.remarks||''}</td>
+        tr.innerHTML = `<td>${e.date}</td><td>${e.fy}</td><td>${monthKeyToLabel(e.monthKey)}</td><td>${normCat(e.category)}</td><td>${e.sub||''}</td><td>${e.description||''}</td><td>${e.firm||''}</td><td>${fmt(e.amount)}</td><td>${e.invoice||''}</td><td>${e.remarks||''}</td>
           <td><button class="btn" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="editExp('${e.createdAt}')">Edit</button><button class="btn" style="padding:4px 8px;font-size:11px;background:#ef4444;" onclick="delExp('${e.createdAt}')">Del</button></td>`;
         tbody.appendChild(tr);
       });
@@ -1366,8 +1400,9 @@
       }
       const expenses = load(LS.EXPENSE, []);
       const prevCat = $('detCategory') ? $('detCategory').value : '';
-      const cats = [...new Set(expenses.map(e=> e.category))].sort();
-      const detCat = $('detCategory'); if(detCat){ detCat.innerHTML = '<option value="">All Category</option>'; cats.forEach(c=> detCat.insertAdjacentHTML('beforeend', `<option value="${c}">${c}</option>`)); detCat.value = prevCat; }
+      const detCatSet = new Set(expenses.map(e=> normCat(e.category)));
+      const cats = [...detCatSet].sort();
+      const detCat = $('detCategory'); if(detCat){ detCat.innerHTML = '<option value="">All Category</option>'; cats.forEach(c=> detCat.insertAdjacentHTML('beforeend', `<option value="${c}">${c}</option>`)); detCat.value = cats.includes(prevCat) ? prevCat : ''; }
       const prevFy = $('detFy') ? $('detFy').value : '';
       const fys = load(LS.FYS, []); if(detFy){ detFy.innerHTML = '<option value="">All FY</option>'; fys.forEach(f=> detFy.insertAdjacentHTML('beforeend', `<option value="${f.name}">${f.name}</option>`)); detFy.value = prevFy; }
     }
@@ -1385,7 +1420,7 @@
       const filtered = expenses.filter(e=>{
         if(fy && e.fy !== fy) return false;
         if(month && e.monthKey !== month) return false;
-        if(cat && e.category !== cat) return false;
+        if(cat && normCat(e.category) !== cat) return false;
         if(sub && !(e.sub||'').toLowerCase().includes(sub)) return false;
         if(firm && !(e.firm||'').toLowerCase().includes(firm)) return false;
         return true;
@@ -1396,7 +1431,7 @@
       filtered.forEach(e=>{
         tot += Number(e.amount||0);
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${e.date}</td><td>${e.fy}</td><td>${monthKeyToLabel(e.monthKey)}</td><td>${e.category}</td><td>${e.sub||''}</td><td>${e.description||''}</td><td>${e.firm||''}</td><td>${fmt(e.amount)}</td>`;
+        tr.innerHTML = `<td>${e.date}</td><td>${e.fy}</td><td>${monthKeyToLabel(e.monthKey)}</td><td>${normCat(e.category)}</td><td>${e.sub||''}</td><td>${e.description||''}</td><td>${e.firm||''}</td><td>${fmt(e.amount)}</td>`;
         tbody.appendChild(tr);
       });
       tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td colspan="7" style="text-align:right;padding-right:16px;">TOTAL EXPENDITURE</td><td>${fmt(tot)}</td></tr>`);
@@ -2205,7 +2240,7 @@
         var expData = load(LS.EXPENSE,[]);
         if(fy) expData=expData.filter(function(e){return e.fy===fy;});
         if(monthKey) expData=expData.filter(function(e){return e.monthKey===monthKey;});
-        if(cat) expData=expData.filter(function(e){return e.category===cat;});
+        if(cat) expData=expData.filter(function(e){return normCat(e.category)===cat;});
         if(sub) expData=expData.filter(function(e){return (e.sub||'').toLowerCase().includes(sub);});
         if(firm) expData=expData.filter(function(e){return (e.firm||'').toLowerCase().includes(firm);});
         if(desc) expData=expData.filter(function(e){return (e.description||'').toLowerCase().includes(desc);});
