@@ -303,7 +303,6 @@
             <tbody></tbody>
           </table>
         </div>
-        <div id="claimsPagination" style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:12px;font-size:13px;"></div>
         
       </section>
 
@@ -1238,8 +1237,6 @@
       this.reset();
       renderClaims();
     });
-    var _claimsPage = 1;
-    var _claimsPageSize = 15;
 
     function renderClaims(){
       populateMonths('claimsFy','claimsMonth');
@@ -1261,12 +1258,7 @@
         tbody.innerHTML = '<tr><td colspan="6" class="small" style="text-align:center;padding:20px;color:#888;">No claim entries found</td></tr>';
         renderDashboard(); return;
       }
-      var totalPages = Math.ceil(incomes.length / _claimsPageSize);
-      if(_claimsPage > totalPages) _claimsPage = 1;
-      var start = (_claimsPage-1)*_claimsPageSize;
-      var pageData = incomes.slice(start, start+_claimsPageSize);
-
-      pageData.forEach(function(i){
+      incomes.forEach(function(i){
         var total = Number(i.claim||0) + Number(i.interest||0);
         var claimLocked = isClaimFyLocked(i.fy);
         var locked = isLocked(i.monthKey) || claimLocked;
@@ -1284,21 +1276,6 @@
           +'</td>';
         tbody.appendChild(tr);
       });
-      // Pagination
-      var pg = $('claimsPagination');
-      if(pg) {
-        var showing = '<span style="color:#666;font-size:12px;">Showing '+(start+1)+' to '+Math.min(start+_claimsPageSize,incomes.length)+' of '+incomes.length+' entries</span>';
-        var buttons = '';
-        if(totalPages > 1) {
-          buttons += '<button style="padding:4px 10px;border:1px solid #d8b4fe;background:#faf5ff;border-radius:6px;cursor:pointer;color:#7c3aed;font-weight:700;" onclick="_claimsPage=Math.max(1,_claimsPage-1);renderClaims();">&lsaquo;</button>';
-          for(var p=1;p<=Math.min(totalPages,7);p++){
-            buttons += '<button style="padding:4px 10px;border:1px solid '+(p===_claimsPage?'#8b5cf6':'#d8b4fe')+';background:'+(p===_claimsPage?'#8b5cf6':'#faf5ff')+';border-radius:6px;cursor:pointer;color:'+(p===_claimsPage?'#fff':'#7c3aed')+';font-weight:700;" onclick="_claimsPage='+p+';renderClaims();">'+p+'</button>';
-          }
-          if(totalPages > 7) buttons += '<span>…</span><button style="padding:4px 10px;border:1px solid #d8b4fe;background:#faf5ff;border-radius:6px;cursor:pointer;color:#7c3aed;font-weight:700;" onclick="_claimsPage='+totalPages+';renderClaims();">'+totalPages+'</button>';
-          buttons += '<button style="padding:4px 10px;border:1px solid #d8b4fe;background:#faf5ff;border-radius:6px;cursor:pointer;color:#7c3aed;font-weight:700;" onclick="_claimsPage=Math.min('+totalPages+',_claimsPage+1);renderClaims();">&rsaquo;</button>';
-        }
-        pg.innerHTML = showing + ' &nbsp; ' + buttons;
-      }
       renderDashboard();
     }
     
