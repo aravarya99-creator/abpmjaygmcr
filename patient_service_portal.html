@@ -598,7 +598,8 @@ table tr {
   var sess = null;
   try { sess = JSON.parse(sessionStorage.getItem('pmjay_user')); } catch(e) {}
   if (!sess || !sess.email) { window.location.href = 'index.html'; return; }
-  if (sess.role !== 'DEO') { window.location.href = 'index.html'; return; }
+  if (sess.role !== 'DEO' && sess.role !== 'Master') { window.location.href = 'index.html'; return; }
+  // Note: Admin can reach here via openAsRole() with role spoofed to DEO
   // Populate user pill
   var name = sess.name || 'Active User';
   var initials = name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2) || 'AU';
