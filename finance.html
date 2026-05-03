@@ -313,6 +313,7 @@
         <div class="report-tabs" id="reportsMenu">
           <div class="report-tab active" id="btnSha" data-report="sha">SHA Report</div>
           <div class="report-tab" id="btnShaShare" data-report="shashare">SHA Share</div>
+          <div class="report-tab" id="btnFundAlloc" data-report="fundalloc">Fund Allocation</div>
         </div>
 
         <div id="rep-sha" style="overflow-x:auto;">
@@ -398,6 +399,39 @@
           </div>
         </div>
         
+        <!-- FUND ALLOCATION SECTION -->
+        <div id="rep-fundalloc" style="display:none;">
+          <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
+            <select id="faFyFilter" style="min-width:110px;"></select>
+            <select id="faMonthFilter" style="min-width:130px;"><option value="">All Month</option></select>
+            <button class="btn" id="applyFaFilter">Apply Filter</button>
+            <button class="btn" onclick="printFundAlloc()" style="background:#4b5563;">🖨 Print / PDF</button>
+            <button class="btn" onclick="exportFaExcel()" style="background:#16a34a;">📊 Excel</button>
+          </div>
+          <div style="margin-bottom:8px;font-size:13px;font-weight:700;color:#7c3aed;" id="faInfoLabel"></div>
+          <div style="overflow-x:auto;">
+            <table id="repFundAllocTable">
+              <thead>
+                <tr style="background:#7c3aed;color:#fff;">
+                  <th>S.No</th><th>Expenditure Category</th><th>Allocation %</th><th>Amount (₹)</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="faMonthWiseWrap" style="display:none;overflow-x:auto;margin-top:16px;">
+            <div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:6px;">MONTH-WISE BREAKDOWN</div>
+            <table id="repFundAllocMonthTable">
+              <thead>
+                <tr style="background:#8b5cf6;color:#fff;">
+                  <th>#</th><th>Month</th><th>Medicines &amp; Consumables (50%)</th><th>Human Resources (15%)</th><th>Hospital Upgradation (15%)</th><th>Admin Expenses (10%)</th><th>SHA Share (5%)</th><th>Unallocated (5%)</th><th>Claim Total</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
         <div style="margin-top:16px;display:flex;gap:12px;justify-content:flex-end;">
           <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
         </div>
@@ -538,91 +572,116 @@
 
       <!-- CUSTOM REPORT BUILDER -->
       <section id="customreport" class="panel tab-screen" style="display:none">
-        <div class="section-title" style="background:#0ea5e9;">🗂 CUSTOM REPORT BUILDER</div>
-        <div style="font-size:13px;color:#4b5563;margin-bottom:16px;">Select any combination of filters to generate a custom formatted report.</div>
-        
-        <!-- DATA TYPE -->
-        <div style="margin-bottom:16px;">
-          <label style="display:block;color:var(--blue);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:8px;">Report Type <span style="color:red">*</span></label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <label style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:2px solid #d8b4fe;background:#faf5ff;cursor:pointer;font-weight:600;">
-              <input type="radio" name="crType" value="income" id="crTypeIncome" checked> 💰 Claims / Income
+        <div class="section-title" style="background:#0ea5e9;font-size:15px;">🗂 CUSTOM REPORT BUILDER</div>
+        <div style="font-size:13px;color:#555;margin-bottom:20px;">Select any data blocks and filters. Each checked block appears as a separate section in the printed report.</div>
+
+        <!-- STEP 1: DATA BLOCKS TO INCLUDE -->
+        <div style="background:#f0f9ff;border:2px solid #bae6fd;border-radius:10px;padding:16px;margin-bottom:18px;">
+          <div style="font-size:12px;font-weight:800;color:#0369a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📌 STEP 1 — Choose Data Blocks to Include</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;border:2px solid #bae6fd;background:#fff;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;" id="lbl_crIncome">
+              <input type="checkbox" id="crIncome" checked onchange="crToggleLabel(this)"> 💰 Claim / Income
             </label>
-            <label style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:2px solid #d8b4fe;background:#faf5ff;cursor:pointer;font-weight:600;">
-              <input type="radio" name="crType" value="expense" id="crTypeExpense"> 💸 Expenditure
+            <label style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;border:2px solid #bae6fd;background:#fff;cursor:pointer;font-weight:700;font-size:13px;" id="lbl_crInterest">
+              <input type="checkbox" id="crInterest" onchange="crToggleLabel(this)"> 📈 Interest Received
             </label>
-            <label style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:2px solid #d8b4fe;background:#faf5ff;cursor:pointer;font-weight:600;">
-              <input type="radio" name="crType" value="both" id="crTypeBoth"> 📊 Both (Income + Expenditure)
+            <label style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;border:2px solid #bae6fd;background:#fff;cursor:pointer;font-weight:700;font-size:13px;" id="lbl_crExpense">
+              <input type="checkbox" id="crExpense" onchange="crToggleLabel(this)"> 💸 Expenditure
             </label>
-            <label style="display:flex;align-items:center;gap=6px;padding:8px 16px;border-radius:8px;border:2px solid #d8b4fe;background:#faf5ff;cursor:pointer;font-weight:600;">
-              <input type="radio" name="crType" value="stats" id="crTypeStats"> 🏥 Hospital Statistics
+            <label style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;border:2px solid #bae6fd;background:#fff;cursor:pointer;font-weight:700;font-size:13px;" id="lbl_crShaShare">
+              <input type="checkbox" id="crShaShare" onchange="crToggleLabel(this)"> 🏦 SHA Fund Distribution
             </label>
-            <label style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:2px solid #d8b4fe;background:#faf5ff;cursor:pointer;font-weight:600;">
-              <input type="radio" name="crType" value="shashare" id="crTypeShaShare"> 🏦 SHA Fund Distribution
+            <label style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;border:2px solid #bae6fd;background:#fff;cursor:pointer;font-weight:700;font-size:13px;" id="lbl_crFundAlloc">
+              <input type="checkbox" id="crFundAlloc" onchange="crToggleLabel(this)"> 📊 Fund Allocation Table
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;border:2px solid #bae6fd;background:#fff;cursor:pointer;font-weight:700;font-size:13px;" id="lbl_crStats">
+              <input type="checkbox" id="crStats" onchange="crToggleLabel(this)"> 🏥 Hospital Statistics
             </label>
           </div>
         </div>
 
-        <!-- FILTERS -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px;">
-          <div>
-            <label style="display:block;color:var(--blue);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Financial Year</label>
-            <select id="crFy" style="width:100%;padding:10px;border:2px solid #d8b4fe;border-radius:8px;background:#faf5ff;color:#4c1d95;font-weight:600;"><option value="">All FY</option></select>
-          </div>
-          <div>
-            <label style="display:block;color:var(--blue);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Month</label>
-            <select id="crMonth" style="width:100%;padding:10px;border:2px solid #d8b4fe;border-radius:8px;background:#faf5ff;color:#4c1d95;font-weight:600;"><option value="">All Months</option></select>
-          </div>
-          <div id="crCatWrap">
-            <label style="display:block;color:var(--blue);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Category</label>
-            <select id="crCategory" style="width:100%;padding:10px;border:2px solid #d8b4fe;border-radius:8px;background:#faf5ff;color:#4c1d95;font-weight:600;">
-              <option value="">All Categories</option>
-              <option>Drugs</option>
-              <option>Consumables</option>
-              <option>Machinery &amp; Equipment</option>
-              <option>Hospital Development</option>
-              <option>Laboratory Development</option>
-              <option>SHA Share Deposited</option>
-              <option>Salary to Arogya Mitras</option>
-              <option>Incentives Disbursed</option>
-              <option>Misc. Expenses</option>
-            </select>
-          </div>
-          <div id="crSubWrap">
-            <label style="display:block;color:var(--blue);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Sub Category</label>
-            <input id="crSub" type="text" placeholder="Search sub category..." style="width:100%;padding:10px;border:2px solid #d8b4fe;border-radius:8px;background:#faf5ff;color:#4c1d95;font-weight:600;">
-          </div>
-          <div id="crFirmWrap">
-            <label style="display:block;color:var(--blue);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Firm / Agency</label>
-            <input id="crFirm" type="text" placeholder="Search firm..." style="width:100%;padding:10px;border:2px solid #d8b4fe;border-radius:8px;background:#faf5ff;color:#4c1d95;font-weight:600;">
-          </div>
-          <div>
-            <label style="display:block;color:var(--blue);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Report Title (optional)</label>
-            <input id="crTitle" type="text" placeholder="Custom title override..." style="width:100%;padding:10px;border:2px solid #d8b4fe;border-radius:8px;background:#faf5ff;color:#4c1d95;font-weight:600;">
-          </div>
-          <div>
-            <label style="display:block;color:var(--blue);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Page Orientation</label>
-            <select id="crOrientation" style="width:100%;padding:10px;border:2px solid #d8b4fe;border-radius:8px;background:#faf5ff;color:#4c1d95;font-weight:600;">
-              <option value="landscape">Landscape</option>
-              <option value="portrait">Portrait</option>
-            </select>
+        <!-- STEP 2: FILTERS -->
+        <div style="background:#faf5ff;border:2px solid #ddd6fe;border-radius:10px;padding:16px;margin-bottom:18px;">
+          <div style="font-size:12px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🔽 STEP 2 — Apply Filters (leave blank = All)</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;">
+            <div>
+              <label style="display:block;color:var(--blue);font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:5px;">Financial Year</label>
+              <select id="crFy" style="width:100%;padding:9px;border:2px solid #d8b4fe;border-radius:8px;background:#fff;color:#4c1d95;font-weight:600;font-size:13px;"><option value="">All FY</option></select>
+            </div>
+            <div>
+              <label style="display:block;color:var(--blue);font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:5px;">Month</label>
+              <select id="crMonth" style="width:100%;padding:9px;border:2px solid #d8b4fe;border-radius:8px;background:#fff;color:#4c1d95;font-weight:600;font-size:13px;"><option value="">All Months</option></select>
+            </div>
+            <div>
+              <label style="display:block;color:var(--blue);font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:5px;">Exp. Category</label>
+              <select id="crCategory" style="width:100%;padding:9px;border:2px solid #d8b4fe;border-radius:8px;background:#fff;color:#4c1d95;font-weight:600;font-size:13px;">
+                <option value="">All Categories</option>
+                <option>Drugs</option>
+                <option>Consumables</option>
+                <option>Machinery &amp; Equipment</option>
+                <option>Hospital Development</option>
+                <option>Laboratory Development</option>
+                <option>SHA Share Deposited</option>
+                <option>Salary to Arogya Mitras</option>
+                <option>Incentives Disbursed</option>
+                <option>Misc. Expenses</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;color:var(--blue);font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:5px;">Sub Category</label>
+              <input id="crSub" type="text" placeholder="e.g. Dialysis, CT Scan..." style="width:100%;padding:9px;border:2px solid #d8b4fe;border-radius:8px;background:#fff;color:#4c1d95;font-weight:600;font-size:13px;">
+            </div>
+            <div>
+              <label style="display:block;color:var(--blue);font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:5px;">Firm / Agency</label>
+              <input id="crFirm" type="text" placeholder="e.g. XYZ Pharma..." style="width:100%;padding:9px;border:2px solid #d8b4fe;border-radius:8px;background:#fff;color:#4c1d95;font-weight:600;font-size:13px;">
+            </div>
+            <div>
+              <label style="display:block;color:var(--blue);font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:5px;">Description / Keywords</label>
+              <input id="crDesc" type="text" placeholder="Search in description..." style="width:100%;padding:9px;border:2px solid #d8b4fe;border-radius:8px;background:#fff;color:#4c1d95;font-weight:600;font-size:13px;">
+            </div>
           </div>
         </div>
 
-        <!-- PREVIEW + ACTION BUTTONS -->
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
-          <button class="btn" onclick="buildCustomReport()" style="background:#0ea5e9;font-size:15px;padding:12px 28px;">🔍 Preview Report</button>
-          <button class="btn" onclick="printCustomReport()" style="background:#4b5563;font-size:15px;padding:12px 28px;">🖨 Print / PDF</button>
-          <button class="btn" onclick="exportCustomExcel()" style="background:#16a34a;font-size:15px;padding:12px 28px;">📊 Export Excel</button>
+        <!-- STEP 3: REPORT OPTIONS -->
+        <div style="background:#f0fdf4;border:2px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:18px;">
+          <div style="font-size:12px;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">⚙ STEP 3 — Report Options</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;">
+            <div>
+              <label style="display:block;color:#15803d;font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:5px;">Report Title</label>
+              <input id="crTitle" type="text" placeholder="Leave blank for auto title..." style="width:100%;padding:9px;border:2px solid #bbf7d0;border-radius:8px;background:#fff;color:#14532d;font-weight:600;font-size:13px;">
+            </div>
+            <div>
+              <label style="display:block;color:#15803d;font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:5px;">Page Orientation</label>
+              <select id="crOrientation" style="width:100%;padding:9px;border:2px solid #bbf7d0;border-radius:8px;background:#fff;color:#14532d;font-weight:600;font-size:13px;">
+                <option value="landscape">Landscape (A4)</option>
+                <option value="portrait">Portrait (A4)</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;color:#15803d;font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:5px;">Min Amount (₹)</label>
+              <input id="crMinAmt" type="number" min="0" placeholder="0" style="width:100%;padding:9px;border:2px solid #bbf7d0;border-radius:8px;background:#fff;color:#14532d;font-weight:600;font-size:13px;">
+            </div>
+            <div>
+              <label style="display:block;color:#15803d;font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:5px;">Max Amount (₹)</label>
+              <input id="crMaxAmt" type="number" min="0" placeholder="No limit" style="width:100%;padding:9px;border:2px solid #bbf7d0;border-radius:8px;background:#fff;color:#14532d;font-weight:600;font-size:13px;">
+            </div>
+          </div>
         </div>
 
-        <!-- PREVIEW TABLE -->
+        <!-- ACTION BUTTONS -->
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:center;">
+          <button class="btn" onclick="buildCustomReport()" style="background:#0ea5e9;font-size:14px;padding:12px 28px;border-radius:10px;">🔍 Preview Report</button>
+          <button class="btn" onclick="printCustomReport()" style="background:#4b5563;font-size:14px;padding:12px 28px;border-radius:10px;">🖨 Print / PDF</button>
+          <button class="btn" onclick="exportCustomExcel()" style="background:#16a34a;font-size:14px;padding:12px 28px;border-radius:10px;">📊 Export Excel</button>
+          <button class="btn" onclick="clearCustomReport()" style="background:#ef4444;font-size:14px;padding:12px 20px;border-radius:10px;">✖ Clear</button>
+        </div>
+
+        <!-- PREVIEW AREA -->
         <div id="crPreviewWrap" style="display:none;">
-          <div id="crPreviewInfo" style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:8px;padding:8px 12px;background:#ede9fe;border-radius:8px;"></div>
-          <div style="overflow-x:auto;">
-            <table id="crPreviewTable"></table>
-          </div>
-          <div id="crSummaryBox" style="margin-top:12px;background:#f5f3ff;padding:12px;border-radius:8px;border:1px solid #ddd6fe;display:none;">
+          <div id="crPreviewInfo" style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:12px;padding:10px 16px;background:#ede9fe;border-radius:8px;border-left:4px solid #8b5cf6;"></div>
+          <div id="crPreviewBlocks"></div>
+          <div id="crSummaryBox" style="margin-top:12px;background:#f5f3ff;padding:14px;border-radius:8px;border:1px solid #ddd6fe;display:none;">
+            <div style="font-size:11px;font-weight:800;color:#7c3aed;text-transform:uppercase;margin-bottom:6px;">REPORT SUMMARY</div>
             <div id="crSummaryContent" style="font-size:13px;font-weight:600;color:#4c1d95;"></div>
           </div>
         </div>
@@ -908,7 +967,8 @@
       
       const mapRep = {
         btnSha: 'sha',
-        btnShaShare: 'shashare'
+        btnShaShare: 'shashare',
+        btnFundAlloc: 'fundalloc'
       };
       Object.keys(mapRep).forEach(id=>{
         const btn = $(id); if(!btn) return;
@@ -920,6 +980,7 @@
           });
           if(mapRep[id] === 'sha') renderShaReport();
           if(mapRep[id] === 'shashare') renderShaShareReport();
+          if(mapRep[id] === 'fundalloc') renderFundAllocReport();
         });
       });
     }
@@ -1810,7 +1871,7 @@
       var periodInfo    = opts.periodInfo      || "";
       var generatedInfo = opts.generatedInfo   || ("Generated: " + new Date().toLocaleString('en-IN'));
       var bodyHTML      = opts.bodyHTML        || "<p>No content provided.</p>";
-      var footerHTML    = opts.footerHTML      || "<div style='margin-top:30px;text-align:right;'><div style='display:inline-block;border-top:1px solid #000;padding-top:6px;min-width:220px;text-align:center;'><div style='font-weight:700;font-size:14px;'>I/C AB-PMJAY</div><div style='font-size:11px;color:#666;'>GMC &amp; AH, Rajouri</div></div></div>";
+      var footerHTML    = opts.footerHTML      || "<div style='margin-top:30px;text-align:right;'><div style='display:inline-block;border-top:1px solid #000;padding-top:6px;min-width:220px;text-align:center;'><div style='font-weight:700;font-size:14px;'>Medical Superintendent</div><div style='font-size:12px;font-weight:600;'>GMC &amp; AH, Rajouri</div></div></div>";
       var orientation   = opts.pageOrientation || "portrait";
       var pageSize      = opts.pageSize        || "A4";
       var w = window.open("","_blank");
@@ -1925,181 +1986,280 @@
     }
 
     // =========================================================================
-    // CUSTOM REPORT BUILDER LOGIC
+    // CUSTOM REPORT BUILDER — FULL REWRITE
     // =========================================================================
-    var _crLastData = null; // cache for export
+    var _crLastData = null;
+    var _crLastBodyHTML = '';
+
+    // Checkbox visual highlight
+    function crToggleLabel(chk) {
+      var lbl = document.getElementById('lbl_' + chk.id);
+      if(!lbl) return;
+      if(chk.checked) { lbl.style.background='#ede9fe'; lbl.style.borderColor='#8b5cf6'; }
+      else { lbl.style.background='#fff'; lbl.style.borderColor='#bae6fd'; }
+    }
 
     function initCustomReport() {
-      // Populate FY
       var fys = load(LS.FYS, []);
       var crFy = $('crFy'); if(!crFy) return;
-      crFy.innerHTML = '<option value="">All FY</option>';
-      fys.forEach(function(f){ crFy.insertAdjacentHTML('beforeend','<option value="'+f.name+'">'+f.name+'</option>'); });
-      // FY change -> populate months
+      if(crFy.children.length <= 1) {
+        fys.forEach(function(f){ crFy.insertAdjacentHTML('beforeend','<option value="'+f.name+'">'+f.name+'</option>'); });
+      }
       crFy.addEventListener('change', function(){
         var sel = $('crMonth'); sel.innerHTML = '<option value="">All Months</option>';
         if(this.value) monthsForFy(this.value).forEach(function(m){
           sel.insertAdjacentHTML('beforeend','<option value="'+m.key+'">'+m.label+'</option>');
         });
       });
-      // Radio change -> show/hide category/firm/sub
-      document.querySelectorAll('input[name="crType"]').forEach(function(r){
-        r.addEventListener('change', function(){
-          var isExp = (this.value==='expense'||this.value==='both');
-          var el;
-          el=$('crCatWrap'); if(el) el.style.display=isExp?'':'none';
-          el=$('crSubWrap'); if(el) el.style.display=isExp?'':'none';
-          el=$('crFirmWrap'); if(el) el.style.display=isExp?'':'none';
-        });
+      // Init checked labels
+      ['crIncome','crInterest','crExpense','crShaShare','crFundAlloc','crStats'].forEach(function(id){
+        var chk=$( id); if(chk) crToggleLabel(chk);
       });
     }
 
+    function clearCustomReport() {
+      ['crIncome','crInterest','crExpense','crShaShare','crFundAlloc','crStats'].forEach(function(id){
+        var chk=$(id); if(chk){chk.checked=false;crToggleLabel(chk);}
+      });
+      $('crFy').value=''; $('crMonth').innerHTML='<option value="">All Months</option>';
+      $('crCategory').value=''; $('crSub').value=''; $('crFirm').value=''; $('crDesc').value='';
+      $('crTitle').value=''; $('crMinAmt').value=''; $('crMaxAmt').value='';
+      $('crPreviewWrap').style.display='none';
+      _crLastData=null; _crLastBodyHTML='';
+    }
+
     function buildCustomReport() {
-      var type = document.querySelector('input[name="crType"]:checked');
-      if(!type){ alert('Select a report type'); return; }
-      type = type.value;
+      // Collect which blocks are checked
+      var inclIncome   = $('crIncome')   && $('crIncome').checked;
+      var inclInterest = $('crInterest') && $('crInterest').checked;
+      var inclExpense  = $('crExpense')  && $('crExpense').checked;
+      var inclShaShare = $('crShaShare') && $('crShaShare').checked;
+      var inclFundAlloc= $('crFundAlloc')&& $('crFundAlloc').checked;
+      var inclStats    = $('crStats')    && $('crStats').checked;
+
+      if(!inclIncome&&!inclInterest&&!inclExpense&&!inclShaShare&&!inclFundAlloc&&!inclStats){
+        alert('Please check at least one data block to include.'); return;
+      }
+
+      // Filters
       var fy       = $('crFy').value;
       var monthKey = $('crMonth').value;
       var cat      = $('crCategory').value;
       var sub      = ($('crSub').value||'').trim().toLowerCase();
       var firm     = ($('crFirm').value||'').trim().toLowerCase();
+      var desc     = ($('crDesc').value||'').trim().toLowerCase();
+      var minAmt   = parseFloat($('crMinAmt').value||0)||0;
+      var maxAmt   = parseFloat($('crMaxAmt').value||0)||0;
 
-      var wrap = $('crPreviewWrap'); wrap.style.display='';
-      var tbl  = $('crPreviewTable');
-      var info = $('crPreviewInfo');
-      var sumBox = $('crSummaryBox');
-      var sumCont= $('crSummaryContent');
-
+      // Period info
       var prdParts=[];
       if(fy) prdParts.push('FY: '+fy);
       if(monthKey) prdParts.push('Month: '+monthKeyToLabel(monthKey));
       if(cat) prdParts.push('Category: '+cat);
       if(sub) prdParts.push('Sub Cat: '+sub);
       if(firm) prdParts.push('Firm: '+firm);
+      if(desc) prdParts.push('Desc: '+desc);
+      if(minAmt>0) prdParts.push('Min ₹'+minAmt.toLocaleString('en-IN'));
+      if(maxAmt>0) prdParts.push('Max ₹'+maxAmt.toLocaleString('en-IN'));
       var prd = prdParts.length ? prdParts.join(' | ') : 'All Records';
-      info.innerHTML = '📋 Report Preview — <b>'+prd+'</b>';
 
-      _crLastData = {type,fy,monthKey,cat,sub,firm,prd};
+      $('crPreviewWrap').style.display='';
+      $('crPreviewInfo').innerHTML='📋 <b>Preview</b> — '+prd+' &nbsp;|&nbsp; <span style="color:#15803d;">'+new Date().toLocaleString('en-IN')+'</span>';
 
-      if(type==='income') _buildIncomeReport(tbl, fy, monthKey, sumBox, sumCont);
-      else if(type==='expense') _buildExpReport(tbl, fy, monthKey, cat, sub, firm, sumBox, sumCont);
-      else if(type==='both') _buildBothReport(tbl, fy, monthKey, cat, sub, firm, sumBox, sumCont);
-      else if(type==='stats') _buildStatsReport2(tbl, fy, monthKey, sumBox, sumCont);
-      else if(type==='shashare') _buildShaShareReport2(tbl, fy, monthKey, sumBox, sumCont);
+      var blocksDiv = $('crPreviewBlocks'); blocksDiv.innerHTML='';
+      var sumParts = [];
+      var htmlParts = [];
+
+      // ── BLOCK: CLAIM / INCOME ──────────────────────────────────────
+      if(inclIncome || inclInterest) {
+        var incData = load(LS.INCOME,[]);
+        if(fy) incData=incData.filter(function(i){return i.fy===fy;});
+        if(monthKey) incData=incData.filter(function(i){return i.monthKey===monthKey;});
+        if(minAmt>0) incData=incData.filter(function(i){return Number(i.claim||0)+Number(i.interest||0)>=minAmt;});
+        if(maxAmt>0) incData=incData.filter(function(i){return Number(i.claim||0)+Number(i.interest||0)<=maxAmt;});
+        incData.sort(function(a,b){return a.monthKey.localeCompare(b.monthKey);});
+
+        var totClaim=0,totInt=0;
+        var cols=[]; var hdrs=[];
+        if(inclIncome){hdrs.push('Claim Received (₹)');}
+        if(inclInterest){hdrs.push('Interest Received (₹)');}
+        hdrs.push('Total (₹)');
+        if(inclIncome&&inclInterest) hdrs.unshift('#','FY','Month');
+        else hdrs.unshift('#','FY','Month');
+
+        var rows=incData.map(function(i,idx){
+          var cl=Number(i.claim||0),it=Number(i.interest||0);
+          totClaim+=cl; totInt+=it;
+          var cells='<td>'+(idx+1)+'</td><td>'+i.fy+'</td><td>'+monthKeyToLabel(i.monthKey)+'</td>';
+          if(inclIncome) cells+='<td>'+fmt(cl)+'</td>';
+          if(inclInterest) cells+='<td>'+fmt(it)+'</td>';
+          cells+='<td><b>'+fmt(inclIncome&&inclInterest?cl+it:inclIncome?cl:it)+'</b></td>';
+          return '<tr>'+cells+'</tr>';
+        }).join('');
+
+        var totRow='<tr style="font-weight:bold;background:#ede9fe;"><td colspan="3">TOTAL</td>';
+        if(inclIncome) totRow+='<td>'+fmt(totClaim)+'</td>';
+        if(inclInterest) totRow+='<td>'+fmt(totInt)+'</td>';
+        totRow+='<td>'+fmt(inclIncome&&inclInterest?totClaim+totInt:inclIncome?totClaim:totInt)+'</td></tr>';
+
+        var blockTitle = (inclIncome&&inclInterest)?'CLAIM & INTEREST RECEIVED':inclIncome?'CLAIM RECEIVED':'INTEREST RECEIVED';
+        var headHTML='<tr>'+ hdrs.map(function(h){return '<th>'+h+'</th>';}).join('') +'</tr>';
+        var blockHTML = _crBlock(blockTitle, '<table><thead>'+headHTML+'</thead><tbody>'+(rows||'<tr><td colspan="'+hdrs.length+'" style="text-align:center;color:#888;">No records</td></tr>')+totRow+'</tbody></table>');
+        blocksDiv.insertAdjacentHTML('beforeend', blockHTML);
+        htmlParts.push(blockHTML);
+        if(rows) sumParts.push('<b>'+(inclIncome?'Claim: '+fmt(totClaim):'')+(inclIncome&&inclInterest?' | ':'')+(inclInterest?'Interest: '+fmt(totInt):'')+'</b>'+(inclIncome&&inclInterest?' | Total: '+fmt(totClaim+totInt):''));
+      }
+
+      // ── BLOCK: EXPENDITURE ─────────────────────────────────────────
+      if(inclExpense) {
+        var expData = load(LS.EXPENSE,[]);
+        if(fy) expData=expData.filter(function(e){return e.fy===fy;});
+        if(monthKey) expData=expData.filter(function(e){return e.monthKey===monthKey;});
+        if(cat) expData=expData.filter(function(e){return e.category===cat;});
+        if(sub) expData=expData.filter(function(e){return (e.sub||'').toLowerCase().includes(sub);});
+        if(firm) expData=expData.filter(function(e){return (e.firm||'').toLowerCase().includes(firm);});
+        if(desc) expData=expData.filter(function(e){return (e.description||'').toLowerCase().includes(desc);});
+        if(minAmt>0) expData=expData.filter(function(e){return Number(e.amount||0)>=minAmt;});
+        if(maxAmt>0) expData=expData.filter(function(e){return Number(e.amount||0)<=maxAmt;});
+        expData.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+        var totExp=0;
+        var expRows=expData.map(function(e,i){
+          totExp+=Number(e.amount||0);
+          return '<tr><td>'+(i+1)+'</td><td>'+e.date+'</td><td>'+e.fy+'</td><td>'+monthKeyToLabel(e.monthKey)+'</td><td>'+e.category+'</td><td>'+(e.sub||'—')+'</td><td>'+(e.description||'—')+'</td><td>'+(e.firm||'—')+'</td><td>'+(e.invoice||'—')+'</td><td>'+fmt(e.amount)+'</td></tr>';
+        }).join('');
+        var expTot='<tr style="font-weight:bold;background:#fee2e2;"><td colspan="9" style="text-align:right;padding-right:12px;">TOTAL EXPENDITURE</td><td>'+fmt(totExp)+'</td></tr>';
+        var expHead='<tr><th>#</th><th>Date</th><th>FY</th><th>Month</th><th>Category</th><th>Sub Category</th><th>Description</th><th>Firm/Agency</th><th>Invoice</th><th>Amount (₹)</th></tr>';
+        var bHTML=_crBlock('EXPENDITURE DETAILS','<table><thead>'+expHead+'</thead><tbody>'+(expRows||'<tr><td colspan="10" style="text-align:center;color:#888;">No records</td></tr>')+expTot+'</tbody></table>');
+        blocksDiv.insertAdjacentHTML('beforeend', bHTML);
+        htmlParts.push(bHTML);
+        if(expRows) sumParts.push('<b>Expenditure: '+fmt(totExp)+'</b> ('+expData.length+' records)');
+      }
+
+      // ── BLOCK: SHA FUND DISTRIBUTION ──────────────────────────────
+      if(inclShaShare) {
+        var shaInc=load(LS.INCOME,[]);
+        if(fy) shaInc=shaInc.filter(function(i){return i.fy===fy;});
+        if(monthKey) shaInc=shaInc.filter(function(i){return i.monthKey===monthKey;});
+        var shaTotCl=shaInc.reduce(function(s,i){return s+Number(i.claim||0);},0);
+        var shaTotIt=shaInc.reduce(function(s,i){return s+Number(i.interest||0);},0);
+        var shaTotal=shaTotCl+shaTotIt;
+        var tied=shaTotal*0.75,untied=shaTotal*0.25,shaS=shaTotal*0.05,incPart=shaTotal*0.20;
+        var shaRows='<tr><td><b>Total Claim + Interest</b></td><td>100%</td><td><b>'+fmt(shaTotal)+'</b></td></tr>'
+          +'<tr style="background:#e0f2fe;"><td>Tied Funds (RKS)</td><td>75%</td><td>'+fmt(tied)+'</td></tr>'
+          +'<tr><td>Untied Funds</td><td>25%</td><td>'+fmt(untied)+'</td></tr>'
+          +'<tr style="background:#fef9c3;"><td>&nbsp;&nbsp;→ SHA Share Deposited</td><td>5%</td><td>'+fmt(shaS)+'</td></tr>'
+          +'<tr style="background:#fef9c3;"><td>&nbsp;&nbsp;→ Incentive Part</td><td>20%</td><td>'+fmt(incPart)+'</td></tr>';
+        var bHTML=_crBlock('SHA FUND DISTRIBUTION','<table><thead><tr><th>Component</th><th>%</th><th>Amount (₹)</th></tr></thead><tbody>'+shaRows+'</tbody></table>');
+        blocksDiv.insertAdjacentHTML('beforeend', bHTML);
+        htmlParts.push(bHTML);
+        sumParts.push('<b>SHA Share: '+fmt(shaS)+'</b> | Incentive: '+fmt(incPart));
+      }
+
+      // ── BLOCK: AB-PMJAY FUND ALLOCATION TABLE ─────────────────────
+      if(inclFundAlloc) {
+        var faInc=load(LS.INCOME,[]);
+        if(fy) faInc=faInc.filter(function(i){return i.fy===fy;});
+        if(monthKey) faInc=faInc.filter(function(i){return i.monthKey===monthKey;});
+        var faTotClaim=faInc.reduce(function(s,i){return s+Number(i.claim||0);},0);
+
+        // If multiple months, show month-wise breakdown
+        var faRows='';
+        if(!monthKey && faInc.length>1) {
+          // Month-wise
+          var seenMonths={};
+          faInc.forEach(function(i){ seenMonths[i.monthKey]=(seenMonths[i.monthKey]||0)+Number(i.claim||0); });
+          var mKeys=Object.keys(seenMonths).sort();
+          mKeys.forEach(function(mk,idx){
+            var cl=seenMonths[mk];
+            faRows+='<tr><td style="text-align:center;">'+(idx+1)+'</td><td>'+monthKeyToLabel(mk)+'</td>'
+              +'<td>'+fmt(cl*0.50)+'</td><td>'+fmt(cl*0.15)+'</td><td>'+fmt(cl*0.15)+'</td>'
+              +'<td>'+fmt(cl*0.10)+'</td><td>'+fmt(cl*0.05)+'</td><td>'+fmt(cl*0.05)+'</td>'
+              +'<td><b>'+fmt(cl)+'</b></td></tr>';
+          });
+          faRows+='<tr style="font-weight:bold;background:#ede9fe;">'
+            +'<td colspan="2" style="text-align:center;">TOTAL</td>'
+            +'<td>'+fmt(faTotClaim*0.50)+'</td><td>'+fmt(faTotClaim*0.15)+'</td><td>'+fmt(faTotClaim*0.15)+'</td>'
+            +'<td>'+fmt(faTotClaim*0.10)+'</td><td>'+fmt(faTotClaim*0.05)+'</td><td>'+fmt(faTotClaim*0.05)+'</td>'
+            +'<td>'+fmt(faTotClaim)+'</td></tr>';
+          var faHead='<tr><th>#</th><th>Month</th><th>Medicines &amp; Consumables (50%)</th><th>Human Resources (15%)</th><th>Hospital Upgradation (15%)</th><th>Admin Expenses (10%)</th><th>SHA Share (5%)</th><th>Unallocated (5%)</th><th>Total</th></tr>';
+          var bHTML=_crBlock('AB-PMJAY FUND ALLOCATION (MONTH-WISE)','<table><thead>'+faHead+'</thead><tbody>'+faRows+'</tbody></table>');
+          blocksDiv.insertAdjacentHTML('beforeend', bHTML);
+          htmlParts.push(bHTML);
+        } else {
+          // Category-wise (single month or aggregate)
+          var cats2=[
+            {n:'Medicines, Consumables &amp; Diagnostics',pct:50},
+            {n:'Human Resources',pct:15},
+            {n:'Hospital Upgradation &amp; Quality Improvement',pct:15},
+            {n:'Administrative Expenses',pct:10},
+            {n:'SHA Share',pct:5},
+            {n:'Unallocated Balance (Post-SHA)',pct:5}
+          ];
+          cats2.forEach(function(c,i){
+            faRows+='<tr'+(i%2?' style="background:#f5f3ff;"':'')+'><td style="text-align:center;">'+(i+1)+'</td><td>'+c.n+'</td><td style="text-align:center;">'+c.pct+'%</td><td>'+fmt(faTotClaim*c.pct/100)+'</td></tr>';
+          });
+          faRows+='<tr style="font-weight:bold;background:#ede9fe;"><td></td><td><b>TOTAL</b></td><td style="text-align:center;"><b>100%</b></td><td><b>'+fmt(faTotClaim)+'</b></td></tr>';
+          var bHTML=_crBlock('AB-PMJAY FUND ALLOCATION (MONTH-WISE BASIS)'
+            +'<div style="font-size:11px;color:#555;margin-top:4px;">Total Claim Amount = '+fmt(faTotClaim)+'</div>',
+            '<table><thead><tr><th>S.No</th><th>Expenditure Category</th><th>Allocation %</th><th>Amount (Auto-Calculated on Claim)</th></tr></thead><tbody>'+faRows+'</tbody></table>');
+          blocksDiv.insertAdjacentHTML('beforeend', bHTML);
+          htmlParts.push(bHTML);
+        }
+        sumParts.push('<b>Total Claim for Allocation: '+fmt(faTotClaim)+'</b>');
+      }
+
+      // ── BLOCK: HOSPITAL STATISTICS ─────────────────────────────────
+      if(inclStats) {
+        var statData=load(LS.STATS,[]);
+        if(fy) statData=statData.filter(function(s){return s.fy===fy;});
+        if(monthKey) statData=statData.filter(function(s){return s.monthKey===monthKey;});
+        statData.sort(function(a,b){return (a.fy+a.monthKey).localeCompare(b.fy+b.monthKey);});
+        var tPat=0,tCards=0,tSCl=0,tSEx=0;
+        var statRows=statData.map(function(s,i){
+          tPat+=Number(s.patients||0);tCards+=Number(s.cards||0);tSCl+=Number(s.claim||0);tSEx+=Number(s.expenditure||0);
+          return '<tr><td>'+(i+1)+'</td><td>'+s.fy+'</td><td>'+monthKeyToLabel(s.monthKey)+'</td><td>'+s.patients+'</td><td>'+s.cards+'</td><td>'+fmt(s.claim||0)+'</td><td>'+fmt(s.expenditure||0)+'</td></tr>';
+        }).join('');
+        var statTot='<tr style="font-weight:bold;background:#ede9fe;"><td colspan="3">TOTAL</td><td>'+tPat+'</td><td>'+tCards+'</td><td>'+fmt(tSCl)+'</td><td>'+fmt(tSEx)+'</td></tr>';
+        var statHead='<tr><th>#</th><th>FY</th><th>Month</th><th>Patients Treated</th><th>Golden Cards</th><th>Claim Received (₹)</th><th>Expenditure (₹)</th></tr>';
+        var bHTML=_crBlock('HOSPITAL STATISTICS','<table><thead>'+statHead+'</thead><tbody>'+(statRows||'<tr><td colspan="7" style="text-align:center;color:#888;">No records</td></tr>')+statTot+'</tbody></table>');
+        blocksDiv.insertAdjacentHTML('beforeend', bHTML);
+        htmlParts.push(bHTML);
+        if(statRows) sumParts.push('<b>Patients: '+tPat+' | Cards: '+tCards+'</b>');
+      }
+
+      // Summary box
+      var sumBox=$('crSummaryBox'), sumCont=$('crSummaryContent');
+      if(sumParts.length>0) {
+        sumBox.style.display='';
+        sumCont.innerHTML=sumParts.join(' &nbsp;&nbsp;|&nbsp;&nbsp; ');
+      } else { sumBox.style.display='none'; }
+
+      _crLastData={prd:prd, fy:fy, monthKey:monthKey};
+      _crLastBodyHTML = htmlParts.join('');
     }
 
-    function _buildIncomeReport(tbl, fy, monthKey, sumBox, sumCont) {
-      var data = load(LS.INCOME,[]);
-      if(fy) data = data.filter(function(i){return i.fy===fy;});
-      if(monthKey) data = data.filter(function(i){return i.monthKey===monthKey;});
-      data.sort(function(a,b){return a.monthKey.localeCompare(b.monthKey);});
-      var totClaim=0,totInt=0;
-      var rows = data.map(function(i,idx){
-        totClaim+=Number(i.claim||0); totInt+=Number(i.interest||0);
-        return '<tr><td>'+(idx+1)+'</td><td>'+i.fy+'</td><td>'+monthKeyToLabel(i.monthKey)+'</td><td>'+fmt(i.claim)+'</td><td>'+fmt(i.interest)+'</td><td>'+fmt(Number(i.claim||0)+Number(i.interest||0))+'</td><td>'+(i.remarks||'')+'</td></tr>';
-      }).join('');
-      if(!rows){tbl.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:#888;">No records found</td></tr>';sumBox.style.display='none';return;}
-      rows+='<tr style="font-weight:bold;background:#ede9fe;"><td colspan="3">TOTAL</td><td>'+fmt(totClaim)+'</td><td>'+fmt(totInt)+'</td><td>'+fmt(totClaim+totInt)+'</td><td></td></tr>';
-      tbl.innerHTML='<thead><tr><th>#</th><th>FY</th><th>Month</th><th>Claim Received</th><th>Interest Received</th><th>Total</th><th>Remarks</th></tr></thead><tbody>'+rows+'</tbody>';
-      sumBox.style.display='';
-      sumCont.innerHTML='<b>Total Claim:</b> '+fmt(totClaim)+' &nbsp;|&nbsp; <b>Total Interest:</b> '+fmt(totInt)+' &nbsp;|&nbsp; <b>Grand Total:</b> '+fmt(totClaim+totInt);
-    }
-
-    function _buildExpReport(tbl, fy, monthKey, cat, sub, firm, sumBox, sumCont) {
-      var data = load(LS.EXPENSE,[]);
-      if(fy) data=data.filter(function(e){return e.fy===fy;});
-      if(monthKey) data=data.filter(function(e){return e.monthKey===monthKey;});
-      if(cat) data=data.filter(function(e){return e.category===cat;});
-      if(sub) data=data.filter(function(e){return (e.sub||'').toLowerCase().includes(sub);});
-      if(firm) data=data.filter(function(e){return (e.firm||'').toLowerCase().includes(firm);});
-      data.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
-      var tot=0;
-      var rows = data.map(function(e,idx){
-        tot+=Number(e.amount||0);
-        return '<tr><td>'+(idx+1)+'</td><td>'+e.date+'</td><td>'+e.fy+'</td><td>'+monthKeyToLabel(e.monthKey)+'</td><td>'+e.category+'</td><td>'+(e.sub||'')+'</td><td>'+(e.description||'')+'</td><td>'+(e.firm||'')+'</td><td>'+fmt(e.amount)+'</td><td>'+(e.invoice||'')+'</td></tr>';
-      }).join('');
-      if(!rows){tbl.innerHTML='<tr><td colspan="10" style="text-align:center;padding:20px;color:#888;">No records found</td></tr>';sumBox.style.display='none';return;}
-      rows+='<tr style="font-weight:bold;background:#ede9fe;"><td colspan="8" style="text-align:right;">TOTAL EXPENDITURE</td><td>'+fmt(tot)+'</td><td></td></tr>';
-      tbl.innerHTML='<thead><tr><th>#</th><th>Date</th><th>FY</th><th>Month</th><th>Category</th><th>Sub Category</th><th>Description</th><th>Firm/Agency</th><th>Amount</th><th>Invoice</th></tr></thead><tbody>'+rows+'</tbody>';
-      sumBox.style.display='';
-      sumCont.innerHTML='<b>Total Expenditure:</b> '+fmt(tot)+' &nbsp;|&nbsp; <b>Records:</b> '+data.length;
-    }
-
-    function _buildBothReport(tbl, fy, monthKey, cat, sub, firm, sumBox, sumCont) {
-      var income = load(LS.INCOME,[]);
-      var expense = load(LS.EXPENSE,[]);
-      if(fy){ income=income.filter(function(i){return i.fy===fy;}); expense=expense.filter(function(e){return e.fy===fy;}); }
-      if(monthKey){ income=income.filter(function(i){return i.monthKey===monthKey;}); expense=expense.filter(function(e){return e.monthKey===monthKey;}); }
-      if(cat) expense=expense.filter(function(e){return e.category===cat;});
-      if(sub) expense=expense.filter(function(e){return (e.sub||'').toLowerCase().includes(sub);});
-      if(firm) expense=expense.filter(function(e){return (e.firm||'').toLowerCase().includes(firm);});
-      var combined=[];
-      income.forEach(function(i){ combined.push({date:i.monthKey+'-01',fy:i.fy,monthKey:i.monthKey,type:'💰 Income',desc:'Claim: '+fmt(i.claim)+' | Interest: '+fmt(i.interest),amount:Number(i.claim||0)+Number(i.interest||0),cat:'',sub:'',firm:''}); });
-      expense.forEach(function(e){ combined.push({date:e.date,fy:e.fy,monthKey:e.monthKey,type:'💸 Expense',desc:e.description||'',amount:Number(e.amount||0),cat:e.category,sub:e.sub||'',firm:e.firm||''}); });
-      combined.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
-      var totIn=income.reduce(function(s,i){return s+Number(i.claim||0)+Number(i.interest||0);},0);
-      var totEx=expense.reduce(function(s,e){return s+Number(e.amount||0);},0);
-      var rows=combined.map(function(r,idx){
-        return '<tr><td>'+(idx+1)+'</td><td>'+r.date+'</td><td>'+r.fy+'</td><td>'+monthKeyToLabel(r.monthKey)+'</td><td>'+r.type+'</td><td>'+(r.cat||r.desc)+'</td><td>'+r.sub+'</td><td>'+r.firm+'</td><td>'+fmt(r.amount)+'</td></tr>';
-      }).join('');
-      if(!rows){tbl.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:#888;">No records found</td></tr>';sumBox.style.display='none';return;}
-      tbl.innerHTML='<thead><tr><th>#</th><th>Date</th><th>FY</th><th>Month</th><th>Type</th><th>Category/Desc</th><th>Sub Cat</th><th>Firm</th><th>Amount</th></tr></thead><tbody>'+rows+'</tbody>';
-      sumBox.style.display='';
-      sumCont.innerHTML='<b>Total Income:</b> '+fmt(totIn)+' &nbsp;|&nbsp; <b>Total Expense:</b> '+fmt(totEx)+' &nbsp;|&nbsp; <b>Net Balance:</b> '+fmt(totIn-totEx);
-    }
-
-    function _buildStatsReport2(tbl, fy, monthKey, sumBox, sumCont) {
-      var data = load(LS.STATS,[]);
-      if(fy) data=data.filter(function(s){return s.fy===fy;});
-      if(monthKey) data=data.filter(function(s){return s.monthKey===monthKey;});
-      data.sort(function(a,b){return (a.fy+a.monthKey).localeCompare(b.fy+b.monthKey);});
-      var totPat=0,totCards=0,totClaim=0,totExp=0;
-      var rows=data.map(function(s,idx){
-        totPat+=Number(s.patients||0);totCards+=Number(s.cards||0);totClaim+=Number(s.claim||0);totExp+=Number(s.expenditure||0);
-        return '<tr><td>'+(idx+1)+'</td><td>'+s.fy+'</td><td>'+monthKeyToLabel(s.monthKey)+'</td><td>'+s.patients+'</td><td>'+s.cards+'</td><td>'+fmt(s.claim||0)+'</td><td>'+fmt(s.expenditure||0)+'</td></tr>';
-      }).join('');
-      if(!rows){tbl.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:#888;">No records found</td></tr>';sumBox.style.display='none';return;}
-      rows+='<tr style="font-weight:bold;background:#ede9fe;"><td colspan="3">TOTAL</td><td>'+totPat+'</td><td>'+totCards+'</td><td>'+fmt(totClaim)+'</td><td>'+fmt(totExp)+'</td></tr>';
-      tbl.innerHTML='<thead><tr><th>#</th><th>FY</th><th>Month</th><th>Patients Treated</th><th>Golden Cards</th><th>Claim Received</th><th>Expenditure</th></tr></thead><tbody>'+rows+'</tbody>';
-      sumBox.style.display=''; sumCont.innerHTML='<b>Patients:</b> '+totPat+' | <b>Cards:</b> '+totCards;
-    }
-
-    function _buildShaShareReport2(tbl, fy, monthKey, sumBox, sumCont) {
-      var incomes = load(LS.INCOME,[]);
-      if(fy) incomes=incomes.filter(function(i){return i.fy===fy;});
-      if(monthKey) incomes=incomes.filter(function(i){return i.monthKey===monthKey;});
-      var totClaim=incomes.reduce(function(s,i){return s+Number(i.claim||0);},0);
-      var totInt=incomes.reduce(function(s,i){return s+Number(i.interest||0);},0);
-      var totalAmt=totClaim+totInt;
-      var tied=totalAmt*0.75,untied=totalAmt*0.25,sha=totalAmt*0.05,inc=totalAmt*0.20;
-      tbl.innerHTML='<thead><tr><th>Component</th><th>% of Total</th><th>Amount (₹)</th></tr></thead><tbody>'
-        +'<tr><td><b>Total Amount (Claim + Interest)</b></td><td>100%</td><td><b>'+fmt(totalAmt)+'</b></td></tr>'
-        +'<tr><td>Tied Funds (RKS)</td><td>75%</td><td>'+fmt(tied)+'</td></tr>'
-        +'<tr><td>Untied Funds</td><td>25%</td><td>'+fmt(untied)+'</td></tr>'
-        +'<tr><td>&nbsp;&nbsp;→ SHA Share Deposited</td><td>5%</td><td>'+fmt(sha)+'</td></tr>'
-        +'<tr><td>&nbsp;&nbsp;→ Incentive Part</td><td>20%</td><td>'+fmt(inc)+'</td></tr>'
-        +'</tbody>';
-      sumBox.style.display=''; sumCont.innerHTML='<b>Total Amount: '+fmt(totalAmt)+'</b>';
+    function _crBlock(title, contentHTML) {
+      return '<div style="margin-bottom:20px;">'
+        +'<div style="background:linear-gradient(90deg,#8b5cf6,#7c3aed);color:#fff;padding:8px 16px;border-radius:8px 8px 0 0;font-size:13px;font-weight:800;letter-spacing:0.3px;">'+title+'</div>'
+        +'<div style="border:1px solid #ddd6fe;border-top:none;border-radius:0 0 8px 8px;padding:12px;background:#fff;overflow-x:auto;">'+contentHTML+'</div>'
+        +'</div>';
     }
 
     function _doCustomReport(action) {
-      if(!_crLastData){alert('Please Preview the report first.');return;}
-      var d=_crLastData;
-      var title = ($('crTitle').value||'').trim() || 'CUSTOM REPORT';
-      var prd = d.prd;
-      var orient = $('crOrientation').value || 'landscape';
-      var tbl = $('crPreviewTable');
-      var sumCont = $('crSummaryContent');
-      var sumBox = $('crSummaryBox');
-      var bodyHTML = '<div style="overflow-x:auto;">' + (tbl ? '<table>'+tbl.innerHTML+'</table>' : '') + '</div>';
-      if(sumBox && sumBox.style.display !== 'none' && sumCont) {
-        bodyHTML += '<div style="margin-top:12px;padding:10px;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:6px;font-weight:700;">'+sumCont.innerHTML+'</div>';
+      if(!_crLastData){alert('Please click "Preview Report" first.');return;}
+      var title = ($('crTitle').value||'').trim() || 'CUSTOM FINANCIAL REPORT';
+      var prd   = _crLastData.prd;
+      var orient= $('crOrientation').value||'landscape';
+      var bodyHTML = _crLastBodyHTML;
+      var sumBox=$('crSummaryBox'),sumCont=$('crSummaryContent');
+      if(sumBox&&sumBox.style.display!=='none'&&sumCont){
+        bodyHTML+='<div style="margin-top:12px;padding:10px 14px;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:6px;font-weight:700;font-size:12px;">'+sumCont.innerHTML+'</div>';
       }
-      if(action === 'print') {
+      if(action==='print'){
         printReport({title:title,periodInfo:prd,generatedInfo:'Generated: '+new Date().toLocaleString('en-IN'),bodyHTML:bodyHTML,pageOrientation:orient});
-      } else if(action === 'excel') {
+      } else if(action==='excel'){
         var uri='data:application/vnd.ms-excel;base64,';
-        var h='<html><head><meta charset="UTF-8"></head><body>'+bodyHTML+'</body></html>';
+        var h='<html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;}</style></head><body>'+bodyHTML+'</body></html>';
         var a=document.createElement('a');a.href=uri+btoa(unescape(encodeURIComponent(h)));a.download='custom_report.xls';a.click();
       }
     }
@@ -2108,6 +2268,123 @@
 
     function renderCustomReport(){
       initCustomReport();
+    }
+
+
+    // ── FUND ALLOCATION REPORT ───────────────────────────────────────
+    function renderFundAllocReport() {
+      var fys = load(LS.FYS,[]);
+      var faFy = $('faFyFilter');
+      if(faFy && faFy.children.length <= 1) {
+        faFy.innerHTML = '<option value="">All FY</option>';
+        fys.forEach(function(f){ faFy.insertAdjacentHTML('beforeend','<option value="'+f.name+'">'+f.name+'</option>'); });
+        faFy.value = fys[fys.length-1]?.name || '';
+      }
+      _renderFaTable();
+    }
+    $('applyFaFilter')?.addEventListener('click', _renderFaTable);
+    $('faFyFilter')?.addEventListener('change', function(){
+      var sel=$('faMonthFilter'); sel.innerHTML='<option value="">All Month</option>';
+      if(this.value) monthsForFy(this.value).forEach(function(m){
+        sel.insertAdjacentHTML('beforeend','<option value="'+m.key+'">'+m.label+'</option>');
+      });
+      _renderFaTable();
+    });
+    $('faMonthFilter')?.addEventListener('change', _renderFaTable);
+
+    function _renderFaTable() {
+      var fy = $('faFyFilter')?$('faFyFilter').value:'';
+      var mo = $('faMonthFilter')?$('faMonthFilter').value:'';
+      var incomes = load(LS.INCOME,[]);
+      if(fy) incomes=incomes.filter(function(i){return i.fy===fy;});
+      if(mo) incomes=incomes.filter(function(i){return i.monthKey===mo;});
+      var totClaim = incomes.reduce(function(s,i){return s+Number(i.claim||0);},0);
+      var prd = (fy?'FY: '+fy:'') + (mo?' | Month: '+monthKeyToLabel(mo):'') || 'All Periods';
+      var infoLbl = $('faInfoLabel');
+      if(infoLbl) infoLbl.textContent = 'Period: ' + prd + ' | Total Claim: ' + fmt(totClaim).replace('₹ ','₹');
+
+      // Main allocation table (category-wise)
+      var ALLOC_CATS = [
+        {n:'Medicines, Consumables & Diagnostics', pct:50},
+        {n:'Human Resources', pct:15},
+        {n:'Hospital Upgradation & Quality Improvement', pct:15},
+        {n:'Administrative Expenses', pct:10},
+        {n:'SHA Share', pct:5},
+        {n:'Unallocated Balance (Post-SHA)', pct:5}
+      ];
+      var tbody = document.querySelector('#repFundAllocTable tbody');
+      if(tbody) {
+        tbody.innerHTML='';
+        ALLOC_CATS.forEach(function(c,i){
+          tbody.insertAdjacentHTML('beforeend',
+            '<tr'+(i%2?' style="background:#f5f3ff;"':'')+'>'+
+            '<td style="text-align:center;">'+(i+1)+'</td>'+
+            '<td>'+c.n+'</td>'+
+            '<td style="text-align:center;">'+c.pct+'%</td>'+
+            '<td><b>'+fmt(totClaim*c.pct/100)+'</b></td></tr>');
+        });
+        tbody.insertAdjacentHTML('beforeend',
+          '<tr style="font-weight:bold;background:#ede9fe;">'+
+          '<td></td><td><b>TOTAL</b></td><td style="text-align:center;"><b>100%</b></td>'+
+          '<td><b>'+fmt(totClaim)+'</b></td></tr>');
+      }
+
+      // Month-wise table (only if no specific month selected and multiple months)
+      var mwWrap = $('faMonthWiseWrap');
+      if(!mo && incomes.length > 1) {
+        mwWrap.style.display='';
+        var seenM={};
+        incomes.forEach(function(i){ seenM[i.monthKey]=(seenM[i.monthKey]||0)+Number(i.claim||0); });
+        var mKeys=Object.keys(seenM).sort();
+        var mwTbody=document.querySelector('#repFundAllocMonthTable tbody');
+        if(mwTbody) {
+          mwTbody.innerHTML='';
+          var totals=[0,0,0,0,0,0,0];
+          mKeys.forEach(function(mk,i){
+            var cl=seenM[mk];
+            totals[0]+=cl*0.50;totals[1]+=cl*0.15;totals[2]+=cl*0.15;
+            totals[3]+=cl*0.10;totals[4]+=cl*0.05;totals[5]+=cl*0.05;totals[6]+=cl;
+            mwTbody.insertAdjacentHTML('beforeend',
+              '<tr><td>'+(i+1)+'</td><td>'+monthKeyToLabel(mk)+'</td>'+
+              '<td>'+fmt(cl*0.50)+'</td><td>'+fmt(cl*0.15)+'</td><td>'+fmt(cl*0.15)+'</td>'+
+              '<td>'+fmt(cl*0.10)+'</td><td>'+fmt(cl*0.05)+'</td><td>'+fmt(cl*0.05)+'</td>'+
+              '<td><b>'+fmt(cl)+'</b></td></tr>');
+          });
+          mwTbody.insertAdjacentHTML('beforeend',
+            '<tr style="font-weight:bold;background:#ede9fe;">'+
+            '<td colspan="2">TOTAL</td>'+
+            totals.slice(0,6).map(function(t){return '<td>'+fmt(t)+'</td>';}).join('')+
+            '<td><b>'+fmt(totals[6])+'</b></td></tr>');
+        }
+      } else { if(mwWrap) mwWrap.style.display='none'; }
+    }
+
+    function printFundAlloc() {
+      var fy=$('faFyFilter')?$('faFyFilter').value:'', mo=$('faMonthFilter')?$('faMonthFilter').value:'';
+      var t1='<table>'+($('repFundAllocTable')?$('repFundAllocTable').innerHTML:'')+'</table>';
+      var mwWrap=$('faMonthWiseWrap');
+      var t2='';
+      if(mwWrap&&mwWrap.style.display!=='none'){
+        t2='<br><div style="font-weight:800;margin:12px 0 6px;color:#7c3aed;">MONTH-WISE BREAKDOWN</div>'
+           +'<table>'+($('repFundAllocMonthTable')?$('repFundAllocMonthTable').innerHTML:'')+'</table>';
+      }
+      var infoLbl=$('faInfoLabel'); var pInfo=infoLbl?infoLbl.textContent:'';
+      printReport({
+        title:'AB-PMJAY FUND ALLOCATION (MONTH-WISE BASIS)',
+        periodInfo:_periodStr(fy,mo),
+        generatedInfo:'Generated: '+_fmtNow(),
+        bodyHTML:t1+t2
+      });
+    }
+    function exportFaExcel() {
+      var t1=document.getElementById('repFundAllocTable');
+      var t2=document.getElementById('repFundAllocMonthTable');
+      var uri='data:application/vnd.ms-excel;base64,';
+      var h='<html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;}</style></head><body>'
+        +(t1?'<table>'+t1.innerHTML+'</table>':'')+'<br>'
+        +(t2&&$('faMonthWiseWrap')&&$('faMonthWiseWrap').style.display!=='none'?'<table>'+t2.innerHTML+'</table>':'')
+        +'</body></html>';
+      var a=document.createElement('a');a.href=uri+btoa(unescape(encodeURIComponent(h)));a.download='fund_allocation.xls';a.click();
     }
 
     // 4C: AUTO SESSION TIMEOUT — 2 hours inactivity
