@@ -31,183 +31,211 @@
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F0FF 0%,#C8DCFF 50%,#D6EAFF 100%);min-height:100vh;overflow-x:hidden}
 
-/* ===== PMAM BANNER HEADER (EXACT NHA STYLE) ===== */
+/* ===== PURPLE THEME COLOR VARIABLES ===== */
+:root{
+  --purple-50:#FAF5FF;
+  --purple-100:#F4EBFB;
+  --purple-200:#EDE0F7;
+  --purple-300:#D8B9F0;
+  --purple-400:#B080E0;
+  --purple-500:#9333EA;
+  --purple-600:#7B3FE4;
+  --purple-700:#6B26D9;
+  --purple-800:#5B1DC2;
+  --purple-text:#4C1D95;
+  --green-accent:#16A34A;
+  --green-soft:#DCFCE7;
+  --orange-text:#EA580C;
+  --teal-title:#0EA5E9;
+  --red-accent:#DC2626;
+  --bg-grad:linear-gradient(135deg,#F4EBFB 0%,#EDE0F7 50%,#E5D2F2 100%);
+  --pill-grad:linear-gradient(135deg,#7B3FE4 0%,#6B26D9 100%);
+  --pill-grad-hover:linear-gradient(135deg,#6B26D9 0%,#5B1DC2 100%);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",Arial,sans-serif;background:var(--bg-grad);min-height:100vh;overflow-x:hidden}
+
+/* ===== PMAM HEADER (PURPLE THEME — MATCHES ACCOUNTING PORTAL PHOTO) ===== */
 .pmam-header{
   width:100%;
   position:sticky;
   top:0;
   z-index:1000;
-  overflow:visible;
   display:flex;
   flex-direction:column;
+  background:#FFFFFF;
+  border-bottom:1px solid var(--purple-200);
+  box-shadow:0 1px 4px rgba(123,63,228,0.08);
   max-width:100vw;
 }
-
-/* Banner — NHA pink-to-purple gradient */
 .banner-wrap{
   width:100%;
-  position:relative;
-  height:64px;
-  overflow:visible;
-  background:linear-gradient(90deg,#E8869A 0%,#D6739A 18%,#B85F9D 38%,#9B4DA0 58%,#7E3DA3 78%,#6B33A0 100%);
-  display:flex;
+  height:80px;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
   align-items:center;
-  padding:0 24px;
-  gap:14px;
-  box-shadow:0 1px 3px rgba(107,51,160,0.15);
+  padding:0 26px;
+  gap:18px;
+  background:linear-gradient(180deg,#FFFFFF 0%,#FAF5FF 100%);
 }
 
-/* Two circular logos side-by-side, like NHA */
-.banner-logos{
+/* LEFT: Logo + 3-line text */
+.banner-left{
   display:flex;
   align-items:center;
-  gap:8px;
-  flex-shrink:0;
+  gap:14px;
+  min-width:0;
 }
 .banner-logo{
-  width:46px;height:46px;border-radius:50%;
+  width:56px;height:56px;border-radius:50%;
   background:#fff;
-  border:2px solid rgba(255,255,255,0.9);
+  border:2px solid var(--purple-300);
   overflow:hidden;
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
-  box-shadow:0 2px 4px rgba(0,0,0,0.15);
+  box-shadow:0 2px 6px rgba(123,63,228,0.15);
 }
-.banner-logo svg{width:38px;height:38px}
+.banner-logo svg{width:46px;height:46px}
+.banner-text-block{
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+  min-width:0;
+}
+.btxt-line1{
+  font-size:12px;font-weight:800;
+  color:var(--purple-600);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  font-family:"Inter",sans-serif;
+}
+.btxt-line2{
+  font-size:11px;font-weight:800;
+  color:var(--green-accent);
+  letter-spacing:0.6px;
+  text-transform:uppercase;
+}
+.btxt-line3{
+  font-size:10.5px;font-weight:600;
+  color:var(--orange-text);
+  letter-spacing:0.2px;
+}
 
-/* Single bold title — NHA style */
-.banner-title{
-  flex:0 0 auto;
-  font-size:19px;
-  font-weight:800;
-  color:#fff;
-  letter-spacing:0.3px;
-  font-family:"Inter",Arial,sans-serif;
-  text-shadow:0 1px 2px rgba(0,0,0,0.12);
+/* CENTER: Big title */
+.banner-center-title{
+  text-align:center;
+  font-size:30px;
+  font-weight:900;
+  color:var(--teal-title);
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-family:"Inter",sans-serif;
+  position:relative;
+  padding:0 28px;
   white-space:nowrap;
 }
+.banner-center-title::before,
+.banner-center-title::after{
+  content:"";
+  position:absolute;
+  top:50%;
+  height:30px;
+  width:2px;
+  background:var(--purple-300);
+  transform:translateY(-50%);
+}
+.banner-center-title::before{left:0}
+.banner-center-title::after{right:0}
 
-/* Spacer to push profile to far right */
-.banner-spacer{flex:1}
-
-/* Right side container */
-.banner-overlay{
+/* RIGHT: User pill + Logout */
+.banner-right{
   display:flex;
   align-items:center;
-  gap:10px;
-  flex-shrink:0;
-  margin-left:auto;
+  justify-content:flex-end;
+  gap:12px;
 }
 .user-pill{
   display:flex;
   align-items:center;
-  gap:9px;
-  background:rgba(255,255,255,0.18);
-  border:1.5px solid rgba(255,255,255,0.45);
+  gap:10px;
+  background:#fff;
+  border:1.5px solid var(--purple-200);
   border-radius:50px;
-  padding:4px 14px 4px 4px;
+  padding:5px 16px 5px 5px;
   cursor:pointer;
   position:relative;
-  backdrop-filter:blur(6px);
-  transition:background 0.15s,border-color 0.15s;
+  transition:all 0.15s;
+  box-shadow:0 2px 6px rgba(123,63,228,0.06);
 }
 .user-pill:hover{
-  background:rgba(255,255,255,0.28);
-  border-color:rgba(255,255,255,0.6);
+  border-color:var(--purple-400);
+  box-shadow:0 4px 12px rgba(123,63,228,0.15);
 }
 .uphoto{
-  width:38px;height:38px;border-radius:50%;
-  background:rgba(255,255,255,0.25);
-  border:2px solid rgba(255,255,255,0.65);
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,#E9D5FF 0%,#D8B4FE 100%);
+  border:2px solid var(--purple-300);
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;flex-shrink:0;position:relative;
 }
 .uphoto img{width:100%;height:100%;object-fit:cover;display:none;border-radius:50%}
 .uphoto input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.uphoto .ini{font-size:13px;font-weight:800;color:#fff;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,0.2)}
-.uinfo{display:flex;flex-direction:column;gap:1px}
-.uname{font-size:12.5px;font-weight:800;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,0.18)}
-.udesig{font-size:9px;color:rgba(255,255,255,0.88);white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px;font-weight:600}
-.dd-arrow{font-size:11px;color:rgba(255,255,255,0.85);margin-left:4px}
+.uphoto .ini{font-size:13px;font-weight:800;color:var(--purple-700);pointer-events:none}
+.uinfo{display:flex;flex-direction:column;gap:1px;text-align:left}
+.uname{font-size:13px;font-weight:800;color:var(--purple-text);white-space:nowrap;line-height:1.1}
+.udesig{font-size:10px;color:#6B7280;white-space:nowrap;font-weight:500;line-height:1.1}
+.dd-arrow{display:none}
 
-/* ===== NHA-STYLE SECONDARY STRIP ===== */
-.banner-secondary-strip{
-  width:100%;
-  height:36px;
-  background:linear-gradient(90deg,#F4ECF6 0%,#FFFFFF 100%);
-  border-bottom:1px solid #E5DDE8;
+/* Logout pill */
+.btn-logout{
   display:flex;
   align-items:center;
-  padding:0 18px;
-  position:relative;
-  gap:8px;
-}
-/* Purple curve-shape on the left */
-.banner-secondary-strip::before{
-  content:"";
-  position:absolute;
-  left:0; top:0; bottom:-1px;
-  width:135px;
-  background:linear-gradient(90deg,#7E3DA3 0%,#9B4DA0 60%,transparent 100%);
-  clip-path:polygon(0 0, 100% 0, calc(100% - 25px) 100%, 0 100%);
-  z-index:0;
-}
-/* Icon buttons */
-.bss-icons{
-  display:flex;
-  align-items:center;
-  gap:4px;
-  z-index:1;
-  position:relative;
-}
-.bss-icon{
-  width:30px;height:30px;
-  border-radius:6px;
-  display:flex;align-items:center;justify-content:center;
+  gap:6px;
+  background:#fff;
+  border:1.5px solid var(--purple-300);
+  color:var(--purple-700);
+  border-radius:50px;
+  padding:9px 18px;
+  font-size:12px;
+  font-weight:700;
   cursor:pointer;
-  transition:background 0.15s;
-  background:transparent;
-  border:none;
-  color:#fff;
+  transition:all 0.15s;
+  font-family:"Inter",sans-serif;
 }
-.bss-icon:hover{
-  background:rgba(255,255,255,0.2);
+.btn-logout:hover{
+  background:var(--purple-100);
+  border-color:var(--purple-500);
 }
-.bss-icon svg{width:18px;height:18px;fill:#fff}
-/* Centered hospital name in red */
-.bss-hospital{
-  flex:1;
-  text-align:center;
-  font-size:13.5px;
-  font-weight:800;
-  color:#9B1C2E;
-  letter-spacing:1px;
-  text-transform:uppercase;
-  font-family:"Inter",Arial,sans-serif;
-  z-index:1;
-  position:relative;
-  padding-right:120px; /* offset for visual centering against left icons */
+.btn-logout svg{width:14px;height:14px;fill:var(--purple-700)}
+
+/* Responsive — stack on small screens */
+@media (max-width:980px){
+  .banner-wrap{grid-template-columns:1fr;gap:8px;padding:14px 18px;height:auto}
+  .banner-center-title{font-size:22px;padding:0}
+  .banner-center-title::before,.banner-center-title::after{display:none}
+  .banner-right{justify-content:center}
 }
 
-/* DROPDOWN */
+/* DROPDOWN — purple */
 .user-dropdown{
   position:absolute;top:calc(100% + 8px);right:0;
-  background:#fff;border-radius:10px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.2);
+  background:#fff;border-radius:12px;
+  box-shadow:0 12px 32px rgba(76,29,149,0.2);
+  border:1px solid var(--purple-200);
   min-width:185px;overflow:hidden;display:none;z-index:9999;
 }
 .user-dropdown.open{display:block}
 .dd-item{
-  padding:11px 16px;font-size:12px;color:#1e3a8a;
+  padding:11px 16px;font-size:12px;color:var(--purple-text);
   font-weight:600;cursor:pointer;
-  border-bottom:1px solid #E8EFFF;
+  border-bottom:1px solid var(--purple-100);
   display:flex;align-items:center;gap:8px;
 }
-.dd-item:last-child{border-bottom:none;color:#dc2626}
-.dd-item:hover{background:#EFF6FF}
+.dd-item:last-child{border-bottom:none}
+.dd-item:hover{background:var(--purple-100)}
+.dd-item svg{fill:var(--purple-600)}
 
 /* LOGOUT BUTTON */
 .logout-btn{
@@ -223,152 +251,323 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 
 /* TICKER */
 .ticker{
-  background:#E0F7FA;
-  border-bottom:1px solid #B2EBF2;
-  height:28px;overflow:hidden;
+  background:var(--purple-100);
+  border-bottom:1px solid var(--purple-200);
+  height:30px;overflow:hidden;
   display:flex;align-items:center;
 }
 .ticker-inner{
   white-space:nowrap;
   animation:tick 35s linear infinite;
-  color:#005F66;font-size:11px;font-weight:500;padding:0 16px;
+  color:var(--purple-700);font-size:11px;font-weight:600;padding:0 16px;
 }
 @keyframes tick{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
 
 /* LAYOUT */
 .layout{display:flex;min-height:calc(100vh - 138px)}
 
-/* SIDEBAR */
+/* SIDEBAR — purple theme */
 .sidebar{
-  width:72px;background:#fff;
-  border-right:1px solid #E0E8FF;
+  width:72px;background:#FFFFFF;
+  border-right:1px solid var(--purple-200);
   display:flex;flex-direction:column;
   align-items:center;padding:8px 0;gap:2px;
   flex-shrink:0;
+  box-shadow:1px 0 4px rgba(123,63,228,0.04);
 }
 .sbi{
   width:62px;display:flex;flex-direction:column;
   align-items:center;gap:3px;padding:8px 4px;
-  border-radius:8px;cursor:pointer;transition:all 0.15s;
+  border-radius:10px;cursor:pointer;transition:all 0.15s;
 }
-.sbi:hover{background:#F0F5FF}
-.sbi.active{background:linear-gradient(135deg,#0F2B8C,#1A3DB5)}
+.sbi:hover{background:var(--purple-100)}
+.sbi.active{background:var(--pill-grad);box-shadow:0 4px 12px rgba(123,63,228,0.3)}
 .sbi svg{width:22px;height:22px}
 .sbi.active svg{fill:#fff}
-.sbi:not(.active) svg{fill:#1A3DB5}
-.sbl{font-size:8.5px;font-weight:600;text-align:center;line-height:1.2;color:#666}
+.sbi:not(.active) svg{fill:var(--purple-600)}
+.sbl{font-size:8.5px;font-weight:700;text-align:center;line-height:1.2;color:var(--purple-700)}
 .sbi.active .sbl{color:#fff}
-.sb-div{width:40px;height:1px;background:#E0E8FF;margin:4px 0}
+.sbi:not(.active) .sbl{color:#6B7280}
+.sb-div{width:40px;height:1px;background:var(--purple-200);margin:4px 0}
 
 /* CONTENT */
 .content{flex:1;padding:16px;overflow-y:auto}
 .sec{display:none}.sec.active{display:block}
 
 /* CARDS */
+/* CARDS — purple theme */
 .card{
-  background:rgba(255,255,255,0.65);
-  backdrop-filter:blur(12px);
+  background:#FFFFFF;
   border-radius:20px;
-  border:1.5px solid rgba(255,255,255,0.85);
-  padding:16px 18px;margin-bottom:14px;
-  box-shadow:0 4px 16px rgba(30,80,200,0.06);
+  border:1px solid var(--purple-200);
+  padding:18px 20px;margin-bottom:14px;
+  box-shadow:0 4px 20px rgba(123,63,228,0.06);
 }
 .card-hd{
-  font-size:13px;font-weight:800;color:#0F2B8C;
-  margin-bottom:12px;padding-bottom:8px;
-  border-bottom:1.5px solid rgba(26,61,181,0.08);
+  font-size:13px;font-weight:800;color:var(--purple-text);
+  margin-bottom:14px;padding-bottom:10px;
+  border-bottom:1.5px solid var(--purple-100);
   display:flex;align-items:center;justify-content:space-between;
   flex-wrap:wrap;gap:8px;
 }
-.badge-ok{background:#DCFCE7;border:1px solid #A5D6A7;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:#166534}
-.badge-warn{background:#FFF3E0;border:1px solid #FFCC80;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:#E65100}
+.badge-ok{background:var(--green-soft);border:1px solid #86EFAC;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:#15803D}
+.badge-warn{background:#FEF3C7;border:1px solid #FCD34D;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:#B45309}
 
-/* FORM */
-.frow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
-.fld{display:flex;flex-direction:column;gap:3px}
-.fld label{font-size:10px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.3px}
-.fld input,.fld select{height:36px;padding:0 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px;color:#0F2B8C;background:rgba(255,255,255,0.9);outline:none;font-family:"Inter",sans-serif}
-.fld input:disabled{background:#F5F5F5;color:#888}
-.btn{height:36px;padding:0 18px;border-radius:50px;font-size:12px;cursor:pointer;font-weight:700;border:none;transition:all 0.15s;font-family:"Inter",sans-serif}
-.btn-pri{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff}
-.btn-sec{background:#F0F4FF;color:#1A3DB5;border:1.5px solid rgba(26,61,181,0.2)}
-.wtag{background:#E8EFFF;color:#1A3DB5;font-size:10px;padding:2px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;margin:2px;font-weight:600}
-.sec-lbl{font-size:10px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.sec-lbl::before{content:"";width:4px;height:12px;background:#1A3DB5;border-radius:2px;display:inline-block}
-.sec-lbl::after{content:"";flex:1;height:1px;background:rgba(26,61,181,0.15)}
-.divider{height:1px;background:linear-gradient(90deg,rgba(26,61,181,0.15),transparent);margin:10px 0 14px}
+/* SECTION LABEL — purple gradient pill (matches "NEW CLAIM RECEIVED" in photo) */
+.sec-lbl{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:var(--pill-grad);
+  color:#fff;
+  font-size:11.5px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  padding:8px 18px;
+  border-radius:50px;
+  margin-bottom:14px;
+  box-shadow:0 4px 12px rgba(123,63,228,0.25);
+}
+.sec-lbl::before{display:none}
+.sec-lbl::after{display:none}
+.sec-lbl svg{width:14px;height:14px;fill:#fff}
 
-/* CASE DATA AROOTH */
+.divider{
+  height:1px;
+  background:repeating-linear-gradient(90deg,var(--purple-300) 0,var(--purple-300) 6px,transparent 6px,transparent 12px);
+  margin:14px 0 18px;
+}
+
+/* FORM — purple theme */
+.frow{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld label{font-size:10.5px;font-weight:800;color:var(--purple-text);text-transform:uppercase;letter-spacing:0.5px}
+.fld input,.fld select{
+  height:42px;padding:0 14px;
+  border:1.5px solid var(--purple-200);
+  border-radius:10px;font-size:13px;
+  color:var(--purple-text);
+  background:#FFFFFF;outline:none;
+  font-family:"Inter",sans-serif;
+  transition:border-color 0.15s,box-shadow 0.15s;
+}
+.fld input:focus,.fld select:focus{
+  border-color:var(--green-accent);
+  box-shadow:0 0 0 3px rgba(22,163,74,0.12);
+}
+.fld input:disabled{background:var(--purple-50);color:#9CA3AF}
+
+/* BUTTONS — purple gradient pills */
+.btn{
+  height:42px;padding:0 22px;
+  border-radius:50px;font-size:12.5px;
+  cursor:pointer;font-weight:700;border:none;
+  transition:all 0.15s;
+  font-family:"Inter",sans-serif;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.btn-pri{
+  background:var(--pill-grad);
+  color:#fff;
+  box-shadow:0 4px 12px rgba(123,63,228,0.3);
+}
+.btn-pri:hover{background:var(--pill-grad-hover);box-shadow:0 6px 18px rgba(123,63,228,0.4)}
+.btn-sec{
+  background:#fff;
+  color:var(--purple-700);
+  border:1.5px solid var(--purple-300);
+}
+.btn-sec:hover{background:var(--purple-100);border-color:var(--purple-500)}
+
+/* WARD TAGS — purple */
+.wtag{
+  background:var(--purple-100);
+  color:var(--purple-700);
+  font-size:11px;
+  padding:4px 10px;
+  border-radius:50px;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  margin:2px;
+  font-weight:700;
+  border:1px solid var(--purple-300);
+}
+
+/* CASE DATA */
 .case-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
-.fcard{background:#fff;border:1.5px solid rgba(100,150,255,0.2);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-width:105px;flex:1;transition:all 0.2s;box-shadow:0 2px 8px rgba(30,80,200,0.05)}
-.fcard:hover{border-color:#1A3DB5;box-shadow:0 4px 14px rgba(30,80,200,0.12);transform:translateY(-1px)}
-.fcard:focus-within{border-color:#1A3DB5;box-shadow:0 0 0 3px rgba(26,61,181,0.08)}
-.fcard.auto{border-color:rgba(26,61,181,0.3);background:#F0F5FF}
-.fcard-input{padding:12px 14px 6px;flex:1}
-.fcard input{width:100%;border:none;outline:none;font-size:22px;font-weight:800;color:#0D47A1;background:transparent;padding:0;line-height:1;font-family:"Inter",sans-serif}
-.fcard input::placeholder{color:#C5D5F5;font-size:20px;font-weight:400}
-.fcard input[type=number]::-webkit-inner-spin-button,.fcard input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
-.fcard-label{background:linear-gradient(90deg,#1A3DB5,#2952D9);padding:6px 14px;font-size:9px;font-weight:700;color:#fff;letter-spacing:0.7px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;border-radius:0 0 14px 14px}
-.fcard.auto .fcard-label{background:linear-gradient(90deg,#1032A0,#1A3DB5)}
-.auto-badge{background:rgba(255,255,255,0.25);color:#fff;font-size:7px;padding:2px 7px;border-radius:20px;font-weight:700;border:1px solid rgba(255,255,255,0.4)}
-/* DISABLED fcard — greyed out for wards that don't support this case type */
-.fcard.fcard-disabled{background:#F0F0F0;border-color:#D0D0D0;box-shadow:none;opacity:0.6;pointer-events:none}
-.fcard.fcard-disabled:hover{border-color:#D0D0D0;box-shadow:none;transform:none}
+.fcard{
+  background:#fff;
+  border:1.5px solid var(--purple-200);
+  border-radius:16px;overflow:hidden;
+  display:flex;flex-direction:column;
+  min-width:105px;flex:1;
+  transition:all 0.2s;
+  box-shadow:0 2px 8px rgba(123,63,228,0.05);
+}
+.fcard:hover{
+  border-color:var(--purple-500);
+  box-shadow:0 4px 14px rgba(123,63,228,0.15);
+  transform:translateY(-1px);
+}
+.fcard:focus-within{
+  border-color:var(--green-accent);
+  box-shadow:0 0 0 3px rgba(22,163,74,0.12);
+}
+.fcard.auto{border-color:var(--purple-300);background:var(--purple-50)}
+.fcard-input{padding:14px 14px 8px;flex:1}
+.fcard input{
+  width:100%;border:none;outline:none;
+  font-size:22px;font-weight:800;
+  color:var(--purple-text);
+  background:transparent;padding:0;line-height:1;
+  font-family:"Inter",sans-serif;
+}
+.fcard input::placeholder{color:var(--purple-300);font-size:20px;font-weight:400}
+.fcard input[type=number]::-webkit-inner-spin-button,
+.fcard input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+.fcard-label{
+  background:var(--pill-grad);
+  padding:7px 14px;
+  font-size:9.5px;font-weight:800;
+  color:#fff;letter-spacing:0.7px;
+  text-transform:uppercase;
+  display:flex;align-items:center;
+  justify-content:space-between;
+  border-radius:0 0 14px 14px;
+}
+.fcard.auto .fcard-label{background:linear-gradient(135deg,#5B1DC2,#4C1D95)}
+.auto-badge{
+  background:rgba(255,255,255,0.25);
+  color:#fff;font-size:7.5px;
+  padding:2px 8px;border-radius:20px;
+  font-weight:700;
+  border:1px solid rgba(255,255,255,0.4);
+}
+/* DISABLED fcard */
+.fcard.fcard-disabled{background:#F5F5F5;border-color:#E0E0E0;box-shadow:none;opacity:0.55;pointer-events:none}
+.fcard.fcard-disabled:hover{border-color:#E0E0E0;box-shadow:none;transform:none}
 .fcard.fcard-disabled input{color:#AAAAAA;background:transparent;cursor:not-allowed}
 .fcard.fcard-disabled .fcard-label{background:linear-gradient(90deg,#9E9E9E,#BDBDBD)}
-/* Auto-reg disabled state */
 .fcard.auto.fcard-disabled .fcard-label{background:linear-gradient(90deg,#9E9E9E,#BDBDBD)}
 
-/* ── NEW NFIELD (icon-input box) styles ── */
+/* ── NFIELD (icon-input box) — PURPLE THEME ── */
 .nfield-wrap{display:flex;flex-direction:column;gap:5px}
-.nfield-label{font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:4px}
-.nfield-box{display:flex;align-items:center;border:1.5px solid #D1D9F0;border-radius:10px;overflow:hidden;background:#fff;transition:border-color 0.15s,box-shadow 0.15s}
-.nfield-box:focus-within{border-color:#1A3DB5;box-shadow:0 0 0 3px rgba(26,61,181,0.08)}
-.nfield-icon{width:38px;min-width:38px;height:44px;display:flex;align-items:center;justify-content:center;border-right:1.5px solid #E8EEF8;flex-shrink:0}
-.nfield-input{flex:1;height:44px;border:none;outline:none;font-size:13px;font-weight:500;color:#0F2B8C;font-family:Inter,sans-serif;padding:0 12px;background:transparent;width:100%}
-.nfield-input::placeholder{color:#B0BBD5;font-weight:400;font-size:12px}
-.nfield-input[type=number]::-webkit-inner-spin-button,.nfield-input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
-/* Disabled nfield state */
-.nfield-box.nfield-disabled{background:#F4F5F9;border-color:#DDE0EC;opacity:0.55;pointer-events:none}
-.nfield-box.nfield-disabled .nfield-input{color:#9AA0B8;cursor:not-allowed}
-.nfield-box.nfield-disabled .nfield-icon{background:#EBEBF0!important;border-right-color:#DDE0EC}
+.nfield-label{
+  font-size:10.5px;font-weight:800;
+  color:var(--purple-text);
+  text-transform:uppercase;letter-spacing:0.5px;
+  display:flex;align-items:center;gap:4px;
+}
+.nfield-box{
+  display:flex;align-items:center;
+  border:1.5px solid var(--purple-200);
+  border-radius:10px;overflow:hidden;
+  background:#fff;
+  transition:border-color 0.15s,box-shadow 0.15s;
+}
+.nfield-box:focus-within{
+  border-color:var(--green-accent);
+  box-shadow:0 0 0 3px rgba(22,163,74,0.12);
+}
+.nfield-icon{
+  width:42px;min-width:42px;height:46px;
+  display:flex;align-items:center;justify-content:center;
+  border-right:1.5px solid var(--purple-100);
+  flex-shrink:0;
+  background:var(--purple-50);
+}
+.nfield-icon svg{fill:var(--purple-600)!important}
+.nfield-input{
+  flex:1;height:46px;border:none;outline:none;
+  font-size:13px;font-weight:600;
+  color:var(--purple-text);
+  font-family:Inter,sans-serif;
+  padding:0 14px;background:transparent;width:100%;
+}
+.nfield-input::placeholder{color:#B5A5D0;font-weight:400;font-size:12px}
+.nfield-input[type=number]::-webkit-inner-spin-button,
+.nfield-input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+/* Disabled */
+.nfield-box.nfield-disabled{background:#F5F5F5;border-color:#E0E0E0;opacity:0.55;pointer-events:none}
+.nfield-box.nfield-disabled .nfield-input{color:#AAAAAA;cursor:not-allowed}
+.nfield-box.nfield-disabled .nfield-icon{background:#EBEBEB!important;border-right-color:#E0E0E0}
+.nfield-box.nfield-disabled .nfield-icon svg{fill:#9E9E9E!important}
 
-/* METRICS */
-.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
-.mcard{border-radius:16px;padding:12px 14px;position:relative;overflow:hidden;box-shadow:0 2px 10px rgba(26,61,181,0.08);border:1.5px solid rgba(100,150,255,0.12);background:#fff}
+/* METRICS — purple theme */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.mcard{
+  border-radius:16px;padding:14px 16px;
+  position:relative;overflow:hidden;
+  box-shadow:0 4px 14px rgba(123,63,228,0.08);
+  border:1px solid var(--purple-200);
+  background:#fff;
+  transition:transform 0.15s,box-shadow 0.15s;
+}
+.mcard:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(123,63,228,0.15)}
 .mcard::before{content:"";position:absolute;bottom:0;left:0;right:0;height:4px;border-radius:0 0 14px 14px}
-.mcard.c1::before{background:linear-gradient(90deg,#1A3DB5,#2952D9)}
-.mcard.c2::before{background:linear-gradient(90deg,#166534,#16a34a)}
-.mcard.c3::before{background:linear-gradient(90deg,#C94000,#E65800)}
-.mcard.c4::before{background:linear-gradient(90deg,#005F52,#00897B)}
-.mcard.c5::before{background:linear-gradient(90deg,#6A1B9A,#9C27B0)}
-.mcard.c6::before{background:linear-gradient(90deg,#0F1F6E,#1A3DB5)}
-.mcard-num{font-size:26px;font-weight:800;color:#0F2B8C;line-height:1;margin-bottom:4px}
-.mcard-label{font-size:10px;color:#666;font-weight:600}
+.mcard.c1::before{background:linear-gradient(90deg,#7B3FE4,#9333EA)}
+.mcard.c2::before{background:linear-gradient(90deg,#16A34A,#22C55E)}
+.mcard.c3::before{background:linear-gradient(90deg,#EA580C,#F97316)}
+.mcard.c4::before{background:linear-gradient(90deg,#0EA5E9,#38BDF8)}
+.mcard.c5::before{background:linear-gradient(90deg,#A855F7,#C084FC)}
+.mcard.c6::before{background:linear-gradient(90deg,#6B26D9,#7B3FE4)}
+.mcard-num{font-size:26px;font-weight:800;color:var(--purple-text);line-height:1;margin-bottom:4px}
+.mcard-label{font-size:10.5px;color:#6B7280;font-weight:600}
 
-/* TABLE */
-.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid rgba(26,61,181,0.1)}
+/* TABLE — purple header */
+.tbl-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--purple-200);background:#fff}
 table{width:100%;border-collapse:collapse;font-size:12px;min-width:600px}
-th{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;padding:9px 12px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;white-space:nowrap}
-th:first-child{border-radius:10px 0 0 0}
-th:last-child{border-radius:0 10px 0 0}
-td{padding:8px 12px;border-bottom:1px solid rgba(26,61,181,0.05);background:#fff;vertical-align:middle}
-tr:nth-child(even) td{background:#F8FAFF}
-tr:hover td{background:#EEF3FF}
-.empty-td{text-align:center;padding:20px!important;color:#BDBDBD;font-style:italic}
+th{
+  background:var(--pill-grad);
+  color:#fff;padding:11px 12px;text-align:left;
+  font-weight:700;font-size:10.5px;
+  text-transform:uppercase;white-space:nowrap;
+  letter-spacing:0.4px;
+}
+th:first-child{border-radius:14px 0 0 0}
+th:last-child{border-radius:0 14px 0 0}
+td{padding:10px 12px;border-bottom:1px solid var(--purple-100);background:#fff;vertical-align:middle;color:var(--purple-text)}
+tr:nth-child(even) td{background:var(--purple-50)}
+tr:hover td{background:var(--purple-100)}
+.empty-td{text-align:center;padding:24px!important;color:#9CA3AF;font-style:italic}
 
-/* MODAL */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;align-items:center;justify-content:center;padding:20px}
+/* MODAL — purple */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(76,29,149,0.35);z-index:500;align-items:center;justify-content:center;padding:20px}
 .modal-bg.open{display:flex}
-.modal-box{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
-.modal-title{font-size:14px;font-weight:800;color:#1e3a8a;margin-bottom:14px}
-.mfld{margin-bottom:10px}
-.mfld label{display:block;font-size:10px;font-weight:700;color:#1A3DB5;text-transform:uppercase;margin-bottom:3px}
-.mfld input{width:100%;padding:8px 12px;border:1.5px solid #C5D5F5;border-radius:8px;font-size:12px;font-family:"Inter",sans-serif;outline:none}
-.modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-.mbtn{padding:7px 18px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:"Inter",sans-serif;border:none}
-.mbtn-pri{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff}
-.mbtn-sec{background:#F0F5FF;color:#1A3DB5;border:1px solid #C5D5F5}
+.modal-box{
+  background:#fff;border-radius:20px;padding:24px;
+  width:100%;max-width:400px;
+  box-shadow:0 12px 40px rgba(76,29,149,0.25);
+  border:1px solid var(--purple-200);
+}
+.modal-title{font-size:15px;font-weight:800;color:var(--purple-text);margin-bottom:16px}
+.mfld{margin-bottom:12px}
+.mfld label{display:block;font-size:10.5px;font-weight:800;color:var(--purple-text);text-transform:uppercase;margin-bottom:5px;letter-spacing:0.4px}
+.mfld input{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--purple-200);
+  border-radius:10px;font-size:13px;
+  font-family:"Inter",sans-serif;outline:none;
+  color:var(--purple-text);
+  transition:border-color 0.15s,box-shadow 0.15s;
+}
+.mfld input:focus{border-color:var(--green-accent);box-shadow:0 0 0 3px rgba(22,163,74,0.12)}
+.modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+.mbtn{
+  padding:9px 22px;border-radius:50px;
+  font-size:12.5px;font-weight:700;cursor:pointer;
+  font-family:"Inter",sans-serif;border:none;
+  display:inline-flex;align-items:center;gap:6px;
+  transition:all 0.15s;
+}
+.mbtn-pri{background:var(--pill-grad);color:#fff;box-shadow:0 4px 12px rgba(123,63,228,0.25)}
+.mbtn-pri:hover{background:var(--pill-grad-hover)}
+.mbtn-sec{background:#fff;color:var(--purple-700);border:1.5px solid var(--purple-300)}
+.mbtn-sec:hover{background:var(--purple-100)}
 @media print {
   body.printing-leave > * { display: none !important; }
   body.printing-leave #leavePrintArea { display: block !important; }
@@ -387,7 +586,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
      ═══════════════════════════════════════════════════════════════ -->
 <div id="adminTicker" style="display:none;position:relative;width:100%;padding:8px 18px;font-size:13px;font-weight:600;text-align:center;line-height:1.4;border-bottom:1px solid transparent;z-index:100"></div>
 <style>
-  #adminTicker.tk-info    { background:#dbeafe; color:#1e3a8a; border-bottom-color:#93c5fd; }
+  #adminTicker.tk-info    { background:#dbeafe; color:#4C1D95; border-bottom-color:#93c5fd; }
   #adminTicker.tk-success { background:#dcfce7; color:#166534; border-bottom-color:#86efac; }
   #adminTicker.tk-warning { background:#fef3c7; color:#78350f; border-bottom-color:#fcd34d; }
   #adminTicker.tk-danger  { background:#fee2e2; color:#991b1b; border-bottom-color:#fca5a5; animation: tkPulse 2s ease-in-out infinite; }
@@ -398,32 +597,11 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 <!-- PRINT MOUNT: used for leave application printing -->
 <div class="leave-print-mount" id="leavePrintMount" style="display:none"></div>
 
-<!-- ===== PMAM BANNER HEADER (EXACT NHA STYLE) ===== -->
+<!-- ===== PMAM HEADER (PURPLE THEME) ===== -->
 <div class="pmam-header">
   <div class="banner-wrap">
-    <!-- Two circular logos side-by-side, like NHA -->
-    <div class="banner-logos">
-      <!-- Logo 1: National Health Authority style emblem -->
-      <div class="banner-logo" title="National Health Authority">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="50" cy="50" r="48" fill="#fff"/>
-          <!-- Ashoka chakra style -->
-          <circle cx="50" cy="50" r="22" fill="none" stroke="#1E3A8A" stroke-width="2.5"/>
-          <g stroke="#1E3A8A" stroke-width="1.5" stroke-linecap="round">
-            <line x1="50" y1="28" x2="50" y2="72"/>
-            <line x1="28" y1="50" x2="72" y2="50"/>
-            <line x1="34.4" y1="34.4" x2="65.6" y2="65.6"/>
-            <line x1="65.6" y1="34.4" x2="34.4" y2="65.6"/>
-            <line x1="40" y1="29.5" x2="60" y2="70.5"/>
-            <line x1="60" y1="29.5" x2="40" y2="70.5"/>
-            <line x1="29.5" y1="40" x2="70.5" y2="60"/>
-            <line x1="70.5" y1="40" x2="29.5" y2="60"/>
-          </g>
-          <circle cx="50" cy="50" r="3" fill="#1E3A8A"/>
-          <text x="50" y="92" text-anchor="middle" font-size="9" font-weight="bold" fill="#1E3A8A" font-family="Arial">NHA</text>
-        </svg>
-      </div>
-      <!-- Logo 2: Ayushman Bharat PM-JAY -->
+    <!-- LEFT: Logo + 3-line text block -->
+    <div class="banner-left">
       <div class="banner-logo" title="Ayushman Bharat PM-JAY">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <circle cx="50" cy="50" r="48" fill="#FF9933"/>
@@ -436,16 +614,21 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <text x="50" y="82" text-anchor="middle" font-size="7" fill="#FF9933" font-weight="bold" font-family="Arial">PM-JAY</text>
         </svg>
       </div>
+      <div class="banner-text-block">
+        <div class="btxt-line1">MANAGEMENT INFORMATION SYSTEM</div>
+        <div class="btxt-line2">AYUSHMAN BHARAT — PM-JAY</div>
+        <div class="btxt-line3">Government Medical College &amp; Associated Hospital, Rajouri</div>
+      </div>
     </div>
-    <!-- Single bold title (NHA style) -->
-    <div class="banner-title">PMAM Reporting System - GMC Rajouri</div>
-    <!-- Spacer -->
-    <div class="banner-spacer"></div>
-    <!-- User pill on right -->
-    <div class="banner-overlay">
+
+    <!-- CENTER: Big title -->
+    <div class="banner-center-title">PMAM REPORTING PORTAL</div>
+
+    <!-- RIGHT: User pill + Logout -->
+    <div class="banner-right">
       <div class="user-pill" onclick="toggleDD()">
         <div class="uphoto">
-          <span class="ini" id="hInitials">TM</span>
+          <span class="ini" id="hInitials">VK</span>
           <img id="hPhoto" alt="">
           <input type="file" accept="image/*" onchange="loadPhoto(this)">
         </div>
@@ -453,35 +636,20 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <div class="uname" id="hName">PMAM USER</div>
           <div class="udesig" id="hRole">PMAM</div>
         </div>
-        <span class="dd-arrow">▾</span>
         <div class="user-dropdown" id="userDD">
           <div class="dd-item" onclick="openModal('profileModal');event.stopPropagation()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#7B3FE4"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
             Update Profile
-          </div>
-          <div class="dd-item" onclick="doLogout()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#dc2626"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-            Logout
           </div>
         </div>
       </div>
-    </div>
-  </div>
-  <!-- Secondary strip with icons + hospital name (NHA-style) -->
-  <div class="banner-secondary-strip">
-    <div class="bss-icons">
-      <button class="bss-icon" title="Dashboard" onclick="navIconDashboard()">
-        <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" style="display:none"/><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
-      </button>
-      <button class="bss-icon" title="Home" onclick="navIconHome()">
-        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-      </button>
-      <button class="bss-icon" title="Refresh" onclick="navIconRefresh()">
-        <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+      <button class="btn-logout" onclick="doLogout()">
+        <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+        Logout
       </button>
     </div>
-    <div class="bss-hospital">GMC RAJOURI (HOSP1G10293) - RAJAURI</div>
   </div>
+</div>
 
   <!-- TICKER -->
   <div class="ticker">
@@ -523,8 +691,8 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
     <!-- DASHBOARD -->
     <div class="sec" id="sec-dashboard">
       <div style="margin-bottom:16px">
-        <div style="font-size:12px;color:#1A3DB5;font-weight:500">Hello, <strong id="dashName"></strong></div>
-        <div style="font-size:18px;font-weight:800;color:#0F2B8C;margin-top:2px">My Dashboard</div>
+        <div style="font-size:12px;color:#7B3FE4;font-weight:500">Hello, <strong id="dashName"></strong></div>
+        <div style="font-size:18px;font-weight:800;color:#4C1D95;margin-top:2px">My Dashboard</div>
         <div style="font-size:11px;color:#6b7280;margin-top:2px" id="dashDate"></div>
       </div>
       <div id="dashAlert" style="background:rgba(255,243,224,0.9);border:1.5px solid #FFCC80;border-radius:14px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px">
@@ -554,17 +722,17 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
     <!-- FILL REPORT -->
     <div class="sec active" id="sec-fillReport">
       <!-- NEW DESIGN CARD -->
-      <div style="background:#fff;border-radius:16px;box-shadow:0 2px 16px rgba(30,60,180,0.10);border:1px solid #E8EEFF;overflow:hidden;margin-bottom:14px">
+      <div style="background:#fff;border-radius:16px;box-shadow:0 2px 16px rgba(123,63,228,0.10);border:1px solid #EDE0F7;overflow:hidden;margin-bottom:14px">
 
         <!-- Card Header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 14px;border-bottom:1px solid #F0F4FF">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 14px;border-bottom:1px solid #F4EBFB">
           <div style="display:flex;align-items:center;gap:12px">
-            <div style="width:38px;height:38px;border-radius:10px;background:#EEF3FF;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+            <div style="width:38px;height:38px;border-radius:10px;background:#FAF5FF;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#7B3FE4"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
             </div>
             <div>
-              <div style="font-size:15px;font-weight:800;color:#0F2B8C;line-height:1.2">Fill Today's Report</div>
-              <div style="font-size:11px;color:#6B7DB5;margin-top:2px">Enter today's case data and claim details</div>
+              <div style="font-size:15px;font-weight:800;color:#4C1D95;line-height:1.2">Fill Today's Report</div>
+              <div style="font-size:11px;color:#6B7280;margin-top:2px">Enter today's case data and claim details</div>
             </div>
           </div>
           <span id="fillBadge" style="background:#FFF7ED;border:1.5px solid #FED7AA;color:#C2410C;font-size:11px;font-weight:700;border-radius:20px;padding:5px 14px;white-space:nowrap">⚠ Pending Today</span>
@@ -579,10 +747,11 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div style="padding:18px 20px">
 
           <!-- BASIC INFORMATION SECTION -->
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-            <span style="font-size:11px;font-weight:800;color:#1A3DB5;text-transform:uppercase;letter-spacing:1px">Basic Information</span>
-            <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(26,61,181,0.2),transparent)"></div>
+          <div style="margin-bottom:18px">
+            <div style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7B3FE4 0%,#6B26D9 100%);color:#fff;padding:9px 20px;border-radius:50px;box-shadow:0 4px 12px rgba(123,63,228,0.3)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+              <span style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px">Basic Information</span>
+            </div>
           </div>
 
           <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;align-items:flex-end">
@@ -590,22 +759,22 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             <div style="display:flex;flex-direction:column;gap:5px;min-width:140px">
               <label style="font-size:10.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.4px">DATE</label>
               <input type="date" id="eDate"
-                style="height:40px;padding:0 12px;border:1.5px solid #D1D9F0;border-radius:10px;font-size:13px;color:#0F2B8C;font-family:Inter,sans-serif;outline:none;background:#fff;width:100%"
-                onfocus="this.style.borderColor='#1A3DB5'" onblur="this.style.borderColor='#D1D9F0'">
+                style="height:40px;padding:0 12px;border:1.5px solid #EDE0F7;border-radius:10px;font-size:13px;color:#4C1D95;font-family:Inter,sans-serif;outline:none;background:#fff;width:100%"
+                onfocus="this.style.borderColor='#7B3FE4'" onblur="this.style.borderColor='#EDE0F7'">
             </div>
             <!-- PMAM Name -->
             <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px">
               <label style="font-size:10.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.4px">PMAM NAME</label>
               <input type="text" id="ePmam" value="" disabled
-                style="height:40px;padding:0 12px;border:1.5px solid #E9EDF8;border-radius:10px;font-size:13px;color:#6B7DB5;font-family:Inter,sans-serif;outline:none;background:#F8FAFF;width:100%;cursor:default">
+                style="height:40px;padding:0 12px;border:1.5px solid #E9EDF8;border-radius:10px;font-size:13px;color:#6B7280;font-family:Inter,sans-serif;outline:none;background:#FAF5FF;width:100%;cursor:default">
             </div>
             <!-- Select Ward + Add Ward button -->
             <div style="display:flex;flex-direction:column;gap:5px;flex:1.5;min-width:200px">
               <label style="font-size:10.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.4px">SELECT WARD</label>
               <div style="display:flex;gap:10px;align-items:center">
                 <select id="eWard"
-                  style="flex:1;height:40px;padding:0 12px;border:1.5px solid #D1D9F0;border-radius:10px;font-size:12px;color:#0F2B8C;font-family:Inter,sans-serif;outline:none;background:#fff"
-                  onfocus="this.style.borderColor='#1A3DB5'" onblur="this.style.borderColor='#D1D9F0'">
+                  style="flex:1;height:40px;padding:0 12px;border:1.5px solid #EDE0F7;border-radius:10px;font-size:12px;color:#4C1D95;font-family:Inter,sans-serif;outline:none;background:#fff"
+                  onfocus="this.style.borderColor='#7B3FE4'" onblur="this.style.borderColor='#EDE0F7'">
                   <option value="">-- Select Ward --</option>
                   <option>Orthopaedics</option><option>Male Surgery Ward</option>
                   <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
@@ -615,7 +784,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
                   <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
                 </select>
                 <button onclick="addWard()"
-                  style="height:40px;padding:0 18px;background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(26,61,181,0.3)">
+                  style="height:40px;padding:0 18px;background:linear-gradient(90deg,#4C1D95,#7B3FE4);color:#fff;border:none;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(123,63,228,0.3)">
                   <span style="font-size:16px;line-height:1">+</span> Add Ward
                 </button>
               </div>
@@ -630,10 +799,11 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <div style="height:1px;background:linear-gradient(90deg,rgba(26,61,181,0.12),transparent);margin:16px 0"></div>
 
           <!-- CASE DATA SECTION -->
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
-            <span style="font-size:11px;font-weight:800;color:#1A3DB5;text-transform:uppercase;letter-spacing:1px">Case Data</span>
-            <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(26,61,181,0.2),transparent)"></div>
+          <div style="margin-bottom:18px">
+            <div style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7B3FE4 0%,#6B26D9 100%);color:#fff;padding:9px 20px;border-radius:50px;box-shadow:0 4px 12px rgba(123,63,228,0.3)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+              <span style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px">Case Data</span>
+            </div>
           </div>
 
           <!-- 4-column input grid -->
@@ -643,8 +813,8 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             <div class="nfield-wrap" id="wrap-eIPD">
               <div class="nfield-label">WARD IPD <span style="color:#E53935">*</span></div>
               <div class="nfield-box" id="box-eIPD">
-                <div class="nfield-icon" style="background:#EEF3FF">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+                <div class="nfield-icon" style="background:#FAF5FF">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#7B3FE4"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
                 </div>
                 <input type="number" id="eIPD" placeholder="Enter number" min="0"
                   class="nfield-input"
@@ -681,7 +851,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             <!-- Register AUTO -->
             <div class="nfield-wrap" id="wrap-eReg">
               <div class="nfield-label">REGISTER <span style="color:#E53935">*</span> <span style="background:#FFF7ED;color:#C2410C;font-size:9px;padding:1px 6px;border-radius:8px;font-weight:700;border:1px solid #FED7AA;margin-left:4px">AUTO</span></div>
-              <div class="nfield-box" id="box-eReg" style="background:#F8FAFF;border-color:#C8D5F0">
+              <div class="nfield-box" id="box-eReg" style="background:#FAF5FF;border-color:#D8B9F0">
                 <div class="nfield-icon" style="background:#FFF7ED">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="#C2410C"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
                 </div>
@@ -733,8 +903,8 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             <div class="nfield-wrap" id="wrap-eClm">
               <div class="nfield-label">CLAIM AMT (₹) <span style="color:#E53935">*</span></div>
               <div class="nfield-box" id="box-eClm">
-                <div class="nfield-icon" style="background:#EEF3FF">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                <div class="nfield-icon" style="background:#FAF5FF">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#7B3FE4"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
                 </div>
                 <input type="number" id="eClm" placeholder="Enter amount" min="0"
                   class="nfield-input"
@@ -748,14 +918,14 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;align-items:center">
             <div id="entryMsg" style="font-size:12px;color:#166534;flex:1;min-height:16px"></div>
             <button onclick="clearForm()"
-              style="height:40px;padding:0 20px;background:#fff;color:#1A3DB5;border:1.5px solid #D1D9F0;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;gap:6px;transition:all 0.15s"
-              onmouseover="this.style.background='#F0F4FF'" onmouseout="this.style.background='#fff'">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+              style="height:40px;padding:0 20px;background:#fff;color:#7B3FE4;border:1.5px solid #EDE0F7;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;gap:6px;transition:all 0.15s"
+              onmouseover="this.style.background='#F4EBFB'" onmouseout="this.style.background='#fff'">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#7B3FE4"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
               Clear
             </button>
             <button onclick="saveEntry()"
-              style="height:40px;padding:0 24px;background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(26,61,181,0.3);transition:all 0.15s"
-              onmouseover="this.style.boxShadow='0 6px 18px rgba(26,61,181,0.45)'" onmouseout="this.style.boxShadow='0 4px 12px rgba(26,61,181,0.3)'">
+              style="height:40px;padding:0 24px;background:linear-gradient(90deg,#4C1D95,#7B3FE4);color:#fff;border:none;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(123,63,228,0.3);transition:all 0.15s"
+              onmouseover="this.style.boxShadow='0 6px 18px rgba(123,63,228,0.45)'" onmouseout="this.style.boxShadow='0 4px 12px rgba(123,63,228,0.3)'">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
               Save Entry
             </button>
@@ -776,11 +946,11 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
     <div class="sec" id="sec-myRecords">
       <div style="background:rgba(255,255,255,0.55);backdrop-filter:blur(12px);border-radius:20px;border:1.5px solid rgba(255,255,255,0.8);padding:18px;box-shadow:0 4px 24px rgba(30,80,200,0.08);margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-          <div style="font-size:11px;font-weight:700;color:#1A3DB5;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:8px">
-            <div style="width:8px;height:8px;border-radius:50%;background:#1A3DB5;flex-shrink:0"></div>
+          <div style="font-size:11px;font-weight:700;color:#7B3FE4;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:8px">
+            <div style="width:8px;height:8px;border-radius:50%;background:#7B3FE4;flex-shrink:0"></div>
             My Records
           </div>
-          <span id="recCount" style="background:rgba(26,61,181,0.1);color:#1A3DB5;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700"></span>
+          <span id="recCount" style="background:rgba(123,63,228,0.15);color:#7B3FE4;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700"></span>
         </div>
         <!-- FILTERS -->
         <div class="frow" style="margin-bottom:14px">
@@ -802,12 +972,12 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         </div>
         <!-- SUMMARY STRIP -->
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
-          <div style="background:linear-gradient(135deg,#1A3DB5,#2952D9);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.65);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Total IPD</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-ipd">—</div></div>
-          <div style="background:linear-gradient(135deg,#1B7A2E,#27AE46);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.65);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Total Register</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-reg">—</div></div>
-          <div style="background:linear-gradient(135deg,#C94000,#E65800);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.65);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Total Preauth</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-pre">—</div></div>
-          <div style="background:linear-gradient(135deg,#005F52,#00897B);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.65);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Total Discharge</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-dis">—</div></div>
-          <div style="background:linear-gradient(135deg,#6A1B9A,#9C27B0);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.65);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Total Claim (₹)</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-clm">—</div></div>
-          <div style="background:linear-gradient(135deg,#0F1F6E,#1A3DB5);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.65);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Conversion %</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-conv">—</div></div>
+          <div style="background:linear-gradient(135deg,#7B3FE4,#2952D9);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.95);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Total IPD</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-ipd">—</div></div>
+          <div style="background:linear-gradient(135deg,#1B7A2E,#27AE46);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.95);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Total Register</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-reg">—</div></div>
+          <div style="background:linear-gradient(135deg,#C94000,#E65800);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.95);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Total Preauth</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-pre">—</div></div>
+          <div style="background:linear-gradient(135deg,#005F52,#00897B);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.95);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Total Discharge</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-dis">—</div></div>
+          <div style="background:linear-gradient(135deg,#6A1B9A,#9C27B0);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.95);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Total Claim (₹)</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-clm">—</div></div>
+          <div style="background:linear-gradient(135deg,#0F1F6E,#7B3FE4);border-radius:14px;padding:10px 16px;min-width:110px;flex:1;box-shadow:0 3px 10px rgba(26,61,181,0.2)"><div style="font-size:9px;color:rgba(255,255,255,0.95);font-weight:600;letter-spacing:0.5px;text-transform:uppercase">Conversion %</div><div style="font-size:20px;font-weight:800;color:#fff;line-height:1;margin-top:3px" id="rec-s-conv">—</div></div>
         </div>
         <!-- TABLE -->
         <div class="tbl-wrap">
@@ -821,31 +991,31 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
     <!-- LEAVE -->
     <div class="sec" id="sec-leave">
-      <div style="font-size:20px;font-weight:800;color:#0F2B8C;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+      <div style="font-size:20px;font-weight:800;color:#4C1D95;margin-bottom:14px;display:flex;align-items:center;gap:10px">
         Leave Application Form
-        <div style="flex:1;height:2px;background:linear-gradient(90deg,#1A3DB5,transparent)"></div>
+        <div style="flex:1;height:2px;background:linear-gradient(90deg,#7B3FE4,transparent)"></div>
       </div>
 
       <!-- FORM CARD -->
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:13px;font-weight:700;color:#0F2B8C;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(26,61,181,0.1)">Fill Leave Application</div>
+        <div style="font-size:13px;font-weight:700;color:#4C1D95;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(123,63,228,0.15)">Fill Leave Application</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
 
           <!-- Name -->
           <div class="fld"><label>Name of the Official</label>
-            <input type="text" id="lvName" value="" readonly style="width:100%;padding:9px 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:#F8FAFF;color:#0F2B8C;cursor:default">
+            <input type="text" id="lvName" value="" readonly style="width:100%;padding:9px 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:#FAF5FF;color:#4C1D95;cursor:default">
           </div>
 
           <!-- Designation -->
           <div class="fld"><label>Designation</label>
-            <input type="text" id="lvDesig" value="PMAM" style="width:100%;padding:9px 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#0F2B8C">
+            <input type="text" id="lvDesig" value="PMAM" style="width:100%;padding:9px 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#4C1D95">
           </div>
 
           <!-- Ward — left column, same pattern as Fill Report -->
           <div class="fld">
             <label>Ward(s)</label>
             <div style="display:flex;align-items:center;gap:6px">
-              <select id="lvWardSel" style="flex:1;height:34px;padding:0 8px;border:1.5px solid rgba(100,150,255,0.3);border-radius:50px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.8);color:#0F2B8C">
+              <select id="lvWardSel" style="flex:1;height:34px;padding:0 8px;border:1.5px solid rgba(100,150,255,0.3);border-radius:50px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.8);color:#4C1D95">
                 <option value="">-- Select Ward --</option>
                 <option>Orthopaedics</option><option>Male Surgery Ward</option>
                 <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
@@ -863,7 +1033,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
           <!-- Duty Assigned To — right column, same row as Ward -->
           <div class="fld"><label>Duty Assigned To</label>
-            <select id="lvDuty" style="width:100%;height:34px;padding:0 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#0F2B8C">
+            <select id="lvDuty" style="width:100%;height:34px;padding:0 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#4C1D95">
               <option value="">-- Select Substitute PMAM --</option>
               <option>Tania Manhas</option><option>Abrar Choudhary</option>
               <option>Asia Firdose</option><option>Payal Sharma</option>
@@ -880,30 +1050,30 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
           <!-- From Date -->
           <div class="fld">
-            <label style="font-size:10px;font-weight:700;color:#1A3DB5;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">From Date</label>
+            <label style="font-size:10px;font-weight:700;color:#7B3FE4;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">From Date</label>
             <input type="date" id="lvFrom" oninput="calcLvDays()" onchange="calcLvDays()"
-              style="width:100%;padding:5px 4px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#0F2B8C">
+              style="width:100%;padding:5px 4px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#4C1D95">
           </div>
 
           <!-- To Date -->
           <div class="fld">
-            <label style="font-size:10px;font-weight:700;color:#1A3DB5;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">To Date</label>
+            <label style="font-size:10px;font-weight:700;color:#7B3FE4;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">To Date</label>
             <input type="date" id="lvTo" oninput="calcLvDays()" onchange="calcLvDays()"
-              style="width:100%;padding:5px 4px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#0F2B8C">
+              style="width:100%;padding:5px 4px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#4C1D95">
           </div>
 
           <!-- Total Days — auto, read-only -->
           <div class="fld">
-            <label style="font-size:10px;font-weight:700;color:#1A3DB5;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">Total No. of Days</label>
+            <label style="font-size:10px;font-weight:700;color:#7B3FE4;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">Total No. of Days</label>
             <input type="number" id="lvDays" placeholder="Auto" readonly
-              style="width:100%;padding:7px 10px;border:1.5px solid rgba(26,61,181,0.25);border-radius:10px;font-size:14px;font-weight:800;font-family:Inter,sans-serif;outline:none;background:#EEF3FF;color:#0F2B8C;cursor:default;text-align:center">
+              style="width:100%;padding:7px 10px;border:1.5px solid rgba(26,61,181,0.25);border-radius:10px;font-size:14px;font-weight:800;font-family:Inter,sans-serif;outline:none;background:#FAF5FF;color:#4C1D95;cursor:default;text-align:center">
           </div>
 
           <!-- Return Date — auto, read-only -->
           <div class="fld">
-            <label style="font-size:10px;font-weight:700;color:#1A3DB5;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">Return Date</label>
+            <label style="font-size:10px;font-weight:700;color:#7B3FE4;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">Return Date</label>
             <input type="date" id="lvReturn" readonly
-              style="width:100%;padding:7px 10px;border:1.5px solid rgba(26,61,181,0.25);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:#EEF3FF;color:#0F2B8C;cursor:default">
+              style="width:100%;padding:7px 10px;border:1.5px solid rgba(26,61,181,0.25);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:#FAF5FF;color:#4C1D95;cursor:default">
           </div>
         </div>
 
@@ -912,10 +1082,10 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <div class="fld">
             <label>Reason for Leave</label>
             <div style="margin-top:6px">
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:8px"><input type="radio" name="lvReason" id="r1" value="Personal Work (Home)" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Personal Work (Home)</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:8px"><input type="radio" name="lvReason" id="r2" value="Health Issue (Self/Family)" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Health Issue (Self/Family)</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:8px"><input type="radio" name="lvReason" id="r1" value="Personal Work (Home)" style="width:15px;height:15px;accent-color:#7B3FE4;cursor:pointer"> Personal Work (Home)</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:8px"><input type="radio" name="lvReason" id="r2" value="Health Issue (Self/Family)" style="width:15px;height:15px;accent-color:#7B3FE4;cursor:pointer"> Health Issue (Self/Family)</label>
               <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer">
-                <input type="radio" name="lvReason" id="r3" value="other" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer">
+                <input type="radio" name="lvReason" id="r3" value="other" style="width:15px;height:15px;accent-color:#7B3FE4;cursor:pointer">
                 Any Other:&nbsp;<input type="text" id="lvOther" placeholder="specify..." style="width:120px;height:26px;padding:2px 8px;margin-left:2px;border:1px solid rgba(100,150,255,0.3);border-radius:6px;font-size:11px;outline:none;font-family:Inter,sans-serif">
               </label>
             </div>
@@ -923,32 +1093,32 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <div class="fld">
             <label>Type of Leave</label>
             <div style="margin-top:6px">
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt1" value="Casual" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Casual Leave</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt2" value="Compensatory" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Compensatory (Fill details below)</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt3" value="Medical Leave" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Medical Leave</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt4" value="Maternity Leave" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Maternity Leave</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt5" value="Paternity Leave" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Paternity Leave</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer"><input type="radio" name="lvType" id="lt6" value="Leave Without Pay" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Leave Without Pay</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt1" value="Casual" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#7B3FE4;cursor:pointer"> Casual Leave</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt2" value="Compensatory" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#7B3FE4;cursor:pointer"> Compensatory (Fill details below)</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt3" value="Medical Leave" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#7B3FE4;cursor:pointer"> Medical Leave</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt4" value="Maternity Leave" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#7B3FE4;cursor:pointer"> Maternity Leave</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt5" value="Paternity Leave" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#7B3FE4;cursor:pointer"> Paternity Leave</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer"><input type="radio" name="lvType" id="lt6" value="Leave Without Pay" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#7B3FE4;cursor:pointer"> Leave Without Pay</label>
             </div>
           </div>
         </div>
 
         <!-- COMPENSATORY TABLE (shows only when Compensatory selected) -->
         <div id="compSection" style="display:none;margin-top:10px">
-          <div style="font-size:11px;font-weight:700;color:#0F2B8C;margin-bottom:6px">Compensatory Leave Details</div>
+          <div style="font-size:11px;font-weight:700;color:#4C1D95;margin-bottom:6px">Compensatory Leave Details</div>
           <div style="overflow-x:auto;border-radius:10px;border:1px solid rgba(100,150,255,0.15)">
             <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px">
               <thead><tr>
-                <th style="background:#0F2B8C;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap;width:50px;border-radius:8px 0 0 0">S.No</th>
-                <th style="background:#0F2B8C;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap">Date on Duty Performed</th>
-                <th style="background:#0F2B8C;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap">Holiday Name</th>
-                <th style="background:#0F2B8C;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap;border-radius:0 8px 0 0">Leave Date Requested</th>
+                <th style="background:#4C1D95;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap;width:50px;border-radius:8px 0 0 0">S.No</th>
+                <th style="background:#4C1D95;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap">Date on Duty Performed</th>
+                <th style="background:#4C1D95;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap">Holiday Name</th>
+                <th style="background:#4C1D95;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap;border-radius:0 8px 0 0">Leave Date Requested</th>
               </tr></thead>
               <tbody>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff">1</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd1_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="text" id="cd1_hol" placeholder="e.g. Eid" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd1_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF">2</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><input type="date" id="cd2_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><input type="text" id="cd2_hol" placeholder="e.g. Diwali" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><input type="date" id="cd2_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff">3</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd3_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="text" id="cd3_hol" placeholder="Holiday name" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd3_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;background:#F8FAFF">4</td><td style="padding:6px 8px;background:#F8FAFF"><input type="date" id="cd4_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;background:#F8FAFF"><input type="text" id="cd4_hol" placeholder="Holiday name" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;background:#F8FAFF"><input type="date" id="cd4_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
+                <tr><td style="text-align:center;color:#7B3FE4;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#fff">1</td><td style="padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#fff"><input type="date" id="cd1_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#fff"><input type="text" id="cd1_hol" placeholder="e.g. Eid" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#fff"><input type="date" id="cd1_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
+                <tr><td style="text-align:center;color:#7B3FE4;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#FAF5FF">2</td><td style="padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#FAF5FF"><input type="date" id="cd2_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#FAF5FF"><input type="text" id="cd2_hol" placeholder="e.g. Diwali" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#FAF5FF"><input type="date" id="cd2_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
+                <tr><td style="text-align:center;color:#7B3FE4;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#fff">3</td><td style="padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#fff"><input type="date" id="cd3_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#fff"><input type="text" id="cd3_hol" placeholder="Holiday name" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(123,63,228,0.12);background:#fff"><input type="date" id="cd3_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
+                <tr><td style="text-align:center;color:#7B3FE4;font-weight:700;padding:6px 8px;background:#FAF5FF">4</td><td style="padding:6px 8px;background:#FAF5FF"><input type="date" id="cd4_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;background:#FAF5FF"><input type="text" id="cd4_hol" placeholder="Holiday name" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;background:#FAF5FF"><input type="date" id="cd4_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
               </tbody>
             </table>
           </div>
@@ -1046,7 +1216,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
   <div class="modal-box">
     <div class="modal-title">Update Profile</div>
     <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:14px">
-      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#0F2B8C,#1A3DB5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:800;position:relative;overflow:hidden;cursor:pointer">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#4C1D95,#7B3FE4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:800;position:relative;overflow:hidden;cursor:pointer">
         <span id="mInitials">PM</span>
         <img id="mPhoto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;display:none" alt="">
         <input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer" onchange="updatePhoto(this)">
@@ -1183,8 +1353,8 @@ var WARD_CASE_TYPE = {
 function focusBox(boxId) {
   var b = document.getElementById(boxId);
   if (b && !b.classList.contains('nfield-disabled')) {
-    b.style.borderColor = '#1A3DB5';
-    b.style.boxShadow = '0 0 0 3px rgba(26,61,181,0.08)';
+    b.style.borderColor = '#7B3FE4';
+    b.style.boxShadow = '0 0 0 3px rgba(123,63,228,0.12)';
   }
 }
 function blurBox(boxId) {
@@ -1603,7 +1773,7 @@ function submitLeave() {
     desig: 'PMAM',
     timestamp: Date.now()
   };
-  msg.style.color = '#1A3DB5';
+  msg.style.color = '#7B3FE4';
   msg.textContent = 'Submitting leave request…';
   // Note: fetchPmamLeaves() onSnapshot will refresh leaveRequests[] + re-render
   // automatically once Firestore acknowledges this write. Do NOT push locally
@@ -2114,7 +2284,7 @@ function showFlaggedModal(){
       + disputedMsg
       + (!isDisputed
           ? '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
-            + '<button class="flag-act-btn" style="background:#1A3DB5;color:#fff" onclick="editFlaggedReport('+idx+')">✏️ Edit &amp; Resubmit</button>'
+            + '<button class="flag-act-btn" style="background:#7B3FE4;color:#fff" onclick="editFlaggedReport('+idx+')">✏️ Edit &amp; Resubmit</button>'
             + '<button class="flag-act-btn" style="background:#f9fafb;border:1.5px solid #e5e7eb;color:#374151" onclick="toggleDisputeArea('+idx+')">✅ My Data is Correct</button>'
             + '</div>'
             + '<div class="dispute-area" id="disputeArea_'+idx+'">'
