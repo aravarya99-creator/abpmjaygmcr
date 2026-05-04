@@ -287,6 +287,27 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .fcard-label{background:linear-gradient(90deg,#1A3DB5,#2952D9);padding:6px 14px;font-size:9px;font-weight:700;color:#fff;letter-spacing:0.7px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;border-radius:0 0 14px 14px}
 .fcard.auto .fcard-label{background:linear-gradient(90deg,#1032A0,#1A3DB5)}
 .auto-badge{background:rgba(255,255,255,0.25);color:#fff;font-size:7px;padding:2px 7px;border-radius:20px;font-weight:700;border:1px solid rgba(255,255,255,0.4)}
+/* DISABLED fcard — greyed out for wards that don't support this case type */
+.fcard.fcard-disabled{background:#F0F0F0;border-color:#D0D0D0;box-shadow:none;opacity:0.6;pointer-events:none}
+.fcard.fcard-disabled:hover{border-color:#D0D0D0;box-shadow:none;transform:none}
+.fcard.fcard-disabled input{color:#AAAAAA;background:transparent;cursor:not-allowed}
+.fcard.fcard-disabled .fcard-label{background:linear-gradient(90deg,#9E9E9E,#BDBDBD)}
+/* Auto-reg disabled state */
+.fcard.auto.fcard-disabled .fcard-label{background:linear-gradient(90deg,#9E9E9E,#BDBDBD)}
+
+/* ── NEW NFIELD (icon-input box) styles ── */
+.nfield-wrap{display:flex;flex-direction:column;gap:5px}
+.nfield-label{font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:4px}
+.nfield-box{display:flex;align-items:center;border:1.5px solid #D1D9F0;border-radius:10px;overflow:hidden;background:#fff;transition:border-color 0.15s,box-shadow 0.15s}
+.nfield-box:focus-within{border-color:#1A3DB5;box-shadow:0 0 0 3px rgba(26,61,181,0.08)}
+.nfield-icon{width:38px;min-width:38px;height:44px;display:flex;align-items:center;justify-content:center;border-right:1.5px solid #E8EEF8;flex-shrink:0}
+.nfield-input{flex:1;height:44px;border:none;outline:none;font-size:13px;font-weight:500;color:#0F2B8C;font-family:Inter,sans-serif;padding:0 12px;background:transparent;width:100%}
+.nfield-input::placeholder{color:#B0BBD5;font-weight:400;font-size:12px}
+.nfield-input[type=number]::-webkit-inner-spin-button,.nfield-input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+/* Disabled nfield state */
+.nfield-box.nfield-disabled{background:#F4F5F9;border-color:#DDE0EC;opacity:0.55;pointer-events:none}
+.nfield-box.nfield-disabled .nfield-input{color:#9AA0B8;cursor:not-allowed}
+.nfield-box.nfield-disabled .nfield-icon{background:#EBEBF0!important;border-right-color:#DDE0EC}
 
 /* METRICS */
 .metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
@@ -484,54 +505,216 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
     <!-- FILL REPORT -->
     <div class="sec active" id="sec-fillReport">
-      <div class="card">
-        <div class="card-hd">
-          Fill Today's Report
-          <span class="badge-warn" id="fillBadge">⚠️ Not filled yet</span>
+      <!-- NEW DESIGN CARD -->
+      <div style="background:#fff;border-radius:16px;box-shadow:0 2px 16px rgba(30,60,180,0.10);border:1px solid #E8EEFF;overflow:hidden;margin-bottom:14px">
+
+        <!-- Card Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 14px;border-bottom:1px solid #F0F4FF">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:38px;height:38px;border-radius:10px;background:#EEF3FF;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:800;color:#0F2B8C;line-height:1.2">Fill Today's Report</div>
+              <div style="font-size:11px;color:#6B7DB5;margin-top:2px">Enter today's case data and claim details</div>
+            </div>
+          </div>
+          <span id="fillBadge" style="background:#FFF7ED;border:1.5px solid #FED7AA;color:#C2410C;font-size:11px;font-weight:700;border-radius:20px;padding:5px 14px;white-space:nowrap">⚠ Pending Today</span>
         </div>
-        <!-- Correction banner — shown when editing a flagged report -->
-        <div id="flagCorrectionBanner" style="display:none;background:#fef3c7;border:1.5px solid #fcd34d;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#78350f;font-weight:600">
+
+        <!-- Correction banner -->
+        <div id="flagCorrectionBanner" style="display:none;background:#fef3c7;border-bottom:1.5px solid #fcd34d;padding:10px 20px;font-size:12px;color:#78350f;font-weight:600">
           ✏️ You are correcting a flagged report for <span id="flagCorrectionDate"></span>.
           The original values are pre-filled — correct the wrong fields and click Submit.
         </div>
-        <div class="sec-lbl">Basic Information</div>
-        <div class="frow">
-          <div class="fld"><label>Date</label><input type="date" id="eDate" style="width:145px"></div>
-          <div class="fld"><label>PMAM Name</label><input type="text" id="ePmam" value="" disabled style="width:160px"></div>
-          <div class="fld"><label>Select Ward</label>
-            <select id="eWard" style="width:190px">
-              <option value="">-- Select Ward --</option>
-              <option>Orthopaedics</option><option>Male Surgery Ward</option>
-              <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
-              <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
-              <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
-              <option>Optha</option><option>Onco</option><option>Gynae</option>
-              <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
-            </select>
+
+        <div style="padding:18px 20px">
+
+          <!-- BASIC INFORMATION SECTION -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            <span style="font-size:11px;font-weight:800;color:#1A3DB5;text-transform:uppercase;letter-spacing:1px">Basic Information</span>
+            <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(26,61,181,0.2),transparent)"></div>
           </div>
-          <button class="btn btn-pri" onclick="addWard()" style="margin-top:18px">+ Ward</button>
-        </div>
-        <div id="wardTags" style="display:flex;flex-wrap:wrap;gap:4px;min-height:28px;margin-bottom:10px;align-items:center">
-          <span style="font-size:11px;color:#BDBDBD;font-style:italic">No wards selected</span>
-        </div>
-        <div class="divider"></div>
-        <div class="sec-lbl">Case Data</div>
-        <div class="case-grid">
-          <div class="fcard"><div class="fcard-input"><input type="number" id="eIPD" placeholder="0" min="0"></div><div class="fcard-label">Ward IPD</div></div>
-          <div class="fcard"><div class="fcard-input"><input type="number" id="eMed" placeholder="0" min="0" oninput="autoReg()"></div><div class="fcard-label">Conservative Cases</div></div>
-          <div class="fcard"><div class="fcard-input"><input type="number" id="eSurg" placeholder="0" min="0" oninput="autoReg()"></div><div class="fcard-label">Surgery Cases</div></div>
-          <div class="fcard auto"><div class="fcard-input"><input type="number" id="eReg" placeholder="0" readonly></div><div class="fcard-label">Register <span class="auto-badge">AUTO</span></div></div>
-          <div class="fcard"><div class="fcard-input"><input type="number" id="ePre" placeholder="0" min="0"></div><div class="fcard-label">Preauth Initiated</div></div>
-          <div class="fcard"><div class="fcard-input"><input type="number" id="ePreAmt" placeholder="0" min="0"></div><div class="fcard-label">Preauth Amt (₹)</div></div>
-          <div class="fcard"><div class="fcard-input"><input type="number" id="eDis" placeholder="0" min="0"></div><div class="fcard-label">Discharge</div></div>
-          <div class="fcard"><div class="fcard-input"><input type="number" id="eClm" placeholder="0" min="0"></div><div class="fcard-label">Claim Amt (₹)</div></div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
-          <button class="btn btn-sec" onclick="clearForm()">Clear</button>
-          <button class="btn btn-pri" onclick="saveEntry()">Save Entry</button>
-        </div>
-        <div id="entryMsg" style="font-size:12px;text-align:right;margin-top:6px;min-height:16px"></div>
-      </div>
+
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;align-items:flex-end">
+            <!-- Date -->
+            <div style="display:flex;flex-direction:column;gap:5px;min-width:140px">
+              <label style="font-size:10.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.4px">DATE</label>
+              <input type="date" id="eDate"
+                style="height:40px;padding:0 12px;border:1.5px solid #D1D9F0;border-radius:10px;font-size:13px;color:#0F2B8C;font-family:Inter,sans-serif;outline:none;background:#fff;width:100%"
+                onfocus="this.style.borderColor='#1A3DB5'" onblur="this.style.borderColor='#D1D9F0'">
+            </div>
+            <!-- PMAM Name -->
+            <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px">
+              <label style="font-size:10.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.4px">PMAM NAME</label>
+              <input type="text" id="ePmam" value="" disabled
+                style="height:40px;padding:0 12px;border:1.5px solid #E9EDF8;border-radius:10px;font-size:13px;color:#6B7DB5;font-family:Inter,sans-serif;outline:none;background:#F8FAFF;width:100%;cursor:default">
+            </div>
+            <!-- Select Ward + Add Ward button -->
+            <div style="display:flex;flex-direction:column;gap:5px;flex:1.5;min-width:200px">
+              <label style="font-size:10.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.4px">SELECT WARD</label>
+              <div style="display:flex;gap:10px;align-items:center">
+                <select id="eWard"
+                  style="flex:1;height:40px;padding:0 12px;border:1.5px solid #D1D9F0;border-radius:10px;font-size:12px;color:#0F2B8C;font-family:Inter,sans-serif;outline:none;background:#fff"
+                  onfocus="this.style.borderColor='#1A3DB5'" onblur="this.style.borderColor='#D1D9F0'">
+                  <option value="">-- Select Ward --</option>
+                  <option>Orthopaedics</option><option>Male Surgery Ward</option>
+                  <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
+                  <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
+                  <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
+                  <option>Optha</option><option>Onco</option><option>Gynae</option>
+                  <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
+                </select>
+                <button onclick="addWard()"
+                  style="height:40px;padding:0 18px;background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(26,61,181,0.3)">
+                  <span style="font-size:16px;line-height:1">+</span> Add Ward
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ward Tags -->
+          <div id="wardTags" style="display:flex;flex-wrap:wrap;gap:4px;min-height:24px;margin-bottom:4px;align-items:center">
+            <span style="font-size:11px;color:#BDBDBD;font-style:italic">No wards selected</span>
+          </div>
+
+          <div style="height:1px;background:linear-gradient(90deg,rgba(26,61,181,0.12),transparent);margin:16px 0"></div>
+
+          <!-- CASE DATA SECTION -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+            <span style="font-size:11px;font-weight:800;color:#1A3DB5;text-transform:uppercase;letter-spacing:1px">Case Data</span>
+            <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(26,61,181,0.2),transparent)"></div>
+          </div>
+
+          <!-- 4-column input grid -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+
+            <!-- Ward IPD -->
+            <div class="nfield-wrap" id="wrap-eIPD">
+              <div class="nfield-label">WARD IPD <span style="color:#E53935">*</span></div>
+              <div class="nfield-box" id="box-eIPD">
+                <div class="nfield-icon" style="background:#EEF3FF">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+                </div>
+                <input type="number" id="eIPD" placeholder="Enter number" min="0"
+                  class="nfield-input"
+                  onfocus="focusBox('box-eIPD')" onblur="blurBox('box-eIPD')">
+              </div>
+            </div>
+
+            <!-- Conservative Cases -->
+            <div class="nfield-wrap" id="wrap-eMed">
+              <div class="nfield-label">CONSERVATIVE CASES <span style="color:#E53935">*</span></div>
+              <div class="nfield-box" id="box-eMed">
+                <div class="nfield-icon" style="background:#ECFDF5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#16A34A"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5S15.01 22 17.5 22s4.5-2.01 4.5-4.5S19.99 13 17.5 13zm0 7c-1.38 0-2.5-1.12-2.5-2.5S16.12 15 17.5 15s2.5 1.12 2.5 2.5S18.88 20 17.5 20zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z"/></svg>
+                </div>
+                <input type="number" id="eMed" placeholder="Enter number" min="0"
+                  class="nfield-input" oninput="autoReg()"
+                  onfocus="focusBox('box-eMed')" onblur="blurBox('box-eMed')">
+              </div>
+            </div>
+
+            <!-- Surgery Cases -->
+            <div class="nfield-wrap" id="wrap-eSurg">
+              <div class="nfield-label">SURGERY CASES <span style="color:#E53935">*</span></div>
+              <div class="nfield-box" id="box-eSurg">
+                <div class="nfield-icon" style="background:#FFF1F2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#E11D48"><path d="M19.07 4.93l-1.41 1.41C19 7.76 20 9.76 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93V6.5l4-4-4-4v2.07C5.05 1.06 1 6.04 1 12c0 6.07 4.93 11 11 11s11-4.93 11-11c0-3.04-1.23-5.79-3.22-7.79z"/></svg>
+                </div>
+                <input type="number" id="eSurg" placeholder="Enter number" min="0"
+                  class="nfield-input" oninput="autoReg()"
+                  onfocus="focusBox('box-eSurg')" onblur="blurBox('box-eSurg')">
+              </div>
+            </div>
+
+            <!-- Register AUTO -->
+            <div class="nfield-wrap" id="wrap-eReg">
+              <div class="nfield-label">REGISTER <span style="color:#E53935">*</span> <span style="background:#FFF7ED;color:#C2410C;font-size:9px;padding:1px 6px;border-radius:8px;font-weight:700;border:1px solid #FED7AA;margin-left:4px">AUTO</span></div>
+              <div class="nfield-box" id="box-eReg" style="background:#F8FAFF;border-color:#C8D5F0">
+                <div class="nfield-icon" style="background:#FFF7ED">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#C2410C"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                </div>
+                <input type="number" id="eReg" placeholder="0" readonly
+                  class="nfield-input" style="color:#C2410C;font-weight:700;background:transparent;cursor:default">
+              </div>
+            </div>
+
+            <!-- Preauth Initiated -->
+            <div class="nfield-wrap" id="wrap-ePre">
+              <div class="nfield-label">PREAUTH INITIATED <span style="color:#E53935">*</span></div>
+              <div class="nfield-box" id="box-ePre">
+                <div class="nfield-icon" style="background:#F0FDF4">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#16A34A"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                </div>
+                <input type="number" id="ePre" placeholder="Enter number" min="0"
+                  class="nfield-input"
+                  onfocus="focusBox('box-ePre')" onblur="blurBox('box-ePre')">
+              </div>
+            </div>
+
+            <!-- Preauth Amt -->
+            <div class="nfield-wrap" id="wrap-ePreAmt">
+              <div class="nfield-label">PREAUTH AMT (₹) <span style="color:#E53935">*</span></div>
+              <div class="nfield-box" id="box-ePreAmt">
+                <div class="nfield-icon" style="background:#FFF7ED">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#EA580C"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+                </div>
+                <input type="number" id="ePreAmt" placeholder="Enter amount" min="0"
+                  class="nfield-input"
+                  onfocus="focusBox('box-ePreAmt')" onblur="blurBox('box-ePreAmt')">
+              </div>
+            </div>
+
+            <!-- Discharge -->
+            <div class="nfield-wrap" id="wrap-eDis">
+              <div class="nfield-label">DISCHARGE <span style="color:#E53935">*</span></div>
+              <div class="nfield-box" id="box-eDis">
+                <div class="nfield-icon" style="background:#FFFBEB">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#D97706"><path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.84v4h5.66V9h3.84L12 2z"/></svg>
+                </div>
+                <input type="number" id="eDis" placeholder="Enter number" min="0"
+                  class="nfield-input"
+                  onfocus="focusBox('box-eDis')" onblur="blurBox('box-eDis')">
+              </div>
+            </div>
+
+            <!-- Claim Amt -->
+            <div class="nfield-wrap" id="wrap-eClm">
+              <div class="nfield-label">CLAIM AMT (₹) <span style="color:#E53935">*</span></div>
+              <div class="nfield-box" id="box-eClm">
+                <div class="nfield-icon" style="background:#EEF3FF">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                </div>
+                <input type="number" id="eClm" placeholder="Enter amount" min="0"
+                  class="nfield-input"
+                  onfocus="focusBox('box-eClm')" onblur="blurBox('box-eClm')">
+              </div>
+            </div>
+
+          </div><!-- end grid -->
+
+          <!-- Buttons row -->
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;align-items:center">
+            <div id="entryMsg" style="font-size:12px;color:#166534;flex:1;min-height:16px"></div>
+            <button onclick="clearForm()"
+              style="height:40px;padding:0 20px;background:#fff;color:#1A3DB5;border:1.5px solid #D1D9F0;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;gap:6px;transition:all 0.15s"
+              onmouseover="this.style.background='#F0F4FF'" onmouseout="this.style.background='#fff'">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+              Clear
+            </button>
+            <button onclick="saveEntry()"
+              style="height:40px;padding:0 24px;background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(26,61,181,0.3);transition:all 0.15s"
+              onmouseover="this.style.boxShadow='0 6px 18px rgba(26,61,181,0.45)'" onmouseout="this.style.boxShadow='0 4px 12px rgba(26,61,181,0.3)'">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+              Save Entry
+            </button>
+          </div>
+
+        </div><!-- end padding div -->
+      </div><!-- end new design card -->
       <div class="card">
         <div class="card-hd">Today's Entries</div>
         <div class="tbl-wrap">
@@ -894,6 +1077,93 @@ function closeModal() {
 var selWards = [];
 var allEntries = [];
 
+// ══════════════════════════════════════
+// WARD → CASE TYPE CONFIGURATION
+// conservative = eMed enabled, eSurg disabled
+// surgery      = eSurg enabled, eMed disabled
+// both         = both enabled
+// ══════════════════════════════════════
+var WARD_CASE_TYPE = {
+  // Conservative only
+  'Male Medicine Ward A':   'conservative',
+  'Male Medicine Ward B':   'conservative',
+  'Female Medicine Ward A': 'conservative',
+  'Female Medicine Ward B': 'conservative',
+  'MICU':                   'conservative',
+  'SICU':                   'both',
+  'Onco':                   'conservative',
+  'Disaster':               'both',
+  'Dialysis':               'conservative',
+  // Surgery only
+  'Optha':                  'surgery',
+  // Both
+  'Orthopaedics':           'both',
+  'Male Surgery Ward':      'both',
+  'Female Surgery Ward':    'both',
+  'Gynae':                  'both',
+  'ENT':                    'both',
+  'Dental':                 'both'
+};
+
+// ── Focus/blur helpers for nfield boxes ──
+function focusBox(boxId) {
+  var b = document.getElementById(boxId);
+  if (b && !b.classList.contains('nfield-disabled')) {
+    b.style.borderColor = '#1A3DB5';
+    b.style.boxShadow = '0 0 0 3px rgba(26,61,181,0.08)';
+  }
+}
+function blurBox(boxId) {
+  var b = document.getElementById(boxId);
+  if (b && !b.classList.contains('nfield-disabled')) {
+    b.style.borderColor = '';
+    b.style.boxShadow = '';
+  }
+}
+
+function applyWardCaseConfig(wardName) {
+  var type = WARD_CASE_TYPE[wardName] || 'both';
+  var medBox   = document.getElementById('box-eMed');
+  var surgBox  = document.getElementById('box-eSurg');
+  var medInput  = document.getElementById('eMed');
+  var surgInput = document.getElementById('eSurg');
+
+  if (!medInput || !surgInput) return;
+
+  if (type === 'conservative') {
+    // Enable Conservative, disable Surgery
+    if (medBox)  medBox.classList.remove('nfield-disabled');
+    medInput.disabled = false; medInput.placeholder = 'Enter number';
+    if (surgBox) surgBox.classList.add('nfield-disabled');
+    surgInput.disabled = true; surgInput.value = ''; surgInput.placeholder = 'N/A';
+  } else if (type === 'surgery') {
+    // Enable Surgery, disable Conservative
+    if (surgBox) surgBox.classList.remove('nfield-disabled');
+    surgInput.disabled = false; surgInput.placeholder = 'Enter number';
+    if (medBox)  medBox.classList.add('nfield-disabled');
+    medInput.disabled = true; medInput.value = ''; medInput.placeholder = 'N/A';
+  } else {
+    // Both enabled
+    if (medBox)  medBox.classList.remove('nfield-disabled');
+    medInput.disabled = false; medInput.placeholder = 'Enter number';
+    if (surgBox) surgBox.classList.remove('nfield-disabled');
+    surgInput.disabled = false; surgInput.placeholder = 'Enter number';
+  }
+  autoReg();
+}
+
+function resetWardCaseConfig() {
+  var medBox   = document.getElementById('box-eMed');
+  var surgBox  = document.getElementById('box-eSurg');
+  var medInput  = document.getElementById('eMed');
+  var surgInput = document.getElementById('eSurg');
+  if (medBox)   medBox.classList.remove('nfield-disabled');
+  if (surgBox)  surgBox.classList.remove('nfield-disabled');
+  if (medInput)  { medInput.disabled = false; medInput.placeholder = 'Enter number'; medInput.value = ''; }
+  if (surgInput) { surgInput.disabled = false; surgInput.placeholder = 'Enter number'; surgInput.value = ''; }
+  autoReg();
+}
+
 function addWard() {
   var s = document.getElementById('eWard');
   var v = s.value;
@@ -921,26 +1191,39 @@ function addWard() {
   selWards.push(v);
   s.value = '';
   renderSelWards();
+  // Apply case type config for the selected ward
+  applyWardCaseConfig(v);
 }
 function renderSelWards() {
   var d = document.getElementById('wardTags');
   if (selWards.length === 0) {
     d.innerHTML = '<span style="font-size:11px;color:#BDBDBD;font-style:italic">No wards selected</span>';
+    resetWardCaseConfig();
   } else {
     d.innerHTML = selWards.map(function(w, i) {
       return '<span class="wtag">' + w + '<span style="cursor:pointer;margin-left:2px;font-weight:800" onclick="selWards.splice(' + i + ',1);renderSelWards()">×</span></span>';
     }).join('');
+    // Re-apply config for currently selected ward
+    if (selWards.length > 0) applyWardCaseConfig(selWards[0]);
   }
 }
 function autoReg() {
-  var m = parseInt(document.getElementById('eMed').value) || 0;
-  var s = parseInt(document.getElementById('eSurg').value) || 0;
-  document.getElementById('eReg').value = (m + s) || '';
+  var medInput  = document.getElementById('eMed');
+  var surgInput = document.getElementById('eSurg');
+  var m = (medInput  && !medInput.disabled)  ? (parseInt(medInput.value)  || 0) : 0;
+  var s = (surgInput && !surgInput.disabled) ? (parseInt(surgInput.value) || 0) : 0;
+  var regEl = document.getElementById('eReg');
+  if (regEl) regEl.value = (m + s) || '';
 }
 function clearForm() {
   ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].forEach(function(id) {
-    document.getElementById(id).value = '';
+    var el = document.getElementById(id);
+    if (el) { el.value = ''; el.disabled = false; el.placeholder = id === 'eReg' ? '0' : 'Enter number'; }
   });
+  var medBox  = document.getElementById('box-eMed');
+  var surgBox = document.getElementById('box-eSurg');
+  if (medBox)  medBox.classList.remove('nfield-disabled');
+  if (surgBox) surgBox.classList.remove('nfield-disabled');
   selWards = [];
   renderSelWards();
   document.getElementById('eDate').value = new Date().toISOString().split('T')[0];
@@ -984,8 +1267,13 @@ function saveEntry() {
       selWards = [];
       renderSelWards();
       ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].forEach(function(id){
-        var el = document.getElementById(id); if (el) el.value='';
+        var el = document.getElementById(id);
+        if (el) { el.value = ''; el.disabled = false; el.placeholder = id === 'eReg' ? '0' : 'Enter number'; }
       });
+      var medBox2  = document.getElementById('box-eMed');
+      var surgBox2 = document.getElementById('box-eSurg');
+      if (medBox2)  medBox2.classList.remove('nfield-disabled');
+      if (surgBox2) surgBox2.classList.remove('nfield-disabled');
       setTimeout(function(){ msg.textContent=''; }, 3000);
     })
     .catch(function(e) {
@@ -1816,6 +2104,8 @@ function editFlaggedReport(idx){
     // Pre-fill wards
     selWards = Array.isArray(r.wards) ? r.wards.slice() : (r.ward ? [r.ward] : []);
     if (typeof renderSelWards === 'function') renderSelWards();
+    // Apply case config for the pre-filled ward
+    if (selWards.length > 0 && typeof applyWardCaseConfig === 'function') applyWardCaseConfig(selWards[0]);
 
     // Store the doc ID so saveEntry knows to UPDATE not ADD
     _editingFlagDoc = { id: r._docId, idx: idx };
@@ -1906,8 +2196,13 @@ function submitDispute(idx){
         selWards = [];
         if (typeof renderSelWards === 'function') renderSelWards();
         ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].forEach(function(id){
-          var el = document.getElementById(id); if (el) el.value = '';
+          var el = document.getElementById(id);
+          if (el) { el.value = ''; el.disabled = false; el.placeholder = id === 'eReg' ? '0' : 'Enter number'; }
         });
+        var mc = document.getElementById('box-eMed');
+        var sc = document.getElementById('box-eSurg');
+        if (mc) mc.classList.remove('nfield-disabled');
+        if (sc) sc.classList.remove('nfield-disabled');
         document.getElementById('eDate').value = new Date().toISOString().split('T')[0];
         setTimeout(function(){ msg.textContent = ''; }, 3000);
       })
