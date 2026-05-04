@@ -34,7 +34,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F0FF 0%,#C8DCFF 50%,#D6EAFF 100%);min-height:100vh;overflow-x:hidden}
 
-/* ===== PMAM BANNER HEADER (NHA-STYLE PINK→PURPLE) ===== */
+/* ===== PMAM BANNER HEADER (EXACT NHA STYLE) ===== */
 .pmam-header{
   width:100%;
   position:sticky;
@@ -46,105 +46,60 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
   max-width:100vw;
 }
 
-/* Banner — NHA-inspired pink-to-purple gradient */
+/* Banner — NHA pink-to-purple gradient */
 .banner-wrap{
   width:100%;
   position:relative;
-  height:78px;
+  height:64px;
   overflow:visible;
   background:linear-gradient(90deg,#E8869A 0%,#D6739A 18%,#B85F9D 38%,#9B4DA0 58%,#7E3DA3 78%,#6B33A0 100%);
   display:flex;
   align-items:center;
   padding:0 24px;
-  gap:18px;
-  box-shadow:0 2px 8px rgba(107,51,160,0.25);
+  gap:14px;
+  box-shadow:0 1px 3px rgba(107,51,160,0.15);
 }
 
-/* Logo container — circular white badge with subtle border */
+/* Two circular logos side-by-side, like NHA */
+.banner-logos{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+}
 .banner-logo{
-  width:56px;height:56px;border-radius:50%;
+  width:46px;height:46px;border-radius:50%;
   background:#fff;
-  border:2.5px solid rgba(255,255,255,0.85);
+  border:2px solid rgba(255,255,255,0.9);
   overflow:hidden;
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
-  box-shadow:0 2px 6px rgba(0,0,0,0.18);
+  box-shadow:0 2px 4px rgba(0,0,0,0.15);
 }
-.banner-logo svg{width:42px;height:42px}
+.banner-logo svg{width:38px;height:38px}
 
-/* Title block — sits next to logo, white text */
-.banner-titles{
+/* Single bold title — NHA style */
+.banner-title{
   flex:0 0 auto;
-  display:flex;
-  flex-direction:column;
-  gap:1px;
-  max-width:420px;
-}
-.banner-line1{
-  font-size:11.5px;font-weight:700;
-  color:rgba(255,255,255,0.92);
-  letter-spacing:1.2px;
-  text-transform:uppercase;
-  font-family:"Inter",Arial,sans-serif;
-}
-.banner-line2{
-  font-size:20px;font-weight:800;
-  color:#fff;
-  letter-spacing:0.8px;
-  line-height:1.1;
-  text-shadow:0 1px 2px rgba(0,0,0,0.18);
-  font-family:"Inter",Arial,sans-serif;
-}
-.banner-line3{
-  font-size:10.5px;font-weight:600;
-  color:rgba(255,255,255,0.85);
-  letter-spacing:0.4px;
-  font-style:italic;
-  font-family:"Inter",Arial,sans-serif;
-  margin-top:1px;
-}
-
-/* Hospital name strip below gradient */
-.banner-hospital-strip{
-  width:100%;
-  height:34px;
-  background:#FAF9F8;
-  border-bottom:1px solid #E5DDD3;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  position:relative;
-  padding:0 24px;
-}
-.banner-hospital-strip::before{
-  content:"";
-  position:absolute;
-  left:0; top:0; bottom:0;
-  width:140px;
-  background:linear-gradient(90deg,rgba(232,134,154,0.18),rgba(107,51,160,0.10) 60%,transparent);
-}
-.bhs-name{
-  font-size:13px;
+  font-size:19px;
   font-weight:800;
-  color:#9B1C2E;
-  letter-spacing:1px;
-  text-transform:uppercase;
+  color:#fff;
+  letter-spacing:0.3px;
   font-family:"Inter",Arial,sans-serif;
-  z-index:1;
+  text-shadow:0 1px 2px rgba(0,0,0,0.12);
+  white-space:nowrap;
 }
 
-/* Right-side container for user pill */
+/* Spacer to push profile to far right */
+.banner-spacer{flex:1}
+
+/* Right side container */
 .banner-overlay{
-  position:absolute;
-  top:0;right:0;bottom:0;
-  width:auto;
-  background:transparent;
   display:flex;
   align-items:center;
-  justify-content:flex-end;
-  padding:0 18px;
   gap:10px;
-  z-index:10;
+  flex-shrink:0;
+  margin-left:auto;
 }
 .user-pill{
   display:flex;
@@ -153,7 +108,7 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
   background:rgba(255,255,255,0.18);
   border:1.5px solid rgba(255,255,255,0.45);
   border-radius:50px;
-  padding:5px 14px 5px 5px;
+  padding:4px 14px 4px 4px;
   cursor:pointer;
   position:relative;
   backdrop-filter:blur(6px);
@@ -164,7 +119,7 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
   border-color:rgba(255,255,255,0.6);
 }
 .uphoto{
-  width:42px;height:42px;border-radius:50%;
+  width:38px;height:38px;border-radius:50%;
   background:rgba(255,255,255,0.25);
   border:2px solid rgba(255,255,255,0.65);
   display:flex;align-items:center;justify-content:center;
@@ -172,11 +127,70 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 }
 .uphoto img{width:100%;height:100%;object-fit:cover;display:none;border-radius:50%}
 .uphoto input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.uphoto .ini{font-size:14px;font-weight:800;color:#fff;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,0.2)}
+.uphoto .ini{font-size:13px;font-weight:800;color:#fff;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,0.2)}
 .uinfo{display:flex;flex-direction:column;gap:1px}
-.uname{font-size:13px;font-weight:800;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,0.18)}
-.udesig{font-size:9.5px;color:rgba(255,255,255,0.88);white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px;font-weight:600}
-.dd-arrow{font-size:11px;color:rgba(255,255,255,0.85);margin-left:5px}
+.uname{font-size:12.5px;font-weight:800;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,0.18)}
+.udesig{font-size:9px;color:rgba(255,255,255,0.88);white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px;font-weight:600}
+.dd-arrow{font-size:11px;color:rgba(255,255,255,0.85);margin-left:4px}
+
+/* ===== NHA-STYLE SECONDARY STRIP ===== */
+.banner-secondary-strip{
+  width:100%;
+  height:36px;
+  background:linear-gradient(90deg,#F4ECF6 0%,#FFFFFF 100%);
+  border-bottom:1px solid #E5DDE8;
+  display:flex;
+  align-items:center;
+  padding:0 18px;
+  position:relative;
+  gap:8px;
+}
+/* Purple curve-shape on the left */
+.banner-secondary-strip::before{
+  content:"";
+  position:absolute;
+  left:0; top:0; bottom:-1px;
+  width:135px;
+  background:linear-gradient(90deg,#7E3DA3 0%,#9B4DA0 60%,transparent 100%);
+  clip-path:polygon(0 0, 100% 0, calc(100% - 25px) 100%, 0 100%);
+  z-index:0;
+}
+/* Icon buttons */
+.bss-icons{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  z-index:1;
+  position:relative;
+}
+.bss-icon{
+  width:30px;height:30px;
+  border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:background 0.15s;
+  background:transparent;
+  border:none;
+  color:#fff;
+}
+.bss-icon:hover{
+  background:rgba(255,255,255,0.2);
+}
+.bss-icon svg{width:18px;height:18px;fill:#fff}
+/* Centered hospital name in red */
+.bss-hospital{
+  flex:1;
+  text-align:center;
+  font-size:13.5px;
+  font-weight:800;
+  color:#9B1C2E;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  font-family:"Inter",Arial,sans-serif;
+  z-index:1;
+  position:relative;
+  padding-right:120px; /* offset for visual centering against left icons */
+}
 
 /* DROPDOWN */
 .user-dropdown{
@@ -384,27 +398,49 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 <!-- PRINT MOUNT: used for leave application printing -->
 <div class="leave-print-mount" id="leavePrintMount" style="display:none"></div>
 
-<!-- ===== PMAM BANNER HEADER (NHA-STYLE) ===== -->
+<!-- ===== PMAM BANNER HEADER (EXACT NHA STYLE) ===== -->
 <div class="pmam-header">
   <div class="banner-wrap">
-    <!-- PMJAY Logo -->
-    <div class="banner-logo">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="48" fill="#4A35B5" stroke="#FFD700" stroke-width="3"/>
-        <text x="50" y="35" text-anchor="middle" font-size="8" fill="#FFD700" font-weight="bold" font-family="Arial">Pradhan Mantri</text>
-        <text x="50" y="45" text-anchor="middle" font-size="7" fill="#fff" font-family="Arial">Jan Arogya</text>
-        <text x="50" y="55" text-anchor="middle" font-size="7" fill="#fff" font-family="Arial">Yojana</text>
-        <circle cx="50" cy="68" r="10" fill="#138808" opacity="0.8"/>
-        <text x="50" y="72" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold" font-family="Arial">AB</text>
-        <text x="50" y="88" text-anchor="middle" font-size="7" fill="#FFD700" font-family="Arial">PM-JAY</text>
-      </svg>
+    <!-- Two circular logos side-by-side, like NHA -->
+    <div class="banner-logos">
+      <!-- Logo 1: National Health Authority style emblem -->
+      <div class="banner-logo" title="National Health Authority">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="#fff"/>
+          <!-- Ashoka chakra style -->
+          <circle cx="50" cy="50" r="22" fill="none" stroke="#1E3A8A" stroke-width="2.5"/>
+          <g stroke="#1E3A8A" stroke-width="1.5" stroke-linecap="round">
+            <line x1="50" y1="28" x2="50" y2="72"/>
+            <line x1="28" y1="50" x2="72" y2="50"/>
+            <line x1="34.4" y1="34.4" x2="65.6" y2="65.6"/>
+            <line x1="65.6" y1="34.4" x2="34.4" y2="65.6"/>
+            <line x1="40" y1="29.5" x2="60" y2="70.5"/>
+            <line x1="60" y1="29.5" x2="40" y2="70.5"/>
+            <line x1="29.5" y1="40" x2="70.5" y2="60"/>
+            <line x1="70.5" y1="40" x2="29.5" y2="60"/>
+          </g>
+          <circle cx="50" cy="50" r="3" fill="#1E3A8A"/>
+          <text x="50" y="92" text-anchor="middle" font-size="9" font-weight="bold" fill="#1E3A8A" font-family="Arial">NHA</text>
+        </svg>
+      </div>
+      <!-- Logo 2: Ayushman Bharat PM-JAY -->
+      <div class="banner-logo" title="Ayushman Bharat PM-JAY">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="#FF9933"/>
+          <circle cx="50" cy="50" r="36" fill="#fff"/>
+          <text x="50" y="32" text-anchor="middle" font-size="7" fill="#1E3A8A" font-weight="bold" font-family="Arial">PRADHAN MANTRI</text>
+          <text x="50" y="42" text-anchor="middle" font-size="6.5" fill="#1E3A8A" font-family="Arial">JAN AROGYA</text>
+          <text x="50" y="50" text-anchor="middle" font-size="6.5" fill="#1E3A8A" font-family="Arial">YOJANA</text>
+          <circle cx="50" cy="62" r="9" fill="#138808"/>
+          <text x="50" y="65.5" text-anchor="middle" font-size="7" fill="#fff" font-weight="bold" font-family="Arial">AB</text>
+          <text x="50" y="82" text-anchor="middle" font-size="7" fill="#FF9933" font-weight="bold" font-family="Arial">PM-JAY</text>
+        </svg>
+      </div>
     </div>
-    <!-- Main Titles -->
-    <div class="banner-titles">
-      <div class="banner-line1">Pradhan Mantri</div>
-      <div class="banner-line2">Arogya Mitra</div>
-      <div class="banner-line3">Certified Front Line Health Service Professional</div>
-    </div>
+    <!-- Single bold title (NHA style) -->
+    <div class="banner-title">PMAM Reporting System - GMC Rajouri</div>
+    <!-- Spacer -->
+    <div class="banner-spacer"></div>
     <!-- User pill on right -->
     <div class="banner-overlay">
       <div class="user-pill" onclick="toggleDD()">
@@ -431,9 +467,20 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
       </div>
     </div>
   </div>
-  <!-- Hospital name strip (NHA-style) -->
-  <div class="banner-hospital-strip">
-    <div class="bhs-name">GMC &amp; AH RAJOURI — PMAM REPORTING PORTAL</div>
+  <!-- Secondary strip with icons + hospital name (NHA-style) -->
+  <div class="banner-secondary-strip">
+    <div class="bss-icons">
+      <button class="bss-icon" title="Dashboard" onclick="navIconDashboard()">
+        <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" style="display:none"/><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+      </button>
+      <button class="bss-icon" title="Home" onclick="navIconHome()">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      </button>
+      <button class="bss-icon" title="Refresh" onclick="navIconRefresh()">
+        <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+      </button>
+    </div>
+    <div class="bss-hospital">GMC RAJOURI (HOSP1G10293) - RAJAURI</div>
   </div>
 
   <!-- TICKER -->
@@ -1042,6 +1089,32 @@ window.addEventListener('DOMContentLoaded', function() {
 // ══════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════
+// ─── NHA SECONDARY-STRIP ICON HANDLERS ───
+function navIconDashboard() {
+  // Switch to Dashboard section + activate sidebar tab
+  var dashSbi = document.querySelector(".sbi[onclick*=\"'dashboard'\"]");
+  goSec('dashboard', dashSbi);
+}
+function navIconHome() {
+  // Scroll smoothly to top of page
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function navIconRefresh() {
+  // Reload data from Firestore — re-fetch reports + leaves + tickers
+  try {
+    if (typeof fetchPmamReports === 'function') fetchPmamReports();
+    if (typeof fetchPmamLeaves === 'function') fetchPmamLeaves();
+    if (typeof updateDashboard === 'function') updateDashboard();
+    // Brief visual feedback
+    var btn = document.querySelector(".bss-icon[title='Refresh'] svg");
+    if (btn) {
+      btn.style.transition = 'transform 0.6s ease';
+      btn.style.transform = 'rotate(360deg)';
+      setTimeout(function() { btn.style.transform = ''; }, 700);
+    }
+  } catch (e) { console.error('Refresh error:', e); }
+}
+
 function goSec(id, el) {
   document.querySelectorAll('.sec').forEach(function(s) { s.classList.remove('active'); });
   var sec = document.getElementById('sec-' + id);
