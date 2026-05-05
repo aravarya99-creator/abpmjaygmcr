@@ -416,7 +416,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <input type="file" accept="image/*" onchange="loadPhoto(this)">
         </div>
         <div class="uinfo">
-          <div class="uname" id="hName">PMAM USER</div>
+          <div class="uname" id="hName"></div>
           <div class="udesig" id="hRole">PMAM</div>
         </div>
         <span class="dd-arrow">▾</span>
@@ -434,7 +434,8 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
       </div>
     </div>
   </div>
-  <!-- TICKER: loaded from Firestore via adminTicker -->
+
+
 </div>
 
 <!-- LAYOUT -->
@@ -496,10 +497,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
     <!-- FILL REPORT -->
     <div class="sec active" id="sec-fillReport">
-
       <div class="fr-card">
-
-        <!-- CARD HEADER — blue background -->
         <div class="fr-card-header">
           <div class="fr-card-header-left">
             <div class="fr-card-title">Fill Today's Report</div>
@@ -510,29 +508,21 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             Today's report not filled yet
           </div>
         </div>
-
-        <!-- Correction banner -->
         <div id="flagCorrectionBanner" style="display:none;background:#fef3c7;border-bottom:1.5px solid #fcd34d;padding:10px 18px;font-size:12px;color:#78350f;font-weight:600">
           ✏️ You are correcting a flagged report for <span id="flagCorrectionDate"></span>.
           The original values are pre-filled — correct the wrong fields and click Submit.
         </div>
-
-        <!-- BASIC INFORMATION BANNER -->
         <div class="fr-sec-banner">Basic Information</div>
-
         <div class="fr-section" style="padding-top:6px">
           <div class="fr-fields-row" style="align-items:flex-end">
-
             <div class="fr-field" style="width:145px">
               <label>Date</label>
               <input type="date" id="eDate">
             </div>
-
             <div class="fr-field" style="width:170px">
               <label>PMAM Name</label>
               <input type="text" id="ePmam" value="" disabled>
             </div>
-
             <div class="fr-field" style="flex:0.5;min-width:160px">
               <label>Select Ward</label>
               <div style="display:flex;gap:8px;align-items:center">
@@ -548,94 +538,74 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
                 <button class="fr-ward-btn" onclick="addWard()">+ Add</button>
               </div>
             </div>
-
             <div class="fr-ward-status" id="wardStatusPill">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="#CE93D8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
               <span id="wardStatusText">No Ward Selected</span>
             </div>
-
           </div>
           <div class="fr-ward-row" id="wardTags"></div>
         </div>
-
         <div class="fr-divider"></div>
-
-        <!-- CASE DATA BANNER -->
         <div class="fr-sec-banner">Case Data</div>
-
-        <div class="fr-section" style="padding-top:6px">
-          <div class="fr-fields-row">
-
-            <div class="fr-field" style="width:88px" id="wrap-eIPD">
+        <div class="fr-section" style="padding-top:6px;overflow-x:auto">
+          <div class="fr-fields-row" style="flex-wrap:nowrap;align-items:flex-end">
+            <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eIPD">
               <label>Ward IPD</label>
               <input type="number" id="eIPD" placeholder="Ward IPD" min="0">
             </div>
-
-            <div class="fr-field" style="width:115px" id="wrap-eMed">
-              <label>Conservative Cases</label>
+            <div class="fr-field" style="flex:1;min-width:95px" id="wrap-eMed">
+              <label>Conservative</label>
               <input type="number" id="eMed" placeholder="Conservative" min="0" oninput="autoReg()">
             </div>
-
-            <div class="fr-field" style="width:105px" id="wrap-eSurg">
+            <div class="fr-field" style="flex:1;min-width:85px" id="wrap-eSurg">
               <label>Surgery Cases</label>
               <input type="number" id="eSurg" placeholder="Surgery" min="0" oninput="autoReg()">
             </div>
-
-            <div class="fr-field" style="width:95px;position:relative" id="wrap-eReg">
+            <div class="fr-field" style="flex:1;min-width:80px;position:relative" id="wrap-eReg">
               <label>Register</label>
               <input type="number" id="eReg" placeholder="Auto" readonly>
               <span class="fr-auto-tag">AUTO</span>
             </div>
-
-            <div class="fr-field" style="width:120px" id="wrap-ePre">
+            <div class="fr-field" style="flex:1;min-width:95px" id="wrap-ePre">
               <label>Preauth Initiated</label>
               <input type="number" id="ePre" placeholder="Preauth No." min="0">
             </div>
-
-            <div class="fr-field" style="width:130px" id="wrap-ePreAmt">
+            <div class="fr-field" style="flex:1;min-width:105px" id="wrap-ePreAmt">
               <label>Preauth Amt (₹)</label>
               <div class="fr-rupee-wrap" onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'" onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
                 <span class="fr-rupee-sym">₹</span>
                 <input type="number" id="ePreAmt" placeholder="Amount" min="0" class="fr-rupee-input">
               </div>
             </div>
-
-            <div class="fr-field" style="width:90px" id="wrap-eDis">
+            <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eDis">
               <label>Discharge</label>
               <input type="number" id="eDis" placeholder="Discharge" min="0">
             </div>
-
-            <div class="fr-field" style="width:130px" id="wrap-eClm">
+            <div class="fr-field" style="flex:1;min-width:105px" id="wrap-eClm">
               <label>Claim Amt (₹)</label>
               <div class="fr-rupee-wrap" onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'" onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
                 <span class="fr-rupee-sym">₹</span>
                 <input type="number" id="eClm" placeholder="Amount" min="0" class="fr-rupee-input">
               </div>
             </div>
-
           </div>
         </div>
-
         <div id="entryMsg" style="padding:2px 18px 4px;font-size:12px;font-weight:500;min-height:20px"></div>
         <div class="fr-action-row">
           <button class="fr-btn-sec" onclick="clearForm()">Clear</button>
           <button class="fr-btn-pri" onclick="saveEntry()">Save Report</button>
         </div>
-
       </div>
-
-      <!-- TODAY'S ENTRIES TABLE -->
       <div class="fr-tbl-card">
         <div class="fr-tbl-header">
           <span>Today's Entries</span>
-          <span class="fr-tbl-note">Only today's data shown — check Records for other dates</span>
+          <span class="fr-tbl-note">Only today's data — check Records for other dates</span>
         </div>
         <div class="tbl-wrap">
           <table><thead><tr><th>Date</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Del</th></tr></thead>
           <tbody id="entryTbody"><tr><td colspan="12" class="empty-td">No entries today yet</td></tr></tbody></table>
         </div>
       </div>
-
     </div>
 
     <!-- MY RECORDS -->
@@ -931,6 +901,21 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 <script>
 // ── All init runs after DOM is fully loaded ──
 window.addEventListener('DOMContentLoaded', function() {
+  // ── Restore user name from session immediately ──
+  try {
+    var _u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+    var _n = _u.name || _u.email || '';
+    if (_n) {
+      var _hn = document.getElementById('hName');
+      if (_hn) _hn.textContent = _n.toUpperCase();
+      var _ini = document.getElementById('hInitials');
+      if (_ini) _ini.textContent = _n.substring(0,2).toUpperCase();
+      var _ep = document.getElementById('ePmam');
+      if (_ep) _ep.value = _n;
+      var _pb = document.getElementById('pmamNameBadge');
+      if (_pb) _pb.textContent = _n;
+    }
+  } catch(e) {}
 
   // Set today's date in fill report
   document.getElementById('eDate').value = new Date().toISOString().split('T')[0];
@@ -1109,7 +1094,6 @@ function addWard() {
   applyWardCaseConfig(v);
 }
 
-// ── Ward status pill update ──
 function updateWardStatus() {
   var pill = document.getElementById('wardStatusPill');
   var txt  = document.getElementById('wardStatusText');
@@ -1119,7 +1103,7 @@ function updateWardStatus() {
     pill.className = 'fr-ward-status has-ward';
     txt.textContent = selWards.join(', ');
     if (tags) tags.innerHTML = selWards.map(function(w,i){
-      return '<span class="fr-wtag">'+w+'<span onclick="selWards.splice('+i+',1);renderSelWards();">×</span></span>';
+      return '<span class="fr-wtag">'+w+'<span onclick="selWards.splice('+i+',1);renderSelWards()">×</span></span>';
     }).join('');
   } else {
     pill.className = 'fr-ward-status';
@@ -1230,7 +1214,7 @@ function updateDashboard() {
 
   // Build row HTML once, use for both dashboard + fill-report recent list
   var rowsHtml = allEntries.map(function(e) {
-    return '<tr><td>' + formatDate(e.date) + '</td>'
+    return '<tr><td>'+formatDate(e.date)+'</td>'
       + '<td>' + (e.wards||[]).map(function(w){return '<span class="wtag">'+w+'</span>';}).join('') + '</td>'
       + '<td>' + e.ipd + '</td><td>' + e.med + '</td><td>' + e.surg + '</td>'
       + '<td><strong>' + e.reg + '</strong></td><td>' + e.pre + '</td>'
@@ -1248,26 +1232,21 @@ function updateDashboard() {
   var todayOnly = new Date().toISOString().split('T')[0];
   var etb = document.getElementById('entryTbody');
   if (etb) {
-    var tEntries = allEntries.filter(function(e){ return e.date === todayOnly; });
-    tEntries.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
-    if (tEntries.length === 0) {
-      etb.innerHTML = '<tr><td colspan="12" class="empty-td">No entries today — check <strong>Records</strong> for other dates</td></tr>';
-    } else {
-      etb.innerHTML = tEntries.map(function(e){
-        var conv = e.ipd>0?((e.reg/e.ipd)*100).toFixed(1)+'%':'—';
-        var ws = Array.isArray(e.wards)?e.wards:(e.ward?[e.ward]:[]);
-        return '<tr><td>'+formatDate(e.date)+'</td>'
-          +'<td>'+ws.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('')+'</td>'
-          +'<td>'+e.ipd+'</td><td>'+e.med+'</td><td>'+e.surg+'</td>'
-          +'<td><strong>'+e.reg+'</strong></td>'
-          +'<td>'+e.pre+'</td>'
-          +'<td>'+Number(e.preAmt).toLocaleString('en-IN')+'</td>'
-          +'<td>'+e.dis+'</td>'
-          +'<td>'+Number(e.clm).toLocaleString('en-IN')+'</td>'
-          +'<td><strong>'+conv+'</strong></td>'
-          +'<td></td></tr>';
-      }).join('');
-    }
+    var tE = allEntries.filter(function(e){return e.date===todayOnly;});
+    tE.sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+    etb.innerHTML = tE.length===0
+      ? '<tr><td colspan="12" class="empty-td">No entries today — check <strong>Records</strong> for other dates</td></tr>'
+      : tE.map(function(e){
+          var conv=e.ipd>0?((e.reg/e.ipd)*100).toFixed(1)+'%':'—';
+          var ws=Array.isArray(e.wards)?e.wards:(e.ward?[e.ward]:[]);
+          return '<tr><td>'+formatDate(e.date)+'</td>'
+            +'<td>'+ws.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('')+'</td>'
+            +'<td>'+e.ipd+'</td><td>'+e.med+'</td><td>'+e.surg+'</td>'
+            +'<td><strong>'+e.reg+'</strong></td><td>'+e.pre+'</td>'
+            +'<td>'+Number(e.preAmt).toLocaleString('en-IN')+'</td>'
+            +'<td>'+e.dis+'</td><td>'+Number(e.clm).toLocaleString('en-IN')+'</td>'
+            +'<td><strong>'+conv+'</strong></td><td></td></tr>';
+        }).join('');
   }
 }
 
@@ -1308,7 +1287,7 @@ function renderRecords(data) {
   if (!data.length) { tb.innerHTML='<tr><td colspan="12" class="empty-td">No records found</td></tr>'; return; }
   tb.innerHTML = data.map(function(e) {
     return '<tr>'
-      + '<td style="font-weight:600;white-space:nowrap">' + formatDate(e.date) + '</td>'
+      + '<td style="font-weight:600;white-space:nowrap">'+formatDate(e.date)+'</td>'
       + '<td>' + e.wards.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('') + '</td>'
       + '<td>' + e.ipd + '</td><td>' + e.med + '</td><td>' + e.surg + '</td>'
       + '<td><strong>' + e.reg + '</strong></td><td>' + e.pre + '</td>'
@@ -1666,13 +1645,11 @@ function printLeaveForm() {
     + '</div>'
     + '<script>window.onload=function(){window.print();};<\/script>'
     + '
-// ── Format YYYY-MM-DD → DD-MM-YYYY ──
-function formatDate(d) {
-  if (!d) return '';
-  var p = d.split('-');
-  return p.length === 3 ? p[2]+'-'+p[1]+'-'+p[0] : d;
+function formatDate(d){
+  if(!d) return '';
+  var p=d.split('-');
+  return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:d;
 }
-
 </body></html>';
 
   var pw = window.open('','_blank','width=900,height=700');
@@ -1891,15 +1868,6 @@ window.addEventListener('DOMContentLoaded', function() {
 // Uses onSnapshot for live updates — admin's saves appear instantly.
 // ══════════════════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', function(){
-  // Immediately restore PMAM name from session (before Firebase auth fires)
-  try {
-    var _su = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
-    var _sn = _su.name || _su.email || '';
-    if (_sn) {
-      var _ep = document.getElementById('ePmam'); if (_ep) _ep.value = _sn;
-      var _pb = document.getElementById('pmamNameBadge'); if (_pb) _pb.textContent = _sn;
-    }
-  } catch(e){}
   try {
     db.collection('settings').doc('tickers').onSnapshot(function(doc){
       var bar = document.getElementById('adminTicker');
@@ -1972,9 +1940,9 @@ window.addEventListener('DOMContentLoaded', function(){
 .fr-sec-banner{display:flex;align-items:center;background:linear-gradient(90deg,#E91E8C,#F06292);padding:7px 18px;font-size:11px;font-weight:700;color:#fff;letter-spacing:0.8px;text-transform:uppercase;margin:0 0 12px 0}
 .fr-section{padding:14px 18px}
 .fr-divider{height:1px;background:linear-gradient(90deg,#EDE7F6,#E0E0E0,#EDE7F6);margin:0 18px}
-.fr-fields-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.fr-fields-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 .fr-field{display:flex;flex-direction:column;position:relative}
-.fr-field label{font-size:10px;font-weight:700;color:#5B2D8E;letter-spacing:0.3px;margin-bottom:4px;padding-left:2px;text-transform:uppercase}
+.fr-field label{font-size:9.5px;font-weight:700;color:#5B2D8E;letter-spacing:0.3px;margin-bottom:4px;padding-left:2px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fr-field input,.fr-field select{height:38px;padding:0 12px;border:1.5px solid #CE93D8;border-radius:8px;font-size:13px;font-weight:500;background:#fff;color:#2D2D2D;outline:none;transition:all 0.2s;width:100%}
 .fr-field input::placeholder{color:#BDBDBD;font-style:italic;font-size:11px;font-weight:400}
 .fr-field input:focus,.fr-field select:focus{border-color:#5B2D8E;background:#FAFAFA;box-shadow:0 0 0 3px rgba(91,45,142,0.08)}
