@@ -435,15 +435,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
     </div>
   </div>
 
-  <!-- TICKER -->
-  <div class="ticker">
-    <div class="ticker-inner" id="tickerText">
-      Ayushman Bharat PMJAY — All PMAMs are requested to fill daily reports before 5:00 PM &nbsp;&nbsp;&nbsp;&nbsp;
-      For any queries contact: VINOD KUMAR (7006213517) &nbsp;&nbsp;&nbsp;&nbsp;
-      Ayushman Bharat PMJAY — All PMAMs are requested to fill daily reports before 5:00 PM &nbsp;&nbsp;&nbsp;&nbsp;
-      For any queries contact: VINOD KUMAR (7006213517)
-    </div>
-  </div>
+  <!-- TICKER — content loaded dynamically from Firestore settings/tickers.pmam by Admin portal -->
 </div>
 
 <!-- LAYOUT -->
@@ -1913,6 +1905,17 @@ window.addEventListener('DOMContentLoaded', function() {
 // Uses onSnapshot for live updates — admin's saves appear instantly.
 // ══════════════════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', function(){
+  // Restore PMAM name from session immediately on load
+  try {
+    var _u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+    var _n = _u.name || _u.email || '';
+    if (_n) {
+      var _ep = document.getElementById('ePmam');
+      if (_ep) _ep.value = _n;
+      var _pb = document.getElementById('pmamNameBadge');
+      if (_pb) _pb.textContent = _n;
+    }
+  } catch(e){}
   try {
     db.collection('settings').doc('tickers').onSnapshot(function(doc){
       var bar = document.getElementById('adminTicker');
