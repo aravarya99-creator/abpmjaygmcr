@@ -353,6 +353,44 @@ tr:hover td{background:#EEF3FF}
   @page { size: A4 portrait; margin: 0; }
 }
 input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-left: 2px; }
+
+/* ════════════════════════════════════════════
+   FILL REPORT — fill_report.html styles
+   ════════════════════════════════════════════ */
+.fr-card{background:#fff;border:1px solid #E0E0E0;border-radius:12px;padding:0;overflow:hidden;margin-bottom:16px}
+.fr-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:2px solid #EDE7F6;background:#FAFAFA}
+.fr-card-header-left{display:flex;align-items:center;gap:10px}
+.fr-card-title{font-size:14px;font-weight:700;color:#3D1A6E}
+.fr-name-badge{background:#E8F5E9;color:#2E7D32;font-size:10px;padding:3px 10px;border-radius:10px;font-weight:600;border:1px solid #A5D6A7}
+.fr-alert-pill{display:flex;align-items:center;gap:6px;background:#FFF3E0;border:1px solid #FFCC80;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;color:#E65100}
+.fr-alert-pill svg{width:13px;height:13px;flex-shrink:0}
+.fr-alert-pill.filled{background:#E8F5E9;border-color:#A5D6A7;color:#2E7D32}
+.fr-section{padding:14px 18px}
+.fr-divider{height:1px;background:linear-gradient(90deg,#EDE7F6,#E0E0E0,#EDE7F6);margin:0 18px}
+.fr-sec-label{font-size:10px;font-weight:700;color:#9575CD;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.fr-sec-label::after{content:'';flex:1;height:1px;background:#EDE7F6}
+.fr-fields-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.fr-field{display:flex;flex-direction:column;position:relative}
+.fr-field label{font-size:10px;font-weight:700;color:#5B2D8E;letter-spacing:0.3px;margin-bottom:4px;padding-left:2px;text-transform:uppercase}
+.fr-field input,.fr-field select{height:38px;padding:0 12px;border:1.5px solid #CE93D8;border-radius:8px;font-size:13px;font-weight:500;background:#fff;color:#2D2D2D;outline:none;transition:all 0.2s;width:100%}
+.fr-field input:focus,.fr-field select:focus{border-color:#5B2D8E;background:#FAFAFA;box-shadow:0 0 0 3px rgba(91,45,142,0.08)}
+.fr-field input[disabled]{background:#F5F5F5;color:#888;border-color:#E0E0E0;cursor:not-allowed}
+.fr-field input[readonly]{background:#F3E5F5;color:#4A148C;border-color:#AB47BC;font-weight:700;cursor:default}
+.fr-auto-tag{position:absolute;right:8px;top:50%;transform:translateY(4px);font-size:8px;background:#AB47BC;color:#fff;padding:1px 5px;border-radius:4px;font-weight:700;pointer-events:none}
+.fr-ward-row{display:flex;flex-wrap:wrap;gap:5px;min-height:28px;align-items:center;padding:6px 0}
+.fr-wtag{background:#EDE7F6;color:#4A148C;font-size:11px;padding:3px 10px;border-radius:10px;display:inline-flex;align-items:center;gap:4px;font-weight:500;border:1px solid #CE93D8}
+.fr-wtag span{cursor:pointer;font-weight:700;color:#7B1FA2;margin-left:2px}
+.fr-no-ward{font-size:11px;color:#BDBDBD;font-style:italic}
+.fr-ward-btn{height:38px;padding:0 16px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:700;background:#5B2D8E;color:#fff;border:none;white-space:nowrap;align-self:flex-end;font-family:Inter,sans-serif}
+.fr-action-row{display:flex;justify-content:flex-end;gap:10px;padding:12px 18px;background:#FAFAFA;border-top:1px solid #EDE7F6}
+.fr-btn-pri{height:38px;padding:0 22px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:700;border:none;background:#5B2D8E;color:#fff;font-family:Inter,sans-serif;transition:all 0.15s}
+.fr-btn-pri:hover{background:#3D1A6E}
+.fr-btn-sec{height:38px;padding:0 18px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:700;background:#F5F5F5;color:#444;border:1.5px solid #DDD;font-family:Inter,sans-serif}
+.fr-btn-sec:hover{background:#EEE}
+#fr-entryMsg{padding:0 18px 8px;font-size:12px;font-weight:500}
+/* Today's entries table card */
+.fr-tbl-card{background:#fff;border:1px solid #E0E0E0;border-radius:12px;overflow:hidden}
+.fr-tbl-header{padding:12px 18px;border-bottom:2px solid #EDE7F6;background:#FAFAFA;font-size:13px;font-weight:700;color:#3D1A6E}
 </style>
 </head>
 <body>
@@ -505,59 +543,47 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
     <!-- FILL REPORT -->
     <div class="sec active" id="sec-fillReport">
-      <!-- NEW DESIGN CARD -->
-      <div style="background:#fff;border-radius:16px;box-shadow:0 2px 16px rgba(30,60,180,0.10);border:1px solid #E8EEFF;overflow:hidden;margin-bottom:14px">
 
-        <!-- Card Header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 14px;border-bottom:1px solid #F0F4FF">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="width:38px;height:38px;border-radius:10px;background:#EEF3FF;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-            </div>
-            <div>
-              <div style="font-size:15px;font-weight:800;color:#0F2B8C;line-height:1.2">Fill Today's Report</div>
-              <div style="font-size:11px;color:#6B7DB5;margin-top:2px">Enter today's case data and claim details</div>
-            </div>
+      <!-- FILL REPORT CARD -->
+      <div class="fr-card">
+
+        <!-- CARD HEADER -->
+        <div class="fr-card-header">
+          <div class="fr-card-header-left">
+            <div class="fr-card-title">Fill Today's Report</div>
+            <div class="fr-name-badge" id="pmamNameBadge"></div>
           </div>
-          <span id="fillBadge" style="background:#FFF7ED;border:1.5px solid #FED7AA;color:#C2410C;font-size:11px;font-weight:700;border-radius:20px;padding:5px 14px;white-space:nowrap">⚠ Pending Today</span>
+          <div class="fr-alert-pill" id="fillBadge">
+            <svg viewBox="0 0 24 24" fill="#E65100"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+            Today's report not filled yet
+          </div>
         </div>
 
         <!-- Correction banner -->
-        <div id="flagCorrectionBanner" style="display:none;background:#fef3c7;border-bottom:1.5px solid #fcd34d;padding:10px 20px;font-size:12px;color:#78350f;font-weight:600">
+        <div id="flagCorrectionBanner" style="display:none;background:#fef3c7;border-bottom:1.5px solid #fcd34d;padding:10px 18px;font-size:12px;color:#78350f;font-weight:600">
           ✏️ You are correcting a flagged report for <span id="flagCorrectionDate"></span>.
           The original values are pre-filled — correct the wrong fields and click Submit.
         </div>
 
-        <div style="padding:18px 20px">
+        <!-- SECTION 1: BASIC INFORMATION -->
+        <div class="fr-section">
+          <div class="fr-sec-label">Basic Information</div>
+          <div class="fr-fields-row">
 
-          <!-- BASIC INFORMATION SECTION -->
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-            <span style="font-size:11px;font-weight:800;color:#1A3DB5;text-transform:uppercase;letter-spacing:1px">Basic Information</span>
-            <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(26,61,181,0.2),transparent)"></div>
-          </div>
+            <div class="fr-field" style="width:145px">
+              <label>Date</label>
+              <input type="date" id="eDate">
+            </div>
 
-          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;align-items:flex-end">
-            <!-- Date -->
-            <div style="display:flex;flex-direction:column;gap:5px;min-width:140px">
-              <label style="font-size:10.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.4px">DATE</label>
-              <input type="date" id="eDate"
-                style="height:40px;padding:0 12px;border:1.5px solid #D1D9F0;border-radius:10px;font-size:13px;color:#0F2B8C;font-family:Inter,sans-serif;outline:none;background:#fff;width:100%"
-                onfocus="this.style.borderColor='#1A3DB5'" onblur="this.style.borderColor='#D1D9F0'">
+            <div class="fr-field" style="width:175px">
+              <label>PMAM Name</label>
+              <input type="text" id="ePmam" value="" disabled>
             </div>
-            <!-- PMAM Name -->
-            <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px">
-              <label style="font-size:10.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.4px">PMAM NAME</label>
-              <input type="text" id="ePmam" value="" disabled
-                style="height:40px;padding:0 12px;border:1.5px solid #E9EDF8;border-radius:10px;font-size:13px;color:#6B7DB5;font-family:Inter,sans-serif;outline:none;background:#F8FAFF;width:100%;cursor:default">
-            </div>
-            <!-- Select Ward + Add Ward button -->
-            <div style="display:flex;flex-direction:column;gap:5px;flex:1.5;min-width:200px">
-              <label style="font-size:10.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.4px">SELECT WARD</label>
-              <div style="display:flex;gap:10px;align-items:center">
-                <select id="eWard"
-                  style="flex:1;height:40px;padding:0 12px;border:1.5px solid #D1D9F0;border-radius:10px;font-size:12px;color:#0F2B8C;font-family:Inter,sans-serif;outline:none;background:#fff"
-                  onfocus="this.style.borderColor='#1A3DB5'" onblur="this.style.borderColor='#D1D9F0'">
+
+            <div class="fr-field" style="flex:1;min-width:200px">
+              <label>Select Ward</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <select id="eWard" style="flex:1;height:38px;padding:0 12px;border:1.5px solid #CE93D8;border-radius:8px;font-size:13px;font-weight:500;background:#fff;color:#2D2D2D;outline:none;transition:all 0.2s">
                   <option value="">-- Select Ward --</option>
                   <option>Orthopaedics</option><option>Male Surgery Ward</option>
                   <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
@@ -566,162 +592,85 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
                   <option>Optha</option><option>Onco</option><option>Gynae</option>
                   <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
                 </select>
-                <button onclick="addWard()"
-                  style="height:40px;padding:0 18px;background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(26,61,181,0.3)">
-                  <span style="font-size:16px;line-height:1">+</span> Add Ward
-                </button>
+                <button class="fr-ward-btn" onclick="addWard()">+ Add Ward</button>
               </div>
             </div>
+
           </div>
-
-          <!-- Ward Tags -->
-          <div id="wardTags" style="display:flex;flex-wrap:wrap;gap:4px;min-height:24px;margin-bottom:4px;align-items:center">
-            <span style="font-size:11px;color:#BDBDBD;font-style:italic">No wards selected</span>
+          <div class="fr-ward-row" id="wardTags">
+            <span class="fr-no-ward">No wards selected</span>
           </div>
+        </div>
 
-          <div style="height:1px;background:linear-gradient(90deg,rgba(26,61,181,0.12),transparent);margin:16px 0"></div>
+        <div class="fr-divider"></div>
 
-          <!-- CASE DATA SECTION -->
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
-            <span style="font-size:11px;font-weight:800;color:#1A3DB5;text-transform:uppercase;letter-spacing:1px">Case Data</span>
-            <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(26,61,181,0.2),transparent)"></div>
+        <!-- SECTION 2: CASE DATA -->
+        <div class="fr-section">
+          <div class="fr-sec-label">Case Data</div>
+          <div class="fr-fields-row">
+
+            <div class="fr-field" style="width:88px" id="wrap-eIPD">
+              <label>Ward IPD</label>
+              <input type="number" id="eIPD" placeholder="0" min="0">
+            </div>
+
+            <div class="fr-field" style="width:105px" id="wrap-eMed">
+              <label>Medical Cases</label>
+              <input type="number" id="eMed" placeholder="0" min="0" oninput="autoReg()">
+            </div>
+
+            <div class="fr-field" style="width:105px" id="wrap-eSurg">
+              <label>Surgical Cases</label>
+              <input type="number" id="eSurg" placeholder="0" min="0" oninput="autoReg()">
+            </div>
+
+            <div class="fr-field" style="width:95px;position:relative" id="wrap-eReg">
+              <label>Register</label>
+              <input type="number" id="eReg" placeholder="0" readonly>
+              <span class="fr-auto-tag">AUTO</span>
+            </div>
+
+            <div class="fr-field" style="width:115px" id="wrap-ePre">
+              <label>Preauth Initiated</label>
+              <input type="number" id="ePre" placeholder="0" min="0">
+            </div>
+
+            <div class="fr-field" style="width:130px" id="wrap-ePreAmt">
+              <label>Preauth Amt (₹)</label>
+              <input type="number" id="ePreAmt" placeholder="0" min="0">
+            </div>
+
+            <div class="fr-field" style="width:88px" id="wrap-eDis">
+              <label>Discharge</label>
+              <input type="number" id="eDis" placeholder="0" min="0">
+            </div>
+
+            <div class="fr-field" style="width:130px" id="wrap-eClm">
+              <label>Claim Amt (₹)</label>
+              <input type="number" id="eClm" placeholder="0" min="0">
+            </div>
+
           </div>
+        </div>
 
-          <!-- 4-column input grid -->
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+        <!-- ACTION ROW -->
+        <div id="entryMsg" style="padding:0 18px 8px;font-size:12px;font-weight:500"></div>
+        <div class="fr-action-row">
+          <button class="fr-btn-sec" onclick="clearForm()">Clear</button>
+          <button class="fr-btn-pri" onclick="saveEntry()">Save Entry</button>
+        </div>
 
-            <!-- Ward IPD -->
-            <div class="nfield-wrap" id="wrap-eIPD">
-              <div class="nfield-label">WARD IPD <span style="color:#E53935">*</span></div>
-              <div class="nfield-box" id="box-eIPD">
-                <div class="nfield-icon" style="background:#EEF3FF">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
-                </div>
-                <input type="number" id="eIPD" placeholder="Enter number" min="0"
-                  class="nfield-input"
-                  onfocus="focusBox('box-eIPD')" onblur="blurBox('box-eIPD')">
-              </div>
-            </div>
+      </div><!-- end fr-card -->
 
-            <!-- Conservative Cases -->
-            <div class="nfield-wrap" id="wrap-eMed">
-              <div class="nfield-label">CONSERVATIVE CASES <span style="color:#E53935">*</span></div>
-              <div class="nfield-box" id="box-eMed">
-                <div class="nfield-icon" style="background:#ECFDF5">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#16A34A"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5S15.01 22 17.5 22s4.5-2.01 4.5-4.5S19.99 13 17.5 13zm0 7c-1.38 0-2.5-1.12-2.5-2.5S16.12 15 17.5 15s2.5 1.12 2.5 2.5S18.88 20 17.5 20zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z"/></svg>
-                </div>
-                <input type="number" id="eMed" placeholder="Enter number" min="0"
-                  class="nfield-input" oninput="autoReg()"
-                  onfocus="focusBox('box-eMed')" onblur="blurBox('box-eMed')">
-              </div>
-            </div>
-
-            <!-- Surgery Cases -->
-            <div class="nfield-wrap" id="wrap-eSurg">
-              <div class="nfield-label">SURGERY CASES <span style="color:#E53935">*</span></div>
-              <div class="nfield-box" id="box-eSurg">
-                <div class="nfield-icon" style="background:#FFF1F2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#E11D48"><path d="M19.07 4.93l-1.41 1.41C19 7.76 20 9.76 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93V6.5l4-4-4-4v2.07C5.05 1.06 1 6.04 1 12c0 6.07 4.93 11 11 11s11-4.93 11-11c0-3.04-1.23-5.79-3.22-7.79z"/></svg>
-                </div>
-                <input type="number" id="eSurg" placeholder="Enter number" min="0"
-                  class="nfield-input" oninput="autoReg()"
-                  onfocus="focusBox('box-eSurg')" onblur="blurBox('box-eSurg')">
-              </div>
-            </div>
-
-            <!-- Register AUTO -->
-            <div class="nfield-wrap" id="wrap-eReg">
-              <div class="nfield-label">REGISTER <span style="color:#E53935">*</span> <span style="background:#FFF7ED;color:#C2410C;font-size:9px;padding:1px 6px;border-radius:8px;font-weight:700;border:1px solid #FED7AA;margin-left:4px">AUTO</span></div>
-              <div class="nfield-box" id="box-eReg" style="background:#F8FAFF;border-color:#C8D5F0">
-                <div class="nfield-icon" style="background:#FFF7ED">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#C2410C"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-                </div>
-                <input type="number" id="eReg" placeholder="0" readonly
-                  class="nfield-input" style="color:#C2410C;font-weight:700;background:transparent;cursor:default">
-              </div>
-            </div>
-
-            <!-- Preauth Initiated -->
-            <div class="nfield-wrap" id="wrap-ePre">
-              <div class="nfield-label">PREAUTH INITIATED <span style="color:#E53935">*</span></div>
-              <div class="nfield-box" id="box-ePre">
-                <div class="nfield-icon" style="background:#F0FDF4">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#16A34A"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-                </div>
-                <input type="number" id="ePre" placeholder="Enter number" min="0"
-                  class="nfield-input"
-                  onfocus="focusBox('box-ePre')" onblur="blurBox('box-ePre')">
-              </div>
-            </div>
-
-            <!-- Preauth Amt -->
-            <div class="nfield-wrap" id="wrap-ePreAmt">
-              <div class="nfield-label">PREAUTH AMT (₹) <span style="color:#E53935">*</span></div>
-              <div class="nfield-box" id="box-ePreAmt">
-                <div class="nfield-icon" style="background:#FFF7ED">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#EA580C"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
-                </div>
-                <input type="number" id="ePreAmt" placeholder="Enter amount" min="0"
-                  class="nfield-input"
-                  onfocus="focusBox('box-ePreAmt')" onblur="blurBox('box-ePreAmt')">
-              </div>
-            </div>
-
-            <!-- Discharge -->
-            <div class="nfield-wrap" id="wrap-eDis">
-              <div class="nfield-label">DISCHARGE <span style="color:#E53935">*</span></div>
-              <div class="nfield-box" id="box-eDis">
-                <div class="nfield-icon" style="background:#FFFBEB">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#D97706"><path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.84v4h5.66V9h3.84L12 2z"/></svg>
-                </div>
-                <input type="number" id="eDis" placeholder="Enter number" min="0"
-                  class="nfield-input"
-                  onfocus="focusBox('box-eDis')" onblur="blurBox('box-eDis')">
-              </div>
-            </div>
-
-            <!-- Claim Amt -->
-            <div class="nfield-wrap" id="wrap-eClm">
-              <div class="nfield-label">CLAIM AMT (₹) <span style="color:#E53935">*</span></div>
-              <div class="nfield-box" id="box-eClm">
-                <div class="nfield-icon" style="background:#EEF3FF">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                </div>
-                <input type="number" id="eClm" placeholder="Enter amount" min="0"
-                  class="nfield-input"
-                  onfocus="focusBox('box-eClm')" onblur="blurBox('box-eClm')">
-              </div>
-            </div>
-
-          </div><!-- end grid -->
-
-          <!-- Buttons row -->
-          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;align-items:center">
-            <div id="entryMsg" style="font-size:12px;color:#166534;flex:1;min-height:16px"></div>
-            <button onclick="clearForm()"
-              style="height:40px;padding:0 20px;background:#fff;color:#1A3DB5;border:1.5px solid #D1D9F0;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;gap:6px;transition:all 0.15s"
-              onmouseover="this.style.background='#F0F4FF'" onmouseout="this.style.background='#fff'">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-              Clear
-            </button>
-            <button onclick="saveEntry()"
-              style="height:40px;padding:0 24px;background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(26,61,181,0.3);transition:all 0.15s"
-              onmouseover="this.style.boxShadow='0 6px 18px rgba(26,61,181,0.45)'" onmouseout="this.style.boxShadow='0 4px 12px rgba(26,61,181,0.3)'">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
-              Save Entry
-            </button>
-          </div>
-
-        </div><!-- end padding div -->
-      </div><!-- end new design card -->
-      <div class="card">
-        <div class="card-hd">Today's Entries</div>
+      <!-- TODAY'S ENTRIES TABLE -->
+      <div class="fr-tbl-card">
+        <div class="fr-tbl-header">Today's Entries</div>
         <div class="tbl-wrap">
           <table><thead><tr><th>Date</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Del</th></tr></thead>
           <tbody id="entryTbody"><tr><td colspan="12" class="empty-td">No entries today yet</td></tr></tbody></table>
         </div>
       </div>
+
     </div>
 
     <!-- MY RECORDS -->
@@ -1859,8 +1808,13 @@ function fetchPmamReports() {
       if (dashAlertEl) dashAlertEl.style.display = filledToday ? 'none' : '';
       var badge = document.getElementById('fillBadge');
       if (badge) {
-        if (filledToday) { badge.className = 'badge-success'; badge.textContent = '✓ Filled Today'; }
-        else             { badge.className = 'badge-warn';    badge.textContent = '⚠ Pending Today'; }
+        if (filledToday) {
+          badge.className = 'fr-alert-pill filled';
+          badge.innerHTML = '<svg viewBox="0 0 24 24" fill="#2E7D32" style="width:13px;height:13px"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Report Submitted!';
+        } else {
+          badge.className = 'fr-alert-pill';
+          badge.innerHTML = '<svg viewBox="0 0 24 24" fill="#E65100"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg> Today\'s report not filled yet';
+        }
       }
 
       updateDashboard();
@@ -1894,6 +1848,8 @@ window.addEventListener('DOMContentLoaded', function() {
       if(dashNameEl) dashNameEl.textContent = n;
       var ePmamEl = document.getElementById('ePmam');
       if(ePmamEl) ePmamEl.value = n;
+      var pmamBadgeEl = document.getElementById('pmamNameBadge');
+      if(pmamBadgeEl) pmamBadgeEl.textContent = n;
       var unEl = document.getElementById('userName');
       if(unEl) unEl.textContent = n.toUpperCase();
       var uiEl = document.getElementById('userInitials');
