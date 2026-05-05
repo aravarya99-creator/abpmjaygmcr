@@ -434,8 +434,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
       </div>
     </div>
   </div>
-
-  <!-- TICKER — content loaded dynamically from Firestore settings/tickers.pmam by Admin portal -->
+  <!-- TICKER: loaded from Firestore via adminTicker -->
 </div>
 
 <!-- LAYOUT -->
@@ -500,17 +499,15 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
       <div class="fr-card">
 
-        <!-- CARD HEADER -->
+        <!-- CARD HEADER — blue background -->
         <div class="fr-card-header">
           <div class="fr-card-header-left">
             <div class="fr-card-title">Fill Today's Report</div>
             <div class="fr-name-badge" id="pmamNameBadge"></div>
           </div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="fr-alert-pill" id="fillBadge">
-              <svg viewBox="0 0 24 24" fill="#E65100"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-              Today's report not filled yet
-            </div>
+          <div class="fr-alert-pill" id="fillBadge">
+            <svg viewBox="0 0 24 24" fill="#E65100"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+            Today's report not filled yet
           </div>
         </div>
 
@@ -520,9 +517,10 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           The original values are pre-filled — correct the wrong fields and click Submit.
         </div>
 
-        <!-- SECTION 1: BASIC INFORMATION -->
+        <!-- BASIC INFORMATION BANNER -->
         <div class="fr-sec-banner">Basic Information</div>
-        <div class="fr-section" style="padding-top:4px">
+
+        <div class="fr-section" style="padding-top:6px">
           <div class="fr-fields-row" style="align-items:flex-end">
 
             <div class="fr-field" style="width:145px">
@@ -530,7 +528,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
               <input type="date" id="eDate">
             </div>
 
-            <div class="fr-field" style="width:165px">
+            <div class="fr-field" style="width:170px">
               <label>PMAM Name</label>
               <input type="text" id="ePmam" value="" disabled>
             </div>
@@ -538,7 +536,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             <div class="fr-field" style="flex:0.5;min-width:160px">
               <label>Select Ward</label>
               <div style="display:flex;gap:8px;align-items:center">
-                <select id="eWard" style="flex:1;height:38px;padding:0 10px;border:1.5px solid #CE93D8;border-radius:8px;font-size:12px;font-weight:500;background:#fff;color:#2D2D2D;outline:none">
+                <select id="eWard" style="flex:1;height:38px;padding:0 10px;border:1.5px solid #CE93D8;border-radius:8px;font-size:12px;background:#fff;color:#2D2D2D;outline:none;font-family:Inter,sans-serif">
                   <option value="">-- Select Ward --</option>
                   <option>Orthopaedics</option><option>Male Surgery Ward</option>
                   <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
@@ -551,24 +549,21 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
               </div>
             </div>
 
-            <!-- Ward status pill — same row -->
-            <div id="wardStatusPill" class="fr-ward-status" style="margin-bottom:0;align-self:flex-end">
+            <div class="fr-ward-status" id="wardStatusPill">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="#CE93D8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
               <span id="wardStatusText">No Ward Selected</span>
             </div>
 
           </div>
-
-          <!-- Ward tags (hidden row, used for display) -->
-          <div class="fr-ward-row" id="wardTags" style="margin-top:4px">
-          </div>
+          <div class="fr-ward-row" id="wardTags"></div>
         </div>
 
         <div class="fr-divider"></div>
 
-        <!-- SECTION 2: CASE DATA -->
+        <!-- CASE DATA BANNER -->
         <div class="fr-sec-banner">Case Data</div>
-        <div class="fr-section" style="padding-top:4px">
+
+        <div class="fr-section" style="padding-top:6px">
           <div class="fr-fields-row">
 
             <div class="fr-field" style="width:88px" id="wrap-eIPD">
@@ -576,14 +571,14 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
               <input type="number" id="eIPD" placeholder="Ward IPD" min="0">
             </div>
 
-            <div class="fr-field" style="width:110px" id="wrap-eMed">
-              <label>Medical Cases</label>
-              <input type="number" id="eMed" placeholder="Med Cases" min="0" oninput="autoReg()">
+            <div class="fr-field" style="width:115px" id="wrap-eMed">
+              <label>Conservative Cases</label>
+              <input type="number" id="eMed" placeholder="Conservative" min="0" oninput="autoReg()">
             </div>
 
-            <div class="fr-field" style="width:110px" id="wrap-eSurg">
-              <label>Surgical Cases</label>
-              <input type="number" id="eSurg" placeholder="Surg Cases" min="0" oninput="autoReg()">
+            <div class="fr-field" style="width:105px" id="wrap-eSurg">
+              <label>Surgery Cases</label>
+              <input type="number" id="eSurg" placeholder="Surgery" min="0" oninput="autoReg()">
             </div>
 
             <div class="fr-field" style="width:95px;position:relative" id="wrap-eReg">
@@ -592,19 +587,16 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
               <span class="fr-auto-tag">AUTO</span>
             </div>
 
-            <div class="fr-field" style="width:115px" id="wrap-ePre">
+            <div class="fr-field" style="width:120px" id="wrap-ePre">
               <label>Preauth Initiated</label>
               <input type="number" id="ePre" placeholder="Preauth No." min="0">
             </div>
 
             <div class="fr-field" style="width:130px" id="wrap-ePreAmt">
               <label>Preauth Amt (₹)</label>
-              <div style="display:flex;align-items:center;border:1.5px solid #CE93D8;border-radius:8px;background:#fff;overflow:hidden;height:38px;transition:all 0.2s" id="box-ePreAmt-wrap"
-                onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'"
-                onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
-                <span style="padding:0 8px 0 10px;font-size:14px;font-weight:700;color:#5B2D8E;user-select:none;line-height:38px">₹</span>
-                <input type="number" id="ePreAmt" placeholder="Amount" min="0"
-                  style="flex:1;height:100%;border:none;outline:none;font-size:13px;font-weight:500;color:#2D2D2D;background:transparent;padding:0 8px 0 0;width:100%">
+              <div class="fr-rupee-wrap" onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'" onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
+                <span class="fr-rupee-sym">₹</span>
+                <input type="number" id="ePreAmt" placeholder="Amount" min="0" class="fr-rupee-input">
               </div>
             </div>
 
@@ -615,26 +607,22 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
             <div class="fr-field" style="width:130px" id="wrap-eClm">
               <label>Claim Amt (₹)</label>
-              <div style="display:flex;align-items:center;border:1.5px solid #CE93D8;border-radius:8px;background:#fff;overflow:hidden;height:38px;transition:all 0.2s" id="box-eClm-wrap"
-                onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'"
-                onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
-                <span style="padding:0 8px 0 10px;font-size:14px;font-weight:700;color:#5B2D8E;user-select:none;line-height:38px">₹</span>
-                <input type="number" id="eClm" placeholder="Amount" min="0"
-                  style="flex:1;height:100%;border:none;outline:none;font-size:13px;font-weight:500;color:#2D2D2D;background:transparent;padding:0 8px 0 0;width:100%">
+              <div class="fr-rupee-wrap" onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'" onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
+                <span class="fr-rupee-sym">₹</span>
+                <input type="number" id="eClm" placeholder="Amount" min="0" class="fr-rupee-input">
               </div>
             </div>
 
           </div>
         </div>
 
-        <!-- ACTION ROW (Clear only — Save is in header) -->
         <div id="entryMsg" style="padding:2px 18px 4px;font-size:12px;font-weight:500;min-height:20px"></div>
         <div class="fr-action-row">
           <button class="fr-btn-sec" onclick="clearForm()">Clear</button>
           <button class="fr-btn-pri" onclick="saveEntry()">Save Report</button>
         </div>
 
-      </div><!-- end fr-card -->
+      </div>
 
       <!-- TODAY'S ENTRIES TABLE -->
       <div class="fr-tbl-card">
@@ -1120,6 +1108,26 @@ function addWard() {
   // Apply case type config for the selected ward
   applyWardCaseConfig(v);
 }
+
+// ── Ward status pill update ──
+function updateWardStatus() {
+  var pill = document.getElementById('wardStatusPill');
+  var txt  = document.getElementById('wardStatusText');
+  var tags = document.getElementById('wardTags');
+  if (!pill || !txt) return;
+  if (selWards && selWards.length > 0) {
+    pill.className = 'fr-ward-status has-ward';
+    txt.textContent = selWards.join(', ');
+    if (tags) tags.innerHTML = selWards.map(function(w,i){
+      return '<span class="fr-wtag">'+w+'<span onclick="selWards.splice('+i+',1);renderSelWards();">×</span></span>';
+    }).join('');
+  } else {
+    pill.className = 'fr-ward-status';
+    txt.textContent = 'No Ward Selected';
+    if (tags) tags.innerHTML = '';
+  }
+}
+
 function renderSelWards() {
   updateWardStatus();
   var d = document.getElementById('wardTags');
@@ -1222,7 +1230,7 @@ function updateDashboard() {
 
   // Build row HTML once, use for both dashboard + fill-report recent list
   var rowsHtml = allEntries.map(function(e) {
-    return '<tr><td>' + e.date + '</td>'
+    return '<tr><td>' + formatDate(e.date) + '</td>'
       + '<td>' + (e.wards||[]).map(function(w){return '<span class="wtag">'+w+'</span>';}).join('') + '</td>'
       + '<td>' + e.ipd + '</td><td>' + e.med + '</td><td>' + e.surg + '</td>'
       + '<td><strong>' + e.reg + '</strong></td><td>' + e.pre + '</td>'
@@ -1237,27 +1245,29 @@ function updateDashboard() {
       ? '<tr><td colspan="11" class="empty-td">No entries yet — fill your first daily report</td></tr>'
       : rowsHtml;
   }
-  var todayStr = new Date().toISOString().split('T')[0];
+  var todayOnly = new Date().toISOString().split('T')[0];
   var etb = document.getElementById('entryTbody');
   if (etb) {
-    var todayEntries = allEntries.filter(function(e){ return e.date === todayStr; });
-    var todayRowsHtml = todayEntries.map(function(e){
-      var conv = e.ipd > 0 ? ((e.reg/e.ipd)*100).toFixed(1)+'%' : '—';
-      var wards = Array.isArray(e.wards) ? e.wards : (e.ward ? [e.ward] : []);
-      return '<tr><td>'+formatDate(e.date)+'</td>'
-        +'<td>'+wards.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('')+'</td>'
-        +'<td>'+e.ipd+'</td><td>'+e.med+'</td><td>'+e.surg+'</td>'
-        +'<td><strong>'+e.reg+'</strong></td>'
-        +'<td>'+e.pre+'</td>'
-        +'<td>'+Number(e.preAmt).toLocaleString('en-IN')+'</td>'
-        +'<td>'+e.dis+'</td>'
-        +'<td>'+Number(e.clm).toLocaleString('en-IN')+'</td>'
-        +'<td><strong>'+conv+'</strong></td>'
-        +'<td></td></tr>';
-    }).join('');
-    etb.innerHTML = todayEntries.length === 0
-      ? '<tr><td colspan="12" class="empty-td">No entries today yet — check <strong>Records</strong> for other dates</td></tr>'
-      : todayRowsHtml;
+    var tEntries = allEntries.filter(function(e){ return e.date === todayOnly; });
+    tEntries.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    if (tEntries.length === 0) {
+      etb.innerHTML = '<tr><td colspan="12" class="empty-td">No entries today — check <strong>Records</strong> for other dates</td></tr>';
+    } else {
+      etb.innerHTML = tEntries.map(function(e){
+        var conv = e.ipd>0?((e.reg/e.ipd)*100).toFixed(1)+'%':'—';
+        var ws = Array.isArray(e.wards)?e.wards:(e.ward?[e.ward]:[]);
+        return '<tr><td>'+formatDate(e.date)+'</td>'
+          +'<td>'+ws.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('')+'</td>'
+          +'<td>'+e.ipd+'</td><td>'+e.med+'</td><td>'+e.surg+'</td>'
+          +'<td><strong>'+e.reg+'</strong></td>'
+          +'<td>'+e.pre+'</td>'
+          +'<td>'+Number(e.preAmt).toLocaleString('en-IN')+'</td>'
+          +'<td>'+e.dis+'</td>'
+          +'<td>'+Number(e.clm).toLocaleString('en-IN')+'</td>'
+          +'<td><strong>'+conv+'</strong></td>'
+          +'<td></td></tr>';
+      }).join('');
+    }
   }
 }
 
@@ -1298,7 +1308,7 @@ function renderRecords(data) {
   if (!data.length) { tb.innerHTML='<tr><td colspan="12" class="empty-td">No records found</td></tr>'; return; }
   tb.innerHTML = data.map(function(e) {
     return '<tr>'
-      + '<td style="font-weight:600;white-space:nowrap">' + e.date + '</td>'
+      + '<td style="font-weight:600;white-space:nowrap">' + formatDate(e.date) + '</td>'
       + '<td>' + e.wards.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('') + '</td>'
       + '<td>' + e.ipd + '</td><td>' + e.med + '</td><td>' + e.surg + '</td>'
       + '<td><strong>' + e.reg + '</strong></td><td>' + e.pre + '</td>'
@@ -1656,36 +1666,11 @@ function printLeaveForm() {
     + '</div>'
     + '<script>window.onload=function(){window.print();};<\/script>'
     + '
-// ── Format date YYYY-MM-DD → DD-MM-YYYY ──
+// ── Format YYYY-MM-DD → DD-MM-YYYY ──
 function formatDate(d) {
   if (!d) return '';
   var p = d.split('-');
-  if (p.length === 3) return p[2] + '-' + p[1] + '-' + p[0];
-  return d;
-}
-
-// ── Update ward status pill ──
-function updateWardStatus() {
-  var pill = document.getElementById('wardStatusPill');
-  var txt  = document.getElementById('wardStatusText');
-  var tags = document.getElementById('wardTags');
-  if (!pill || !txt) return;
-  if (selWards && selWards.length > 0) {
-    pill.className = 'fr-ward-status has-ward';
-    pill.querySelector('svg').setAttribute('fill','#2E7D32');
-    txt.textContent = selWards.join(', ');
-    // render tags
-    if (tags) {
-      tags.innerHTML = selWards.map(function(w, i){
-        return '<span class="fr-wtag">' + w + '<span onclick="selWards.splice(' + i + ',1);renderSelWards();updateWardStatus()">×</span></span>';
-      }).join('');
-    }
-  } else {
-    pill.className = 'fr-ward-status';
-    pill.querySelector('svg').setAttribute('fill','#CE93D8');
-    txt.textContent = 'No Ward Selected';
-    if (tags) tags.innerHTML = '';
-  }
+  return p.length === 3 ? p[2]+'-'+p[1]+'-'+p[0] : d;
 }
 
 </body></html>';
@@ -1843,6 +1828,8 @@ function fetchPmamReports() {
           badge.innerHTML = '<svg viewBox="0 0 24 24" fill="#E65100"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg> Today\'s report not filled yet';
         }
       }
+        else             { badge.className = 'badge-warn';    badge.textContent = '⚠ Pending Today'; }
+      }
 
       updateDashboard();
       if (document.getElementById('sec-myRecords') &&
@@ -1875,8 +1862,7 @@ window.addEventListener('DOMContentLoaded', function() {
       if(dashNameEl) dashNameEl.textContent = n;
       var ePmamEl = document.getElementById('ePmam');
       if(ePmamEl) ePmamEl.value = n;
-      var pmamBadgeEl = document.getElementById('pmamNameBadge');
-      if(pmamBadgeEl) pmamBadgeEl.textContent = n;
+      var _pb2 = document.getElementById('pmamNameBadge'); if(_pb2) _pb2.textContent = n;
       var unEl = document.getElementById('userName');
       if(unEl) unEl.textContent = n.toUpperCase();
       var uiEl = document.getElementById('userInitials');
@@ -1905,15 +1891,13 @@ window.addEventListener('DOMContentLoaded', function() {
 // Uses onSnapshot for live updates — admin's saves appear instantly.
 // ══════════════════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', function(){
-  // Restore PMAM name from session immediately on load
+  // Immediately restore PMAM name from session (before Firebase auth fires)
   try {
-    var _u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
-    var _n = _u.name || _u.email || '';
-    if (_n) {
-      var _ep = document.getElementById('ePmam');
-      if (_ep) _ep.value = _n;
-      var _pb = document.getElementById('pmamNameBadge');
-      if (_pb) _pb.textContent = _n;
+    var _su = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+    var _sn = _su.name || _su.email || '';
+    if (_sn) {
+      var _ep = document.getElementById('ePmam'); if (_ep) _ep.value = _sn;
+      var _pb = document.getElementById('pmamNameBadge'); if (_pb) _pb.textContent = _sn;
     }
   } catch(e){}
   try {
@@ -1976,33 +1960,18 @@ window.addEventListener('DOMContentLoaded', function(){
   .dispute-area{background:#fff;border:1.5px solid #fcd34d;border-radius:8px;padding:10px;margin-top:8px;display:none}
   .dispute-area textarea{width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;margin-top:4px}
 
-/* ═══ FILL REPORT — fill_report.html styles ═══ */
+/* ═══ FILL REPORT STYLES ═══ */
 .fr-card{background:#fff;border:1px solid #E0E0E0;border-radius:12px;padding:0;overflow:hidden;margin-bottom:16px}
-
-/* card header */
-.fr-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:2px solid #EDE7F6;background:#1A3DB5}
+.fr-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:2px solid #1A3DB5;background:#1A3DB5}
 .fr-card-header-left{display:flex;align-items:center;gap:10px}
 .fr-card-title{font-size:14px;font-weight:700;color:#fff}
 .fr-name-badge{background:#E8F5E9;color:#2E7D32;font-size:10px;padding:3px 10px;border-radius:10px;font-weight:600;border:1px solid #A5D6A7}
 .fr-alert-pill{display:flex;align-items:center;gap:6px;background:#FFF3E0;border:1px solid #FFCC80;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;color:#E65100;white-space:nowrap}
 .fr-alert-pill svg{width:13px;height:13px;flex-shrink:0}
 .fr-alert-pill.filled{background:#E8F5E9;border-color:#A5D6A7;color:#2E7D32}
-
-/* section banner bar — full-width pink like image 1 */
-.fr-sec-banner{
-  display:flex;align-items:center;
-  background:linear-gradient(90deg,#E91E8C,#F06292);
-  padding:7px 18px;
-  font-size:11px;font-weight:700;color:#fff;
-  letter-spacing:0.8px;text-transform:uppercase;
-  margin:0 0 12px 0;
-  border-radius:0;
-}
-
+.fr-sec-banner{display:flex;align-items:center;background:linear-gradient(90deg,#E91E8C,#F06292);padding:7px 18px;font-size:11px;font-weight:700;color:#fff;letter-spacing:0.8px;text-transform:uppercase;margin:0 0 12px 0}
 .fr-section{padding:14px 18px}
 .fr-divider{height:1px;background:linear-gradient(90deg,#EDE7F6,#E0E0E0,#EDE7F6);margin:0 18px}
-
-/* fields */
 .fr-fields-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
 .fr-field{display:flex;flex-direction:column;position:relative}
 .fr-field label{font-size:10px;font-weight:700;color:#5B2D8E;letter-spacing:0.3px;margin-bottom:4px;padding-left:2px;text-transform:uppercase}
@@ -2012,24 +1981,23 @@ window.addEventListener('DOMContentLoaded', function(){
 .fr-field input[disabled]{background:#F5F5F5;color:#888;border-color:#E0E0E0;cursor:not-allowed}
 .fr-field input[readonly]{background:#F3E5F5;color:#4A148C;border-color:#AB47BC;font-weight:700;cursor:default}
 .fr-auto-tag{position:absolute;right:8px;top:50%;transform:translateY(4px);font-size:8px;background:#AB47BC;color:#fff;padding:1px 5px;border-radius:4px;font-weight:700;pointer-events:none}
-
-/* ward row */
-.fr-ward-row{display:flex;flex-wrap:wrap;gap:5px;min-height:28px;align-items:center;padding:6px 0}
+.fr-ward-row{display:flex;flex-wrap:wrap;gap:5px;min-height:24px;align-items:center;padding:6px 0}
 .fr-wtag{background:#EDE7F6;color:#4A148C;font-size:11px;padding:3px 10px;border-radius:10px;display:inline-flex;align-items:center;gap:4px;font-weight:500;border:1px solid #CE93D8}
 .fr-wtag span{cursor:pointer;font-weight:700;color:#7B1FA2;margin-left:2px}
-.fr-no-ward{font-size:11px;color:#BDBDBD;font-style:italic}
-.fr-ward-status{display:flex;align-items:center;padding:5px 16px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid #CE93D8;background:#F3E5F5;color:#5B2D8E;white-space:nowrap;min-width:160px;gap:6px}
+.fr-ward-status{display:inline-flex;align-items:center;padding:5px 16px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid #CE93D8;background:#F3E5F5;color:#5B2D8E;white-space:nowrap;gap:6px;align-self:flex-end;height:38px}
 .fr-ward-status.has-ward{background:#E8F5E9;border-color:#A5D6A7;color:#2E7D32}
-.fr-ward-btn{height:38px;padding:0 16px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:700;background:#1A3DB5;color:#fff;border:none;white-space:nowrap;align-self:flex-end;font-family:Inter,sans-serif}
-
-/* action row */
+.fr-ward-btn{height:38px;padding:0 16px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:700;background:#1A3DB5;color:#fff;border:none;white-space:nowrap;font-family:Inter,sans-serif}
+.fr-ward-btn:hover{background:#0F2B8C}
 .fr-action-row{display:flex;justify-content:flex-end;gap:10px;padding:10px 18px;background:#FAFAFA;border-top:1px solid #EDE7F6;align-items:center}
 .fr-btn-pri{height:36px;padding:0 22px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:700;border:none;background:#1A3DB5;color:#fff;font-family:Inter,sans-serif;transition:all 0.15s}
 .fr-btn-pri:hover{background:#0F2B8C}
 .fr-btn-sec{height:36px;padding:0 18px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:700;background:#F5F5F5;color:#444;border:1.5px solid #DDD;font-family:Inter,sans-serif}
 .fr-btn-sec:hover{background:#EEE}
-
-/* table card */
+.fr-rupee-wrap{display:flex;align-items:center;border:1.5px solid #CE93D8;border-radius:8px;background:#fff;overflow:hidden;height:38px;transition:all 0.2s;width:100%}
+.fr-rupee-wrap:focus-within{border-color:#5B2D8E;box-shadow:0 0 0 3px rgba(91,45,142,0.08)}
+.fr-rupee-sym{padding:0 6px 0 10px;font-size:14px;font-weight:700;color:#5B2D8E;user-select:none;flex-shrink:0}
+.fr-rupee-input{flex:1;height:100%;border:none;outline:none;font-size:13px;font-weight:500;color:#2D2D2D;background:transparent;padding:0 8px 0 0}
+.fr-rupee-input::placeholder{color:#BDBDBD;font-style:italic;font-size:11px}
 .fr-tbl-card{background:#fff;border:1px solid #E0E0E0;border-radius:12px;overflow:hidden}
 .fr-tbl-header{padding:12px 18px;border-bottom:2px solid #EDE7F6;background:#FAFAFA;font-size:13px;font-weight:700;color:#3D1A6E;display:flex;align-items:center;justify-content:space-between}
 .fr-tbl-note{font-size:10px;font-weight:500;color:#9575CD;font-style:italic}
