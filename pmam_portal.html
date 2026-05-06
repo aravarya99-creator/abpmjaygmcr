@@ -435,7 +435,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
     </div>
   </div>
 
-
+  <!-- TICKER: dynamic content via #adminTicker (loaded from Firestore) -->
 </div>
 
 <!-- LAYOUT -->
@@ -514,7 +514,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         </div>
         <div class="fr-sec-banner">Basic Information</div>
         <div class="fr-section" style="padding-top:6px">
-          <div class="fr-fields-row" style="align-items:flex-end">
+          <div class="fr-fields-row">
             <div class="fr-field" style="width:145px">
               <label>Date</label>
               <input type="date" id="eDate">
@@ -548,7 +548,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div class="fr-divider"></div>
         <div class="fr-sec-banner">Case Data</div>
         <div class="fr-section" style="padding-top:6px;overflow-x:auto">
-          <div class="fr-fields-row" style="flex-wrap:nowrap;align-items:flex-end">
+          <div class="fr-fields-row" style="flex-wrap:nowrap">
             <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eIPD">
               <label>Ward IPD</label>
               <input type="number" id="eIPD" placeholder="Ward IPD" min="0">
@@ -567,7 +567,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
               <span class="fr-auto-tag">AUTO</span>
             </div>
             <div class="fr-field" style="flex:1;min-width:95px" id="wrap-ePre">
-              <label>Preauth Initiated</label>
+              <label>Preauth Init</label>
               <input type="number" id="ePre" placeholder="Preauth No." min="0">
             </div>
             <div class="fr-field" style="flex:1;min-width:105px" id="wrap-ePreAmt">
@@ -901,21 +901,6 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 <script>
 // ── All init runs after DOM is fully loaded ──
 window.addEventListener('DOMContentLoaded', function() {
-  // ── Restore user name from session immediately ──
-  try {
-    var _u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
-    var _n = _u.name || _u.email || '';
-    if (_n) {
-      var _hn = document.getElementById('hName');
-      if (_hn) _hn.textContent = _n.toUpperCase();
-      var _ini = document.getElementById('hInitials');
-      if (_ini) _ini.textContent = _n.substring(0,2).toUpperCase();
-      var _ep = document.getElementById('ePmam');
-      if (_ep) _ep.value = _n;
-      var _pb = document.getElementById('pmamNameBadge');
-      if (_pb) _pb.textContent = _n;
-    }
-  } catch(e) {}
 
   // Set today's date in fill report
   document.getElementById('eDate').value = new Date().toISOString().split('T')[0];
@@ -1093,25 +1078,6 @@ function addWard() {
   // Apply case type config for the selected ward
   applyWardCaseConfig(v);
 }
-
-function updateWardStatus() {
-  var pill = document.getElementById('wardStatusPill');
-  var txt  = document.getElementById('wardStatusText');
-  var tags = document.getElementById('wardTags');
-  if (!pill || !txt) return;
-  if (selWards && selWards.length > 0) {
-    pill.className = 'fr-ward-status has-ward';
-    txt.textContent = selWards.join(', ');
-    if (tags) tags.innerHTML = selWards.map(function(w,i){
-      return '<span class="fr-wtag">'+w+'<span onclick="selWards.splice('+i+',1);renderSelWards()">×</span></span>';
-    }).join('');
-  } else {
-    pill.className = 'fr-ward-status';
-    txt.textContent = 'No Ward Selected';
-    if (tags) tags.innerHTML = '';
-  }
-}
-
 function renderSelWards() {
   updateWardStatus();
   var d = document.getElementById('wardTags');
@@ -1214,7 +1180,7 @@ function updateDashboard() {
 
   // Build row HTML once, use for both dashboard + fill-report recent list
   var rowsHtml = allEntries.map(function(e) {
-    return '<tr><td>'+formatDate(e.date)+'</td>'
+    return '<tr><td>' + e.date + '</td>'
       + '<td>' + (e.wards||[]).map(function(w){return '<span class="wtag">'+w+'</span>';}).join('') + '</td>'
       + '<td>' + e.ipd + '</td><td>' + e.med + '</td><td>' + e.surg + '</td>'
       + '<td><strong>' + e.reg + '</strong></td><td>' + e.pre + '</td>'
@@ -1232,21 +1198,26 @@ function updateDashboard() {
   var todayOnly = new Date().toISOString().split('T')[0];
   var etb = document.getElementById('entryTbody');
   if (etb) {
-    var tE = allEntries.filter(function(e){return e.date===todayOnly;});
+    var tE = (typeof allEntries !== 'undefined' ? allEntries : []).filter(function(e){return e.date === todayOnly;});
     tE.sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
-    etb.innerHTML = tE.length===0
-      ? '<tr><td colspan="12" class="empty-td">No entries today — check <strong>Records</strong> for other dates</td></tr>'
-      : tE.map(function(e){
-          var conv=e.ipd>0?((e.reg/e.ipd)*100).toFixed(1)+'%':'—';
-          var ws=Array.isArray(e.wards)?e.wards:(e.ward?[e.ward]:[]);
-          return '<tr><td>'+formatDate(e.date)+'</td>'
-            +'<td>'+ws.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('')+'</td>'
-            +'<td>'+e.ipd+'</td><td>'+e.med+'</td><td>'+e.surg+'</td>'
-            +'<td><strong>'+e.reg+'</strong></td><td>'+e.pre+'</td>'
-            +'<td>'+Number(e.preAmt).toLocaleString('en-IN')+'</td>'
-            +'<td>'+e.dis+'</td><td>'+Number(e.clm).toLocaleString('en-IN')+'</td>'
-            +'<td><strong>'+conv+'</strong></td><td></td></tr>';
-        }).join('');
+    if (tE.length === 0) {
+      etb.innerHTML = '<tr><td colspan="12" class="empty-td">No entries today — check <strong>Records</strong> for other dates</td></tr>';
+    } else {
+      etb.innerHTML = tE.map(function(e){
+        var conv = e.ipd > 0 ? ((e.reg/e.ipd)*100).toFixed(1)+'%' : '—';
+        var ws = Array.isArray(e.wards) ? e.wards : (e.ward ? [e.ward] : []);
+        return '<tr><td>'+formatDate(e.date)+'</td>'
+          +'<td>'+ws.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('')+'</td>'
+          +'<td>'+(e.ipd||0)+'</td><td>'+(e.med||0)+'</td><td>'+(e.surg||0)+'</td>'
+          +'<td><strong>'+(e.reg||0)+'</strong></td>'
+          +'<td>'+(e.pre||0)+'</td>'
+          +'<td>'+Number(e.preAmt||0).toLocaleString('en-IN')+'</td>'
+          +'<td>'+(e.dis||0)+'</td>'
+          +'<td>'+Number(e.clm||0).toLocaleString('en-IN')+'</td>'
+          +'<td><strong>'+conv+'</strong></td>'
+          +'<td></td></tr>';
+      }).join('');
+    }
   }
 }
 
@@ -1287,7 +1258,7 @@ function renderRecords(data) {
   if (!data.length) { tb.innerHTML='<tr><td colspan="12" class="empty-td">No records found</td></tr>'; return; }
   tb.innerHTML = data.map(function(e) {
     return '<tr>'
-      + '<td style="font-weight:600;white-space:nowrap">'+formatDate(e.date)+'</td>'
+      + '<td style="font-weight:600;white-space:nowrap">' + e.date + '</td>'
       + '<td>' + e.wards.map(function(w){return '<span class="wtag">'+w+'</span>';}).join('') + '</td>'
       + '<td>' + e.ipd + '</td><td>' + e.med + '</td><td>' + e.surg + '</td>'
       + '<td><strong>' + e.reg + '</strong></td><td>' + e.pre + '</td>'
@@ -1644,12 +1615,33 @@ function printLeaveForm() {
 
     + '</div>'
     + '<script>window.onload=function(){window.print();};<\/script>'
-    + '
+    + '<script>
+// ── Format YYYY-MM-DD → DD-MM-YYYY ──
 function formatDate(d){
   if(!d) return '';
-  var p=d.split('-');
-  return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:d;
+  var p = d.split('-');
+  return p.length === 3 ? p[2]+'-'+p[1]+'-'+p[0] : d;
 }
+
+// ── Ward status pill update ──
+function updateWardStatus(){
+  var pill = document.getElementById('wardStatusPill');
+  var txt  = document.getElementById('wardStatusText');
+  var tags = document.getElementById('wardTags');
+  if(!pill || !txt) return;
+  if(typeof selWards !== 'undefined' && selWards && selWards.length > 0){
+    pill.className = 'fr-ward-status has-ward';
+    txt.textContent = selWards.join(', ');
+    if(tags) tags.innerHTML = selWards.map(function(w,i){
+      return '<span class="fr-wtag">'+w+'<span onclick="selWards.splice('+i+',1);renderSelWards()">×</span></span>';
+    }).join('');
+  } else {
+    pill.className = 'fr-ward-status';
+    txt.textContent = 'No Ward Selected';
+    if(tags) tags.innerHTML = '';
+  }
+}
+</script>
 </body></html>';
 
   var pw = window.open('','_blank','width=900,height=700');
@@ -1940,7 +1932,7 @@ window.addEventListener('DOMContentLoaded', function(){
 .fr-divider{height:1px;background:linear-gradient(90deg,#EDE7F6,#E0E0E0,#EDE7F6);margin:0 18px}
 .fr-fields-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 .fr-field{display:flex;flex-direction:column;position:relative}
-.fr-field label{font-size:9.5px;font-weight:700;color:#5B2D8E;letter-spacing:0.3px;margin-bottom:4px;padding-left:2px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-field label{font-size:9.5px;font-weight:700;color:#5B2D8E;letter-spacing:0.3px;margin-bottom:4px;padding-left:2px;text-transform:uppercase;white-space:nowrap}
 .fr-field input,.fr-field select{height:38px;padding:0 12px;border:1.5px solid #CE93D8;border-radius:8px;font-size:13px;font-weight:500;background:#fff;color:#2D2D2D;outline:none;transition:all 0.2s;width:100%}
 .fr-field input::placeholder{color:#BDBDBD;font-style:italic;font-size:11px;font-weight:400}
 .fr-field input:focus,.fr-field select:focus{border-color:#5B2D8E;background:#FAFAFA;box-shadow:0 0 0 3px rgba(91,45,142,0.08)}
