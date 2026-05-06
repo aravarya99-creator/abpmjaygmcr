@@ -251,6 +251,21 @@ tr:hover td{background:#EEF3FF}
 .btn-red{background:#dc2626;color:#fff}
 .btn-red:hover{background:#b91c1c}
 .dm-act-btn{padding:5px 10px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-right:4px}
+/* ── Data Management unified tabs ── */
+.dmt-tab{padding:8px 16px;font-size:12px;border-radius:10px;border:1.5px solid #e0e8ff;cursor:pointer;font-weight:600;color:#374151;background:#f8faff;transition:all 0.18s;white-space:nowrap}
+.dmt-tab:hover{background:#dbeafe;color:#1e3a8a;border-color:#93c5fd}
+.dmt-tab.active{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border-color:#1d4ed8;box-shadow:0 2px 8px rgba(29,78,216,0.25)}
+.dmt-pane{display:none}
+.dmt-pane.active{display:block}
+/* ── Holiday Calendar cells ── */
+.hc-cell{border-radius:6px;padding:4px 2px;text-align:center;font-size:11px;font-weight:600;cursor:pointer;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;border:1.5px solid transparent;transition:all 0.15s}
+.hc-cell:hover{border-color:#1A3DB5;box-shadow:0 0 0 2px rgba(26,61,181,0.15)}
+.hc-cell.sunday{background:#fee2e2;color:#dc2626}
+.hc-cell.gazetted{background:#ede9fe;color:#7c3aed}
+.hc-cell.state{background:#fef3c7;color:#92400e}
+.hc-cell.custom{background:#dcfce7;color:#166534}
+.hc-cell.today{box-shadow:0 0 0 2px #2563eb}
+.hc-header{background:#1A3DB5;color:#fff;border-radius:6px;padding:6px 2px;text-align:center;font-size:10px;font-weight:800;letter-spacing:0.5px}
 
 </style>
   <!-- Firebase v10 -->
@@ -357,22 +372,15 @@ tr:hover td{background:#EEF3FF}
       <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
       <div class="sbl">Users</div>
     </div>
-    <div class="sbi" onclick="goSec('roster',this)" title="Ward Roster">
-      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
-      <div class="sbl">Roster</div>
-    </div>
-    <div class="sbi" onclick="goSec('holiday',this)" title="Holiday Duty">
-      <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
-      <div class="sbl">Holiday</div>
+    <div class="sb-div"></div>
+    <div class="sbi" onclick="goSec('staff',this)" title="Staff Management">
+      <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 110 10A5 5 0 0112 2zm0 12c5.33 0 8 2.67 8 4v2H4v-2c0-1.33 2.67-4 8-4z"/><path d="M18 8.5A2.5 2.5 0 1118 3a2.5 2.5 0 010 5zm0 2c2.67 0 4 1.33 4 2v1h-3v-1c0-.67-.22-1.3-.6-1.82.2-.1.4-.18.6-.18zm-12 0c-.2 0-.4.08-.6.18A4.4 4.4 0 005 14.5v1H2v-1c0-.67 1.33-2 4-2z"/></svg>
+      <div class="sbl">Staff</div>
     </div>
     <div class="sb-div"></div>
-    <div class="sbi" data-goto="datamgmt" onclick="goSec('datamgmt',this)" title="Data Management (Admin Tools)">
+    <div class="sbi" data-goto="datamgmt" onclick="goSec('datamgmt',this)" title="Data Management">
       <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 4.48 2 7.5v9C2 19.52 6.48 22 12 22s10-2.48 10-5.5v-9C22 4.48 17.52 2 12 2zm0 2c4.42 0 8 1.79 8 4s-3.58 4-8 4-8-1.79-8-4 3.58-4 8-4zm0 16c-4.42 0-8-1.79-8-4v-2.55c1.76 1.52 4.74 2.55 8 2.55s6.24-1.03 8-2.55V16c0 2.21-3.58 4-8 4zm0-6c-4.42 0-8-1.79-8-4V7.5c1.76 1.52 4.74 2.55 8 2.55s6.24-1.03 8-2.55V10c0 2.21-3.58 4-8 4z"/></svg>
       <div class="sbl">Data</div>
-    </div>
-    <div class="sbi" data-goto="auditlog" onclick="goSec('auditlog',this)" title="Audit Log">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 12h8v2H8zm0 4h5v2H8z"/></svg>
-      <div class="sbl">Audit</div>
     </div>
     <div class="sb-div"></div>
     <div class="sbi" onclick="goSec('settings',this)" title="Settings">
@@ -456,97 +464,355 @@ tr:hover td{background:#EEF3FF}
       </div>
     </div>
 
-    <!-- ===== WARD ROSTER ===== -->
-    <div class="sec" id="sec-roster">
-      <div class="page-hd">Ward Roster</div>
-      <div class="card">
-        <div class="card-hd">
-          PMAM Ward Assignments
-          <button class="btn-add" onclick="addRosterRow()">+ Add Row</button>
+    <!-- ===== STAFF MANAGEMENT ===== -->
+    <div class="sec" id="sec-staff">
+      <div class="page-hd" style="justify-content:space-between">
+        Staff Management
+        <button class="btn btn-pri" onclick="loadStaffFromUsers()">🔄 Refresh</button>
+      </div>
+
+      <!-- Filter bar -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
+        <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px">Filter:</div>
+        <button class="dmt-tab active" id="sf-tab-all" onclick="filterStaff('all',this)">All Staff</button>
+        <button class="dmt-tab" id="sf-tab-pmam" onclick="filterStaff('PMAM',this)">PMAMs</button>
+        <button class="dmt-tab" id="sf-tab-ic" onclick="filterStaff('I/C AB-PMJAY',this)">I/C</button>
+        <button class="dmt-tab" id="sf-tab-deo" onclick="filterStaff('DEO',this)">DEO</button>
+        <button class="dmt-tab" id="sf-tab-admin" onclick="filterStaff('Admin',this)">Admin</button>
+        <div style="margin-left:auto;font-size:11px;color:#6b7280" id="staffCountBadge"></div>
+      </div>
+
+      <div id="staffGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px">
+        <div style="color:#9ca3af;font-style:italic;padding:20px;grid-column:1/-1">Loading staff...</div>
+      </div>
+    </div>
+
+    <!-- STAFF EDIT MODAL -->
+    <div class="modal-bg" id="staffEditModal">
+      <div class="modal-box" style="max-width:520px">
+        <div class="modal-title">✏️ Edit Staff Profile</div>
+        <input type="hidden" id="seEmail">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+          <div id="sePhotoPreview" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#1A3DB5,#2952D9);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;border:3px solid #e0e8ff"></div>
+          <div style="flex:1">
+            <label style="font-size:10px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:4px">Profile Photo</label>
+            <input type="file" id="sePhotoFile" accept="image/*" onchange="sePreviewPhoto(this)" style="font-size:11px;padding:6px;border:1px solid #d1d5db;border-radius:6px;width:100%;background:#fff">
+            <div style="font-size:10px;color:#9ca3af;margin-top:2px">Max ~300KB · will be stored as Base64</div>
+          </div>
         </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th style="width:50px">S.No</th>
-              <th>PMAM Name</th>
-              <th>Ward Assigned</th>
-              <th style="width:90px">Action</th>
-            </tr></thead>
-            <tbody id="rosterBody"></tbody>
-          </table>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="mfld"><label>Full Name</label><input type="text" id="seName" placeholder="Full name"></div>
+          <div class="mfld"><label>Role</label><input type="text" id="seRole" readonly style="background:#f9fafb;color:#6b7280"></div>
+          <div class="mfld"><label>Email</label><input type="text" id="seEmailDisplay" readonly style="background:#f9fafb;color:#6b7280"></div>
+          <div class="mfld"><label>Status</label>
+            <select id="seStatus">
+              <option value="approved">✅ Approved</option>
+              <option value="inactive">⛔ Inactive</option>
+              <option value="pending">⏳ Pending</option>
+            </select>
+          </div>
+          <div class="mfld" style="grid-column:1/-1"><label>Ward / Department</label>
+            <select id="seWard">
+              <option value="">-- Select Ward --</option>
+              <option>Orthopaedics</option><option>Male Surgery Ward</option><option>Female Surgery Ward</option>
+              <option>Male Medicine Ward A</option><option>Male Medicine Ward B</option>
+              <option>Female Medicine Ward A</option><option>Female Medicine Ward B</option>
+              <option>MICU</option><option>SICU</option><option>Optha</option><option>Onco</option>
+              <option>Gynae</option><option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
+              <option>Admin</option><option>Finance</option><option>OPD</option>
+            </select>
+          </div>
         </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <span id="rosterSaveMsg" style="font-size:11px;font-weight:600;margin-right:12px;align-self:center"></span>
-          <button class="btn btn-pri" onclick="saveRosterToDb()">Save Roster</button>
+        <div id="seErr" style="font-size:11px;color:#dc2626;min-height:14px;margin-top:6px"></div>
+        <div class="modal-footer">
+          <button class="mbtn mbtn-sec" onclick="document.getElementById('staffEditModal').classList.remove('open')">Cancel</button>
+          <button class="mbtn mbtn-pri" onclick="saveStaffEdit()">💾 Save Changes</button>
         </div>
       </div>
     </div>
 
-    <!-- ===== HOLIDAY DUTY ===== -->
-    <div class="sec" id="sec-holiday">
-      <div class="page-hd">Holiday Duty Roster</div>
-      <div class="card">
-        <div class="card-hd">
-          Holiday Assignments
-          <button class="btn-add" onclick="addHolidayRow()">+ Add Holiday</button>
-        </div>
-        <div class="tbl-wrap">
-          <table class="holiday-tbl">
-            <thead><tr>
-              <th>S.No</th><th>Holiday Name</th><th>Date</th><th>PMAMs on Duty (Max 7)</th><th>Action</th>
-            </tr></thead>
-            <tbody id="holidayBody"></tbody>
-          </table>
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <span id="holidaySaveMsg" style="font-size:11px;font-weight:600;margin-right:12px;align-self:center"></span>
-          <button class="btn btn-pri" onclick="saveHolidayToDb()">Save Holiday Roster</button>
+    <!-- ===== DATA MANAGEMENT (unified) ===== -->
+    <div class="sec" id="sec-datamgmt">
+      <div class="page-hd">Data Management</div>
+
+      <!-- Sub-tab nav -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
+        <button class="dmt-tab active" id="dmt-holidaycal"  onclick="showDmTab('holidaycal',this)">📅 Holiday Calendar</button>
+        <button class="dmt-tab"        id="dmt-wardroster"  onclick="showDmTab('wardroster',this)">🏥 Ward Roster</button>
+        <button class="dmt-tab"        id="dmt-holidayrost" onclick="showDmTab('holidayrost',this)">🎉 Holiday Roster</button>
+        <button class="dmt-tab"        id="dmt-weekendroster" onclick="showDmTab('weekendroster',this)">📆 Weekend Roster</button>
+        <button class="dmt-tab"        id="dmt-wardmgmt"    onclick="showDmTab('wardmgmt',this)">🏨 Ward Management</button>
+        <button class="dmt-tab"        id="dmt-reports"     onclick="showDmTab('reports',this)">📊 Monthly Reports</button>
+        <button class="dmt-tab"        id="dmt-leaves"      onclick="showDmTab('leaves',this)">📋 Leave Requests</button>
+      </div>
+
+      <!-- ── TAB: Holiday Calendar ── -->
+      <div class="dmt-pane active" id="dmpane-holidaycal">
+        <div class="card">
+          <div class="card-hd">
+            Holiday Calendar
+            <div style="display:flex;gap:8px;align-items:center">
+              <select id="hcYear" onchange="hcRender()" style="padding:4px 10px;border:1px solid #e0e8ff;border-radius:6px;font-size:12px"></select>
+              <select id="hcMonth" onchange="hcRender()" style="padding:4px 10px;border:1px solid #e0e8ff;border-radius:6px;font-size:12px">
+                <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+                <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+                <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+                <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+              </select>
+              <button class="btn-add" onclick="openAddHolidayCal()">+ Add Holiday</button>
+            </div>
+          </div>
+          <!-- Calendar grid -->
+          <div id="hcGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:14px"></div>
+          <!-- Legend -->
+          <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11px;font-weight:600;margin-bottom:10px">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#dc2626;border-radius:3px"></span> Sunday</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#7c3aed;border-radius:3px"></span> Gazetted Holiday</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#f59e0b;border-radius:3px"></span> State Holiday</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#16a34a;border-radius:3px"></span> Custom / Other</span>
+          </div>
+          <!-- Import from state govt -->
+          <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:12px;margin-bottom:10px">
+            <div style="font-size:12px;font-weight:700;color:#0369a1;margin-bottom:6px">📥 Import Holidays (Paste list)</div>
+            <div style="font-size:11px;color:#6b7280;margin-bottom:6px">Paste one holiday per line in format: <code>YYYY-MM-DD | Holiday Name | Type (Gazetted/State/Custom)</code></div>
+            <textarea id="hcImportText" rows="4" placeholder="e.g.&#10;2026-01-26 | Republic Day | Gazetted&#10;2026-03-25 | Holi | Gazetted" style="width:100%;padding:8px;border:1.5px solid #bae6fd;border-radius:7px;font-size:12px;font-family:inherit;resize:vertical"></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn btn-pri" onclick="hcImport()" style="background:linear-gradient(135deg,#0369a1,#0284c7)">📥 Import</button>
+              <button class="btn" onclick="hcSaveAll()" style="background:linear-gradient(135deg,#166534,#16a34a);color:#fff">💾 Save Calendar to Firebase</button>
+            </div>
+            <div id="hcImportMsg" style="font-size:11px;font-weight:600;margin-top:6px;min-height:14px"></div>
+          </div>
+          <!-- Holiday list for selected month -->
+          <div style="font-size:12px;font-weight:700;color:#0F2B8C;margin-bottom:8px">Holidays this month:</div>
+          <div id="hcHolidayList" style="display:flex;flex-direction:column;gap:5px"></div>
         </div>
       </div>
+
+      <!-- ── TAB: Ward Roster ── -->
+      <div class="dmt-pane" id="dmpane-wardroster">
+        <div class="card">
+          <div class="card-hd">
+            PMAM Ward Assignments
+            <button class="btn-add" onclick="addRosterRow()">+ Add Row</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th style="width:50px">S.No</th><th>PMAM Name</th><th>Ward Assigned</th><th style="width:90px">Action</th>
+              </tr></thead>
+              <tbody id="rosterBody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px">
+            <span id="rosterSaveMsg" style="font-size:11px;font-weight:600;margin-right:12px;align-self:center"></span>
+            <button class="btn btn-pri" onclick="saveRosterToDb()">💾 Save Roster</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB: Holiday Roster ── -->
+      <div class="dmt-pane" id="dmpane-holidayrost">
+        <div class="card">
+          <div class="card-hd">
+            Holiday Duty Assignments
+            <button class="btn-add" onclick="addHolidayRow()">+ Add Holiday</button>
+          </div>
+          <div class="tbl-wrap">
+            <table class="holiday-tbl">
+              <thead><tr>
+                <th>S.No</th><th>Holiday Name</th><th>Date</th><th>PMAMs on Duty (Max 7)</th><th>Action</th>
+              </tr></thead>
+              <tbody id="holidayBody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px">
+            <span id="holidaySaveMsg" style="font-size:11px;font-weight:600;margin-right:12px;align-self:center"></span>
+            <button class="btn btn-pri" onclick="saveHolidayToDb()">💾 Save Holiday Roster</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB: Weekend Roster ── -->
+      <div class="dmt-pane" id="dmpane-weekendroster">
+        <div class="card">
+          <div class="card-hd">
+            Weekend Duty Assignments
+            <button class="btn-add" onclick="wrAddRow()">+ Add Row</button>
+          </div>
+          <div class="tbl-wrap">
+            <table id="wrTable" style="min-width:700px">
+              <thead>
+                <tr>
+                  <th rowspan="2" style="width:54px;vertical-align:middle">S.NO</th>
+                  <th colspan="2" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)">NAME OF EMPLOYEE</th>
+                  <th rowspan="2" style="vertical-align:middle">SATURDAY<br><span style="font-size:9px;font-weight:400;opacity:0.8">(DATE)</span></th>
+                  <th rowspan="2" style="vertical-align:middle">SUNDAY<br><span style="font-size:9px;font-weight:400;opacity:0.8">(DATE)</span></th>
+                  <th rowspan="2" style="width:90px;vertical-align:middle">ACTION</th>
+                </tr>
+                <tr>
+                  <th style="background:rgba(255,255,255,0.08)">PMAM 1</th>
+                  <th style="background:rgba(255,255,255,0.08)">PMAM 2</th>
+                </tr>
+              </thead>
+              <tbody id="wrBody">
+                <tr><td colspan="6" class="empty-td">No rows yet. Click + Add Row.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:14px">
+            <span id="wrSaveMsg" style="font-size:11px;font-weight:600"></span>
+            <button class="btn btn-pri" onclick="wrSave()" style="padding:10px 22px;border-radius:50px;font-size:13px;font-weight:700">Save &amp; Publish</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB: Ward Management ── -->
+      <div class="dmt-pane" id="dmpane-wardmgmt">
+        <div class="card">
+          <div class="card-hd">Ward Management</div>
+          <div id="wardList"></div>
+          <div class="add-row" style="margin-top:10px">
+            <input type="text" class="add-input" id="newWard" placeholder="Type new ward name">
+            <button class="btn btn-pri" onclick="addWard()">+ Add Ward</button>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px">
+            <button class="btn btn-pri" onclick="saveWardsToDb()">💾 Save Wards</button>
+          </div>
+          <div id="wardSaveMsg" style="font-size:11px;font-weight:600;margin-top:6px;min-height:14px"></div>
+        </div>
+      </div>
+
+      <!-- ── TAB: Monthly Reports ── -->
+      <div class="dmt-pane" id="dmpane-reports">
+        <div class="card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;margin-bottom:12px">
+          <div class="card-hd" style="color:#1e3a8a">📊 Monthly Reports — View / Edit / Delete</div>
+          <div style="font-size:12px;color:#1e3a8a">Filter by date range, PMAM, or ward. Edit or flag reports.</div>
+        </div>
+        <div class="card">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end">
+            <div class="fld"><label>From Date</label><input type="date" id="dmRepFrom" style="height:34px;padding:0 10px;border:1.5px solid #ddd6fe;border-radius:8px;font-size:12px"></div>
+            <div class="fld"><label>To Date</label><input type="date" id="dmRepTo" style="height:34px;padding:0 10px;border:1.5px solid #ddd6fe;border-radius:8px;font-size:12px"></div>
+            <div class="fld"><label>PMAM</label><select id="dmRepPmam" style="height:34px;padding:0 10px;border:1.5px solid #ddd6fe;border-radius:8px;font-size:12px"><option value="">All PMAMs</option></select></div>
+            <div class="fld"><label>Ward</label><select id="dmRepWard" style="height:34px;padding:0 10px;border:1.5px solid #ddd6fe;border-radius:8px;font-size:12px"><option value="">All Wards</option></select></div>
+            <button class="btn btn-pri" onclick="dmLoadReports()">🔍 Load</button>
+          </div>
+          <div id="dmRepStatus" style="font-size:11px;color:#6b7280;margin-top:8px"></div>
+        </div>
+        <div class="card" style="padding:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:8px">
+            <span style="font-weight:700;color:#1e293b;font-size:13px">Reports <span id="dmRepCount" style="font-weight:400;color:#6b7280;font-size:11px"></span></span>
+            <button class="btn btn-pri" onclick="openAddReport()" style="padding:6px 12px;font-size:11px">➕ Add Report</button>
+          </div>
+          <div class="tbl-wrap" style="max-height:520px;overflow:auto">
+            <table>
+              <thead><tr><th>Date</th><th>PMAM</th><th>Ward</th><th>OPD</th><th>IPD</th><th>Reg</th><th>Pre-Auth</th><th>Discharged</th><th>Claims</th><th>Status</th><th style="width:110px">Actions</th></tr></thead>
+              <tbody id="dmRepTbody"><tr><td colspan="11" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">Click Load to fetch reports…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB: Leave Requests ── -->
+      <div class="dmt-pane" id="dmpane-leaves">
+        <div class="card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;margin-bottom:12px">
+          <div class="card-hd" style="color:#14532d">📋 Leave Requests — View / Edit / Approve / Reject</div>
+          <div style="font-size:12px;color:#14532d">Filter by PMAM, status, or type.</div>
+        </div>
+        <div class="card">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
+            <div class="fld"><label>PMAM</label><select id="dmLvPmam" style="height:34px;padding:0 10px;border:1.5px solid #bbf7d0;border-radius:8px;font-size:12px"><option value="">All PMAMs</option></select></div>
+            <div class="fld"><label>Status</label><select id="dmLvStatus" style="height:34px;padding:0 10px;border:1.5px solid #bbf7d0;border-radius:8px;font-size:12px"><option value="">All</option><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+            <div class="fld"><label>Type</label><select id="dmLvType" style="height:34px;padding:0 10px;border:1.5px solid #bbf7d0;border-radius:8px;font-size:12px"><option value="">All</option><option>Casual</option><option>Earned</option><option>Medical</option><option>Compensatory</option></select></div>
+            <button class="btn btn-pri" onclick="dmLoadLeaves()">🔍 Load</button>
+          </div>
+          <div id="dmLvStatusTxt" style="font-size:11px;color:#6b7280;margin-top:8px"></div>
+        </div>
+        <div class="card" style="padding:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:8px">
+            <span style="font-weight:700;color:#1e293b;font-size:13px">Leave Requests <span id="dmLvCount" style="font-weight:400;color:#6b7280;font-size:11px"></span></span>
+            <button class="btn btn-pri" onclick="openAddLeave()" style="padding:6px 12px;font-size:11px">➕ Add Leave</button>
+          </div>
+          <div class="tbl-wrap" style="max-height:520px;overflow:auto">
+            <table>
+              <thead><tr><th>Type</th><th>PMAM</th><th>Ward</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th style="width:110px">Actions</th></tr></thead>
+              <tbody id="dmLvTbody"><tr><td colspan="9" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">Click Load to fetch leave requests…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ===== SETTINGS ===== -->
     <div class="sec" id="sec-settings">
       <div class="page-hd">Settings</div>
+
+      <!-- Settings Tabs -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
+        <button class="dmt-tab active" id="stab-landing" onclick="showSettingsTab('landing',this)">🌐 Landing Page</button>
+        <button class="dmt-tab" id="stab-branding" onclick="showSettingsTab('branding',this)">🖼️ Branding</button>
+        <button class="dmt-tab" id="stab-tickers" onclick="showSettingsTab('tickers',this)">📣 Tickers</button>
+        <button class="dmt-tab" id="stab-sysinfo" onclick="showSettingsTab('sysinfo',this)">⚙️ System</button>
+      </div>
+
       <div class="settings-layout">
 
-        <div class="settings-sidebar">
-          <div class="sbs-title">Settings Menu</div>
-
-          <div class="sbs-section-label">🌐 Landing Page</div>
-          <div class="sbs-item active" onclick="showPanel('landingPageEditor',this)" style="background:linear-gradient(90deg,#fef3c7,#fef9c3);border-left:3px solid #f59e0b;font-weight:700">
-            <svg viewBox="0 0 24 24"><path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/></svg>🎨 Landing Page Editor
-          </div>
-          <div class="sbs-item" onclick="showPanel('branding',this)">
-            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>🖼️ Branding &amp; Logos
-          </div>
-
-          <div class="sbs-divider"></div>
-          <div class="sbs-section-label">📢 Announcements</div>
-          <div class="sbs-item" onclick="showPanel('tickers',this)">
-            <svg viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg>📣 Ticker Messages
-          </div>
-
-          <div class="sbs-divider"></div>
-          <div class="sbs-section-label">📋 Data Management</div>
-          <div class="sbs-item" onclick="showPanel('dmReports',this)">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg>📊 Monthly Reports
-          </div>
-          <div class="sbs-item" onclick="showPanel('dmLeaves',this)">
-            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>📋 Leave Requests
-          </div>
-          <div class="sbs-item" onclick="showPanel('wards',this)">
-            <svg viewBox="0 0 24 24"><path d="M19 21V9l-7-5-7 5v12"/><path d="M9 21v-6h6v6"/></svg>🏥 Ward Management
-          </div>
-
-          <div class="sbs-divider"></div>
-          <div class="sbs-section-label">⚙️ System</div>
-          <div class="sbs-item" onclick="showPanel('sysinfo',this)">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>🛡️ System Info &amp; Backup
+        <div class="settings-sidebar" id="settings-sub-sidebar">
+          <div class="sbs-title" id="sbs-sub-title">Landing Page</div>
+          <div id="sbs-sub-items">
+            <!-- filled dynamically -->
           </div>
         </div>
 
         <div class="settings-content">
+
+          <!-- ════════════════════════════════════════════════════════════════
+               🧭 NAV BAR MANAGER — dedicated panel for navigation bar items
+               Saves to settings/landing_page → index.html picks up via onSnapshot
+               ════════════════════════════════════════════════════════════════ -->
+          <div class="settings-panel" id="panel-navbarManager">
+
+            <!-- Hero info card -->
+            <div class="s-card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd">
+              <div class="s-card-title" style="color:#1e3a8a">
+                <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+                Navigation Bar Manager
+                <span id="nbm-status" style="margin-left:auto;font-size:11px;color:#6b7280;font-weight:500"></span>
+              </div>
+              <div style="font-size:12px;color:#1e3a8a;line-height:1.65;margin-bottom:10px">
+                Manage the top navigation bar on <strong>index.html</strong> (public landing page).
+                Changes save to Firebase and appear on the landing page <strong>immediately</strong> via real-time sync — no page reload needed.
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-pri" onclick="nbmSave()" style="background:linear-gradient(135deg,#1d4ed8,#2563eb)">💾 Save Nav Bar to Firebase</button>
+                <button class="btn" onclick="nbmReload()" style="background:#fff;border:1.5px solid #93c5fd;color:#1e3a8a">↻ Reload from Firebase</button>
+                <button class="btn" onclick="nbmResetDefaults()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">⚠️ Reset to Defaults</button>
+              </div>
+            </div>
+
+            <!-- Live preview strip -->
+            <div class="s-card" style="padding:12px 16px">
+              <div style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px">📺 Live Preview — as it will appear on landing page</div>
+              <div id="nbm-preview" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;min-height:42px">
+                <span style="color:#9ca3af;font-style:italic;font-size:11px">Loading preview…</span>
+              </div>
+              <div style="font-size:10.5px;color:#9ca3af;margin-top:6px">✓ Only items marked <strong>Visible</strong> appear. The <strong>highlighted</strong> item gets the active (green) style.</div>
+            </div>
+
+            <!-- Items editor -->
+            <div class="s-card">
+              <div class="s-card-title" style="display:flex;justify-content:space-between;align-items:center">
+                <span><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#1A3DB5"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg> Navigation Items</span>
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-pri" onclick="nbmAdd()" style="padding:5px 12px;font-size:11px">+ Add Item</button>
+                </div>
+              </div>
+              <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Use ↑↓ to reorder. Toggle <strong>Visible</strong> to show/hide. Toggle <strong>Active</strong> to highlight the current page link.</div>
+              <div id="nbm-items-list" style="display:flex;flex-direction:column;gap:8px"></div>
+              <div id="nbm-save-msg" style="font-size:11px;font-weight:600;margin-top:10px;min-height:16px"></div>
+            </div>
+
+          </div>
 
           <!-- ════════════════════════════════════════════════════════════════
                🎨 LANDING PAGE EDITOR — single panel controlling 4 landing sections
@@ -650,20 +916,6 @@ tr:hover td{background:#EEF3FF}
               </div>
             </div>
 
-            <!-- ── SECONDARY LOGO (HOSPITAL) ── -->
-            <div class="s-card">
-              <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M19 21V9l-7-5-7 5v12"/><path d="M9 21v-6h6v6"/></svg>Secondary Logo (Hospital)</div>
-              <div style="font-size:12px;color:#6b7280;margin-bottom:10px">Secondary logo (e.g., hospital crest) — shown on landing page header. Recommended: 80×80px.</div>
-              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-                <div id="brLogo2Preview" style="width:64px;height:64px;border-radius:8px;border:1.5px dashed #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9ca3af;overflow:hidden">No logo</div>
-                <div style="flex:1;min-width:200px">
-                  <input type="file" id="brLogo2File" accept="image/*" onchange="brHandleFile(this,'logo2')" style="font-size:11px;padding:6px;border:1px solid #d1d5db;border-radius:6px;width:100%;background:#fff">
-                  <div style="font-size:11px;color:#6b7280;margin-top:4px">Choose a file (max ~500KB).</div>
-                </div>
-                <button class="btn" onclick="brClear('logo2')" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5">🗑 Remove</button>
-              </div>
-            </div>
-
             <!-- ── HERO BACKGROUND IMAGE ── -->
             <div class="s-card">
               <div class="s-card-title"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Landing Page Background Image</div>
@@ -703,9 +955,12 @@ tr:hover td{background:#EEF3FF}
             <!-- ── TAB BUTTONS ── -->
             <div class="s-card" style="padding:8px">
               <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button id="tk-tab-pmam"     class="tk-tab-btn tk-tab-active" onclick="tkSwitchTab('pmam')">👩‍⚕️ PMAM Portal</button>
-                <button id="tk-tab-ic"       class="tk-tab-btn"               onclick="tkSwitchTab('ic')">👨‍💼 I/C AB-PMJAY</button>
-                <button id="tk-tab-patient"  class="tk-tab-btn"               onclick="tkSwitchTab('patient')">🏥 Patient Services</button>
+                <button id="tk-tab-index"   class="tk-tab-btn"               onclick="tkSwitchTab('index')"  >🌐 Index (Landing)</button>
+                <button id="tk-tab-pmam"    class="tk-tab-btn tk-tab-active" onclick="tkSwitchTab('pmam')"   ">👩‍⚕️ PMAM Portal</button>
+                <button id="tk-tab-ic"      class="tk-tab-btn"               onclick="tkSwitchTab('ic')"     >👨‍💼 I/C AB-PMJAY</button>
+                <button id="tk-tab-admin"   class="tk-tab-btn"               onclick="tkSwitchTab('admin')"  >🔐 Admin Portal</button>
+                <button id="tk-tab-patient" class="tk-tab-btn"               onclick="tkSwitchTab('patient')">🏥 Patient Services</button>
+                <button id="tk-tab-finance" class="tk-tab-btn"               onclick="tkSwitchTab('finance')">💰 Finance Portal</button>
               </div>
             </div>
 
@@ -913,7 +1168,7 @@ tr:hover td{background:#EEF3FF}
                 <div style="padding:14px;background:#fff;border-radius:10px;border:1px solid #FECACA">
                   <div style="font-weight:700;color:#991b1b;font-size:12px">Clear all PMAM Monthly Reports</div>
                   <div id="bulkRepCount" style="font-size:11px;color:#6b7280;margin:6px 0">Count: —</div>
-                  <button class="btn btn-red" onclick="bulkClear('pmam_reports','All Monthly Reports')">🗑️ Clear Reports</button>
+                  <button class="btn btn-red" onclick="bulkClear('daily_reports','All Daily Reports')">🗑️ Clear Reports</button>
                 </div>
                 <div style="padding:14px;background:#fff;border-radius:10px;border:1px solid #FECACA">
                   <div style="font-weight:700;color:#991b1b;font-size:12px">Clear all Leave Requests</div>
@@ -1532,8 +1787,308 @@ function addUser(){
   });
 }
 
-// ===== ROSTER =====
-function addRosterRow(){rosterData.push({name:'',ward:''});renderRoster();}
+// ══════════════════════════════════════════════════════
+// DATA MANAGEMENT — Tab switcher
+// ══════════════════════════════════════════════════════
+function showDmTab(tab, el){
+  document.querySelectorAll('.dmt-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.dmt-pane').forEach(function(p){ p.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  var pane = document.getElementById('dmpane-'+tab);
+  if (pane) pane.classList.add('active');
+  // Auto-actions when switching tabs
+  if (tab === 'wardroster')   { loadRosterFromDb(); }
+  if (tab === 'holidayrost')  { loadHolidayFromDb(); }
+  if (tab === 'weekendroster'){ wrInit(); }
+  if (tab === 'wardmgmt')     { renderWards(); }
+  if (tab === 'reports')      { dmLoadFilters(); }
+  if (tab === 'leaves')       { dmLoadFilters(); }
+  if (tab === 'holidaycal')   { hcInit(); }
+}
+
+// ── Load roster from Firebase ──
+function loadRosterFromDb(){
+  db.collection('settings').doc('roster').get().then(function(doc){
+    if (doc.exists && doc.data() && Array.isArray(doc.data().rows)) {
+      rosterData = doc.data().rows.map(function(r){ return { name: r.pmam || r.name || '', ward: r.ward || '' }; });
+    }
+    renderRoster();
+  }).catch(function(){ renderRoster(); });
+}
+
+// ── Load holiday duty from Firebase ──
+function loadHolidayFromDb(){
+  db.collection('settings').doc('holidays').get().then(function(doc){
+    if (doc.exists && doc.data() && Array.isArray(doc.data().rows)) {
+      holidayData = doc.data().rows.map(function(r){
+        return { name: r.name || '', date: r.date || '', pmams: Array.isArray(r.pmams) ? r.pmams : [''] };
+      });
+    }
+    renderHoliday();
+  }).catch(function(){ renderHoliday(); });
+}
+
+// ══════════════════════════════════════════════════════
+// HOLIDAY CALENDAR
+// ══════════════════════════════════════════════════════
+var _hcHolidays = []; // [{date:'YYYY-MM-DD', name:'', type:'Gazetted|State|Custom'}]
+
+function hcInit(){
+  // Populate year selector
+  var yearSel = document.getElementById('hcYear');
+  if (yearSel && !yearSel.options.length) {
+    var cy = new Date().getFullYear();
+    for (var y = cy-1; y <= cy+2; y++) {
+      yearSel.options.add(new Option(y, y, y===cy, y===cy));
+    }
+  }
+  // Set current month
+  var monthSel = document.getElementById('hcMonth');
+  if (monthSel) monthSel.value = new Date().getMonth();
+  // Load from Firebase
+  db.collection('settings').doc('holiday_calendar').get().then(function(doc){
+    if (doc.exists && Array.isArray(doc.data().holidays)) {
+      _hcHolidays = doc.data().holidays;
+    }
+    hcRender();
+  }).catch(function(){ hcRender(); });
+}
+
+function hcRender(){
+  var yearEl  = document.getElementById('hcYear');
+  var monthEl = document.getElementById('hcMonth');
+  if (!yearEl || !monthEl) return;
+  var yr  = parseInt(yearEl.value) || new Date().getFullYear();
+  var mon = parseInt(monthEl.value);
+  var today = new Date();
+  var firstDay = new Date(yr, mon, 1).getDay(); // 0=Sun
+  var daysInMonth = new Date(yr, mon+1, 0).getDate();
+  var days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  var grid = document.getElementById('hcGrid');
+  if (!grid) return;
+  var html = days.map(function(d){ return '<div class="hc-header">'+d+'</div>'; }).join('');
+  // Empty cells before first day
+  for (var i=0; i<firstDay; i++) html += '<div></div>';
+  for (var d2=1; d2<=daysInMonth; d2++){
+    var dateStr = yr+'-'+String(mon+1).padStart(2,'0')+'-'+String(d2).padStart(2,'0');
+    var dow = new Date(yr,mon,d2).getDay();
+    var holiday = _hcHolidays.find(function(h){ return h.date===dateStr; });
+    var cls = 'hc-cell';
+    var tipName = '';
+    if (holiday) {
+      if (holiday.type==='Gazetted') cls += ' gazetted';
+      else if (holiday.type==='State') cls += ' state';
+      else cls += ' custom';
+      tipName = holiday.name;
+    } else if (dow===0) {
+      cls += ' sunday';
+    }
+    if (today.getFullYear()===yr && today.getMonth()===mon && today.getDate()===d2) cls += ' today';
+    html += '<div class="'+cls+'" onclick="hcDayClick(\''+dateStr+'\')">'
+      +'<span>'+d2+'</span>'
+      +(tipName ? '<span style="font-size:8px;line-height:1.1;text-align:center;word-break:break-word">'+tipName+'</span>' : '')
+      +'</div>';
+  }
+  grid.innerHTML = html;
+  hcRenderList(yr, mon);
+}
+
+function hcRenderList(yr, mon){
+  var listEl = document.getElementById('hcHolidayList');
+  if (!listEl) return;
+  var monthHols = _hcHolidays.filter(function(h){
+    if (!h.date) return false;
+    var d = new Date(h.date);
+    return d.getFullYear()===yr && d.getMonth()===mon;
+  });
+  // Also include Sundays
+  var sundays = [];
+  var daysInMonth = new Date(yr, mon+1, 0).getDate();
+  for (var d=1; d<=daysInMonth; d++) {
+    if (new Date(yr,mon,d).getDay()===0) {
+      var ds = yr+'-'+String(mon+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      if (!monthHols.find(function(h){ return h.date===ds; })) {
+        sundays.push({date:ds, name:'Sunday', type:'Sunday'});
+      }
+    }
+  }
+  var all = sundays.concat(monthHols).sort(function(a,b){ return a.date.localeCompare(b.date); });
+  if (!all.length) { listEl.innerHTML = '<div style="color:#9ca3af;font-style:italic;font-size:12px">No holidays this month.</div>'; return; }
+  var typeColors = {Sunday:'#fecaca',Gazetted:'#ddd6fe',State:'#fde68a',Custom:'#bbf7d0'};
+  var typeFg = {Sunday:'#dc2626',Gazetted:'#7c3aed',State:'#92400e',Custom:'#166534'};
+  listEl.innerHTML = all.map(function(h, idx){
+    var bg = typeColors[h.type] || '#f3f4f6';
+    var fg = typeFg[h.type] || '#374151';
+    var delBtn = h.type!=='Sunday' ? '<button onclick="hcDeleteHoliday('+_hcHolidays.indexOf(h)+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:14px;font-weight:800;padding:0 4px" title="Delete">×</button>' : '';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:#fff;border:1.5px solid '+bg+';border-radius:8px">'
+      +'<span style="background:'+bg+';color:'+fg+';padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700">'+h.type+'</span>'
+      +'<span style="font-size:11px;color:#374151;font-weight:600">'+h.date+'</span>'
+      +'<span style="flex:1;font-size:12px;color:#1e293b">'+h.name+'</span>'
+      +delBtn+'</div>';
+  }).join('');
+}
+
+function hcDayClick(dateStr){
+  var existing = _hcHolidays.find(function(h){ return h.date===dateStr; });
+  if (existing) {
+    if (confirm('Remove holiday "'+existing.name+'" on '+dateStr+'?')) {
+      _hcHolidays.splice(_hcHolidays.indexOf(existing), 1);
+      hcRender();
+    }
+    return;
+  }
+  var name = prompt('Holiday name for '+dateStr+':');
+  if (!name) return;
+  var type = prompt('Type? (Gazetted / State / Custom)', 'Gazetted');
+  if (!type) type = 'Custom';
+  if (!['Gazetted','State','Custom'].includes(type)) type = 'Custom';
+  _hcHolidays.push({date:dateStr, name:name.trim(), type:type});
+  hcRender();
+}
+
+function openAddHolidayCal(){
+  var dateStr = prompt('Date (YYYY-MM-DD):');
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) { showToast('Invalid date format', 'error'); return; }
+  var name = prompt('Holiday name:');
+  if (!name) return;
+  var type = prompt('Type? (Gazetted / State / Custom)', 'Gazetted');
+  if (!type || !['Gazetted','State','Custom'].includes(type)) type = 'Custom';
+  _hcHolidays.push({date:dateStr, name:name.trim(), type:type});
+  hcRender();
+  showToast('Holiday added. Click Save to persist.', 'success');
+}
+
+function hcDeleteHoliday(idx){
+  if (idx < 0 || idx >= _hcHolidays.length) return;
+  if (!confirm('Delete "'+_hcHolidays[idx].name+'"?')) return;
+  _hcHolidays.splice(idx, 1);
+  hcRender();
+}
+
+function hcImport(){
+  var txt = (document.getElementById('hcImportText') || {}).value || '';
+  var lines = txt.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  var added = 0, errors = [];
+  lines.forEach(function(line, i){
+    var parts = line.split('|').map(function(p){ return p.trim(); });
+    if (parts.length < 2) { errors.push('Line '+(i+1)+': needs at least date and name'); return; }
+    var date = parts[0], name = parts[1], type = parts[2] || 'Gazetted';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { errors.push('Line '+(i+1)+': bad date "'+date+'"'); return; }
+    if (!['Gazetted','State','Custom'].includes(type)) type = 'Custom';
+    if (!_hcHolidays.find(function(h){ return h.date===date; })) {
+      _hcHolidays.push({date:date, name:name, type:type});
+      added++;
+    }
+  });
+  var msg = document.getElementById('hcImportMsg');
+  if (errors.length) {
+    if (msg) { msg.style.color='#dc2626'; msg.textContent='Errors: '+errors.join('; '); }
+  } else {
+    if (msg) { msg.style.color='#166534'; msg.textContent='✓ Imported '+added+' holidays. Click Save to persist.'; }
+  }
+  hcRender();
+  if (document.getElementById('hcImportText')) document.getElementById('hcImportText').value = '';
+}
+
+function hcSaveAll(){
+  var msg = document.getElementById('hcImportMsg');
+  if (msg) { msg.style.color='#6b7280'; msg.textContent='Saving…'; }
+  db.collection('settings').doc('holiday_calendar').set({
+    holidays: _hcHolidays,
+    _updatedAt: Date.now(),
+    _updatedBy: (typeof ADMIN_EMAIL!=='undefined' ? ADMIN_EMAIL : '')
+  }).then(function(){
+    if (msg) { msg.style.color='#166534'; msg.textContent='✅ Saved '+_hcHolidays.length+' holidays to Firebase!'; setTimeout(function(){ msg.textContent=''; },4000); }
+    showToast('✅ Holiday calendar saved', 'success');
+    if (typeof writeAudit === 'function') writeAudit('EDIT','settings/holiday_calendar','holiday_calendar',{count:_hcHolidays.length});
+  }).catch(function(e){
+    if (msg) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; }
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// WEEKEND ROSTER — table-based (PMAM1, PMAM2, Sat date, Sun date)
+// ══════════════════════════════════════════════════════
+var _wrRows = []; // [{pmam1, pmam2, saturday, sunday}]
+
+function wrInit(){
+  db.collection('settings').doc('weekend_roster').get().then(function(doc){
+    if (doc.exists && Array.isArray(doc.data().rows)) {
+      _wrRows = doc.data().rows;
+    } else {
+      _wrRows = [];
+    }
+    wrRenderTable();
+  }).catch(function(){ _wrRows = []; wrRenderTable(); });
+}
+
+function wrRenderTable(){
+  var tb = document.getElementById('wrBody');
+  if (!tb) return;
+  if (!_wrRows.length) {
+    tb.innerHTML = '<tr><td colspan="6" class="empty-td">No rows yet. Click + Add Row.</td></tr>';
+    return;
+  }
+  tb.innerHTML = _wrRows.map(function(r, i){
+    return '<tr>'
+      + '<td style="text-align:center;font-weight:700;color:#0F2B8C">'+( i+1)+'</td>'
+      + '<td><input type="text" value="'+escAttr(r.pmam1||'')+'" placeholder="PMAM 1 name" '
+      +   'onchange="_wrRows['+i+'].pmam1=this.value" '
+      +   'style="width:100%;padding:5px 9px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;outline:none"></td>'
+      + '<td><input type="text" value="'+escAttr(r.pmam2||'')+'" placeholder="PMAM 2 name" '
+      +   'onchange="_wrRows['+i+'].pmam2=this.value" '
+      +   'style="width:100%;padding:5px 9px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;outline:none"></td>'
+      + '<td><input type="date" value="'+(r.saturday||'')+'" '
+      +   'onchange="_wrRows['+i+'].saturday=this.value" '
+      +   'style="width:100%;padding:5px 9px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;outline:none"></td>'
+      + '<td><input type="date" value="'+(r.sunday||'')+'" '
+      +   'onchange="_wrRows['+i+'].sunday=this.value" '
+      +   'style="width:100%;padding:5px 9px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;outline:none"></td>'
+      + '<td><button onclick="_wrRows.splice('+i+',1);wrRenderTable()" '
+      +   'style="background:#FFE4E6;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer">Remove</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function wrAddRow(){
+  _wrRows.push({ pmam1:'', pmam2:'', saturday:'', sunday:'' });
+  wrRenderTable();
+}
+
+// Keep wrRender as alias for backward compat
+function wrRender(){ wrRenderTable(); }
+
+function wrSave(){
+  var msg = document.getElementById('wrSaveMsg');
+  if (msg) { msg.style.color='#6b7280'; msg.textContent='Saving…'; }
+  db.collection('settings').doc('weekend_roster').set({
+    rows: _wrRows,
+    _updatedAt: Date.now(),
+    _updatedBy: (typeof ADMIN_EMAIL!=='undefined' ? ADMIN_EMAIL : '')
+  }).then(function(){
+    if (msg) { msg.style.color='#166534'; msg.textContent='✅ Saved!'; setTimeout(function(){ msg.textContent=''; },3000); }
+    showToast('✅ Weekend roster saved','success');
+    if (typeof writeAudit==='function') writeAudit('EDIT','settings/weekend_roster','weekend_roster',{rows:_wrRows.length});
+  }).catch(function(e){
+    if (msg) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; }
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// WARD MANAGEMENT — save to Firebase
+// ══════════════════════════════════════════════════════
+function saveWardsToDb(){
+  var msg = document.getElementById('wardSaveMsg');
+  if (msg) { msg.style.color='#6b7280'; msg.textContent='Saving…'; }
+  db.collection('settings').doc('wards').set({ wards:wards, _updatedAt:Date.now() }, { merge:true })
+    .then(function(){
+      if (msg) { msg.style.color='#166534'; msg.textContent='✅ Wards saved!'; setTimeout(function(){ msg.textContent=''; },3000); }
+      showToast('✅ Wards saved','success');
+    })
+    .catch(function(e){ if (msg) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; } });
+}
+
+
 function renderRoster(){
   const b=document.getElementById('rosterBody');
   if(!rosterData.length){b.innerHTML='<tr><td colspan="4" class="empty-td">No rows yet. Click + Add Row.</td></tr>';return;}
@@ -1578,6 +2133,7 @@ function showPanel(id,el){
   // Auto-load data when panels open
   if (id === 'sysinfo'           && typeof refreshSysStats === 'function') { refreshSysStats(); refreshBulkCounts(); }
   if (id === 'landingPageEditor' && typeof lpeLoad === 'function')         lpeLoad();
+  if (id === 'navbarManager'     && typeof nbmLoad === 'function')         nbmLoad();
   if (id === 'branding'          && typeof brLoad === 'function')          brLoad();
   if (id === 'tickers'           && typeof tkLoadAll === 'function')       tkLoadAll();
   if (id === 'dmReports'         && typeof dmLoadFilters === 'function')   dmLoadFilters();
@@ -1741,11 +2297,13 @@ function loadContactUs() {
 // BACKUP — downloads a JSON of ALL Firebase collections to admin's computer
 // Uses no Firebase storage. Writes "last backup" timestamp to settings/system.
 // ══════════════════════════════════════
+// Collections actually used by the portal system. PMAM/I/C/Admin all
+// share 'daily_reports' for report data — there is no 'pmam_reports'
+// or 'reports' collection.
 var BACKUP_COLLECTIONS = [
-  'users', 'pmam_reports', 'daily_reports', 'reports',
+  'users', 'daily_reports',
   'leave_requests', 'settings', 'admin_audit_log',
-  'wards', 'roster', 'holidays', 'staff', 'orders',
-  'otps', 'user_requests', 'tickers'
+  'otps', 'notifications'
 ];
 
 function backupNow() {
@@ -1826,7 +2384,7 @@ function refreshSysStats() {
   // Count total entries across known collections
   var total = 0;
   var done = 0;
-  var keyCollections = ['users','pmam_reports','leave_requests','admin_audit_log'];
+  var keyCollections = ['users','daily_reports','leave_requests','admin_audit_log'];
   keyCollections.forEach(function(coll){
     db.collection(coll).get().then(function(s){
       total += s.size; done++;
@@ -1880,55 +2438,222 @@ function saveTicker() {
     .catch(function(e) { showToast('Error: ' + e.message, 'error'); });
 }
 
-async function savePortalInfo() {
-  const msg = document.getElementById('uploadStatusMsg');
-  msg.textContent = 'Saving changes...';
-  msg.style.color = '#1A3DB5';
-  
-  const logo1File = document.getElementById('setLogo1').files[0];
-  const logo2File = document.getElementById('setLogo2').files[0];
-  const bgImgFile = document.getElementById('setBgImg').files[0];
-  
-  let updates = {};
-  
-  const toBase64 = (file) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
-  
-  try {
-    if (logo1File) {
-      msg.textContent = 'Uploading Primary Logo...';
-      updates.logo1 = await toBase64(logo1File);
-    }
-    if (logo2File) {
-      msg.textContent = 'Uploading Secondary Logo...';
-      updates.logo2 = await toBase64(logo2File);
-    }
-    if (bgImgFile) {
-      msg.textContent = 'Uploading Background Image...';
-      updates.bgImage = await toBase64(bgImgFile);
-    }
-    
-    msg.textContent = 'Saving to database...';
-    await db.collection('settings').doc('portal').set(updates, { merge: true });
-    
-    msg.textContent = 'Changes saved successfully!';
-    msg.style.color = '#16a34a';
-    
-    document.getElementById('setLogo1').value = '';
-    document.getElementById('setLogo2').value = '';
-    document.getElementById('setBgImg').value = '';
-    
-    setTimeout(() => { msg.textContent = ''; }, 4000);
-    
-  } catch(e) {
-    console.error(e);
-    msg.textContent = 'Error: ' + e.message;
-    msg.style.color = '#dc2626';
+// NOTE: branding logos / background image are saved via brSaveAll()
+// (Branding tab → brHandleFile → brSaveAll → settings/portal). The
+// previous savePortalInfo() function read non-existent setLogo1 /
+// setLogo2 / setBgImg input IDs and was never called from anywhere,
+// so it has been removed.
+
+
+// ══════════════════════════════════════
+// SETTINGS TABS (top-level tab switcher)
+// ══════════════════════════════════════
+var _settingsTabSubSidebars = {
+  landing: {
+    title: 'Landing Page',
+    items: [
+      { id:'navbarManager', label:'🧭 Nav Bar', icon:'M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z' },
+      { id:'landingPageEditor', label:'🥷 Hero & Footer', icon:'M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z' }
+    ]
+  },
+  branding: {
+    title: 'Branding',
+    items: [
+      { id:'branding', label:'🖼️ Logos & Images', icon:'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12' }
+    ]
+  },
+  tickers: {
+    title: 'Tickers',
+    items: [
+      { id:'tickers', label:'📣 Ticker Messages', icon:'M3 11l18-5v12L3 14v-3z' }
+    ]
+  },
+  sysinfo: {
+    title: 'System',
+    items: [
+      { id:'sysinfo', label:'🛡️ System Info & Backup', icon:'M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z' }
+    ]
   }
+};
+
+function showSettingsTab(tab, el) {
+  // Update top tab buttons
+  document.querySelectorAll('#sec-settings .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
+  if (el) el.classList.add('active');
+
+  // Render sub-sidebar
+  var cfg = _settingsTabSubSidebars[tab];
+  if (!cfg) return;
+  var titleEl = document.getElementById('sbs-sub-title');
+  if (titleEl) titleEl.textContent = cfg.title;
+  var itemsEl = document.getElementById('sbs-sub-items');
+  if (itemsEl) {
+    itemsEl.innerHTML = cfg.items.map(function(it, i) {
+      return '<div class="sbs-item'+(i===0?' active':'')+'" id="sbs-'+it.id+'" onclick="showPanel(\''+it.id+'\',this)">'+it.label+'</div>';
+    }).join('');
+  }
+
+  // Show the first panel of that tab
+  document.querySelectorAll('.settings-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sbs-item').forEach(function(s){ s.classList.remove('active'); });
+  if (cfg.items.length > 0) {
+    var firstId = cfg.items[0].id;
+    var panel = document.getElementById('panel-'+firstId);
+    if (panel) panel.classList.add('active');
+    var sbsItem = document.getElementById('sbs-'+firstId);
+    if (sbsItem) sbsItem.classList.add('active');
+    // Auto-load
+    if (firstId === 'navbarManager'     && typeof nbmLoad === 'function')   nbmLoad();
+    if (firstId === 'landingPageEditor' && typeof lpeLoad === 'function')   lpeLoad();
+    if (firstId === 'branding'          && typeof brLoad === 'function')    brLoad();
+    if (firstId === 'tickers'           && typeof tkLoadAll === 'function') tkLoadAll();
+    if (firstId === 'sysinfo'           && typeof refreshSysStats === 'function') { refreshSysStats(); refreshBulkCounts(); }
+  }
+}
+
+// ══════════════════════════════════════
+// STAFF MANAGEMENT — Firebase users → staff cards
+// ══════════════════════════════════════
+var _allStaff = [];
+var _staffPhotoBase64 = '';
+
+function loadStaffFromUsers() {
+  var grid = document.getElementById('staffGrid');
+  if (grid) grid.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:20px;grid-column:1/-1">Loading staff from Firebase...</div>';
+  db.collection('users').get().then(function(snap) {
+    _allStaff = [];
+    snap.forEach(function(doc) {
+      var u = doc.data();
+      // Include all non-pending/rejected
+      if (u.status === 'approved' || u.status === 'active' || !u.status || u.status === 'inactive') {
+        _allStaff.push(Object.assign({ _docId: doc.id }, u));
+      }
+    });
+    _allStaff.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+    var badge = document.getElementById('staffCountBadge');
+    if (badge) badge.textContent = _allStaff.length + ' staff members';
+    renderStaffCards(_allStaff);
+  }).catch(function(e){ showToast('Error loading staff: '+e.message,'error'); });
+}
+
+function renderStaffCards(list) {
+  var grid = document.getElementById('staffGrid');
+  if (!grid) return;
+  if (!list.length) {
+    grid.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:30px;grid-column:1/-1;text-align:center">No staff found.</div>';
+    return;
+  }
+  var roleColors = {
+    'PMAM':         { bg:'#E8EFFF', fg:'#1A3DB5', av:'linear-gradient(135deg,#1A3DB5,#2952D9)' },
+    'I/C AB-PMJAY': { bg:'#DCFCE7', fg:'#166534', av:'linear-gradient(135deg,#166534,#16a34a)' },
+    'Admin':        { bg:'#F3E8FF', fg:'#7c3aed', av:'linear-gradient(135deg,#7c3aed,#9333ea)' },
+    'DEO':          { bg:'#FEF3C7', fg:'#92400e', av:'linear-gradient(135deg,#C94000,#E65800)' },
+    'Accountant':   { bg:'#D1FAE5', fg:'#065F46', av:'linear-gradient(135deg,#059669,#047857)' }
+  };
+  grid.innerHTML = list.map(function(u) {
+    var rc = roleColors[u.role] || { bg:'#F3F4F6', fg:'#374151', av:'linear-gradient(135deg,#6b7280,#4b5563)' };
+    var initials = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+    var photoHtml = u.photoBase64
+      ? '<img src="'+u.photoBase64+'" style="width:100%;height:100%;object-fit:cover">'
+      : '<span style="font-size:18px;font-weight:800;color:#fff">'+initials+'</span>';
+    var statusBadge = u.status === 'inactive'
+      ? '<span style="background:#FEE2E2;color:#dc2626;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">INACTIVE</span>'
+      : '<span style="background:#DCFCE7;color:#166534;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">ACTIVE</span>';
+    return '<div style="background:#fff;border-radius:16px;padding:16px;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(26,61,181,0.06);display:flex;align-items:center;gap:14px">'
+      + '<div style="width:56px;height:56px;border-radius:50%;background:'+rc.av+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:2px solid rgba(255,255,255,0.4)">'+photoHtml+'</div>'
+      + '<div style="flex:1;min-width:0">'
+      +   '<div style="font-size:14px;font-weight:800;color:#0F2B8C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(u.name||'Unknown')+'</div>'
+      +   '<div style="font-size:10px;color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(u.email||'')+'</div>'
+      +   '<div style="display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap">'
+      +     '<span style="background:'+rc.bg+';color:'+rc.fg+';padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">'+(u.role||'Staff')+'</span>'
+      +     statusBadge
+      +     (u.ward ? '<span style="background:#F0F4FF;color:#1A3DB5;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600">📍 '+(u.ward)+'</span>' : '')
+      +   '</div>'
+      + '</div>'
+      + '<button onclick="openStaffEdit(\''+encodeURIComponent(u.email || u._docId)+'\')" style="padding:7px 14px;background:linear-gradient(135deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">✏️ Edit</button>'
+      + '</div>';
+  }).join('');
+}
+
+function filterStaff(role, el) {
+  document.querySelectorAll('#sec-staff .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  var filtered = role === 'all' ? _allStaff : _allStaff.filter(function(u){
+    if (role === 'DEO') return u.role === 'DEO' || (u.role||'').startsWith('MTS');
+    return u.role === role;
+  });
+  var badge = document.getElementById('staffCountBadge');
+  if (badge) badge.textContent = filtered.length + ' staff members';
+  renderStaffCards(filtered);
+}
+
+function openStaffEdit(encodedEmail) {
+  var email = decodeURIComponent(encodedEmail);
+  var u = _allStaff.find(function(s){ return s.email === email || s._docId === email; });
+  if (!u) { showToast('Staff not found','error'); return; }
+  _staffPhotoBase64 = u.photoBase64 || '';
+  document.getElementById('seEmail').value = u.email || u._docId;
+  document.getElementById('seName').value = u.name || '';
+  document.getElementById('seRole').value = u.role || '';
+  document.getElementById('seEmailDisplay').value = u.email || '';
+  var statusSel = document.getElementById('seStatus');
+  if (statusSel) {
+    statusSel.value = (u.status === 'active' || u.status === 'approved') ? 'approved' : (u.status || 'approved');
+  }
+  var wardSel = document.getElementById('seWard');
+  if (wardSel) wardSel.value = u.ward || '';
+  // Photo preview
+  var prev = document.getElementById('sePhotoPreview');
+  var initials = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+  if (prev) {
+    if (_staffPhotoBase64) {
+      prev.innerHTML = '<img src="'+_staffPhotoBase64+'" style="width:100%;height:100%;object-fit:cover">';
+    } else {
+      prev.innerHTML = '<span>'+initials+'</span>';
+    }
+  }
+  document.getElementById('seErr').textContent = '';
+  document.getElementById('sePhotoFile').value = '';
+  document.getElementById('staffEditModal').classList.add('open');
+}
+
+function sePreviewPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 350000) { showToast('Image too large (max ~300KB)', 'error'); input.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    _staffPhotoBase64 = e.target.result;
+    var prev = document.getElementById('sePhotoPreview');
+    if (prev) prev.innerHTML = '<img src="'+_staffPhotoBase64+'" style="width:100%;height:100%;object-fit:cover">';
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveStaffEdit() {
+  var email = document.getElementById('seEmail').value;
+  var name = document.getElementById('seName').value.trim();
+  var ward = document.getElementById('seWard').value;
+  var status = document.getElementById('seStatus').value;
+  var errEl = document.getElementById('seErr');
+  if (!name) { errEl.textContent = 'Name is required.'; return; }
+  errEl.textContent = 'Saving...';
+  var patch = { name: name, ward: ward, status: status };
+  if (_staffPhotoBase64) patch.photoBase64 = _staffPhotoBase64;
+  db.collection('users').doc(email).update(patch).then(function() {
+    // Update local cache
+    var u = _allStaff.find(function(s){ return s.email === email || s._docId === email; });
+    if (u) { u.name = name; u.ward = ward; u.status = status; if (_staffPhotoBase64) u.photoBase64 = _staffPhotoBase64; }
+    document.getElementById('staffEditModal').classList.remove('open');
+    showToast('✅ Staff profile updated','success');
+    if (typeof writeAudit === 'function') writeAudit('EDIT','users',email,{name:name,ward:ward,status:status});
+    // Refresh display
+    var activeFilt = document.querySelector('#sec-staff .dmt-tab.active');
+    var role = activeFilt ? activeFilt.getAttribute('data-role') || 'all' : 'all';
+    renderStaffCards(_allStaff);
+  }).catch(function(e) {
+    errEl.textContent = 'Error: '+e.message;
+  });
 }
 
 // ===== INIT =====
@@ -2310,40 +3035,30 @@ function dmLoadReports(){
   var statusEl = document.getElementById('dmRepStatus');
   statusEl.textContent = 'Loading…'; statusEl.style.color = '#6b7280';
 
-  // Try common collection names used by the portal
-  var collNames = ['pmam_reports','daily_reports','reports'];
-  var found = null;
-  function tryNext(i){
-    if (i >= collNames.length) { statusEl.textContent = '⚠️ No report collection found (checked: '+collNames.join(', ')+')'; statusEl.style.color = '#dc2626'; _dmReports=[]; dmRenderReports(); return; }
-    db.collection(collNames[i]).limit(1).get().then(function(s){
-      if (!s.empty) { found = collNames[i]; loadFrom(found); }
-      else tryNext(i+1);
-    }).catch(function(){ tryNext(i+1); });
-  }
-  function loadFrom(coll){
-    window._dmReportsColl = coll;
-    var q = db.collection(coll);
-    q.get().then(function(s){
-      _dmReports = [];
-      s.forEach(function(d){ var r = d.data(); r._id = d.id; _dmReports.push(r); });
-      // Client-side filter
-      _dmReports = _dmReports.filter(function(r){
-        var d = r.date || r.reportDate || '';
-        if (fromD && d < fromD) return false;
-        if (toD && d > toD) return false;
-        if (pmam && (r.email||r.pmamEmail) !== pmam) return false;
-        if (ward && (r.ward||'') !== ward) return false;
-        return true;
-      });
-      _dmReports.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
-      statusEl.textContent = '✅ Loaded '+_dmReports.length+' records from "'+coll+'"';
-      statusEl.style.color = '#166534';
-      dmRenderReports();
-    }).catch(function(e){
-      statusEl.textContent = 'Error: '+e.message; statusEl.style.color = '#dc2626';
+  // PMAM portal writes to 'daily_reports' (canonical collection shared
+  // across PMAM, I/C, and Admin portals). No fallback chain needed.
+  var coll = 'daily_reports';
+  window._dmReportsColl = coll;
+  db.collection(coll).get().then(function(s){
+    _dmReports = [];
+    s.forEach(function(d){ var r = d.data(); r._id = d.id; _dmReports.push(r); });
+    // Client-side filter
+    _dmReports = _dmReports.filter(function(r){
+      var d = r.date || r.reportDate || '';
+      if (fromD && d < fromD) return false;
+      if (toD && d > toD) return false;
+      if (pmam && (r.email||r.pmamEmail) !== pmam) return false;
+      if (ward && (r.ward||'') !== ward) return false;
+      return true;
     });
-  }
-  tryNext(0);
+    _dmReports.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    statusEl.textContent = '✅ Loaded '+_dmReports.length+' records from "'+coll+'"';
+    statusEl.style.color = '#166534';
+    dmRenderReports();
+  }).catch(function(e){
+    statusEl.textContent = 'Error: '+e.message; statusEl.style.color = '#dc2626';
+    _dmReports = []; dmRenderReports();
+  });
 }
 function dmRenderReports(){
   var tb = document.getElementById('dmRepTbody');
@@ -2409,7 +3124,7 @@ function dmEditReport(id){
 }
 function saveEditReport(){
   var id = window._editingRepId; if (!id) return;
-  var coll = window._dmReportsColl || 'pmam_reports';
+  var coll = window._dmReportsColl || 'daily_reports';
   var patch = {
     date: document.getElementById('erDate').value,
     ward: document.getElementById('erWard').value,
@@ -2434,7 +3149,7 @@ function saveEditReport(){
 function dmDeleteReport(id){
   var r = _dmReports.find(function(x){ return x._id === id; });
   if (!r) return;
-  var coll = window._dmReportsColl || 'pmam_reports';
+  var coll = window._dmReportsColl || 'daily_reports';
   var n = r.name || r.pmamName || r.email || '—';
   confirmModal({
     title: '🗑️ Delete PMAM Report',
@@ -2712,7 +3427,7 @@ function dmDeleteLeave(id){
 // BULK CLEAR
 // ══════════════════════════════════════
 function refreshBulkCounts(){
-  [['pmam_reports','bulkRepCount'],['leave_requests','bulkLvCount'],['admin_audit_log','bulkAuditCount'],['otps','bulkOtpCount']].forEach(function(pair){
+  [['daily_reports','bulkRepCount'],['leave_requests','bulkLvCount'],['admin_audit_log','bulkAuditCount'],['otps','bulkOtpCount']].forEach(function(pair){
     db.collection(pair[0]).get().then(function(s){
       var el = document.getElementById(pair[1]);
       if (el) el.textContent = 'Count: ' + s.size + ' records';
@@ -2830,7 +3545,7 @@ function saveAddReport(){
     _createdAt: Date.now()
   };
 
-  var coll = window._dmReportsColl || 'pmam_reports';
+  var coll = window._dmReportsColl || 'daily_reports';
   err.textContent = 'Checking for duplicates…'; err.style.color = '#6b7280';
 
   // Duplicate check: same PMAM + date + ward
@@ -3239,13 +3954,16 @@ function brSaveAll(){
 // ══════════════════════════════════════════════════════════════════════
 
 var _tkData = {
+  index:   { enabled:false, message:'', severity:'info', link:'', linkLabel:'' },
   pmam:    { enabled:false, message:'', severity:'info', link:'', linkLabel:'' },
   ic:      { enabled:false, message:'', severity:'info', link:'', linkLabel:'' },
-  patient: { enabled:false, message:'', severity:'info', link:'', linkLabel:'' }
+  admin:   { enabled:false, message:'', severity:'info', link:'', linkLabel:'' },
+  patient: { enabled:false, message:'', severity:'info', link:'', linkLabel:'' },
+  finance: { enabled:false, message:'', severity:'info', link:'', linkLabel:'' }
 };
 var _tkActiveTab = 'pmam';
 
-var TK_PORTAL_NAMES = { pmam:'PMAM Portal', ic:'I/C AB-PMJAY', patient:'Patient Services' };
+var TK_PORTAL_NAMES = { index:'Index (Landing Page)', pmam:'PMAM Portal', ic:'I/C AB-PMJAY', admin:'Admin Portal', patient:'Patient Services', finance:'Finance Portal' };
 var TK_SEVERITY_COLORS = {
   info:    { bg:'#dbeafe', fg:'#1e3a8a', border:'#93c5fd' },
   success: { bg:'#dcfce7', fg:'#166534', border:'#86efac' },
@@ -3264,7 +3982,7 @@ function tkSwitchTab(tab){
   tkCaptureFormToData(_tkActiveTab);
   _tkActiveTab = tab;
   // Update tab button styles
-  ['pmam','ic','patient'].forEach(function(t){
+  ['index','pmam','ic','admin','patient','finance'].forEach(function(t){
     var btn = document.getElementById('tk-tab-'+t);
     if (btn) {
       if (t === tab) btn.classList.add('tk-tab-active');
@@ -3350,7 +4068,7 @@ function tkLoadAll(){
   tkSetStatus('Loading…', '#6b7280');
   db.collection('settings').doc('tickers').get().then(function(doc){
     var d = doc.exists ? (doc.data() || {}) : {};
-    ['pmam','ic','patient'].forEach(function(p){
+    ['index','pmam','ic','admin','patient','finance'].forEach(function(p){
       _tkData[p] = Object.assign({ enabled:false, message:'', severity:'info', link:'', linkLabel:'' }, d[p] || {});
     });
     tkLoadFormFromData(_tkActiveTab);
@@ -3629,6 +4347,196 @@ function lpeResetToDefaults(){
 }
 
 
+// ══════════════════════════════════════════════════════════════════════
+// 🧭 NAV BAR MANAGER — standalone panel for editing index.html nav bar
+// Reads / writes to settings/landing_page (navBar array) in Firestore.
+// index.html has an onSnapshot listener — changes appear in real time.
+// ══════════════════════════════════════════════════════════════════════
+
+var _nbmItems = [];  // working copy
+
+var NBM_DEFAULTS = [
+  { id:'home',     label:'Home',         url:'#',         active:true,  visible:true,  order:0 },
+  { id:'about',    label:'About Us',     url:'#',         active:false, visible:true,  order:1 },
+  { id:'staff',    label:'Staff',        url:'#',         active:false, visible:true,  order:2 },
+  { id:'roster',   label:'Ward Roster',  url:'#',         active:false, visible:true,  order:3 },
+  { id:'holiday',  label:'Holiday Duty', url:'#',         active:false, visible:true,  order:4 },
+  { id:'leave',    label:'Leave',        url:'#',         active:false, visible:true,  order:5 },
+  { id:'orders',   label:'Orders',       url:'#',         active:false, visible:true,  order:6 },
+  { id:'contact',  label:'Contact Us',   url:'#',         active:false, visible:true,  order:7 }
+];
+
+function nbmSetStatus(msg, color){
+  var el = document.getElementById('nbm-status');
+  if (el) { el.textContent = msg; el.style.color = color || '#6b7280'; }
+  var msg2 = document.getElementById('nbm-save-msg');
+  if (msg2) { msg2.textContent = msg; msg2.style.color = color || '#6b7280'; }
+}
+
+function nbmLoad(){
+  nbmSetStatus('Loading…', '#6b7280');
+  db.collection('settings').doc('landing_page').get().then(function(doc){
+    var navBar = [];
+    if (doc.exists && doc.data() && Array.isArray(doc.data().navBar) && doc.data().navBar.length) {
+      navBar = doc.data().navBar.slice();
+    } else {
+      navBar = JSON.parse(JSON.stringify(NBM_DEFAULTS));
+    }
+    navBar.sort(function(a,b){ return (a.order||0)-(b.order||0); });
+    _nbmItems = navBar;
+    nbmRender();
+    nbmSetStatus('✓ Loaded from Firebase', '#166534');
+  }).catch(function(e){
+    _nbmItems = JSON.parse(JSON.stringify(NBM_DEFAULTS));
+    nbmRender();
+    nbmSetStatus('⚠️ Using defaults ('+e.message+')', '#92400e');
+  });
+}
+
+function nbmRender(){
+  var list = document.getElementById('nbm-items-list');
+  if (!list) return;
+  if (!_nbmItems.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af;font-style:italic;background:#f9fafb;border-radius:8px">No items. Click "+ Add Item" to begin.</div>';
+    nbmRenderPreview();
+    return;
+  }
+  list.innerHTML = _nbmItems.map(function(it, i){
+    var visChk = it.visible !== false;
+    var actChk = it.active === true;
+    return '<div style="background:#fff;border:1.5px solid '+(visChk?'#bfdbfe':'#e5e7eb')+';border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start">'
+      // Drag handle / number
+      + '<div style="font-weight:800;color:#9ca3af;text-align:center;padding-top:10px;font-size:13px">'+(i+1)+'</div>'
+      // Fields
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      // Label
+      +   '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Label</label>'
+      +     '<input type="text" value="'+escAttr(it.label||'')+'" placeholder="e.g. Home" '
+      +       'onchange="_nbmItems['+i+'].label=this.value;nbmRenderPreview()" '
+      +       'style="width:100%;padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none" '
+      +       'onfocus="this.style.borderColor=\'#2563eb\'" onblur="this.style.borderColor=\'#e5e7eb\'">'
+      +   '</div>'
+      // URL
+      +   '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Link / URL</label>'
+      +     '<input type="text" value="'+escAttr(it.url||'')+'" placeholder="# or https://..." '
+      +       'onchange="_nbmItems['+i+'].url=this.value" '
+      +       'style="width:100%;padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none" '
+      +       'onfocus="this.style.borderColor=\'#2563eb\'" onblur="this.style.borderColor=\'#e5e7eb\'">'
+      +   '</div>'
+      // Checkboxes row
+      +   '<div style="grid-column:1/-1;display:flex;align-items:center;gap:16px;padding-top:4px">'
+      +     '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;font-weight:600;color:#374151">'
+      +       '<input type="checkbox" '+(visChk?'checked':'')+''
+      +         ' onchange="_nbmItems['+i+'].visible=this.checked;nbmRender()" '
+      +         ' style="width:14px;height:14px;accent-color:#2563eb;cursor:pointer">'
+      +       ' Visible'
+      +     '</label>'
+      +     '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;font-weight:600;color:#374151">'
+      +       '<input type="checkbox" '+(actChk?'checked':'')+''
+      +         ' onchange="_nbmItems['+i+'].active=this.checked;nbmRenderPreview()" '
+      +         ' style="width:14px;height:14px;accent-color:#16a34a;cursor:pointer">'
+      +       ' Active (highlighted)'
+      +     '</label>'
+      +     (!visChk ? '<span style="background:#fee2e2;color:#dc2626;padding:2px 8px;border-radius:20px;font-size:9.5px;font-weight:700">HIDDEN</span>' : '')
+      +   '</div>'
+      + '</div>'
+      // Actions
+      + '<div style="display:flex;flex-direction:column;gap:3px">'
+      +   '<button onclick="nbmMove('+i+',-1)" '+(i===0?'disabled':'')+' style="width:26px;height:22px;border:1px solid #e5e7eb;background:#f9fafb;cursor:'+(i===0?'not-allowed':'pointer')+';border-radius:5px;font-size:11px;color:#374151" title="Move up">↑</button>'
+      +   '<button onclick="nbmMove('+i+',1)" '+(i===_nbmItems.length-1?'disabled':'')+' style="width:26px;height:22px;border:1px solid #e5e7eb;background:#f9fafb;cursor:'+(i===_nbmItems.length-1?'not-allowed':'pointer')+';border-radius:5px;font-size:11px;color:#374151" title="Move down">↓</button>'
+      +   '<button onclick="nbmRemove('+i+')" style="width:26px;height:22px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;border-radius:5px;font-size:11px;color:#dc2626;margin-top:2px" title="Delete">✕</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+  nbmRenderPreview();
+}
+
+function nbmRenderPreview(){
+  var prev = document.getElementById('nbm-preview');
+  if (!prev) return;
+  var visible = _nbmItems.filter(function(it){ return it.visible !== false; });
+  if (!visible.length) {
+    prev.innerHTML = '<span style="color:#9ca3af;font-style:italic;font-size:11px">No visible items</span>';
+    return;
+  }
+  prev.innerHTML = visible.map(function(it){
+    var isActive = it.active === true;
+    return '<span style="display:inline-flex;align-items:center;padding:'+(isActive?'7px 14px':'6px 10px')+';border-radius:50px;font-size:12px;font-weight:'+(isActive?'700':'600')+';white-space:nowrap;'
+      + (isActive ? 'background:#16a34a;color:#fff;box-shadow:0 2px 6px rgba(22,163,74,0.3)' : 'color:#334155;background:#f1f5f9')
+      + '">'+(it.label||'Item')+'</span>';
+  }).join('');
+}
+
+function nbmAdd(){
+  _nbmItems.push({ id:'item_'+Date.now(), label:'New Item', url:'#', active:false, visible:true, order:_nbmItems.length });
+  nbmRender();
+  nbmSetStatus('● Unsaved changes', '#dc2626');
+}
+
+function nbmRemove(i){
+  var label = (_nbmItems[i] && _nbmItems[i].label) || 'this item';
+  if (!confirm('Remove "'+label+'" from the nav bar?\n\nClick Save to persist this change.')) return;
+  _nbmItems.splice(i, 1);
+  _nbmItems.forEach(function(it, idx){ it.order = idx; });
+  nbmRender();
+  nbmSetStatus('● Unsaved changes', '#dc2626');
+}
+
+function nbmMove(i, dir){
+  var j = i + dir;
+  if (j < 0 || j >= _nbmItems.length) return;
+  var tmp = _nbmItems[i]; _nbmItems[i] = _nbmItems[j]; _nbmItems[j] = tmp;
+  _nbmItems.forEach(function(it, idx){ it.order = idx; });
+  nbmRender();
+  nbmSetStatus('● Unsaved changes', '#dc2626');
+}
+
+function nbmResetDefaults(){
+  if (!confirm('Reset nav bar to the 8 default items?\n\nYour unsaved edits will be lost. Click Save to apply to Firebase.')) return;
+  _nbmItems = JSON.parse(JSON.stringify(NBM_DEFAULTS));
+  nbmRender();
+  nbmSetStatus('● Reset to defaults — click Save to apply', '#92400e');
+}
+
+function nbmReload(){
+  if (!confirm('Reload from Firebase? Unsaved changes will be lost.')) return;
+  nbmLoad();
+}
+
+function nbmSave(){
+  // Validate
+  for (var i = 0; i < _nbmItems.length; i++) {
+    if (!(_nbmItems[i].label || '').trim()) {
+      nbmSetStatus('⚠️ Item #'+(i+1)+' has no label.', '#dc2626');
+      return;
+    }
+  }
+  // Normalize order
+  _nbmItems.forEach(function(it, idx){ it.order = idx; });
+  nbmSetStatus('Saving…', '#6b7280');
+
+  // We only update the navBar field inside landing_page doc, preserving other sections
+  db.collection('settings').doc('landing_page').get().then(function(doc){
+    var existing = doc.exists ? (doc.data() || {}) : {};
+    var payload = Object.assign({}, existing, {
+      navBar: _nbmItems,
+      _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
+      _updatedAt: Date.now(),
+      _updatedAtReadable: new Date().toLocaleString('en-IN')
+    });
+    return db.collection('settings').doc('landing_page').set(payload);
+  }).then(function(){
+    nbmSetStatus('✅ Saved! Changes are now live on index.html via real-time sync.', '#166534');
+    if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/landing_page', 'navBar', {
+      itemCount: _nbmItems.length,
+      items: _nbmItems.map(function(it){ return { label:it.label, visible:it.visible }; })
+    });
+    if (typeof showToast === 'function') showToast('✅ Nav bar saved · live on index.html', 'success');
+  }).catch(function(e){
+    nbmSetStatus('Error: '+e.message, '#dc2626');
+  });
+}
+
 // ══════════════════════════════════════
 function loadAuditLog(){
   var tb = document.getElementById('auditTbody');
@@ -3665,8 +4573,20 @@ function loadAuditLog(){
 var _goSecOrig = goSec;
 goSec = function(id, el) {
   _goSecOrig(id, el);
-  if (id === 'users') loadAllUsers();
-  if (id === 'datamgmt') { dmLoadFilters(); setAdminUnlocked(isAdminUnlocked()); }
+  if (id === 'users')    loadAllUsers();
+  if (id === 'staff')    loadStaffFromUsers();
+  if (id === 'datamgmt') {
+    var firstTab = document.getElementById('dmt-holidaycal');
+    if (firstTab) showDmTab('holidaycal', firstTab);
+    dmLoadFilters();
+    setAdminUnlocked(isAdminUnlocked());
+  }
+  if (id === 'settings') {
+    // Init the settings tab sub-sidebar on first visit
+    var activStab = document.querySelector('#sec-settings .dmt-tab.active');
+    if (!activStab) activStab = document.getElementById('stab-landing');
+    if (activStab) showSettingsTab('landing', activStab);
+  }
   if (id === 'auditlog') loadAuditLog();
 };
 
@@ -3685,10 +4605,12 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   loadSessionUser();
   setTimeout(loadAllUsers, 500);
-  // Restore admin unlock state indicator if visiting datamgmt
   setTimeout(function(){ setAdminUnlocked(isAdminUnlocked()); }, 800);
-  // Auto-load Landing Page Editor since it's the default active panel
-  setTimeout(function(){ if (typeof lpeLoad === 'function') lpeLoad(); }, 1000);
+  // Init settings to Landing tab by default
+  setTimeout(function(){
+    var firstStab = document.getElementById('stab-landing');
+    if (firstStab) showSettingsTab('landing', firstStab);
+  }, 1200);
 });
 
 // ══════════════════════════════════════════════════════════════════════
