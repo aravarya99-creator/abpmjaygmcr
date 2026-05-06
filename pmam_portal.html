@@ -1805,8 +1805,6 @@ function fetchPmamReports() {
           badge.innerHTML = '<svg viewBox="0 0 24 24" fill="#E65100"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg> Today\'s report not filled yet';
         }
       }
-        else             { badge.className = 'badge-warn';    badge.textContent = '⚠ Pending Today'; }
-      }
 
       updateDashboard();
       if (document.getElementById('sec-myRecords') &&
