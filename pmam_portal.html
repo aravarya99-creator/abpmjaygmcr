@@ -1615,34 +1615,7 @@ function printLeaveForm() {
 
     + '</div>'
     + '<script>window.onload=function(){window.print();};<\/script>'
-    + '<script>
-// ── Format YYYY-MM-DD → DD-MM-YYYY ──
-function formatDate(d){
-  if(!d) return '';
-  var p = d.split('-');
-  return p.length === 3 ? p[2]+'-'+p[1]+'-'+p[0] : d;
-}
-
-// ── Ward status pill update ──
-function updateWardStatus(){
-  var pill = document.getElementById('wardStatusPill');
-  var txt  = document.getElementById('wardStatusText');
-  var tags = document.getElementById('wardTags');
-  if(!pill || !txt) return;
-  if(typeof selWards !== 'undefined' && selWards && selWards.length > 0){
-    pill.className = 'fr-ward-status has-ward';
-    txt.textContent = selWards.join(', ');
-    if(tags) tags.innerHTML = selWards.map(function(w,i){
-      return '<span class="fr-wtag">'+w+'<span onclick="selWards.splice('+i+',1);renderSelWards()">×</span></span>';
-    }).join('');
-  } else {
-    pill.className = 'fr-ward-status';
-    txt.textContent = 'No Ward Selected';
-    if(tags) tags.innerHTML = '';
-  }
-}
-</script>
-</body></html>';
+    + '</body></html>';
 
   var pw = window.open('','_blank','width=900,height=700');
   pw.document.open();
@@ -2202,5 +2175,33 @@ window.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 
+
+<script>
+// ── Format YYYY-MM-DD → DD-MM-YYYY ──
+function formatDate(d){
+  if(!d) return '';
+  var p = d.split('-');
+  return p.length === 3 ? p[2]+'-'+p[1]+'-'+p[0] : d;
+}
+
+// ── Ward status pill update ──
+function updateWardStatus(){
+  var pill = document.getElementById('wardStatusPill');
+  var txt  = document.getElementById('wardStatusText');
+  var tags = document.getElementById('wardTags');
+  if(!pill || !txt) return;
+  if(typeof selWards !== 'undefined' && selWards && selWards.length > 0){
+    pill.className = 'fr-ward-status has-ward';
+    txt.textContent = selWards.join(', ');
+    if(tags) tags.innerHTML = selWards.map(function(w,i){
+      return '<span class="fr-wtag">'+w+'<span onclick="selWards.splice('+i+',1);renderSelWards()">×</span></span>';
+    }).join('');
+  } else {
+    pill.className = 'fr-ward-status';
+    txt.textContent = 'No Ward Selected';
+    if(tags) tags.innerHTML = '';
+  }
+}
+</script>
 </body>
 </html>
