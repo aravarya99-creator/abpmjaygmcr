@@ -975,7 +975,14 @@ window.addEventListener('DOMContentLoaded', function() {
       var pmams=[];
       uSnap.forEach(function(doc){
         var u=doc.data();
-        if(u.status==='approved'||u.status==='active') pmams.push({email:u.email,name:u.name||u.email});
+        if(u.status==='approved'||u.status==='active'){
+          // Use doc.id as the source of truth for email — it's the canonical
+          // primary key (signup writes db.collection('users').doc(email).set).
+          // Older accounts may not have an `email` field in the document body,
+          // which would make u.email undefined and break the join with reports.
+          var em = ((doc.id || u.email || '') + '').trim().toLowerCase();
+          pmams.push({email: em, name: u.name || em});
+        }
       });
       pmams.sort(function(a,b){return a.name.localeCompare(b.name);});
 
@@ -1026,13 +1033,42 @@ window.addEventListener('DOMContentLoaded', function() {
     var tbody=document.getElementById('rsTblBody');
     if(!tbody) return;
 
-    // Index reports by email+date
-    var repMap={};
+    // Index reports by email+date AND name+date. We use both keys because:
+    //   - Some older PMAM reports may have email saved as 'unknown' (PMAM
+    //     portal falls back to that string if sessionStorage is empty), so
+    //     joining strictly on email would miss them.
+    //   - Both sides are normalized to lowercase + trimmed to defeat any
+    //     casing/whitespace mismatch between the user record and the report.
+    var repMap = {};
+    var unmatched = []; // for the debug log
     reports.forEach(function(r){
-      var email=r.email||r.pmamEmail||'';
-      var date=r.date||r.reportDate||'';
-      if(email&&date) repMap[email+'|'+date]=true;
+      var email = ((r.email || r.pmamEmail || '') + '').trim().toLowerCase();
+      var name  = ((r.name  || r.pmamName  || '') + '').trim().toLowerCase();
+      var date  = ((r.date  || r.reportDate || '') + '').trim();
+      if (date) {
+        if (email) repMap['e:' + email + '|' + date] = true;
+        if (name)  repMap['n:' + name  + '|' + date] = true;
+        if (!email && !name) unmatched.push(r);
+      }
     });
+
+    // Debug logger — open browser console to see why a row shows ✗.
+    // Prints once per render. Safe to leave in production; logs only.
+    try {
+      console.groupCollapsed('[PMAM Status] '+pmams.length+' PMAMs · '+reports.length+' reports in window');
+      console.log('PMAMs (key used for lookup):', pmams.map(function(p){return p.email+' = '+p.name;}));
+      console.log('Reports (raw email/name/date):',
+        reports.map(function(r){
+          return {
+            email: r.email || r.pmamEmail || '(none)',
+            name:  r.name  || r.pmamName  || '(none)',
+            date:  r.date  || r.reportDate || '(none)'
+          };
+        })
+      );
+      if (unmatched.length) console.warn('Reports with no email AND no name:', unmatched);
+      console.groupEnd();
+    } catch(_) {}
 
     var todayFilled=0, todayNotFilled=0;
 
@@ -1040,9 +1076,12 @@ window.addEventListener('DOMContentLoaded', function() {
       tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#9ca3af;font-style:italic">No PMAM users found.</td></tr>';
     } else {
       tbody.innerHTML=pmams.map(function(p,i){
+        var pname = (p.name || '').trim().toLowerCase();
         var cells='<td class="name-cell">'+p.name+'</td>';
         dates.forEach(function(d){
-          var filled=!!repMap[p.email+'|'+d.str];
+          // Try email match first, then fall back to name match.
+          var filled = !!repMap['e:' + p.email + '|' + d.str]
+                    || !!repMap['n:' + pname    + '|' + d.str];
           if(d.isToday){ if(filled) todayFilled++; else todayNotFilled++; }
           cells+='<td>'+checkIcon(filled)+'</td>';
         });
