@@ -248,6 +248,17 @@ a.hero-gc-ci:hover{color:#7c3aed}
   </div>
 </div>
 
+<!-- ADMIN-CONTROLLED TICKER — rendered from settings/tickers.index -->
+<div id="adminTicker" style="display:none;position:relative;width:100%;padding:8px 18px;font-size:13px;font-weight:600;text-align:center;line-height:1.4;border-bottom:1px solid transparent;z-index:100"></div>
+<style>
+  #adminTicker.tk-info    { background:#dbeafe; color:#1e3a8a; border-bottom-color:#93c5fd; }
+  #adminTicker.tk-success { background:#dcfce7; color:#166534; border-bottom-color:#86efac; }
+  #adminTicker.tk-warning { background:#fef3c7; color:#78350f; border-bottom-color:#fcd34d; }
+  #adminTicker.tk-danger  { background:#fee2e2; color:#991b1b; border-bottom-color:#fca5a5; animation: tkPulse 2s ease-in-out infinite; }
+  #adminTicker a { color: inherit; font-weight:800; text-decoration:underline; margin-left:8px; }
+  @keyframes tkPulse { 0%,100% { background:#fee2e2 } 50% { background:#fecaca } }
+</style>
+
 <!-- ═══════════════ HERO (SPLIT SCREEN) ═══════════════ -->
 <section class="hero">
 
@@ -805,6 +816,42 @@ window.addEventListener('DOMContentLoaded', function() {
   });
 
   // ══════════════════════════════════════════════════════════════════════
+  // ADMIN-CONTROLLED TICKER LOADER
+  // Reads settings/tickers.index from Firestore and renders the ticker bar.
+  // Uses onSnapshot for live updates — admin's saves appear instantly.
+  // ══════════════════════════════════════════════════════════════════════
+  try {
+    db.collection('settings').doc('tickers').onSnapshot(function(doc){
+      var bar = document.getElementById('adminTicker');
+      if (!bar) return;
+      if (!doc.exists) { bar.style.display = 'none'; return; }
+      var data = doc.data() || {};
+      var t = data.index || {};
+      if (!t.enabled || !t.message || !String(t.message).trim()) {
+        bar.style.display = 'none';
+        bar.className = '';
+        bar.innerHTML = '';
+        return;
+      }
+      var sev = t.severity || 'info';
+      bar.className = 'tk-' + (['info','success','warning','danger'].indexOf(sev) >= 0 ? sev : 'info');
+      var msg = String(t.message).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      var html = '📣 ' + msg;
+      if (t.link) {
+        var safeLink = String(t.link).replace(/"/g,'&quot;');
+        var label = t.linkLabel ? String(t.linkLabel).replace(/&/g,'&amp;').replace(/</g,'&lt;') : 'Read more';
+        html += '<a href="' + safeLink + '" target="_blank" rel="noopener">' + label + ' →</a>';
+      }
+      bar.innerHTML = html;
+      bar.style.display = 'block';
+    }, function(err){
+      console.warn('Ticker sync failed:', err && err.message);
+      var bar = document.getElementById('adminTicker');
+      if (bar) bar.style.display = 'none';
+    });
+  } catch(e) { console.warn('Ticker init error:', e); }
+
+  // ══════════════════════════════════════════════════════════════════════
   // DYNAMIC LANDING PAGE — reads from settings/landing_page and renders
   // 4 sections (nav, quick links, get in touch, important links) in real time.
   // Uses onSnapshot so admin changes appear instantly without page reload.
@@ -840,7 +887,13 @@ window.addEventListener('DOMContentLoaded', function() {
         var iconSvg = it.active
           ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>'
           : '';
-        return '<a class="'+cls+'" href="'+esc(url)+'">'+iconSvg+label+'</a>';
+        // Open external URLs in a new tab. Internal links (anchors like
+        // #about, relative paths like /pages/about.html) stay in the same
+        // tab. External = anything starting with http://, https://, or
+        // protocol-relative // (covers Google Drive, Forms, Docs, etc.)
+        var isExternal = /^(https?:|\/\/)/i.test(url);
+        var targetAttr = isExternal ? ' target="_blank" rel="noopener"' : '';
+        return '<a class="'+cls+'" href="'+esc(url)+'"'+targetAttr+'>'+iconSvg+label+'</a>';
       }).join('');
     }
 
@@ -1128,7 +1181,290 @@ window.addEventListener('DOMContentLoaded', function() {
   });
 })();
 
+// ══════════════════════════════════════════════════════════════════════
+// STAFF MODAL — opens when visitor clicks the "Staff" nav item.
+// Pulls live from Firebase 'users' collection (excludes pending/rejected,
+// hides emails for privacy on the public page).
+// Auto-rebinds whenever the nav bar is re-rendered from settings/landing_page.
+// ══════════════════════════════════════════════════════════════════════
+(function setupStaffModal(){
+  var _staffCache = null;
+  var _staffLoading = false;
+
+  // Role color palette — matches admin portal for visual continuity
+  var ROLE_COLORS = {
+    'PMAM':         { bg:'#E8EFFF', fg:'#1A3DB5', av:'linear-gradient(135deg,#1A3DB5,#2952D9)' },
+    'I/C AB-PMJAY': { bg:'#DCFCE7', fg:'#166534', av:'linear-gradient(135deg,#166534,#16a34a)' },
+    'Admin':        { bg:'#F3E8FF', fg:'#7c3aed', av:'linear-gradient(135deg,#7c3aed,#9333ea)' },
+    'DEO':          { bg:'#FEF3C7', fg:'#92400e', av:'linear-gradient(135deg,#C94000,#E65800)' },
+    'Accountant':   { bg:'#D1FAE5', fg:'#065F46', av:'linear-gradient(135deg,#059669,#047857)' }
+  };
+
+  function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function openModal(){
+    var modal = document.getElementById('staffModal');
+    if (!modal) return;
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (_staffCache) {
+      renderCards(_staffCache, currentFilter());
+    } else {
+      loadStaff();
+    }
+  }
+
+  function closeModal(){
+    var modal = document.getElementById('staffModal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  window.closeStaffModal = closeModal;
+
+  function currentFilter(){
+    var btn = document.querySelector('#staffModal .smf-tab.active');
+    return btn ? btn.getAttribute('data-role') : 'all';
+  }
+
+  function loadStaff(){
+    if (_staffLoading) return;
+    _staffLoading = true;
+    var grid = document.getElementById('staffModalGrid');
+    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#6b7280">Loading staff…</div>';
+    db.collection('users').get().then(function(snap){
+      var list = [];
+      snap.forEach(function(doc){
+        var u = doc.data();
+        // Public listing: only show approved + active. Hide pending/rejected/inactive.
+        if (u.status === 'approved' || u.status === 'active') {
+          list.push({
+            name: u.name || '',
+            role: u.role || '',
+            ward: u.ward || '',
+            photoBase64: u.photoBase64 || ''
+            // intentionally NOT exposing email/phone on public page
+          });
+        }
+      });
+      list.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+      _staffCache = list;
+      _staffLoading = false;
+      renderCards(list, currentFilter());
+    }).catch(function(e){
+      _staffLoading = false;
+      if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#dc2626">Could not load staff: '+escHtml(e.message)+'</div>';
+    });
+  }
+
+  function renderCards(list, roleFilter){
+    var grid = document.getElementById('staffModalGrid');
+    if (!grid) return;
+    var search = (document.getElementById('staffModalSearch') || {}).value || '';
+    search = search.trim().toLowerCase();
+    var filtered = list.filter(function(u){
+      if (roleFilter && roleFilter !== 'all') {
+        if (roleFilter === 'DEO') {
+          if (u.role !== 'DEO' && !(u.role||'').startsWith('MTS')) return false;
+        } else if (u.role !== roleFilter) return false;
+      }
+      if (search) {
+        var hay = ((u.name||'') + ' ' + (u.ward||'') + ' ' + (u.role||'')).toLowerCase();
+        if (hay.indexOf(search) < 0) return false;
+      }
+      return true;
+    });
+    var countEl = document.getElementById('staffModalCount');
+    if (countEl) countEl.textContent = filtered.length + (filtered.length === 1 ? ' member' : ' members');
+    if (!filtered.length) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#9ca3af;font-style:italic">No staff matching this filter.</div>';
+      return;
+    }
+    grid.innerHTML = filtered.map(function(u){
+      var rc = ROLE_COLORS[u.role] || { bg:'#F3F4F6', fg:'#374151', av:'linear-gradient(135deg,#6b7280,#4b5563)' };
+      var initials = (u.name||'?').split(/\s+/).map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+      var photoHtml = u.photoBase64
+        ? '<img src="'+u.photoBase64+'" style="width:100%;height:100%;object-fit:cover" alt="">'
+        : '<span style="font-size:18px;font-weight:800;color:#fff">'+escHtml(initials)+'</span>';
+      return '<div class="staff-card">'
+        + '<div class="staff-av-lg" style="background:'+rc.av+'">'+photoHtml+'</div>'
+        + '<div style="flex:1;min-width:0">'
+        +   '<div class="staff-name">'+escHtml(u.name||'Unknown')+'</div>'
+        +   '<div class="staff-meta">'
+        +     '<span class="staff-pill" style="background:'+rc.bg+';color:'+rc.fg+'">'+escHtml(u.role||'Staff')+'</span>'
+        +     (u.ward ? '<span class="staff-pill" style="background:#F0F4FF;color:#1A3DB5">📍 '+escHtml(u.ward)+'</span>' : '')
+        +   '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // Filter button click
+  function setFilter(roleVal, btn){
+    document.querySelectorAll('#staffModal .smf-tab').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    if (_staffCache) renderCards(_staffCache, roleVal);
+  }
+  window.setStaffFilter = setFilter;
+
+  // Search input
+  function onSearch(){
+    if (_staffCache) renderCards(_staffCache, currentFilter());
+  }
+  window.onStaffSearch = onSearch;
+
+  // Intercept any nav-item link whose label is "Staff" (case-insensitive,
+  // matches "Staff", "STAFF", "Staff ▾" etc.) AND whose URL is empty/#.
+  // Re-runs after every nav-bar render so dynamically loaded items work too.
+  function bindNavTriggers(){
+    var nav = document.getElementById('lpNavArea');
+    if (!nav) return;
+    nav.querySelectorAll('a.nav-item').forEach(function(a){
+      var label = (a.textContent || '').trim().toLowerCase().replace(/[▾▼]/g,'').trim();
+      if (label === 'staff') {
+        // Only hijack if there's no real URL set
+        var href = a.getAttribute('href') || '';
+        if (href === '' || href === '#') {
+          a.setAttribute('data-staff-trigger','1');
+          a.style.cursor = 'pointer';
+        }
+      }
+    });
+  }
+
+  // Delegate clicks at body level — works for both static and dynamic nav items
+  document.addEventListener('click', function(e){
+    var a = e.target.closest('a.nav-item');
+    if (!a) return;
+    var label = (a.textContent || '').trim().toLowerCase().replace(/[▾▼]/g,'').trim();
+    if (label === 'staff') {
+      var href = a.getAttribute('href') || '';
+      // Only intercept if URL is unset OR starts with '#' (anchor → modal)
+      if (href === '' || href === '#') {
+        e.preventDefault();
+        openModal();
+      }
+    }
+  });
+
+  // Close on backdrop click or Escape
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // Initial bind, then re-bind whenever navBar is re-rendered (handled by
+  // the click delegation above, but we still mark items for keyboard nav).
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindNavTriggers);
+  } else {
+    bindNavTriggers();
+  }
+  // The navBar is also re-rendered by setupLandingPageSync's onSnapshot —
+  // since we use event delegation on document, that's automatically covered.
+})();
+
 </script>
+
+<!-- ═══════════════ STAFF MODAL ═══════════════ -->
+<style>
+  #staffModal {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9000;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+    animation: smFadeIn 0.18s ease-out;
+  }
+  #staffModal.open { display: flex; }
+  @keyframes smFadeIn { from { opacity: 0 } to { opacity: 1 } }
+  .sm-card {
+    background: #fff; border-radius: 18px; width: 100%; max-width: 980px;
+    max-height: 88vh; display: flex; flex-direction: column;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3); overflow: hidden;
+    animation: smSlideUp 0.22s ease-out;
+  }
+  @keyframes smSlideUp { from { transform: translateY(20px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+  .sm-header {
+    background: linear-gradient(135deg, #0f172a, #1e3a5f);
+    color: #fff; padding: 18px 24px; display: flex; align-items: center; gap: 14px;
+  }
+  .sm-header h2 { margin: 0; font-size: 18px; font-weight: 700; flex: 1 }
+  .sm-header .sm-sub { font-size: 11px; opacity: 0.75; margin-top: 2px }
+  .sm-close {
+    width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.15);
+    border: none; color: #fff; font-size: 18px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; transition: background 0.15s;
+  }
+  .sm-close:hover { background: rgba(255,255,255,0.28) }
+  .sm-toolbar {
+    padding: 14px 20px; border-bottom: 1px solid #e5e7eb; background: #f9fafb;
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  }
+  .sm-toolbar input {
+    flex: 1; min-width: 200px; padding: 8px 12px; font-size: 13px;
+    border: 1px solid #d1d5db; border-radius: 8px; outline: none; background: #fff;
+  }
+  .sm-toolbar input:focus { border-color: #2563eb }
+  .smf-tab {
+    padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 50px;
+    border: 1px solid #d1d5db; background: #fff; color: #475569; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .smf-tab:hover { background: #f1f5f9 }
+  .smf-tab.active { background: #16a34a; color: #fff; border-color: #16a34a }
+  .sm-body {
+    flex: 1; overflow-y: auto; padding: 20px;
+    background: #f8fafc;
+  }
+  #staffModalGrid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;
+  }
+  .staff-card {
+    background: #fff; border-radius: 14px; padding: 14px;
+    border: 1.5px solid rgba(100,150,255,0.12); box-shadow: 0 2px 8px rgba(26,61,181,0.05);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .staff-av-lg {
+    width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.4);
+  }
+  .staff-av-lg img { width: 100%; height: 100%; object-fit: cover }
+  .staff-name { font-size: 14px; font-weight: 800; color: #0F2B8C; line-height: 1.2 }
+  .staff-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px }
+  .staff-pill { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; white-space: nowrap }
+  .sm-footer {
+    padding: 10px 20px; font-size: 11px; color: #6b7280; text-align: center;
+    border-top: 1px solid #e5e7eb; background: #fff;
+  }
+  @media (max-width: 600px) {
+    #staffModal { padding: 0 }
+    .sm-card { max-height: 100vh; height: 100vh; border-radius: 0 }
+  }
+</style>
+<div id="staffModal" onclick="if(event.target===this)closeStaffModal()">
+  <div class="sm-card">
+    <div class="sm-header">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      <div style="flex:1">
+        <h2>Our Staff</h2>
+        <div class="sm-sub" id="staffModalCount">Loading…</div>
+      </div>
+      <button class="sm-close" onclick="closeStaffModal()" aria-label="Close">×</button>
+    </div>
+    <div class="sm-toolbar">
+      <input type="text" id="staffModalSearch" placeholder="Search by name, ward, role…" oninput="onStaffSearch()">
+      <button class="smf-tab active" data-role="all"          onclick="setStaffFilter('all',this)">All</button>
+      <button class="smf-tab"        data-role="PMAM"         onclick="setStaffFilter('PMAM',this)">PMAMs</button>
+      <button class="smf-tab"        data-role="I/C AB-PMJAY" onclick="setStaffFilter('I/C AB-PMJAY',this)">I/C</button>
+      <button class="smf-tab"        data-role="DEO"          onclick="setStaffFilter('DEO',this)">DEO</button>
+      <button class="smf-tab"        data-role="Admin"        onclick="setStaffFilter('Admin',this)">Admin</button>
+    </div>
+    <div class="sm-body">
+      <div id="staffModalGrid"></div>
+    </div>
+    <div class="sm-footer">
+      AB-PMJAY Unit · Government Medical College &amp; Associated Hospital, Rajouri
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
