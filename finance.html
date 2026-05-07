@@ -544,6 +544,8 @@
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
             <label style="margin:0;">Financial Year</label>
             <select id="repFy"></select>
+            <label style="margin:0;">Month</label>
+            <select id="repMonth" style="min-width:130px;"><option value="">All Month</option></select>
             <button class="btn" onclick="printMonthly()" style="background:#4b5563;">🖨 Print/PDF</button>
             <button class="btn" onclick="exportLedgerTable('repMonthlyTable','excel')" style="background:#16a34a;">📊 Excel</button>
           </div>
@@ -554,10 +556,6 @@
         </div>
 
         <div id="rep-annual" style="display:none">
-          <div style="display:flex;gap:8px;margin-bottom:8px;">
-            <button class="btn" onclick="printAnnual()" style="background:#4b5563;">🖨 Print/PDF</button>
-            <button class="btn" onclick="exportLedgerTable('repAnnualTable','excel')" style="background:#16a34a;">📊 Excel</button>
-          </div>
           <table id="repAnnualTable">
             <thead><tr><th>Financial Year</th><th>Opening Balance</th><th>Claim Received</th><th>Interest Received</th><th>Total Received</th><th>Expenditure</th><th>Closing Balance</th></tr></thead>
             <tbody></tbody>
@@ -565,10 +563,6 @@
         </div>
 
         <div id="rep-cumulative" style="display:none">
-          <div style="display:flex;gap:8px;margin-bottom:8px;">
-            <button class="btn" onclick="printCumulative()" style="background:#4b5563;">🖨 Print/PDF</button>
-            <button class="btn" onclick="exportLedgerTable('repCumTable','excel')" style="background:#16a34a;">📊 Excel</button>
-          </div>
           <table id="repCumTable">
             <thead><tr><th>Metric</th><th>Amount (₹)</th></tr></thead>
             <tbody></tbody>
@@ -591,10 +585,6 @@
         </div>
 
         <div id="rep-fysummary" style="display:none; overflow-x:auto;">
-          <div style="display:flex;gap:8px;margin-bottom:8px;">
-            <button class="btn" onclick="printFySummary()" style="background:#4b5563;">🖨 Print/PDF</button>
-            <button class="btn" onclick="exportLedgerTable('repFySummaryTable','excel')" style="background:#16a34a;">📊 Excel</button>
-          </div>
           <table id="repFySummaryTable">
             <thead>
               <tr><th colspan="10" style="text-align:center;background:#fbbf24;color:#000;">Head-wise Expenditure of Funds</th></tr>
@@ -604,11 +594,6 @@
           </table>
         </div>
         
-        <div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end;">
-          <button class="btn" onclick="exportActiveTable('print')" style="background:#4b5563;">🖨 Print / PDF</button>
-          <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
-          <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
-        </div>
       </section>
 
       <!-- STATS -->
@@ -1474,6 +1459,14 @@
           fys.forEach(f => shaFyFilter.insertAdjacentHTML('beforeend', `<option value="${f.name}">${f.name}</option>`));
         }
         if(!shaFyFilter.value) shaFyFilter.value = fys[fys.length-1]?.name;
+        // Populate month filter whenever FY is set
+        const mSel = $('shaMonthFilter');
+        if(mSel && shaFyFilter.value) {
+          const prevM = mSel.value;
+          mSel.innerHTML = '<option value="">All Month</option>';
+          monthsForFy(shaFyFilter.value).forEach(m => mSel.insertAdjacentHTML('beforeend', `<option value="${m.key}">${m.label}</option>`));
+          mSel.value = prevM;
+        }
       }
       if(sshaFyFilter) {
         if(!sshaFyFilter.children.length || sshaFyFilter.children.length <= 1) {
@@ -1521,23 +1514,39 @@
 
     function renderMonthlyReport(){
       const fy = $('repFy').value;
+      // Populate month dropdown for selected FY
+      const repMonthSel = $('repMonth');
+      if(repMonthSel && fy) {
+        const prevMonth = repMonthSel.value;
+        repMonthSel.innerHTML = '<option value="">All Month</option>';
+        monthsForFy(fy).forEach(m => repMonthSel.insertAdjacentHTML('beforeend', `<option value="${m.key}">${m.label}</option>`));
+        repMonthSel.value = prevMonth;
+      }
+      const selectedMonth = repMonthSel ? repMonthSel.value : '';
       const tbody = document.querySelector('#repMonthlyTable tbody'); tbody.innerHTML = '';
       const carry = getCarryOpening(fy);
       const rows = computeFyRows(fy, carry);
       
       let totClaim=0, totInt=0, totInc=0, totExp=0;
-      rows.forEach(r=>{
+      const filteredRows = selectedMonth ? rows.filter(r => r.monthKey === selectedMonth) : rows;
+      filteredRows.forEach(r=>{
         totClaim+=r.claim; totInt+=r.interest; totInc+=r.incomeTotal; totExp+=r.expTotal;
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${r.label}</td><td>${fmt(r.opening)}</td><td>${fmt(r.claim)}</td><td>${fmt(r.interest)}</td><td>${fmt(r.incomeTotal)}</td><td>${fmt(r.expTotal)}</td><td>${fmt(r.closing)}</td>`;
         tbody.appendChild(tr);
       });
-      if(rows.length>0) {
-        tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td>TOTAL</td><td>-</td><td>${fmt(totClaim)}</td><td>${fmt(totInt)}</td><td>${fmt(totInc)}</td><td>${fmt(totExp)}</td><td>${fmt(rows[rows.length-1].closing)}</td></tr>`);
+      if(filteredRows.length>0 && !selectedMonth) {
+        tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td>TOTAL</td><td>-</td><td>${fmt(totClaim)}</td><td>${fmt(totInt)}</td><td>${fmt(totInc)}</td><td>${fmt(totExp)}</td><td>${fmt(filteredRows[filteredRows.length-1].closing)}</td></tr>`);
       }
     }
     
-    $('repFy')?.addEventListener('change', renderMonthlyReport);
+    $('repFy')?.addEventListener('change', function() {
+      // Reset month filter on FY change, then re-render
+      const repMonthSel = $('repMonth');
+      if(repMonthSel) repMonthSel.value = '';
+      renderMonthlyReport();
+    });
+    $('repMonth')?.addEventListener('change', renderMonthlyReport);
 
     function renderAnnualReport(){
       const fys = load(LS.FYS, []);
