@@ -95,6 +95,13 @@
     #claimsTable td { border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; }
     #claimsTable td:last-child { border-right:none; }
     #claimsTable tbody tr:last-child td { border-bottom:none; }
+    /* Expenditure table — full grid (thin column + row lines) */
+    #expTable { border:1px solid #e9d5ff; border-radius:8px; overflow:hidden; }
+    #expTable th { border-right:1px solid rgba(255,255,255,0.35); border-bottom:1px solid #e9d5ff; }
+    #expTable th:last-child { border-right:none; }
+    #expTable td { border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; }
+    #expTable td:last-child { border-right:none; }
+    #expTable tbody tr:last-child td { border-bottom:none; }
     tbody tr:nth-child(even) { background-color: #f9fafb; }
     tbody tr:nth-child(odd) { background-color: #ffffff; }
     tbody tr:hover { background-color: #eff6ff; }
@@ -292,6 +299,9 @@
           <select id="claimsFyFilter" style="padding:8px 12px;border:2px solid #d8b4fe;border-radius:8px;font-weight:600;background:#faf5ff;color:#4c1d95;" onchange="renderClaims()">
             <option value="">All FY</option>
           </select>
+          <select id="claimsMonthFilter" style="padding:8px 12px;border:2px solid #d8b4fe;border-radius:8px;font-weight:600;background:#faf5ff;color:#4c1d95;" onchange="renderClaims()">
+            <option value="">All Months</option>
+          </select>
           <button class="btn" onclick="printClaims()" style="background:#4b5563;margin-left:auto;">🖨 Print/PDF</button>
           <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
           <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
@@ -315,7 +325,8 @@
       </section>
 
       <!-- EXPENDITURE -->
-      <section id="expenditure" class="panel tab-screen" style="display:none">
+      <section id="expenditure" class="tab-screen" style="display:none">
+        <div class="panel">
         <div class="section-title">ADD EXPENDITURE</div>
         <form id="expForm">
           <div class="row">
@@ -346,17 +357,16 @@
             <div style="padding-bottom:2px;"><button class="btn" type="submit" style="height:45px;margin-bottom:0;">💾 Save</button></div>
           </div>
         </form>
+        </div>
 
-        <div style="height:32px;"></div>
-        <hr style="border:none; border-top:4px dashed #d8b4fe; margin-bottom:32px;">
-
+        <div class="panel">
         <div class="section-title">EXPENDITURE LIST</div>
         <div class="filter-bar" style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center;">
-          <select id="filterFyExp" style="min-width:100px;"><option value="">All FY</option></select>
-          <select id="filterMonthExp" style="min-width:120px;"><option value="">All Month</option></select>
-          <select id="filterCategoryExp" style="min-width:160px;"><option value="">All Category</option></select>
-          <input id="filterSubExp" type="text" placeholder="Sub Category..." style="padding:8px 10px;border:1px solid #d8b4fe;border-radius:6px;font-size:13px;min-width:140px;">
-          <input id="filterFirmExp" type="text" placeholder="Firm/Agency..." style="padding:8px 10px;border:1px solid #d8b4fe;border-radius:6px;font-size:13px;min-width:140px;">
+          <select id="filterFyExp" style="min-width:110px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"><option value="">All FY</option></select>
+          <select id="filterMonthExp" style="min-width:130px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"><option value="">All Month</option></select>
+          <select id="filterCategoryExp" style="min-width:170px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"><option value="">All Category</option></select>
+          <input id="filterSubExp" type="text" placeholder="Sub Category..." style="padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-size:13px;min-width:140px;background:#faf5ff;">
+          <input id="filterFirmExp" type="text" placeholder="Firm/Agency..." style="padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-size:13px;min-width:140px;background:#faf5ff;">
           <button class="btn" id="applyExpFilters">Apply</button>
           <button class="btn" onclick="clearExpFilters()" style="background:#6b7280;padding:8px 12px;">✖ Clear</button>
         </div>
@@ -380,6 +390,7 @@
           <button class="btn" onclick="printExpenditure()" style="background:#4b5563;">🖨 Print / PDF</button>
           <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
           <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
+        </div>
         </div>
       </section>
 
@@ -1243,9 +1254,27 @@
         if(prevFyFilter) cfFy.value = prevFyFilter;
       }
       var fyFilter = cfFy ? cfFy.value : '';
+      // Populate Month filter dropdown (only months that exist in claims data, optionally narrowed by FY)
+      var cfMonth = $('claimsMonthFilter');
+      if(cfMonth) {
+        var prevMonthFilter = cfMonth.value;
+        var allIncomes = load(LS.INCOME, []);
+        var monthSet = {};
+        allIncomes.forEach(function(i){
+          if(!fyFilter || i.fy===fyFilter) monthSet[i.monthKey] = true;
+        });
+        var monthKeys = Object.keys(monthSet).sort();
+        cfMonth.innerHTML = '<option value="">All Months</option>';
+        monthKeys.forEach(function(mk){
+          cfMonth.insertAdjacentHTML('beforeend','<option value="'+mk+'">'+monthKeyToLabel(mk)+'</option>');
+        });
+        if(prevMonthFilter && monthSet[prevMonthFilter]) cfMonth.value = prevMonthFilter; else cfMonth.value = '';
+      }
+      var monthFilter = cfMonth ? cfMonth.value : '';
       var tbody = document.querySelector('#claimsTable tbody'); tbody.innerHTML = '';
       var incomes = load(LS.INCOME, []);
       if(fyFilter) incomes = incomes.filter(function(i){return i.fy===fyFilter;});
+      if(monthFilter) incomes = incomes.filter(function(i){return i.monthKey===monthFilter;});
       incomes.sort(function(a,b){return a.monthKey.localeCompare(b.monthKey);});
       if(incomes.length===0){
         tbody.innerHTML = '<tr><td colspan="6" class="small" style="text-align:center;padding:20px;color:#888;">No claim entries found</td></tr>';
@@ -2265,7 +2294,9 @@
       // Build table without Actions column for print
       var incomes = load(LS.INCOME,[]);
       var fyFilter = $('claimsFyFilter') ? $('claimsFyFilter').value : '';
+      var monthFilter = $('claimsMonthFilter') ? $('claimsMonthFilter').value : '';
       if(fyFilter) incomes = incomes.filter(function(i){return i.fy===fyFilter;});
+      if(monthFilter) incomes = incomes.filter(function(i){return i.monthKey===monthFilter;});
       incomes.sort(function(a,b){return a.monthKey.localeCompare(b.monthKey);});
       var rows='';
       incomes.forEach(function(i,idx){
@@ -2273,7 +2304,7 @@
         rows+='<tr><td>'+(idx+1)+'</td><td>'+i.fy+'</td><td>'+monthKeyToLabel(i.monthKey)+'</td><td>'+fmt(i.claim)+'</td><td>'+fmt(i.interest)+'</td><td>'+fmt(total)+'</td>'+(i.remarks?'<td>'+i.remarks+'</td>':'<td></td>')+'</tr>';
       });
       var bodyHTML='<table><thead><tr><th>#</th><th>FY</th><th>Month</th><th>Claim Received</th><th>Interest Received</th><th>Total</th><th>Remarks</th></tr></thead><tbody>'+rows+'</tbody></table>';
-      var prd=(fyFilter?'FY: '+fyFilter:'All FY');
+      var prd=(fyFilter?'FY: '+fyFilter:'All FY') + (monthFilter?' | Month: '+monthKeyToLabel(monthFilter):'');
       printReport({title:'CLAIM RECEIVED REPORT',periodInfo:prd,generatedInfo:'Generated: '+_fmtNow(),bodyHTML:bodyHTML,pageOrientation:'landscape'});
     }
     // Expenditure print
