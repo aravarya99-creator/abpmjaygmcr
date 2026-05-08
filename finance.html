@@ -102,6 +102,13 @@
     #expTable td { border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; }
     #expTable td:last-child { border-right:none; }
     #expTable tbody tr:last-child td { border-bottom:none; }
+    /* Settings sub-tab bar */
+    .settings-tabbar { display:flex; flex-wrap:wrap; gap:6px; padding:8px; background:#faf5ff; border:1px solid #ddd6fe; border-radius:10px; margin-bottom:18px; }
+    .settings-tab { padding:8px 16px; background:#fff; border:1.5px solid #ddd6fe; border-radius:8px; cursor:pointer; font-size:13px; font-weight:700; color:#6b21a8; transition:all .15s; user-select:none; }
+    .settings-tab:hover { background:#ede9fe; }
+    .settings-tab.active { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+    .settings-pane { display:none; }
+    .settings-pane.active { display:block; }
     /* Custom Report Builder — column picker checkboxes */
     .cr-col-chk { display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:8px; border:2px solid #ddd6fe; background:#fff; cursor:pointer; font-weight:700; font-size:13px; transition:all .2s; color:#4c1d95; }
     .cr-col-chk.checked { background:#ddd6fe; border-color:#7c3aed; }
@@ -160,12 +167,11 @@
       <li><a class="nav" data-tab="customreport"><span class="icon">🗂</span>Custom Report</a></li>
       <li><a class="nav" data-tab="settings"><span class="icon">⚙</span>Settings</a>
         <ul id="settingsSubNav" style="list-style:none;padding:0 0 0 12px;margin:4px 0 0;display:none;">
-          <li><a onclick="showTab('settings');setTimeout(()=>{var el=document.getElementById('settingsSec_fy');if(el)el.scrollIntoView({behavior:'smooth'});},100);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">📅 Financial Years</a></li>
-          <li><a onclick="showTab('settings');setTimeout(()=>{var el=document.getElementById('settingsSec_opening');if(el)el.scrollIntoView({behavior:'smooth'});},100);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">💰 Opening Balance</a></li>
-          <li><a onclick="showTab('settings');setTimeout(()=>{var el=document.getElementById('settingsSec_lock');if(el)el.scrollIntoView({behavior:'smooth'});},100);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">🔒 Lock Months</a></li>
-          <li><a onclick="showTab('settings');setTimeout(()=>{var el=document.getElementById('settingsSec_claimlock');if(el)el.scrollIntoView({behavior:'smooth'});},100);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">🔐 Lock Claims FY</a></li>
-          <li><a onclick="showTab('settings');setTimeout(()=>{var el=document.getElementById('settingsSec_import');if(el)el.scrollIntoView({behavior:'smooth'});},100);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">📤 Bulk Import</a></li>
-          <li><a onclick="showTab('settings');setTimeout(()=>{var el=document.getElementById('settingsSec_delete');if(el)el.scrollIntoView({behavior:'smooth'});},100);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">🗑 Bulk Delete</a></li>
+          <li><a onclick="showTab('settings');setTimeout(function(){showSettingsPane('opening');},50);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">💰 Opening Balance</a></li>
+          <li><a onclick="showTab('settings');setTimeout(function(){showSettingsPane('claimlock');},50);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">🔐 Lock Claims</a></li>
+          <li><a onclick="showTab('settings');setTimeout(function(){showSettingsPane('explock');},50);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">🔒 Lock Expenditure</a></li>
+          <li><a onclick="showTab('settings');setTimeout(function(){showSettingsPane('import');},50);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">📤 Bulk Import</a></li>
+          <li><a onclick="showTab('settings');setTimeout(function(){showSettingsPane('delete');},50);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">🗑 Bulk Delete</a></li>
         </ul>
       </li>
     </ul>
@@ -794,115 +800,133 @@
 
       <!-- SETTINGS -->
       <section id="settings" class="panel tab-screen" style="display:none">
-        <div class="small">Set initial opening balance for the first FY month (applies when computing opening balances).</div>
-        <label>Financial Year</label>
-        <select id="setFy"></select>
-        <label>Month</label>
-        <select id="setMonth"></select>
-        <label>Opening Balance (₹)</label>
-        <input id="setOpening" type="number" min="0" step="0.01">
-        <button class="btn" id="saveOpening">Save Opening</button>
-        
-        <hr style="margin:24px 0; border:none; border-top:1px solid #ccc;">
-        
-        <div id="settingsSec_lock" class="section-title">LOCK / UNLOCK MONTHS</div>
-        <div class="small" style="margin-bottom:8px;">Prevent accidental edits or deletions in completed months. Unlocking requires manual action here.</div>
-        <label>Select Month to Toggle Lock Status</label>
-        <div style="display:flex;gap:8px;">
-          <select id="lockMonthSel"></select>
-          <button class="btn" id="toggleLockBtn" style="background:#ef4444;">Toggle Lock</button>
-        </div>
-        <div id="lockedList" style="margin-top:12px; font-weight:bold; color:#b91c1c;"></div>
-
-        <hr style="margin:24px 0; border:none; border-top:1px solid #ccc;">
-        
-        <div class="section-title" style="color:#0ea5e9;">BULK EXCEL IMPORT</div>
-        
-        <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:12px;">
-          <div style="flex:1;min-width:300px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #cbd5e1;">
-            <div style="font-weight:bold;margin-bottom:8px;">1. Income Import</div>
-            <div class="small">Paste columns: <b>Month | Interest | Claim</b> (tab or comma separated)<br>Month can be anywhere in row: <i>Apr-2025, April-25, Apr 25, April 2025</i><br>e.g. <i>Apr-2026 &nbsp;&nbsp; 0 &nbsp;&nbsp; 890344</i><br>or: <i>890344 &nbsp;&nbsp; 0 &nbsp;&nbsp; Apr-2026</i></div>
-            <textarea id="importIncomeArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
-            <label class="small" style="display:block;margin-top:4px;">Select Financial Year for this data:</label>
-            <select id="importIncomeFy"></select>
-            <button class="btn" id="btnImportIncome" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Income</button>
-          </div>
-
-          <div style="flex:1;min-width:300px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #cbd5e1;">
-            <div style="font-weight:bold;margin-bottom:8px;">2. Expenditure Import</div>
-            <div class="small">Paste columns: <b>Category | Sub Category | Amount | Month</b><br><span style="color:#b91c1c;">(Skip the 'S NO' column)</span><br>(e.g. <i>SHA Share &nbsp; SHA Share 5%... &nbsp; 73695 &nbsp; May-25</i>)</div>
-            <textarea id="importExpArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
-            <button class="btn" id="btnImportExp" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Expenditure</button>
-          </div>
-
-          <div style="flex:1;min-width:300px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #cbd5e1;">
-            <div style="font-weight:bold;margin-bottom:8px;">3. Hospital Stats Import</div>
-            <div class="small">Paste columns: <b>Session (FY) | Patient Treated | Golden Card</b><br>(e.g. <i>2018-19 &nbsp; 500 &nbsp; 1200</i>)</div>
-            <textarea id="importStatsArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
-            <button class="btn" id="btnImportStats" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Stats</button>
-          </div>
+        <!-- TAB BAR -->
+        <div class="settings-tabbar">
+          <div class="settings-tab active" data-pane="opening" onclick="showSettingsPane('opening')">💰 Opening Balance</div>
+          <div class="settings-tab" data-pane="claimlock" onclick="showSettingsPane('claimlock')">🔐 Lock/Unlock Claims</div>
+          <div class="settings-tab" data-pane="explock" onclick="showSettingsPane('explock')">🔒 Lock/Unlock Expenditure</div>
+          <div class="settings-tab" data-pane="import" onclick="showSettingsPane('import')">📤 Bulk Import</div>
+          <div class="settings-tab" data-pane="delete" onclick="showSettingsPane('delete')">🗑 Bulk Delete</div>
         </div>
 
-        <hr style="margin:24px 0;border:none;border-top:2px solid #fee2e2;">
-
-        <!-- BULK DELETE SECTION -->
-        <hr style="margin:24px 0;border:none;border-top:2px solid #d1fae5;">
-        <!-- CLAIM LOCK BY FY -->
-        <div id="settingsSec_claimlock" class="section-title" style="background:#0369a1;">🔒 LOCK / UNLOCK CLAIM ENTRIES BY FY</div>
-        <div class="small" style="margin-bottom:12px;color:#0369a1;font-weight:600;">Locking a FY prevents editing/deleting any claim entry for that year. Use this to protect finalized records.</div>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
-          <div>
-            <label style="font-size:12px;font-weight:700;color:#0369a1;display:block;margin-bottom:4px;">Select Financial Year</label>
-            <select id="lockClaimFy" style="padding:8px 12px;border:2px solid #bae6fd;border-radius:8px;font-weight:600;min-width:120px;"></select>
-          </div>
-          <button class="btn" onclick="toggleClaimLock()" style="background:#0369a1;height:40px;">🔒 Toggle Lock</button>
-          <div id="lockClaimStatus" style="font-size:13px;font-weight:700;color:#0369a1;align-self:center;"></div>
+        <!-- PANE 1: OPENING BALANCE -->
+        <div id="setPane_opening" class="settings-pane active">
+          <div class="section-title" style="background:#7c3aed;">💰 OPENING BALANCE SETUP</div>
+          <div class="small">Set initial opening balance for the first FY month (applies when computing opening balances).</div>
+          <label>Financial Year</label>
+          <select id="setFy"></select>
+          <label>Month</label>
+          <select id="setMonth"></select>
+          <label>Opening Balance (₹)</label>
+          <input id="setOpening" type="number" min="0" step="0.01">
+          <button class="btn" id="saveOpening" style="margin-top:12px;">💾 Save Opening Balance</button>
         </div>
-        <div id="lockedClaimFyList" style="font-size:13px;font-weight:700;color:#dc2626;"></div>
 
-        <hr style="margin:24px 0;border:none;border-top:2px solid #fee2e2;">
-        <div id="settingsSec_delete" class="section-title" style="background:#dc2626;">🗑 BULK DELETE BY FINANCIAL YEAR</div>
-        <div class="small" style="margin-bottom:12px;color:#b91c1c;font-weight:600;">⚠ WARNING: This permanently deletes ALL records of the selected type for the chosen FY. This cannot be undone.</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:12px;">
-          
-          <!-- Delete Income by FY -->
-          <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #fca5a5;">
-            <div style="font-weight:800;color:#dc2626;margin-bottom:8px;font-size:13px;">1. Delete Income Records</div>
-            <div class="small" style="margin-bottom:8px;">Select FY to delete ALL claim/income entries for that year.</div>
-            <select id="bulkDelIncomeFy" style="width:100%;padding:8px;border:1px solid #fca5a5;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
-            <div id="bulkDelIncomeCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
-            <button class="btn" onclick="bulkDeleteIncome()" style="width:100%;background:#dc2626;font-weight:700;">🗑 Delete Income for Selected FY</button>
+        <!-- PANE 2: LOCK / UNLOCK CLAIM ENTRIES BY FY -->
+        <div id="setPane_claimlock" class="settings-pane">
+          <div id="settingsSec_claimlock" class="section-title" style="background:#0369a1;">🔐 LOCK / UNLOCK CLAIM ENTRIES BY FY</div>
+          <div class="small" style="margin-bottom:12px;color:#0369a1;font-weight:600;">Locking a FY prevents editing/deleting any claim entry for that year. Use this to protect finalized records.</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#0369a1;display:block;margin-bottom:4px;">Select Financial Year</label>
+              <select id="lockClaimFy" style="padding:8px 12px;border:2px solid #bae6fd;border-radius:8px;font-weight:600;min-width:120px;"></select>
+            </div>
+            <button class="btn" onclick="toggleClaimLock()" style="background:#0369a1;height:40px;">🔒 Toggle Lock</button>
+            <div id="lockClaimStatus" style="font-size:13px;font-weight:700;color:#0369a1;align-self:center;"></div>
           </div>
+          <div id="lockedClaimFyList" style="font-size:13px;font-weight:700;color:#dc2626;"></div>
+        </div>
 
-          <!-- Delete Expenditure by FY -->
-          <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #fca5a5;">
-            <div style="font-weight:800;color:#dc2626;margin-bottom:8px;font-size:13px;">2. Delete Expenditure Records</div>
-            <div class="small" style="margin-bottom:8px;">Select FY to delete ALL expenditure entries for that year.</div>
-            <select id="bulkDelExpFy" style="width:100%;padding:8px;border:1px solid #fca5a5;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
-            <div id="bulkDelExpCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
-            <button class="btn" onclick="bulkDeleteExp()" style="width:100%;background:#dc2626;font-weight:700;">🗑 Delete Expenditure for Selected FY</button>
+        <!-- PANE 3: LOCK / UNLOCK EXPENDITURE ENTRIES BY FY -->
+        <div id="setPane_explock" class="settings-pane">
+          <div class="section-title" style="background:#0369a1;">🔒 LOCK / UNLOCK EXPENDITURE ENTRIES BY FY</div>
+          <div class="small" style="margin-bottom:12px;color:#0369a1;font-weight:600;">Locking a FY prevents editing/deleting any expenditure entry for that year. Use this to protect finalized records.</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#0369a1;display:block;margin-bottom:4px;">Select Financial Year</label>
+              <select id="lockExpFy" style="padding:8px 12px;border:2px solid #bae6fd;border-radius:8px;font-weight:600;min-width:120px;"></select>
+            </div>
+            <button class="btn" onclick="toggleExpLock()" style="background:#0369a1;height:40px;">🔒 Toggle Lock</button>
+            <div id="lockExpStatus" style="font-size:13px;font-weight:700;color:#0369a1;align-self:center;"></div>
           </div>
+          <div id="lockedExpFyList" style="font-size:13px;font-weight:700;color:#dc2626;"></div>
+        </div>
 
-          <!-- Delete Stats by FY -->
-          <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #fca5a5;">
-            <div style="font-weight:800;color:#dc2626;margin-bottom:8px;font-size:13px;">3. Delete Statistics Records</div>
-            <div class="small" style="margin-bottom:8px;">Select FY to delete ALL hospital statistics for that year.</div>
-            <select id="bulkDelStatsFy" style="width:100%;padding:8px;border:1px solid #fca5a5;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
-            <div id="bulkDelStatsCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
-            <button class="btn" onclick="bulkDeleteStats()" style="width:100%;background:#dc2626;font-weight:700;">🗑 Delete Statistics for Selected FY</button>
-          </div>
+        <!-- PANE 4: BULK EXCEL IMPORT -->
+        <div id="setPane_import" class="settings-pane">
+          <div class="section-title" style="color:#fff;background:#0ea5e9;">📤 BULK EXCEL IMPORT</div>
 
-          <!-- Delete ALL data for FY (nuclear) -->
-          <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #dc2626;">
-            <div style="font-weight:800;color:#991b1b;margin-bottom:8px;font-size:13px;">4. Delete ALL Data for FY</div>
-            <div class="small" style="margin-bottom:8px;color:#b91c1c;">Deletes Income + Expenditure + Stats for the selected FY in one go.</div>
-            <select id="bulkDelAllFy" style="width:100%;padding:8px;border:1px solid #dc2626;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
-            <div id="bulkDelAllCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
-            <button class="btn" onclick="bulkDeleteAll()" style="width:100%;background:#991b1b;font-weight:700;">🗑 Delete ALL Records for Selected FY</button>
+          <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:12px;">
+            <div style="flex:1;min-width:300px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #cbd5e1;">
+              <div style="font-weight:bold;margin-bottom:8px;">1. Income Import</div>
+              <div class="small">Paste columns: <b>Month | Interest | Claim</b> (tab or comma separated)<br>Month can be anywhere in row: <i>Apr-2025, April-25, Apr 25, April 2025</i><br>e.g. <i>Apr-2026 &nbsp;&nbsp; 0 &nbsp;&nbsp; 890344</i><br>or: <i>890344 &nbsp;&nbsp; 0 &nbsp;&nbsp; Apr-2026</i></div>
+              <textarea id="importIncomeArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
+              <label class="small" style="display:block;margin-top:4px;">Select Financial Year for this data:</label>
+              <select id="importIncomeFy"></select>
+              <button class="btn" id="btnImportIncome" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Income</button>
+            </div>
+
+            <div style="flex:1;min-width:300px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #cbd5e1;">
+              <div style="font-weight:bold;margin-bottom:8px;">2. Expenditure Import</div>
+              <div class="small">Paste columns: <b>Category | Sub Category | Amount | Month</b><br><span style="color:#b91c1c;">(Skip the 'S NO' column)</span><br>(e.g. <i>SHA Share &nbsp; SHA Share 5%... &nbsp; 73695 &nbsp; May-25</i>)</div>
+              <textarea id="importExpArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
+              <button class="btn" id="btnImportExp" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Expenditure</button>
+            </div>
+
+            <div style="flex:1;min-width:300px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #cbd5e1;">
+              <div style="font-weight:bold;margin-bottom:8px;">3. Hospital Stats Import</div>
+              <div class="small">Paste columns: <b>Session (FY) | Patient Treated | Golden Card</b><br>(e.g. <i>2018-19 &nbsp; 500 &nbsp; 1200</i>)</div>
+              <textarea id="importStatsArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
+              <button class="btn" id="btnImportStats" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Stats</button>
+            </div>
           </div>
         </div>
+
+        <!-- PANE 5: BULK DELETE -->
+        <div id="setPane_delete" class="settings-pane">
+          <div class="section-title" style="background:#dc2626;">🗑 BULK DELETE BY FINANCIAL YEAR</div>
+          <div class="small" style="margin-bottom:12px;color:#b91c1c;font-weight:600;">⚠ WARNING: This permanently deletes ALL records of the selected type for the chosen FY. This cannot be undone.</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:12px;">
+
+            <!-- Delete Income by FY -->
+            <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #fca5a5;">
+              <div style="font-weight:800;color:#dc2626;margin-bottom:8px;font-size:13px;">1. Delete Income Records</div>
+              <div class="small" style="margin-bottom:8px;">Select FY to delete ALL claim/income entries for that year.</div>
+              <select id="bulkDelIncomeFy" style="width:100%;padding:8px;border:1px solid #fca5a5;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
+              <div id="bulkDelIncomeCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
+              <button class="btn" onclick="bulkDeleteIncome()" style="width:100%;background:#dc2626;font-weight:700;">🗑 Delete Income for Selected FY</button>
+            </div>
+
+            <!-- Delete Expenditure by FY -->
+            <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #fca5a5;">
+              <div style="font-weight:800;color:#dc2626;margin-bottom:8px;font-size:13px;">2. Delete Expenditure Records</div>
+              <div class="small" style="margin-bottom:8px;">Select FY to delete ALL expenditure entries for that year.</div>
+              <select id="bulkDelExpFy" style="width:100%;padding:8px;border:1px solid #fca5a5;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
+              <div id="bulkDelExpCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
+              <button class="btn" onclick="bulkDeleteExp()" style="width:100%;background:#dc2626;font-weight:700;">🗑 Delete Expenditure for Selected FY</button>
+            </div>
+
+            <!-- Delete Stats by FY -->
+            <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #fca5a5;">
+              <div style="font-weight:800;color:#dc2626;margin-bottom:8px;font-size:13px;">3. Delete Statistics Records</div>
+              <div class="small" style="margin-bottom:8px;">Select FY to delete ALL hospital statistics for that year.</div>
+              <select id="bulkDelStatsFy" style="width:100%;padding:8px;border:1px solid #fca5a5;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
+              <div id="bulkDelStatsCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
+              <button class="btn" onclick="bulkDeleteStats()" style="width:100%;background:#dc2626;font-weight:700;">🗑 Delete Statistics for Selected FY</button>
+            </div>
+
+            <!-- Delete ALL data for FY (nuclear) -->
+            <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #dc2626;">
+              <div style="font-weight:800;color:#991b1b;margin-bottom:8px;font-size:13px;">4. Delete ALL Data for FY</div>
+              <div class="small" style="margin-bottom:8px;color:#b91c1c;">Deletes Income + Expenditure + Stats for the selected FY in one go.</div>
+              <select id="bulkDelAllFy" style="width:100%;padding:8px;border:1px solid #dc2626;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
+              <div id="bulkDelAllCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
+              <button class="btn" onclick="bulkDeleteAll()" style="width:100%;background:#991b1b;font-weight:700;">🗑 Delete ALL Records for Selected FY</button>
+            </div>
+          </div>
+        </div>
+
       </section>
-
     </div>
   </main>
 
@@ -1413,15 +1437,17 @@
       pageData.forEach(e=>{
         const tr = document.createElement('tr');
         tr.style.borderBottom = '1px solid #ede9fe';
+        const fyLocked = isExpFyLocked(e.fy) || isLocked(e.monthKey);
+        const actionsCell = fyLocked
+          ? '<span style="font-size:11px;color:#dc2626;font-weight:700;">🔒</span>'
+          : `<button title="Edit" style="background:none;border:none;cursor:pointer;padding:4px 6px;" onclick="editExp('${e.createdAt}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>`
+            + `<button title="Delete" style="background:none;border:none;cursor:pointer;padding:4px 6px;" onclick="delExp('${e.createdAt}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`;
         tr.innerHTML = `<td>${e.fy}</td><td>${monthKeyToLabel(e.monthKey)}</td>`
           +`<td>${catTag(normCat(e.category))}</td>`
           +`<td>${e.sub||''}</td><td>${e.description||''}</td><td>${e.firm||''}</td>`
           +`<td style="text-align:right;color:#7c3aed;font-weight:700;">${fmt(e.amount)}</td>`
           +`<td>${e.invoice||''}</td><td>${e.remarks||''}</td>`
-          +`<td style="white-space:nowrap;text-align:center;">`
-          +`<button title="Edit" style="background:none;border:none;cursor:pointer;padding:4px 6px;" onclick="editExp('${e.createdAt}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>`
-          +`<button title="Delete" style="background:none;border:none;cursor:pointer;padding:4px 6px;" onclick="delExp('${e.createdAt}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`
-          +`</td>`;
+          +`<td style="white-space:nowrap;text-align:center;">${actionsCell}</td>`;
         tbody.appendChild(tr);
       });
       // Pagination
@@ -1444,7 +1470,9 @@
     function delExp(id) {
       const expenses = load(LS.EXPENSE, []);
       const item = expenses.find(x => x.createdAt === id);
-      if(item && isLocked(item.monthKey)) { alert('Cannot delete: ' + item.monthKey + ' is locked.'); return; }
+      if(!item) return;
+      if(isExpFyLocked(item.fy)) { alert('Cannot delete: FY ' + item.fy + ' is locked.'); return; }
+      if(isLocked(item.monthKey)) { alert('Cannot delete: ' + item.monthKey + ' is locked.'); return; }
       if(!confirm('Delete this entry?')) return;
       save(LS.EXPENSE, expenses.filter(x => x.createdAt !== id));
       renderExpenditure();
@@ -1453,6 +1481,7 @@
       const exps = load(LS.EXPENSE, []);
       const item = exps.find(x => x.createdAt === id);
       if(!item) return;
+      if(isExpFyLocked(item.fy)) { alert('Cannot edit: FY ' + item.fy + ' is locked.'); return; }
       if(isLocked(item.monthKey)) { alert('Cannot edit: ' + item.monthKey + ' is locked.'); return; }
       
       $('expDate').value = item.date;
@@ -2178,15 +2207,17 @@
     function renderSettings(){
       initBulkDelete();
       initClaimLockSection();
+      initExpLockSection();
       const fys = load(LS.FYS, []);
       const selFy = $('setFy'); selFy.innerHTML = ''; fys.forEach(f=> selFy.insertAdjacentHTML('beforeend', `<option value="${f.name}">${f.name}</option>`));
-      selFy.value = fys[fys.length-1].name;
+      if(fys.length) selFy.value = fys[fys.length-1].name;
       populateMonths('setFy','setMonth');
       const meta = load(LS.META, {});
       if(meta.initialOpening){ $('setFy').value = meta.initialOpening.fy; populateMonths('setFy','setMonth'); $('setMonth').value = meta.initialOpening.monthKey; $('setOpening').value = meta.initialOpening.amount; }
     }
     $('setFy')?.addEventListener('change', () => populateMonths('setFy','setMonth'));
     $('lockClaimFy')?.addEventListener('change', updateClaimLockStatus);
+    $('lockExpFy')?.addEventListener('change', updateExpLockStatus);
     $('saveOpening').addEventListener('click', ()=>{
       const fy = $('setFy').value; const monthKey = $('setMonth').value; const amt = Number($('setOpening').value||0);
       const meta = load(LS.META, {}); meta.initialOpening = {fy, monthKey, amount: amt}; save(LS.META, meta);
@@ -2983,6 +3014,67 @@
       }
       updateClaimLockStatus();
       renderClaims();
+    }
+
+    // ── EXPENDITURE FY LOCK ──────────────────────────────────────────
+    var LS_EXP_LOCK = 'fp_exp_locked_fys';
+    function loadExpLocks() { return load(LS_EXP_LOCK, []); }
+    function saveExpLocks(arr) { save(LS_EXP_LOCK, arr); }
+    function isExpFyLocked(fy) { return loadExpLocks().includes(fy); }
+
+    function initExpLockSection() {
+      var sel = $('lockExpFy'); if(!sel) return;
+      var fys = load(LS.FYS,[]);
+      sel.innerHTML = '<option value="">— Select FY —</option>';
+      fys.forEach(function(f){ sel.insertAdjacentHTML('beforeend','<option value="'+f.name+'">'+f.name+'</option>'); });
+      updateExpLockStatus();
+    }
+
+    function updateExpLockStatus() {
+      var locked = loadExpLocks();
+      var listEl = $('lockedExpFyList');
+      var statusEl = $('lockExpStatus');
+      if(listEl) {
+        listEl.innerHTML = locked.length ? '🔒 Currently locked FYs: <b>'+locked.join(', ')+'</b>' : '✅ No FYs currently locked';
+      }
+      var sel = $('lockExpFy');
+      if(sel && sel.value && statusEl) {
+        statusEl.textContent = locked.includes(sel.value) ? '🔒 ' + sel.value + ' is LOCKED' : '🔓 ' + sel.value + ' is UNLOCKED';
+        statusEl.style.color = locked.includes(sel.value) ? '#dc2626' : '#16a34a';
+      } else if(statusEl) {
+        statusEl.textContent = '';
+      }
+    }
+
+    function toggleExpLock() {
+      var fy = $('lockExpFy') ? $('lockExpFy').value : '';
+      if(!fy) { alert('Please select a Financial Year.'); return; }
+      var locked = loadExpLocks();
+      if(locked.includes(fy)) {
+        if(!confirm('UNLOCK expenditure entries for FY ' + fy + '?')) return;
+        saveExpLocks(locked.filter(function(x){return x!==fy;}));
+        alert('✅ Expenditure entries for FY '+fy+' are now UNLOCKED.');
+      } else {
+        if(!confirm('LOCK all expenditure entries for FY ' + fy + '?\nThis will prevent editing or deleting any expenditure entry for this FY.')) return;
+        locked.push(fy);
+        saveExpLocks(locked);
+        alert('🔒 Expenditure entries for FY '+fy+' are now LOCKED.');
+      }
+      updateExpLockStatus();
+      if(typeof renderExpenditure === 'function') renderExpenditure();
+    }
+
+    // ── SETTINGS TAB SWITCHER ────────────────────────────────────────
+    function showSettingsPane(name) {
+      document.querySelectorAll('.settings-tab').forEach(function(t){
+        t.classList.toggle('active', t.dataset.pane === name);
+      });
+      document.querySelectorAll('.settings-pane').forEach(function(p){
+        p.classList.toggle('active', p.id === 'setPane_'+name);
+      });
+      // Lazy-init sub-sections so dropdowns are populated when first shown
+      if(name === 'claimlock') initClaimLockSection();
+      if(name === 'explock') initExpLockSection();
     }
 
 
