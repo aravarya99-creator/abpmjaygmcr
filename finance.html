@@ -254,7 +254,8 @@
       </section>
 
       <!-- CLAIMS RECEIVED -->
-      <section id="claims" class="panel tab-screen" style="display:none">
+      <section id="claims" class="tab-screen" style="display:none">
+        <div class="panel">
         <div class="section-title" style="background:#7c3aed;">💰 ENTER CLAIM RECEIVED</div>
         <form id="claimsForm">
           <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;">
@@ -283,10 +284,9 @@
             </div>
           </div>
         </form>
+        </div>
 
-        <div style="height:32px;"></div>
-        <hr style="border:none; border-top:1px solid #c4b5fd; margin-bottom:32px;">
-
+        <div class="panel">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
           <div class="section-title" style="margin:0;background:#7c3aed;flex-shrink:0;">💰 CLAIM RECEIVED LIST</div>
           <select id="claimsFyFilter" style="padding:8px 12px;border:2px solid #d8b4fe;border-radius:8px;font-weight:600;background:#faf5ff;color:#4c1d95;" onchange="renderClaims()">
@@ -309,6 +309,7 @@
             </thead>
             <tbody></tbody>
           </table>
+        </div>
         </div>
         
       </section>
