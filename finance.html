@@ -102,6 +102,14 @@
     #expTable td { border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; }
     #expTable td:last-child { border-right:none; }
     #expTable tbody tr:last-child td { border-bottom:none; }
+    /* Reports tables — full grid (column + row lines) */
+    #repShaNewTable td { border:1px solid #e9d5ff; padding:6px 8px; }
+    #repFundTable, #repFundAllocTable, #repFundAllocMonthTable { border:1px solid #e9d5ff; border-radius:8px; overflow:hidden; }
+    #repFundTable th, #repFundAllocTable th, #repFundAllocMonthTable th { border-right:1px solid rgba(255,255,255,0.35); border-bottom:1px solid #e9d5ff; }
+    #repFundTable th:last-child, #repFundAllocTable th:last-child, #repFundAllocMonthTable th:last-child { border-right:none; }
+    #repFundTable td, #repFundAllocTable td, #repFundAllocMonthTable td { border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; }
+    #repFundTable td:last-child, #repFundAllocTable td:last-child, #repFundAllocMonthTable td:last-child { border-right:none; }
+    #repFundTable tbody tr:last-child td, #repFundAllocTable tbody tr:last-child td, #repFundAllocMonthTable tbody tr:last-child td { border-bottom:none; }
     tbody tr:nth-child(even) { background-color: #f9fafb; }
     tbody tr:nth-child(odd) { background-color: #ffffff; }
     tbody tr:hover { background-color: #eff6ff; }
@@ -329,13 +337,22 @@
         <div class="panel">
         <div class="section-title">ADD EXPENDITURE</div>
         <form id="expForm">
-          <div class="row">
-            <div><label>Date <span class="req">*</span></label><input id="expDate" type="date" required></div>
-            <div><label>Amount (₹) <span class="req">*</span></label><input id="expAmount" type="number" min="0" step="0.01" required></div>
-            <div><label>Invoice No</label><input id="expInvoice" type="text" placeholder="invoice no"></div>
-            <div>
-              <label>Category <span class="req">*</span></label>
-              <select id="expCategory">
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;">
+            <div style="display:flex;flex-direction:column;min-width:0;">
+              <label style="margin-top:0;">Date <span class="req">*</span></label>
+              <input id="expDate" type="date" required style="min-width:140px;padding:10px 10px;">
+            </div>
+            <div style="display:flex;flex-direction:column;min-width:0;">
+              <label style="margin-top:0;">Amount (₹) <span class="req">*</span></label>
+              <input id="expAmount" type="number" min="0" step="0.01" required style="min-width:120px;padding:10px 10px;" placeholder="0.00">
+            </div>
+            <div style="display:flex;flex-direction:column;min-width:0;">
+              <label style="margin-top:0;">Invoice No</label>
+              <input id="expInvoice" type="text" placeholder="invoice no" style="min-width:120px;padding:10px 10px;">
+            </div>
+            <div style="display:flex;flex-direction:column;min-width:0;">
+              <label style="margin-top:0;">Category <span class="req">*</span></label>
+              <select id="expCategory" style="min-width:140px;padding:10px 10px;">
                 <option value="Drugs">Drugs</option>
                 <option value="Consumables">Consumables</option>
                 <option value="Machinery & Equipment">Machinery & Equipment</option>
@@ -347,14 +364,20 @@
                 <option value="Misc. Expenses">Misc. Expenses</option>
               </select>
             </div>
-            <div><label>Sub Category</label><input id="expSub" type="text" placeholder="sub category"></div>
-            <div><label>Description</label><input id="expDesc" type="text" placeholder="description"></div>
-            <div><label>Firm / Agency</label><input id="expFirm" type="text" placeholder="firm or agency"></div>
-          </div>
-
-          <div style="display:flex;gap:12px;align-items:flex-end;margin-top:16px;">
-            <div style="flex:1;"><label>Remarks</label><input id="expRemarks" type="text" placeholder="optional"></div>
-            <div style="padding-bottom:2px;"><button class="btn" type="submit" style="height:45px;margin-bottom:0;">💾 Save</button></div>
+            <div style="display:flex;flex-direction:column;min-width:0;">
+              <label style="margin-top:0;">Sub Category</label>
+              <input id="expSub" type="text" placeholder="sub category" style="min-width:130px;padding:10px 10px;">
+            </div>
+            <div style="display:flex;flex-direction:column;flex:1;min-width:140px;">
+              <label style="margin-top:0;">Firm / Agency</label>
+              <input id="expFirm" type="text" placeholder="firm or agency" style="padding:10px 10px;">
+            </div>
+            <!-- Hidden fields kept for backward compatibility with save logic -->
+            <input id="expDesc" type="hidden" value="">
+            <input id="expRemarks" type="hidden" value="">
+            <div style="padding-bottom:2px;flex-shrink:0;">
+              <button class="btn" type="submit" style="height:45px;white-space:nowrap;margin-bottom:0;">💾 Save</button>
+            </div>
           </div>
         </form>
         </div>
@@ -404,10 +427,11 @@
 
         <div id="rep-sha" style="overflow-x:auto;">
           <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;">
-            <select id="shaFyFilter" style="min-width:110px;"></select>
-            <select id="shaMonthFilter" style="min-width:130px;"><option value="">All Month</option></select>
+            <select id="shaFyFilter" style="min-width:110px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"></select>
+            <select id="shaMonthFilter" style="min-width:130px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"><option value="">All Month</option></select>
             <button class="btn" id="applyShaFilter">Apply Filter</button>
             <button class="btn" onclick="printShaReport()" style="background:#4b5563;">🖨 Print / PDF</button>
+            <button class="btn" onclick="printShaReport(true)" style="background:#0891b2;">✏️ Custom Title</button>
             <button class="btn" onclick="exportShaExcel()" style="background:#16a34a;">📊 Excel</button>
             <button class="btn" onclick="exportShaWord()" style="background:#2563eb;">📝 Word</button>
           </div>
@@ -444,10 +468,11 @@
         <div id="rep-shashare" style="display:none">
           <!-- SHA Share Filters -->
           <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
-            <select id="sshaFyFilter" style="min-width:110px;"></select>
-            <select id="sshaMonthFilter" style="min-width:130px;"><option value="">All Month</option></select>
+            <select id="sshaFyFilter" style="min-width:110px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"></select>
+            <select id="sshaMonthFilter" style="min-width:130px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"><option value="">All Month</option></select>
             <button class="btn" id="applySshaFilter">Apply Filter</button>
             <button class="btn" onclick="printSshaReport()" style="background:#4b5563;">🖨 Print / PDF</button>
+            <button class="btn" onclick="printSshaReport(true)" style="background:#0891b2;">✏️ Custom Title</button>
             <button class="btn" onclick="exportSshaExcel()" style="background:#16a34a;">📊 Excel</button>
             <button class="btn" onclick="exportSshaWord()" style="background:#2563eb;">📝 Word</button>
           </div>
@@ -513,10 +538,11 @@
         <!-- FUND ALLOCATION SECTION -->
         <div id="rep-fundalloc" style="display:none;">
           <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
-            <select id="faFyFilter" style="min-width:110px;"></select>
-            <select id="faMonthFilter" style="min-width:130px;"><option value="">All Month</option></select>
+            <select id="faFyFilter" style="min-width:110px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"></select>
+            <select id="faMonthFilter" style="min-width:130px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"><option value="">All Month</option></select>
             <button class="btn" id="applyFaFilter">Apply Filter</button>
             <button class="btn" onclick="printFundAlloc()" style="background:#4b5563;">🖨 Print / PDF</button>
+            <button class="btn" onclick="printFundAlloc(true)" style="background:#0891b2;">✏️ Custom Title</button>
             <button class="btn" onclick="exportFaExcel()" style="background:#16a34a;">📊 Excel</button>
             <button class="btn" onclick="exportFaWord()" style="background:#2563eb;">📝 Word</button>
           </div>
@@ -544,9 +570,6 @@
           </div>
         </div>
 
-        <div style="margin-top:16px;display:flex;gap:12px;justify-content:flex-end;">
-          <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
-        </div>
       </section>
 
       <!-- LEDGER -->
@@ -2122,9 +2145,6 @@
       }
     }
     
-    function printSshaReport() {
-      window.print();
-    }
     function exportSshaExcel() {
       const table = $('repFundTable');
       if(!table) return;
@@ -2138,7 +2158,6 @@
       const h=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="UTF-8"></head><body><table border="1">${table.innerHTML}</table></body></html>`;
       const a=document.createElement('a');a.href=uri+btoa(unescape(encodeURIComponent(h)));a.download='sha_share_report.doc';a.click();
     }
-    function printShaReport() { window.print(); }
     function exportShaExcel() {
       const table = $('repShaNewTable');
       if(!table) return;
@@ -2316,20 +2335,32 @@
         bodyHTML:_tableHTML('expTable'),pageOrientation:'landscape'});
     }
     // SHA report print
-    function printShaReport() {
+    function printShaReport(askTitle) {
       var fy=$('shaFyFilter').value, mo=$('shaMonthFilter')?$('shaMonthFilter').value:'';
-      printReport({title:'AB-PMJAY SHA FUND UTILISATION REPORT',
+      var title='AB-PMJAY SHA FUND UTILISATION REPORT';
+      if(askTitle){
+        var t = prompt('Enter custom report title:', title);
+        if(t===null) return; // cancelled
+        if(t.trim()) title = t.trim();
+      }
+      printReport({title:title,
         periodInfo:_periodStr(fy,mo),generatedInfo:'Generated: '+_fmtNow(),
         bodyHTML:_tableHTML('repShaNewTable'),pageOrientation:'landscape'});
     }
     // SHA Share print
-    function printSshaReport() {
+    function printSshaReport(askTitle) {
       var fy=$('sshaFyFilter')?$('sshaFyFilter').value:'', mo=$('sshaMonthFilter')?$('sshaMonthFilter').value:'';
       var prd=_periodStr(fy,mo);
       var fc=$('sshaFlowchart');
       var flowHTML='';
       if(fc&&fc.style.display!=='none'){flowHTML=fc.outerHTML;}
-      printReport({title:'AB-PMJAY FUND DISTRIBUTION REPORT',
+      var title='AB-PMJAY FUND DISTRIBUTION REPORT';
+      if(askTitle){
+        var t = prompt('Enter custom report title:', title);
+        if(t===null) return;
+        if(t.trim()) title = t.trim();
+      }
+      printReport({title:title,
         periodInfo:prd,generatedInfo:'Generated: '+_fmtNow(),
         bodyHTML:flowHTML+_tableHTML('repFundTable')});
     }
@@ -2758,7 +2789,7 @@
       } else { if(mwWrap) mwWrap.style.display='none'; }
     }
 
-    function printFundAlloc() {
+    function printFundAlloc(askTitle) {
       var fy=$('faFyFilter')?$('faFyFilter').value:'', mo=$('faMonthFilter')?$('faMonthFilter').value:'';
       var t1='<table>'+($('repFundAllocTable')?$('repFundAllocTable').innerHTML:'')+'</table>';
       var mwWrap=$('faMonthWiseWrap');
@@ -2768,8 +2799,14 @@
            +'<table>'+($('repFundAllocMonthTable')?$('repFundAllocMonthTable').innerHTML:'')+'</table>';
       }
       var infoLbl=$('faInfoLabel'); var pInfo=infoLbl?infoLbl.textContent:'';
+      var title='AB-PMJAY FUND ALLOCATION (MONTH-WISE BASIS)';
+      if(askTitle){
+        var tt = prompt('Enter custom report title:', title);
+        if(tt===null) return;
+        if(tt.trim()) title = tt.trim();
+      }
       printReport({
-        title:'AB-PMJAY FUND ALLOCATION (MONTH-WISE BASIS)',
+        title:title,
         periodInfo:_periodStr(fy,mo),
         generatedInfo:'Generated: '+_fmtNow(),
         bodyHTML:t1+t2
