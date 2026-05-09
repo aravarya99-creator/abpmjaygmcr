@@ -683,22 +683,7 @@
               <div><label>Expenditure (₹)</label><input id="statsExpenditure" type="number" min="0" step="0.01" placeholder="0"></div>
             </div>
 
-            <!-- DHS-only manual fields -->
-            <div style="margin-top:18px;padding:14px 16px;background:#f0f9ff;border:1.5px dashed #bae6fd;border-radius:10px;">
-              <div style="font-size:12px;font-weight:800;color:#0369a1;text-transform:uppercase;margin-bottom:10px;">📋 DHS Report Fields (optional — fill for DHS Report generation)</div>
-              <div class="row">
-                <div><label>Pre-Auth Raised</label><input id="statsPreAuth" type="number" min="0" placeholder="0"></div>
-                <div><label>TMS Settled (₹)</label><input id="statsTmsSettled" type="number" min="0" step="0.01" placeholder="0"></div>
-                <div><label>Actual Claim Received (₹)</label><input id="statsActualRecvd" type="number" min="0" step="0.01" placeholder="0"></div>
-                <div><label>Pending at SHA Level</label><input id="statsPendingSHA" type="number" min="0" placeholder="0"></div>
-                <div><label>Pending at NHA Level</label><input id="statsPendingNHA" type="number" min="0" placeholder="0"></div>
-                <div><label>Cases Rejected</label><input id="statsRejected" type="number" min="0" placeholder="0"></div>
-                <div><label>Pending Liabilities (₹)</label><input id="statsPendingLiab" type="number" min="0" step="0.01" placeholder="0"></div>
-                <div><label>Short-Stay IPDs</label><input id="statsShortStay" type="number" min="0" placeholder="0"></div>
-                <div><label>Excluded IPDs (C-section etc.)</label><input id="statsExcludedIPDs" type="number" min="0" placeholder="0"></div>
-                <div><label>Converted to AB-PMJAY IPDs</label><input id="statsConvertedIPDs" type="number" min="0" placeholder="0"></div>
-              </div>
-            </div>
+            <!-- DHS-only fields moved to DHS Report tab -->
 
             <div style="display:flex;justify-content:flex-end;margin-top:16px;">
               <button class="btn" type="submit" style="height:45px;margin-bottom:0;">💾 Save</button>
@@ -736,8 +721,9 @@
         <!-- DHS REPORT PANE -->
         <div id="rep-stats-dhs" style="display:none;">
           <div class="section-title" style="background:#0369a1;">📋 DHS REPORT FORMAT</div>
-          <div style="font-size:13px;color:#475569;margin-bottom:16px;">Generates the DHS-format combined report (3 tables) for the selected month. Pre-Auth, TMS, Pending, Conversion fields come from the manual inputs in the Data Entry tab.</div>
+          <div style="font-size:13px;color:#475569;margin-bottom:16px;">Pick FY + Month. Auto-data fills in from Claims/Expenditure/Stats. Fill manual fields below, then click <b>Save & Generate Preview</b>.</div>
 
+          <!-- Period selector -->
           <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;background:#f0f9ff;padding:14px 16px;border-radius:10px;border:1.5px solid #bae6fd;">
             <div>
               <label style="display:block;color:#0369a1;font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Financial Year</label>
@@ -747,9 +733,49 @@
               <label style="display:block;color:#0369a1;font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Month</label>
               <select id="dhsMonth" style="padding:8px 12px;border:2px solid #bae6fd;border-radius:8px;font-weight:600;min-width:140px;background:#fff;"></select>
             </div>
-            <button class="btn" onclick="renderDhsPreview()" style="background:#0369a1;height:38px;">🔍 Generate Preview</button>
-            <button class="btn" onclick="printDhsReport()" style="background:#4b5563;height:38px;">🖨 Print / PDF</button>
-            <button class="btn" onclick="exportDhsExcel()" style="background:#16a34a;height:38px;">📊 Excel</button>
+            <button class="btn" onclick="loadDhsForm()" style="background:#0369a1;height:38px;">📥 Load Data</button>
+          </div>
+
+          <!-- Integrated DHS data-entry form -->
+          <div id="dhsFormCard" style="background:#fff;padding:18px 20px;border-radius:12px;border:1.5px solid #c7d2fe;box-shadow:0 4px 12px rgba(99,102,241,0.08);margin-bottom:18px;display:none;">
+            <div style="font-size:13px;font-weight:800;color:#4338ca;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.4px;">📝 DHS Data — Auto + Manual Entry</div>
+
+            <!-- AUTO FIELDS (read-only display) -->
+            <div style="background:#f0fdf4;padding:12px 14px;border-radius:8px;border:1px solid #bbf7d0;margin-bottom:14px;">
+              <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;margin-bottom:8px;">✅ Auto-Fetched (from Claims / Expenditure / Stats)</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;font-size:12px;">
+                <div><div style="color:#475569;font-size:10px;">Opening Balance (₹)</div><div id="dhsAutoOpening" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
+                <div><div style="color:#475569;font-size:10px;">Funds Received (₹)</div><div id="dhsAutoFundsReceived" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
+                <div><div style="color:#475569;font-size:10px;">Expenditure (₹)</div><div id="dhsAutoExpenditure" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
+                <div><div style="color:#475569;font-size:10px;">Closing Balance (₹)</div><div id="dhsAutoClosing" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
+                <div><div style="color:#475569;font-size:10px;">Patients Treated (IPDs)</div><div id="dhsAutoPatients" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
+                <div><div style="color:#475569;font-size:10px;">Golden Cards Generated</div><div id="dhsAutoCards" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
+              </div>
+            </div>
+
+            <!-- MANUAL FIELDS (editable) -->
+            <div style="background:#fef3c7;padding:12px 14px;border-radius:8px;border:1px solid #fcd34d;margin-bottom:14px;">
+              <div style="font-size:11px;font-weight:700;color:#a16207;text-transform:uppercase;margin-bottom:10px;">✏️ Manual Entry (fill these for the selected month)</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;">
+                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Pre-Auth Raised</label><input id="dhsPreAuth" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
+                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">TMS Settled (₹)</label><input id="dhsTmsSettled" type="number" min="0" step="0.01" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
+                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Actual Claim Received (₹)</label><input id="dhsActualRecvd" type="number" min="0" step="0.01" placeholder="auto if blank" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
+                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Pending at SHA Level</label><input id="dhsPendingSHA" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
+                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Pending at NHA Level</label><input id="dhsPendingNHA" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
+                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Cases Rejected</label><input id="dhsRejected" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
+                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Pending Liabilities (₹)</label><input id="dhsPendingLiab" type="number" min="0" step="0.01" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
+                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Short-Stay IPDs</label><input id="dhsShortStay" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
+                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Excluded IPDs (C-section etc.)</label><input id="dhsExcludedIPDs" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
+                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Converted to AB-PMJAY IPDs</label><input id="dhsConvertedIPDs" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn" onclick="saveDhsAndPreview()" style="background:#4338ca;">💾 Save & Generate Preview</button>
+              <button class="btn" onclick="renderDhsPreview()" style="background:#0369a1;">🔍 Preview Only</button>
+              <button class="btn" onclick="printDhsReport()" style="background:#4b5563;">🖨 Print / PDF</button>
+              <button class="btn" onclick="exportDhsExcel()" style="background:#16a34a;">📊 Excel</button>
+            </div>
           </div>
 
           <div id="dhsPreviewWrap"></div>
@@ -2084,27 +2110,14 @@
       
       const statsClaim = Number($('statsClaim').value||0);
       const statsExp = Number($('statsExpenditure').value||0);
-      // DHS extra fields
-      const preAuth = Number($('statsPreAuth').value||0);
-      const tmsSettled = Number($('statsTmsSettled').value||0);
-      const actualRecvd = Number($('statsActualRecvd').value||0);
-      const pendingSHA = Number($('statsPendingSHA').value||0);
-      const pendingNHA = Number($('statsPendingNHA').value||0);
-      const rejected = Number($('statsRejected').value||0);
-      const pendingLiab = Number($('statsPendingLiab').value||0);
-      const shortStay = Number($('statsShortStay').value||0);
-      const excludedIPDs = Number($('statsExcludedIPDs').value||0);
-      const convertedIPDs = Number($('statsConvertedIPDs').value||0);
       stats.push({
         fy, monthKey, patients, cards,
         claim: statsClaim, expenditure: statsExp,
-        preAuth, tmsSettled, actualRecvd, pendingSHA, pendingNHA,
-        rejected, pendingLiab, shortStay, excludedIPDs, convertedIPDs,
         createdAt: new Date().toISOString()
       });
       save(LS.STATS, stats);
       this.reset();
-      populateFyAll(); // resets dropdowns
+      populateFyAll();
       renderStatsEntryTable();
     });
 
@@ -2513,14 +2526,12 @@
     var _dhsLastPeriod = '';
 
     function initDhsReport(){
-      // Populate FY dropdown if needed
       var fySel = $('dhsFy');
       if(!fySel) return;
       var fys = load(LS.FYS, []);
       if(fySel.children.length === 0){
         fys.forEach(function(f){ fySel.insertAdjacentHTML('beforeend','<option value="'+f.name+'">'+f.name+'</option>'); });
       }
-      // Default to most recent FY
       if(fys.length && !fySel.value) fySel.value = fys[fys.length-1].name;
       populateDhsMonths();
       $('dhsFy').onchange = populateDhsMonths;
@@ -2535,27 +2546,16 @@
       months.forEach(function(m){ sel.insertAdjacentHTML('beforeend','<option value="'+m.key+'">'+m.label+'</option>'); });
     }
 
-    // Compute opening balance for a given month: cumulative claims+interest (received) minus cumulative expenditure for ALL prior months across ALL FYs
+    // Compute opening balance: initial opening + all prior received - all prior expenditure
     function computeOpeningBalance(targetMonthKey){
       var income = load(LS.INCOME, []);
       var exp = load(LS.EXPENSE, []);
       var totalIn = 0, totalOut = 0;
-      income.forEach(function(i){
-        if(i.monthKey < targetMonthKey){
-          totalIn += Number(i.claim||0) + Number(i.interest||0);
-        }
-      });
-      exp.forEach(function(e){
-        if(e.monthKey < targetMonthKey){
-          totalOut += Number(e.amount||0);
-        }
-      });
-      // Add initial opening balance from meta
+      income.forEach(function(i){ if(i.monthKey < targetMonthKey) totalIn += Number(i.claim||0) + Number(i.interest||0); });
+      exp.forEach(function(e){ if(e.monthKey < targetMonthKey) totalOut += Number(e.amount||0); });
       var meta = load(LS.META, {});
       var initial = (meta.initialOpening && meta.initialOpening.amount) ? Number(meta.initialOpening.amount) : 0;
-      // Only add initial if its month is at or before targetMonthKey
       if(meta.initialOpening && meta.initialOpening.monthKey <= targetMonthKey){
-        // initial is already at the START of that month, so it counts as opening for any month >= initialOpening.monthKey
         return initial + totalIn - totalOut;
       }
       return totalIn - totalOut;
@@ -2574,7 +2574,6 @@
         fundsReceived: fundsReceived,
         expenditure: totalExp,
         closing: closing,
-        // From stats record (DHS manual fields)
         patients: Number(stat.patients||0),
         cards: Number(stat.cards||0),
         preAuth: Number(stat.preAuth||0),
@@ -2590,103 +2589,167 @@
       };
     }
 
+    // Load auto-data + manual fields into the integrated form
+    function loadDhsForm(){
+      var fy = $('dhsFy').value, monthKey = $('dhsMonth').value;
+      if(!fy || !monthKey){ alert('Please select FY and Month.'); return; }
+      var d = getMonthData(fy, monthKey);
+      // Auto fields display
+      $('dhsAutoOpening').textContent = '₹ ' + fmt(d.opening);
+      $('dhsAutoFundsReceived').textContent = '₹ ' + fmt(d.fundsReceived);
+      $('dhsAutoExpenditure').textContent = '₹ ' + fmt(d.expenditure);
+      $('dhsAutoClosing').textContent = '₹ ' + fmt(d.closing);
+      $('dhsAutoPatients').textContent = d.patients;
+      $('dhsAutoCards').textContent = d.cards;
+      // Manual fields - populate from saved stats record (or 0)
+      $('dhsPreAuth').value = d.preAuth || '';
+      $('dhsTmsSettled').value = d.tmsSettled || '';
+      $('dhsActualRecvd').value = d.actualRecvd || '';
+      $('dhsPendingSHA').value = d.pendingSHA || '';
+      $('dhsPendingNHA').value = d.pendingNHA || '';
+      $('dhsRejected').value = d.rejected || '';
+      $('dhsPendingLiab').value = d.pendingLiab || '';
+      $('dhsShortStay').value = d.shortStay || '';
+      $('dhsExcludedIPDs').value = d.excludedIPDs || '';
+      $('dhsConvertedIPDs').value = d.convertedIPDs || '';
+      $('dhsFormCard').style.display = '';
+      // Clear preview until user clicks generate
+      $('dhsPreviewWrap').innerHTML = '';
+    }
+
+    // Persist manual fields into the stats record for this month
+    function saveDhsManualFields(){
+      var fy = $('dhsFy').value, monthKey = $('dhsMonth').value;
+      if(!fy || !monthKey) return false;
+      var stats = load(LS.STATS, []);
+      var idx = stats.findIndex(function(s){return s.fy===fy && s.monthKey===monthKey;});
+      var manualData = {
+        preAuth: Number($('dhsPreAuth').value||0),
+        tmsSettled: Number($('dhsTmsSettled').value||0),
+        actualRecvd: Number($('dhsActualRecvd').value||0),
+        pendingSHA: Number($('dhsPendingSHA').value||0),
+        pendingNHA: Number($('dhsPendingNHA').value||0),
+        rejected: Number($('dhsRejected').value||0),
+        pendingLiab: Number($('dhsPendingLiab').value||0),
+        shortStay: Number($('dhsShortStay').value||0),
+        excludedIPDs: Number($('dhsExcludedIPDs').value||0),
+        convertedIPDs: Number($('dhsConvertedIPDs').value||0)
+      };
+      if(idx >= 0){
+        // Merge into existing record
+        Object.assign(stats[idx], manualData);
+      } else {
+        // Create a minimal stats record (auto fields aren't in stats; they come from income/exp on render)
+        stats.push(Object.assign({
+          fy: fy, monthKey: monthKey,
+          patients: 0, cards: 0,
+          claim: 0, expenditure: 0,
+          createdAt: new Date().toISOString()
+        }, manualData));
+      }
+      save(LS.STATS, stats);
+      return true;
+    }
+
+    function saveDhsAndPreview(){
+      if(!saveDhsManualFields()){ alert('Please load FY/Month first.'); return; }
+      renderDhsPreview();
+    }
+
     function buildDhsHTML(monthLabel, data){
       var d = data;
-      // Table 1 — Claim Fund Received & Expenditure
-      var t1 = ''
-        + '<div class="dhs-table-title">Claim Fund Received & Expenditure on account of AB-PMJAY/SEHAT Scheme for the month of ' + monthLabel + '</div>'
-        + '<table class="dhs-table">'
-        + '<thead><tr>'
-        +   '<th>S. No.</th><th>District</th><th>Hospital</th>'
-        +   '<th>Opening Balance (₹)</th><th>Funds Received (₹)</th><th>Expenditure (₹)</th><th>Balance (₹)</th>'
-        + '</tr></thead><tbody>'
-        +   '<tr>'
-        +     '<td>1</td><td>' + DHS_DISTRICT + '</td><td>' + DHS_HOSPITAL + '</td>'
-        +     '<td style="text-align:right;">' + fmt(d.opening) + '</td>'
-        +     '<td style="text-align:right;">' + fmt(d.fundsReceived) + '</td>'
-        +     '<td style="text-align:right;">' + fmt(d.expenditure) + '</td>'
-        +     '<td style="text-align:right;font-weight:700;">' + fmt(d.closing) + '</td>'
-        +   '</tr>'
-        + '</tbody></table>';
 
-      // Table 1B — Hospital subtotal (no district col)
-      t1 += ''
-        + '<table class="dhs-table" style="margin-top:6px;">'
-        + '<thead><tr>'
-        +   '<th>S. No.</th><th>Hospital</th>'
-        +   '<th>Opening Balance (₹)</th><th>Funds Received (₹)</th><th>Expenditure (₹)</th><th>Balance (₹)</th>'
-        + '</tr></thead><tbody>'
-        +   '<tr>'
-        +     '<td>1</td><td>' + DHS_HOSPITAL + '</td>'
-        +     '<td style="text-align:right;">' + fmt(d.opening) + '</td>'
-        +     '<td style="text-align:right;">' + fmt(d.fundsReceived) + '</td>'
-        +     '<td style="text-align:right;">' + fmt(d.expenditure) + '</td>'
-        +     '<td style="text-align:right;font-weight:700;">' + fmt(d.closing) + '</td>'
-        +   '</tr>'
-        + '</tbody></table>';
+      // Color palette per table
+      var T1_COLOR = '#0369a1'; // blue
+      var T2_COLOR = '#16a34a'; // green
+      var T3_COLOR = '#ea580c'; // orange
+
+      // Table 1 — Claim Fund Received & Expenditure (District version ONLY)
+      var t1 = ''
+        + '<div class="dhs-card" style="border-color:'+T1_COLOR+';">'
+        +   '<div class="dhs-table-title" style="background:'+T1_COLOR+';">Claim Fund Received & Expenditure on account of AB-PMJAY/SEHAT Scheme for the month of ' + monthLabel + '</div>'
+        +   '<table class="dhs-table">'
+        +     '<thead><tr style="background:'+T1_COLOR+';">'
+        +       '<th>S. No.</th><th>District</th><th>Hospital</th>'
+        +       '<th>Opening Balance (₹)</th><th>Funds Received (₹)</th><th>Expenditure (₹)</th><th>Balance (₹)</th>'
+        +     '</tr></thead><tbody>'
+        +       '<tr>'
+        +         '<td>1</td><td>' + DHS_DISTRICT + '</td><td>' + DHS_HOSPITAL + '</td>'
+        +         '<td style="text-align:right;">' + fmt(d.opening) + '</td>'
+        +         '<td style="text-align:right;">' + fmt(d.fundsReceived) + '</td>'
+        +         '<td style="text-align:right;">' + fmt(d.expenditure) + '</td>'
+        +         '<td style="text-align:right;font-weight:700;">' + fmt(d.closing) + '</td>'
+        +       '</tr>'
+        +     '</tbody></table>'
+        + '</div>';
 
       // Table 2 — IPD / Claim Stats
       var t2 = ''
-        + '<div class="dhs-table-title" style="margin-top:24px;">AB PMJAY & PMJAY SEHAT for the Month of ' + monthLabel + '</div>'
-        + '<table class="dhs-table">'
-        + '<thead><tr>'
-        +   '<th>S.No.</th><th>District</th><th>Empanelled Hospital</th>'
-        +   '<th>No. of IPDs</th><th>No. of Pre-Auth Raised</th>'
-        +   '<th>Claim Amount Settled as per TMS (₹)</th>'
-        +   '<th>Actual Claim Amount Received (₹)</th>'
-        +   '<th>Pending at SHA Level</th><th>Pending at NHA Level</th>'
-        +   '<th>Cases Rejected</th><th>Pending Liabilities (₹)</th>'
-        + '</tr></thead><tbody>'
-        +   '<tr>'
-        +     '<td>1</td><td>' + DHS_DISTRICT + '</td><td>' + DHS_HOSPITAL + '</td>'
-        +     '<td style="text-align:right;">' + d.patients + '</td>'
-        +     '<td style="text-align:right;">' + d.preAuth + '</td>'
-        +     '<td style="text-align:right;">' + fmt(d.tmsSettled) + '</td>'
-        +     '<td style="text-align:right;">' + fmt(d.actualRecvd || d.fundsReceived) + '</td>'
-        +     '<td style="text-align:right;">' + d.pendingSHA + '</td>'
-        +     '<td style="text-align:right;">' + d.pendingNHA + '</td>'
-        +     '<td style="text-align:right;">' + d.rejected + '</td>'
-        +     '<td style="text-align:right;">' + fmt(d.pendingLiab) + '</td>'
-        +   '</tr>'
-        + '</tbody></table>';
+        + '<div class="dhs-card" style="border-color:'+T2_COLOR+';">'
+        +   '<div class="dhs-table-title" style="background:'+T2_COLOR+';">AB PMJAY & PMJAY SEHAT for the Month of ' + monthLabel + '</div>'
+        +   '<table class="dhs-table">'
+        +     '<thead><tr style="background:'+T2_COLOR+';">'
+        +       '<th>S.No.</th><th>District</th><th>Empanelled Hospital</th>'
+        +       '<th>No. of IPDs</th><th>No. of Pre-Auth Raised</th>'
+        +       '<th>Claim Amount Settled as per TMS (₹)</th>'
+        +       '<th>Actual Claim Amount Received (₹)</th>'
+        +       '<th>Pending at SHA Level</th><th>Pending at NHA Level</th>'
+        +       '<th>Cases Rejected</th><th>Pending Liabilities (₹)</th>'
+        +     '</tr></thead><tbody>'
+        +       '<tr>'
+        +         '<td>1</td><td>' + DHS_DISTRICT + '</td><td>' + DHS_HOSPITAL + '</td>'
+        +         '<td style="text-align:right;">' + d.patients + '</td>'
+        +         '<td style="text-align:right;">' + d.preAuth + '</td>'
+        +         '<td style="text-align:right;">' + fmt(d.tmsSettled) + '</td>'
+        +         '<td style="text-align:right;">' + fmt(d.actualRecvd || d.fundsReceived) + '</td>'
+        +         '<td style="text-align:right;">' + d.pendingSHA + '</td>'
+        +         '<td style="text-align:right;">' + d.pendingNHA + '</td>'
+        +         '<td style="text-align:right;">' + d.rejected + '</td>'
+        +         '<td style="text-align:right;">' + fmt(d.pendingLiab) + '</td>'
+        +       '</tr>'
+        +     '</tbody></table>'
+        + '</div>';
 
       // Table 3 — IPD Conversion
-      var totalIPD = d.patients;          // C
-      var shortStay = d.shortStay;         // D
-      var excluded = d.excludedIPDs;       // E
-      var eligible = Math.max(0, totalIPD - shortStay - excluded);  // F = C-D-E
-      var converted = d.convertedIPDs;     // G
+      var totalIPD = d.patients;
+      var shortStay = d.shortStay;
+      var excluded = d.excludedIPDs;
+      var eligible = Math.max(0, totalIPD - shortStay - excluded);
+      var converted = d.convertedIPDs;
       var pct = eligible > 0 ? ((converted/eligible)*100) : 0;
       var pctStr = (eligible > 0 ? pct.toFixed(2) + '%' : 'N/A');
 
       var t3 = ''
-        + '<div class="dhs-table-title" style="margin-top:24px;">AB PMJAY IPD Conversion ' + monthLabel + '</div>'
-        + '<table class="dhs-table">'
-        + '<thead><tr>'
-        +   '<th>S.No.</th><th>District</th><th>Empanelled Hospitals</th>'
-        +   '<th>Total Number of IPDs (C)</th>'
-        +   '<th>Short-Stay IPDs (D)</th>'
-        +   '<th>IPDs Not Covered under AB PM-JAY/SEHAT — C-section/Normal Deliveries/External Congenital Anomalies etc. (E)</th>'
-        +   '<th>Total Eligible IPDs for Conversion (F = C-D-E)</th>'
-        +   '<th>Total IPDs Converted to AB PM-JAY/SEHAT (G)</th>'
-        +   '<th>%age Conversion (G/F × 100)</th>'
-        + '</tr></thead><tbody>'
-        +   '<tr>'
-        +     '<td>1</td><td>' + DHS_DISTRICT + '</td><td>GMC Rajouri</td>'
-        +     '<td style="text-align:right;">' + totalIPD + '</td>'
-        +     '<td style="text-align:right;">' + shortStay + '</td>'
-        +     '<td style="text-align:right;">' + excluded + '</td>'
-        +     '<td style="text-align:right;">' + eligible + '</td>'
-        +     '<td style="text-align:right;">' + converted + '</td>'
-        +     '<td style="text-align:right;font-weight:700;">' + pctStr + '</td>'
-        +   '</tr>'
-        + '</tbody></table>';
+        + '<div class="dhs-card" style="border-color:'+T3_COLOR+';">'
+        +   '<div class="dhs-table-title" style="background:'+T3_COLOR+';">AB PMJAY IPD Conversion ' + monthLabel + '</div>'
+        +   '<table class="dhs-table">'
+        +     '<thead><tr style="background:'+T3_COLOR+';">'
+        +       '<th>S.No.</th><th>District</th><th>Empanelled Hospitals</th>'
+        +       '<th>Total Number of IPDs (C)</th>'
+        +       '<th>Short-Stay IPDs (D)</th>'
+        +       '<th>IPDs Not Covered under AB PM-JAY/SEHAT — C-section/Normal Deliveries/External Congenital Anomalies etc. (E)</th>'
+        +       '<th>Total Eligible IPDs for Conversion (F = C-D-E)</th>'
+        +       '<th>Total IPDs Converted to AB PM-JAY/SEHAT (G)</th>'
+        +       '<th>%age Conversion (G/F × 100)</th>'
+        +     '</tr></thead><tbody>'
+        +       '<tr>'
+        +         '<td>1</td><td>' + DHS_DISTRICT + '</td><td>GMC Rajouri</td>'
+        +         '<td style="text-align:right;">' + totalIPD + '</td>'
+        +         '<td style="text-align:right;">' + shortStay + '</td>'
+        +         '<td style="text-align:right;">' + excluded + '</td>'
+        +         '<td style="text-align:right;">' + eligible + '</td>'
+        +         '<td style="text-align:right;">' + converted + '</td>'
+        +         '<td style="text-align:right;font-weight:700;">' + pctStr + '</td>'
+        +       '</tr>'
+        +     '</tbody></table>'
+        + '</div>';
 
       var styles = '<style>'
-        + '.dhs-table-title{font-size:13px;font-weight:800;color:#0369a1;margin:8px 0 6px;padding:8px 12px;background:#e0f2fe;border-left:4px solid #0369a1;}'
-        + '.dhs-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:8px;}'
-        + '.dhs-table th,.dhs-table td{border:1px solid #94a3b8;padding:6px 8px;}'
-        + '.dhs-table thead th{background:#0369a1;color:#fff;font-weight:700;text-align:center;}'
+        + '.dhs-card{margin-bottom:18px;border:2px solid #cbd5e1;border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,0.06);}'
+        + '.dhs-table-title{font-size:13px;font-weight:800;color:#fff;padding:10px 14px;letter-spacing:0.3px;}'
+        + '.dhs-table{width:100%;border-collapse:collapse;font-size:11.5px;}'
+        + '.dhs-table th,.dhs-table td{border:1px solid #cbd5e1;padding:7px 9px;}'
+        + '.dhs-table thead th{color:#fff;font-weight:700;text-align:center;}'
         + '.dhs-table tbody tr:nth-child(even){background:#f8fafc;}'
         + '</style>';
       return styles + t1 + t2 + t3;
@@ -2702,7 +2765,7 @@
       _dhsLastBodyHTML = bodyHTML;
       _dhsLastPeriod = 'Period: ' + monthLabel + ' | FY: ' + fy;
       var wrap = $('dhsPreviewWrap');
-      wrap.innerHTML = '<div style="overflow-x:auto;background:#fff;padding:14px;border-radius:8px;border:1px solid #cbd5e1;">' + bodyHTML + '</div>';
+      wrap.innerHTML = '<div style="padding:4px;">' + bodyHTML + '</div>';
     }
 
     function printDhsReport(){
