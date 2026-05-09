@@ -232,6 +232,21 @@
   </div>
   <style>@keyframes fin-spin{to{transform:rotate(360deg)}}</style>
 
+  <!-- PIN MODAL FOR PROTECTED TABS -->
+  <div id="pinModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:14px;padding:28px 32px;min-width:320px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;">
+      <div style="font-size:36px;margin-bottom:8px;">🔐</div>
+      <div id="pinModalTitle" style="font-size:18px;font-weight:800;color:#0369a1;margin-bottom:6px;">Enter Login PIN</div>
+      <div id="pinModalSubtitle" style="font-size:13px;color:#475569;margin-bottom:18px;">This section is protected. Please re-enter your login PIN to continue.</div>
+      <input id="pinModalInput" type="password" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="• • • •" style="width:200px;padding:12px;font-size:22px;text-align:center;letter-spacing:8px;border:2px solid #bae6fd;border-radius:10px;font-weight:700;background:#f0f9ff;outline:none;">
+      <div id="pinModalError" style="font-size:12px;color:#dc2626;margin-top:8px;height:16px;font-weight:600;"></div>
+      <div style="display:flex;gap:10px;margin-top:14px;justify-content:center;">
+        <button class="btn" onclick="pinModalCancel()" style="background:#94a3b8;padding:9px 22px;border-radius:8px;">Cancel</button>
+        <button class="btn" onclick="pinModalSubmit()" style="background:#0369a1;padding:9px 22px;border-radius:8px;">✓ Unlock</button>
+      </div>
+    </div>
+  </div>
+
   <main>
     <div style="max-width:1200px;margin:0 auto">
 
@@ -994,7 +1009,7 @@
     // Documents: fin_income, fin_expense, fin_stats, fin_meta, fin_locked, fin_fys
     // In-memory cache for fast UI — synced from Firestore on load
     // ─────────────────────────────────────────────────────────────────
-    var _cache = { income:[], expense:[], stats:[], meta:{}, locked:[], fys:[] };
+    var _cache = { income:[], expense:[], stats:[], meta:{}, locked:[], fys:[], claimLockedFys:[], expLockedFys:[] };
     var _loaded = false;
 
     // Show/hide global loading indicator
@@ -1021,6 +1036,8 @@
             if(doc.id === 'fin_meta')    _cache.meta    = val || {};
             if(doc.id === 'fin_locked')  _cache.locked  = val || [];
             if(doc.id === 'fin_fys')     _cache.fys     = val || [];
+            if(doc.id === 'fin_claim_locked_fys') _cache.claimLockedFys = val || [];
+            if(doc.id === 'fin_exp_locked_fys')   _cache.expLockedFys   = val || [];
           } catch(e) {}
         });
         // Default FYs if none stored
@@ -1057,6 +1074,8 @@
       if(k === LS.META    || k === 'fp_meta')    return Object.keys(_cache.meta).length ? _cache.meta : (fallback||{});
       if(k === LS.LOCKED  || k === 'fp_locked')  return _cache.locked;
       if(k === LS.FYS     || k === 'fp_fys')     return _cache.fys.length ? _cache.fys : (fallback||[]);
+      if(k === 'fp_claim_locked_fys') return _cache.claimLockedFys || [];
+      if(k === 'fp_exp_locked_fys')   return _cache.expLockedFys   || [];
       return fallback;
     }
 
@@ -1067,6 +1086,8 @@
       if(k === LS.META    || k === 'fp_meta')    { _cache.meta    = v; fsSave('fin_meta',    v); }
       if(k === LS.LOCKED  || k === 'fp_locked')  { _cache.locked  = v; fsSave('fin_locked',  v); }
       if(k === LS.FYS     || k === 'fp_fys')     { _cache.fys     = v; fsSave('fin_fys',     v); }
+      if(k === 'fp_claim_locked_fys') { _cache.claimLockedFys = v; fsSave('fin_claim_locked_fys', v); }
+      if(k === 'fp_exp_locked_fys')   { _cache.expLockedFys   = v; fsSave('fin_exp_locked_fys',   v); }
     }
 
     function isLocked(monthKey) {
@@ -3066,6 +3087,11 @@
 
     // ── SETTINGS TAB SWITCHER ────────────────────────────────────────
     function showSettingsPane(name) {
+      // Gate Bulk Import and Bulk Delete behind PIN
+      if((name === 'import' || name === 'delete') && !pinUnlockedFor(name)) {
+        requirePin(name, function(){ showSettingsPane(name); });
+        return;
+      }
       document.querySelectorAll('.settings-tab').forEach(function(t){
         t.classList.toggle('active', t.dataset.pane === name);
       });
@@ -3076,6 +3102,68 @@
       if(name === 'claimlock') initClaimLockSection();
       if(name === 'explock') initExpLockSection();
     }
+
+    // ── PIN PROTECTION FOR SENSITIVE TABS ────────────────────────────
+    var _pinUnlockedSession = {}; // { import: true, delete: true } - resets on page reload
+    var _pinPendingCallback = null;
+    var _pinPendingTab = null;
+
+    function pinUnlockedFor(tabName){
+      return _pinUnlockedSession[tabName] === true;
+    }
+
+    function requirePin(tabName, onSuccess){
+      _pinPendingCallback = onSuccess;
+      _pinPendingTab = tabName;
+      var tabLabel = (tabName === 'import') ? 'Bulk Import' : 'Bulk Delete';
+      var subtitle = $('pinModalSubtitle');
+      if(subtitle) subtitle.textContent = '"' + tabLabel + '" is protected. Please re-enter your login PIN to continue.';
+      var err = $('pinModalError'); if(err) err.textContent = '';
+      var input = $('pinModalInput'); if(input) { input.value = ''; }
+      var modal = $('pinModal');
+      modal.style.display = 'flex';
+      setTimeout(function(){ if(input) input.focus(); }, 50);
+    }
+
+    function pinModalSubmit(){
+      var entered = ($('pinModalInput').value || '').trim();
+      var stored = (localStorage.getItem('userPin') || '').trim();
+      var errEl = $('pinModalError');
+      if(!stored){
+        // No PIN stored — fall back: prompt user that PIN check unavailable in this session
+        errEl.textContent = 'Login PIN not found. Please log in again.';
+        return;
+      }
+      if(entered === stored){
+        // Success
+        _pinUnlockedSession[_pinPendingTab] = true;
+        $('pinModal').style.display = 'none';
+        var cb = _pinPendingCallback;
+        _pinPendingCallback = null; _pinPendingTab = null;
+        if(typeof cb === 'function') cb();
+      } else {
+        errEl.textContent = '❌ Incorrect PIN. Try again.';
+        $('pinModalInput').value = '';
+        $('pinModalInput').focus();
+      }
+    }
+
+    function pinModalCancel(){
+      $('pinModal').style.display = 'none';
+      _pinPendingCallback = null;
+      _pinPendingTab = null;
+      // Switch back to a safe pane
+      showSettingsPane('opening');
+    }
+
+    // Allow Enter key to submit; Escape to cancel
+    document.addEventListener('keydown', function(e){
+      var modal = $('pinModal');
+      if(modal && modal.style.display === 'flex'){
+        if(e.key === 'Enter'){ e.preventDefault(); pinModalSubmit(); }
+        else if(e.key === 'Escape'){ e.preventDefault(); pinModalCancel(); }
+      }
+    });
 
 
     var CAT_COLORS = {
