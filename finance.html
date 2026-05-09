@@ -738,35 +738,64 @@
 
           <!-- Integrated DHS data-entry form -->
           <div id="dhsFormCard" style="background:#fff;padding:18px 20px;border-radius:12px;border:1.5px solid #c7d2fe;box-shadow:0 4px 12px rgba(99,102,241,0.08);margin-bottom:18px;display:none;">
-            <div style="font-size:13px;font-weight:800;color:#4338ca;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.4px;">📝 DHS Data — Auto + Manual Entry</div>
+            <div style="font-size:13px;font-weight:800;color:#4338ca;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.4px;">📝 DHS Data Entry — Fields Grouped by Table</div>
 
-            <!-- AUTO FIELDS (read-only display) -->
-            <div style="background:#f0fdf4;padding:12px 14px;border-radius:8px;border:1px solid #bbf7d0;margin-bottom:14px;">
-              <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;margin-bottom:8px;">✅ Auto-Fetched (from Claims / Expenditure / Stats)</div>
+            <!-- ─────────── TABLE 1 SECTION (all auto) ─────────── -->
+            <div style="border-left:4px solid #0369a1;padding:12px 14px;background:#f0f9ff;border-radius:0 8px 8px 0;margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:800;color:#0369a1;margin-bottom:10px;text-transform:uppercase;">📊 Table 1 — Claim Fund Received & Expenditure</div>
+              <div style="font-size:11px;color:#0c4a6e;font-style:italic;margin-bottom:10px;">All fields auto-fetched from Claims & Expenditure modules</div>
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;font-size:12px;">
-                <div><div style="color:#475569;font-size:10px;">Opening Balance (₹)</div><div id="dhsAutoOpening" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
-                <div><div style="color:#475569;font-size:10px;">Funds Received (₹)</div><div id="dhsAutoFundsReceived" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
-                <div><div style="color:#475569;font-size:10px;">Expenditure (₹)</div><div id="dhsAutoExpenditure" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
-                <div><div style="color:#475569;font-size:10px;">Closing Balance (₹)</div><div id="dhsAutoClosing" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
-                <div><div style="color:#475569;font-size:10px;">Patients Treated (IPDs)</div><div id="dhsAutoPatients" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
-                <div><div style="color:#475569;font-size:10px;">Golden Cards Generated</div><div id="dhsAutoCards" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
+                <div style="background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #bae6fd;"><div style="color:#475569;font-size:10px;">Opening Balance (₹)</div><div id="dhsAutoOpening" style="font-weight:700;color:#0c4a6e;font-size:13px;">—</div></div>
+                <div style="background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #bae6fd;"><div style="color:#475569;font-size:10px;">Funds Received (₹)</div><div id="dhsAutoFundsReceived" style="font-weight:700;color:#0c4a6e;font-size:13px;">—</div></div>
+                <div style="background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #bae6fd;"><div style="color:#475569;font-size:10px;">Expenditure (₹)</div><div id="dhsAutoExpenditure" style="font-weight:700;color:#0c4a6e;font-size:13px;">—</div></div>
+                <div style="background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #bae6fd;"><div style="color:#475569;font-size:10px;">Balance (₹)</div><div id="dhsAutoClosing" style="font-weight:700;color:#0c4a6e;font-size:13px;">—</div></div>
               </div>
             </div>
 
-            <!-- MANUAL FIELDS (editable) -->
-            <div style="background:#fef3c7;padding:12px 14px;border-radius:8px;border:1px solid #fcd34d;margin-bottom:14px;">
-              <div style="font-size:11px;font-weight:700;color:#a16207;text-transform:uppercase;margin-bottom:10px;">✏️ Manual Entry (fill these for the selected month)</div>
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;">
-                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Pre-Auth Raised</label><input id="dhsPreAuth" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
-                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">TMS Settled (₹)</label><input id="dhsTmsSettled" type="number" min="0" step="0.01" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
-                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Actual Claim Received (₹)</label><input id="dhsActualRecvd" type="number" min="0" step="0.01" placeholder="auto if blank" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
-                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Pending at SHA Level</label><input id="dhsPendingSHA" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
-                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Pending at NHA Level</label><input id="dhsPendingNHA" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
-                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Cases Rejected</label><input id="dhsRejected" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
-                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Pending Liabilities (₹)</label><input id="dhsPendingLiab" type="number" min="0" step="0.01" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
-                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Short-Stay IPDs</label><input id="dhsShortStay" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
-                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Excluded IPDs (C-section etc.)</label><input id="dhsExcludedIPDs" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
-                <div><label style="font-size:11px;color:#78350f;font-weight:700;display:block;margin-bottom:3px;">Converted to AB-PMJAY IPDs</label><input id="dhsConvertedIPDs" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:6px;background:#fff;"></div>
+            <!-- ─────────── TABLE 2 SECTION (auto + manual) ─────────── -->
+            <div style="border-left:4px solid #16a34a;padding:12px 14px;background:#f0fdf4;border-radius:0 8px 8px 0;margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:800;color:#16a34a;margin-bottom:10px;text-transform:uppercase;">🏥 Table 2 — AB PMJAY & PMJAY SEHAT (IPD / Claim Stats)</div>
+              <!-- Auto: No. of IPDs -->
+              <div style="margin-bottom:10px;">
+                <div style="font-size:10px;color:#15803d;font-weight:700;margin-bottom:4px;">AUTO-FETCHED</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;">
+                  <div style="background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #bbf7d0;"><div style="color:#475569;font-size:10px;">No. of IPDs (Patients Treated)</div><div id="dhsAutoPatients" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
+                </div>
+              </div>
+              <!-- Manual fields for Table 2 -->
+              <div>
+                <div style="font-size:10px;color:#a16207;font-weight:700;margin-bottom:4px;">✏️ MANUAL ENTRY</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pre-Auth Raised</label><input id="dhsPreAuth" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
+                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Claim Settled per TMS (₹)</label><input id="dhsTmsSettled" type="number" min="0" step="0.01" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
+                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Actual Claim Received (₹)</label><input id="dhsActualRecvd" type="number" min="0" step="0.01" placeholder="auto if blank" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
+                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pending at SHA Level</label><input id="dhsPendingSHA" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
+                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pending at NHA Level</label><input id="dhsPendingNHA" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
+                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Cases Rejected</label><input id="dhsRejected" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
+                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pending Liabilities (₹)</label><input id="dhsPendingLiab" type="number" min="0" step="0.01" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ─────────── TABLE 3 SECTION (auto + manual) ─────────── -->
+            <div style="border-left:4px solid #ea580c;padding:12px 14px;background:#fff7ed;border-radius:0 8px 8px 0;margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:800;color:#ea580c;margin-bottom:10px;text-transform:uppercase;">🔄 Table 3 — AB PMJAY IPD Conversion</div>
+              <!-- Auto: Total IPDs (C) + Cards -->
+              <div style="margin-bottom:10px;">
+                <div style="font-size:10px;color:#c2410c;font-weight:700;margin-bottom:4px;">AUTO-FETCHED</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;">
+                  <div style="background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #fed7aa;"><div style="color:#475569;font-size:10px;">Total Number of IPDs (C)</div><div id="dhsAutoTotalIPDs" style="font-weight:700;color:#7c2d12;font-size:13px;">—</div></div>
+                  <div style="background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #fed7aa;"><div style="color:#475569;font-size:10px;">Golden Cards Generated</div><div id="dhsAutoCards" style="font-weight:700;color:#7c2d12;font-size:13px;">—</div></div>
+                </div>
+              </div>
+              <!-- Manual fields for Table 3 -->
+              <div>
+                <div style="font-size:10px;color:#a16207;font-weight:700;margin-bottom:4px;">✏️ MANUAL ENTRY</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+                  <div><label style="font-size:11px;color:#c2410c;font-weight:700;display:block;margin-bottom:3px;">Short-Stay IPDs (D)</label><input id="dhsShortStay" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fed7aa;border-radius:6px;background:#fff;"></div>
+                  <div><label style="font-size:11px;color:#c2410c;font-weight:700;display:block;margin-bottom:3px;">IPDs Not Covered — C-section etc. (E)</label><input id="dhsExcludedIPDs" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fed7aa;border-radius:6px;background:#fff;"></div>
+                  <div><label style="font-size:11px;color:#c2410c;font-weight:700;display:block;margin-bottom:3px;">Converted to AB-PMJAY IPDs (G)</label><input id="dhsConvertedIPDs" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fed7aa;border-radius:6px;background:#fff;"></div>
+                </div>
               </div>
             </div>
 
@@ -2600,6 +2629,7 @@
       $('dhsAutoExpenditure').textContent = '₹ ' + fmt(d.expenditure);
       $('dhsAutoClosing').textContent = '₹ ' + fmt(d.closing);
       $('dhsAutoPatients').textContent = d.patients;
+      $('dhsAutoTotalIPDs').textContent = d.patients;
       $('dhsAutoCards').textContent = d.cards;
       // Manual fields - populate from saved stats record (or 0)
       $('dhsPreAuth').value = d.preAuth || '';
