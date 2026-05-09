@@ -660,6 +660,8 @@ function doLogin() {
     // Success — clear attempt counters
     localStorage.setItem(attemptKey, '0');
     localStorage.removeItem(lockKey);
+    // Save login PIN for in-app PIN re-verification on protected sections (e.g. Bulk Import / Bulk Delete)
+    localStorage.setItem('userPin', pin);
     sessionStorage.setItem('pmjay_user', JSON.stringify({ email:email, name:u.name||'', role:u.role||'', desig:u.role||'', ward:u.ward||'' }));
     var remChk = document.getElementById('rememberMe');
     if (remChk && remChk.checked) localStorage.setItem('pmjay_remember', email);

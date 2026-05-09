@@ -165,15 +165,7 @@
       <li><a class="nav" data-tab="ledger"><span class="icon">📒</span>Ledger</a></li>
       <li><a class="nav" data-tab="stats"><span class="icon">🏥</span>Stats</a></li>
       <li><a class="nav" data-tab="customreport"><span class="icon">🗂</span>Custom Report</a></li>
-      <li><a class="nav" data-tab="settings"><span class="icon">⚙</span>Settings</a>
-        <ul id="settingsSubNav" style="list-style:none;padding:0 0 0 12px;margin:4px 0 0;display:none;">
-          <li><a onclick="showTab('settings');setTimeout(function(){showSettingsPane('opening');},50);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">💰 Opening Balance</a></li>
-          <li><a onclick="showTab('settings');setTimeout(function(){showSettingsPane('claimlock');},50);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">🔐 Lock Claims</a></li>
-          <li><a onclick="showTab('settings');setTimeout(function(){showSettingsPane('explock');},50);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">🔒 Lock Expenditure</a></li>
-          <li><a onclick="showTab('settings');setTimeout(function(){showSettingsPane('import');},50);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">📤 Bulk Import</a></li>
-          <li><a onclick="showTab('settings');setTimeout(function(){showSettingsPane('delete');},50);" style="font-size:12px;color:#7c3aed;cursor:pointer;display:block;padding:4px 8px;">🗑 Bulk Delete</a></li>
-        </ul>
-      </li>
+      <li><a class="nav" data-tab="settings"><span class="icon">⚙</span>Settings</a></li>
     </ul>
   </aside>
 
@@ -221,6 +213,7 @@
     })();
     function finLogout() {
       sessionStorage.removeItem('pmjay_user');
+      localStorage.removeItem('userPin');
       window.location.href = 'index.html';
     }
   </script>
@@ -1205,8 +1198,7 @@
       if(tab==='reports') renderReports();
       if(tab==='ledger') renderLedger();
       if(tab==='stats') renderStats();
-      if(tab==='settings') { renderSettings(); var sn=$('settingsSubNav'); if(sn)sn.style.display='block'; }
-      else { var sn=$('settingsSubNav'); if(sn)sn.style.display='none'; }
+      if(tab==='settings') renderSettings();
       if(tab==='customreport') renderCustomReport();
     }
     document.querySelectorAll('.nav').forEach(el=> el.addEventListener('click', ()=> showTab(el.dataset.tab)));
@@ -3190,6 +3182,7 @@
       clearTimeout(_sessionTimer);
       _sessionTimer = setTimeout(function() {
         sessionStorage.removeItem('pmjay_user');
+        localStorage.removeItem('userPin');
         alert('Session expired due to inactivity. Please login again.');
         window.location.href = 'index.html';
       }, _SESSION_TIMEOUT);
