@@ -1279,6 +1279,8 @@
       }
       populateMonths('setFy','setMonth');
       populateMonths('statsFy','statsMonth');
+      // Trigger Stats auto-fill (Claim Received / Expenditure) since populateMonths doesn't fire 'change'
+      if(typeof refreshStatsAutoFields === 'function') refreshStatsAutoFields();
       
       const allMonths = [];
       fys.forEach(f => monthsForFy(f.name).forEach(m => allMonths.push(m)));
@@ -2127,6 +2129,7 @@
       $('rep-stats-report').style.display = 'none';
       var dhs=$('rep-stats-dhs'); if(dhs) dhs.style.display='none';
       renderStatsEntryTable();
+      if(typeof refreshStatsAutoFields === 'function') refreshStatsAutoFields();
     });
     $('btnStatsReport')?.addEventListener('click', () => {
       $('btnStatsReport').classList.add('active');
