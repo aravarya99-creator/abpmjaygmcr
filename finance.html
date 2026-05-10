@@ -752,20 +752,14 @@
               </div>
             </div>
 
-            <!-- ─────────── TABLE 2 SECTION (auto + manual) ─────────── -->
+            <!-- ─────────── TABLE 2 SECTION (all manual now) ─────────── -->
             <div style="border-left:4px solid #16a34a;padding:12px 14px;background:#f0fdf4;border-radius:0 8px 8px 0;margin-bottom:14px;">
               <div style="font-size:12px;font-weight:800;color:#16a34a;margin-bottom:10px;text-transform:uppercase;">🏥 Table 2 — AB PMJAY & PMJAY SEHAT (IPD / Claim Stats)</div>
-              <!-- Auto: No. of IPDs -->
-              <div style="margin-bottom:10px;">
-                <div style="font-size:10px;color:#15803d;font-weight:700;margin-bottom:4px;">AUTO-FETCHED</div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;">
-                  <div style="background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #bbf7d0;"><div style="color:#475569;font-size:10px;">No. of IPDs (Patients Treated)</div><div id="dhsAutoPatients" style="font-weight:700;color:#14532d;font-size:13px;">—</div></div>
-                </div>
-              </div>
               <!-- Manual fields for Table 2 -->
               <div>
                 <div style="font-size:10px;color:#a16207;font-weight:700;margin-bottom:4px;">✏️ MANUAL ENTRY</div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">No. of IPDs</label><input id="dhsIpdCount" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;" oninput="syncDhsTotalIPDs()"></div>
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pre-Auth Raised</label><input id="dhsPreAuth" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Claim Settled per TMS (₹)</label><input id="dhsTmsSettled" type="number" min="0" step="0.01" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Actual Claim Received (₹)</label><input id="dhsActualRecvd" type="number" min="0" step="0.01" placeholder="auto if blank" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
@@ -780,12 +774,11 @@
             <!-- ─────────── TABLE 3 SECTION (auto + manual) ─────────── -->
             <div style="border-left:4px solid #ea580c;padding:12px 14px;background:#fff7ed;border-radius:0 8px 8px 0;margin-bottom:14px;">
               <div style="font-size:12px;font-weight:800;color:#ea580c;margin-bottom:10px;text-transform:uppercase;">🔄 Table 3 — AB PMJAY IPD Conversion</div>
-              <!-- Auto: Total IPDs (C) + Cards -->
+              <!-- Auto: Total IPDs (C) - synced from Table 2 -->
               <div style="margin-bottom:10px;">
-                <div style="font-size:10px;color:#c2410c;font-weight:700;margin-bottom:4px;">AUTO-FETCHED</div>
+                <div style="font-size:10px;color:#c2410c;font-weight:700;margin-bottom:4px;">AUTO-FILLED FROM TABLE 2</div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;">
                   <div style="background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #fed7aa;"><div style="color:#475569;font-size:10px;">Total Number of IPDs (C)</div><div id="dhsAutoTotalIPDs" style="font-weight:700;color:#7c2d12;font-size:13px;">—</div></div>
-                  <div style="background:#fff;padding:8px 10px;border-radius:6px;border:1px solid #fed7aa;"><div style="color:#475569;font-size:10px;">Golden Cards Generated</div><div id="dhsAutoCards" style="font-weight:700;color:#7c2d12;font-size:13px;">—</div></div>
                 </div>
               </div>
               <!-- Manual fields for Table 3 -->
@@ -2605,6 +2598,7 @@
         closing: closing,
         patients: Number(stat.patients||0),
         cards: Number(stat.cards||0),
+        ipdCount: Number(stat.ipdCount||0),
         preAuth: Number(stat.preAuth||0),
         tmsSettled: Number(stat.tmsSettled||0),
         actualRecvd: Number(stat.actualRecvd||0),
@@ -2618,6 +2612,13 @@
       };
     }
 
+    // Sync Table 3's auto Total IPDs (C) from Table 2's manual IPD count
+    function syncDhsTotalIPDs(){
+      var ipd = Number(($('dhsIpdCount') && $('dhsIpdCount').value) || 0);
+      var totEl = $('dhsAutoTotalIPDs');
+      if(totEl) totEl.textContent = ipd;
+    }
+
     // Load auto-data + manual fields into the integrated form
     function loadDhsForm(){
       var fy = $('dhsFy').value, monthKey = $('dhsMonth').value;
@@ -2628,10 +2629,8 @@
       $('dhsAutoFundsReceived').textContent = '₹ ' + fmt(d.fundsReceived);
       $('dhsAutoExpenditure').textContent = '₹ ' + fmt(d.expenditure);
       $('dhsAutoClosing').textContent = '₹ ' + fmt(d.closing);
-      $('dhsAutoPatients').textContent = d.patients;
-      $('dhsAutoTotalIPDs').textContent = d.patients;
-      $('dhsAutoCards').textContent = d.cards;
       // Manual fields - populate from saved stats record (or 0)
+      $('dhsIpdCount').value = d.ipdCount || '';
       $('dhsPreAuth').value = d.preAuth || '';
       $('dhsTmsSettled').value = d.tmsSettled || '';
       $('dhsActualRecvd').value = d.actualRecvd || '';
@@ -2642,6 +2641,8 @@
       $('dhsShortStay').value = d.shortStay || '';
       $('dhsExcludedIPDs').value = d.excludedIPDs || '';
       $('dhsConvertedIPDs').value = d.convertedIPDs || '';
+      // Sync Table 3's Total IPDs (C) from Table 2's manual IPD entry
+      syncDhsTotalIPDs();
       $('dhsFormCard').style.display = '';
       // Clear preview until user clicks generate
       $('dhsPreviewWrap').innerHTML = '';
@@ -2654,6 +2655,7 @@
       var stats = load(LS.STATS, []);
       var idx = stats.findIndex(function(s){return s.fy===fy && s.monthKey===monthKey;});
       var manualData = {
+        ipdCount: Number($('dhsIpdCount').value||0),
         preAuth: Number($('dhsPreAuth').value||0),
         tmsSettled: Number($('dhsTmsSettled').value||0),
         actualRecvd: Number($('dhsActualRecvd').value||0),
@@ -2728,7 +2730,7 @@
         +     '</tr></thead><tbody>'
         +       '<tr>'
         +         '<td>1</td><td>' + DHS_DISTRICT + '</td><td>' + DHS_HOSPITAL + '</td>'
-        +         '<td style="text-align:right;">' + d.patients + '</td>'
+        +         '<td style="text-align:right;">' + (d.ipdCount || 0) + '</td>'
         +         '<td style="text-align:right;">' + d.preAuth + '</td>'
         +         '<td style="text-align:right;">' + fmt(d.tmsSettled) + '</td>'
         +         '<td style="text-align:right;">' + fmt(d.actualRecvd || d.fundsReceived) + '</td>'
@@ -2741,7 +2743,7 @@
         + '</div>';
 
       // Table 3 — IPD Conversion
-      var totalIPD = d.patients;
+      var totalIPD = d.ipdCount || 0;     // C — sourced from Table 2's manual entry
       var shortStay = d.shortStay;
       var excluded = d.excludedIPDs;
       var eligible = Math.max(0, totalIPD - shortStay - excluded);
