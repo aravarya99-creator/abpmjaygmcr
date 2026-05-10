@@ -921,6 +921,7 @@
           <div class="settings-tab active" data-pane="opening" onclick="showSettingsPane('opening')">💰 Opening Balance</div>
           <div class="settings-tab" data-pane="claimlock" onclick="showSettingsPane('claimlock')">🔐 Lock/Unlock Claims</div>
           <div class="settings-tab" data-pane="explock" onclick="showSettingsPane('explock')">🔒 Lock/Unlock Expenditure</div>
+          <div class="settings-tab" data-pane="statslock" onclick="showSettingsPane('statslock')">📊 Lock/Unlock Stats</div>
           <div class="settings-tab" data-pane="import" onclick="showSettingsPane('import')">📤 Bulk Import</div>
           <div class="settings-tab" data-pane="delete" onclick="showSettingsPane('delete')">🗑 Bulk Delete</div>
         </div>
@@ -966,6 +967,21 @@
             <div id="lockExpStatus" style="font-size:13px;font-weight:700;color:#0369a1;align-self:center;"></div>
           </div>
           <div id="lockedExpFyList" style="font-size:13px;font-weight:700;color:#dc2626;"></div>
+        </div>
+
+        <!-- PANE 3.5: LOCK / UNLOCK STATS ENTRIES BY FY -->
+        <div id="setPane_statslock" class="settings-pane">
+          <div class="section-title" style="background:#7c3aed;">📊 LOCK / UNLOCK STATS ENTRIES BY FY</div>
+          <div class="small" style="margin-bottom:12px;color:#7c3aed;font-weight:600;">Locking a FY prevents editing/deleting any monthly stats entry (Patients Treated, Golden Cards, etc.) for that year.</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#7c3aed;display:block;margin-bottom:4px;">Select Financial Year</label>
+              <select id="lockStatsFy" style="padding:8px 12px;border:2px solid #ddd6fe;border-radius:8px;font-weight:600;min-width:120px;"></select>
+            </div>
+            <button class="btn" onclick="toggleStatsLock()" style="background:#7c3aed;height:40px;">🔒 Toggle Lock</button>
+            <div id="lockStatsStatus" style="font-size:13px;font-weight:700;color:#7c3aed;align-self:center;"></div>
+          </div>
+          <div id="lockedStatsFyList" style="font-size:13px;font-weight:700;color:#dc2626;"></div>
         </div>
 
         <!-- PANE 4: BULK EXCEL IMPORT -->
@@ -1110,7 +1126,7 @@
     // Documents: fin_income, fin_expense, fin_stats, fin_meta, fin_locked, fin_fys
     // In-memory cache for fast UI — synced from Firestore on load
     // ─────────────────────────────────────────────────────────────────
-    var _cache = { income:[], expense:[], stats:[], meta:{}, locked:[], fys:[], claimLockedFys:[], expLockedFys:[] };
+    var _cache = { income:[], expense:[], stats:[], meta:{}, locked:[], fys:[], claimLockedFys:[], expLockedFys:[], statsLockedFys:[] };
     var _loaded = false;
 
     // Show/hide global loading indicator
@@ -1139,6 +1155,7 @@
             if(doc.id === 'fin_fys')     _cache.fys     = val || [];
             if(doc.id === 'fin_claim_locked_fys') _cache.claimLockedFys = val || [];
             if(doc.id === 'fin_exp_locked_fys')   _cache.expLockedFys   = val || [];
+            if(doc.id === 'fin_stats_locked_fys') _cache.statsLockedFys = val || [];
           } catch(e) {}
         });
         // Default FYs if none stored
@@ -1177,6 +1194,7 @@
       if(k === LS.FYS     || k === 'fp_fys')     return _cache.fys.length ? _cache.fys : (fallback||[]);
       if(k === 'fp_claim_locked_fys') return _cache.claimLockedFys || [];
       if(k === 'fp_exp_locked_fys')   return _cache.expLockedFys   || [];
+      if(k === 'fp_stats_locked_fys') return _cache.statsLockedFys || [];
       return fallback;
     }
 
@@ -1189,6 +1207,7 @@
       if(k === LS.FYS     || k === 'fp_fys')     { _cache.fys     = v; fsSave('fin_fys',     v); }
       if(k === 'fp_claim_locked_fys') { _cache.claimLockedFys = v; fsSave('fin_claim_locked_fys', v); }
       if(k === 'fp_exp_locked_fys')   { _cache.expLockedFys   = v; fsSave('fin_exp_locked_fys',   v); }
+      if(k === 'fp_stats_locked_fys') { _cache.statsLockedFys = v; fsSave('fin_stats_locked_fys', v); }
     }
 
     function isLocked(monthKey) {
@@ -2168,7 +2187,7 @@
       e.preventDefault();
       const fy = $('statsFy').value;
       const monthKey = $('statsMonth').value;
-      if(isClaimFyLocked(fy) || isExpFyLocked(fy)) { alert('Cannot modify: FY ' + fy + ' is locked.'); return; }
+      if(isStatsFyLocked(fy)) { alert('Cannot modify: FY ' + fy + ' is locked for Stats.'); return; }
       if (isLocked(monthKey)) { alert('Cannot modify: ' + monthKey + ' is locked.'); return; }
       const patients = Number($('statsPatients').value||0);
       const cards = Number($('statsCards').value||0);
@@ -2199,8 +2218,8 @@
       const stats = load(LS.STATS, []);
       const item = stats.find(x => x.createdAt === id);
       if(!item) return;
-      // Apply FY-wise locks (same model as claims/expenditure) plus legacy month lock
-      if(isClaimFyLocked(item.fy) || isExpFyLocked(item.fy)) { alert('Cannot delete: FY ' + item.fy + ' is locked.'); return; }
+      // Use dedicated Stats FY lock
+      if(isStatsFyLocked(item.fy)) { alert('Cannot delete: FY ' + item.fy + ' is locked for Stats.'); return; }
       if(item.monthKey !== 'YEARLY' && isLocked(item.monthKey)) { alert('Cannot delete: ' + item.monthKey + ' is locked.'); return; }
       if(!confirm('Delete this entry?')) return;
       save(LS.STATS, stats.filter(x => x.createdAt !== id));
@@ -2216,7 +2235,7 @@
       stats.forEach(s=>{
         const isYearly = s.monthKey.includes('YEARLY');
         const mLabel = isYearly ? 'Aggregate/Yearly' : s.monthKey;
-        const fyLocked = isClaimFyLocked(s.fy) || isExpFyLocked(s.fy) || (!isYearly && isLocked(s.monthKey));
+        const fyLocked = isStatsFyLocked(s.fy) || (!isYearly && isLocked(s.monthKey));
         const actionsCell = fyLocked
           ? '<span style="font-size:13px;color:#dc2626;font-weight:700;" title="Locked">🔒</span>'
           : `<button class="btn" style="padding:4px 8px;font-size:11px;background:#ef4444;" onclick="delStat('${s.createdAt}')">Del</button>`;
@@ -2380,6 +2399,7 @@
       initBulkDelete();
       initClaimLockSection();
       initExpLockSection();
+      initStatsLockSection();
       const fys = load(LS.FYS, []);
       const selFy = $('setFy'); selFy.innerHTML = ''; fys.forEach(f=> selFy.insertAdjacentHTML('beforeend', `<option value="${f.name}">${f.name}</option>`));
       if(fys.length) selFy.value = fys[fys.length-1].name;
@@ -2390,6 +2410,7 @@
     $('setFy')?.addEventListener('change', () => populateMonths('setFy','setMonth'));
     $('lockClaimFy')?.addEventListener('change', updateClaimLockStatus);
     $('lockExpFy')?.addEventListener('change', updateExpLockStatus);
+    $('lockStatsFy')?.addEventListener('change', updateStatsLockStatus);
     $('saveOpening').addEventListener('click', ()=>{
       const fy = $('setFy').value; const monthKey = $('setMonth').value; const amt = Number($('setOpening').value||0);
       const meta = load(LS.META, {}); meta.initialOpening = {fy, monthKey, amount: amt}; save(LS.META, meta);
@@ -3548,6 +3569,54 @@
       if(typeof renderExpenditure === 'function') renderExpenditure();
     }
 
+    // ── STATS FY LOCK ────────────────────────────────────────────────
+    var LS_STATS_LOCK = 'fp_stats_locked_fys';
+    function loadStatsLocks() { return load(LS_STATS_LOCK, []); }
+    function saveStatsLocks(arr) { save(LS_STATS_LOCK, arr); }
+    function isStatsFyLocked(fy) { return loadStatsLocks().includes(fy); }
+
+    function initStatsLockSection() {
+      var sel = $('lockStatsFy'); if(!sel) return;
+      var fys = load(LS.FYS,[]);
+      sel.innerHTML = '<option value="">— Select FY —</option>';
+      fys.forEach(function(f){ sel.insertAdjacentHTML('beforeend','<option value="'+f.name+'">'+f.name+'</option>'); });
+      updateStatsLockStatus();
+    }
+
+    function updateStatsLockStatus() {
+      var locked = loadStatsLocks();
+      var listEl = $('lockedStatsFyList');
+      var statusEl = $('lockStatsStatus');
+      if(listEl) {
+        listEl.innerHTML = locked.length ? '🔒 Currently locked FYs: <b>'+locked.join(', ')+'</b>' : '✅ No FYs currently locked';
+      }
+      var sel = $('lockStatsFy');
+      if(sel && sel.value && statusEl) {
+        statusEl.textContent = locked.includes(sel.value) ? '🔒 ' + sel.value + ' is LOCKED' : '🔓 ' + sel.value + ' is UNLOCKED';
+        statusEl.style.color = locked.includes(sel.value) ? '#dc2626' : '#16a34a';
+      } else if(statusEl) {
+        statusEl.textContent = '';
+      }
+    }
+
+    function toggleStatsLock() {
+      var fy = $('lockStatsFy') ? $('lockStatsFy').value : '';
+      if(!fy) { alert('Please select a Financial Year.'); return; }
+      var locked = loadStatsLocks();
+      if(locked.includes(fy)) {
+        if(!confirm('UNLOCK stats entries for FY ' + fy + '?')) return;
+        saveStatsLocks(locked.filter(function(x){return x!==fy;}));
+        alert('✅ Stats entries for FY '+fy+' are now UNLOCKED.');
+      } else {
+        if(!confirm('LOCK all stats entries for FY ' + fy + '?\nThis will prevent editing or deleting any stats entry for this FY.')) return;
+        locked.push(fy);
+        saveStatsLocks(locked);
+        alert('🔒 Stats entries for FY '+fy+' are now LOCKED.');
+      }
+      updateStatsLockStatus();
+      if(typeof renderStatsEntryTable === 'function') renderStatsEntryTable();
+    }
+
     // ── SETTINGS TAB SWITCHER ────────────────────────────────────────
     function showSettingsPane(name) {
       // Gate Bulk Import and Bulk Delete behind PIN
@@ -3564,6 +3633,7 @@
       // Lazy-init sub-sections so dropdowns are populated when first shown
       if(name === 'claimlock') initClaimLockSection();
       if(name === 'explock') initExpLockSection();
+      if(name === 'statslock') initStatsLockSection();
     }
 
     // ── PIN PROTECTION FOR SENSITIVE TABS ────────────────────────────
