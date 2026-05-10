@@ -615,6 +615,7 @@
             <select id="repMonth" style="min-width:130px;"><option value="">All Month</option></select>
             <button class="btn" onclick="printMonthly()" style="background:#4b5563;">🖨 Print/PDF</button>
             <button class="btn" onclick="exportLedgerTable('repMonthlyTable','excel')" style="background:#16a34a;">📊 Excel</button>
+            <button class="btn" onclick="exportLedgerTable('repMonthlyTable','word')" style="background:#2563eb;">📝 Word</button>
           </div>
           <table id="repMonthlyTable">
             <thead><tr><th>Month</th><th>Opening Balance</th><th>Claim Received</th><th>Interest Received</th><th>Total Received</th><th>Expenditure</th><th>Closing Balance</th></tr></thead>
@@ -623,6 +624,11 @@
         </div>
 
         <div id="rep-annual" style="display:none">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+            <button class="btn" onclick="printAnnual()" style="background:#4b5563;">🖨 Print/PDF</button>
+            <button class="btn" onclick="exportLedgerTable('repAnnualTable','excel')" style="background:#16a34a;">📊 Excel</button>
+            <button class="btn" onclick="exportLedgerTable('repAnnualTable','word')" style="background:#2563eb;">📝 Word</button>
+          </div>
           <table id="repAnnualTable">
             <thead><tr><th>Financial Year</th><th>Opening Balance</th><th>Claim Received</th><th>Interest Received</th><th>Total Received</th><th>Expenditure</th><th>Closing Balance</th></tr></thead>
             <tbody></tbody>
@@ -630,6 +636,11 @@
         </div>
 
         <div id="rep-cumulative" style="display:none">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+            <button class="btn" onclick="printCumulative()" style="background:#4b5563;">🖨 Print/PDF</button>
+            <button class="btn" onclick="exportLedgerTable('repCumTable','excel')" style="background:#16a34a;">📊 Excel</button>
+            <button class="btn" onclick="exportLedgerTable('repCumTable','word')" style="background:#2563eb;">📝 Word</button>
+          </div>
           <table id="repCumTable">
             <thead><tr><th>Metric</th><th>Amount (₹)</th></tr></thead>
             <tbody></tbody>
@@ -644,6 +655,9 @@
             <input id="detSub" placeholder="Sub Category">
             <input id="detFirm" placeholder="Firm/Agency">
             <button class="btn" id="detApply">Apply</button>
+            <button class="btn" onclick="printDetailed()" style="background:#4b5563;">🖨 Print/PDF</button>
+            <button class="btn" onclick="exportLedgerTable('repDetailedTable','excel')" style="background:#16a34a;">📊 Excel</button>
+            <button class="btn" onclick="exportLedgerTable('repDetailedTable','word')" style="background:#2563eb;">📝 Word</button>
           </div>
           <table id="repDetailedTable">
             <thead><tr><th>Date</th><th>FY</th><th>Month</th><th>Category</th><th>Sub Category</th><th>Description</th><th>Firm</th><th>Amount</th></tr></thead>
@@ -652,6 +666,11 @@
         </div>
 
         <div id="rep-fysummary" style="display:none; overflow-x:auto;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+            <button class="btn" onclick="printFySummary()" style="background:#4b5563;">🖨 Print/PDF</button>
+            <button class="btn" onclick="exportLedgerTable('repFySummaryTable','excel')" style="background:#16a34a;">📊 Excel</button>
+            <button class="btn" onclick="exportLedgerTable('repFySummaryTable','word')" style="background:#2563eb;">📝 Word</button>
+          </div>
           <table id="repFySummaryTable">
             <thead>
               <tr><th colspan="10" style="text-align:center;background:#fbbf24;color:#000;">Head-wise Expenditure of Funds</th></tr>
@@ -2111,7 +2130,34 @@
     
     function exportStatsReport(format) {
       const table = $('statsReportTable'); if(!table) return;
-      if(format === 'print') { window.print(); return; }
+      if(format === 'print') {
+        // Build a light-blue styled print body (uniform with DHS report)
+        var fy = $('statsRepFy') ? $('statsRepFy').value : '';
+        var mo = $('statsRepMonth') ? $('statsRepMonth').value : '';
+        var styles = '<style>'
+          + '.stats-print-table{width:100%;border-collapse:collapse;font-size:11px;page-break-inside:avoid;break-inside:avoid;}'
+          + '.stats-print-table th,.stats-print-table td{border:1px solid #94a3b8;padding:5px 7px;}'
+          + '.stats-print-table thead th{background:#e8f4fd;color:#0c4a6e;font-weight:700;text-align:center;}'
+          + '.stats-print-table tbody tr{background:#f9fbff;}'
+          + '.stats-print-sig{margin-top:20px;text-align:right;page-break-inside:avoid;}'
+          + '@media print{ @page{ size:A4 landscape; margin:10mm; } }'
+          + '</style>';
+        // Clone the report table content, inject our class
+        var cloneHTML = '<table class="stats-print-table">' + table.innerHTML + '</table>';
+        var sig = '<div class="stats-print-sig">'
+          + '<div style="height:50px;"></div>'
+          + '<div style="font-weight:700;font-size:12px;">Medical Superintendent</div>'
+          + '<div style="font-size:11px;">GMC & AH Rajouri</div>'
+          + '</div>';
+        printReport({
+          title:'HOSPITAL STATISTICS REPORT — GMC & AH RAJOURI',
+          periodInfo:_periodStr ? _periodStr(fy,mo) : ((fy?'FY: '+fy:'All FY')+(mo?' | Month: '+monthKeyToLabel(mo):'')),
+          generatedInfo:'Generated: ' + new Date().toLocaleString('en-IN'),
+          bodyHTML: styles + cloneHTML + sig,
+          pageOrientation:'landscape'
+        });
+        return;
+      }
       const uri = format === 'excel' ? 'data:application/vnd.ms-excel;base64,' : 'data:application/vnd.ms-word;base64,';
       const ext = format === 'excel' ? 'xls' : 'doc';
       const h = `<html><head><meta charset="UTF-8"></head><body><table border="1">${table.innerHTML}</table></body></html>`;
@@ -2122,6 +2168,7 @@
       e.preventDefault();
       const fy = $('statsFy').value;
       const monthKey = $('statsMonth').value;
+      if(isClaimFyLocked(fy) || isExpFyLocked(fy)) { alert('Cannot modify: FY ' + fy + ' is locked.'); return; }
       if (isLocked(monthKey)) { alert('Cannot modify: ' + monthKey + ' is locked.'); return; }
       const patients = Number($('statsPatients').value||0);
       const cards = Number($('statsCards').value||0);
@@ -2151,7 +2198,10 @@
     function delStat(id) {
       const stats = load(LS.STATS, []);
       const item = stats.find(x => x.createdAt === id);
-      if(item && item.monthKey !== 'YEARLY' && isLocked(item.monthKey)) { alert('Cannot delete: ' + item.monthKey + ' is locked.'); return; }
+      if(!item) return;
+      // Apply FY-wise locks (same model as claims/expenditure) plus legacy month lock
+      if(isClaimFyLocked(item.fy) || isExpFyLocked(item.fy)) { alert('Cannot delete: FY ' + item.fy + ' is locked.'); return; }
+      if(item.monthKey !== 'YEARLY' && isLocked(item.monthKey)) { alert('Cannot delete: ' + item.monthKey + ' is locked.'); return; }
       if(!confirm('Delete this entry?')) return;
       save(LS.STATS, stats.filter(x => x.createdAt !== id));
       renderStatsEntryTable();
@@ -2161,14 +2211,17 @@
       const tbody = document.querySelector('#statsEntryTable tbody'); if(!tbody) return;
       tbody.innerHTML = '';
       const stats = load(LS.STATS, []);
-      if(stats.length===0){ tbody.innerHTML = '<tr><td colspan="5" class="small">No entries yet</td></tr>'; return; }
+      if(stats.length===0){ tbody.innerHTML = '<tr><td colspan="7" class="small">No entries yet</td></tr>'; return; }
       stats.sort((a,b)=> b.monthKey.localeCompare(a.monthKey));
       stats.forEach(s=>{
         const isYearly = s.monthKey.includes('YEARLY');
         const mLabel = isYearly ? 'Aggregate/Yearly' : s.monthKey;
+        const fyLocked = isClaimFyLocked(s.fy) || isExpFyLocked(s.fy) || (!isYearly && isLocked(s.monthKey));
+        const actionsCell = fyLocked
+          ? '<span style="font-size:13px;color:#dc2626;font-weight:700;" title="Locked">🔒</span>'
+          : `<button class="btn" style="padding:4px 8px;font-size:11px;background:#ef4444;" onclick="delStat('${s.createdAt}')">Del</button>`;
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${s.fy}</td><td>${mLabel}</td><td>${s.patients}</td><td>${s.cards}</td><td>${fmt(s.claim||0)}</td><td>${fmt(s.expenditure||0)}</td>
-          <td><button class="btn" style="padding:4px 8px;font-size:11px;background:#ef4444;" onclick="delStat('${s.createdAt}')">Del</button></td>`;
+        tr.innerHTML = `<td>${s.fy}</td><td>${mLabel}</td><td>${s.patients}</td><td>${s.cards}</td><td>${fmt(s.claim||0)}</td><td>${fmt(s.expenditure||0)}</td><td>${actionsCell}</td>`;
         tbody.appendChild(tr);
       });
     }
@@ -2691,17 +2744,26 @@
     function buildDhsHTML(monthLabel, data){
       var d = data;
 
-      // Color palette per table
-      var T1_COLOR = '#0369a1'; // blue
-      var T2_COLOR = '#16a34a'; // green
-      var T3_COLOR = '#ea580c'; // orange
+      // Uniform light-blue palette for printed/exported output (per user spec)
+      var HDR_BG = '#e8f4fd';   // header row background (very light blue)
+      var ROW_BG = '#f9fbff';   // data row background
+      var HDR_FG = '#0c4a6e';   // header text color
+      var BORDER = '#94a3b8';   // table border
+      // Accent stripes (above each table heading) — keep table identity
+      var T1_ACCENT = '#0369a1';
+      var T2_ACCENT = '#16a34a';
+      var T3_ACCENT = '#ea580c';
 
-      // Table 1 — Claim Fund Received & Expenditure (District version ONLY)
+      function makeHeading(text, accent){
+        return '<div class="dhs-table-title" style="border-left:5px solid '+accent+';">'+text+'</div>';
+      }
+
+      // Table 1 — Claim Fund Received & Expenditure
       var t1 = ''
-        + '<div class="dhs-card" style="border-color:'+T1_COLOR+';">'
-        +   '<div class="dhs-table-title" style="background:'+T1_COLOR+';">Claim Fund Received & Expenditure on account of AB-PMJAY/SEHAT Scheme for the month of ' + monthLabel + '</div>'
+        + '<div class="dhs-card">'
+        +   makeHeading('1. Claim Fund Received & Expenditure on account of AB-PMJAY/SEHAT Scheme for the month of ' + monthLabel, T1_ACCENT)
         +   '<table class="dhs-table">'
-        +     '<thead><tr style="background:'+T1_COLOR+';">'
+        +     '<thead><tr>'
         +       '<th>S. No.</th><th>District</th><th>Hospital</th>'
         +       '<th>Opening Balance (₹)</th><th>Funds Received (₹)</th><th>Expenditure (₹)</th><th>Balance (₹)</th>'
         +     '</tr></thead><tbody>'
@@ -2717,12 +2779,12 @@
 
       // Table 2 — IPD / Claim Stats
       var t2 = ''
-        + '<div class="dhs-card" style="border-color:'+T2_COLOR+';">'
-        +   '<div class="dhs-table-title" style="background:'+T2_COLOR+';">AB PMJAY & PMJAY SEHAT for the Month of ' + monthLabel + '</div>'
+        + '<div class="dhs-card">'
+        +   makeHeading('2. AB PMJAY & PMJAY SEHAT for the Month of ' + monthLabel, T2_ACCENT)
         +   '<table class="dhs-table">'
-        +     '<thead><tr style="background:'+T2_COLOR+';">'
+        +     '<thead><tr>'
         +       '<th>S.No.</th><th>District</th><th>Empanelled Hospital</th>'
-        +       '<th>No. of IPDs</th><th>No. of Pre-Auth Raised</th>'
+        +       '<th>No. of IPDs</th><th>No. of Pre-Authorization Raised</th>'
         +       '<th>Claim Amount Settled as per TMS (₹)</th>'
         +       '<th>Actual Claim Amount Received (₹)</th>'
         +       '<th>Pending at SHA Level</th><th>Pending at NHA Level</th>'
@@ -2743,7 +2805,7 @@
         + '</div>';
 
       // Table 3 — IPD Conversion
-      var totalIPD = d.ipdCount || 0;     // C — sourced from Table 2's manual entry
+      var totalIPD = d.ipdCount || 0;
       var shortStay = d.shortStay;
       var excluded = d.excludedIPDs;
       var eligible = Math.max(0, totalIPD - shortStay - excluded);
@@ -2752,13 +2814,13 @@
       var pctStr = (eligible > 0 ? pct.toFixed(2) + '%' : 'N/A');
 
       var t3 = ''
-        + '<div class="dhs-card" style="border-color:'+T3_COLOR+';">'
-        +   '<div class="dhs-table-title" style="background:'+T3_COLOR+';">AB PMJAY IPD Conversion ' + monthLabel + '</div>'
+        + '<div class="dhs-card">'
+        +   makeHeading('3. AB PMJAY IPD Conversion ' + monthLabel, T3_ACCENT)
         +   '<table class="dhs-table">'
-        +     '<thead><tr style="background:'+T3_COLOR+';">'
+        +     '<thead><tr>'
         +       '<th>S.No.</th><th>District</th><th>Empanelled Hospitals</th>'
         +       '<th>Total Number of IPDs (C)</th>'
-        +       '<th>Short-Stay IPDs (D)</th>'
+        +       '<th>No. of Short-Stay IPDs (D)</th>'
         +       '<th>IPDs Not Covered under AB PM-JAY/SEHAT — C-section/Normal Deliveries/External Congenital Anomalies etc. (E)</th>'
         +       '<th>Total Eligible IPDs for Conversion (F = C-D-E)</th>'
         +       '<th>Total IPDs Converted to AB PM-JAY/SEHAT (G)</th>'
@@ -2776,15 +2838,27 @@
         +     '</tbody></table>'
         + '</div>';
 
+      // Signature block (Medical Superintendent / GMC Rajouri) — kept on same page via avoid-break-inside
+      var sig = ''
+        + '<div class="dhs-sig">'
+        +   '<div style="text-align:right;">'
+        +     '<div style="height:50px;"></div>'
+        +     '<div style="font-weight:700;font-size:12px;">Medical Superintendent</div>'
+        +     '<div style="font-size:11px;">GMC & AH Rajouri</div>'
+        +   '</div>'
+        + '</div>';
+
       var styles = '<style>'
-        + '.dhs-card{margin-bottom:18px;border:2px solid #cbd5e1;border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,0.06);}'
-        + '.dhs-table-title{font-size:13px;font-weight:800;color:#fff;padding:10px 14px;letter-spacing:0.3px;}'
-        + '.dhs-table{width:100%;border-collapse:collapse;font-size:11.5px;}'
-        + '.dhs-table th,.dhs-table td{border:1px solid #cbd5e1;padding:7px 9px;}'
-        + '.dhs-table thead th{color:#fff;font-weight:700;text-align:center;}'
-        + '.dhs-table tbody tr:nth-child(even){background:#f8fafc;}'
+        + '.dhs-card{margin-bottom:10px;background:#fff;page-break-inside:avoid;break-inside:avoid;}'
+        + '.dhs-table-title{font-size:12px;font-weight:700;color:'+HDR_FG+';padding:6px 10px;background:'+HDR_BG+';margin-bottom:0;}'
+        + '.dhs-table{width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:0;page-break-inside:avoid;break-inside:avoid;}'
+        + '.dhs-table th,.dhs-table td{border:1px solid '+BORDER+';padding:4px 6px;}'
+        + '.dhs-table thead th{background:'+HDR_BG+';color:'+HDR_FG+';font-weight:700;text-align:center;}'
+        + '.dhs-table tbody tr{background:'+ROW_BG+';}'
+        + '.dhs-sig{margin-top:14px;page-break-inside:avoid;break-inside:avoid;}'
+        + '@media print{ @page { size:A4 landscape; margin:10mm; } body{font-size:10pt;} .dhs-card{page-break-inside:avoid;} }'
         + '</style>';
-      return styles + t1 + t2 + t3;
+      return styles + t1 + t2 + t3 + sig;
     }
 
     function renderDhsPreview(){
@@ -2832,6 +2906,10 @@
         var uri='data:application/vnd.ms-excel;base64,';
         var h='<html><head><meta charset="UTF-8"></head><body><table border="1">'+table.innerHTML+'</table></body></html>';
         var a=document.createElement('a');a.href=uri+btoa(unescape(encodeURIComponent(h)));a.download=tableId+'.xls';a.click();
+      } else if(format==='word'){
+        var uri='data:application/vnd.ms-word;base64,';
+        var h='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="UTF-8"></head><body><table border="1">'+table.innerHTML+'</table></body></html>';
+        var a=document.createElement('a');a.href=uri+btoa(unescape(encodeURIComponent(h)));a.download=tableId+'.doc';a.click();
       }
     }
 
