@@ -2171,8 +2171,8 @@
       var expense = load(LS.EXPENSE, []).filter(function(e){return e.monthKey === monthKey;});
       var totClaim = income.reduce(function(s,i){ return s + Number(i.claim||0) + Number(i.interest||0); }, 0);
       var totExp   = expense.reduce(function(s,e){ return s + Number(e.amount||0); }, 0);
-      if(claimDisp) claimDisp.textContent = '₹ ' + fmt(totClaim);
-      if(expDisp)   expDisp.textContent   = '₹ ' + fmt(totExp);
+      if(claimDisp) claimDisp.textContent = fmt(totClaim);
+      if(expDisp)   expDisp.textContent   = fmt(totExp);
       if(claimHid)  claimHid.value = String(totClaim);
       if(expHid)    expHid.value   = String(totExp);
     }
@@ -2269,6 +2269,8 @@
       tbody.innerHTML = '';
       const stats = load(LS.STATS, []);
       if(stats.length===0){ tbody.innerHTML = '<tr><td colspan="7" class="small">No entries yet</td></tr>'; return; }
+      const incomes = load(LS.INCOME, []);
+      const expenses = load(LS.EXPENSE, []);
       stats.sort((a,b)=> b.monthKey.localeCompare(a.monthKey));
       stats.forEach(s=>{
         const isYearly = s.monthKey.includes('YEARLY');
@@ -2277,8 +2279,13 @@
         const actionsCell = fyLocked
           ? '<span style="font-size:13px;color:#dc2626;font-weight:700;" title="Locked">🔒</span>'
           : `<button class="btn" style="padding:4px 8px;font-size:11px;background:#ef4444;" onclick="delStat('${s.createdAt}')">Del</button>`;
+        // Live values from claims/expenditure modules (override stale saved zeros)
+        const claimVal = isYearly ? Number(s.claim||0)
+          : incomes.filter(i => i.fy===s.fy && i.monthKey===s.monthKey).reduce((sum,i)=> sum + Number(i.claim||0) + Number(i.interest||0), 0);
+        const expVal = isYearly ? Number(s.expenditure||0)
+          : expenses.filter(e => e.fy===s.fy && e.monthKey===s.monthKey).reduce((sum,e)=> sum + Number(e.amount||0), 0);
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${s.fy}</td><td>${mLabel}</td><td>${s.patients}</td><td>${s.cards}</td><td>${fmt(s.claim||0)}</td><td>${fmt(s.expenditure||0)}</td><td>${actionsCell}</td>`;
+        tr.innerHTML = `<td>${s.fy}</td><td>${mLabel}</td><td>${s.patients}</td><td>${s.cards}</td><td>${fmt(claimVal)}</td><td>${fmt(expVal)}</td><td>${actionsCell}</td>`;
         tbody.appendChild(tr);
       });
     }
@@ -2288,22 +2295,36 @@
       const tbody = document.querySelector('#statsReportTable tbody'); if(!tbody) return;
       tbody.innerHTML = '';
       const stats = load(LS.STATS, []);
+      const incomes = load(LS.INCOME, []);
+      const expenses = load(LS.EXPENSE, []);
       const selFy = $('statsRepFy') ? $('statsRepFy').value : '';
       const selMonth = $('statsRepMonth') ? $('statsRepMonth').value : '';
-      
+
       let filtered = stats;
       if(selFy) filtered = filtered.filter(x => x.fy === selFy);
       if(selMonth) filtered = filtered.filter(x => x.monthKey === selMonth);
-      
+
       filtered.sort((a,b) => (a.fy+a.monthKey).localeCompare(b.fy+b.monthKey));
-      
+
+      // Helper: live claim+interest and expenditure totals for a given fy+monthKey
+      function liveClaim(fy, mk){
+        return incomes.filter(i => i.fy===fy && i.monthKey===mk)
+                      .reduce((s,i)=> s + Number(i.claim||0) + Number(i.interest||0), 0);
+      }
+      function liveExp(fy, mk){
+        return expenses.filter(e => e.fy===fy && e.monthKey===mk)
+                       .reduce((s,e)=> s + Number(e.amount||0), 0);
+      }
+
       let sno = 1, totPat = 0, totCards = 0, totClaim = 0, totExp = 0;
       filtered.forEach(s => {
         const isYearly = s.monthKey && s.monthKey.includes('YEARLY');
         const mLabel = isYearly ? 'Aggregate/Yearly' : monthKeyToLabel(s.monthKey);
+        const claimVal = isYearly ? Number(s.claim||0) : liveClaim(s.fy, s.monthKey);
+        const expVal   = isYearly ? Number(s.expenditure||0) : liveExp(s.fy, s.monthKey);
         totPat += Number(s.patients||0); totCards += Number(s.cards||0);
-        totClaim += Number(s.claim||0); totExp += Number(s.expenditure||0);
-        tbody.insertAdjacentHTML('beforeend', `<tr><td>${sno++}</td><td>${s.fy}</td><td>${mLabel}</td><td>${s.patients||0}</td><td>${s.cards||0}</td><td>${fmt(s.claim||0)}</td><td>${fmt(s.expenditure||0)}</td></tr>`);
+        totClaim += claimVal; totExp += expVal;
+        tbody.insertAdjacentHTML('beforeend', `<tr><td>${sno++}</td><td>${s.fy}</td><td>${mLabel}</td><td>${s.patients||0}</td><td>${s.cards||0}</td><td>${fmt(claimVal)}</td><td>${fmt(expVal)}</td></tr>`);
       });
       if(sno > 1) tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td>TOTAL</td><td>-</td><td>-</td><td>${totPat}</td><td>${totCards}</td><td>${fmt(totClaim)}</td><td>${fmt(totExp)}</td></tr>`);
       if(filtered.length === 0) tbody.innerHTML = '<tr><td colspan="7" class="small">No records found</td></tr>';
@@ -2737,10 +2758,10 @@
       if(!fy || !monthKey){ alert('Please select FY and Month.'); return; }
       var d = getMonthData(fy, monthKey);
       // Auto fields display
-      $('dhsAutoOpening').textContent = '₹ ' + fmt(d.opening);
-      $('dhsAutoFundsReceived').textContent = '₹ ' + fmt(d.fundsReceived);
-      $('dhsAutoExpenditure').textContent = '₹ ' + fmt(d.expenditure);
-      $('dhsAutoClosing').textContent = '₹ ' + fmt(d.closing);
+      $('dhsAutoOpening').textContent = fmt(d.opening);
+      $('dhsAutoFundsReceived').textContent = fmt(d.fundsReceived);
+      $('dhsAutoExpenditure').textContent = fmt(d.expenditure);
+      $('dhsAutoClosing').textContent = fmt(d.closing);
       // Manual fields - populate from saved stats record (or 0)
       $('dhsIpdCount').value = d.ipdCount || '';
       // Pre-Auth Raised: pre-fill from Patients Treated if no manual value saved (still editable)
