@@ -698,8 +698,16 @@
               <div><label>Month <span class="req">*</span></label><select id="statsMonth" required></select></div>
               <div><label>Patients Treated <span class="req">*</span></label><input id="statsPatients" type="number" min="0" required></div>
               <div><label>Golden Cards Generated <span class="req">*</span></label><input id="statsCards" type="number" min="0" required></div>
-              <div><label>Claim Received (₹)</label><input id="statsClaim" type="number" min="0" step="0.01" placeholder="0"></div>
-              <div><label>Expenditure (₹)</label><input id="statsExpenditure" type="number" min="0" step="0.01" placeholder="0"></div>
+              <div>
+                <label>Claim Received (₹) <span style="color:#16a34a;font-size:10px;font-weight:700;">AUTO</span></label>
+                <div id="statsClaimDisplay" style="padding:10px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:6px;color:#14532d;font-weight:700;font-size:13px;min-height:40px;box-sizing:border-box;">— pick FY & Month —</div>
+                <input id="statsClaim" type="hidden" value="0">
+              </div>
+              <div>
+                <label>Expenditure (₹) <span style="color:#16a34a;font-size:10px;font-weight:700;">AUTO</span></label>
+                <div id="statsExpenditureDisplay" style="padding:10px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:6px;color:#14532d;font-weight:700;font-size:13px;min-height:40px;box-sizing:border-box;">— pick FY & Month —</div>
+                <input id="statsExpenditure" type="hidden" value="0">
+              </div>
             </div>
 
             <!-- DHS-only fields moved to DHS Report tab -->
@@ -2138,7 +2146,33 @@
       $('rep-stats-report').style.display = 'none';
       initDhsReport();
     });
-    $('statsFy')?.addEventListener('change', () => populateMonths('statsFy','statsMonth'));
+    $('statsFy')?.addEventListener('change', () => { populateMonths('statsFy','statsMonth'); refreshStatsAutoFields(); });
+    $('statsMonth')?.addEventListener('change', refreshStatsAutoFields);
+
+    // Auto-fill Claim Received & Expenditure from existing modules for selected month
+    function refreshStatsAutoFields() {
+      var monthKey = $('statsMonth') ? $('statsMonth').value : '';
+      var claimDisp = $('statsClaimDisplay');
+      var expDisp = $('statsExpenditureDisplay');
+      var claimHid = $('statsClaim');
+      var expHid = $('statsExpenditure');
+      if(!monthKey) {
+        if(claimDisp) claimDisp.textContent = '— pick FY & Month —';
+        if(expDisp)   expDisp.textContent   = '— pick FY & Month —';
+        if(claimHid)  claimHid.value = '0';
+        if(expHid)    expHid.value   = '0';
+        return;
+      }
+      // Pull from claims (claim + interest) and expenditure for this monthKey
+      var income  = load(LS.INCOME, []).filter(function(i){return i.monthKey === monthKey;});
+      var expense = load(LS.EXPENSE, []).filter(function(e){return e.monthKey === monthKey;});
+      var totClaim = income.reduce(function(s,i){ return s + Number(i.claim||0) + Number(i.interest||0); }, 0);
+      var totExp   = expense.reduce(function(s,e){ return s + Number(e.amount||0); }, 0);
+      if(claimDisp) claimDisp.textContent = '₹ ' + fmt(totClaim);
+      if(expDisp)   expDisp.textContent   = '₹ ' + fmt(totExp);
+      if(claimHid)  claimHid.value = String(totClaim);
+      if(expHid)    expHid.value   = String(totExp);
+    }
     $('statsRepFy')?.addEventListener('change', function(){
       const sel = $('statsRepMonth'); sel.innerHTML = '<option value="">All Month</option>';
       if(this.value) monthsForFy(this.value).forEach(m => sel.insertAdjacentHTML('beforeend', `<option value="${m.key}">${m.label}</option>`));
@@ -2206,6 +2240,7 @@
       save(LS.STATS, stats);
       this.reset();
       populateFyAll();
+      refreshStatsAutoFields();
       renderStatsEntryTable();
     });
 
@@ -2705,7 +2740,8 @@
       $('dhsAutoClosing').textContent = '₹ ' + fmt(d.closing);
       // Manual fields - populate from saved stats record (or 0)
       $('dhsIpdCount').value = d.ipdCount || '';
-      $('dhsPreAuth').value = d.preAuth || '';
+      // Pre-Auth Raised: pre-fill from Patients Treated if no manual value saved (still editable)
+      $('dhsPreAuth').value = d.preAuth || (d.patients || '');
       $('dhsTmsSettled').value = d.tmsSettled || '';
       $('dhsActualRecvd').value = d.actualRecvd || '';
       $('dhsPendingSHA').value = d.pendingSHA || '';
@@ -2714,7 +2750,8 @@
       $('dhsPendingLiab').value = d.pendingLiab || '';
       $('dhsShortStay').value = d.shortStay || '';
       $('dhsExcludedIPDs').value = d.excludedIPDs || '';
-      $('dhsConvertedIPDs').value = d.convertedIPDs || '';
+      // Converted IPDs (G): pre-fill from Patients Treated if no manual value saved (still editable)
+      $('dhsConvertedIPDs').value = d.convertedIPDs || (d.patients || '');
       // Sync Table 3's Total IPDs (C) from Table 2's manual IPD entry
       syncDhsTotalIPDs();
       $('dhsFormCard').style.display = '';
@@ -2848,7 +2885,7 @@
         +       '<th>%age Conversion (G/F × 100)</th>'
         +     '</tr></thead><tbody>'
         +       '<tr>'
-        +         '<td>1</td><td>' + DHS_DISTRICT + '</td><td>GMC Rajouri</td>'
+        +         '<td>1</td><td>' + DHS_DISTRICT + '</td><td>' + DHS_HOSPITAL + '</td>'
         +         '<td style="text-align:right;">' + totalIPD + '</td>'
         +         '<td style="text-align:right;">' + shortStay + '</td>'
         +         '<td style="text-align:right;">' + excluded + '</td>'
