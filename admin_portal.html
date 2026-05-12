@@ -550,6 +550,7 @@ tr:hover td{background:#EEF3FF}
         <button class="dmt-tab"        id="dmt-wardmgmt"    onclick="showDmTab('wardmgmt',this)">🏨 Ward Management</button>
         <button class="dmt-tab"        id="dmt-reports"     onclick="showDmTab('reports',this)">📊 Monthly Reports</button>
         <button class="dmt-tab"        id="dmt-leaves"      onclick="showDmTab('leaves',this)">📋 Leave Requests</button>
+        <button class="dmt-tab"        id="dmt-navbar"      onclick="showDmTab('navbar',this)">🧭 Nav Bar</button>
       </div>
 
       <!-- ── TAB: Holiday Calendar ── -->
@@ -747,6 +748,55 @@ tr:hover td{background:#EEF3FF}
         </div>
       </div>
 
+      <!-- ════════════════════════════════════════════════════════════════
+           🧭 TAB: Nav Bar Manager (moved here from Settings → Landing Page)
+           Saves to settings/landing_page.navBar → index.html picks up via
+           onSnapshot in real time. Uses the same nbm* JS functions.
+           ════════════════════════════════════════════════════════════════ -->
+      <div class="dmt-pane" id="dmpane-navbar">
+
+        <!-- Hero info card -->
+        <div class="card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;margin-bottom:12px">
+          <div class="card-hd" style="color:#1e3a8a;display:flex;align-items:center;gap:8px">
+            <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#1e3a8a"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+            Navigation Bar Manager
+            <span id="nbm-status" style="margin-left:auto;font-size:11px;color:#6b7280;font-weight:500"></span>
+          </div>
+          <div style="font-size:12px;color:#1e3a8a;line-height:1.65;margin-bottom:10px">
+            Manage the top navigation bar on <strong>index.html</strong> (public landing page).
+            Changes save to Firebase and appear on the landing page <strong>immediately</strong> via real-time sync — no page reload needed.
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-pri" onclick="nbmSave()" style="background:linear-gradient(135deg,#1d4ed8,#2563eb)">💾 Save Nav Bar to Firebase</button>
+            <button class="btn" onclick="nbmReload()" style="background:#fff;border:1.5px solid #93c5fd;color:#1e3a8a">↻ Reload from Firebase</button>
+            <button class="btn" onclick="nbmResetDefaults()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">⚠️ Reset to Defaults</button>
+          </div>
+        </div>
+
+        <!-- Live preview strip -->
+        <div class="card" style="padding:12px 16px;margin-bottom:12px">
+          <div style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px">📺 Live Preview — as it will appear on landing page</div>
+          <div id="nbm-preview" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;min-height:42px">
+            <span style="color:#9ca3af;font-style:italic;font-size:11px">Loading preview…</span>
+          </div>
+          <div style="font-size:10.5px;color:#9ca3af;margin-top:6px">✓ Only items marked <strong>Visible</strong> appear. The <strong>highlighted</strong> item gets the active (green) style.</div>
+        </div>
+
+        <!-- Items editor -->
+        <div class="card">
+          <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center">
+            <span style="display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#1A3DB5"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg> Navigation Items</span>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-pri" onclick="nbmAdd()" style="padding:5px 12px;font-size:11px">+ Add Item</button>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Use ↑↓ to reorder. Toggle <strong>Visible</strong> to show/hide. Toggle <strong>Active</strong> to highlight the current page link.</div>
+          <div id="nbm-items-list" style="display:flex;flex-direction:column;gap:8px"></div>
+          <div id="nbm-save-msg" style="font-size:11px;font-weight:600;margin-top:10px;min-height:16px"></div>
+        </div>
+
+      </div>
+
     </div>
 
     <!-- ===== SETTINGS ===== -->
@@ -755,8 +805,7 @@ tr:hover td{background:#EEF3FF}
 
       <!-- Settings Tabs -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
-        <button class="dmt-tab active" id="stab-landing" onclick="showSettingsTab('landing',this)">🌐 Landing Page</button>
-        <button class="dmt-tab" id="stab-branding" onclick="showSettingsTab('branding',this)">🖼️ Branding</button>
+        <button class="dmt-tab active" id="stab-branding" onclick="showSettingsTab('branding',this)">🖼️ Branding</button>
         <button class="dmt-tab" id="stab-tickers" onclick="showSettingsTab('tickers',this)">📣 Tickers</button>
         <button class="dmt-tab" id="stab-sysinfo" onclick="showSettingsTab('sysinfo',this)">⚙️ System</button>
       </div>
@@ -764,7 +813,7 @@ tr:hover td{background:#EEF3FF}
       <div class="settings-layout">
 
         <div class="settings-sidebar" id="settings-sub-sidebar">
-          <div class="sbs-title" id="sbs-sub-title">Landing Page</div>
+          <div class="sbs-title" id="sbs-sub-title">Branding</div>
           <div id="sbs-sub-items">
             <!-- filled dynamically -->
           </div>
@@ -772,53 +821,9 @@ tr:hover td{background:#EEF3FF}
 
         <div class="settings-content">
 
-          <!-- ════════════════════════════════════════════════════════════════
-               🧭 NAV BAR MANAGER — dedicated panel for navigation bar items
-               Saves to settings/landing_page → index.html picks up via onSnapshot
-               ════════════════════════════════════════════════════════════════ -->
-          <div class="settings-panel active" id="panel-navbarManager">
-
-            <!-- Hero info card -->
-            <div class="s-card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd">
-              <div class="s-card-title" style="color:#1e3a8a">
-                <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
-                Navigation Bar Manager
-                <span id="nbm-status" style="margin-left:auto;font-size:11px;color:#6b7280;font-weight:500"></span>
-              </div>
-              <div style="font-size:12px;color:#1e3a8a;line-height:1.65;margin-bottom:10px">
-                Manage the top navigation bar on <strong>index.html</strong> (public landing page).
-                Changes save to Firebase and appear on the landing page <strong>immediately</strong> via real-time sync — no page reload needed.
-              </div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <button class="btn btn-pri" onclick="nbmSave()" style="background:linear-gradient(135deg,#1d4ed8,#2563eb)">💾 Save Nav Bar to Firebase</button>
-                <button class="btn" onclick="nbmReload()" style="background:#fff;border:1.5px solid #93c5fd;color:#1e3a8a">↻ Reload from Firebase</button>
-                <button class="btn" onclick="nbmResetDefaults()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">⚠️ Reset to Defaults</button>
-              </div>
-            </div>
-
-            <!-- Live preview strip -->
-            <div class="s-card" style="padding:12px 16px">
-              <div style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px">📺 Live Preview — as it will appear on landing page</div>
-              <div id="nbm-preview" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;min-height:42px">
-                <span style="color:#9ca3af;font-style:italic;font-size:11px">Loading preview…</span>
-              </div>
-              <div style="font-size:10.5px;color:#9ca3af;margin-top:6px">✓ Only items marked <strong>Visible</strong> appear. The <strong>highlighted</strong> item gets the active (green) style.</div>
-            </div>
-
-            <!-- Items editor -->
-            <div class="s-card">
-              <div class="s-card-title" style="display:flex;justify-content:space-between;align-items:center">
-                <span><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#1A3DB5"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg> Navigation Items</span>
-                <div style="display:flex;gap:6px">
-                  <button class="btn btn-pri" onclick="nbmAdd()" style="padding:5px 12px;font-size:11px">+ Add Item</button>
-                </div>
-              </div>
-              <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Use ↑↓ to reorder. Toggle <strong>Visible</strong> to show/hide. Toggle <strong>Active</strong> to highlight the current page link.</div>
-              <div id="nbm-items-list" style="display:flex;flex-direction:column;gap:8px"></div>
-              <div id="nbm-save-msg" style="font-size:11px;font-weight:600;margin-top:10px;min-height:16px"></div>
-            </div>
-
-          </div>
+          <!-- 🧭 Nav Bar Manager moved to Data Management → Nav Bar tab.
+               The nbm* JS functions remain (see ~line 4275+) and continue
+               to drive the new DM panel. -->
 
           <!-- panel-landingPageEditor removed — Hero & Footer tab dropped per
                admin request. The lpe* JS below is now orphaned but harmless;
@@ -1731,6 +1736,7 @@ function showDmTab(tab, el){
   if (tab === 'reports')      { dmLoadFilters(); }
   if (tab === 'leaves')       { dmLoadFilters(); }
   if (tab === 'holidaycal')   { hcInit(); }
+  if (tab === 'navbar' && typeof nbmLoad === 'function') { nbmLoad(); }
 }
 
 // ── Load roster from Firebase ──
@@ -2060,7 +2066,6 @@ function showPanel(id,el){
   // Auto-load data when panels open
   if (id === 'sysinfo'           && typeof refreshSysStats === 'function') { refreshSysStats(); refreshBulkCounts(); }
   if (id === 'landingPageEditor' && typeof lpeLoad === 'function')         lpeLoad();
-  if (id === 'navbarManager'     && typeof nbmLoad === 'function')         nbmLoad();
   if (id === 'branding'          && typeof brLoad === 'function')          brLoad();
   if (id === 'tickers'           && typeof tkLoadAll === 'function')       tkLoadAll();
   if (id === 'dmReports'         && typeof dmLoadFilters === 'function')   dmLoadFilters();
@@ -2372,12 +2377,6 @@ async function savePortalInfo() {} // removed; see brSaveAll() instead
 // SETTINGS TABS (top-level tab switcher)
 // ══════════════════════════════════════
 var _settingsTabSubSidebars = {
-  landing: {
-    title: 'Landing Page',
-    items: [
-      { id:'navbarManager', label:'🧭 Nav Bar', icon:'M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z' }
-    ]
-  },
   branding: {
     title: 'Branding',
     items: [
@@ -2425,7 +2424,6 @@ function showSettingsTab(tab, el) {
     var sbsItem = document.getElementById('sbs-'+firstId);
     if (sbsItem) sbsItem.classList.add('active');
     // Auto-load
-    if (firstId === 'navbarManager'     && typeof nbmLoad === 'function')   nbmLoad();
     if (firstId === 'landingPageEditor' && typeof lpeLoad === 'function')   lpeLoad();
     if (firstId === 'branding'          && typeof brLoad === 'function')    brLoad();
     if (firstId === 'tickers'           && typeof tkLoadAll === 'function') tkLoadAll();
@@ -3594,168 +3592,10 @@ function saveAddLeave(){
   });
 }
 
-// ══════════════════════════════════════
-// NAV BAR EDITOR — admin controls landing page navigation
-// Data lives in Firestore at settings/navbar as { items: [...] }
-// Each item: { id, label, icon, link, visible, order }
-// ══════════════════════════════════════
+// ── Old NAV BAR EDITOR (settings/navbar doc) removed: replaced by the
+//    new Nav Bar Manager under Data Management → Nav Bar tab, which writes
+//    to settings/landing_page.navBar consumed by index.html via onSnapshot.
 
-var NB_ICONS = [
-  { v:'info',     label:'ℹ️ Info' },
-  { v:'users',    label:'👥 Users' },
-  { v:'document', label:'📄 Document' },
-  { v:'phone',    label:'📞 Phone' },
-  { v:'home',     label:'🏠 Home' },
-  { v:'settings', label:'⚙️ Settings' },
-  { v:'star',     label:'⭐ Star' },
-  { v:'heart',    label:'❤️ Heart' },
-  { v:'calendar', label:'📅 Calendar' },
-  { v:'book',     label:'📖 Book' },
-  { v:'download', label:'⬇️ Download' },
-  { v:'upload',   label:'⬆️ Upload' },
-  { v:'link',     label:'🔗 Link' },
-  { v:'chart',    label:'📊 Chart' },
-  { v:'hospital', label:'🏥 Hospital' },
-  { v:'shield',   label:'🛡️ Shield' },
-  { v:'flag',     label:'🚩 Flag' },
-  { v:'mail',     label:'✉️ Mail' },
-  { v:'help',     label:'❓ Help' },
-  { v:'none',     label:'— None —' }
-];
-
-var NB_DEFAULTS = [
-  { id:'about',   label:'About Us',   icon:'info',     link:'#about',   visible:true, order:0 },
-  { id:'staff',   label:'Staff',      icon:'users',    link:'#staff',   visible:true, order:1 },
-  { id:'orders',  label:'Orders',     icon:'document', link:'#orders',  visible:true, order:2 },
-  { id:'contact', label:'Contact Us', icon:'phone',    link:'#contact', visible:true, order:3 }
-];
-
-var _nbItems = [];   // working copy being edited
-var _nbLoaded = false;
-
-function loadNavBar(){
-  var list = document.getElementById('nbItemsList');
-  if (list) list.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:20px;text-align:center">Loading…</div>';
-  db.collection('settings').doc('navbar').get().then(function(doc){
-    if (doc.exists && doc.data() && Array.isArray(doc.data().items) && doc.data().items.length) {
-      _nbItems = doc.data().items.slice();
-    } else {
-      _nbItems = JSON.parse(JSON.stringify(NB_DEFAULTS));
-    }
-    _nbItems.sort(function(a,b){ return (a.order||0) - (b.order||0); });
-    _nbLoaded = true;
-    nbRender();
-  }).catch(function(e){
-    console.warn('loadNavBar:', e);
-    _nbItems = JSON.parse(JSON.stringify(NB_DEFAULTS));
-    nbRender();
-    var msg = document.getElementById('nbSaveMsg');
-    if (msg) { msg.style.color = '#92400e'; msg.textContent = '⚠️ Could not load saved nav — starting from defaults.'; }
-  });
-}
-
-function nbRender(){
-  var list = document.getElementById('nbItemsList');
-  if (!list) return;
-  if (_nbItems.length === 0) {
-    list.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:20px;text-align:center;background:#F9FAFB;border-radius:10px">No nav items yet. Click "+ Add Nav Item" or "Reset to Defaults" to get started.</div>';
-    return;
-  }
-  var iconOpts = NB_ICONS.map(function(ic){ return '<option value="'+ic.v+'">'+ic.label+'</option>'; }).join('');
-  list.innerHTML = _nbItems.map(function(it, i){
-    var selectedIcon = iconOpts.replace('value="'+(it.icon||'info')+'"','value="'+(it.icon||'info')+'" selected');
-    var vis = it.visible !== false;
-    return '<div style="background:#fff;border:1.5px solid rgba(100,150,255,0.25);border-radius:10px;padding:12px;display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:start">'
-      + '<div style="font-size:18px;color:#9ca3af;text-align:center;padding-top:8px;font-weight:700;user-select:none">'+(i+1)+'</div>'
-      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
-      +   '<div class="sfld" style="margin:0"><label style="font-size:10px">Label</label><input type="text" value="'+(it.label||'').replace(/"/g,'&quot;')+'" onchange="nbUpdate('+i+',\'label\',this.value)"></div>'
-      +   '<div class="sfld" style="margin:0"><label style="font-size:10px">Icon</label><select onchange="nbUpdate('+i+',\'icon\',this.value)">'+selectedIcon+'</select></div>'
-      +   '<div class="sfld" style="margin:0;grid-column:1/-1"><label style="font-size:10px">Link (use <code>#section-id</code> or <code>https://...</code>)</label><input type="text" value="'+(it.link||'').replace(/"/g,'&quot;')+'" placeholder="#section-id or https://..." onchange="nbUpdate('+i+',\'link\',this.value)"></div>'
-      +   '<div style="grid-column:1/-1;display:flex;gap:10px;align-items:center;font-size:11px">'
-      +     '<label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" '+(vis?'checked':'')+' onchange="nbUpdate('+i+',\'visible\',this.checked)"> <span>Visible on landing page</span></label>'
-      +     (vis ? '' : '<span style="background:#F3F4F6;color:#6b7280;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700">HIDDEN</span>')
-      +   '</div>'
-      + '</div>'
-      + '<div style="display:flex;flex-direction:column;gap:4px">'
-      +   '<button class="dm-act-btn" style="background:#E5E7EB;color:#374151" onclick="nbMove('+i+',-1)" title="Move up" '+(i===0?'disabled':'')+'>↑</button>'
-      +   '<button class="dm-act-btn" style="background:#E5E7EB;color:#374151" onclick="nbMove('+i+',1)" title="Move down" '+(i===_nbItems.length-1?'disabled':'')+'>↓</button>'
-      +   '<button class="dm-act-btn" style="background:#FEE2E2;color:#991b1b" onclick="nbRemove('+i+')" title="Delete">🗑️</button>'
-      + '</div>'
-      + '</div>';
-  }).join('');
-}
-
-function nbUpdate(i, field, value){
-  if (!_nbItems[i]) return;
-  _nbItems[i][field] = value;
-  _nbItems[i].order = i; // keep order in sync with array index
-}
-
-function nbAddItem(){
-  var newId = 'item_' + Date.now();
-  _nbItems.push({ id:newId, label:'New Item', icon:'info', link:'#new', visible:true, order:_nbItems.length });
-  nbRender();
-}
-
-function nbRemove(i){
-  if (!confirm('Remove this nav item?\n\nLabel: '+(_nbItems[i].label||'—'))) return;
-  _nbItems.splice(i, 1);
-  _nbItems.forEach(function(it, idx){ it.order = idx; });
-  nbRender();
-}
-
-function nbMove(i, dir){
-  var j = i + dir;
-  if (j < 0 || j >= _nbItems.length) return;
-  var tmp = _nbItems[i];
-  _nbItems[i] = _nbItems[j];
-  _nbItems[j] = tmp;
-  _nbItems.forEach(function(it, idx){ it.order = idx; });
-  nbRender();
-}
-
-function nbReset(){
-  if (!confirm('Reset the nav bar to default items (About Us, Staff, Orders, Contact Us)?\n\nYour unsaved changes will be lost. Saved Firebase data is NOT overwritten until you click "Save Nav Bar".')) return;
-  _nbItems = JSON.parse(JSON.stringify(NB_DEFAULTS));
-  nbRender();
-  var msg = document.getElementById('nbSaveMsg');
-  if (msg) { msg.style.color = '#1A3DB5'; msg.textContent = '↻ Reset to defaults in editor. Click "Save Nav Bar" to persist.'; }
-}
-
-function saveNavBar(){
-  // Validate
-  var msg = document.getElementById('nbSaveMsg');
-  if (!_nbItems || _nbItems.length === 0) {
-    if (msg) { msg.style.color = '#dc2626'; msg.textContent = '⚠️ Nav bar is empty. Add at least 1 item before saving.'; }
-    return;
-  }
-  for (var i = 0; i < _nbItems.length; i++) {
-    if (!_nbItems[i].label || !String(_nbItems[i].label).trim()) {
-      if (msg) { msg.style.color = '#dc2626'; msg.textContent = '⚠️ Item #'+(i+1)+' has no label.'; }
-      return;
-    }
-  }
-  // Normalize order
-  _nbItems.forEach(function(it, idx){ it.order = idx; });
-  if (msg) { msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…'; }
-  var payload = {
-    items: _nbItems,
-    _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
-    _updatedAt: Date.now(),
-    _updatedAtReadable: new Date().toLocaleString('en-IN')
-  };
-  db.collection('settings').doc('navbar').set(payload).then(function(){
-    if (msg) {
-      msg.style.color = '#166534';
-      msg.textContent = '✅ Nav bar saved ('+_nbItems.length+' items). Landing page will pick up changes on next page load.';
-      setTimeout(function(){ msg.textContent = ''; }, 5000);
-    }
-    if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/navbar', 'navbar', { itemCount: _nbItems.length, items: _nbItems.map(function(i){ return { label:i.label, link:i.link, visible:i.visible }; }) });
-    showToast('✅ Nav bar saved', 'success');
-  }).catch(function(e){
-    if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Error: '+e.message; }
-  });
-}
 
 // ══════════════════════════════════════════════════════════════════════
 // 🖼️ BRANDING & LOGOS — manage logos and hero background image
@@ -4509,8 +4349,8 @@ goSec = function(id, el) {
   if (id === 'settings') {
     // Init the settings tab sub-sidebar on first visit
     var activStab = document.querySelector('#sec-settings .dmt-tab.active');
-    if (!activStab) activStab = document.getElementById('stab-landing');
-    if (activStab) showSettingsTab('landing', activStab);
+    if (!activStab) activStab = document.getElementById('stab-branding');
+    if (activStab) showSettingsTab('branding', activStab);
   }
   if (id === 'auditlog') loadAuditLog();
 };
@@ -4531,10 +4371,10 @@ window.addEventListener('DOMContentLoaded', function() {
   loadSessionUser();
   setTimeout(loadAllUsers, 500);
   setTimeout(function(){ setAdminUnlocked(isAdminUnlocked()); }, 800);
-  // Init settings to Landing tab by default
+  // Init settings to Branding tab by default
   setTimeout(function(){
-    var firstStab = document.getElementById('stab-landing');
-    if (firstStab) showSettingsTab('landing', firstStab);
+    var firstStab = document.getElementById('stab-branding');
+    if (firstStab) showSettingsTab('branding', firstStab);
   }, 1200);
 });
 
