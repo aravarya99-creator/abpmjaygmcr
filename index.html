@@ -234,17 +234,17 @@ a.hero-gc-ci:hover{color:#7c3aed}
   </div>
 
   <div class="nav-area" id="lpNavArea">
-    <a class="nav-item active" href="#">
+    <a class="nav-item active" href="#" data-nav="home">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V21H3z"/><path d="M9 21v-6h6v6"/></svg>
       Home
     </a>
-    <a class="nav-item" href="#">About Us <span class="nav-arrow">▾</span></a>
-    <a class="nav-item" href="#">Staff <span class="nav-arrow">▾</span></a>
-    <a class="nav-item" href="#">Ward Roster</a>
-    <a class="nav-item" href="#">Holiday Duty</a>
-    <a class="nav-item" href="#">Leave <span class="nav-arrow">▾</span></a>
-    <a class="nav-item" href="#">Orders <span class="nav-arrow">▾</span></a>
-    <a class="nav-item" href="#">Contact Us</a>
+    <a class="nav-item" href="#" data-nav="about">About Us <span class="nav-arrow">▾</span></a>
+    <a class="nav-item" href="#" data-nav="staff">Staff <span class="nav-arrow">▾</span></a>
+    <a class="nav-item" href="#" data-nav="roster">Ward Roster</a>
+    <a class="nav-item" href="#" data-nav="holiday">Holiday Duty</a>
+    <a class="nav-item" href="#" data-nav="leave">Leave <span class="nav-arrow">▾</span></a>
+    <a class="nav-item" href="#" data-nav="orders">Orders <span class="nav-arrow">▾</span></a>
+    <a class="nav-item" href="#" data-nav="contact">Contact Us</a>
   </div>
 </div>
 
@@ -886,6 +886,7 @@ window.addEventListener('DOMContentLoaded', function() {
         var cls = 'nav-item' + (it.active ? ' active' : '');
         var url = it.url || '#';
         var label = esc(it.label || '');
+        var navId = esc((it.id || '').toLowerCase());
         var iconSvg = it.active
           ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>'
           : '';
@@ -895,7 +896,8 @@ window.addEventListener('DOMContentLoaded', function() {
         // protocol-relative // (covers Google Drive, Forms, Docs, etc.)
         var isExternal = /^(https?:|\/\/)/i.test(url);
         var targetAttr = isExternal ? ' target="_blank" rel="noopener"' : '';
-        return '<a class="'+cls+'" href="'+esc(url)+'"'+targetAttr+'>'+iconSvg+label+'</a>';
+        var dataAttr   = navId ? ' data-nav="'+navId+'"' : '';
+        return '<a class="'+cls+'" href="'+esc(url)+'"'+targetAttr+dataAttr+'>'+iconSvg+label+'</a>';
       }).join('');
     }
 
@@ -1315,38 +1317,118 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   window.onStaffSearch = onSearch;
 
-  // Intercept any nav-item link whose label is "Staff" (case-insensitive,
-  // matches "Staff", "STAFF", "Staff ▾" etc.) AND whose URL is empty/#.
-  // Re-runs after every nav-bar render so dynamically loaded items work too.
+  // ════════════════════════════════════════════════════════════════════
+  // GENERAL NAV-BAR CLICK HANDLER
+  // Handles every tab in the nav bar (static fallback + dynamic from
+  // Firestore settings/landing_page.navBar). Behaviour per tab:
+  //
+  //   1. If href is a real URL (not '', not '#') → let browser navigate
+  //   2. If data-nav === 'staff' and no URL    → open Staff modal
+  //   3. If data-nav === 'home'  and no URL    → smooth-scroll to top
+  //   4. Any other tab with no URL              → show "Coming soon" toast
+  //
+  // Also: clicking any tab updates the .active visual state for feedback.
+  // Uses event delegation on document so dynamically rendered items work
+  // automatically (renderNav re-emits innerHTML on every Firestore snapshot).
+  // ════════════════════════════════════════════════════════════════════
+
+  // ─── Toast helper ───────────────────────────────────────────────────
+  function showNavToast(msg){
+    var t = document.getElementById('navToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'navToast';
+      t.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);'
+                      + 'background:rgba(15,23,42,0.95);color:#fff;padding:11px 20px;border-radius:10px;'
+                      + 'font-size:13px;font-weight:600;font-family:Inter,Arial,sans-serif;z-index:9999;'
+                      + 'box-shadow:0 8px 24px rgba(0,0,0,0.25);opacity:0;transition:all 0.25s ease;'
+                      + 'pointer-events:none;max-width:90vw;text-align:center;line-height:1.4';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    // Force reflow then animate in
+    void t.offsetWidth;
+    t.style.opacity = '1';
+    t.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(t._hideTimer);
+    t._hideTimer = setTimeout(function(){
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(-50%) translateY(20px)';
+    }, 2400);
+  }
+
+  // ─── Resolve nav id from element (data-nav preferred, label fallback) ─
+  function getNavId(a){
+    var id = (a.getAttribute('data-nav') || '').trim().toLowerCase();
+    if (id) return id;
+    // Legacy fallback: derive from label text
+    var label = (a.textContent || '').trim().toLowerCase().replace(/[▾▼]/g,'').trim();
+    if (label === 'home')        return 'home';
+    if (label === 'staff')       return 'staff';
+    if (label === 'about us')    return 'about';
+    if (label === 'ward roster') return 'roster';
+    if (label === 'holiday duty')return 'holiday';
+    if (label === 'leave')       return 'leave';
+    if (label === 'orders')      return 'orders';
+    if (label === 'contact us')  return 'contact';
+    return '';
+  }
+
+  // ─── Update active visual state ─────────────────────────────────────
+  function setActiveNav(clickedAnchor){
+    var nav = document.getElementById('lpNavArea');
+    if (!nav) return;
+    nav.querySelectorAll('a.nav-item').forEach(function(el){
+      el.classList.remove('active');
+    });
+    clickedAnchor.classList.add('active');
+  }
+
+  // ─── Bind: set cursor pointer on items that will trigger JS actions ─
   function bindNavTriggers(){
     var nav = document.getElementById('lpNavArea');
     if (!nav) return;
     nav.querySelectorAll('a.nav-item').forEach(function(a){
-      var label = (a.textContent || '').trim().toLowerCase().replace(/[▾▼]/g,'').trim();
-      if (label === 'staff') {
-        // Only hijack if there's no real URL set
-        var href = a.getAttribute('href') || '';
-        if (href === '' || href === '#') {
-          a.setAttribute('data-staff-trigger','1');
-          a.style.cursor = 'pointer';
-        }
+      var href = a.getAttribute('href') || '';
+      if (href === '' || href === '#') {
+        a.style.cursor = 'pointer';
       }
     });
   }
 
-  // Delegate clicks at body level — works for both static and dynamic nav items
+  // ─── Single delegated click handler for every nav tab ───────────────
   document.addEventListener('click', function(e){
     var a = e.target.closest('a.nav-item');
     if (!a) return;
-    var label = (a.textContent || '').trim().toLowerCase().replace(/[▾▼]/g,'').trim();
-    if (label === 'staff') {
-      var href = a.getAttribute('href') || '';
-      // Only intercept if URL is unset OR starts with '#' (anchor → modal)
-      if (href === '' || href === '#') {
-        e.preventDefault();
-        openModal();
-      }
+    // Only intercept tabs inside the landing-page nav area
+    if (!a.closest('#lpNavArea')) return;
+
+    var href  = a.getAttribute('href') || '';
+    var navId = getNavId(a);
+
+    // Real URL → let browser navigate normally, but still update active state
+    if (href && href !== '#') {
+      setActiveNav(a);
+      return;
     }
+
+    // No URL set — handle by nav id
+    e.preventDefault();
+    setActiveNav(a);
+
+    if (navId === 'staff') {
+      openModal();
+      return;
+    }
+    if (navId === 'home') {
+      // Already on the landing page — smooth-scroll to top
+      try { window.scrollTo({ top:0, behavior:'smooth' }); }
+      catch(_){ window.scrollTo(0, 0); }
+      return;
+    }
+    // Any other tab with no URL — friendly "coming soon" toast
+    var labelText = (a.textContent || '').trim().replace(/[▾▼]/g,'').trim() || 'This section';
+    showNavToast(labelText + ' — coming soon. Set URL in Admin → Nav Bar Manager.');
   });
 
   // Close on backdrop click or Escape
@@ -1355,7 +1437,7 @@ window.addEventListener('DOMContentLoaded', function() {
   });
 
   // Initial bind, then re-bind whenever navBar is re-rendered (handled by
-  // the click delegation above, but we still mark items for keyboard nav).
+  // the click delegation above, but we still mark items with cursor:pointer).
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bindNavTriggers);
   } else {
