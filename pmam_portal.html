@@ -526,7 +526,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             <div class="fr-field" style="flex:0.5;min-width:160px">
               <label>Select Ward</label>
               <div style="display:flex;gap:8px;align-items:center">
-                <select id="eWard" style="flex:1;height:38px;padding:0 10px;border:1.5px solid #CE93D8;border-radius:8px;font-size:12px;background:#fff;color:#2D2D2D;outline:none;font-family:Inter,sans-serif">
+                <select id="eWard" style="flex:1;height:38px;padding:0 10px;border:1.5px solid #CE93D8;border-radius:8px;font-size:12px;background:#fff;color:#2D2D2D;outline:none;font-family:Inter,sans-serif" data-ward-select="1">
                   <option value="">-- Select Ward --</option>
                   <option>Orthopaedics</option><option>Male Surgery Ward</option>
                   <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
@@ -623,7 +623,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <div class="fld"><label>From Date</label><input type="date" id="recFrom" style="width:150px"></div>
           <div class="fld"><label>To Date</label><input type="date" id="recTo" style="width:150px"></div>
           <div class="fld"><label>Ward</label>
-            <select id="recWard" style="width:170px">
+            <select id="recWard" style="width:170px" data-ward-select="1" data-ward-extras="All Wards">
               <option value="">All Wards</option>
               <option>Orthopaedics</option><option>Male Surgery Ward</option>
               <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
@@ -681,7 +681,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <div class="fld">
             <label>Ward(s)</label>
             <div style="display:flex;align-items:center;gap:6px">
-              <select id="lvWardSel" style="flex:1;height:34px;padding:0 8px;border:1.5px solid rgba(100,150,255,0.3);border-radius:50px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.8);color:#0F2B8C">
+              <select id="lvWardSel" style="flex:1;height:34px;padding:0 8px;border:1.5px solid rgba(100,150,255,0.3);border-radius:50px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.8);color:#0F2B8C" data-ward-select="1">
                 <option value="">-- Select Ward --</option>
                 <option>Orthopaedics</option><option>Male Surgery Ward</option>
                 <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
@@ -968,25 +968,36 @@ var allEntries = [];
 // both         = both enabled
 // ══════════════════════════════════════
 var WARD_CASE_TYPE = {
-  // Conservative only
+  // Fallback map. WARD_REGISTRY is the source of truth at runtime; this
+  // map is only consulted while the registry is still loading.
+  'Male Medical A':   'conservative',
+  'Male Medical B':   'conservative',
+  'Female Medical A': 'conservative',
+  'Female Medical B': 'conservative',
+  'MICU':             'conservative',
+  'SICU':             'both',
+  'Oncology':         'conservative',
+  'Disaster':         'both',
+  'Dialysis':         'conservative',
+  'Ophthalmology':    'surgery',
+  'Orthopaedics':     'both',
+  'Male Surgical':    'both',
+  'Female Surgical':  'both',
+  'Gynecology':       'both',
+  'ENT':              'both',
+  'Dental':           'both',
+  'PM RAHAT':         'both',
+  'PICU':             'both',
+  // Legacy aliases:
   'Male Medicine Ward A':   'conservative',
   'Male Medicine Ward B':   'conservative',
   'Female Medicine Ward A': 'conservative',
   'Female Medicine Ward B': 'conservative',
-  'MICU':                   'conservative',
-  'SICU':                   'both',
-  'Onco':                   'conservative',
-  'Disaster':               'both',
-  'Dialysis':               'conservative',
-  // Surgery only
-  'Optha':                  'surgery',
-  // Both
-  'Orthopaedics':           'both',
   'Male Surgery Ward':      'both',
   'Female Surgery Ward':    'both',
-  'Gynae':                  'both',
-  'ENT':                    'both',
-  'Dental':                 'both'
+  'Optha':                  'surgery',
+  'Onco':                   'conservative',
+  'Gynae':                  'both'
 };
 
 // ── Focus/blur helpers for nfield boxes ──
@@ -1006,7 +1017,12 @@ function blurBox(boxId) {
 }
 
 function applyWardCaseConfig(wardName) {
-  var type = WARD_CASE_TYPE[wardName] || 'both';
+  var type;
+  if (window.WARD_REGISTRY && WARD_REGISTRY.isReady()) {
+    type = WARD_REGISTRY.caseType(wardName);
+  } else {
+    type = WARD_CASE_TYPE[wardName] || 'both';
+  }
   var medBox   = document.getElementById('box-eMed');
   var surgBox  = document.getElementById('box-eSurg');
   var medInput  = document.getElementById('eMed');
@@ -2202,6 +2218,290 @@ function updateWardStatus(){
     if(tags) tags.innerHTML = '';
   }
 }
+</script>
+
+<!-- ═══ WARD_REGISTRY (auto-injected) ═══ -->
+<script>
+// ════════════════════════════════════════════════════════════════════════
+// WARD_REGISTRY — single source of truth for ward labels, icons, colors,
+// and case-type classification across ALL portals.
+//
+// Data lives in Firestore at settings/wards.
+//   Document shape (new):  { wards: [{ id, label, icon, color, caseType,
+//                                       order, imageUrl? }], _updatedAt }
+//   Legacy shape:          { wards: ['Name1','Name2', ...] }
+//
+// On load:
+//   1) Subscribes to settings/wards via onSnapshot
+//   2) If doc is missing OR uses legacy array shape, falls back to DEFAULTS
+//      and (admin-portal only) writes DEFAULTS up to Firestore
+//   3) Maintains ALIAS map: old hard-coded names → canonical labels, so
+//      pre-existing Firestore data (users, rosters) keeps resolving
+//
+// Public API:
+//   WARD_REGISTRY.list()              → array of canonical ward objects
+//   WARD_REGISTRY.byLabel(name)       → ward object (resolves aliases)
+//   WARD_REGISTRY.canonical(name)     → canonical label string
+//   WARD_REGISTRY.caseType(name)      → 'conservative' | 'surgery' | 'both'
+//   WARD_REGISTRY.icon(name)          → emoji or img-src string
+//   WARD_REGISTRY.color(name)         → CSS color (hex)
+//   WARD_REGISTRY.pill(name, opts?)   → HTML string of a colored pill
+//   WARD_REGISTRY.populateSelect(sel, selected?, opts?) → fills a <select>
+//   WARD_REGISTRY.onReady(cb)         → fires once when data is loaded
+//   WARD_REGISTRY.onChange(cb)        → fires on every Firestore update
+// ════════════════════════════════════════════════════════════════════════
+
+(function(){
+  'use strict';
+
+  // ── Color tokens (consistent across portals) ──────────────────────────
+  var C = {
+    red:         { bg:'#fee2e2', text:'#dc2626', border:'#fecaca' },
+    darkRed:     { bg:'#fecaca', text:'#991b1b', border:'#f87171' },
+    brightRed:   { bg:'#fef2f2', text:'#dc2626', border:'#dc2626' },
+    orange:      { bg:'#ffedd5', text:'#c2410c', border:'#fdba74' },
+    indigo:      { bg:'#e0e7ff', text:'#4338ca', border:'#a5b4fc' },
+    pinkIndigo:  { bg:'#fce7f3', text:'#9333ea', border:'#f9a8d4' },
+    blue:        { bg:'#dbeafe', text:'#1e40af', border:'#93c5fd' },
+    rose:        { bg:'#ffe4e6', text:'#be185d', border:'#fda4af' },
+    skyBlue:     { bg:'#e0f2fe', text:'#0369a1', border:'#7dd3fc' },
+    pink:        { bg:'#fce7f3', text:'#be185d', border:'#f9a8d4' },
+    teal:        { bg:'#ccfbf1', text:'#0f766e', border:'#5eead4' },
+    purple:      { bg:'#ede9fe', text:'#6d28d9', border:'#c4b5fd' },
+    cyan:        { bg:'#cffafe', text:'#0e7490', border:'#67e8f9' },
+    violet:      { bg:'#f3e8ff', text:'#7c3aed', border:'#d8b4fe' }
+  };
+
+  // ── DEFAULT WARDS (from spec — admin can override via Firestore) ──────
+  var DEFAULTS = [
+    { id:'pm_rahat',         label:'PM RAHAT',          icon:'🚑',        colorKey:'red',         caseType:'both',         order:0  },
+    { id:'orthopaedics',     label:'Orthopaedics',      icon:'🦴',        colorKey:'orange',      caseType:'both',         order:1  },
+    { id:'male_surgical',    label:'Male Surgical',     icon:'👨🔪',       colorKey:'indigo',      caseType:'both',         order:2  },
+    { id:'female_surgical',  label:'Female Surgical',   icon:'👩🔪',       colorKey:'pinkIndigo',  caseType:'both',         order:3  },
+    { id:'male_medical_a',   label:'Male Medical A',    icon:'👨\u200d⚕️🩺🅰️', colorKey:'blue',  caseType:'conservative', order:4  },
+    { id:'male_medical_b',   label:'Male Medical B',    icon:'👨\u200d⚕️🩺🅱️', colorKey:'blue',  caseType:'conservative', order:5  },
+    { id:'female_medical_a', label:'Female Medical A',  icon:'👩\u200d⚕️🩺🅰️', colorKey:'rose',  caseType:'conservative', order:6  },
+    { id:'female_medical_b', label:'Female Medical B',  icon:'👩\u200d⚕️🩺🅱️', colorKey:'rose',  caseType:'conservative', order:7  },
+    { id:'micu',             label:'MICU',              icon:'❤️\u200d🩹📈',   colorKey:'red',     caseType:'conservative', order:8  },
+    { id:'sicu',             label:'SICU',              icon:'🛏️📈',      colorKey:'darkRed',     caseType:'both',         order:9  },
+    { id:'picu',             label:'PICU',              icon:'👶',        colorKey:'skyBlue',     caseType:'both',         order:10 },
+    { id:'dialysis',         label:'Dialysis',          icon:'💧🩸',      colorKey:'blue',        caseType:'conservative', order:11 },
+    { id:'gynecology',       label:'Gynecology',        icon:'♀️',        colorKey:'pink',        caseType:'both',         order:12 },
+    { id:'ophthalmology',    label:'Ophthalmology',     icon:'👁️',        colorKey:'teal',        caseType:'surgery',      order:13 },
+    { id:'ent',              label:'ENT',               icon:'👂',        colorKey:'purple',      caseType:'both',         order:14 },
+    { id:'dental',           label:'Dental',            icon:'🦷',        colorKey:'cyan',        caseType:'both',         order:15 },
+    { id:'oncology',         label:'Oncology',          icon:'🎗️',        colorKey:'violet',      caseType:'conservative', order:16 },
+    { id:'disaster',         label:'Disaster',          icon:'🚨',        colorKey:'brightRed',   caseType:'both',         order:17 }
+  ];
+
+  // ── ALIAS map: legacy names → canonical labels ────────────────────────
+  var ALIASES = {
+    'Male Surgery Ward':      'Male Surgical',
+    'Female Surgery Ward':    'Female Surgical',
+    'Male Medicine Ward A':   'Male Medical A',
+    'Male Medicine Ward B':   'Male Medical B',
+    'Female Medicine Ward A': 'Female Medical A',
+    'Female Medicine Ward B': 'Female Medical B',
+    'Optha':                  'Ophthalmology',
+    'Onco':                   'Oncology',
+    'Gynae':                  'Gynecology'
+  };
+
+  // Internal state
+  var _wards   = null;   // current canonical list (objects with resolved color)
+  var _ready   = false;
+  var _onReady = [];
+  var _onChange = [];
+
+  // Hydrate a ward record: ensure all fields set; resolve color object from key.
+  function hydrate(w) {
+    var def = DEFAULTS.find(function(d){ return d.label === w.label || d.id === w.id; }) || {};
+    var hydrated = {
+      id:        w.id        || def.id        || (w.label || '').toLowerCase().replace(/[^a-z0-9]+/g,'_'),
+      label:     w.label     || def.label     || '',
+      icon:      w.icon      || def.icon      || '',
+      caseType:  w.caseType  || def.caseType  || 'both',
+      order:     (w.order != null ? w.order : (def.order != null ? def.order : 99)),
+      imageUrl:  w.imageUrl  || w.image       || null,
+      colorKey:  w.colorKey  || def.colorKey  || 'blue'
+    };
+    hydrated.color = C[hydrated.colorKey] || C.blue;
+    return hydrated;
+  }
+
+  function setWards(arr) {
+    _wards = arr.map(hydrate).sort(function(a,b){ return a.order - b.order; });
+    _ready = true;
+    _onReady.splice(0).forEach(function(cb){ try { cb(); } catch(e){ console.warn(e); } });
+    _onChange.forEach(function(cb){ try { cb(); } catch(e){ console.warn(e); } });
+  }
+
+  // Map an arbitrary input name → canonical label (returns null if no match)
+  function canonicalLabel(name) {
+    if (!name) return null;
+    var s = String(name).trim();
+    if (!s) return null;
+    if (ALIASES[s]) return ALIASES[s];
+    // Case-insensitive match against current label list
+    if (_wards) {
+      var hit = _wards.find(function(w){ return w.label.toLowerCase() === s.toLowerCase(); });
+      if (hit) return hit.label;
+    }
+    return s; // unknown → return as-is so existing free-text wards still display
+  }
+
+  function byLabel(name) {
+    if (!_wards) return null;
+    var canon = canonicalLabel(name);
+    return _wards.find(function(w){ return w.label === canon; }) || null;
+  }
+
+  function escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── Public API ────────────────────────────────────────────────────────
+  window.WARD_REGISTRY = {
+    DEFAULTS: DEFAULTS,
+    ALIASES:  ALIASES,
+    isReady:  function(){ return _ready; },
+    list:     function(){ return _wards ? _wards.slice() : DEFAULTS.map(hydrate); },
+    byLabel:  byLabel,
+    canonical: canonicalLabel,
+    caseType: function(name){ var w = byLabel(name); return w ? w.caseType : 'both'; },
+    icon:     function(name){ var w = byLabel(name); return w ? w.icon : ''; },
+    color:    function(name){ var w = byLabel(name); return w ? w.color : C.blue; },
+    onReady:  function(cb){ if (_ready) try { cb(); } catch(e){} else _onReady.push(cb); },
+    onChange: function(cb){ _onChange.push(cb); },
+
+    // Render a colored pill (icon + label). Used in tables, modals, etc.
+    pill: function(name, opts){
+      opts = opts || {};
+      var w = byLabel(name);
+      if (!w) {
+        // Unknown ward — neutral grey pill (preserves the text)
+        return '<span class="ward-pill ward-pill-unknown" style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:50px;font-size:11px;font-weight:600;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb">'+escHtml(name||'—')+'</span>';
+      }
+      var c = w.color;
+      var iconHtml = '';
+      if (w.imageUrl) {
+        iconHtml = '<img src="'+escHtml(w.imageUrl)+'" alt="" style="width:14px;height:14px;object-fit:contain;flex-shrink:0">';
+      } else if (w.icon) {
+        iconHtml = '<span style="font-size:'+(opts.iconSize||'12px')+';line-height:1;flex-shrink:0">'+w.icon+'</span>';
+      }
+      var labelHtml = opts.iconOnly ? '' : '<span>'+escHtml(w.label)+'</span>';
+      return '<span class="ward-pill" data-ward-id="'+w.id+'" '
+           + 'style="display:inline-flex;align-items:center;gap:5px;'
+           + 'padding:2px 9px;border-radius:50px;font-size:'+(opts.fontSize||'11px')+';font-weight:700;'
+           + 'background:'+c.bg+';color:'+c.text+';border:1px solid '+c.border+';'
+           + 'letter-spacing:0.2px;white-space:nowrap;'+(opts.style||'')+'">'
+           + iconHtml + labelHtml
+           + '</span>';
+    },
+
+    // Populate a <select>. Resolves the selected value through ALIASES.
+    populateSelect: function(sel, selected, opts){
+      if (!sel) return;
+      opts = opts || {};
+      var canonSelected = canonicalLabel(selected);
+      var withIcon = opts.withIcon !== false;
+      var caseTypeFilter = opts.caseType || null;  // 'conservative' | 'surgery' | 'both' | null
+      var html = '';
+      if (opts.placeholder !== false) {
+        html += '<option value="">'+(opts.placeholderText || '— Select Ward —')+'</option>';
+      }
+      var list = _wards || DEFAULTS.map(hydrate);
+      list.forEach(function(w){
+        if (caseTypeFilter && w.caseType !== caseTypeFilter && w.caseType !== 'both') return;
+        var text = withIcon && w.icon ? (w.icon + ' ' + w.label) : w.label;
+        var isSel = (w.label === canonSelected) ? ' selected' : '';
+        html += '<option value="'+escHtml(w.label)+'"'+isSel+'>'+escHtml(text)+'</option>';
+      });
+      // Preserve unknown values so legacy data doesn't disappear silently
+      if (selected && canonSelected && !list.find(function(w){ return w.label === canonSelected; })) {
+        html += '<option value="'+escHtml(selected)+'" selected>'+escHtml(selected)+' (unknown)</option>';
+      }
+      sel.innerHTML = html;
+    }
+  };
+
+  // ── Initialise: subscribe to Firestore once `db` is available ─────────
+  function tryInit() {
+    if (typeof db === 'undefined' || !db || !db.collection) {
+      // Fall back to defaults immediately, then keep retrying for Firestore
+      if (!_ready) setWards(DEFAULTS.map(function(d){ return Object.assign({}, d); }));
+      setTimeout(tryInit, 1000);
+      return;
+    }
+    db.collection('settings').doc('wards').onSnapshot(function(doc){
+      if (!doc.exists) { setWards(DEFAULTS.map(function(d){ return Object.assign({}, d); })); return; }
+      var data = doc.data() || {};
+      var arr = data.wards;
+      if (!Array.isArray(arr) || arr.length === 0) {
+        setWards(DEFAULTS.map(function(d){ return Object.assign({}, d); }));
+        return;
+      }
+      // Detect legacy (array of strings) and migrate to objects on-the-fly
+      if (typeof arr[0] === 'string') {
+        var migrated = arr.map(function(name, i){
+          var canon = ALIASES[name] || name;
+          var def = DEFAULTS.find(function(d){ return d.label === canon; });
+          return def ? Object.assign({}, def, { order:i }) : {
+            id: canon.toLowerCase().replace(/[^a-z0-9]+/g,'_'),
+            label: canon, icon: '', colorKey: 'blue', caseType: 'both', order: i
+          };
+        });
+        setWards(migrated);
+      } else {
+        setWards(arr);
+      }
+    }, function(err){
+      console.warn('[WARD_REGISTRY] Firestore listen failed:', err && err.message);
+      if (!_ready) setWards(DEFAULTS.map(function(d){ return Object.assign({}, d); }));
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tryInit);
+  } else {
+    tryInit();
+  }
+
+  // ─── Auto-populate any <select data-ward-select="1"> on the page ──────
+  function _wardSelectsBootstrap(){
+    if (!window.WARD_REGISTRY) { setTimeout(_wardSelectsBootstrap, 250); return; }
+    function populate(){
+      var sels = document.querySelectorAll('select[data-ward-select]');
+      sels.forEach(function(sel){
+        var extras = (sel.getAttribute('data-ward-extras') || '').split(',').filter(Boolean);
+        var current = sel.value || sel.getAttribute('data-pending-value') || '';
+        var canon = WARD_REGISTRY.canonical(current);
+        WARD_REGISTRY.populateSelect(sel, canon, {
+          placeholderText: sel.getAttribute('data-placeholder') || '— Select Ward —'
+        });
+        if (extras.length) {
+          var sep = document.createElement('option');
+          sep.disabled = true;
+          sep.textContent = '──────────';
+          sel.appendChild(sep);
+          extras.forEach(function(ex){
+            var o = document.createElement('option');
+            o.value = ex; o.textContent = ex;
+            if (ex === current) o.selected = true;
+            sel.appendChild(o);
+          });
+        }
+      });
+    }
+    WARD_REGISTRY.onReady(populate);
+    WARD_REGISTRY.onChange(populate);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _wardSelectsBootstrap);
+  } else {
+    _wardSelectsBootstrap();
+  }
+
+})();
+
 </script>
 </body>
 </html>

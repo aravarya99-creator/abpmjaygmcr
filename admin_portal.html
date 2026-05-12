@@ -524,7 +524,7 @@ tr:hover td{background:#EEF3FF}
             </select>
           </div>
           <div class="mfld" style="grid-column:1/-1"><label>Ward / Department</label>
-            <select id="seWard">
+            <select id="seWard" data-ward-select="1" data-ward-extras="Admin,Finance,OPD">
               <option value="">-- Select Ward --</option>
               <option>Orthopaedics</option><option>Male Surgery Ward</option><option>Female Surgery Ward</option>
               <option>Male Medicine Ward A</option><option>Male Medicine Ward B</option>
@@ -564,18 +564,96 @@ tr:hover td{background:#EEF3FF}
 
       <!-- ── TAB: Ward Management ── -->
       <div class="dmt-pane active" id="dmpane-wardmgmt">
-        <div class="card">
-          <div class="card-hd">Ward Management</div>
-          <div id="wardList"></div>
-          <div class="add-row" style="margin-top:10px">
-            <input type="text" class="add-input" id="newWard" placeholder="Type new ward name">
-            <button class="btn btn-pri" onclick="addWard()">+ Add Ward</button>
+
+        <!-- Hero info card -->
+        <div class="card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;margin-bottom:12px">
+          <div class="card-hd" style="color:#1e3a8a;display:flex;align-items:center;gap:8px">
+            <span style="font-size:18px">🏨</span> Ward Management
+            <span id="wmStatus" style="margin-left:auto;font-size:11px;color:#6b7280;font-weight:500"></span>
           </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:10px">
-            <button class="btn btn-pri" onclick="saveWardsToDb()">💾 Save Wards</button>
+          <div style="font-size:12px;color:#1e3a8a;line-height:1.65;margin-bottom:10px">
+            Manage the hospital ward catalogue. <strong>Label</strong>, <strong>icon</strong>, <strong>color</strong>, and <strong>case type</strong> for each ward.
+            Changes auto-publish to all portals (PMAM, IC, Landing Page) via real-time sync — no reload required.
           </div>
-          <div id="wardSaveMsg" style="font-size:11px;font-weight:600;margin-top:6px;min-height:14px"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-pri" onclick="wmSave()" style="background:linear-gradient(135deg,#1d4ed8,#2563eb)">💾 Save All Changes</button>
+            <button class="btn" onclick="wmAddWard()" style="background:#fff;border:1.5px solid #93c5fd;color:#1e3a8a">+ Add Ward</button>
+            <button class="btn" onclick="wmReload()" style="background:#fff;border:1.5px solid #93c5fd;color:#1e3a8a">↻ Reload</button>
+            <button class="btn" onclick="wmResetDefaults()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">⚠️ Reset to Defaults</button>
+            <button class="btn" onclick="wmRunMigration()" style="background:#dcfce7;color:#166534;border:1.5px solid #86efac;margin-left:auto" title="One-time migration: rewrites old ward names in users/rosters">🔄 Migrate Legacy Names</button>
+          </div>
         </div>
+
+        <!-- Ward cards grid -->
+        <div class="card">
+          <div class="card-hd"><span style="display:flex;align-items:center;gap:6px">🏥 Wards <span id="wmCount" style="font-weight:400;color:#6b7280;font-size:11px"></span></span></div>
+          <div id="wmGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px"></div>
+          <div id="wmSaveMsg" style="font-size:11.5px;font-weight:600;margin-top:12px;min-height:16px"></div>
+        </div>
+
+        <!-- Edit modal -->
+        <div id="wmEditModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:9100;align-items:center;justify-content:center;padding:20px">
+          <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.3)">
+            <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:10px">
+              <span style="font-size:20px">✏️</span>
+              <h3 style="margin:0;font-size:16px;font-weight:700;flex:1" id="wmEditTitle">Edit Ward</h3>
+              <button onclick="wmCloseEdit()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:18px;line-height:1">×</button>
+            </div>
+            <div style="padding:18px 22px;display:flex;flex-direction:column;gap:14px">
+              <div>
+                <label style="font-size:10.5px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:5px">Label *</label>
+                <input type="text" id="wmEditLabel" placeholder="e.g. Male Medical A" style="width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none">
+              </div>
+              <div>
+                <label style="font-size:10.5px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:5px">Icon (emoji or text)</label>
+                <input type="text" id="wmEditIcon" placeholder="e.g. 🦴 or 🅰️" style="width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:18px;font-family:inherit;outline:none">
+                <div style="font-size:10px;color:#9ca3af;margin-top:4px">Paste an emoji or use the inline image URL (advanced)</div>
+              </div>
+              <div>
+                <label style="font-size:10.5px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:5px">Color</label>
+                <select id="wmEditColor" style="width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;cursor:pointer">
+                  <option value="red">🔴 Red</option>
+                  <option value="darkRed">🟥 Dark Red</option>
+                  <option value="brightRed">⛔ Bright Red</option>
+                  <option value="orange">🟧 Orange</option>
+                  <option value="indigo">🟪 Indigo</option>
+                  <option value="pinkIndigo">💗 Pink-Indigo</option>
+                  <option value="blue">🔵 Blue</option>
+                  <option value="rose">🌹 Rose</option>
+                  <option value="skyBlue">🌤️ Sky Blue</option>
+                  <option value="pink">🩷 Pink</option>
+                  <option value="teal">🟢 Teal</option>
+                  <option value="purple">🟣 Purple</option>
+                  <option value="cyan">🩵 Cyan</option>
+                  <option value="violet">💜 Violet</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:10.5px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:5px">Case Type</label>
+                <select id="wmEditCaseType" style="width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;cursor:pointer">
+                  <option value="conservative">Conservative only</option>
+                  <option value="surgery">Surgery only</option>
+                  <option value="both">Both</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:10.5px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:5px">Custom Image URL (optional)</label>
+                <input type="text" id="wmEditImage" placeholder="https://… or data:image/png;base64,…" style="width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:11.5px;font-family:inherit;outline:none">
+                <div style="font-size:10px;color:#9ca3af;margin-top:4px">If set, overrides the emoji icon</div>
+              </div>
+              <!-- Live preview -->
+              <div style="background:#f9fafb;border-radius:10px;padding:12px;border:1px dashed #cbd5e1">
+                <div style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Preview</div>
+                <div id="wmEditPreview" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"></div>
+              </div>
+            </div>
+            <div style="padding:14px 22px;background:#f8fafc;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #e5e7eb">
+              <button onclick="wmCloseEdit()" style="padding:7px 16px;background:#fff;border:1.5px solid #cbd5e1;color:#475569;border-radius:8px;cursor:pointer;font-weight:600;font-size:12.5px">Cancel</button>
+              <button onclick="wmSaveEdit()" style="padding:7px 16px;background:linear-gradient(135deg,#1d4ed8,#2563eb);border:none;color:#fff;border-radius:8px;cursor:pointer;font-weight:700;font-size:12.5px">Save</button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- ── TAB: Monthly Reports ── -->
@@ -1401,7 +1479,7 @@ tr:hover td{background:#EEF3FF}
       </select>
     </div>
     <div class="mfld" id="wardFieldWrap"><label>Ward Assigned</label>
-      <select id="newWardSel">
+      <select id="newWardSel" data-ward-select="1">
         <option value="">-- Select Ward --</option>
         <option>Orthopaedics</option><option>Male Surgery Ward</option>
         <option>Female Surgery Ward</option><option>Gynae</option>
@@ -1474,7 +1552,9 @@ tr:hover td{background:#EEF3FF}
 // ===== DATA =====
 let pmams=[];
 let others=[];
-let wards=['Orthopaedics','Male Surgery Ward','Female Surgery Ward','Male Medicine Ward A','Male Medicine Ward B','Female Medicine Ward A','Female Medicine Ward B','MICU','SICU','Optha','Onco','Gynae','ENT','Dental','Disaster','Dialysis'];
+// `wards` is kept as a derived array of labels for backward compatibility
+// with any code that still reads it. Source of truth is WARD_REGISTRY.
+let wards=[];
 let staffData=[];
 let rosterData=[];
 let holidayData=[];
@@ -1743,7 +1823,7 @@ function showDmTab(tab, el){
   var pane = document.getElementById('dmpane-'+tab);
   if (pane) pane.classList.add('active');
   // Auto-actions when switching tabs (only the 3 panes that live in DM)
-  if (tab === 'wardmgmt') { renderWards(); }
+  if (tab === 'wardmgmt') { if (typeof wmReload === 'function') wmReload(); else if (typeof renderWards === 'function') renderWards(); }
   if (tab === 'reports')  { dmLoadFilters(); }
   if (tab === 'leaves')   { dmLoadFilters(); }
 }
@@ -2037,18 +2117,291 @@ function wrSave(){
 }
 
 // ══════════════════════════════════════════════════════
-// WARD MANAGEMENT — save to Firebase
+// WARD MANAGEMENT — full editor on top of WARD_REGISTRY
+// Saves objects to settings/wards. Live-syncs across portals.
 // ══════════════════════════════════════════════════════
-function saveWardsToDb(){
-  var msg = document.getElementById('wardSaveMsg');
-  if (msg) { msg.style.color='#6b7280'; msg.textContent='Saving…'; }
-  db.collection('settings').doc('wards').set({ wards:wards, _updatedAt:Date.now() }, { merge:true })
-    .then(function(){
-      if (msg) { msg.style.color='#166534'; msg.textContent='✅ Wards saved!'; setTimeout(function(){ msg.textContent=''; },3000); }
-      showToast('✅ Wards saved','success');
-    })
-    .catch(function(e){ if (msg) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; } });
+var _wmEditing = null; // {newIndex} or {existingIndex}
+var _wmLocal   = [];   // editable copy
+
+function wmSetStatus(msg, color){
+  var el = document.getElementById('wmStatus');
+  if (el) { el.style.color = color || '#6b7280'; el.textContent = msg || ''; }
 }
+
+function wmReload(){
+  // Re-pull from registry (which is live from Firestore)
+  _wmLocal = (window.WARD_REGISTRY ? WARD_REGISTRY.list() : []).map(function(w){
+    return Object.assign({}, w);
+  });
+  // Also sync derived `wards` label array for any legacy code
+  wards = _wmLocal.map(function(w){ return w.label; });
+  wmRender();
+  wmSetStatus('● Synced with Firebase', '#166534');
+}
+
+function wmRender(){
+  var grid = document.getElementById('wmGrid');
+  var cnt  = document.getElementById('wmCount');
+  if (!grid) return;
+  if (cnt) cnt.textContent = '('+_wmLocal.length+')';
+  if (!_wmLocal.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#9ca3af;font-style:italic;background:#f9fafb;border-radius:10px">No wards configured. Click "+ Add Ward" or "⚠️ Reset to Defaults".</div>';
+    return;
+  }
+  // Order
+  _wmLocal.sort(function(a,b){ return (a.order||0)-(b.order||0); });
+  grid.innerHTML = _wmLocal.map(function(w, i){
+    var c = (window.WARD_REGISTRY && WARD_REGISTRY.color) ? WARD_REGISTRY.color(w.label) : { bg:'#dbeafe', text:'#1e40af', border:'#93c5fd' };
+    var iconHtml = w.imageUrl
+      ? '<img src="'+escAttr(w.imageUrl)+'" alt="" style="width:32px;height:32px;object-fit:contain;border-radius:6px;background:#fff;padding:2px">'
+      : '<div style="width:36px;height:36px;border-radius:9px;background:'+c.bg+';display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;flex-shrink:0;border:1px solid '+c.border+'">'+(w.icon||'·')+'</div>';
+    return '<div style="background:#fff;border:1.5px solid '+c.border+';border-radius:12px;padding:11px 12px;display:flex;align-items:center;gap:11px;transition:all 0.15s" onmouseover="this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'\'">'
+      + iconHtml
+      + '<div style="flex:1;min-width:0">'
+      +   '<div style="font-weight:700;font-size:13px;color:#1e293b;line-height:1.25">'+escHtml(w.label)+'</div>'
+      +   '<div style="font-size:10px;color:#6b7280;margin-top:2px;display:flex;gap:6px;flex-wrap:wrap">'
+      +     '<span style="background:'+c.bg+';color:'+c.text+';padding:1px 7px;border-radius:50px;font-weight:700">'+escHtml(w.caseType||'both')+'</span>'
+      +     '<span style="color:#9ca3af;font-family:monospace">'+escHtml(w.id||'')+'</span>'
+      +   '</div>'
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:3px">'
+      +   '<button onclick="wmEdit('+i+')" style="width:28px;height:24px;border:1px solid #bfdbfe;background:#eff6ff;color:#1e3a8a;cursor:pointer;border-radius:6px;font-size:11px" title="Edit">✏️</button>'
+      +   '<button onclick="wmRemove('+i+')" style="width:28px;height:24px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;cursor:pointer;border-radius:6px;font-size:11px" title="Delete">🗑️</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function escAttr(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escHtml(s){ return escAttr(s); }
+
+function wmEdit(i){
+  _wmEditing = { index: i };
+  var w = _wmLocal[i];
+  document.getElementById('wmEditTitle').textContent = 'Edit Ward — ' + w.label;
+  document.getElementById('wmEditLabel').value     = w.label || '';
+  document.getElementById('wmEditIcon').value      = w.icon  || '';
+  document.getElementById('wmEditColor').value     = w.colorKey || 'blue';
+  document.getElementById('wmEditCaseType').value  = w.caseType || 'both';
+  document.getElementById('wmEditImage').value     = w.imageUrl || '';
+  document.getElementById('wmEditModal').style.display = 'flex';
+  wmUpdatePreview();
+  // Wire live preview updates
+  ['wmEditLabel','wmEditIcon','wmEditColor','wmEditImage'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el && !el._wmBound) {
+      el._wmBound = true;
+      el.addEventListener('input', wmUpdatePreview);
+      el.addEventListener('change', wmUpdatePreview);
+    }
+  });
+}
+
+function wmUpdatePreview(){
+  var label = (document.getElementById('wmEditLabel').value || '').trim() || 'Preview';
+  var icon  = (document.getElementById('wmEditIcon').value || '').trim();
+  var colorKey = document.getElementById('wmEditColor').value;
+  var img   = (document.getElementById('wmEditImage').value || '').trim();
+  // Read color from local copy of palette by reaching into WARD_REGISTRY's defaults
+  var colorMap = {
+    red:{bg:'#fee2e2',text:'#dc2626',border:'#fecaca'}, darkRed:{bg:'#fecaca',text:'#991b1b',border:'#f87171'},
+    brightRed:{bg:'#fef2f2',text:'#dc2626',border:'#dc2626'}, orange:{bg:'#ffedd5',text:'#c2410c',border:'#fdba74'},
+    indigo:{bg:'#e0e7ff',text:'#4338ca',border:'#a5b4fc'}, pinkIndigo:{bg:'#fce7f3',text:'#9333ea',border:'#f9a8d4'},
+    blue:{bg:'#dbeafe',text:'#1e40af',border:'#93c5fd'}, rose:{bg:'#ffe4e6',text:'#be185d',border:'#fda4af'},
+    skyBlue:{bg:'#e0f2fe',text:'#0369a1',border:'#7dd3fc'}, pink:{bg:'#fce7f3',text:'#be185d',border:'#f9a8d4'},
+    teal:{bg:'#ccfbf1',text:'#0f766e',border:'#5eead4'}, purple:{bg:'#ede9fe',text:'#6d28d9',border:'#c4b5fd'},
+    cyan:{bg:'#cffafe',text:'#0e7490',border:'#67e8f9'}, violet:{bg:'#f3e8ff',text:'#7c3aed',border:'#d8b4fe'}
+  };
+  var c = colorMap[colorKey] || colorMap.blue;
+  var iconHtml = img
+    ? '<img src="'+escAttr(img)+'" alt="" style="width:18px;height:18px;object-fit:contain">'
+    : '<span style="font-size:13px;line-height:1">'+escHtml(icon)+'</span>';
+  var prev = document.getElementById('wmEditPreview');
+  if (prev) {
+    prev.innerHTML =
+      // Pill style
+      '<span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:50px;font-size:11px;font-weight:700;background:'+c.bg+';color:'+c.text+';border:1px solid '+c.border+'">'+iconHtml+'<span>'+escHtml(label)+'</span></span>'
+      // Card style
+      + '<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:10px;font-size:12px;font-weight:700;background:'+c.bg+';color:'+c.text+';border:1.5px solid '+c.border+'">'+iconHtml+'<span>'+escHtml(label)+'</span></span>';
+  }
+}
+
+function wmCloseEdit(){
+  document.getElementById('wmEditModal').style.display = 'none';
+  _wmEditing = null;
+}
+
+function wmSaveEdit(){
+  if (!_wmEditing) return;
+  var label = (document.getElementById('wmEditLabel').value || '').trim();
+  if (!label) { alert('Label is required'); return; }
+  var w = _wmLocal[_wmEditing.index];
+  w.label    = label;
+  w.icon     = (document.getElementById('wmEditIcon').value || '').trim();
+  w.colorKey = document.getElementById('wmEditColor').value;
+  w.caseType = document.getElementById('wmEditCaseType').value;
+  w.imageUrl = (document.getElementById('wmEditImage').value || '').trim() || null;
+  if (!w.id) w.id = label.toLowerCase().replace(/[^a-z0-9]+/g,'_');
+  wmCloseEdit();
+  wmRender();
+  wmSetStatus('● Unsaved changes', '#dc2626');
+}
+
+function wmAddWard(){
+  var newWard = {
+    id: 'ward_'+Date.now(),
+    label: 'New Ward',
+    icon: '',
+    colorKey: 'blue',
+    caseType: 'both',
+    imageUrl: null,
+    order: _wmLocal.length
+  };
+  _wmLocal.push(newWard);
+  wmRender();
+  // Immediately open edit dialog for it
+  wmEdit(_wmLocal.length - 1);
+  wmSetStatus('● Unsaved changes', '#dc2626');
+}
+
+function wmRemove(i){
+  var w = _wmLocal[i];
+  if (!confirm('Delete ward "'+(w && w.label)+'"?\n\nThis only removes it from the catalogue.\nExisting users/rosters referencing this ward will still display its name.')) return;
+  _wmLocal.splice(i, 1);
+  // Renumber
+  _wmLocal.forEach(function(w, idx){ w.order = idx; });
+  wmRender();
+  wmSetStatus('● Unsaved changes', '#dc2626');
+}
+
+function wmResetDefaults(){
+  if (!confirm('Reset ALL wards to the default 18 (from spec)?\n\nAny custom wards or edits will be lost.')) return;
+  if (!window.WARD_REGISTRY) return;
+  _wmLocal = WARD_REGISTRY.DEFAULTS.map(function(d){ return Object.assign({}, d); });
+  wmRender();
+  wmSetStatus('● Unsaved changes (defaults loaded)', '#dc2626');
+}
+
+function wmSave(){
+  var msg = document.getElementById('wmSaveMsg');
+  if (msg) { msg.style.color='#6b7280'; msg.textContent='Saving…'; }
+  // Strip resolved `color` object (regenerated from colorKey on read)
+  var toSave = _wmLocal.map(function(w, i){
+    return {
+      id:       w.id,
+      label:    w.label,
+      icon:     w.icon || '',
+      colorKey: w.colorKey || 'blue',
+      caseType: w.caseType || 'both',
+      imageUrl: w.imageUrl || null,
+      order:    i
+    };
+  });
+  // Also keep a derived label array for any old reader
+  wards = toSave.map(function(w){ return w.label; });
+  db.collection('settings').doc('wards').set({
+    wards: toSave,
+    _updatedAt: Date.now(),
+    _schema: 'v2'
+  }, { merge: false }).then(function(){
+    if (msg) { msg.style.color='#166534'; msg.textContent='✅ Wards saved! (Auto-published to all portals)'; setTimeout(function(){ msg.textContent=''; },3500); }
+    showToast('✅ Wards saved','success');
+    wmSetStatus('● Saved', '#166534');
+  }).catch(function(e){
+    if (msg) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; }
+  });
+}
+
+// ──────────────────────────────────────────────────────────
+// One-time MIGRATION — rewrites legacy ward names everywhere.
+// Safe to run repeatedly (idempotent). Logs counts.
+// ──────────────────────────────────────────────────────────
+function wmRunMigration(){
+  if (!window.WARD_REGISTRY) { alert('WARD_REGISTRY not ready, please wait a moment.'); return; }
+  var ALIASES = WARD_REGISTRY.ALIASES || {};
+  var aliasKeys = Object.keys(ALIASES);
+  if (!aliasKeys.length) { alert('No alias map — nothing to migrate.'); return; }
+  if (!confirm('Migrate legacy ward names to canonical labels?\n\nThis updates:\n  • users[].ward\n  • settings/roster.rows[].ward\n\nSafe to run multiple times. Continue?')) return;
+
+  var counts = { users:0, roster:0 };
+  var batchPromises = [];
+
+  // 1) Users
+  batchPromises.push(
+    db.collection('users').get().then(function(snap){
+      var batch = db.batch();
+      var changed = 0;
+      snap.forEach(function(doc){
+        var u = doc.data() || {};
+        if (u.ward && ALIASES[u.ward]) {
+          batch.update(doc.ref, { ward: ALIASES[u.ward], _migratedAt: Date.now() });
+          changed++;
+        }
+      });
+      counts.users = changed;
+      return changed > 0 ? batch.commit() : Promise.resolve();
+    })
+  );
+
+  // 2) Roster
+  batchPromises.push(
+    db.collection('settings').doc('roster').get().then(function(doc){
+      if (!doc.exists) return;
+      var data = doc.data() || {};
+      var rows = Array.isArray(data.rows) ? data.rows : [];
+      var changed = 0;
+      var fixed = rows.map(function(r){
+        if (r && r.ward && ALIASES[r.ward]) { changed++; return Object.assign({}, r, { ward: ALIASES[r.ward] }); }
+        return r;
+      });
+      counts.roster = changed;
+      return changed > 0
+        ? db.collection('settings').doc('roster').set({ rows: fixed, _updatedAt: Date.now() }, { merge: true })
+        : Promise.resolve();
+    })
+  );
+
+  Promise.all(batchPromises).then(function(){
+    var lines = [
+      'Migration complete:',
+      '  • Users migrated: '+counts.users,
+      '  • Roster rows migrated: '+counts.roster
+    ];
+    alert(lines.join('\n'));
+    showToast('✅ Migration complete', 'success');
+  }).catch(function(e){
+    alert('Migration error: '+e.message);
+  });
+}
+
+// ── Hook to refresh `wards` array + Ward Management UI when registry updates ──
+(function bindWardRegistry(){
+  function bind(){
+    if (!window.WARD_REGISTRY) { setTimeout(bind, 300); return; }
+    WARD_REGISTRY.onReady(function(){
+      wards = WARD_REGISTRY.list().map(function(w){ return w.label; });
+      if (document.getElementById('wmGrid')) {
+        _wmLocal = WARD_REGISTRY.list().map(function(w){ return Object.assign({}, w); });
+        wmRender();
+      }
+    });
+    WARD_REGISTRY.onChange(function(){
+      wards = WARD_REGISTRY.list().map(function(w){ return w.label; });
+      // Don't blow away unsaved local edits silently
+      var anyUnsaved = (document.getElementById('wmStatus') || {}).textContent || '';
+      if (document.getElementById('wmGrid') && !anyUnsaved.includes('Unsaved')) {
+        _wmLocal = WARD_REGISTRY.list().map(function(w){ return Object.assign({}, w); });
+        wmRender();
+      }
+    });
+  }
+  bind();
+})();
+
+// Back-compat: legacy code calls renderWards() — route to wmRender if available
+function renderWards(){ if (typeof wmRender === 'function') wmRender(); }
+function addWard(){ wmAddWard(); }
+function saveWardsToDb(){ wmSave(); }
 
 
 function renderRoster(){
@@ -2100,16 +2453,6 @@ function showPanel(id,el){
   if (id === 'dmReports'         && typeof dmLoadFilters === 'function')   dmLoadFilters();
   if (id === 'dmLeaves'          && typeof dmLoadFilters === 'function')   dmLoadFilters();
 }
-function renderWards(){
-  document.getElementById('wardList').innerHTML=wards.map((w,i)=>`
-    <div class="list-item">
-      <span class="li-text">${w}</span>
-      <div class="li-actions">
-        <button class="li-btn li-del" onclick="wards.splice(${i},1);renderWards()">Remove</button>
-      </div>
-    </div>`).join('');
-}
-function addWard(){const v=document.getElementById('newWard').value.trim();if(!v)return;wards.push(v);document.getElementById('newWard').value='';renderWards();}
 function renderStaff(){
   var el = document.getElementById('staffGrid');
   if (!el) return;
@@ -4717,5 +5060,290 @@ window.addEventListener('DOMContentLoaded', function(){
 });
 
 </script>
+
+<!-- ═══ WARD_REGISTRY (auto-injected) ═══ -->
+<script>
+// ════════════════════════════════════════════════════════════════════════
+// WARD_REGISTRY — single source of truth for ward labels, icons, colors,
+// and case-type classification across ALL portals.
+//
+// Data lives in Firestore at settings/wards.
+//   Document shape (new):  { wards: [{ id, label, icon, color, caseType,
+//                                       order, imageUrl? }], _updatedAt }
+//   Legacy shape:          { wards: ['Name1','Name2', ...] }
+//
+// On load:
+//   1) Subscribes to settings/wards via onSnapshot
+//   2) If doc is missing OR uses legacy array shape, falls back to DEFAULTS
+//      and (admin-portal only) writes DEFAULTS up to Firestore
+//   3) Maintains ALIAS map: old hard-coded names → canonical labels, so
+//      pre-existing Firestore data (users, rosters) keeps resolving
+//
+// Public API:
+//   WARD_REGISTRY.list()              → array of canonical ward objects
+//   WARD_REGISTRY.byLabel(name)       → ward object (resolves aliases)
+//   WARD_REGISTRY.canonical(name)     → canonical label string
+//   WARD_REGISTRY.caseType(name)      → 'conservative' | 'surgery' | 'both'
+//   WARD_REGISTRY.icon(name)          → emoji or img-src string
+//   WARD_REGISTRY.color(name)         → CSS color (hex)
+//   WARD_REGISTRY.pill(name, opts?)   → HTML string of a colored pill
+//   WARD_REGISTRY.populateSelect(sel, selected?, opts?) → fills a <select>
+//   WARD_REGISTRY.onReady(cb)         → fires once when data is loaded
+//   WARD_REGISTRY.onChange(cb)        → fires on every Firestore update
+// ════════════════════════════════════════════════════════════════════════
+
+(function(){
+  'use strict';
+
+  // ── Color tokens (consistent across portals) ──────────────────────────
+  var C = {
+    red:         { bg:'#fee2e2', text:'#dc2626', border:'#fecaca' },
+    darkRed:     { bg:'#fecaca', text:'#991b1b', border:'#f87171' },
+    brightRed:   { bg:'#fef2f2', text:'#dc2626', border:'#dc2626' },
+    orange:      { bg:'#ffedd5', text:'#c2410c', border:'#fdba74' },
+    indigo:      { bg:'#e0e7ff', text:'#4338ca', border:'#a5b4fc' },
+    pinkIndigo:  { bg:'#fce7f3', text:'#9333ea', border:'#f9a8d4' },
+    blue:        { bg:'#dbeafe', text:'#1e40af', border:'#93c5fd' },
+    rose:        { bg:'#ffe4e6', text:'#be185d', border:'#fda4af' },
+    skyBlue:     { bg:'#e0f2fe', text:'#0369a1', border:'#7dd3fc' },
+    pink:        { bg:'#fce7f3', text:'#be185d', border:'#f9a8d4' },
+    teal:        { bg:'#ccfbf1', text:'#0f766e', border:'#5eead4' },
+    purple:      { bg:'#ede9fe', text:'#6d28d9', border:'#c4b5fd' },
+    cyan:        { bg:'#cffafe', text:'#0e7490', border:'#67e8f9' },
+    violet:      { bg:'#f3e8ff', text:'#7c3aed', border:'#d8b4fe' }
+  };
+
+  // ── DEFAULT WARDS (from spec — admin can override via Firestore) ──────
+  var DEFAULTS = [
+    { id:'pm_rahat',         label:'PM RAHAT',          icon:'🚑',        colorKey:'red',         caseType:'both',         order:0  },
+    { id:'orthopaedics',     label:'Orthopaedics',      icon:'🦴',        colorKey:'orange',      caseType:'both',         order:1  },
+    { id:'male_surgical',    label:'Male Surgical',     icon:'👨🔪',       colorKey:'indigo',      caseType:'both',         order:2  },
+    { id:'female_surgical',  label:'Female Surgical',   icon:'👩🔪',       colorKey:'pinkIndigo',  caseType:'both',         order:3  },
+    { id:'male_medical_a',   label:'Male Medical A',    icon:'👨\u200d⚕️🩺🅰️', colorKey:'blue',  caseType:'conservative', order:4  },
+    { id:'male_medical_b',   label:'Male Medical B',    icon:'👨\u200d⚕️🩺🅱️', colorKey:'blue',  caseType:'conservative', order:5  },
+    { id:'female_medical_a', label:'Female Medical A',  icon:'👩\u200d⚕️🩺🅰️', colorKey:'rose',  caseType:'conservative', order:6  },
+    { id:'female_medical_b', label:'Female Medical B',  icon:'👩\u200d⚕️🩺🅱️', colorKey:'rose',  caseType:'conservative', order:7  },
+    { id:'micu',             label:'MICU',              icon:'❤️\u200d🩹📈',   colorKey:'red',     caseType:'conservative', order:8  },
+    { id:'sicu',             label:'SICU',              icon:'🛏️📈',      colorKey:'darkRed',     caseType:'both',         order:9  },
+    { id:'picu',             label:'PICU',              icon:'👶',        colorKey:'skyBlue',     caseType:'both',         order:10 },
+    { id:'dialysis',         label:'Dialysis',          icon:'💧🩸',      colorKey:'blue',        caseType:'conservative', order:11 },
+    { id:'gynecology',       label:'Gynecology',        icon:'♀️',        colorKey:'pink',        caseType:'both',         order:12 },
+    { id:'ophthalmology',    label:'Ophthalmology',     icon:'👁️',        colorKey:'teal',        caseType:'surgery',      order:13 },
+    { id:'ent',              label:'ENT',               icon:'👂',        colorKey:'purple',      caseType:'both',         order:14 },
+    { id:'dental',           label:'Dental',            icon:'🦷',        colorKey:'cyan',        caseType:'both',         order:15 },
+    { id:'oncology',         label:'Oncology',          icon:'🎗️',        colorKey:'violet',      caseType:'conservative', order:16 },
+    { id:'disaster',         label:'Disaster',          icon:'🚨',        colorKey:'brightRed',   caseType:'both',         order:17 }
+  ];
+
+  // ── ALIAS map: legacy names → canonical labels ────────────────────────
+  var ALIASES = {
+    'Male Surgery Ward':      'Male Surgical',
+    'Female Surgery Ward':    'Female Surgical',
+    'Male Medicine Ward A':   'Male Medical A',
+    'Male Medicine Ward B':   'Male Medical B',
+    'Female Medicine Ward A': 'Female Medical A',
+    'Female Medicine Ward B': 'Female Medical B',
+    'Optha':                  'Ophthalmology',
+    'Onco':                   'Oncology',
+    'Gynae':                  'Gynecology'
+  };
+
+  // Internal state
+  var _wards   = null;   // current canonical list (objects with resolved color)
+  var _ready   = false;
+  var _onReady = [];
+  var _onChange = [];
+
+  // Hydrate a ward record: ensure all fields set; resolve color object from key.
+  function hydrate(w) {
+    var def = DEFAULTS.find(function(d){ return d.label === w.label || d.id === w.id; }) || {};
+    var hydrated = {
+      id:        w.id        || def.id        || (w.label || '').toLowerCase().replace(/[^a-z0-9]+/g,'_'),
+      label:     w.label     || def.label     || '',
+      icon:      w.icon      || def.icon      || '',
+      caseType:  w.caseType  || def.caseType  || 'both',
+      order:     (w.order != null ? w.order : (def.order != null ? def.order : 99)),
+      imageUrl:  w.imageUrl  || w.image       || null,
+      colorKey:  w.colorKey  || def.colorKey  || 'blue'
+    };
+    hydrated.color = C[hydrated.colorKey] || C.blue;
+    return hydrated;
+  }
+
+  function setWards(arr) {
+    _wards = arr.map(hydrate).sort(function(a,b){ return a.order - b.order; });
+    _ready = true;
+    _onReady.splice(0).forEach(function(cb){ try { cb(); } catch(e){ console.warn(e); } });
+    _onChange.forEach(function(cb){ try { cb(); } catch(e){ console.warn(e); } });
+  }
+
+  // Map an arbitrary input name → canonical label (returns null if no match)
+  function canonicalLabel(name) {
+    if (!name) return null;
+    var s = String(name).trim();
+    if (!s) return null;
+    if (ALIASES[s]) return ALIASES[s];
+    // Case-insensitive match against current label list
+    if (_wards) {
+      var hit = _wards.find(function(w){ return w.label.toLowerCase() === s.toLowerCase(); });
+      if (hit) return hit.label;
+    }
+    return s; // unknown → return as-is so existing free-text wards still display
+  }
+
+  function byLabel(name) {
+    if (!_wards) return null;
+    var canon = canonicalLabel(name);
+    return _wards.find(function(w){ return w.label === canon; }) || null;
+  }
+
+  function escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── Public API ────────────────────────────────────────────────────────
+  window.WARD_REGISTRY = {
+    DEFAULTS: DEFAULTS,
+    ALIASES:  ALIASES,
+    isReady:  function(){ return _ready; },
+    list:     function(){ return _wards ? _wards.slice() : DEFAULTS.map(hydrate); },
+    byLabel:  byLabel,
+    canonical: canonicalLabel,
+    caseType: function(name){ var w = byLabel(name); return w ? w.caseType : 'both'; },
+    icon:     function(name){ var w = byLabel(name); return w ? w.icon : ''; },
+    color:    function(name){ var w = byLabel(name); return w ? w.color : C.blue; },
+    onReady:  function(cb){ if (_ready) try { cb(); } catch(e){} else _onReady.push(cb); },
+    onChange: function(cb){ _onChange.push(cb); },
+
+    // Render a colored pill (icon + label). Used in tables, modals, etc.
+    pill: function(name, opts){
+      opts = opts || {};
+      var w = byLabel(name);
+      if (!w) {
+        // Unknown ward — neutral grey pill (preserves the text)
+        return '<span class="ward-pill ward-pill-unknown" style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:50px;font-size:11px;font-weight:600;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb">'+escHtml(name||'—')+'</span>';
+      }
+      var c = w.color;
+      var iconHtml = '';
+      if (w.imageUrl) {
+        iconHtml = '<img src="'+escHtml(w.imageUrl)+'" alt="" style="width:14px;height:14px;object-fit:contain;flex-shrink:0">';
+      } else if (w.icon) {
+        iconHtml = '<span style="font-size:'+(opts.iconSize||'12px')+';line-height:1;flex-shrink:0">'+w.icon+'</span>';
+      }
+      var labelHtml = opts.iconOnly ? '' : '<span>'+escHtml(w.label)+'</span>';
+      return '<span class="ward-pill" data-ward-id="'+w.id+'" '
+           + 'style="display:inline-flex;align-items:center;gap:5px;'
+           + 'padding:2px 9px;border-radius:50px;font-size:'+(opts.fontSize||'11px')+';font-weight:700;'
+           + 'background:'+c.bg+';color:'+c.text+';border:1px solid '+c.border+';'
+           + 'letter-spacing:0.2px;white-space:nowrap;'+(opts.style||'')+'">'
+           + iconHtml + labelHtml
+           + '</span>';
+    },
+
+    // Populate a <select>. Resolves the selected value through ALIASES.
+    populateSelect: function(sel, selected, opts){
+      if (!sel) return;
+      opts = opts || {};
+      var canonSelected = canonicalLabel(selected);
+      var withIcon = opts.withIcon !== false;
+      var caseTypeFilter = opts.caseType || null;  // 'conservative' | 'surgery' | 'both' | null
+      var html = '';
+      if (opts.placeholder !== false) {
+        html += '<option value="">'+(opts.placeholderText || '— Select Ward —')+'</option>';
+      }
+      var list = _wards || DEFAULTS.map(hydrate);
+      list.forEach(function(w){
+        if (caseTypeFilter && w.caseType !== caseTypeFilter && w.caseType !== 'both') return;
+        var text = withIcon && w.icon ? (w.icon + ' ' + w.label) : w.label;
+        var isSel = (w.label === canonSelected) ? ' selected' : '';
+        html += '<option value="'+escHtml(w.label)+'"'+isSel+'>'+escHtml(text)+'</option>';
+      });
+      // Preserve unknown values so legacy data doesn't disappear silently
+      if (selected && canonSelected && !list.find(function(w){ return w.label === canonSelected; })) {
+        html += '<option value="'+escHtml(selected)+'" selected>'+escHtml(selected)+' (unknown)</option>';
+      }
+      sel.innerHTML = html;
+    }
+  };
+
+  // ── Initialise: subscribe to Firestore once `db` is available ─────────
+  function tryInit() {
+    if (typeof db === 'undefined' || !db || !db.collection) {
+      // Fall back to defaults immediately, then keep retrying for Firestore
+      if (!_ready) setWards(DEFAULTS.map(function(d){ return Object.assign({}, d); }));
+      setTimeout(tryInit, 1000);
+      return;
+    }
+    db.collection('settings').doc('wards').onSnapshot(function(doc){
+      if (!doc.exists) { setWards(DEFAULTS.map(function(d){ return Object.assign({}, d); })); return; }
+      var data = doc.data() || {};
+      var arr = data.wards;
+      if (!Array.isArray(arr) || arr.length === 0) {
+        setWards(DEFAULTS.map(function(d){ return Object.assign({}, d); }));
+        return;
+      }
+      // Detect legacy (array of strings) and migrate to objects on-the-fly
+      if (typeof arr[0] === 'string') {
+        var migrated = arr.map(function(name, i){
+          var canon = ALIASES[name] || name;
+          var def = DEFAULTS.find(function(d){ return d.label === canon; });
+          return def ? Object.assign({}, def, { order:i }) : {
+            id: canon.toLowerCase().replace(/[^a-z0-9]+/g,'_'),
+            label: canon, icon: '', colorKey: 'blue', caseType: 'both', order: i
+          };
+        });
+        setWards(migrated);
+      } else {
+        setWards(arr);
+      }
+    }, function(err){
+      console.warn('[WARD_REGISTRY] Firestore listen failed:', err && err.message);
+      if (!_ready) setWards(DEFAULTS.map(function(d){ return Object.assign({}, d); }));
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tryInit);
+  } else {
+    tryInit();
+  }
+
+  // ─── Auto-populate any <select data-ward-select="1"> on the page ──────
+  function _wardSelectsBootstrap(){
+    if (!window.WARD_REGISTRY) { setTimeout(_wardSelectsBootstrap, 250); return; }
+    function populate(){
+      var sels = document.querySelectorAll('select[data-ward-select]');
+      sels.forEach(function(sel){
+        var extras = (sel.getAttribute('data-ward-extras') || '').split(',').filter(Boolean);
+        var current = sel.value || sel.getAttribute('data-pending-value') || '';
+        var canon = WARD_REGISTRY.canonical(current);
+        WARD_REGISTRY.populateSelect(sel, canon, {
+          placeholderText: sel.getAttribute('data-placeholder') || '— Select Ward —'
+        });
+        if (extras.length) {
+          var sep = document.createElement('option');
+          sep.disabled = true;
+          sep.textContent = '──────────';
+          sel.appendChild(sep);
+          extras.forEach(function(ex){
+            var o = document.createElement('option');
+            o.value = ex; o.textContent = ex;
+            if (ex === current) o.selected = true;
+            sel.appendChild(o);
+          });
+        }
+      });
+    }
+    WARD_REGISTRY.onReady(populate);
+    WARD_REGISTRY.onChange(populate);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _wardSelectsBootstrap);
+  } else {
+    _wardSelectsBootstrap();
+  }
+
+})();
+
+</script>
+
 </body>
 </html>
