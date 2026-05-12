@@ -912,6 +912,10 @@ window.addEventListener('DOMContentLoaded', function() {
     };
     function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+    // Known content ids that always open a modal on the landing page —
+    // for these, ignore any saved URL (legacy data may have '#orders' etc.)
+    var MODAL_IDS = ['home','staff','calendar','roster','holiday','weekend'];
+
     function renderNav(items){
       var nav = document.getElementById('lpNavArea');
       if (!nav || !Array.isArray(items)) return;
@@ -920,16 +924,15 @@ window.addEventListener('DOMContentLoaded', function() {
       if (visible.length === 0) return; // keep fallback hardcoded items
       nav.innerHTML = visible.map(function(it){
         var cls = 'nav-item' + (it.active ? ' active' : '');
-        var url = it.url || '#';
-        var label = esc(it.label || '');
         var navId = esc((it.id || '').toLowerCase());
+        // For known content ids, force href='#' so click handler routes by id.
+        // For unknown/custom ids, honor the saved url so admins can still link out.
+        var url = (MODAL_IDS.indexOf(navId) !== -1) ? '#' : (it.url || '#');
+        var label = esc(it.label || '');
         var iconSvg = it.active
           ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>'
           : '';
-        // Open external URLs in a new tab. Internal links (anchors like
-        // #about, relative paths like /pages/about.html) stay in the same
-        // tab. External = anything starting with http://, https://, or
-        // protocol-relative // (covers Google Drive, Forms, Docs, etc.)
+        // External URLs (http/https///) open in a new tab.
         var isExternal = /^(https?:|\/\/)/i.test(url);
         var targetAttr = isExternal ? ' target="_blank" rel="noopener"' : '';
         var dataAttr   = navId ? ' data-nav="'+navId+'"' : '';
@@ -1444,14 +1447,24 @@ window.addEventListener('DOMContentLoaded', function() {
     var labelText = (a.textContent || '').trim().replace(/[▾▼]/g,'').trim();
     console.log('[nav] click intercepted — id:"'+navId+'" label:"'+labelText+'" href:"'+href+'"');
 
-    // Real URL → let browser navigate normally, but still update active state
-    if (href && href !== '#') {
+    // A "real URL" is one that actually navigates somewhere: http://, https://,
+    // protocol-relative //, or a path like /page or ./page or page.html.
+    // Anything starting with '#' (anchor) is NOT a real URL — older saved nav
+    // data had `url:'#orders'` etc., but those anchors don't point anywhere
+    // and should fall through to id-based modal routing.
+    var isRealUrl = href && href.charAt(0) !== '#' && (
+      /^(https?:|\/\/)/i.test(href) ||  // external
+      /^[./]/.test(href) ||              // relative path (./ or /)
+      /^[a-z0-9_-]+\.[a-z]+/i.test(href) // bare filename like "page.html"
+    );
+
+    if (isRealUrl) {
       setActiveNav(a);
       closeMobileNav();
       return;
     }
 
-    // No URL set — handle by nav id
+    // No real URL — always intercept and route by nav id
     e.preventDefault();
     setActiveNav(a);
     closeMobileNav();
