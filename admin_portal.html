@@ -763,8 +763,10 @@ tr:hover td{background:#EEF3FF}
             <span id="nbm-status" style="margin-left:auto;font-size:11px;color:#6b7280;font-weight:500"></span>
           </div>
           <div style="font-size:12px;color:#1e3a8a;line-height:1.65;margin-bottom:10px">
-            Manage the top navigation bar on <strong>index.html</strong> (public landing page).
-            Changes save to Firebase and appear on the landing page <strong>immediately</strong> via real-time sync — no page reload needed.
+            Manage the top navigation bar on <strong>index.html</strong>. Use this tab to <strong>rename</strong>,
+            <strong>add</strong>, <strong>delete</strong>, <strong>reorder</strong>, hide/show, or highlight items.
+            <br>The actual <strong>data</strong> shown when a visitor clicks a tile comes from the matching Data Management tab —
+            saving in those tabs auto-publishes to the landing page (real-time sync, no reload needed).
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-pri" onclick="nbmSave()" style="background:linear-gradient(135deg,#1d4ed8,#2563eb)">💾 Save Nav Bar to Firebase</button>
@@ -1931,7 +1933,7 @@ function hcSaveAll(){
     _updatedAt: Date.now(),
     _updatedBy: (typeof ADMIN_EMAIL!=='undefined' ? ADMIN_EMAIL : '')
   }).then(function(){
-    if (msg) { msg.style.color='#166534'; msg.textContent='✅ Saved '+_hcHolidays.length+' holidays to Firebase!'; setTimeout(function(){ msg.textContent=''; },4000); }
+    if (msg) { msg.style.color='#166534'; msg.textContent='✅ Saved '+_hcHolidays.length+' holidays! (Auto-published to landing page)'; setTimeout(function(){ msg.textContent=''; },4000); }
     showToast('✅ Holiday calendar saved', 'success');
     if (typeof writeAudit === 'function') writeAudit('EDIT','settings/holiday_calendar','holiday_calendar',{count:_hcHolidays.length});
   }).catch(function(e){
@@ -1999,7 +2001,7 @@ function wrSave(){
     _updatedAt: Date.now(),
     _updatedBy: (typeof ADMIN_EMAIL!=='undefined' ? ADMIN_EMAIL : '')
   }).then(function(){
-    if (msg) { msg.style.color='#166534'; msg.textContent='✅ Saved!'; setTimeout(function(){ msg.textContent=''; },3000); }
+    if (msg) { msg.style.color='#166534'; msg.textContent='✅ Saved! (Auto-published to landing page)'; setTimeout(function(){ msg.textContent=''; },3500); }
     showToast('✅ Weekend roster saved','success');
     if (typeof writeAudit==='function') writeAudit('EDIT','settings/weekend_roster','weekend_roster',{rows:_wrRows.length});
   }).catch(function(e){
@@ -2129,23 +2131,30 @@ function saveRosterToDb() {
   msg.style.color = '#1A3DB5';
   msg.textContent = 'Saving…';
   db.collection('settings').doc('roster').set({ rows: rows, updatedAt: Date.now() }, { merge: true })
-    .then(function() { msg.style.color='#166534'; msg.textContent='✅ Roster saved!'; setTimeout(function(){msg.textContent='';},3000); })
+    .then(function() { msg.style.color='#166534'; msg.textContent='✅ Roster saved! (Auto-published to landing page)'; setTimeout(function(){msg.textContent='';},3500); })
     .catch(function(e) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; });
 }
 
 function saveHolidayToDb() {
-  var rows = [];
-  document.querySelectorAll('#holidayBody tr').forEach(function(tr) {
-    var cells = tr.querySelectorAll('input');
-    if (cells.length >= 2) {
-      rows.push({ name: cells[0] ? cells[0].value : '', date: cells[1] ? cells[1].value : '' });
-    }
+  // Save from in-memory holidayData (preserves pmams array — the DOM-only
+  // approach used previously was dropping the pmams column).
+  var rows = (holidayData || []).map(function(h){
+    return {
+      name:  (h.name  || '').trim(),
+      date:  (h.date  || '').trim(),
+      pmams: Array.isArray(h.pmams) ? h.pmams.filter(function(p){ return (p||'').trim(); }) : []
+    };
   });
   var msg = document.getElementById('holidaySaveMsg');
   msg.style.color = '#1A3DB5';
   msg.textContent = 'Saving…';
   db.collection('settings').doc('holidays').set({ rows: rows, updatedAt: Date.now() }, { merge: true })
-    .then(function() { msg.style.color='#166534'; msg.textContent='✅ Holiday roster saved!'; setTimeout(function(){msg.textContent='';},3000); })
+    .then(function() {
+      msg.style.color='#166534';
+      msg.textContent='✅ Holiday roster saved! (Auto-published to landing page)';
+      setTimeout(function(){msg.textContent='';},3500);
+      if (typeof writeAudit === 'function') writeAudit('EDIT','settings/holidays','holidays',{count:rows.length});
+    })
     .catch(function(e) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; });
 }
 
@@ -4121,14 +4130,14 @@ function lpeResetToDefaults(){
 var _nbmItems = [];  // working copy
 
 var NBM_DEFAULTS = [
-  { id:'home',     label:'Home',         url:'#',         active:true,  visible:true,  order:0 },
-  { id:'about',    label:'About Us',     url:'#',         active:false, visible:true,  order:1 },
-  { id:'staff',    label:'Staff',        url:'#',         active:false, visible:true,  order:2 },
-  { id:'roster',   label:'Ward Roster',  url:'#',         active:false, visible:true,  order:3 },
-  { id:'holiday',  label:'Holiday Duty', url:'#',         active:false, visible:true,  order:4 },
-  { id:'leave',    label:'Leave',        url:'#',         active:false, visible:true,  order:5 },
-  { id:'orders',   label:'Orders',       url:'#',         active:false, visible:true,  order:6 },
-  { id:'contact',  label:'Contact Us',   url:'#',         active:false, visible:true,  order:7 }
+  { id:'home',     label:'Home',            active:true,  visible:true,  order:0 },
+  { id:'about',    label:'About Us',        active:false, visible:true,  order:1 },
+  { id:'staff',    label:'Staff',           active:false, visible:true,  order:2 },
+  { id:'calendar', label:'Holiday Calendar',active:false, visible:true,  order:3 },
+  { id:'roster',   label:'Ward Roster',     active:false, visible:true,  order:4 },
+  { id:'holiday',  label:'Holiday Duty',    active:false, visible:true,  order:5 },
+  { id:'weekend',  label:'Weekend Roster',  active:false, visible:true,  order:6 },
+  { id:'contact',  label:'Contact Us',      active:false, visible:true,  order:7 }
 ];
 
 function nbmSetStatus(msg, color){
@@ -4166,39 +4175,55 @@ function nbmRender(){
     nbmRenderPreview();
     return;
   }
+  // id → friendly description of the data source / behaviour on the landing page
+  var SOURCE_LABEL = {
+    home:     '🏠 Scrolls to top',
+    about:    'ℹ️ Static info (no data feed)',
+    staff:    '👥 Staff modal (live users data)',
+    calendar: '📅 Holiday Calendar tab',
+    roster:   '🏥 Ward Roster tab',
+    holiday:  '🎉 Holiday Duty Roster tab',
+    weekend:  '📆 Weekend Roster tab',
+    leave:    '📋 Leave Requests (internal)',
+    orders:   '📄 Static info (no data feed)',
+    contact:  '📞 Static info (no data feed)'
+  };
   list.innerHTML = _nbmItems.map(function(it, i){
     var visChk = it.visible !== false;
     var actChk = it.active === true;
+    var navId  = (it.id || '').toLowerCase();
+    var source = SOURCE_LABEL[navId] || ('🔗 Custom id — no data feed');
+    var sourceColor = SOURCE_LABEL[navId] ? '#0369a1' : '#92400e';
+    var sourceBg    = SOURCE_LABEL[navId] ? '#e0f2fe' : '#fef3c7';
     return '<div style="background:#fff;border:1.5px solid '+(visChk?'#bfdbfe':'#e5e7eb')+';border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start">'
       // Drag handle / number
       + '<div style="font-weight:800;color:#9ca3af;text-align:center;padding-top:10px;font-size:13px">'+(i+1)+'</div>'
       // Fields
-      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
-      // Label
-      +   '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Label</label>'
+      + '<div style="display:flex;flex-direction:column;gap:8px">'
+      // Label (editable)
+      +   '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Label (shown on landing page)</label>'
       +     '<input type="text" value="'+escAttr(it.label||'')+'" placeholder="e.g. Home" '
-      +       'onchange="_nbmItems['+i+'].label=this.value;nbmRenderPreview()" '
+      +       'onchange="_nbmItems['+i+'].label=this.value;nbmRenderPreview();nbmSetStatus(\'● Unsaved changes\',\'#dc2626\')" '
       +       'style="width:100%;padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none" '
       +       'onfocus="this.style.borderColor=\'#2563eb\'" onblur="this.style.borderColor=\'#e5e7eb\'">'
       +   '</div>'
-      // URL
-      +   '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Link / URL</label>'
-      +     '<input type="text" value="'+escAttr(it.url||'')+'" placeholder="# or https://..." '
-      +       'onchange="_nbmItems['+i+'].url=this.value" '
-      +       'style="width:100%;padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none" '
-      +       'onfocus="this.style.borderColor=\'#2563eb\'" onblur="this.style.borderColor=\'#e5e7eb\'">'
+      // Data source badge (read-only — id determines what data feeds this tile)
+      +   '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+      +     '<span style="font-size:9.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px">Data source:</span>'
+      +     '<span style="background:'+sourceBg+';color:'+sourceColor+';padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:0.2px">'+source+'</span>'
+      +     '<span style="background:#f3f4f6;color:#6b7280;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600;font-family:monospace">id: '+(navId||'(none)')+'</span>'
       +   '</div>'
       // Checkboxes row
-      +   '<div style="grid-column:1/-1;display:flex;align-items:center;gap:16px;padding-top:4px">'
+      +   '<div style="display:flex;align-items:center;gap:16px;padding-top:2px">'
       +     '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;font-weight:600;color:#374151">'
       +       '<input type="checkbox" '+(visChk?'checked':'')+''
-      +         ' onchange="_nbmItems['+i+'].visible=this.checked;nbmRender()" '
+      +         ' onchange="_nbmItems['+i+'].visible=this.checked;nbmRender();nbmSetStatus(\'● Unsaved changes\',\'#dc2626\')" '
       +         ' style="width:14px;height:14px;accent-color:#2563eb;cursor:pointer">'
       +       ' Visible'
       +     '</label>'
       +     '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;font-weight:600;color:#374151">'
       +       '<input type="checkbox" '+(actChk?'checked':'')+''
-      +         ' onchange="_nbmItems['+i+'].active=this.checked;nbmRenderPreview()" '
+      +         ' onchange="_nbmItems['+i+'].active=this.checked;nbmRenderPreview();nbmSetStatus(\'● Unsaved changes\',\'#dc2626\')" '
       +         ' style="width:14px;height:14px;accent-color:#16a34a;cursor:pointer">'
       +       ' Active (highlighted)'
       +     '</label>'
@@ -4233,7 +4258,44 @@ function nbmRenderPreview(){
 }
 
 function nbmAdd(){
-  _nbmItems.push({ id:'item_'+Date.now(), label:'New Item', url:'#', active:false, visible:true, order:_nbmItems.length });
+  // Known ids and their default labels (id determines the data feed on landing page)
+  var KNOWN_IDS = [
+    { id:'home',     label:'Home' },
+    { id:'about',    label:'About Us' },
+    { id:'staff',    label:'Staff' },
+    { id:'calendar', label:'Holiday Calendar' },
+    { id:'roster',   label:'Ward Roster' },
+    { id:'holiday',  label:'Holiday Duty' },
+    { id:'weekend',  label:'Weekend Roster' },
+    { id:'contact',  label:'Contact Us' }
+  ];
+  // Filter out ids already in use
+  var existingIds = _nbmItems.map(function(it){ return (it.id||'').toLowerCase(); });
+  var available = KNOWN_IDS.filter(function(k){ return existingIds.indexOf(k.id) === -1; });
+  var menu = available.map(function(k, i){ return (i+1)+'. '+k.label+' (id: '+k.id+')'; }).join('\n');
+  var custom = available.length+1;
+  var promptText = 'Select the data source for this nav item:\n\n'
+                 + (menu ? menu+'\n' : '')
+                 + custom+'. Custom id (no data feed — will show toast)\n\n'
+                 + 'Enter number:';
+  var pick = prompt(promptText, available.length ? '1' : String(custom));
+  if (pick === null) return;
+  var n = parseInt(pick, 10);
+  if (!n || n < 1) return;
+  var newItem;
+  if (n <= available.length) {
+    var chosen = available[n-1];
+    newItem = { id:chosen.id, label:chosen.label, active:false, visible:true, order:_nbmItems.length };
+  } else {
+    // Custom id
+    var customId = prompt('Enter a custom id (letters/numbers, lowercase):', 'item_'+Date.now());
+    if (!customId) return;
+    customId = customId.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
+    if (!customId) return;
+    var customLabel = prompt('Label to display on landing page:', 'New Item') || 'New Item';
+    newItem = { id:customId, label:customLabel.trim(), active:false, visible:true, order:_nbmItems.length };
+  }
+  _nbmItems.push(newItem);
   nbmRender();
   nbmSetStatus('● Unsaved changes', '#dc2626');
 }

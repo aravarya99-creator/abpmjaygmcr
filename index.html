@@ -178,7 +178,19 @@ a.hero-gc-ci:hover{color:#7c3aed}
   .hero-left{padding:32px 20px 220px}
   .hero-right{padding:22px 20px 36px}
   .wb-main-title{font-size:32px}
-  .nav-area{display:none}
+  .nav-toggle{display:flex !important}
+  .nav-area{
+    position:absolute;top:100%;left:0;right:0;
+    flex-direction:column;align-items:stretch;
+    background:#fff;border-top:1px solid #e5e7eb;
+    box-shadow:0 8px 24px rgba(15,33,73,0.12);
+    padding:8px 12px;gap:4px;margin-left:0;
+    max-height:0;overflow:hidden;transition:max-height 0.25s ease, padding 0.25s ease;
+  }
+  .nav-area.open{max-height:480px;padding:10px 12px}
+  .nav-area .nav-item{width:100%;border-radius:8px;padding:11px 14px;font-size:14px;justify-content:flex-start}
+  .nav-area .nav-item.active{padding:11px 14px;border-radius:8px}
+  .header{position:relative;flex-wrap:wrap}
 }
 @media(max-width:600px){
   .header{padding:12px 16px;gap:10px;flex-wrap:wrap}
@@ -192,7 +204,25 @@ a.hero-gc-ci:hover{color:#7c3aed}
   .hero-gc{grid-template-columns:1fr;gap:10px}
   .hero-gc-right{align-items:flex-start;text-align:left}
   .hero-copyright{font-size:9.5px;padding:6px 12px;line-height:1.5}
+  .hb1{font-size:13px}
+  .hb2{font-size:14px}
+  .hb3{font-size:10.5px}
+  .logo-circle{width:42px;height:42px}
 }
+
+/* ═══ Hamburger toggle button (mobile only) ═══ */
+.nav-toggle{
+  display:none;width:38px;height:38px;border:1px solid #e5e7eb;border-radius:8px;
+  background:#f9fafb;cursor:pointer;padding:0;
+  flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  margin-left:auto;flex-shrink:0;transition:all 0.15s;
+}
+.nav-toggle:hover{background:#f1f5f9;border-color:#cbd5e1}
+.nav-toggle:active{transform:scale(0.95)}
+.nav-toggle-bar{width:18px;height:2px;background:#334155;border-radius:2px;transition:all 0.2s}
+.nav-toggle.open .nav-toggle-bar:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.nav-toggle.open .nav-toggle-bar:nth-child(2){opacity:0}
+.nav-toggle.open .nav-toggle-bar:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
 </style>
   <!-- Firebase v10 -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -233,17 +263,23 @@ a.hero-gc-ci:hover{color:#7c3aed}
     </div>
   </div>
 
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span class="nav-toggle-bar"></span>
+    <span class="nav-toggle-bar"></span>
+    <span class="nav-toggle-bar"></span>
+  </button>
+
   <div class="nav-area" id="lpNavArea">
     <a class="nav-item active" href="#" data-nav="home">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V21H3z"/><path d="M9 21v-6h6v6"/></svg>
       Home
     </a>
-    <a class="nav-item" href="#" data-nav="about">About Us <span class="nav-arrow">▾</span></a>
-    <a class="nav-item" href="#" data-nav="staff">Staff <span class="nav-arrow">▾</span></a>
+    <a class="nav-item" href="#" data-nav="about">About Us</a>
+    <a class="nav-item" href="#" data-nav="staff">Staff</a>
+    <a class="nav-item" href="#" data-nav="calendar">Holiday Calendar</a>
     <a class="nav-item" href="#" data-nav="roster">Ward Roster</a>
     <a class="nav-item" href="#" data-nav="holiday">Holiday Duty</a>
-    <a class="nav-item" href="#" data-nav="leave">Leave <span class="nav-arrow">▾</span></a>
-    <a class="nav-item" href="#" data-nav="orders">Orders <span class="nav-arrow">▾</span></a>
+    <a class="nav-item" href="#" data-nav="weekend">Weekend Roster</a>
     <a class="nav-item" href="#" data-nav="contact">Contact Us</a>
   </div>
 </div>
@@ -1363,14 +1399,14 @@ window.addEventListener('DOMContentLoaded', function() {
     if (id) return id;
     // Legacy fallback: derive from label text
     var label = (a.textContent || '').trim().toLowerCase().replace(/[▾▼]/g,'').trim();
-    if (label === 'home')        return 'home';
-    if (label === 'staff')       return 'staff';
-    if (label === 'about us')    return 'about';
-    if (label === 'ward roster') return 'roster';
-    if (label === 'holiday duty')return 'holiday';
-    if (label === 'leave')       return 'leave';
-    if (label === 'orders')      return 'orders';
-    if (label === 'contact us')  return 'contact';
+    if (label === 'home')              return 'home';
+    if (label === 'staff')             return 'staff';
+    if (label === 'about us')          return 'about';
+    if (label === 'holiday calendar')  return 'calendar';
+    if (label === 'ward roster')       return 'roster';
+    if (label === 'holiday duty')      return 'holiday';
+    if (label === 'weekend roster')    return 'weekend';
+    if (label === 'contact us')        return 'contact';
     return '';
   }
 
@@ -1405,19 +1441,22 @@ window.addEventListener('DOMContentLoaded', function() {
 
     var href  = a.getAttribute('href') || '';
     var navId = getNavId(a);
+    var labelText = (a.textContent || '').trim().replace(/[▾▼]/g,'').trim();
 
     // Real URL → let browser navigate normally, but still update active state
     if (href && href !== '#') {
       setActiveNav(a);
+      closeMobileNav();
       return;
     }
 
     // No URL set — handle by nav id
     e.preventDefault();
     setActiveNav(a);
+    closeMobileNav();
 
     if (navId === 'staff') {
-      openModal();
+      openModal();  // existing Staff modal
       return;
     }
     if (navId === 'home') {
@@ -1426,10 +1465,42 @@ window.addEventListener('DOMContentLoaded', function() {
       catch(_){ window.scrollTo(0, 0); }
       return;
     }
-    // Any other tab with no URL — friendly "coming soon" toast
-    var labelText = (a.textContent || '').trim().replace(/[▾▼]/g,'').trim() || 'This section';
-    showNavToast(labelText + ' — coming soon. Set URL in Admin → Nav Bar Manager.');
+    // Known content ids → open the generic content modal
+    if (typeof openContentModal === 'function' && CONTENT_RENDERERS[navId]) {
+      openContentModal(navId, labelText || navId);
+      return;
+    }
+    // Static/non-data tabs or unknown id — friendly toast
+    showNavToast((labelText || 'This section') + ' — info coming soon.');
   });
+
+  // Helper: close mobile nav after a click
+  function closeMobileNav(){
+    var nav = document.getElementById('lpNavArea');
+    var btn = document.getElementById('navToggle');
+    if (nav) nav.classList.remove('open');
+    if (btn) { btn.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+  }
+
+  // Hamburger toggle
+  (function bindHamburger(){
+    function bind(){
+      var btn = document.getElementById('navToggle');
+      var nav = document.getElementById('lpNavArea');
+      if (!btn || !nav || btn._bound) return;
+      btn._bound = true;
+      btn.addEventListener('click', function(){
+        var isOpen = nav.classList.toggle('open');
+        btn.classList.toggle('open', isOpen);
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bind);
+    } else {
+      bind();
+    }
+  })();
 
   // Close on backdrop click or Escape
   document.addEventListener('keydown', function(e){
@@ -1549,6 +1620,438 @@ window.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </div>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     GENERIC CONTENT MODAL — Holiday Calendar / Ward Roster /
+     Holiday Duty / Weekend Roster, fed by live Firestore data.
+     Auto-publishes whenever admin saves any matching DM tab.
+     ════════════════════════════════════════════════════════════════════ -->
+<style>
+  #contentModal{
+    position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:9000;
+    display:none;align-items:center;justify-content:center;padding:20px;
+    animation:cmFadeIn 0.18s ease-out;
+  }
+  #contentModal.open{display:flex}
+  @keyframes cmFadeIn{from{opacity:0}to{opacity:1}}
+  .cm-card{
+    background:#fff;border-radius:18px;width:100%;max-width:920px;
+    max-height:88vh;display:flex;flex-direction:column;
+    box-shadow:0 24px 60px rgba(0,0,0,0.3);overflow:hidden;
+    animation:cmSlideUp 0.22s ease-out;
+  }
+  @keyframes cmSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .cm-header{
+    background:linear-gradient(135deg,#4c1d95,#7c3aed);
+    color:#fff;padding:18px 24px;display:flex;align-items:center;gap:14px;flex-shrink:0;
+  }
+  .cm-header svg{flex-shrink:0}
+  .cm-header h2{margin:0;font-size:18px;font-weight:700;flex:1;line-height:1.2}
+  .cm-sub{font-size:11px;opacity:0.85;margin-top:2px}
+  .cm-close{
+    width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.18);
+    border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;
+    align-items:center;justify-content:center;transition:background 0.15s;line-height:1;
+  }
+  .cm-close:hover{background:rgba(255,255,255,0.3)}
+  .cm-body{flex:1;overflow-y:auto;padding:18px 20px;background:#f8fafc}
+  .cm-footer{
+    padding:10px 20px;font-size:11px;color:#6b7280;text-align:center;
+    border-top:1px solid #e5e7eb;background:#fff;flex-shrink:0;
+  }
+  .cm-loading{text-align:center;padding:40px 20px;color:#9ca3af;font-style:italic;font-size:13px}
+  .cm-empty{
+    text-align:center;padding:30px 20px;color:#6b7280;font-size:13px;
+    background:#fff;border-radius:12px;border:1.5px dashed #e5e7eb;
+  }
+
+  /* Generic data tables inside the modal */
+  .cm-tbl-wrap{background:#fff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden}
+  .cm-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+  .cm-tbl thead th{
+    background:linear-gradient(135deg,#1e3a8a,#1d4ed8);color:#fff;padding:9px 12px;
+    text-align:left;font-weight:700;letter-spacing:0.2px;white-space:nowrap;font-size:11.5px;
+    text-transform:uppercase;
+  }
+  .cm-tbl tbody td{padding:9px 12px;border-bottom:1px solid #f1f5f9;color:#1e293b;line-height:1.45}
+  .cm-tbl tbody tr:nth-child(even){background:#f9fafb}
+  .cm-tbl tbody tr:hover{background:#eff6ff}
+  .cm-tbl tbody tr:last-child td{border-bottom:none}
+
+  /* Pills used in renderers */
+  .cm-pill{display:inline-block;padding:2px 9px;border-radius:50px;font-size:10.5px;font-weight:700;letter-spacing:0.2px}
+  .cm-pill-gazetted{background:#ddd6fe;color:#5b21b6}
+  .cm-pill-state{background:#fde68a;color:#92400e}
+  .cm-pill-custom{background:#bbf7d0;color:#166534}
+  .cm-pill-sunday{background:#fecaca;color:#dc2626}
+  .cm-pill-pmam{background:#dbeafe;color:#1e3a8a;margin:2px 3px 2px 0}
+
+  /* Calendar grid */
+  .cm-cal-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .cm-cal-controls select{
+    padding:6px 12px;border:1.5px solid #ddd6fe;border-radius:8px;
+    font-size:12px;background:#fff;color:#4c1d95;font-weight:600;cursor:pointer;
+    font-family:inherit;outline:none;
+  }
+  .cm-cal-controls select:focus{border-color:#7c3aed}
+  .cm-cal-grid{
+    display:grid;grid-template-columns:repeat(7,1fr);gap:4px;
+    background:#fff;border-radius:12px;padding:10px;border:1px solid #e5e7eb;
+  }
+  .cm-cal-dh{
+    text-align:center;font-size:10px;font-weight:800;color:#6b7280;
+    padding:4px;letter-spacing:0.5px;text-transform:uppercase;
+  }
+  .cm-cal-day{
+    min-height:54px;border-radius:8px;padding:5px 6px;font-size:11px;
+    border:1.5px solid #f1f5f9;background:#fff;color:#1e293b;
+    display:flex;flex-direction:column;
+  }
+  .cm-cal-day-num{font-weight:700;font-size:12px}
+  .cm-cal-day-name{font-size:9.5px;line-height:1.2;margin-top:2px;word-break:break-word}
+  .cm-cal-day.sun{background:#fef2f2;border-color:#fecaca;color:#dc2626}
+  .cm-cal-day.gaz{background:#f5f3ff;border-color:#ddd6fe;color:#5b21b6}
+  .cm-cal-day.state{background:#fffbeb;border-color:#fde68a;color:#92400e}
+  .cm-cal-day.custom{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+  .cm-cal-day.today{box-shadow:0 0 0 2px #7c3aed;font-weight:800}
+  .cm-cal-day.empty{background:transparent;border:none}
+
+  .cm-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:10.5px;margin-top:10px;color:#475569}
+  .cm-legend span{display:inline-flex;align-items:center;gap:5px}
+  .cm-legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  /* Mobile responsive */
+  @media(max-width:768px){
+    #contentModal{padding:0}
+    .cm-card{max-height:100vh;height:100vh;border-radius:0;max-width:100%}
+    .cm-header{padding:14px 16px;gap:10px}
+    .cm-header h2{font-size:16px}
+    .cm-body{padding:12px}
+    .cm-tbl{font-size:11.5px}
+    .cm-tbl thead th{padding:7px 9px;font-size:10.5px}
+    .cm-tbl tbody td{padding:7px 9px}
+    .cm-cal-day{min-height:42px;font-size:10px;padding:3px 4px}
+    .cm-cal-day-name{font-size:8.5px}
+    .cm-cal-grid{padding:6px;gap:2px}
+    .cm-cal-dh{font-size:9px;padding:2px}
+    /* Allow horizontal scroll for very wide tables */
+    .cm-scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .cm-scroll-x .cm-tbl{min-width:520px}
+  }
+  @media(max-width:480px){
+    .cm-header h2{font-size:14.5px}
+    .cm-sub{font-size:10px}
+    .cm-tbl{font-size:11px}
+  }
+</style>
+
+<div id="contentModal" onclick="if(event.target===this)closeContentModal()">
+  <div class="cm-card">
+    <div class="cm-header">
+      <svg id="cmIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+      <div style="flex:1;min-width:0">
+        <h2 id="cmTitle">Title</h2>
+        <div class="cm-sub" id="cmSub">Live data from Admin Portal</div>
+      </div>
+      <button class="cm-close" onclick="closeContentModal()" aria-label="Close">×</button>
+    </div>
+    <div class="cm-body" id="cmBody">
+      <div class="cm-loading">Loading…</div>
+    </div>
+    <div class="cm-footer">
+      AB-PMJAY Unit · Government Medical College &amp; Associated Hospital, Rajouri
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ─── Live data store: each key holds latest Firestore snapshot ─────
+  var LIVE = {
+    holidayCalendar: null,  // settings/holiday_calendar
+    wardRoster:      null,  // settings/roster
+    holidayDuty:     null,  // settings/holidays
+    weekendRoster:   null   // settings/weekend_roster
+  };
+  // Current open modal id (so we can re-render when data updates)
+  var _openId = null;
+
+  // ─── Firestore real-time subscriptions ──────────────────────────────
+  // Each updates LIVE and re-renders the modal if currently visible.
+  function subscribe(){
+    if (typeof db === 'undefined' || !db.collection) {
+      console.warn('[contentModal] Firestore not ready; will retry…');
+      return setTimeout(subscribe, 800);
+    }
+    db.collection('settings').doc('holiday_calendar').onSnapshot(function(doc){
+      LIVE.holidayCalendar = doc.exists ? (doc.data() || {}) : {};
+      if (_openId === 'calendar') renderInto(_openId);
+    }, function(err){ console.warn('holiday_calendar listener:', err && err.message); });
+
+    db.collection('settings').doc('roster').onSnapshot(function(doc){
+      LIVE.wardRoster = doc.exists ? (doc.data() || {}) : {};
+      if (_openId === 'roster') renderInto(_openId);
+    }, function(err){ console.warn('roster listener:', err && err.message); });
+
+    db.collection('settings').doc('holidays').onSnapshot(function(doc){
+      LIVE.holidayDuty = doc.exists ? (doc.data() || {}) : {};
+      if (_openId === 'holiday') renderInto(_openId);
+    }, function(err){ console.warn('holidays listener:', err && err.message); });
+
+    db.collection('settings').doc('weekend_roster').onSnapshot(function(doc){
+      LIVE.weekendRoster = doc.exists ? (doc.data() || {}) : {};
+      if (_openId === 'weekend') renderInto(_openId);
+    }, function(err){ console.warn('weekend_roster listener:', err && err.message); });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', subscribe);
+  } else {
+    subscribe();
+  }
+
+  // ─── Helpers ─────────────────────────────────────────────────────────
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function fmtDate(iso){
+    if (!iso) return '—';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+  }
+  function weekday(iso){
+    if (!iso) return '';
+    var d = new Date(iso); if (isNaN(d.getTime())) return '';
+    return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+  }
+
+  // ─── Per-id renderers ───────────────────────────────────────────────
+  function renderHolidayCalendar(){
+    var data = LIVE.holidayCalendar || {};
+    var holidays = Array.isArray(data.holidays) ? data.holidays : [];
+    var now = new Date();
+    // Year + month picker (default: current)
+    var calState = renderHolidayCalendar._state || (renderHolidayCalendar._state = { year:now.getFullYear(), month:now.getMonth() });
+    var years = []; for (var y = now.getFullYear()-1; y <= now.getFullYear()+2; y++) years.push(y);
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var html = '<div class="cm-cal-controls">'
+      + '<select id="cmCalYear">'+years.map(function(y){return '<option value="'+y+'"'+(y===calState.year?' selected':'')+'>'+y+'</option>';}).join('')+'</select>'
+      + '<select id="cmCalMonth">'+months.map(function(m,i){return '<option value="'+i+'"'+(i===calState.month?' selected':'')+'>'+m+'</option>';}).join('')+'</select>'
+      + '<span style="font-size:11px;color:#6b7280;margin-left:auto">'+holidays.length+' total holidays</span>'
+      + '</div>';
+    html += renderCalGrid(calState.year, calState.month, holidays);
+    html += '<div class="cm-legend">'
+      +   '<span><i style="background:#fecaca"></i>Sunday</span>'
+      +   '<span><i style="background:#ddd6fe"></i>Gazetted</span>'
+      +   '<span><i style="background:#fde68a"></i>State</span>'
+      +   '<span><i style="background:#bbf7d0"></i>Custom</span>'
+      + '</div>';
+    // List below
+    var monthHols = holidays.filter(function(h){
+      if (!h.date) return false; var d = new Date(h.date);
+      return d.getFullYear()===calState.year && d.getMonth()===calState.month;
+    }).sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+    if (monthHols.length){
+      html += '<div style="margin-top:14px"><div style="font-size:11px;font-weight:800;color:#4c1d95;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">'
+            + 'Holidays this month</div><div style="display:flex;flex-direction:column;gap:6px">';
+      monthHols.forEach(function(h){
+        var cls = 'cm-pill-' + (h.type||'custom').toLowerCase();
+        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #e5e7eb;flex-wrap:wrap">'
+              + '<span class="cm-pill '+cls+'">'+esc(h.type||'Custom')+'</span>'
+              + '<span style="font-size:12px;font-weight:700;color:#1e293b">'+esc(fmtDate(h.date))+'</span>'
+              + '<span style="font-size:11.5px;color:#475569;flex:1">'+esc(h.name||'')+'</span>'
+              + '</div>';
+      });
+      html += '</div></div>';
+    }
+    return html;
+  }
+
+  function renderCalGrid(yr, mon, holidays){
+    var firstDay = new Date(yr, mon, 1).getDay();
+    var daysInMonth = new Date(yr, mon+1, 0).getDate();
+    var today = new Date();
+    var hMap = {};
+    holidays.forEach(function(h){ if (h.date) hMap[h.date] = h; });
+    var headers = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    var html = '<div class="cm-cal-grid">';
+    headers.forEach(function(d){ html += '<div class="cm-cal-dh">'+d+'</div>'; });
+    for (var i = 0; i < firstDay; i++) html += '<div class="cm-cal-day empty"></div>';
+    for (var d = 1; d <= daysInMonth; d++) {
+      var ds = yr+'-'+String(mon+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      var dateObj = new Date(yr, mon, d);
+      var isSun = dateObj.getDay() === 0;
+      var isToday = (dateObj.getFullYear()===today.getFullYear() && dateObj.getMonth()===today.getMonth() && dateObj.getDate()===today.getDate());
+      var h = hMap[ds];
+      var cls = 'cm-cal-day';
+      var name = '';
+      if (h) {
+        var t = (h.type||'').toLowerCase();
+        if (t === 'gazetted') cls += ' gaz';
+        else if (t === 'state') cls += ' state';
+        else if (t === 'sunday') cls += ' sun';
+        else cls += ' custom';
+        name = h.name || '';
+      } else if (isSun) {
+        cls += ' sun'; name = 'Sunday';
+      }
+      if (isToday) cls += ' today';
+      html += '<div class="'+cls+'" title="'+esc(name||ds)+'">'
+            +   '<div class="cm-cal-day-num">'+d+'</div>'
+            + (name ? '<div class="cm-cal-day-name">'+esc(name)+'</div>' : '')
+            + '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function renderWardRoster(){
+    var data = LIVE.wardRoster || {};
+    var rows = Array.isArray(data.rows) ? data.rows : [];
+    if (!rows.length) {
+      return '<div class="cm-empty">No ward assignments published yet. Admin can add rows from <strong>Data Management → Ward Roster</strong>.</div>';
+    }
+    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl">'
+      + '<thead><tr><th style="width:42px">#</th><th>PMAM Name</th><th>Ward Assigned</th></tr></thead>'
+      + '<tbody>';
+    rows.forEach(function(r, i){
+      var name = r.pmam || r.name || '';
+      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:600">'+(i+1)+'</td>'
+            + '<td style="font-weight:600">'+esc(name)+'</td>'
+            + '<td>'+esc(r.ward||'')+'</td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+    if (data.updatedAt) {
+      html += '<div style="font-size:10.5px;color:#9ca3af;text-align:right;margin-top:6px">Last updated: '+fmtDate(new Date(data.updatedAt).toISOString().slice(0,10))+'</div>';
+    }
+    return html;
+  }
+
+  function renderHolidayDuty(){
+    var data = LIVE.holidayDuty || {};
+    var rows = Array.isArray(data.rows) ? data.rows : [];
+    if (!rows.length) {
+      return '<div class="cm-empty">No holiday duty roster published yet. Admin can add rows from <strong>Data Management → Holiday Duty Roster</strong>.</div>';
+    }
+    // Sort by date ascending
+    var sorted = rows.slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl">'
+      + '<thead><tr><th style="width:42px">#</th><th>Date</th><th>Day</th><th>Holiday</th><th>PMAMs on Duty</th></tr></thead>'
+      + '<tbody>';
+    sorted.forEach(function(r, i){
+      var pmams = Array.isArray(r.pmams) ? r.pmams.filter(function(p){ return (p||'').trim(); }) : [];
+      var pmamHtml = pmams.length
+        ? pmams.map(function(p){ return '<span class="cm-pill cm-pill-pmam">'+esc(p)+'</span>'; }).join('')
+        : '<span style="color:#9ca3af;font-style:italic;font-size:11px">No PMAMs assigned</span>';
+      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:600">'+(i+1)+'</td>'
+            + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.date))+'</td>'
+            + '<td style="color:#475569">'+esc(weekday(r.date))+'</td>'
+            + '<td style="font-weight:600">'+esc(r.name||'')+'</td>'
+            + '<td>'+pmamHtml+'</td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+    return html;
+  }
+
+  function renderWeekendRoster(){
+    var data = LIVE.weekendRoster || {};
+    var rows = Array.isArray(data.rows) ? data.rows : [];
+    if (!rows.length) {
+      return '<div class="cm-empty">No weekend roster published yet. Admin can add rows from <strong>Data Management → Weekend Roster</strong>.</div>';
+    }
+    // Sort by saturday date ascending
+    var sorted = rows.slice().sort(function(a,b){ return (a.saturday||'').localeCompare(b.saturday||''); });
+    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl">'
+      + '<thead><tr><th style="width:42px">#</th><th>Saturday</th><th>Sunday</th><th>PMAM 1</th><th>PMAM 2</th></tr></thead>'
+      + '<tbody>';
+    sorted.forEach(function(r, i){
+      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:600">'+(i+1)+'</td>'
+            + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.saturday))+'</td>'
+            + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td>'
+            + '<td>'+esc(r.pmam1||'—')+'</td>'
+            + '<td>'+esc(r.pmam2||'—')+'</td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+    return html;
+  }
+
+  // ─── Renderer registry (exposed globally so click handler can check) ─
+  var ICON = {
+    calendar: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    roster:   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l7-3 7 3z"/></svg>',
+    holiday:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+    weekend:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+  };
+  window.CONTENT_RENDERERS = {
+    calendar: renderHolidayCalendar,
+    roster:   renderWardRoster,
+    holiday:  renderHolidayDuty,
+    weekend:  renderWeekendRoster
+  };
+
+  function renderInto(id){
+    var body = document.getElementById('cmBody');
+    if (!body) return;
+    var fn = window.CONTENT_RENDERERS[id];
+    if (!fn) { body.innerHTML = '<div class="cm-empty">No data renderer for "'+esc(id)+'".</div>'; return; }
+    try { body.innerHTML = fn(); }
+    catch(e){
+      console.error('Renderer error for '+id+':', e);
+      body.innerHTML = '<div class="cm-empty">Couldn\'t display this data: '+esc(e.message||'unknown error')+'</div>';
+    }
+    // Rebind calendar month/year selects (if calendar is showing)
+    if (id === 'calendar') {
+      var yr = document.getElementById('cmCalYear');
+      var mo = document.getElementById('cmCalMonth');
+      var st = renderHolidayCalendar._state;
+      if (yr && st) yr.addEventListener('change', function(){ st.year  = parseInt(this.value,10); renderInto('calendar'); });
+      if (mo && st) mo.addEventListener('change', function(){ st.month = parseInt(this.value,10); renderInto('calendar'); });
+    }
+  }
+
+  // ─── Public API ─────────────────────────────────────────────────────
+  window.openContentModal = function(id, label){
+    var modal = document.getElementById('contentModal');
+    if (!modal) return;
+    _openId = id;
+    var iconEl = document.getElementById('cmIcon');
+    if (iconEl && ICON[id]) iconEl.outerHTML = ICON[id].replace('<svg', '<svg id="cmIcon"');
+    var titleEl = document.getElementById('cmTitle');
+    var subEl   = document.getElementById('cmSub');
+    if (titleEl) titleEl.textContent = label || id;
+    if (subEl) {
+      var hasData = (
+        (id==='calendar' && LIVE.holidayCalendar) ||
+        (id==='roster'   && LIVE.wardRoster) ||
+        (id==='holiday'  && LIVE.holidayDuty) ||
+        (id==='weekend'  && LIVE.weekendRoster)
+      );
+      subEl.textContent = hasData ? 'Live data — auto-syncs from Admin Portal' : 'Loading from server…';
+    }
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderInto(id);
+  };
+
+  window.closeContentModal = function(){
+    var modal = document.getElementById('contentModal');
+    if (modal) modal.classList.remove('open');
+    document.body.style.overflow = '';
+    _openId = null;
+  };
+
+  // ESC closes (only this modal — staff modal has its own ESC handler)
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') {
+      var modal = document.getElementById('contentModal');
+      if (modal && modal.classList.contains('open')) {
+        window.closeContentModal();
+      }
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
