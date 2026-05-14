@@ -1855,7 +1855,20 @@ function showNavTab(tab, el){
 function loadRosterFromDb(){
   db.collection('settings').doc('roster').get().then(function(doc){
     if (doc.exists && doc.data() && Array.isArray(doc.data().rows)) {
-      rosterData = doc.data().rows.map(function(r){ return { name: r.pmam || r.name || '', ward: r.ward || '' }; });
+      rosterData = doc.data().rows.map(function(r){
+        // Multi-ward: prefer `wards` array; fall back to legacy single `ward` string
+        var wards;
+        if (Array.isArray(r.wards)) {
+          wards = r.wards.slice();
+        } else if (typeof r.ward === 'string' && r.ward.trim()) {
+          wards = r.ward.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+        } else if (Array.isArray(r.ward)) {
+          wards = r.ward.slice();
+        } else {
+          wards = [];
+        }
+        return { name: r.pmam || r.name || '', wards: wards };
+      });
     }
     renderRoster();
   }).catch(function(){ renderRoster(); });
@@ -2472,20 +2485,110 @@ function saveWardsToDb(){ wmSave(); }
 
 // ── Ward Roster: add a blank row ──
 function addRosterRow(){
-  rosterData.push({ name:'', ward:'' });
+  rosterData.push({ name:'', wards:[] });
   renderRoster();
+}
+
+// Normalise a roster row's ward value into an array of canonical labels.
+// Handles legacy data where `ward` was a single string or comma list.
+function rosterWardArray(r){
+  if (Array.isArray(r.wards)) return r.wards.slice();
+  if (typeof r.ward === 'string' && r.ward.trim()) {
+    return r.ward.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  }
+  if (Array.isArray(r.ward)) return r.ward.slice();
+  return [];
+}
+
+// Toggle a ward on/off for a given roster row.
+function rosterToggleWard(i, wardLabel, checked){
+  if (!rosterData[i]) return;
+  var arr = rosterWardArray(rosterData[i]);
+  var pos = arr.indexOf(wardLabel);
+  if (checked && pos === -1) arr.push(wardLabel);
+  if (!checked && pos !== -1) arr.splice(pos, 1);
+  rosterData[i].wards = arr;
+  delete rosterData[i].ward; // drop legacy field; wards[] is source of truth
+  renderRosterRowWards(i);
+}
+
+// Open/close the ward checkbox panel for a row.
+function rosterToggleWardPanel(i){
+  var panel = document.getElementById('rwPanel-'+i);
+  if (!panel) return;
+  var isOpen = panel.style.display === 'block';
+  // close all other panels first
+  document.querySelectorAll('[id^="rwPanel-"]').forEach(function(p){ p.style.display='none'; });
+  panel.style.display = isOpen ? 'none' : 'block';
+}
+
+// Re-render just the ward cell of one row (after a checkbox toggle) so the
+// dropdown panel stays open and the summary chips update live.
+function renderRosterRowWards(i){
+  var cell = document.getElementById('rwCell-'+i);
+  if (!cell) return;
+  cell.innerHTML = rosterWardCellHtml(i);
+  var panel = document.getElementById('rwPanel-'+i);
+  if (panel) panel.style.display = 'block'; // keep open while editing
+}
+
+// Build the inner HTML of a row's ward cell: summary chips + toggle button + checkbox panel.
+function rosterWardCellHtml(i){
+  var r = rosterData[i] || {};
+  var selected = rosterWardArray(r);
+  var allWards = (window.WARD_REGISTRY && WARD_REGISTRY.isReady())
+    ? WARD_REGISTRY.list()
+    : (window.WARD_REGISTRY ? WARD_REGISTRY.list() : []);
+  // Summary chips
+  var chips = selected.length
+    ? selected.map(function(w){
+        return (window.WARD_REGISTRY ? WARD_REGISTRY.pill(w) : '<span>'+escAttr(w)+'</span>');
+      }).join(' ')
+    : '<span style="font-size:11px;color:#9ca3af;font-style:italic">No wards selected</span>';
+  // Checkbox list
+  var boxes = allWards.map(function(w){
+    var checked = selected.indexOf(w.label) !== -1 ? ' checked' : '';
+    var ic = w.icon ? '<span style="margin-right:4px">'+w.icon+'</span>' : '';
+    return '<label style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px" '
+         + 'onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'transparent\'">'
+         + '<input type="checkbox"'+checked+' onchange="rosterToggleWard('+i+',\''+escAttr(w.label).replace(/'/g,"\\'")+'\',this.checked)" style="width:15px;height:15px;cursor:pointer">'
+         + ic + escAttr(w.label)
+         + '</label>';
+  }).join('');
+  if (!allWards.length) {
+    boxes = '<div style="padding:8px;font-size:11px;color:#9ca3af">Wards still loading… try again in a moment.</div>';
+  }
+  return '<div style="position:relative;min-width:210px">'
+    + '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px">'+chips+'</div>'
+    + '<button type="button" onclick="rosterToggleWardPanel('+i+')" '
+    +   'style="width:100%;padding:5px 10px;border:1px solid #c7d2e8;border-radius:6px;background:#fff;font-size:11px;font-weight:700;color:#1e3a8a;cursor:pointer;text-align:left">'
+    +   '▾ Select / change wards ('+selected.length+')</button>'
+    + '<div id="rwPanel-'+i+'" style="display:none;position:absolute;z-index:50;left:0;right:0;margin-top:3px;'
+    +   'background:#fff;border:1.5px solid #c7d2e8;border-radius:8px;box-shadow:0 8px 24px rgba(15,43,140,0.18);'
+    +   'max-height:230px;overflow-y:auto;padding:5px">'
+    +   boxes
+    +   '<div style="border-top:1px solid #eef2f7;margin-top:4px;padding-top:5px;text-align:right">'
+    +     '<button type="button" onclick="rosterToggleWardPanel('+i+')" style="background:#1e3a8a;color:#fff;border:none;border-radius:6px;padding:4px 14px;font-size:11px;font-weight:700;cursor:pointer">Done</button>'
+    +   '</div>'
+    + '</div>'
+    + '</div>';
 }
 
 function renderRoster(){
   const b=document.getElementById('rosterBody');
   if(!b) return;
   if(!rosterData.length){b.innerHTML='<tr><td colspan="4" class="empty-td">No rows yet. Click + Add Row.</td></tr>';return;}
-  b.innerHTML=rosterData.map((r,i)=>`<tr>
-    <td>${i+1}</td>
-    <td><input value="${r.name||''}" placeholder="PMAM Name" style="width:150px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="rosterData[${i}].name=this.value"></td>
-    <td><input value="${r.ward||''}" placeholder="Ward Assigned" style="width:190px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="rosterData[${i}].ward=this.value"></td>
-    <td><button class="li-btn li-del" onclick="rosterData.splice(${i},1);renderRoster()">Remove</button></td>
+  b.innerHTML=rosterData.map((r,i)=>`<tr style="vertical-align:top">
+    <td style="padding-top:9px">${i+1}</td>
+    <td style="padding-top:7px"><input value="${escAttr(r.name||'')}" placeholder="PMAM Name" style="width:150px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="rosterData[${i}].name=this.value"></td>
+    <td id="rwCell-${i}">${rosterWardCellHtml(i)}</td>
+    <td style="padding-top:7px"><button class="li-btn li-del" onclick="rosterData.splice(${i},1);renderRoster()">Remove</button></td>
   </tr>`).join('');
+  // Re-render once WARD_REGISTRY becomes ready (in case it loaded late)
+  if (window.WARD_REGISTRY && !WARD_REGISTRY.isReady() && !renderRoster._waiting) {
+    renderRoster._waiting = true;
+    WARD_REGISTRY.onReady(function(){ renderRoster._waiting = false; renderRoster(); });
+  }
 }
 
 // ===== HOLIDAY =====
@@ -2619,18 +2722,26 @@ function sendResetOtpFromAdmin(){
 }
 
 function saveRosterToDb() {
-  var rows = [];
-  document.querySelectorAll('#rosterBody tr').forEach(function(tr) {
-    var cells = tr.querySelectorAll('input,select');
-    if (cells.length >= 2) {
-      rows.push({ pmam: cells[0] ? cells[0].value : '', ward: cells[1] ? cells[1].value : '' });
-    }
+  // Save straight from in-memory rosterData so the multi-ward arrays are
+  // preserved. We also write a comma-joined `ward` string for backward
+  // compatibility with any older reader that still expects a single field.
+  var rows = (rosterData || []).map(function(r){
+    var wards = Array.isArray(r.wards) ? r.wards.filter(function(w){ return (w||'').trim(); }) : [];
+    return {
+      pmam:  (r.name || '').trim(),
+      wards: wards,
+      ward:  wards.join(', ')   // legacy mirror
+    };
   });
   var msg = document.getElementById('rosterSaveMsg');
   msg.style.color = '#1A3DB5';
   msg.textContent = 'Saving…';
   db.collection('settings').doc('roster').set({ rows: rows, updatedAt: Date.now() }, { merge: true })
-    .then(function() { msg.style.color='#166534'; msg.textContent='✅ Roster saved! (Auto-published to landing page)'; setTimeout(function(){msg.textContent='';},3500); })
+    .then(function() {
+      msg.style.color='#166534'; msg.textContent='✅ Roster saved! (Auto-published to landing page)';
+      setTimeout(function(){msg.textContent='';},3500);
+      if (typeof writeAudit === 'function') writeAudit('EDIT','settings/roster','roster',{count:rows.length});
+    })
     .catch(function(e) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; });
 }
 

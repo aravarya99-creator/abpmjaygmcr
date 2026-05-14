@@ -916,6 +916,23 @@ window.addEventListener('DOMContentLoaded', function() {
     // for these, ignore any saved URL (legacy data may have '#orders' etc.)
     var MODAL_IDS = ['home','staff','calendar','roster','holiday','weekend'];
 
+    // Local id normaliser (mirrors window.normalizeNavId; defined here so
+    // renderNav never depends on script load order). Maps stale variants
+    // like 'weekendroster' / 'weekend_roster' / '#weekend' → 'weekend'.
+    function navIdCanon(raw){
+      var s = String(raw || '').toLowerCase().replace(/^#/, '').replace(/[^a-z]/g, '');
+      if (!s) return '';
+      var M = {
+        home:'home', staff:'staff', about:'about', aboutus:'about',
+        calendar:'calendar', holidaycalendar:'calendar',
+        roster:'roster', wardroster:'roster', ward:'roster',
+        holiday:'holiday', holidayduty:'holiday', holidayroster:'holiday', holidayrost:'holiday',
+        weekend:'weekend', weekendroster:'weekend', weekendrost:'weekend', weekendduty:'weekend',
+        contact:'contact', contactus:'contact'
+      };
+      return M[s] || s;
+    }
+
     function renderNav(items){
       var nav = document.getElementById('lpNavArea');
       if (!nav || !Array.isArray(items)) return;
@@ -924,7 +941,8 @@ window.addEventListener('DOMContentLoaded', function() {
       if (visible.length === 0) return; // keep fallback hardcoded items
       nav.innerHTML = visible.map(function(it){
         var cls = 'nav-item' + (it.active ? ' active' : '');
-        var navId = esc((it.id || '').toLowerCase());
+        // Normalise the id so legacy/variant ids still route to the right modal
+        var navId = esc(navIdCanon(it.id || it.label || ''));
         // For known content ids, force href='#' so click handler routes by id.
         // For unknown/custom ids, honor the saved url so admins can still link out.
         var url = (MODAL_IDS.indexOf(navId) !== -1) ? '#' : (it.url || '#');
@@ -1396,21 +1414,31 @@ window.addEventListener('DOMContentLoaded', function() {
     }, 2400);
   }
 
+  // ─── Normalise any nav id/label variant to a canonical modal id ─────
+  // Handles stale Firestore data: 'weekendroster', 'weekend-roster',
+  // 'weekend_roster', '#weekend', 'wardroster', etc. all map cleanly.
+  function normalizeNavId(raw){
+    var s = String(raw || '').toLowerCase().replace(/^#/, '').replace(/[^a-z]/g, '');
+    if (!s) return '';
+    var MAP = {
+      home:'home', staff:'staff', about:'about', aboutus:'about',
+      calendar:'calendar', holidaycalendar:'calendar',
+      roster:'roster', wardroster:'roster', ward:'roster',
+      holiday:'holiday', holidayduty:'holiday', holidayroster:'holiday', holidayrost:'holiday',
+      weekend:'weekend', weekendroster:'weekend', weekendrost:'weekend', weekendduty:'weekend',
+      contact:'contact', contactus:'contact'
+    };
+    return MAP[s] || s;
+  }
+  window.normalizeNavId = normalizeNavId;
+
   // ─── Resolve nav id from element (data-nav preferred, label fallback) ─
   function getNavId(a){
     var id = (a.getAttribute('data-nav') || '').trim().toLowerCase();
-    if (id) return id;
+    if (id) return normalizeNavId(id);
     // Legacy fallback: derive from label text
     var label = (a.textContent || '').trim().toLowerCase().replace(/[▾▼]/g,'').trim();
-    if (label === 'home')              return 'home';
-    if (label === 'staff')             return 'staff';
-    if (label === 'about us')          return 'about';
-    if (label === 'holiday calendar')  return 'calendar';
-    if (label === 'ward roster')       return 'roster';
-    if (label === 'holiday duty')      return 'holiday';
-    if (label === 'weekend roster')    return 'weekend';
-    if (label === 'contact us')        return 'contact';
-    return '';
+    return normalizeNavId(label);
   }
 
   // ─── Update active visual state ─────────────────────────────────────
@@ -1930,16 +1958,34 @@ window.addEventListener('DOMContentLoaded', function() {
       return '<div class="cm-empty">No ward assignments published yet. Admin can add rows from <strong>Data Management → Ward Roster</strong>.</div>';
     }
     var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl">'
-      + '<thead><tr><th style="width:42px">#</th><th>PMAM Name</th><th>Ward Assigned</th></tr></thead>'
+      + '<thead><tr><th style="width:42px">#</th><th>PMAM Name</th><th>Ward(s) Assigned</th></tr></thead>'
       + '<tbody>';
     rows.forEach(function(r, i){
       var name = r.pmam || r.name || '';
-      var wardPill = (window.WARD_REGISTRY && r.ward)
-        ? WARD_REGISTRY.pill(r.ward)
-        : esc(r.ward || '');
+      // Multi-ward: prefer `wards` array, fall back to legacy `ward` string/array
+      var wardList;
+      if (Array.isArray(r.wards)) {
+        wardList = r.wards;
+      } else if (typeof r.ward === 'string' && r.ward.trim()) {
+        wardList = r.ward.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+      } else if (Array.isArray(r.ward)) {
+        wardList = r.ward;
+      } else {
+        wardList = [];
+      }
+      var wardCell;
+      if (!wardList.length) {
+        wardCell = '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
+      } else {
+        wardCell = '<span style="display:inline-flex;flex-wrap:wrap;gap:4px">'
+          + wardList.map(function(w){
+              return (window.WARD_REGISTRY) ? WARD_REGISTRY.pill(w) : esc(w);
+            }).join('')
+          + '</span>';
+      }
       html += '<tr><td style="text-align:center;color:#6b7280;font-weight:600">'+(i+1)+'</td>'
             + '<td style="font-weight:600">'+esc(name)+'</td>'
-            + '<td>'+wardPill+'</td></tr>';
+            + '<td>'+wardCell+'</td></tr>';
     });
     html += '</tbody></table></div></div>';
     if (data.updatedAt) {
