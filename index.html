@@ -270,17 +270,14 @@ a.hero-gc-ci:hover{color:#7c3aed}
   </button>
 
   <div class="nav-area" id="lpNavArea">
-    <a class="nav-item active" href="#" data-nav="home">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V21H3z"/><path d="M9 21v-6h6v6"/></svg>
-      Home
-    </a>
     <a class="nav-item" href="#" data-nav="about">About Us</a>
-    <a class="nav-item" href="#" data-nav="calendar">Holiday Calendar</a>
+    <a class="nav-item" href="#" data-nav="developer">About Developer</a>
+    <a class="nav-item" href="#" data-nav="staff">Staff</a>
     <a class="nav-item" href="#" data-nav="roster">Ward Roster</a>
-    <a class="nav-item" href="#" data-nav="holiday">Holiday Duty</a>
     <a class="nav-item" href="#" data-nav="weekend">Weekend Roster</a>
+    <a class="nav-item" href="#" data-nav="holiday">Holiday Roster</a>
+    <a class="nav-item" href="#" data-nav="calendar">Holiday Calendar</a>
     <a class="nav-item" href="#" data-nav="orders">Orders</a>
-    <a class="nav-item" href="#" data-nav="contact">Contact Us</a>
   </div>
 </div>
 
@@ -927,7 +924,8 @@ window.addEventListener('DOMContentLoaded', function() {
         holiday:'holiday', holidayduty:'holiday', holidayroster:'holiday', holidayrost:'holiday',
         weekend:'weekend', weekendroster:'weekend', weekendrost:'weekend', weekendduty:'weekend',
         contact:'contact', contactus:'contact',
-        orders:'orders', order:'orders', officeorders:'orders', circulars:'orders', notices:'orders'
+        orders:'orders', order:'orders', officeorders:'orders', circulars:'orders', notices:'orders',
+        developer:'developer', aboutdeveloper:'developer', aboutdev:'developer', dev:'developer', webdeveloper:'developer'
       };
       return M[s] || s;
     }
@@ -937,20 +935,36 @@ window.addEventListener('DOMContentLoaded', function() {
     // missing any, we append it — so a stale config can never make a working
     // feature (Weekend Roster, Orders, About Us) disappear from the nav.
     var CORE_TABS = [
-      { id:'home',     label:'Home',            order:0 },
-      { id:'about',    label:'About Us',        order:1 },
-      { id:'calendar', label:'Holiday Calendar',order:3 },
-      { id:'roster',   label:'Ward Roster',     order:4 },
-      { id:'holiday',  label:'Holiday Duty',    order:5 },
-      { id:'weekend',  label:'Weekend Roster',  order:6 },
-      { id:'orders',   label:'Orders',          order:7 },
-      { id:'contact',  label:'Contact Us',      order:8 }
-    ];
+      { id:'about',     label:'About Us',         order:0 },
+      { id:'developer', label:'About Developer',  order:1 },
+      { id:'staff',     label:'Staff',            order:2 },
+      { id:'roster',    label:'Ward Roster',      order:3 },
+      { id:'weekend',   label:'Weekend Roster',   order:4 },
+      { id:'holiday',   label:'Holiday Roster',   order:5 },
+      { id:'calendar',  label:'Holiday Calendar', order:6 },
+      { id:'orders',    label:'Orders',           order:7 }
+    ]
 
     function renderNav(items){
       var nav = document.getElementById('lpNavArea');
       if (!nav) return;
       if (!Array.isArray(items)) items = [];
+
+      // 0. Allow-list: the landing page is built around exactly the 8 CORE
+      //    tab ids. Any saved item whose canonical id isn't one of these
+      //    (e.g. stale 'home' / 'contact' entries from an old config) is
+      //    dropped so removed tabs never reappear. Custom-id items with a
+      //    real URL are kept, since an admin may have added them on purpose.
+      var ALLOWED = {};
+      CORE_TABS.forEach(function(ct){ ALLOWED[ct.id] = true; });
+      items = items.filter(function(it){
+        var cid = navIdCanon(it.id || it.label || '');
+        if (ALLOWED[cid]) return true;
+        // keep genuine custom external links, drop stale known-but-removed ids
+        var REMOVED = { home:true, contact:true, leave:true, staffold:true };
+        if (REMOVED[cid]) return false;
+        return !!(it.url && /^(https?:|\/\/)/i.test(it.url));
+      });
 
       // 1. Start with saved items, then append any missing CORE_TABS.
       var merged = items.slice();
@@ -1476,11 +1490,12 @@ window.addEventListener('DOMContentLoaded', function() {
       holiday:'holiday', holidayduty:'holiday', holidayroster:'holiday', holidayrost:'holiday',
       weekend:'weekend', weekendroster:'weekend', weekendrost:'weekend', weekendduty:'weekend',
       contact:'contact', contactus:'contact',
-      orders:'orders', order:'orders', officeorders:'orders', circulars:'orders', notices:'orders'
+      orders:'orders', order:'orders', officeorders:'orders', circulars:'orders', notices:'orders',
+      developer:'developer', aboutdeveloper:'developer', aboutdev:'developer', dev:'developer', webdeveloper:'developer'
     };
     return M[s] || s;
   }
-  var KNOWN_MODAL_IDS = ['calendar','roster','holiday','weekend','orders','about'];
+  var KNOWN_MODAL_IDS = ['calendar','roster','holiday','weekend','orders','about','developer'];
   var ACTION_IDS = ['home','staff','contact'];
   function getNavId(a){
     var fromId    = navIdCanonLocal((a.getAttribute('data-nav') || '').trim());
@@ -1916,7 +1931,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
     db.collection('settings').doc('about_page').onSnapshot(function(doc){
       LIVE.aboutPage = doc.exists ? (doc.data() || {}) : {};
-      if (_openId === 'about') renderInto(_openId);
+      if (_openId === 'about' || _openId === 'developer') renderInto(_openId);
     }, function(err){ console.warn('about_page listener:', err && err.message); });
   }
   if (document.readyState === 'loading') {
@@ -2108,118 +2123,40 @@ window.addEventListener('DOMContentLoaded', function() {
     return html;
   }
 
-  // Internal state for the About modal's sub-tabs.
-  var _aboutTab = 'sehat';
-
-  // Switch between About page sub-tabs (called from inline onclick).
-  window.aboutSwitchTab = function(tab){
-    _aboutTab = tab;
-    renderInto('about');
-  };
-
-  function aboutStaffCardsHtml(){
-    // Reuse the same public staff data the Staff modal uses (exposed as
-    // globals from the staff IIFE, which is a separate scope).
-    var list = (typeof window.lpGetStaffCache === 'function') ? window.lpGetStaffCache() : null;
-    if (!list) {
-      if (typeof window.lpLoadStaff === 'function') {
-        try {
-          window.lpLoadStaff();
-          var tries = 0;
-          var poll = setInterval(function(){
-            tries++;
-            var c = (typeof window.lpGetStaffCache === 'function') ? window.lpGetStaffCache() : null;
-            if (c || tries > 20) {
-              clearInterval(poll);
-              if (_openId === 'about' && _aboutTab === 'staff') renderInto('about');
-            }
-          }, 250);
-        } catch(e){}
-      }
-      return '<div style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">Loading staff…</div>';
-    }
-    if (!list.length) {
-      return '<div class="cm-empty">No staff published yet.</div>';
-    }
-    var ROLE_C = window.lpRoleColors || {};
-    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">';
-    list.forEach(function(u){
-      var rc = ROLE_C[u.role] || { bg:'#F3F4F6', fg:'#374151', av:'linear-gradient(135deg,#6b7280,#4b5563)' };
-      var initials = (u.name||'?').split(/\s+/).map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
-      var photoHtml = u.photoBase64
-        ? '<img src="'+u.photoBase64+'" style="width:100%;height:100%;object-fit:cover" alt="">'
-        : '<span style="font-size:18px;font-weight:800;color:#fff">'+esc(initials)+'</span>';
-      html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:13px;display:flex;align-items:center;gap:12px">'
-        + '<div style="width:50px;height:50px;border-radius:50%;background:'+rc.av+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">'+photoHtml+'</div>'
-        + '<div style="flex:1;min-width:0">'
-        +   '<div style="font-size:13px;font-weight:800;color:#0F2B8C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(u.name||'Unknown')+'</div>'
-        +   '<div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">'
-        +     '<span style="background:'+rc.bg+';color:'+rc.fg+';padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">'+esc(u.role||'Staff')+'</span>'
-        +     (u.ward ? '<span style="background:#F0F4FF;color:#1A3DB5;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600">\uD83D\uDCCD '+esc(u.ward)+'</span>' : '')
-        +   '</div>'
-        + '</div>'
-        + '</div>';
-    });
-    html += '</div>';
-    return html;
-  }
-
+  // ── About Us modal: the AB-PMJAY / SEHAT scheme writeup ──
   function renderAbout(){
     var d = LIVE.aboutPage || {};
-    var staffShow = (d.staffShow !== false);
-    // Tab bar
-    var tabs = [
-      { id:'sehat', label:'About AB-PMJAY SEHAT' }
-    ];
-    if (staffShow) tabs.push({ id:'staff', label:'Our Staff' });
-    tabs.push({ id:'dev', label:'About the Developer' });
-    // If current tab is hidden, fall back to first.
-    if (!tabs.some(function(t){ return t.id === _aboutTab; })) _aboutTab = 'sehat';
-
-    var tabBar = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">'
-      + tabs.map(function(t){
-          var on = t.id === _aboutTab;
-          return '<button onclick="aboutSwitchTab(\''+t.id+'\')" style="'
-            + 'padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid '
-            + (on ? '#7c3aed;background:#7c3aed;color:#fff' : '#e9d5ff;background:#fff;color:#6b21a8')
-            + '">'+esc(t.label)+'</button>';
-        }).join('')
+    var heading = d.sehatHeading || 'About Ayushman Bharat — PM-JAY / SEHAT';
+    var text = d.sehatBody || '';
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:22px">'
+      + '<h3 style="margin:0 0 14px;font-size:18px;color:#4c1d95;font-weight:800">' + esc(heading) + '</h3>'
+      + (text
+          ? '<div style="font-size:13.5px;color:#334155;line-height:1.75;white-space:pre-wrap">' + esc(text) + '</div>'
+          : '<div style="color:#9ca3af;font-style:italic;font-size:13px">No content added yet. The admin can add it from <strong>Nav Bar → About Us</strong>.</div>')
       + '</div>';
+  }
 
-    var body = '';
-    if (_aboutTab === 'sehat') {
-      var heading = d.sehatHeading || 'About Ayushman Bharat — PM-JAY / SEHAT';
-      var text = d.sehatBody || '';
-      body = '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px">'
-        + '<h3 style="margin:0 0 12px;font-size:17px;color:#4c1d95;font-weight:800">'+esc(heading)+'</h3>'
-        + (text
-            ? '<div style="font-size:13.5px;color:#334155;line-height:1.7;white-space:pre-wrap">'+esc(text)+'</div>'
-            : '<div style="color:#9ca3af;font-style:italic;font-size:13px">No content added yet. The admin can add it from <strong>Nav Bar → About Page</strong>.</div>')
-        + '</div>';
-    } else if (_aboutTab === 'staff') {
-      body = aboutStaffCardsHtml();
-    } else if (_aboutTab === 'dev') {
-      var dn = d.devName || '';
-      var dr = d.devRole || '';
-      var db_ = d.devBody || '';
-      var dp = d.devPhoto || '';
-      var photo = dp
-        ? '<img src="'+esc(dp)+'" style="width:110px;height:110px;border-radius:16px;object-fit:cover;border:3px solid #e9d5ff;flex-shrink:0">'
-        : '<div style="width:110px;height:110px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#9333ea);display:flex;align-items:center;justify-content:center;font-size:38px;flex-shrink:0">\uD83D\uDC68\u200D\uD83D\uDCBB</div>';
-      if (!dn && !dr && !db_ && !dp) {
-        body = '<div class="cm-empty">No developer details added yet. The admin can add them from <strong>Nav Bar → About Page</strong>.</div>';
-      } else {
-        body = '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">'
-          + photo
-          + '<div style="flex:1;min-width:200px">'
-          +   (dn ? '<h3 style="margin:0 0 3px;font-size:17px;color:#4c1d95;font-weight:800">'+esc(dn)+'</h3>' : '')
-          +   (dr ? '<div style="font-size:12px;color:#7c3aed;font-weight:700;margin-bottom:10px">'+esc(dr)+'</div>' : '')
-          +   (db_ ? '<div style="font-size:13.5px;color:#334155;line-height:1.7;white-space:pre-wrap">'+esc(db_)+'</div>' : '')
-          + '</div>'
-          + '</div>';
-      }
+  // ── About Developer modal: name, role, photo and writeup ──
+  function renderDeveloper(){
+    var d = LIVE.aboutPage || {};
+    var dn = d.devName || '';
+    var dr = d.devRole || '';
+    var db_ = d.devBody || '';
+    var dp = d.devPhoto || '';
+    if (!dn && !dr && !db_ && !dp) {
+      return '<div class="cm-empty">No developer details added yet. The admin can add them from <strong>Nav Bar → About Developer</strong>.</div>';
     }
-    return tabBar + body;
+    var photo = dp
+      ? '<img src="' + esc(dp) + '" style="width:120px;height:120px;border-radius:16px;object-fit:cover;border:3px solid #e9d5ff;flex-shrink:0">'
+      : '<div style="width:120px;height:120px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#9333ea);display:flex;align-items:center;justify-content:center;font-size:42px;flex-shrink:0">\uD83D\uDC68\u200D\uD83D\uDCBB</div>';
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:22px;display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">'
+      + photo
+      + '<div style="flex:1;min-width:220px">'
+      +   (dn ? '<h3 style="margin:0 0 4px;font-size:18px;color:#4c1d95;font-weight:800">' + esc(dn) + '</h3>' : '')
+      +   (dr ? '<div style="font-size:12.5px;color:#7c3aed;font-weight:700;margin-bottom:12px">' + esc(dr) + '</div>' : '')
+      +   (db_ ? '<div style="font-size:13.5px;color:#334155;line-height:1.75;white-space:pre-wrap">' + esc(db_) + '</div>' : '')
+      + '</div>'
+      + '</div>';
   }
 
   function renderOrders(){
@@ -2271,7 +2208,8 @@ window.addEventListener('DOMContentLoaded', function() {
     holiday:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
     weekend:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
     orders:   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
-    about:    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+    about:    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    developer:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
   };
   window.CONTENT_RENDERERS = {
     calendar: renderHolidayCalendar,
@@ -2279,7 +2217,8 @@ window.addEventListener('DOMContentLoaded', function() {
     holiday:  renderHolidayDuty,
     weekend:  renderWeekendRoster,
     orders:   renderOrders,
-    about:    renderAbout
+    about:    renderAbout,
+    developer:renderDeveloper
   };
   console.log('[contentModal] Initialized. Known ids:', Object.keys(window.CONTENT_RENDERERS));
 
@@ -2320,7 +2259,8 @@ window.addEventListener('DOMContentLoaded', function() {
         (id==='holiday'  && LIVE.holidayDuty) ||
         (id==='weekend'  && LIVE.weekendRoster) ||
         (id==='orders'   && LIVE.orders) ||
-        (id==='about'    && LIVE.aboutPage)
+        (id==='about'    && LIVE.aboutPage) ||
+        (id==='developer'&& LIVE.aboutPage)
       );
       subEl.textContent = hasData ? 'Live data — auto-syncs from Admin Portal' : 'Loading from server…';
     }

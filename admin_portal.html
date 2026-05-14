@@ -724,16 +724,18 @@ tr:hover td{background:#EEF3FF}
 
       <!-- Sub-tab nav -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
-        <button class="dmt-tab active" id="nbt-holidaycal"    onclick="showNavTab('holidaycal',this)">📅 Holiday Calendar</button>
+        <button class="dmt-tab active" id="nbt-aboutpage"     onclick="showNavTab('aboutpage',this)">ℹ️ About Us</button>
+        <button class="dmt-tab"        id="nbt-developer"     onclick="showNavTab('developer',this)">👨‍💻 About Developer</button>
+        <button class="dmt-tab"        id="nbt-staff"         onclick="showNavTab('staff',this)">👥 Staff</button>
         <button class="dmt-tab"        id="nbt-wardroster"    onclick="showNavTab('wardroster',this)">🏥 Ward Roster</button>
-        <button class="dmt-tab"        id="nbt-holidayrost"   onclick="showNavTab('holidayrost',this)">🎉 Holiday Roster</button>
         <button class="dmt-tab"        id="nbt-weekendroster" onclick="showNavTab('weekendroster',this)">📆 Weekend Roster</button>
+        <button class="dmt-tab"        id="nbt-holidayrost"   onclick="showNavTab('holidayrost',this)">🎉 Holiday Roster</button>
+        <button class="dmt-tab"        id="nbt-holidaycal"    onclick="showNavTab('holidaycal',this)">📅 Holiday Calendar</button>
         <button class="dmt-tab"        id="nbt-orders"        onclick="showNavTab('orders',this)">📋 Orders</button>
-        <button class="dmt-tab"        id="nbt-aboutpage"     onclick="showNavTab('aboutpage',this)">ℹ️ About Page</button>
         <button class="dmt-tab"        id="nbt-navbar"        onclick="showNavTab('navbar',this)">⚙️ Nav Bar Settings</button>
       </div>
 
-      <div class="dmt-pane active" id="dmpane-holidaycal">
+      <div class="dmt-pane" id="dmpane-holidaycal">
         <div class="card">
           <div class="card-hd">
             Holiday Calendar
@@ -913,17 +915,14 @@ tr:hover td{background:#EEF3FF}
           </div>
         </div>
       </div>
-      <div class="dmt-pane" id="dmpane-aboutpage">
+      <div class="dmt-pane active" id="dmpane-aboutpage">
         <div class="card" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #d8b4fe;margin-bottom:12px">
-          <div class="card-hd" style="color:#6b21a8">ℹ️ About Page Editor</div>
+          <div class="card-hd" style="color:#6b21a8">ℹ️ About Us — AB-PMJAY / SEHAT</div>
           <div style="font-size:12px;color:#6b21a8;line-height:1.6">
             Edit the content shown when visitors click <strong>About Us</strong> on the landing page.
-            The About page has three sections: <strong>About AB-PMJAY SEHAT</strong>, <strong>Our Staff</strong>
-            (auto-pulled from approved staff accounts), and <strong>About the Web Developer</strong>.
             Changes go live instantly after you Save &amp; Publish.
           </div>
         </div>
-
         <div class="card">
           <div class="card-hd">🏥 About AB-PMJAY SEHAT</div>
           <div style="display:flex;flex-direction:column;gap:8px">
@@ -931,30 +930,27 @@ tr:hover td{background:#EEF3FF}
             <input type="text" id="abSehatHeading" placeholder="e.g. Ayushman Bharat — PM-JAY / SEHAT"
               style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
             <label style="font-size:11px;font-weight:700;color:#0F2B8C;margin-top:4px">Body text</label>
-            <textarea id="abSehatBody" rows="7" placeholder="Describe the AB-PMJAY / SEHAT scheme, its objectives, coverage, and how it operates at GMC &amp; AH Rajouri…"
+            <textarea id="abSehatBody" rows="9" placeholder="Describe the AB-PMJAY / SEHAT scheme, its objectives, coverage, and how it operates at GMC &amp; AH Rajouri…"
               style="width:100%;padding:10px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit;line-height:1.6;resize:vertical"></textarea>
             <div style="font-size:10px;color:#9ca3af">Plain text. Line breaks are preserved on the landing page.</div>
           </div>
         </div>
+        <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:4px">
+          <span id="abSaveMsg" style="font-size:11px;font-weight:600"></span>
+          <button class="btn btn-pri" onclick="abSave()">💾 Save &amp; Publish</button>
+        </div>
+      </div>
 
-        <div class="card">
-          <div class="card-hd">👥 Our Staff</div>
-          <div style="font-size:12px;color:#475569;line-height:1.6">
-            The Staff section on the About page is generated automatically from approved staff
-            accounts (the same data as <strong>Staff Management</strong>). There is nothing to edit here —
-            add or update staff from the <strong>Staff Management</strong> section in the sidebar, and the
-            About page Staff tab updates automatically.
-          </div>
-          <div style="margin-top:8px">
-            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#0F2B8C;font-weight:700;cursor:pointer">
-              <input type="checkbox" id="abStaffShow" checked style="width:16px;height:16px;cursor:pointer">
-              Show the "Our Staff" tab on the About page
-            </label>
+      <div class="dmt-pane" id="dmpane-developer">
+        <div class="card" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #d8b4fe;margin-bottom:12px">
+          <div class="card-hd" style="color:#6b21a8">👨‍💻 About Developer</div>
+          <div style="font-size:12px;color:#6b21a8;line-height:1.6">
+            Edit the content shown when visitors click <strong>About Developer</strong> on the landing page.
+            Add a name, role, photo and a short writeup. Saved together with the About Us page.
           </div>
         </div>
-
         <div class="card">
-          <div class="card-hd">👨‍💻 About the Web Developer</div>
+          <div class="card-hd">👨‍💻 Web Developer Details</div>
           <div style="display:flex;gap:16px;flex-wrap:wrap">
             <div style="flex-shrink:0">
               <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Photo</label>
@@ -977,18 +973,42 @@ tr:hover td{background:#EEF3FF}
               </div>
               <div>
                 <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">About text</label>
-                <textarea id="abDevBody" rows="5" placeholder="A short note about the developer, the technology used, contact info, acknowledgements…"
+                <textarea id="abDevBody" rows="6" placeholder="A short note about the developer, the technology used, contact info, acknowledgements…"
                   style="width:100%;padding:10px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit;line-height:1.6;resize:vertical"></textarea>
               </div>
             </div>
           </div>
         </div>
-
         <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:4px">
-          <span id="abSaveMsg" style="font-size:11px;font-weight:600"></span>
-          <button class="btn btn-pri" onclick="abSave()">💾 Save &amp; Publish About Page</button>
+          <span id="abDevSaveMsg" style="font-size:11px;font-weight:600"></span>
+          <button class="btn btn-pri" onclick="abSave()">💾 Save &amp; Publish</button>
         </div>
       </div>
+
+      <div class="dmt-pane" id="dmpane-staff">
+        <div class="card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;margin-bottom:12px">
+          <div class="card-hd" style="color:#1e3a8a">👥 Staff</div>
+          <div style="font-size:12px;color:#1e3a8a;line-height:1.6">
+            The <strong>Staff</strong> tab on the landing page is generated automatically from approved
+            staff accounts. To add a new staff member, edit details, change a photo, or update
+            approval status, use the full <strong>Staff Management</strong> section.
+          </div>
+          <div style="margin-top:10px">
+            <button class="btn btn-pri" onclick="nbOpenStaffMgmt()">👥 Open Staff Management</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            Quick Preview
+            <button class="btn" onclick="nbStaffPreviewRender()" style="margin-left:auto;padding:4px 10px;font-size:10px;background:#fff;border:1px solid #93c5fd;color:#1e3a8a">↻ Refresh</button>
+          </div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">A read-only snapshot of staff currently visible on the landing page.</div>
+          <div id="nbStaffPreview" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
+            <div style="color:#9ca3af;font-style:italic;padding:14px;grid-column:1/-1">Loading staff…</div>
+          </div>
+        </div>
+      </div>
+
       <div class="dmt-pane" id="dmpane-navbar">
 
         <!-- Hero info card -->
@@ -998,26 +1018,11 @@ tr:hover td{background:#EEF3FF}
             Navigation Bar Manager
             <span id="nbm-status" style="margin-left:auto;font-size:11px;color:#6b7280;font-weight:500"></span>
           </div>
-          <div style="font-size:12px;color:#1e3a8a;line-height:1.65;margin-bottom:10px">
-            Manage the top navigation bar on <strong>index.html</strong>. Use this tab to <strong>rename</strong>,
-            <strong>add</strong>, <strong>delete</strong>, <strong>reorder</strong>, hide/show, or highlight items.
-            <br>The actual <strong>data</strong> shown when a visitor clicks a tile comes from the matching Data Management tab —
-            saving in those tabs auto-publishes to the landing page (real-time sync, no reload needed).
+          <div style="font-size:12px;color:#1e3a8a;line-height:1.65">
+            Manage the navigation items shown on the <strong>landing page</strong>. You can
+            <strong>edit</strong> a label, <strong>add</strong> an item, or <strong>delete</strong> one.
+            Click <strong>Save</strong> to publish your changes.
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-pri" onclick="nbmSave()" style="background:linear-gradient(135deg,#1d4ed8,#2563eb)">💾 Save Nav Bar to Firebase</button>
-            <button class="btn" onclick="nbmReload()" style="background:#fff;border:1.5px solid #93c5fd;color:#1e3a8a">↻ Reload from Firebase</button>
-            <button class="btn" onclick="nbmResetDefaults()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">⚠️ Reset to Defaults</button>
-          </div>
-        </div>
-
-        <!-- Live preview strip -->
-        <div class="card" style="padding:12px 16px;margin-bottom:12px">
-          <div style="font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px">📺 Live Preview — as it will appear on landing page</div>
-          <div id="nbm-preview" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;min-height:42px">
-            <span style="color:#9ca3af;font-style:italic;font-size:11px">Loading preview…</span>
-          </div>
-          <div style="font-size:10.5px;color:#9ca3af;margin-top:6px">✓ Only items marked <strong>Visible</strong> appear. The <strong>highlighted</strong> item gets the active (green) style.</div>
         </div>
 
         <!-- Items editor -->
@@ -1028,9 +1033,12 @@ tr:hover td{background:#EEF3FF}
               <button class="btn btn-pri" onclick="nbmAdd()" style="padding:5px 12px;font-size:11px">+ Add Item</button>
             </div>
           </div>
-          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Use ↑↓ to reorder. Toggle <strong>Visible</strong> to show/hide. Toggle <strong>Active</strong> to highlight the current page link.</div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Edit a label inline, or use Delete to remove an item. Click <strong>Save Nav Bar</strong> when done.</div>
           <div id="nbm-items-list" style="display:flex;flex-direction:column;gap:8px"></div>
-          <div id="nbm-save-msg" style="font-size:11px;font-weight:600;margin-top:10px;min-height:16px"></div>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:14px">
+            <span id="nbm-save-msg" style="font-size:11px;font-weight:600"></span>
+            <button class="btn btn-pri" onclick="nbmSave()" style="background:linear-gradient(135deg,#1d4ed8,#2563eb)">💾 Save Nav Bar</button>
+          </div>
         </div>
 
       </div>
@@ -1996,6 +2004,8 @@ function showNavTab(tab, el){
   if (tab === 'weekendroster') { if (typeof wrInit === 'function') wrInit(); }
   if (tab === 'orders')        { if (typeof ordInit === 'function') ordInit(); }
   if (tab === 'aboutpage')     { if (typeof abInit === 'function') abInit(); }
+  if (tab === 'developer')     { if (typeof abInit === 'function') abInit(); }
+  if (tab === 'staff')         { if (typeof loadStaffFromUsers === 'function') loadStaffFromUsers(); if (typeof nbStaffPreviewRender === 'function') nbStaffPreviewRender(); }
   if (tab === 'navbar')        { if (typeof nbmLoad === 'function') nbmLoad(); }
 }
 
@@ -2863,8 +2873,6 @@ function abInit(){
     set('abDevName',      d.devName);
     set('abDevRole',      d.devRole);
     set('abDevBody',      d.devBody);
-    var chk = document.getElementById('abStaffShow');
-    if (chk) chk.checked = (d.staffShow !== false);
     _abDevPhoto = d.devPhoto || '';
     abDevRenderPhoto();
   }).catch(function(e){
@@ -2906,12 +2914,16 @@ function abDevClearPhoto(){
 }
 
 function abSave(){
-  var msg = document.getElementById('abSaveMsg');
+  // Update whichever status element is on screen (About Us pane uses
+  // #abSaveMsg, the Developer pane uses #abDevSaveMsg).
+  var msgs = [document.getElementById('abSaveMsg'), document.getElementById('abDevSaveMsg')];
+  var setMsg = function(text, color){
+    msgs.forEach(function(m){ if (m){ m.textContent = text; m.style.color = color; } });
+  };
   var val = function(id){ var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
   var payload = {
     sehatHeading: val('abSehatHeading'),
     sehatBody:    val('abSehatBody'),
-    staffShow:    (function(){ var c = document.getElementById('abStaffShow'); return c ? c.checked : true; })(),
     devName:      val('abDevName'),
     devRole:      val('abDevRole'),
     devBody:      val('abDevBody'),
@@ -2919,15 +2931,16 @@ function abSave(){
     updatedAt:    Date.now(),
     _updatedBy:   (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
   };
-  if (msg) { msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…'; }
+  setMsg('Saving…', '#1A3DB5');
   db.collection('settings').doc('about_page').set(payload, { merge: true })
     .then(function(){
-      if (msg) { msg.style.color = '#166534'; msg.textContent = '✅ Saved & published!'; setTimeout(function(){ msg.textContent = ''; }, 3500); }
+      setMsg('✅ Saved & published!', '#166534');
+      setTimeout(function(){ setMsg('', '#166534'); }, 3500);
       if (typeof showToast === 'function') showToast('✅ About page published', 'success');
       if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/about_page', 'about_page', {});
     })
     .catch(function(e){
-      if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Error: ' + (e && e.message ? e.message : e); }
+      setMsg('Error: ' + (e && e.message ? e.message : e), '#dc2626');
     });
 }
 
@@ -5073,18 +5086,28 @@ function lpeResetToDefaults(){
 // index.html has an onSnapshot listener — changes appear in real time.
 // ══════════════════════════════════════════════════════════════════════
 
-var _nbmItems = [];  // working copy
+var _nbmItems = [];  // working copy of the nav items
 
+// The 8 navigation items the landing page is built around, in the required
+// display order. id determines what content opens; label is what the visitor
+// sees and is the only editable field.
 var NBM_DEFAULTS = [
-  { id:'home',     label:'Home',            active:true,  visible:true,  order:0 },
-  { id:'about',    label:'About Us',        active:false, visible:true,  order:1 },
-  { id:'calendar', label:'Holiday Calendar',active:false, visible:true,  order:3 },
-  { id:'roster',   label:'Ward Roster',     active:false, visible:true,  order:4 },
-  { id:'holiday',  label:'Holiday Duty',    active:false, visible:true,  order:5 },
-  { id:'weekend',  label:'Weekend Roster',  active:false, visible:true,  order:6 },
-  { id:'orders',   label:'Orders',          active:false, visible:true,  order:7 },
-  { id:'contact',  label:'Contact Us',      active:false, visible:true,  order:8 }
+  { id:'about',     label:'About Us',         order:0 },
+  { id:'developer', label:'About Developer',  order:1 },
+  { id:'staff',     label:'Staff',            order:2 },
+  { id:'roster',    label:'Ward Roster',      order:3 },
+  { id:'weekend',   label:'Weekend Roster',   order:4 },
+  { id:'holiday',   label:'Holiday Roster',   order:5 },
+  { id:'calendar',  label:'Holiday Calendar', order:6 },
+  { id:'orders',    label:'Orders',           order:7 }
 ];
+
+// Canonical id -> default label (used when adding an item / repairing data).
+var NBM_KNOWN = {
+  about:'About Us', developer:'About Developer', staff:'Staff',
+  roster:'Ward Roster', weekend:'Weekend Roster', holiday:'Holiday Roster',
+  calendar:'Holiday Calendar', orders:'Orders'
+};
 
 function nbmSetStatus(msg, color){
   var el = document.getElementById('nbm-status');
@@ -5094,7 +5117,7 @@ function nbmSetStatus(msg, color){
 }
 
 function nbmLoad(){
-  nbmSetStatus('Loading…', '#6b7280');
+  nbmSetStatus('Loading\u2026', '#6b7280');
   db.collection('settings').doc('landing_page').get().then(function(doc){
     var navBar = [];
     if (doc.exists && doc.data() && Array.isArray(doc.data().navBar) && doc.data().navBar.length) {
@@ -5105,11 +5128,11 @@ function nbmLoad(){
     navBar.sort(function(a,b){ return (a.order||0)-(b.order||0); });
     _nbmItems = navBar;
     nbmRender();
-    nbmSetStatus('✓ Loaded from Firebase', '#166534');
+    nbmSetStatus('\u2713 Loaded', '#166534');
   }).catch(function(e){
     _nbmItems = JSON.parse(JSON.stringify(NBM_DEFAULTS));
     nbmRender();
-    nbmSetStatus('⚠️ Using defaults ('+e.message+')', '#92400e');
+    nbmSetStatus('\u26A0\uFE0F Using defaults (' + e.message + ')', '#92400e');
   });
 }
 
@@ -5118,177 +5141,85 @@ function nbmRender(){
   if (!list) return;
   if (!_nbmItems.length) {
     list.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af;font-style:italic;background:#f9fafb;border-radius:8px">No items. Click "+ Add Item" to begin.</div>';
-    nbmRenderPreview();
     return;
   }
-  // id → friendly description of the data source / behaviour on the landing page
-  var SOURCE_LABEL = {
-    home:     '🏠 Scrolls to top',
-    about:    'ℹ️ Static info (no data feed)',
-    staff:    '👥 Staff modal (live users data)',
-    calendar: '📅 Holiday Calendar tab',
-    roster:   '🏥 Ward Roster tab',
-    holiday:  '🎉 Holiday Duty Roster tab',
-    weekend:  '📆 Weekend Roster tab',
-    leave:    '📋 Leave Requests (internal)',
-    orders:   '📄 Static info (no data feed)',
-    contact:  '📞 Static info (no data feed)'
-  };
   list.innerHTML = _nbmItems.map(function(it, i){
-    var visChk = it.visible !== false;
-    var actChk = it.active === true;
-    var navId  = (it.id || '').toLowerCase();
-    var source = SOURCE_LABEL[navId] || ('🔗 Custom id — no data feed');
-    var sourceColor = SOURCE_LABEL[navId] ? '#0369a1' : '#92400e';
-    var sourceBg    = SOURCE_LABEL[navId] ? '#e0f2fe' : '#fef3c7';
-    return '<div style="background:#fff;border:1.5px solid '+(visChk?'#bfdbfe':'#e5e7eb')+';border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start">'
-      // Drag handle / number
-      + '<div style="font-weight:800;color:#9ca3af;text-align:center;padding-top:10px;font-size:13px">'+(i+1)+'</div>'
-      // Fields
-      + '<div style="display:flex;flex-direction:column;gap:8px">'
-      // Label (editable)
-      +   '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Label (shown on landing page)</label>'
-      +     '<input type="text" value="'+escAttr(it.label||'')+'" placeholder="e.g. Home" '
-      +       'onchange="_nbmItems['+i+'].label=this.value;nbmRenderPreview();nbmSetStatus(\'● Unsaved changes\',\'#dc2626\')" '
-      +       'style="width:100%;padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none" '
-      +       'onfocus="this.style.borderColor=\'#2563eb\'" onblur="this.style.borderColor=\'#e5e7eb\'">'
-      +   '</div>'
-      // Data source badge (read-only — id determines what data feeds this tile)
-      +   '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
-      +     '<span style="font-size:9.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px">Data source:</span>'
-      +     '<span style="background:'+sourceBg+';color:'+sourceColor+';padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:0.2px">'+source+'</span>'
-      +     '<span style="background:#f3f4f6;color:#6b7280;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600;font-family:monospace">id: '+(navId||'(none)')+'</span>'
-      +   '</div>'
-      // Checkboxes row
-      +   '<div style="display:flex;align-items:center;gap:16px;padding-top:2px">'
-      +     '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;font-weight:600;color:#374151">'
-      +       '<input type="checkbox" '+(visChk?'checked':'')+''
-      +         ' onchange="_nbmItems['+i+'].visible=this.checked;nbmRender();nbmSetStatus(\'● Unsaved changes\',\'#dc2626\')" '
-      +         ' style="width:14px;height:14px;accent-color:#2563eb;cursor:pointer">'
-      +       ' Visible'
-      +     '</label>'
-      +     '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;font-weight:600;color:#374151">'
-      +       '<input type="checkbox" '+(actChk?'checked':'')+''
-      +         ' onchange="_nbmItems['+i+'].active=this.checked;nbmRenderPreview();nbmSetStatus(\'● Unsaved changes\',\'#dc2626\')" '
-      +         ' style="width:14px;height:14px;accent-color:#16a34a;cursor:pointer">'
-      +       ' Active (highlighted)'
-      +     '</label>'
-      +     (!visChk ? '<span style="background:#fee2e2;color:#dc2626;padding:2px 8px;border-radius:20px;font-size:9.5px;font-weight:700">HIDDEN</span>' : '')
-      +   '</div>'
+    var navId = (it.id || '').toLowerCase();
+    var known = !!NBM_KNOWN[navId];
+    return '<div style="background:#fff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center">'
+      // number
+      + '<div style="font-weight:800;color:#9ca3af;text-align:center;font-size:13px">' + (i+1) + '</div>'
+      // label editor + id badge
+      + '<div style="display:flex;flex-direction:column;gap:5px">'
+      +   '<label style="font-size:9.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px">Label (shown on landing page)</label>'
+      +   '<input type="text" value="' + escAttr(it.label || '') + '" placeholder="e.g. About Us" '
+      +     'onchange="_nbmItems[' + i + '].label=this.value;nbmSetStatus(\'\u25CF Unsaved changes\',\'#dc2626\')" '
+      +     'style="width:100%;max-width:320px;padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none" '
+      +     'onfocus="this.style.borderColor=\'#2563eb\'" onblur="this.style.borderColor=\'#e5e7eb\'">'
+      +   '<span style="background:' + (known ? '#e0f2fe;color:#0369a1' : '#fef3c7;color:#92400e') + ';padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:monospace;width:fit-content">id: ' + (navId || '(none)') + (known ? '' : ' \u00b7 custom') + '</span>'
       + '</div>'
-      // Actions
-      + '<div style="display:flex;flex-direction:column;gap:3px">'
-      +   '<button onclick="nbmMove('+i+',-1)" '+(i===0?'disabled':'')+' style="width:26px;height:22px;border:1px solid #e5e7eb;background:#f9fafb;cursor:'+(i===0?'not-allowed':'pointer')+';border-radius:5px;font-size:11px;color:#374151" title="Move up">↑</button>'
-      +   '<button onclick="nbmMove('+i+',1)" '+(i===_nbmItems.length-1?'disabled':'')+' style="width:26px;height:22px;border:1px solid #e5e7eb;background:#f9fafb;cursor:'+(i===_nbmItems.length-1?'not-allowed':'pointer')+';border-radius:5px;font-size:11px;color:#374151" title="Move down">↓</button>'
-      +   '<button onclick="nbmRemove('+i+')" style="width:26px;height:22px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;border-radius:5px;font-size:11px;color:#dc2626;margin-top:2px" title="Delete">✕</button>'
+      // delete action
+      + '<div>'
+      +   '<button onclick="nbmRemove(' + i + ')" style="padding:7px 14px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;border-radius:8px;font-size:11px;font-weight:700;color:#dc2626" title="Delete item">\uD83D\uDDD1 Delete</button>'
       + '</div>'
       + '</div>';
-  }).join('');
-  nbmRenderPreview();
-}
-
-function nbmRenderPreview(){
-  var prev = document.getElementById('nbm-preview');
-  if (!prev) return;
-  var visible = _nbmItems.filter(function(it){ return it.visible !== false; });
-  if (!visible.length) {
-    prev.innerHTML = '<span style="color:#9ca3af;font-style:italic;font-size:11px">No visible items</span>';
-    return;
-  }
-  prev.innerHTML = visible.map(function(it){
-    var isActive = it.active === true;
-    return '<span style="display:inline-flex;align-items:center;padding:'+(isActive?'7px 14px':'6px 10px')+';border-radius:50px;font-size:12px;font-weight:'+(isActive?'700':'600')+';white-space:nowrap;'
-      + (isActive ? 'background:#16a34a;color:#fff;box-shadow:0 2px 6px rgba(22,163,74,0.3)' : 'color:#334155;background:#f1f5f9')
-      + '">'+(it.label||'Item')+'</span>';
   }).join('');
 }
 
 function nbmAdd(){
-  // Known ids and their default labels (id determines the data feed on landing page)
-  var KNOWN_IDS = [
-    { id:'home',     label:'Home' },
-    { id:'about',    label:'About Us' },
-    { id:'calendar', label:'Holiday Calendar' },
-    { id:'roster',   label:'Ward Roster' },
-    { id:'holiday',  label:'Holiday Duty' },
-    { id:'weekend',  label:'Weekend Roster' },
-    { id:'orders',   label:'Orders' },
-    { id:'contact',  label:'Contact Us' }
-  ];
-  // Filter out ids already in use
-  var existingIds = _nbmItems.map(function(it){ return (it.id||'').toLowerCase(); });
-  var available = KNOWN_IDS.filter(function(k){ return existingIds.indexOf(k.id) === -1; });
-  var menu = available.map(function(k, i){ return (i+1)+'. '+k.label+' (id: '+k.id+')'; }).join('\n');
-  var custom = available.length+1;
-  var promptText = 'Select the data source for this nav item:\n\n'
-                 + (menu ? menu+'\n' : '')
-                 + custom+'. Custom id (no data feed — will show toast)\n\n'
-                 + 'Enter number:';
-  var pick = prompt(promptText, available.length ? '1' : String(custom));
+  // Offer any of the 8 known items not already present, plus a custom option.
+  var existing = _nbmItems.map(function(it){ return (it.id||'').toLowerCase(); });
+  var available = Object.keys(NBM_KNOWN).filter(function(id){ return existing.indexOf(id) === -1; });
+  var menu = available.map(function(id, i){ return (i+1) + '. ' + NBM_KNOWN[id] + '  (id: ' + id + ')'; }).join('\n');
+  var customNo = available.length + 1;
+  var promptText = 'Add a navigation item:\n\n'
+    + (menu ? menu + '\n' : '')
+    + customNo + '. Custom item (enter your own id + label)\n\n'
+    + 'Enter number:';
+  var pick = prompt(promptText, available.length ? '1' : String(customNo));
   if (pick === null) return;
   var n = parseInt(pick, 10);
   if (!n || n < 1) return;
   var newItem;
   if (n <= available.length) {
-    var chosen = available[n-1];
-    newItem = { id:chosen.id, label:chosen.label, active:false, visible:true, order:_nbmItems.length };
+    var id = available[n-1];
+    newItem = { id:id, label:NBM_KNOWN[id], order:_nbmItems.length };
   } else {
-    // Custom id
-    var customId = prompt('Enter a custom id (letters/numbers, lowercase):', 'item_'+Date.now());
+    var customId = prompt('Enter a custom id (lowercase letters/numbers):', 'item_' + Date.now());
     if (!customId) return;
-    customId = customId.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
+    customId = customId.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
     if (!customId) return;
-    var customLabel = prompt('Label to display on landing page:', 'New Item') || 'New Item';
-    newItem = { id:customId, label:customLabel.trim(), active:false, visible:true, order:_nbmItems.length };
+    var customLabel = prompt('Label to display on the landing page:', 'New Item') || 'New Item';
+    newItem = { id:customId, label:customLabel.trim(), order:_nbmItems.length };
   }
   _nbmItems.push(newItem);
   nbmRender();
-  nbmSetStatus('● Unsaved changes', '#dc2626');
+  nbmSetStatus('\u25CF Unsaved changes', '#dc2626');
 }
 
 function nbmRemove(i){
   var label = (_nbmItems[i] && _nbmItems[i].label) || 'this item';
-  if (!confirm('Remove "'+label+'" from the nav bar?\n\nClick Save to persist this change.')) return;
+  if (!confirm('Delete "' + label + '" from the navigation bar?\n\nClick Save Nav Bar afterwards to publish the change.')) return;
   _nbmItems.splice(i, 1);
   _nbmItems.forEach(function(it, idx){ it.order = idx; });
   nbmRender();
-  nbmSetStatus('● Unsaved changes', '#dc2626');
-}
-
-function nbmMove(i, dir){
-  var j = i + dir;
-  if (j < 0 || j >= _nbmItems.length) return;
-  var tmp = _nbmItems[i]; _nbmItems[i] = _nbmItems[j]; _nbmItems[j] = tmp;
-  _nbmItems.forEach(function(it, idx){ it.order = idx; });
-  nbmRender();
-  nbmSetStatus('● Unsaved changes', '#dc2626');
-}
-
-function nbmResetDefaults(){
-  if (!confirm('Reset nav bar to the 8 default items?\n\nYour unsaved edits will be lost. Click Save to apply to Firebase.')) return;
-  _nbmItems = JSON.parse(JSON.stringify(NBM_DEFAULTS));
-  nbmRender();
-  nbmSetStatus('● Reset to defaults — click Save to apply', '#92400e');
-}
-
-function nbmReload(){
-  if (!confirm('Reload from Firebase? Unsaved changes will be lost.')) return;
-  nbmLoad();
+  nbmSetStatus('\u25CF Unsaved changes', '#dc2626');
 }
 
 function nbmSave(){
-  // Validate
   for (var i = 0; i < _nbmItems.length; i++) {
     if (!(_nbmItems[i].label || '').trim()) {
-      nbmSetStatus('⚠️ Item #'+(i+1)+' has no label.', '#dc2626');
+      nbmSetStatus('\u26A0\uFE0F Item #' + (i+1) + ' has no label.', '#dc2626');
       return;
     }
   }
-  // Normalize order
-  _nbmItems.forEach(function(it, idx){ it.order = idx; });
-  nbmSetStatus('Saving…', '#6b7280');
-
-  // We only update the navBar field inside landing_page doc, preserving other sections
+  // Normalise: order by position, ensure visible:true (no hide feature now).
+  _nbmItems.forEach(function(it, idx){
+    it.order = idx;
+    it.visible = true;
+    if (typeof it.active === 'undefined') it.active = false;
+  });
+  nbmSetStatus('Saving\u2026', '#6b7280');
   db.collection('settings').doc('landing_page').get().then(function(doc){
     var existing = doc.exists ? (doc.data() || {}) : {};
     var payload = Object.assign({}, existing, {
@@ -5299,14 +5230,61 @@ function nbmSave(){
     });
     return db.collection('settings').doc('landing_page').set(payload);
   }).then(function(){
-    nbmSetStatus('✅ Saved! Changes are now live on index.html via real-time sync.', '#166534');
+    nbmSetStatus('\u2705 Saved & published to the landing page.', '#166534');
     if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/landing_page', 'navBar', {
       itemCount: _nbmItems.length,
-      items: _nbmItems.map(function(it){ return { label:it.label, visible:it.visible }; })
+      items: _nbmItems.map(function(it){ return { id:it.id, label:it.label }; })
     });
-    if (typeof showToast === 'function') showToast('✅ Nav bar saved · live on index.html', 'success');
+    if (typeof showToast === 'function') showToast('\u2705 Nav bar saved', 'success');
   }).catch(function(e){
-    nbmSetStatus('Error: '+e.message, '#dc2626');
+    nbmSetStatus('Error: ' + e.message, '#dc2626');
+  });
+}
+
+// \u2500\u2500 Nav Bar > Staff sub-tab: jump button + read-only preview \u2500\u2500
+function nbOpenStaffMgmt(){
+  var sbi = document.querySelector('.sidebar .sbi[title="Staff Management"]');
+  if (typeof goSec === 'function') goSec('staff', sbi);
+}
+
+function nbStaffPreviewRender(){
+  var box = document.getElementById('nbStaffPreview');
+  if (!box) return;
+  box.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:14px;grid-column:1/-1">Loading staff\u2026</div>';
+  db.collection('users').get().then(function(snap){
+    var list = [];
+    snap.forEach(function(doc){
+      var u = doc.data();
+      if (u.status === 'approved' || u.status === 'active') {
+        list.push({ name:u.name||'', role:u.role||'', ward:u.ward||'', photoBase64:u.photoBase64||'' });
+      }
+    });
+    list.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+    if (!list.length) {
+      box.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:14px;grid-column:1/-1">No approved staff to show yet.</div>';
+      return;
+    }
+    var rc = { 'PMAM':{bg:'#E8EFFF',fg:'#1A3DB5'}, 'I/C AB-PMJAY':{bg:'#DCFCE7',fg:'#166534'},
+               'Admin':{bg:'#F3E8FF',fg:'#7c3aed'}, 'DEO':{bg:'#FEF3C7',fg:'#92400e'} };
+    box.innerHTML = list.map(function(u){
+      var c = rc[u.role] || { bg:'#F3F4F6', fg:'#374151' };
+      var initials = (u.name||'?').split(/\s+/).map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+      var photo = u.photoBase64
+        ? '<img src="' + u.photoBase64 + '" style="width:100%;height:100%;object-fit:cover">'
+        : '<span style="font-size:15px;font-weight:800;color:#fff">' + initials + '</span>';
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:11px;display:flex;align-items:center;gap:10px">'
+        + '<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1A3DB5,#2952D9);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">' + photo + '</div>'
+        + '<div style="flex:1;min-width:0">'
+        +   '<div style="font-size:12.5px;font-weight:800;color:#0F2B8C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (u.name||'Unknown') + '</div>'
+        +   '<div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap">'
+        +     '<span style="background:' + c.bg + ';color:' + c.fg + ';padding:1px 7px;border-radius:10px;font-size:9px;font-weight:700">' + (u.role||'Staff') + '</span>'
+        +     (u.ward ? '<span style="background:#F0F4FF;color:#1A3DB5;padding:1px 7px;border-radius:10px;font-size:9px;font-weight:600">' + u.ward + '</span>' : '')
+        +   '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }).catch(function(e){
+    box.innerHTML = '<div style="color:#dc2626;padding:14px;grid-column:1/-1">Could not load staff: ' + e.message + '</div>';
   });
 }
 
