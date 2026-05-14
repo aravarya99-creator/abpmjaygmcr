@@ -275,7 +275,6 @@ a.hero-gc-ci:hover{color:#7c3aed}
       Home
     </a>
     <a class="nav-item" href="#" data-nav="about">About Us</a>
-    <a class="nav-item" href="#" data-nav="staff">Staff</a>
     <a class="nav-item" href="#" data-nav="calendar">Holiday Calendar</a>
     <a class="nav-item" href="#" data-nav="roster">Ward Roster</a>
     <a class="nav-item" href="#" data-nav="holiday">Holiday Duty</a>
@@ -940,7 +939,6 @@ window.addEventListener('DOMContentLoaded', function() {
     var CORE_TABS = [
       { id:'home',     label:'Home',            order:0 },
       { id:'about',    label:'About Us',        order:1 },
-      { id:'staff',    label:'Staff',           order:2 },
       { id:'calendar', label:'Holiday Calendar',order:3 },
       { id:'roster',   label:'Ward Roster',     order:4 },
       { id:'holiday',  label:'Holiday Duty',    order:5 },
@@ -953,19 +951,40 @@ window.addEventListener('DOMContentLoaded', function() {
       var nav = document.getElementById('lpNavArea');
       if (!nav) return;
       if (!Array.isArray(items)) items = [];
-      // Merge saved items with any missing CORE_TABS (matched by canonical id).
-      var presentIds = {};
-      items.forEach(function(it){ presentIds[navIdCanon(it.id || it.label || '')] = true; });
+
+      // 1. Start with saved items, then append any missing CORE_TABS.
       var merged = items.slice();
+      var seenForAppend = {};
+      items.forEach(function(it){ seenForAppend[navIdCanon(it.id || it.label || '')] = true; });
       var maxOrder = items.reduce(function(m,it){ return Math.max(m, it.order||0); }, 0);
       CORE_TABS.forEach(function(ct){
-        if (!presentIds[ct.id]) {
+        if (!seenForAppend[ct.id]) {
           merged.push({ id:ct.id, label:ct.label, order:maxOrder + 1 + ct.order, visible:true, active:false });
         }
       });
-      var visible = merged.filter(function(i){ return i && i.visible !== false; })
-                          .sort(function(a,b){ return (a.order||0) - (b.order||0); });
+
+      // 2. Sort by order.
+      var sorted = merged.filter(function(i){ return i; })
+                         .sort(function(a,b){ return (a.order||0) - (b.order||0); });
+
+      // 3. Deduplicate by CANONICAL id — keep the first occurrence only.
+      //    This kills any doubled tabs (e.g. two "Weekend Roster" entries)
+      //    regardless of whether the duplication came from stale Firestore
+      //    data or the CORE_TABS merge.
+      var seen = {};
+      var deduped = [];
+      sorted.forEach(function(it){
+        var cid = navIdCanon(it.id || it.label || '');
+        if (!cid) { deduped.push(it); return; } // keep id-less custom items
+        if (seen[cid]) return;
+        seen[cid] = true;
+        deduped.push(it);
+      });
+
+      // 4. Only show visible items.
+      var visible = deduped.filter(function(i){ return i.visible !== false; });
       if (visible.length === 0) return;
+
       nav.innerHTML = visible.map(function(it){
         var cls = 'nav-item' + (it.active ? ' active' : '');
         var navId = esc(navIdCanon(it.id || it.label || ''));
@@ -1397,6 +1416,13 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   window.onStaffSearch = onSearch;
 
+  // ── Expose staff data for the About page's "Our Staff" tab ──
+  // The About modal lives in a different IIFE, so it can't see _staffCache
+  // directly. These globals let it pull the same public staff list.
+  window.lpLoadStaff = loadStaff;
+  window.lpGetStaffCache = function(){ return _staffCache; };
+  window.lpRoleColors = ROLE_COLORS;
+
   // ════════════════════════════════════════════════════════════════════
   // GENERAL NAV-BAR CLICK HANDLER
   // Handles every tab in the nav bar (static fallback + dynamic from
@@ -1454,8 +1480,8 @@ window.addEventListener('DOMContentLoaded', function() {
     };
     return M[s] || s;
   }
-  var KNOWN_MODAL_IDS = ['calendar','roster','holiday','weekend','orders'];
-  var ACTION_IDS = ['home','staff','about','contact'];
+  var KNOWN_MODAL_IDS = ['calendar','roster','holiday','weekend','orders','about'];
+  var ACTION_IDS = ['home','staff','contact'];
   function getNavId(a){
     var fromId    = navIdCanonLocal((a.getAttribute('data-nav') || '').trim());
     var fromLabel = navIdCanonLocal((a.textContent || '').trim().replace(/[▾▼]/g,'').trim());
@@ -1850,7 +1876,8 @@ window.addEventListener('DOMContentLoaded', function() {
     wardRoster:      null,  // settings/roster
     holidayDuty:     null,  // settings/holidays
     weekendRoster:   null,  // settings/weekend_roster
-    orders:          null   // settings/orders
+    orders:          null,  // settings/orders
+    aboutPage:       null   // settings/about_page
   };
   // Current open modal id (so we can re-render when data updates)
   var _openId = null;
@@ -1886,6 +1913,11 @@ window.addEventListener('DOMContentLoaded', function() {
       LIVE.orders = doc.exists ? (doc.data() || {}) : {};
       if (_openId === 'orders') renderInto(_openId);
     }, function(err){ console.warn('orders listener:', err && err.message); });
+
+    db.collection('settings').doc('about_page').onSnapshot(function(doc){
+      LIVE.aboutPage = doc.exists ? (doc.data() || {}) : {};
+      if (_openId === 'about') renderInto(_openId);
+    }, function(err){ console.warn('about_page listener:', err && err.message); });
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', subscribe);
@@ -2076,6 +2108,120 @@ window.addEventListener('DOMContentLoaded', function() {
     return html;
   }
 
+  // Internal state for the About modal's sub-tabs.
+  var _aboutTab = 'sehat';
+
+  // Switch between About page sub-tabs (called from inline onclick).
+  window.aboutSwitchTab = function(tab){
+    _aboutTab = tab;
+    renderInto('about');
+  };
+
+  function aboutStaffCardsHtml(){
+    // Reuse the same public staff data the Staff modal uses (exposed as
+    // globals from the staff IIFE, which is a separate scope).
+    var list = (typeof window.lpGetStaffCache === 'function') ? window.lpGetStaffCache() : null;
+    if (!list) {
+      if (typeof window.lpLoadStaff === 'function') {
+        try {
+          window.lpLoadStaff();
+          var tries = 0;
+          var poll = setInterval(function(){
+            tries++;
+            var c = (typeof window.lpGetStaffCache === 'function') ? window.lpGetStaffCache() : null;
+            if (c || tries > 20) {
+              clearInterval(poll);
+              if (_openId === 'about' && _aboutTab === 'staff') renderInto('about');
+            }
+          }, 250);
+        } catch(e){}
+      }
+      return '<div style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">Loading staff…</div>';
+    }
+    if (!list.length) {
+      return '<div class="cm-empty">No staff published yet.</div>';
+    }
+    var ROLE_C = window.lpRoleColors || {};
+    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">';
+    list.forEach(function(u){
+      var rc = ROLE_C[u.role] || { bg:'#F3F4F6', fg:'#374151', av:'linear-gradient(135deg,#6b7280,#4b5563)' };
+      var initials = (u.name||'?').split(/\s+/).map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+      var photoHtml = u.photoBase64
+        ? '<img src="'+u.photoBase64+'" style="width:100%;height:100%;object-fit:cover" alt="">'
+        : '<span style="font-size:18px;font-weight:800;color:#fff">'+esc(initials)+'</span>';
+      html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:13px;display:flex;align-items:center;gap:12px">'
+        + '<div style="width:50px;height:50px;border-radius:50%;background:'+rc.av+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">'+photoHtml+'</div>'
+        + '<div style="flex:1;min-width:0">'
+        +   '<div style="font-size:13px;font-weight:800;color:#0F2B8C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(u.name||'Unknown')+'</div>'
+        +   '<div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">'
+        +     '<span style="background:'+rc.bg+';color:'+rc.fg+';padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">'+esc(u.role||'Staff')+'</span>'
+        +     (u.ward ? '<span style="background:#F0F4FF;color:#1A3DB5;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600">\uD83D\uDCCD '+esc(u.ward)+'</span>' : '')
+        +   '</div>'
+        + '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function renderAbout(){
+    var d = LIVE.aboutPage || {};
+    var staffShow = (d.staffShow !== false);
+    // Tab bar
+    var tabs = [
+      { id:'sehat', label:'About AB-PMJAY SEHAT' }
+    ];
+    if (staffShow) tabs.push({ id:'staff', label:'Our Staff' });
+    tabs.push({ id:'dev', label:'About the Developer' });
+    // If current tab is hidden, fall back to first.
+    if (!tabs.some(function(t){ return t.id === _aboutTab; })) _aboutTab = 'sehat';
+
+    var tabBar = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">'
+      + tabs.map(function(t){
+          var on = t.id === _aboutTab;
+          return '<button onclick="aboutSwitchTab(\''+t.id+'\')" style="'
+            + 'padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid '
+            + (on ? '#7c3aed;background:#7c3aed;color:#fff' : '#e9d5ff;background:#fff;color:#6b21a8')
+            + '">'+esc(t.label)+'</button>';
+        }).join('')
+      + '</div>';
+
+    var body = '';
+    if (_aboutTab === 'sehat') {
+      var heading = d.sehatHeading || 'About Ayushman Bharat — PM-JAY / SEHAT';
+      var text = d.sehatBody || '';
+      body = '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px">'
+        + '<h3 style="margin:0 0 12px;font-size:17px;color:#4c1d95;font-weight:800">'+esc(heading)+'</h3>'
+        + (text
+            ? '<div style="font-size:13.5px;color:#334155;line-height:1.7;white-space:pre-wrap">'+esc(text)+'</div>'
+            : '<div style="color:#9ca3af;font-style:italic;font-size:13px">No content added yet. The admin can add it from <strong>Nav Bar → About Page</strong>.</div>')
+        + '</div>';
+    } else if (_aboutTab === 'staff') {
+      body = aboutStaffCardsHtml();
+    } else if (_aboutTab === 'dev') {
+      var dn = d.devName || '';
+      var dr = d.devRole || '';
+      var db_ = d.devBody || '';
+      var dp = d.devPhoto || '';
+      var photo = dp
+        ? '<img src="'+esc(dp)+'" style="width:110px;height:110px;border-radius:16px;object-fit:cover;border:3px solid #e9d5ff;flex-shrink:0">'
+        : '<div style="width:110px;height:110px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#9333ea);display:flex;align-items:center;justify-content:center;font-size:38px;flex-shrink:0">\uD83D\uDC68\u200D\uD83D\uDCBB</div>';
+      if (!dn && !dr && !db_ && !dp) {
+        body = '<div class="cm-empty">No developer details added yet. The admin can add them from <strong>Nav Bar → About Page</strong>.</div>';
+      } else {
+        body = '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">'
+          + photo
+          + '<div style="flex:1;min-width:200px">'
+          +   (dn ? '<h3 style="margin:0 0 3px;font-size:17px;color:#4c1d95;font-weight:800">'+esc(dn)+'</h3>' : '')
+          +   (dr ? '<div style="font-size:12px;color:#7c3aed;font-weight:700;margin-bottom:10px">'+esc(dr)+'</div>' : '')
+          +   (db_ ? '<div style="font-size:13.5px;color:#334155;line-height:1.7;white-space:pre-wrap">'+esc(db_)+'</div>' : '')
+          + '</div>'
+          + '</div>';
+      }
+    }
+    return tabBar + body;
+  }
+
   function renderOrders(){
     var data = LIVE.orders || {};
     var rows = Array.isArray(data.rows) ? data.rows : [];
@@ -2124,14 +2270,16 @@ window.addEventListener('DOMContentLoaded', function() {
     roster:   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l7-3 7 3z"/></svg>',
     holiday:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
     weekend:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-    orders:   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+    orders:   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+    about:    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
   };
   window.CONTENT_RENDERERS = {
     calendar: renderHolidayCalendar,
     roster:   renderWardRoster,
     holiday:  renderHolidayDuty,
     weekend:  renderWeekendRoster,
-    orders:   renderOrders
+    orders:   renderOrders,
+    about:    renderAbout
   };
   console.log('[contentModal] Initialized. Known ids:', Object.keys(window.CONTENT_RENDERERS));
 
@@ -2171,7 +2319,8 @@ window.addEventListener('DOMContentLoaded', function() {
         (id==='roster'   && LIVE.wardRoster) ||
         (id==='holiday'  && LIVE.holidayDuty) ||
         (id==='weekend'  && LIVE.weekendRoster) ||
-        (id==='orders'   && LIVE.orders)
+        (id==='orders'   && LIVE.orders) ||
+        (id==='about'    && LIVE.aboutPage)
       );
       subEl.textContent = hasData ? 'Live data — auto-syncs from Admin Portal' : 'Loading from server…';
     }

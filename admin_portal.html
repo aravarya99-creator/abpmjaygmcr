@@ -729,6 +729,7 @@ tr:hover td{background:#EEF3FF}
         <button class="dmt-tab"        id="nbt-holidayrost"   onclick="showNavTab('holidayrost',this)">🎉 Holiday Roster</button>
         <button class="dmt-tab"        id="nbt-weekendroster" onclick="showNavTab('weekendroster',this)">📆 Weekend Roster</button>
         <button class="dmt-tab"        id="nbt-orders"        onclick="showNavTab('orders',this)">📋 Orders</button>
+        <button class="dmt-tab"        id="nbt-aboutpage"     onclick="showNavTab('aboutpage',this)">ℹ️ About Page</button>
         <button class="dmt-tab"        id="nbt-navbar"        onclick="showNavTab('navbar',this)">⚙️ Nav Bar Settings</button>
       </div>
 
@@ -910,6 +911,82 @@ tr:hover td{background:#EEF3FF}
             <span id="ordSaveMsg" style="font-size:11px;font-weight:600"></span>
             <button class="btn btn-pri" onclick="ordSave()">💾 Save &amp; Publish Orders</button>
           </div>
+        </div>
+      </div>
+      <div class="dmt-pane" id="dmpane-aboutpage">
+        <div class="card" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #d8b4fe;margin-bottom:12px">
+          <div class="card-hd" style="color:#6b21a8">ℹ️ About Page Editor</div>
+          <div style="font-size:12px;color:#6b21a8;line-height:1.6">
+            Edit the content shown when visitors click <strong>About Us</strong> on the landing page.
+            The About page has three sections: <strong>About AB-PMJAY SEHAT</strong>, <strong>Our Staff</strong>
+            (auto-pulled from approved staff accounts), and <strong>About the Web Developer</strong>.
+            Changes go live instantly after you Save &amp; Publish.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">🏥 About AB-PMJAY SEHAT</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <label style="font-size:11px;font-weight:700;color:#0F2B8C">Heading</label>
+            <input type="text" id="abSehatHeading" placeholder="e.g. Ayushman Bharat — PM-JAY / SEHAT"
+              style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+            <label style="font-size:11px;font-weight:700;color:#0F2B8C;margin-top:4px">Body text</label>
+            <textarea id="abSehatBody" rows="7" placeholder="Describe the AB-PMJAY / SEHAT scheme, its objectives, coverage, and how it operates at GMC &amp; AH Rajouri…"
+              style="width:100%;padding:10px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit;line-height:1.6;resize:vertical"></textarea>
+            <div style="font-size:10px;color:#9ca3af">Plain text. Line breaks are preserved on the landing page.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">👥 Our Staff</div>
+          <div style="font-size:12px;color:#475569;line-height:1.6">
+            The Staff section on the About page is generated automatically from approved staff
+            accounts (the same data as <strong>Staff Management</strong>). There is nothing to edit here —
+            add or update staff from the <strong>Staff Management</strong> section in the sidebar, and the
+            About page Staff tab updates automatically.
+          </div>
+          <div style="margin-top:8px">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#0F2B8C;font-weight:700;cursor:pointer">
+              <input type="checkbox" id="abStaffShow" checked style="width:16px;height:16px;cursor:pointer">
+              Show the "Our Staff" tab on the About page
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">👨‍💻 About the Web Developer</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <div style="flex-shrink:0">
+              <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Photo</label>
+              <div id="abDevPhotoPreview" style="width:96px;height:96px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#9333ea);display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;overflow:hidden;border:3px solid #e9d5ff">👨‍💻</div>
+              <input type="file" id="abDevPhotoFile" accept="image/*" onchange="abDevPreviewPhoto(this)"
+                style="font-size:10px;padding:5px;margin-top:6px;border:1px solid #d1d5db;border-radius:6px;width:96px;background:#fff">
+              <div style="font-size:9px;color:#9ca3af;margin-top:2px;width:96px">Max ~300KB · stored as Base64</div>
+              <button onclick="abDevClearPhoto()" style="margin-top:4px;font-size:10px;color:#dc2626;background:none;border:none;cursor:pointer;padding:0;font-weight:700">Remove photo</button>
+            </div>
+            <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:8px">
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Developer Name</label>
+                <input type="text" id="abDevName" placeholder="e.g. Dr. Arya Sharma"
+                  style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Role / Title</label>
+                <input type="text" id="abDevRole" placeholder="e.g. Portal Developer — AB-PMJAY Unit, GMC Rajouri"
+                  style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">About text</label>
+                <textarea id="abDevBody" rows="5" placeholder="A short note about the developer, the technology used, contact info, acknowledgements…"
+                  style="width:100%;padding:10px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit;line-height:1.6;resize:vertical"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:4px">
+          <span id="abSaveMsg" style="font-size:11px;font-weight:600"></span>
+          <button class="btn btn-pri" onclick="abSave()">💾 Save &amp; Publish About Page</button>
         </div>
       </div>
       <div class="dmt-pane" id="dmpane-navbar">
@@ -1918,6 +1995,7 @@ function showNavTab(tab, el){
   }
   if (tab === 'weekendroster') { if (typeof wrInit === 'function') wrInit(); }
   if (tab === 'orders')        { if (typeof ordInit === 'function') ordInit(); }
+  if (tab === 'aboutpage')     { if (typeof abInit === 'function') abInit(); }
   if (tab === 'navbar')        { if (typeof nbmLoad === 'function') nbmLoad(); }
 }
 
@@ -2768,6 +2846,91 @@ function sendResetOtpFromAdmin(){
 }
 
 // ══════════════════════════
+// ══════════════════════════
+// ABOUT PAGE EDITOR
+// Stored in Firestore: settings/about_page {
+//   sehatHeading, sehatBody, staffShow, devName, devRole, devBody, devPhoto
+// }
+// ══════════════════════════
+var _abDevPhoto = '';  // Base64 data URI for the developer photo
+
+function abInit(){
+  db.collection('settings').doc('about_page').get().then(function(doc){
+    var d = doc.exists ? (doc.data() || {}) : {};
+    var set = function(id, val){ var el = document.getElementById(id); if (el) el.value = val || ''; };
+    set('abSehatHeading', d.sehatHeading);
+    set('abSehatBody',    d.sehatBody);
+    set('abDevName',      d.devName);
+    set('abDevRole',      d.devRole);
+    set('abDevBody',      d.devBody);
+    var chk = document.getElementById('abStaffShow');
+    if (chk) chk.checked = (d.staffShow !== false);
+    _abDevPhoto = d.devPhoto || '';
+    abDevRenderPhoto();
+  }).catch(function(e){
+    if (typeof showToast === 'function') showToast('Could not load About page: ' + e.message, 'error');
+  });
+}
+
+function abDevRenderPhoto(){
+  var prev = document.getElementById('abDevPhotoPreview');
+  if (!prev) return;
+  if (_abDevPhoto) {
+    prev.innerHTML = '<img src="' + _abDevPhoto + '" style="width:100%;height:100%;object-fit:cover">';
+  } else {
+    prev.innerHTML = '\uD83D\uDC68\u200D\uD83D\uDCBB';
+  }
+}
+
+function abDevPreviewPhoto(input){
+  var file = input.files && input.files[0];
+  if (!file) return;
+  if (file.size > 350 * 1024) {
+    alert('Photo is too large (' + Math.round(file.size/1024) + 'KB). Please use an image under ~300KB.');
+    input.value = '';
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    _abDevPhoto = e.target.result;
+    abDevRenderPhoto();
+  };
+  reader.readAsDataURL(file);
+}
+
+function abDevClearPhoto(){
+  _abDevPhoto = '';
+  var f = document.getElementById('abDevPhotoFile');
+  if (f) f.value = '';
+  abDevRenderPhoto();
+}
+
+function abSave(){
+  var msg = document.getElementById('abSaveMsg');
+  var val = function(id){ var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
+  var payload = {
+    sehatHeading: val('abSehatHeading'),
+    sehatBody:    val('abSehatBody'),
+    staffShow:    (function(){ var c = document.getElementById('abStaffShow'); return c ? c.checked : true; })(),
+    devName:      val('abDevName'),
+    devRole:      val('abDevRole'),
+    devBody:      val('abDevBody'),
+    devPhoto:     _abDevPhoto || '',
+    updatedAt:    Date.now(),
+    _updatedBy:   (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
+  };
+  if (msg) { msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…'; }
+  db.collection('settings').doc('about_page').set(payload, { merge: true })
+    .then(function(){
+      if (msg) { msg.style.color = '#166534'; msg.textContent = '✅ Saved & published!'; setTimeout(function(){ msg.textContent = ''; }, 3500); }
+      if (typeof showToast === 'function') showToast('✅ About page published', 'success');
+      if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/about_page', 'about_page', {});
+    })
+    .catch(function(e){
+      if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Error: ' + (e && e.message ? e.message : e); }
+    });
+}
+
 // ORDERS / CIRCULARS — published via Google Drive links
 // Stored in Firestore: settings/orders { rows:[{title,date,category,link}] }
 // (ordersData is already declared near the top with the other data arrays.)
@@ -3215,6 +3378,30 @@ function loadStaffFromUsers() {
         _allStaff.push(Object.assign({ _docId: doc.id }, u));
       }
     });
+    // ── Ensure the Administrator always appears under the Admin filter ──
+    // The admin account may not have a row in the `users` collection (its
+    // login is handled separately). If it's missing, synthesise an entry so
+    // the Admin tab is never empty. If a doc exists but its role isn't
+    // exactly "Admin", normalise it.
+    var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL : 'aravarya99@gmail.com';
+    var adminRow = _allStaff.find(function(s){
+      return (s.email || '').toLowerCase() === adminEmail.toLowerCase();
+    });
+    if (adminRow) {
+      adminRow.role = 'Admin';                 // force canonical role
+      if (!adminRow.name) adminRow.name = 'Vinod Kumar';
+      if (!adminRow.status) adminRow.status = 'active';
+    } else {
+      _allStaff.push({
+        _docId:   adminEmail,
+        _synthetic: true,
+        name:     'Vinod Kumar',
+        email:    adminEmail,
+        role:     'Admin',
+        status:   'active',
+        ward:     'Admin'
+      });
+    }
     _allStaff.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
     var badge = document.getElementById('staffCountBadge');
     if (badge) badge.textContent = _allStaff.length + ' staff members';
@@ -3265,7 +3452,9 @@ function filterStaff(role, el) {
   document.querySelectorAll('#sec-staff .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
   if (el) el.classList.add('active');
   var filtered = role === 'all' ? _allStaff : _allStaff.filter(function(u){
-    if (role === 'DEO') return u.role === 'DEO' || (u.role||'').startsWith('MTS');
+    var r = (u.role || '').toLowerCase();
+    if (role === 'DEO')   return r === 'deo' || r.indexOf('mts') === 0;
+    if (role === 'Admin') return r === 'admin' || r === 'administrator';
     return u.role === role;
   });
   var badge = document.getElementById('staffCountBadge');
@@ -4889,7 +5078,6 @@ var _nbmItems = [];  // working copy
 var NBM_DEFAULTS = [
   { id:'home',     label:'Home',            active:true,  visible:true,  order:0 },
   { id:'about',    label:'About Us',        active:false, visible:true,  order:1 },
-  { id:'staff',    label:'Staff',           active:false, visible:true,  order:2 },
   { id:'calendar', label:'Holiday Calendar',active:false, visible:true,  order:3 },
   { id:'roster',   label:'Ward Roster',     active:false, visible:true,  order:4 },
   { id:'holiday',  label:'Holiday Duty',    active:false, visible:true,  order:5 },
@@ -5020,7 +5208,6 @@ function nbmAdd(){
   var KNOWN_IDS = [
     { id:'home',     label:'Home' },
     { id:'about',    label:'About Us' },
-    { id:'staff',    label:'Staff' },
     { id:'calendar', label:'Holiday Calendar' },
     { id:'roster',   label:'Ward Roster' },
     { id:'holiday',  label:'Holiday Duty' },
