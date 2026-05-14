@@ -1843,7 +1843,10 @@ function showNavTab(tab, el){
   // Auto-actions
   if (tab === 'holidaycal')    { if (typeof hcInit === 'function') hcInit(); }
   if (tab === 'wardroster')    { if (typeof loadRosterFromDb === 'function') loadRosterFromDb(); }
-  if (tab === 'holidayrost')   { if (typeof loadHolidayFromDb === 'function') loadHolidayFromDb(); }
+  if (tab === 'holidayrost')   {
+    if (typeof hcEnsureLoaded === 'function') hcEnsureLoaded();
+    if (typeof loadHolidayFromDb === 'function') loadHolidayFromDb();
+  }
   if (tab === 'weekendroster') { if (typeof wrInit === 'function') wrInit(); }
   if (tab === 'navbar')        { if (typeof nbmLoad === 'function') nbmLoad(); }
 }
@@ -1874,6 +1877,21 @@ function loadHolidayFromDb(){
 // HOLIDAY CALENDAR
 // ══════════════════════════════════════════════════════
 var _hcHolidays = []; // [{date:'YYYY-MM-DD', name:'', type:'Gazetted|State|Custom'}]
+var _hcLoaded = false; // true once we've fetched holiday_calendar at least once
+
+// Fetch the holiday calendar if it hasn't been loaded yet, then run an
+// optional callback. Lets other tabs (e.g. Holiday Roster) reuse the data.
+function hcEnsureLoaded(cb){
+  if (_hcLoaded) { if (cb) cb(); return; }
+  db.collection('settings').doc('holiday_calendar').get().then(function(doc){
+    if (doc.exists && Array.isArray(doc.data().holidays)) {
+      _hcHolidays = doc.data().holidays;
+    }
+    _hcLoaded = true;
+    if (typeof renderHoliday === 'function') renderHoliday(); // refresh roster dropdowns
+    if (cb) cb();
+  }).catch(function(){ _hcLoaded = true; if (cb) cb(); });
+}
 
 function hcInit(){
   // Populate year selector
@@ -1892,8 +1910,9 @@ function hcInit(){
     if (doc.exists && Array.isArray(doc.data().holidays)) {
       _hcHolidays = doc.data().holidays;
     }
+    _hcLoaded = true;
     hcRender();
-  }).catch(function(){ hcRender(); });
+  }).catch(function(){ _hcLoaded = true; hcRender(); });
 }
 
 function hcRender(){
@@ -2092,8 +2111,30 @@ function wrRenderTable(){
   }).join('');
 }
 
+// ── Date helpers: compute the upcoming Saturday & Sunday ──
+// Returns 'YYYY-MM-DD'. If today IS Sat/Sun, uses the current weekend.
+function wrFmtDate(d){
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function wrNextWeekend(weeksAhead){
+  weeksAhead = weeksAhead || 0;
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  var dow = today.getDay(); // 0=Sun ... 6=Sat
+  // days until the coming Saturday (if today is Sat, that's 0; if Sun, that's 6)
+  var daysToSat = (6 - dow + 7) % 7;
+  var sat = new Date(today);
+  sat.setDate(today.getDate() + daysToSat + (weeksAhead * 7));
+  var sun = new Date(sat);
+  sun.setDate(sat.getDate() + 1);
+  return { saturday: wrFmtDate(sat), sunday: wrFmtDate(sun) };
+}
+
 function wrAddRow(){
-  _wrRows.push({ pmam1:'', pmam2:'', saturday:'', sunday:'' });
+  // Auto-advance the weekend for each new row so consecutive rows
+  // map to consecutive weekends (week 0, week 1, week 2 ...).
+  var we = wrNextWeekend(_wrRows.length);
+  _wrRows.push({ pmam1:'', pmam2:'', saturday:we.saturday, sunday:we.sunday });
   wrRenderTable();
 }
 
@@ -2102,17 +2143,42 @@ function wrRender(){ wrRenderTable(); }
 
 function wrSave(){
   var msg = document.getElementById('wrSaveMsg');
+  // Pull the latest values straight from the DOM so nothing is lost
+  // even if an onchange didn't fire (e.g. user clicked Save mid-edit).
+  var tb = document.getElementById('wrBody');
+  if (tb) {
+    var trs = tb.querySelectorAll('tr');
+    var collected = [];
+    trs.forEach(function(tr){
+      var ins = tr.querySelectorAll('input');
+      if (ins.length >= 4) {
+        collected.push({
+          pmam1: ins[0].value || '',
+          pmam2: ins[1].value || '',
+          saturday: ins[2].value || '',
+          sunday: ins[3].value || ''
+        });
+      }
+    });
+    if (collected.length) _wrRows = collected;
+  }
+  if (!_wrRows.length) {
+    if (msg) { msg.style.color='#dc2626'; msg.textContent='Add at least one row before saving.'; }
+    showToast('Nothing to save — add a row first','error');
+    return;
+  }
   if (msg) { msg.style.color='#6b7280'; msg.textContent='Saving…'; }
   db.collection('settings').doc('weekend_roster').set({
     rows: _wrRows,
     _updatedAt: Date.now(),
     _updatedBy: (typeof ADMIN_EMAIL!=='undefined' ? ADMIN_EMAIL : '')
-  }).then(function(){
-    if (msg) { msg.style.color='#166534'; msg.textContent='✅ Saved! (Auto-published to landing page)'; setTimeout(function(){ msg.textContent=''; },3500); }
+  }, { merge: true }).then(function(){
+    if (msg) { msg.style.color='#166534'; msg.textContent='✅ Saved & published! ('+_wrRows.length+' row'+(_wrRows.length>1?'s':'')+')'; setTimeout(function(){ msg.textContent=''; },3500); }
     showToast('✅ Weekend roster saved','success');
     if (typeof writeAudit==='function') writeAudit('EDIT','settings/weekend_roster','weekend_roster',{rows:_wrRows.length});
   }).catch(function(e){
-    if (msg) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; }
+    if (msg) { msg.style.color='#dc2626'; msg.textContent='Error: '+(e && e.message ? e.message : e); }
+    showToast('Save failed: '+(e && e.message ? e.message : e),'error');
   });
 }
 
@@ -2404,8 +2470,15 @@ function addWard(){ wmAddWard(); }
 function saveWardsToDb(){ wmSave(); }
 
 
+// ── Ward Roster: add a blank row ──
+function addRosterRow(){
+  rosterData.push({ name:'', ward:'' });
+  renderRoster();
+}
+
 function renderRoster(){
   const b=document.getElementById('rosterBody');
+  if(!b) return;
   if(!rosterData.length){b.innerHTML='<tr><td colspan="4" class="empty-td">No rows yet. Click + Add Row.</td></tr>';return;}
   b.innerHTML=rosterData.map((r,i)=>`<tr>
     <td>${i+1}</td>
@@ -2419,19 +2492,75 @@ function renderRoster(){
 function addHolidayRow(){holidayData.push({name:'',date:'',pmams:['']});renderHoliday();}
 function addHolidayPmam(i){if(holidayData[i].pmams.length>=7){alert('Max 7 PMAMs');return;}holidayData[i].pmams.push('');renderHoliday();}
 function removeHolidayPmam(i,j){holidayData[i].pmams.splice(j,1);renderHoliday();}
+
+// When a holiday is picked from the dropdown, fill in BOTH the date and,
+// if the name field is empty, the holiday name from the calendar.
+function onHolidayPick(i, val){
+  if (val === '__manual__') {
+    holidayData[i].date = '';
+    holidayData[i]._manual = true;
+    renderHoliday();
+    return;
+  }
+  holidayData[i]._manual = false;
+  holidayData[i].date = val;
+  var hit = (_hcHolidays || []).find(function(h){ return h.date === val; });
+  if (hit && !(holidayData[i].name || '').trim()) {
+    holidayData[i].name = hit.name || '';
+  }
+  renderHoliday();
+}
+
+// Build the <option> list of holidays from the Holiday Calendar, sorted by date.
+function holidayDateOptions(selected, isManual){
+  var opts = '<option value="">— Select holiday —</option>';
+  var list = (_hcHolidays || []).slice().sort(function(a,b){
+    return (a.date||'').localeCompare(b.date||'');
+  });
+  var found = false;
+  list.forEach(function(h){
+    if (!h.date) return;
+    var sel = (!isManual && h.date === selected) ? ' selected' : '';
+    if (sel) found = true;
+    var label = h.date + ' — ' + (h.name || 'Holiday') + (h.type ? ' ('+h.type+')' : '');
+    opts += '<option value="'+escAttr(h.date)+'"'+sel+'>'+escAttr(label)+'</option>';
+  });
+  // If the saved date isn't in the calendar list, keep it visible anyway
+  if (!isManual && selected && !found) {
+    opts += '<option value="'+escAttr(selected)+'" selected>'+escAttr(selected)+' — (not in calendar)</option>';
+  }
+  opts += '<option value="__manual__"'+(isManual?' selected':'')+'>✏️ Enter date manually…</option>';
+  return opts;
+}
+
 function renderHoliday(){
   const b=document.getElementById('holidayBody');
+  if(!b) return;
   if(!holidayData.length){b.innerHTML='<tr><td colspan="5" class="empty-td">No holidays added yet. Click + Add Holiday.</td></tr>';return;}
+  var hasCal = (_hcHolidays || []).length > 0;
   b.innerHTML=holidayData.map((h,i)=>{
     const pmamHTML=h.pmams.map((p,j)=>`
       <div style="display:flex;align-items:center;gap:3px;margin-bottom:3px">
-        <input value="${p}" placeholder="PMAM ${j+1}" style="width:140px;padding:3px 7px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px;outline:none" onchange="holidayData[${i}].pmams[${j}]=this.value">
+        <input value="${escAttr(p)}" placeholder="PMAM ${j+1}" style="width:140px;padding:3px 7px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px;outline:none" onchange="holidayData[${i}].pmams[${j}]=this.value">
         ${h.pmams.length>1?`<button onclick="removeHolidayPmam(${i},${j})" style="background:none;border:none;color:#dc2626;font-weight:800;cursor:pointer;font-size:13px">×</button>`:''}
       </div>`).join('');
+    // Date cell: dropdown of calendar holidays, or manual date input
+    var isManual = !!h._manual || (!hasCal);
+    var dateCell;
+    if (isManual) {
+      dateCell =
+        '<input type="date" value="'+(h.date||'')+'" style="width:135px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="holidayData['+i+'].date=this.value">'
+        + (hasCal ? '<div style="margin-top:3px"><button onclick="holidayData['+i+']._manual=false;renderHoliday()" style="background:none;border:none;color:#1e3a8a;font-size:10px;font-weight:700;cursor:pointer;padding:0">↩ pick from calendar</button></div>' : '<div style="font-size:9px;color:#9ca3af;margin-top:2px">No calendar holidays yet</div>');
+    } else {
+      dateCell =
+        '<select style="width:215px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px;outline:none;background:#fff" onchange="onHolidayPick('+i+',this.value)">'
+        + holidayDateOptions(h.date||'', false)
+        + '</select>';
+    }
     return`<tr style="vertical-align:top">
       <td>${i+1}</td>
-      <td><input value="${h.name||''}" placeholder="Holiday Name" style="width:130px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="holidayData[${i}].name=this.value"></td>
-      <td><input type="date" value="${h.date||''}" style="width:130px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="holidayData[${i}].date=this.value"></td>
+      <td><input value="${escAttr(h.name||'')}" placeholder="Holiday Name" style="width:130px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="holidayData[${i}].name=this.value"></td>
+      <td>${dateCell}</td>
       <td>${pmamHTML}${h.pmams.length<7?`<button onclick="addHolidayPmam(${i})" style="background:#dbeafe;color:#1e3a8a;border:none;border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;cursor:pointer;margin-top:3px">+ Add PMAM</button>`:'<span style="font-size:10px;color:#9ca3af">Max 7</span>'}</td>
       <td><button class="li-btn li-del" onclick="holidayData.splice(${i},1);renderHoliday()">Remove</button></td>
     </tr>`;
