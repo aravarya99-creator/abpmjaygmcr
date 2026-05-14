@@ -1033,7 +1033,7 @@ tr:hover td{background:#EEF3FF}
               <button class="btn btn-pri" onclick="nbmAdd()" style="padding:5px 12px;font-size:11px">+ Add Item</button>
             </div>
           </div>
-          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Edit a label inline, or use Delete to remove an item. Click <strong>Save Nav Bar</strong> when done.</div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Edit a label inline, use ↑ ↓ to reorder, or Delete to remove an item. The order here is the order shown on the landing page. Click <strong>Save Nav Bar</strong> when done.</div>
           <div id="nbm-items-list" style="display:flex;flex-direction:column;gap:8px"></div>
           <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:14px">
             <span id="nbm-save-msg" style="font-size:11px;font-weight:600"></span>
@@ -5116,21 +5116,46 @@ function nbmSetStatus(msg, color){
   if (msg2) { msg2.textContent = msg; msg2.style.color = color || '#6b7280'; }
 }
 
+// Reconcile a (possibly stale) saved navBar against the 8 canonical items:
+//  - drop ids that are no longer valid (home, leave, contact, etc.)
+//  - repair blank/missing labels using NBM_KNOWN
+//  - keep the saved display order for items that ARE valid
+//  - append any of the 8 that were missing, in their default order
+// Result: the manager always shows exactly the 8 correct items.
+function nbmReconcile(savedItems){
+  var bySaved = [];
+  var seen = {};
+  (savedItems || []).forEach(function(it){
+    var id = (it.id || '').toLowerCase();
+    // canonicalise a few common legacy variants
+    var CANON = { holidayduty:'holiday', holidayroster:'holiday', wardroster:'roster',
+                  weekendroster:'weekend', holidaycalendar:'calendar', aboutus:'about',
+                  aboutdeveloper:'developer', webdeveloper:'developer' };
+    if (CANON[id]) id = CANON[id];
+    if (!NBM_KNOWN[id] || seen[id]) return;          // drop invalid / duplicate
+    seen[id] = true;
+    var label = (it.label || '').trim() || NBM_KNOWN[id];  // repair blank label
+    bySaved.push({ id:id, label:label });
+  });
+  // Append any canonical items the saved data didn't include.
+  NBM_DEFAULTS.forEach(function(def){
+    if (!seen[def.id]) bySaved.push({ id:def.id, label:def.label });
+  });
+  bySaved.forEach(function(it, idx){ it.order = idx; });
+  return bySaved;
+}
+
 function nbmLoad(){
   nbmSetStatus('Loading\u2026', '#6b7280');
   db.collection('settings').doc('landing_page').get().then(function(doc){
-    var navBar = [];
-    if (doc.exists && doc.data() && Array.isArray(doc.data().navBar) && doc.data().navBar.length) {
-      navBar = doc.data().navBar.slice();
-    } else {
-      navBar = JSON.parse(JSON.stringify(NBM_DEFAULTS));
-    }
-    navBar.sort(function(a,b){ return (a.order||0)-(b.order||0); });
-    _nbmItems = navBar;
+    var saved = (doc.exists && doc.data() && Array.isArray(doc.data().navBar))
+      ? doc.data().navBar.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); })
+      : [];
+    _nbmItems = nbmReconcile(saved);
     nbmRender();
     nbmSetStatus('\u2713 Loaded', '#166534');
   }).catch(function(e){
-    _nbmItems = JSON.parse(JSON.stringify(NBM_DEFAULTS));
+    _nbmItems = nbmReconcile([]);
     nbmRender();
     nbmSetStatus('\u26A0\uFE0F Using defaults (' + e.message + ')', '#92400e');
   });
@@ -5158,12 +5183,31 @@ function nbmRender(){
       +     'onfocus="this.style.borderColor=\'#2563eb\'" onblur="this.style.borderColor=\'#e5e7eb\'">'
       +   '<span style="background:' + (known ? '#e0f2fe;color:#0369a1' : '#fef3c7;color:#92400e') + ';padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:monospace;width:fit-content">id: ' + (navId || '(none)') + (known ? '' : ' \u00b7 custom') + '</span>'
       + '</div>'
-      // delete action
-      + '<div>'
-      +   '<button onclick="nbmRemove(' + i + ')" style="padding:7px 14px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;border-radius:8px;font-size:11px;font-weight:700;color:#dc2626" title="Delete item">\uD83D\uDDD1 Delete</button>'
+      // actions: reorder + delete
+      + '<div style="display:flex;align-items:center;gap:6px">'
+      +   '<div style="display:flex;flex-direction:column;gap:3px">'
+      +     '<button onclick="nbmMove(' + i + ',-1)" ' + (i===0?'disabled':'') + ' title="Move up" '
+      +       'style="width:28px;height:24px;border:1px solid #d1d5db;background:' + (i===0?'#f3f4f6':'#fff') + ';cursor:' + (i===0?'not-allowed':'pointer') + ';border-radius:6px;font-size:12px;color:#374151;line-height:1">\u2191</button>'
+      +     '<button onclick="nbmMove(' + i + ',1)" ' + (i===_nbmItems.length-1?'disabled':'') + ' title="Move down" '
+      +       'style="width:28px;height:24px;border:1px solid #d1d5db;background:' + (i===_nbmItems.length-1?'#f3f4f6':'#fff') + ';cursor:' + (i===_nbmItems.length-1?'not-allowed':'pointer') + ';border-radius:6px;font-size:12px;color:#374151;line-height:1">\u2193</button>'
+      +   '</div>'
+      +   '<button onclick="nbmRemove(' + i + ')" style="padding:7px 12px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;border-radius:8px;font-size:11px;font-weight:700;color:#dc2626" title="Delete item">\uD83D\uDDD1 Delete</button>'
       + '</div>'
       + '</div>';
   }).join('');
+}
+
+// Move an item up (dir=-1) or down (dir=1) in the list. The new position
+// becomes the item's order, which drives the landing-page sequence on Save.
+function nbmMove(i, dir){
+  var j = i + dir;
+  if (j < 0 || j >= _nbmItems.length) return;
+  var tmp = _nbmItems[i];
+  _nbmItems[i] = _nbmItems[j];
+  _nbmItems[j] = tmp;
+  _nbmItems.forEach(function(it, idx){ it.order = idx; });
+  nbmRender();
+  nbmSetStatus('\u25CF Unsaved changes', '#dc2626');
 }
 
 function nbmAdd(){
