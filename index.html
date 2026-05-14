@@ -280,6 +280,7 @@ a.hero-gc-ci:hover{color:#7c3aed}
     <a class="nav-item" href="#" data-nav="roster">Ward Roster</a>
     <a class="nav-item" href="#" data-nav="holiday">Holiday Duty</a>
     <a class="nav-item" href="#" data-nav="weekend">Weekend Roster</a>
+    <a class="nav-item" href="#" data-nav="orders">Orders</a>
     <a class="nav-item" href="#" data-nav="contact">Contact Us</a>
   </div>
 </div>
@@ -912,45 +913,67 @@ window.addEventListener('DOMContentLoaded', function() {
     };
     function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    // Known content ids that always open a modal on the landing page —
-    // for these, ignore any saved URL (legacy data may have '#orders' etc.)
-    var MODAL_IDS = ['home','staff','calendar','roster','holiday','weekend'];
+    // Known content ids that always open a modal on the landing page.
+    var MODAL_IDS = ['home','staff','calendar','roster','holiday','weekend','orders'];
 
-    // Local id normaliser (mirrors window.normalizeNavId; defined here so
-    // renderNav never depends on script load order). Maps stale variants
-    // like 'weekendroster' / 'weekend_roster' / '#weekend' → 'weekend'.
+    // Map any id/label variant to a canonical id. Handles stale Firestore
+    // data ('weekendroster', 'weekend_roster', '#weekend', etc.).
     function navIdCanon(raw){
       var s = String(raw || '').toLowerCase().replace(/^#/, '').replace(/[^a-z]/g, '');
       if (!s) return '';
       var M = {
         home:'home', staff:'staff', about:'about', aboutus:'about',
-        calendar:'calendar', holidaycalendar:'calendar',
-        roster:'roster', wardroster:'roster', ward:'roster',
+        calendar:'calendar', holidaycalendar:'calendar', holidaycal:'calendar',
+        roster:'roster', wardroster:'roster', ward:'roster', wards:'roster',
         holiday:'holiday', holidayduty:'holiday', holidayroster:'holiday', holidayrost:'holiday',
         weekend:'weekend', weekendroster:'weekend', weekendrost:'weekend', weekendduty:'weekend',
-        contact:'contact', contactus:'contact'
+        contact:'contact', contactus:'contact',
+        orders:'orders', order:'orders', officeorders:'orders', circulars:'orders', notices:'orders'
       };
       return M[s] || s;
     }
+    window.normalizeNavId = navIdCanon;
+
+    // Core tabs that must always be reachable. If Firestore's saved navBar is
+    // missing any, we append it — so a stale config can never make a working
+    // feature (Weekend Roster, Orders, About Us) disappear from the nav.
+    var CORE_TABS = [
+      { id:'home',     label:'Home',            order:0 },
+      { id:'about',    label:'About Us',        order:1 },
+      { id:'staff',    label:'Staff',           order:2 },
+      { id:'calendar', label:'Holiday Calendar',order:3 },
+      { id:'roster',   label:'Ward Roster',     order:4 },
+      { id:'holiday',  label:'Holiday Duty',    order:5 },
+      { id:'weekend',  label:'Weekend Roster',  order:6 },
+      { id:'orders',   label:'Orders',          order:7 },
+      { id:'contact',  label:'Contact Us',      order:8 }
+    ];
 
     function renderNav(items){
       var nav = document.getElementById('lpNavArea');
-      if (!nav || !Array.isArray(items)) return;
-      var visible = items.filter(function(i){ return i && i.visible !== false; })
-                         .sort(function(a,b){ return (a.order||0) - (b.order||0); });
-      if (visible.length === 0) return; // keep fallback hardcoded items
+      if (!nav) return;
+      if (!Array.isArray(items)) items = [];
+      // Merge saved items with any missing CORE_TABS (matched by canonical id).
+      var presentIds = {};
+      items.forEach(function(it){ presentIds[navIdCanon(it.id || it.label || '')] = true; });
+      var merged = items.slice();
+      var maxOrder = items.reduce(function(m,it){ return Math.max(m, it.order||0); }, 0);
+      CORE_TABS.forEach(function(ct){
+        if (!presentIds[ct.id]) {
+          merged.push({ id:ct.id, label:ct.label, order:maxOrder + 1 + ct.order, visible:true, active:false });
+        }
+      });
+      var visible = merged.filter(function(i){ return i && i.visible !== false; })
+                          .sort(function(a,b){ return (a.order||0) - (b.order||0); });
+      if (visible.length === 0) return;
       nav.innerHTML = visible.map(function(it){
         var cls = 'nav-item' + (it.active ? ' active' : '');
-        // Normalise the id so legacy/variant ids still route to the right modal
         var navId = esc(navIdCanon(it.id || it.label || ''));
-        // For known content ids, force href='#' so click handler routes by id.
-        // For unknown/custom ids, honor the saved url so admins can still link out.
         var url = (MODAL_IDS.indexOf(navId) !== -1) ? '#' : (it.url || '#');
         var label = esc(it.label || '');
         var iconSvg = it.active
           ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>'
           : '';
-        // External URLs (http/https///) open in a new tab.
         var isExternal = /^(https?:|\/\/)/i.test(url);
         var targetAttr = isExternal ? ' target="_blank" rel="noopener"' : '';
         var dataAttr   = navId ? ' data-nav="'+navId+'"' : '';
@@ -1414,31 +1437,32 @@ window.addEventListener('DOMContentLoaded', function() {
     }, 2400);
   }
 
-  // ─── Normalise any nav id/label variant to a canonical modal id ─────
-  // Handles stale Firestore data: 'weekendroster', 'weekend-roster',
-  // 'weekend_roster', '#weekend', 'wardroster', etc. all map cleanly.
-  function normalizeNavId(raw){
+  // ─── Resolve nav id from element (data-nav preferred, label fallback) ─
+  // Local copy of the canonical normaliser so this block never depends on
+  // script load order.
+  function navIdCanonLocal(raw){
     var s = String(raw || '').toLowerCase().replace(/^#/, '').replace(/[^a-z]/g, '');
     if (!s) return '';
-    var MAP = {
+    var M = {
       home:'home', staff:'staff', about:'about', aboutus:'about',
-      calendar:'calendar', holidaycalendar:'calendar',
-      roster:'roster', wardroster:'roster', ward:'roster',
+      calendar:'calendar', holidaycalendar:'calendar', holidaycal:'calendar',
+      roster:'roster', wardroster:'roster', ward:'roster', wards:'roster',
       holiday:'holiday', holidayduty:'holiday', holidayroster:'holiday', holidayrost:'holiday',
       weekend:'weekend', weekendroster:'weekend', weekendrost:'weekend', weekendduty:'weekend',
-      contact:'contact', contactus:'contact'
+      contact:'contact', contactus:'contact',
+      orders:'orders', order:'orders', officeorders:'orders', circulars:'orders', notices:'orders'
     };
-    return MAP[s] || s;
+    return M[s] || s;
   }
-  window.normalizeNavId = normalizeNavId;
-
-  // ─── Resolve nav id from element (data-nav preferred, label fallback) ─
+  var KNOWN_MODAL_IDS = ['calendar','roster','holiday','weekend','orders'];
+  var ACTION_IDS = ['home','staff','about','contact'];
   function getNavId(a){
-    var id = (a.getAttribute('data-nav') || '').trim().toLowerCase();
-    if (id) return normalizeNavId(id);
-    // Legacy fallback: derive from label text
-    var label = (a.textContent || '').trim().toLowerCase().replace(/[▾▼]/g,'').trim();
-    return normalizeNavId(label);
+    var fromId    = navIdCanonLocal((a.getAttribute('data-nav') || '').trim());
+    var fromLabel = navIdCanonLocal((a.textContent || '').trim().replace(/[▾▼]/g,'').trim());
+    // Prefer whichever resolves to a real modal/action id.
+    if (KNOWN_MODAL_IDS.indexOf(fromId) !== -1 || ACTION_IDS.indexOf(fromId) !== -1) return fromId;
+    if (KNOWN_MODAL_IDS.indexOf(fromLabel) !== -1 || ACTION_IDS.indexOf(fromLabel) !== -1) return fromLabel;
+    return fromId || fromLabel;
   }
 
   // ─── Update active visual state ─────────────────────────────────────
@@ -1514,8 +1538,15 @@ window.addEventListener('DOMContentLoaded', function() {
       window.openContentModal(navId, labelText || navId);
       return;
     }
-    console.log('[nav] No renderer for id="'+navId+'" — known ids:', Object.keys(renderers));
-    // Static/non-data tabs or unknown id — friendly toast
+    // Last resort: resolve straight from the label text in case the id was
+    // stale/missing and getNavId still couldn't land it.
+    var labelId = navIdCanonLocal(labelText);
+    if (labelId && typeof window.openContentModal === 'function' && renderers[labelId]) {
+      console.log('[nav] Opening content modal via label fallback for:', labelId);
+      window.openContentModal(labelId, labelText || labelId);
+      return;
+    }
+    console.log('[nav] No renderer for id="'+navId+'" / label="'+labelText+'" — known ids:', Object.keys(renderers));
     showNavToast((labelText || 'This section') + ' — info coming soon.');
   });
 
@@ -1818,7 +1849,8 @@ window.addEventListener('DOMContentLoaded', function() {
     holidayCalendar: null,  // settings/holiday_calendar
     wardRoster:      null,  // settings/roster
     holidayDuty:     null,  // settings/holidays
-    weekendRoster:   null   // settings/weekend_roster
+    weekendRoster:   null,  // settings/weekend_roster
+    orders:          null   // settings/orders
   };
   // Current open modal id (so we can re-render when data updates)
   var _openId = null;
@@ -1849,6 +1881,11 @@ window.addEventListener('DOMContentLoaded', function() {
       LIVE.weekendRoster = doc.exists ? (doc.data() || {}) : {};
       if (_openId === 'weekend') renderInto(_openId);
     }, function(err){ console.warn('weekend_roster listener:', err && err.message); });
+
+    db.collection('settings').doc('orders').onSnapshot(function(doc){
+      LIVE.orders = doc.exists ? (doc.data() || {}) : {};
+      if (_openId === 'orders') renderInto(_openId);
+    }, function(err){ console.warn('orders listener:', err && err.message); });
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', subscribe);
@@ -1955,14 +1992,13 @@ window.addEventListener('DOMContentLoaded', function() {
     var data = LIVE.wardRoster || {};
     var rows = Array.isArray(data.rows) ? data.rows : [];
     if (!rows.length) {
-      return '<div class="cm-empty">No ward assignments published yet. Admin can add rows from <strong>Data Management → Ward Roster</strong>.</div>';
+      return '<div class="cm-empty">No ward assignments published yet. Admin can add rows from <strong>Nav Bar → Ward Roster</strong>.</div>';
     }
     var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl">'
       + '<thead><tr><th style="width:42px">#</th><th>PMAM Name</th><th>Ward(s) Assigned</th></tr></thead>'
       + '<tbody>';
     rows.forEach(function(r, i){
       var name = r.pmam || r.name || '';
-      // Multi-ward: prefer `wards` array, fall back to legacy `ward` string/array
       var wardList;
       if (Array.isArray(r.wards)) {
         wardList = r.wards;
@@ -1978,9 +2014,7 @@ window.addEventListener('DOMContentLoaded', function() {
         wardCell = '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
       } else {
         wardCell = '<span style="display:inline-flex;flex-wrap:wrap;gap:4px">'
-          + wardList.map(function(w){
-              return (window.WARD_REGISTRY) ? WARD_REGISTRY.pill(w) : esc(w);
-            }).join('')
+          + wardList.map(function(w){ return (window.WARD_REGISTRY) ? WARD_REGISTRY.pill(w) : esc(w); }).join('')
           + '</span>';
       }
       html += '<tr><td style="text-align:center;color:#6b7280;font-weight:600">'+(i+1)+'</td>'
@@ -2042,18 +2076,62 @@ window.addEventListener('DOMContentLoaded', function() {
     return html;
   }
 
+  function renderOrders(){
+    var data = LIVE.orders || {};
+    var rows = Array.isArray(data.rows) ? data.rows : [];
+    if (!rows.length) {
+      return '<div class="cm-empty">No orders published yet. Admin can add orders from <strong>Nav Bar → Orders</strong> in the Admin Portal.</div>';
+    }
+    var sorted = rows.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    var catColor = { 'Office Order':'#dbeafe','Circular':'#fef3c7','Notice':'#fae8ff','Notification':'#dcfce7','Other':'#f1f5f9' };
+    var catFg    = { 'Office Order':'#1e40af','Circular':'#92400e','Notice':'#86198f','Notification':'#166534','Other':'#475569' };
+    var html = '<div style="display:flex;flex-direction:column;gap:10px">';
+    sorted.forEach(function(r){
+      var title = r.title || r.name || 'Untitled order';
+      var cat   = r.category || 'Office Order';
+      var bg = catColor[cat] || '#f1f5f9';
+      var fg = catFg[cat] || '#475569';
+      var link = r.link || '';
+      var openBtn = link
+        ? '<a href="'+esc(link)+'" target="_blank" rel="noopener" '
+          + 'style="display:inline-flex;align-items:center;gap:5px;background:#16a34a;color:#fff;'
+          + 'padding:7px 16px;border-radius:50px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">'
+          + 'View / Download ↗</a>'
+        : '<span style="color:#dc2626;font-size:11px">Link unavailable</span>';
+      html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:13px 15px;'
+            + 'display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+        +   '<div style="flex:1;min-width:180px">'
+        +     '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
+        +       '<span style="background:'+bg+';color:'+fg+';padding:2px 10px;border-radius:20px;font-size:10px;font-weight:800">'+esc(cat)+'</span>'
+        +       (r.date ? '<span style="font-size:11px;color:#6b7280;font-weight:600">'+esc(fmtDate(r.date))+'</span>' : '')
+        +     '</div>'
+        +     '<div style="font-size:13.5px;font-weight:700;color:#1e293b;line-height:1.4">'+esc(title)+'</div>'
+        +   '</div>'
+        +   openBtn
+        + '</div>';
+    });
+    html += '</div>';
+    if (data.updatedAt) {
+      html += '<div style="font-size:10.5px;color:#9ca3af;text-align:right;margin-top:10px">Last updated: '
+            + esc(fmtDate(new Date(data.updatedAt).toISOString().slice(0,10)))+'</div>';
+    }
+    return html;
+  }
+
   // ─── Renderer registry (exposed globally so click handler can check) ─
   var ICON = {
     calendar: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
     roster:   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l7-3 7 3z"/></svg>',
     holiday:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
-    weekend:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+    weekend:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    orders:   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
   };
   window.CONTENT_RENDERERS = {
     calendar: renderHolidayCalendar,
     roster:   renderWardRoster,
     holiday:  renderHolidayDuty,
-    weekend:  renderWeekendRoster
+    weekend:  renderWeekendRoster,
+    orders:   renderOrders
   };
   console.log('[contentModal] Initialized. Known ids:', Object.keys(window.CONTENT_RENDERERS));
 
@@ -2092,7 +2170,8 @@ window.addEventListener('DOMContentLoaded', function() {
         (id==='calendar' && LIVE.holidayCalendar) ||
         (id==='roster'   && LIVE.wardRoster) ||
         (id==='holiday'  && LIVE.holidayDuty) ||
-        (id==='weekend'  && LIVE.weekendRoster)
+        (id==='weekend'  && LIVE.weekendRoster) ||
+        (id==='orders'   && LIVE.orders)
       );
       subEl.textContent = hasData ? 'Live data — auto-syncs from Admin Portal' : 'Loading from server…';
     }

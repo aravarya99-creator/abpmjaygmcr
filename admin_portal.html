@@ -728,6 +728,7 @@ tr:hover td{background:#EEF3FF}
         <button class="dmt-tab"        id="nbt-wardroster"    onclick="showNavTab('wardroster',this)">🏥 Ward Roster</button>
         <button class="dmt-tab"        id="nbt-holidayrost"   onclick="showNavTab('holidayrost',this)">🎉 Holiday Roster</button>
         <button class="dmt-tab"        id="nbt-weekendroster" onclick="showNavTab('weekendroster',this)">📆 Weekend Roster</button>
+        <button class="dmt-tab"        id="nbt-orders"        onclick="showNavTab('orders',this)">📋 Orders</button>
         <button class="dmt-tab"        id="nbt-navbar"        onclick="showNavTab('navbar',this)">⚙️ Nav Bar Settings</button>
       </div>
 
@@ -840,6 +841,74 @@ tr:hover td{background:#EEF3FF}
           <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:14px">
             <span id="wrSaveMsg" style="font-size:11px;font-weight:600"></span>
             <button class="btn btn-pri" onclick="wrSave()" style="padding:10px 22px;border-radius:50px;font-size:13px;font-weight:700">Save &amp; Publish</button>
+          </div>
+        </div>
+      </div>
+      <div class="dmt-pane" id="dmpane-orders">
+        <div class="card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;margin-bottom:12px">
+          <div class="card-hd" style="color:#1e3a8a">📋 Orders / Circulars — published via Google Drive</div>
+          <div style="font-size:12px;color:#1e3a8a;line-height:1.6">
+            Add office orders, circulars, or notices here. Each order links to a file on
+            <strong>Google Drive</strong>. Upload your PDF to Drive, set its sharing to
+            <em>"Anyone with the link → Viewer"</em>, copy the link, and paste it below.
+            Saved orders appear instantly on the landing page under the <strong>Orders</strong> tab.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Add a New Order</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Order Title</label>
+              <input type="text" id="ordTitle" placeholder="e.g. Office Order No. 123 — Duty Reallocation"
+                style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <div style="flex:1;min-width:140px">
+                <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Order Date</label>
+                <input type="date" id="ordDate"
+                  style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+              </div>
+              <div style="flex:1;min-width:140px">
+                <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Category</label>
+                <select id="ordCategory"
+                  style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit;background:#fff">
+                  <option value="Office Order">Office Order</option>
+                  <option value="Circular">Circular</option>
+                  <option value="Notice">Notice</option>
+                  <option value="Notification">Notification</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Google Drive Link</label>
+              <input type="text" id="ordLink" placeholder="https://drive.google.com/file/d/.../view"
+                style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+              <div style="font-size:10px;color:#9ca3af;margin-top:3px">
+                Paste any Google Drive share link — the portal converts it to a direct view link automatically.
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end">
+              <button class="btn-add" onclick="ordAddRow()">+ Add Order</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            Published Orders
+            <span id="ordCount" style="font-size:11px;font-weight:600;color:#6b7280"></span>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th style="width:46px">S.No</th><th>Title</th><th style="width:120px">Date</th><th style="width:120px">Category</th><th style="width:70px">Link</th><th style="width:80px">Action</th>
+              </tr></thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:12px">
+            <span id="ordSaveMsg" style="font-size:11px;font-weight:600"></span>
+            <button class="btn btn-pri" onclick="ordSave()">💾 Save &amp; Publish Orders</button>
           </div>
         </div>
       </div>
@@ -1848,6 +1917,7 @@ function showNavTab(tab, el){
     if (typeof loadHolidayFromDb === 'function') loadHolidayFromDb();
   }
   if (tab === 'weekendroster') { if (typeof wrInit === 'function') wrInit(); }
+  if (tab === 'orders')        { if (typeof ordInit === 'function') ordInit(); }
   if (tab === 'navbar')        { if (typeof nbmLoad === 'function') nbmLoad(); }
 }
 
@@ -1856,7 +1926,6 @@ function loadRosterFromDb(){
   db.collection('settings').doc('roster').get().then(function(doc){
     if (doc.exists && doc.data() && Array.isArray(doc.data().rows)) {
       rosterData = doc.data().rows.map(function(r){
-        // Multi-ward: prefer `wards` array; fall back to legacy single `ward` string
         var wards;
         if (Array.isArray(r.wards)) {
           wards = r.wards.slice();
@@ -1890,10 +1959,10 @@ function loadHolidayFromDb(){
 // HOLIDAY CALENDAR
 // ══════════════════════════════════════════════════════
 var _hcHolidays = []; // [{date:'YYYY-MM-DD', name:'', type:'Gazetted|State|Custom'}]
-var _hcLoaded = false; // true once we've fetched holiday_calendar at least once
+var _hcLoaded = false; // true once holiday_calendar has been fetched at least once
 
-// Fetch the holiday calendar if it hasn't been loaded yet, then run an
-// optional callback. Lets other tabs (e.g. Holiday Roster) reuse the data.
+// Fetch the holiday calendar on demand (used by tabs other than Holiday
+// Calendar, e.g. Holiday Roster, so its date dropdown has data to show).
 function hcEnsureLoaded(cb){
   if (_hcLoaded) { if (cb) cb(); return; }
   db.collection('settings').doc('holiday_calendar').get().then(function(doc){
@@ -1901,7 +1970,7 @@ function hcEnsureLoaded(cb){
       _hcHolidays = doc.data().holidays;
     }
     _hcLoaded = true;
-    if (typeof renderHoliday === 'function') renderHoliday(); // refresh roster dropdowns
+    if (typeof renderHoliday === 'function') renderHoliday();
     if (cb) cb();
   }).catch(function(){ _hcLoaded = true; if (cb) cb(); });
 }
@@ -2125,7 +2194,6 @@ function wrRenderTable(){
 }
 
 // ── Date helpers: compute the upcoming Saturday & Sunday ──
-// Returns 'YYYY-MM-DD'. If today IS Sat/Sun, uses the current weekend.
 function wrFmtDate(d){
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
@@ -2134,8 +2202,7 @@ function wrNextWeekend(weeksAhead){
   var today = new Date();
   today.setHours(0,0,0,0);
   var dow = today.getDay(); // 0=Sun ... 6=Sat
-  // days until the coming Saturday (if today is Sat, that's 0; if Sun, that's 6)
-  var daysToSat = (6 - dow + 7) % 7;
+  var daysToSat = (6 - dow + 7) % 7; // if today is Sat -> 0
   var sat = new Date(today);
   sat.setDate(today.getDate() + daysToSat + (weeksAhead * 7));
   var sun = new Date(sat);
@@ -2144,8 +2211,7 @@ function wrNextWeekend(weeksAhead){
 }
 
 function wrAddRow(){
-  // Auto-advance the weekend for each new row so consecutive rows
-  // map to consecutive weekends (week 0, week 1, week 2 ...).
+  // Auto-fill consecutive weekends: row 0 -> this weekend, row 1 -> next, ...
   var we = wrNextWeekend(_wrRows.length);
   _wrRows.push({ pmam1:'', pmam2:'', saturday:we.saturday, sunday:we.sunday });
   wrRenderTable();
@@ -2156,20 +2222,17 @@ function wrRender(){ wrRenderTable(); }
 
 function wrSave(){
   var msg = document.getElementById('wrSaveMsg');
-  // Pull the latest values straight from the DOM so nothing is lost
-  // even if an onchange didn't fire (e.g. user clicked Save mid-edit).
+  // Pull latest values straight from the DOM so nothing is lost even if an
+  // onchange didn't fire (e.g. user clicked Save mid-edit).
   var tb = document.getElementById('wrBody');
   if (tb) {
-    var trs = tb.querySelectorAll('tr');
     var collected = [];
-    trs.forEach(function(tr){
+    tb.querySelectorAll('tr').forEach(function(tr){
       var ins = tr.querySelectorAll('input');
       if (ins.length >= 4) {
         collected.push({
-          pmam1: ins[0].value || '',
-          pmam2: ins[1].value || '',
-          saturday: ins[2].value || '',
-          sunday: ins[3].value || ''
+          pmam1: ins[0].value || '', pmam2: ins[1].value || '',
+          saturday: ins[2].value || '', sunday: ins[3].value || ''
         });
       }
     });
@@ -2489,13 +2552,10 @@ function addRosterRow(){
   renderRoster();
 }
 
-// Normalise a roster row's ward value into an array of canonical labels.
-// Handles legacy data where `ward` was a single string or comma list.
+// Normalise a roster row's ward value into an array of labels (legacy-safe).
 function rosterWardArray(r){
   if (Array.isArray(r.wards)) return r.wards.slice();
-  if (typeof r.ward === 'string' && r.ward.trim()) {
-    return r.ward.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
-  }
+  if (typeof r.ward === 'string' && r.ward.trim()) return r.ward.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
   if (Array.isArray(r.ward)) return r.ward.slice();
   return [];
 }
@@ -2508,7 +2568,7 @@ function rosterToggleWard(i, wardLabel, checked){
   if (checked && pos === -1) arr.push(wardLabel);
   if (!checked && pos !== -1) arr.splice(pos, 1);
   rosterData[i].wards = arr;
-  delete rosterData[i].ward; // drop legacy field; wards[] is source of truth
+  delete rosterData[i].ward; // wards[] is now source of truth
   renderRosterRowWards(i);
 }
 
@@ -2517,35 +2577,27 @@ function rosterToggleWardPanel(i){
   var panel = document.getElementById('rwPanel-'+i);
   if (!panel) return;
   var isOpen = panel.style.display === 'block';
-  // close all other panels first
   document.querySelectorAll('[id^="rwPanel-"]').forEach(function(p){ p.style.display='none'; });
   panel.style.display = isOpen ? 'none' : 'block';
 }
 
-// Re-render just the ward cell of one row (after a checkbox toggle) so the
-// dropdown panel stays open and the summary chips update live.
+// Re-render just one row's ward cell (keeps the panel open while editing).
 function renderRosterRowWards(i){
   var cell = document.getElementById('rwCell-'+i);
   if (!cell) return;
   cell.innerHTML = rosterWardCellHtml(i);
   var panel = document.getElementById('rwPanel-'+i);
-  if (panel) panel.style.display = 'block'; // keep open while editing
+  if (panel) panel.style.display = 'block';
 }
 
-// Build the inner HTML of a row's ward cell: summary chips + toggle button + checkbox panel.
+// Build the inner HTML of a row's ward cell: chips + toggle button + checkbox panel.
 function rosterWardCellHtml(i){
   var r = rosterData[i] || {};
   var selected = rosterWardArray(r);
-  var allWards = (window.WARD_REGISTRY && WARD_REGISTRY.isReady())
-    ? WARD_REGISTRY.list()
-    : (window.WARD_REGISTRY ? WARD_REGISTRY.list() : []);
-  // Summary chips
+  var allWards = (window.WARD_REGISTRY) ? WARD_REGISTRY.list() : [];
   var chips = selected.length
-    ? selected.map(function(w){
-        return (window.WARD_REGISTRY ? WARD_REGISTRY.pill(w) : '<span>'+escAttr(w)+'</span>');
-      }).join(' ')
+    ? selected.map(function(w){ return (window.WARD_REGISTRY ? WARD_REGISTRY.pill(w) : '<span>'+escAttr(w)+'</span>'); }).join(' ')
     : '<span style="font-size:11px;color:#9ca3af;font-style:italic">No wards selected</span>';
-  // Checkbox list
   var boxes = allWards.map(function(w){
     var checked = selected.indexOf(w.label) !== -1 ? ' checked' : '';
     var ic = w.icon ? '<span style="margin-right:4px">'+w.icon+'</span>' : '';
@@ -2584,7 +2636,6 @@ function renderRoster(){
     <td id="rwCell-${i}">${rosterWardCellHtml(i)}</td>
     <td style="padding-top:7px"><button class="li-btn li-del" onclick="rosterData.splice(${i},1);renderRoster()">Remove</button></td>
   </tr>`).join('');
-  // Re-render once WARD_REGISTRY becomes ready (in case it loaded late)
   if (window.WARD_REGISTRY && !WARD_REGISTRY.isReady() && !renderRoster._waiting) {
     renderRoster._waiting = true;
     WARD_REGISTRY.onReady(function(){ renderRoster._waiting = false; renderRoster(); });
@@ -2596,8 +2647,7 @@ function addHolidayRow(){holidayData.push({name:'',date:'',pmams:['']});renderHo
 function addHolidayPmam(i){if(holidayData[i].pmams.length>=7){alert('Max 7 PMAMs');return;}holidayData[i].pmams.push('');renderHoliday();}
 function removeHolidayPmam(i,j){holidayData[i].pmams.splice(j,1);renderHoliday();}
 
-// When a holiday is picked from the dropdown, fill in BOTH the date and,
-// if the name field is empty, the holiday name from the calendar.
+// When a holiday is picked from the dropdown, fill in date and (if empty) name.
 function onHolidayPick(i, val){
   if (val === '__manual__') {
     holidayData[i].date = '';
@@ -2614,12 +2664,10 @@ function onHolidayPick(i, val){
   renderHoliday();
 }
 
-// Build the <option> list of holidays from the Holiday Calendar, sorted by date.
+// Build <option>s of holidays from the Holiday Calendar, sorted by date.
 function holidayDateOptions(selected, isManual){
   var opts = '<option value="">— Select holiday —</option>';
-  var list = (_hcHolidays || []).slice().sort(function(a,b){
-    return (a.date||'').localeCompare(b.date||'');
-  });
+  var list = (_hcHolidays || []).slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
   var found = false;
   list.forEach(function(h){
     if (!h.date) return;
@@ -2628,7 +2676,6 @@ function holidayDateOptions(selected, isManual){
     var label = h.date + ' — ' + (h.name || 'Holiday') + (h.type ? ' ('+h.type+')' : '');
     opts += '<option value="'+escAttr(h.date)+'"'+sel+'>'+escAttr(label)+'</option>';
   });
-  // If the saved date isn't in the calendar list, keep it visible anyway
   if (!isManual && selected && !found) {
     opts += '<option value="'+escAttr(selected)+'" selected>'+escAttr(selected)+' — (not in calendar)</option>';
   }
@@ -2647,7 +2694,6 @@ function renderHoliday(){
         <input value="${escAttr(p)}" placeholder="PMAM ${j+1}" style="width:140px;padding:3px 7px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px;outline:none" onchange="holidayData[${i}].pmams[${j}]=this.value">
         ${h.pmams.length>1?`<button onclick="removeHolidayPmam(${i},${j})" style="background:none;border:none;color:#dc2626;font-weight:800;cursor:pointer;font-size:13px">×</button>`:''}
       </div>`).join('');
-    // Date cell: dropdown of calendar holidays, or manual date input
     var isManual = !!h._manual || (!hasCal);
     var dateCell;
     if (isManual) {
@@ -2721,17 +2767,128 @@ function sendResetOtpFromAdmin(){
   document.getElementById('resetModal').classList.remove('open');
 }
 
+// ══════════════════════════
+// ORDERS / CIRCULARS — published via Google Drive links
+// Stored in Firestore: settings/orders { rows:[{title,date,category,link}] }
+// (ordersData is already declared near the top with the other data arrays.)
+// ══════════════════════════
+
+// Convert any Google Drive share link into a clean /view link.
+function ordDriveDirectLink(url){
+  if (!url) return '';
+  var u = String(url).trim();
+  var id = '', m;
+  if ((m = u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)))  id = m[1];
+  else if ((m = u.match(/[?&]id=([a-zA-Z0-9_-]+)/)))    id = m[1];
+  else if ((m = u.match(/\/d\/([a-zA-Z0-9_-]+)/)))    id = m[1];
+  if (id) return 'https://drive.google.com/file/d/' + id + '/view';
+  return u;
+}
+
+function ordInit(){
+  db.collection('settings').doc('orders').get().then(function(doc){
+    if (doc.exists && Array.isArray(doc.data().rows)) {
+      ordersData = doc.data().rows.map(function(r){
+        return {
+          title:    r.title || r.name || '',
+          date:     r.date || '',
+          category: r.category || 'Office Order',
+          link:     r.link || ''
+        };
+      });
+    } else {
+      ordersData = [];
+    }
+    renderOrders();
+  }).catch(function(){ renderOrders(); });
+}
+
+function ordAddRow(){
+  var title = (document.getElementById('ordTitle')    || {}).value || '';
+  var date  = (document.getElementById('ordDate')     || {}).value || '';
+  var cat   = (document.getElementById('ordCategory') || {}).value || 'Office Order';
+  var link  = (document.getElementById('ordLink')     || {}).value || '';
+  title = title.trim(); link = link.trim();
+  var msg = document.getElementById('ordSaveMsg');
+  if (!title) { if(msg){msg.style.color='#dc2626';msg.textContent='Enter an order title.';} return; }
+  if (!link)  { if(msg){msg.style.color='#dc2626';msg.textContent='Paste a Google Drive link.';} return; }
+  ordersData.push({ title:title, date:date, category:cat, link:ordDriveDirectLink(link) });
+  if (document.getElementById('ordTitle')) document.getElementById('ordTitle').value = '';
+  if (document.getElementById('ordDate'))  document.getElementById('ordDate').value  = '';
+  if (document.getElementById('ordLink'))  document.getElementById('ordLink').value  = '';
+  if (msg) { msg.style.color='#166534'; msg.textContent='Added — remember to Save & Publish.'; }
+  renderOrders();
+}
+
+function renderOrders(){
+  var d = document.getElementById('ordersBody');
+  if (!d) return;
+  var countEl = document.getElementById('ordCount');
+  if (countEl) countEl.textContent = ordersData.length ? '('+ordersData.length+')' : '';
+  if (!ordersData.length){
+    d.innerHTML = '<tr><td colspan="6" class="empty-td">No orders added yet. Use the form above.</td></tr>';
+    return;
+  }
+  var view = ordersData.map(function(o,idx){ return { o:o, idx:idx }; })
+    .sort(function(a,b){ return (b.o.date||'').localeCompare(a.o.date||''); });
+  d.innerHTML = view.map(function(row, n){
+    var o = row.o, i = row.idx;
+    return '<tr>'
+      + '<td>'+(n+1)+'</td>'
+      + '<td><input value="'+escAttr(o.title||'')+'" placeholder="Order title" '
+      +   'onchange="ordersData['+i+'].title=this.value" '
+      +   'style="width:100%;min-width:160px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none"></td>'
+      + '<td><input type="date" value="'+(o.date||'')+'" '
+      +   'onchange="ordersData['+i+'].date=this.value;renderOrders()" '
+      +   'style="width:100%;padding:4px 6px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px;outline:none"></td>'
+      + '<td><select onchange="ordersData['+i+'].category=this.value" '
+      +   'style="width:100%;padding:4px 6px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px;outline:none;background:#fff">'
+      +   ['Office Order','Circular','Notice','Notification','Other'].map(function(c){
+            return '<option value="'+c+'"'+(o.category===c?' selected':'')+'>'+c+'</option>';
+          }).join('')
+      +   '</select></td>'
+      + '<td>'+(o.link
+          ? '<a href="'+escAttr(o.link)+'" target="_blank" rel="noopener" style="background:#E8EFFF;color:#1A3DB5;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;text-decoration:none">Open ↗</a>'
+          : '<span style="color:#dc2626;font-size:10px">no link</span>')+'</td>'
+      + '<td><button class="li-btn li-del" onclick="ordersData.splice('+i+',1);renderOrders()">Remove</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function ordSave(){
+  var msg = document.getElementById('ordSaveMsg');
+  var rows = (ordersData || []).filter(function(o){
+    return (o.title||'').trim() && (o.link||'').trim();
+  }).map(function(o){
+    return {
+      title:    (o.title||'').trim(),
+      date:     (o.date||'').trim(),
+      category: (o.category||'Office Order').trim(),
+      link:     ordDriveDirectLink((o.link||'').trim())
+    };
+  });
+  if (msg) { msg.style.color='#1A3DB5'; msg.textContent='Saving…'; }
+  db.collection('settings').doc('orders').set({
+    rows: rows,
+    updatedAt: Date.now(),
+    _updatedBy: (typeof ADMIN_EMAIL!=='undefined' ? ADMIN_EMAIL : '')
+  }, { merge: true })
+  .then(function(){
+    if (msg) { msg.style.color='#166534'; msg.textContent='✅ Saved & published! ('+rows.length+' order'+(rows.length!==1?'s':'')+')'; setTimeout(function(){ msg.textContent=''; },3500); }
+    if (typeof showToast==='function') showToast('✅ Orders published','success');
+    if (typeof writeAudit==='function') writeAudit('EDIT','settings/orders','orders',{count:rows.length});
+  })
+  .catch(function(e){
+    if (msg) { msg.style.color='#dc2626'; msg.textContent='Error: '+(e&&e.message?e.message:e); }
+  });
+}
+
 function saveRosterToDb() {
-  // Save straight from in-memory rosterData so the multi-ward arrays are
-  // preserved. We also write a comma-joined `ward` string for backward
-  // compatibility with any older reader that still expects a single field.
+  // Save from in-memory rosterData so multi-ward arrays are preserved.
+  // Also write a comma-joined `ward` string for backward compatibility.
   var rows = (rosterData || []).map(function(r){
     var wards = Array.isArray(r.wards) ? r.wards.filter(function(w){ return (w||'').trim(); }) : [];
-    return {
-      pmam:  (r.name || '').trim(),
-      wards: wards,
-      ward:  wards.join(', ')   // legacy mirror
-    };
+    return { pmam: (r.name||'').trim(), wards: wards, ward: wards.join(', ') };
   });
   var msg = document.getElementById('rosterSaveMsg');
   msg.style.color = '#1A3DB5';
@@ -2968,18 +3125,8 @@ function refreshSysStats() {
   });
 }
 
-function renderOrders(){
-  const d=document.getElementById('ordersList');
-  if(!ordersData.length){d.innerHTML='<div style="color:#9ca3af;font-style:italic;text-align:center;padding:20px">No orders added yet</div>';return;}
-  d.innerHTML=ordersData.map((o,i)=>`
-    <div class="list-item">
-      <div><div class="li-text">${o.name}</div><div class="li-sub">${o.link.substring(0,45)}...</div></div>
-      <div class="li-actions">
-        <a href="${o.link}" target="_blank" style="background:#E8EFFF;color:#1A3DB5;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;text-decoration:none">Open</a>
-        <button class="li-btn li-del" onclick="ordersData.splice(${i},1);renderOrders()">Remove</button>
-      </div>
-    </div>`).join('');
-}
+// (Legacy renderOrders removed — superseded by the Orders/Circulars block
+//  above which targets #ordersBody and the new order data shape.)
 
 function saveTicker() {
   const txt = document.getElementById('tickerTxt').value.trim();
@@ -4747,7 +4894,8 @@ var NBM_DEFAULTS = [
   { id:'roster',   label:'Ward Roster',     active:false, visible:true,  order:4 },
   { id:'holiday',  label:'Holiday Duty',    active:false, visible:true,  order:5 },
   { id:'weekend',  label:'Weekend Roster',  active:false, visible:true,  order:6 },
-  { id:'contact',  label:'Contact Us',      active:false, visible:true,  order:7 }
+  { id:'orders',   label:'Orders',          active:false, visible:true,  order:7 },
+  { id:'contact',  label:'Contact Us',      active:false, visible:true,  order:8 }
 ];
 
 function nbmSetStatus(msg, color){
@@ -4877,6 +5025,7 @@ function nbmAdd(){
     { id:'roster',   label:'Ward Roster' },
     { id:'holiday',  label:'Holiday Duty' },
     { id:'weekend',  label:'Weekend Roster' },
+    { id:'orders',   label:'Orders' },
     { id:'contact',  label:'Contact Us' }
   ];
   // Filter out ids already in use
