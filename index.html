@@ -1340,8 +1340,7 @@ window.addEventListener('DOMContentLoaded', function() {
   window.closeStaffModal = closeModal;
 
   function currentFilter(){
-    var btn = document.querySelector('#staffModal .smf-tab.active');
-    return btn ? btn.getAttribute('data-role') : 'all';
+    return 'all';  // search & role filters removed; always show all, grouped by rank
   }
 
   function loadStaff(){
@@ -1377,57 +1376,104 @@ window.addEventListener('DOMContentLoaded', function() {
   function renderCards(list, roleFilter){
     var grid = document.getElementById('staffModalGrid');
     if (!grid) return;
-    var search = (document.getElementById('staffModalSearch') || {}).value || '';
-    search = search.trim().toLowerCase();
-    var filtered = list.filter(function(u){
-      if (roleFilter && roleFilter !== 'all') {
-        if (roleFilter === 'DEO') {
-          if (u.role !== 'DEO' && !(u.role||'').startsWith('MTS')) return false;
-        } else if (u.role !== roleFilter) return false;
-      }
-      if (search) {
-        var hay = ((u.name||'') + ' ' + (u.ward||'') + ' ' + (u.role||'')).toLowerCase();
-        if (hay.indexOf(search) < 0) return false;
-      }
-      return true;
-    });
+
     var countEl = document.getElementById('staffModalCount');
-    if (countEl) countEl.textContent = filtered.length + (filtered.length === 1 ? ' member' : ' members');
-    if (!filtered.length) {
-      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#9ca3af;font-style:italic">No staff matching this filter.</div>';
+    if (countEl) countEl.textContent = list.length + (list.length === 1 ? ' member' : ' members');
+    if (!list.length) {
+      grid.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#9ca3af;font-style:italic">No staff published yet.</div>';
       return;
     }
-    grid.innerHTML = filtered.map(function(u){
+
+    // ── Rank order for the vertical, grouped staff list ──
+    // Principal → Medical Superintendent → I/C AB-PMJAY → PMAMs → DEO → others.
+    // Matching is case-insensitive and tolerant of small naming variations.
+    var RANK_GROUPS = [
+      { key:'principal', label:'Principal',                icon:'\uD83C\uDF93',
+        match:function(r){ return /principal/.test(r); } },
+      { key:'ms',        label:'Medical Superintendent',   icon:'\uD83C\uDFE5',
+        match:function(r){ return /medical\s*superintendent|(^|\b)ms\b/.test(r); } },
+      { key:'ic',        label:'I/C AB-PMJAY',             icon:'\uD83D\uDCCB',
+        match:function(r){ return /i\/?c|in.?charge|incharge/.test(r) && /pmjay|ab-?pmjay|sehat/.test(r); } },
+      { key:'pmam',      label:'PMAMs',                    icon:'\uD83D\uDC65',
+        match:function(r){ return /pmam/.test(r); } },
+      { key:'deo',       label:'DEO',                      icon:'\uD83D\uDCBB',
+        match:function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(r); } }
+    ];
+    // Admin-configurable order: settings/about_page.staffGroupOrder is an
+    // array of group keys (e.g. ['deo','pmam','ic','ms','principal']).
+    // It lives in a different IIFE's LIVE store, so we read it through the
+    // global accessor exposed there. Any keys not listed keep their default
+    // relative order and are appended after the saved ones.
+    (function applyStaffGroupOrder(){
+      var saved = (typeof window.lpGetStaffGroupOrder === 'function')
+        ? window.lpGetStaffGroupOrder() : null;
+      if (!saved || !Array.isArray(saved) || !saved.length) return;
+      var byKey = {};
+      RANK_GROUPS.forEach(function(g){ byKey[g.key] = g; });
+      var ordered = [];
+      saved.forEach(function(k){ if (byKey[k] && ordered.indexOf(byKey[k]) === -1) ordered.push(byKey[k]); });
+      RANK_GROUPS.forEach(function(g){ if (ordered.indexOf(g) === -1) ordered.push(g); });
+      RANK_GROUPS = ordered;
+    })();
+
+    function groupFor(role){
+      var r = String(role || '').toLowerCase();
+      for (var i = 0; i < RANK_GROUPS.length; i++) {
+        if (RANK_GROUPS[i].match(r)) return i;
+      }
+      return RANK_GROUPS.length; // "Other Staff" bucket
+    }
+
+    // Bucket staff into groups, preserving alphabetical order within each.
+    var buckets = {};
+    list.forEach(function(u){
+      var gi = groupFor(u.role);
+      (buckets[gi] = buckets[gi] || []).push(u);
+    });
+
+    function cardHtml(u){
       var rc = ROLE_COLORS[u.role] || { bg:'#F3F4F6', fg:'#374151', av:'linear-gradient(135deg,#6b7280,#4b5563)' };
       var initials = (u.name||'?').split(/\s+/).map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
       var photoHtml = u.photoBase64
         ? '<img src="'+u.photoBase64+'" style="width:100%;height:100%;object-fit:cover" alt="">'
-        : '<span style="font-size:18px;font-weight:800;color:#fff">'+escHtml(initials)+'</span>';
+        : '<span style="font-size:20px;font-weight:800;color:#fff">'+escHtml(initials)+'</span>';
       return '<div class="staff-card">'
         + '<div class="staff-av-lg" style="background:'+rc.av+'">'+photoHtml+'</div>'
         + '<div style="flex:1;min-width:0">'
         +   '<div class="staff-name">'+escHtml(u.name||'Unknown')+'</div>'
         +   '<div class="staff-meta">'
         +     '<span class="staff-pill" style="background:'+rc.bg+';color:'+rc.fg+'">'+escHtml(u.role||'Staff')+'</span>'
-        +     (u.ward ? '<span class="staff-pill" style="background:#F0F4FF;color:#1A3DB5">📍 '+escHtml(u.ward)+'</span>' : '')
+        +     (u.ward ? '<span class="staff-pill" style="background:#F0F4FF;color:#1A3DB5">\uD83D\uDCCD '+escHtml(u.ward)+'</span>' : '')
         +   '</div>'
         + '</div>'
         + '</div>';
-    }).join('');
+    }
+
+    var html = '';
+    // Defined rank groups first, in order
+    RANK_GROUPS.forEach(function(g, gi){
+      var members = buckets[gi];
+      if (!members || !members.length) return;
+      html += '<div class="staff-group-hd">'
+        + '<span>'+g.icon+'</span><span>'+g.label+'</span>'
+        + '<span class="sg-count">'+members.length+'</span>'
+        + '</div>';
+      html += members.map(cardHtml).join('');
+    });
+    // Any leftover roles in an "Other Staff" group at the end
+    var others = buckets[RANK_GROUPS.length];
+    if (others && others.length) {
+      html += '<div class="staff-group-hd"><span>\uD83D\uDC64</span><span>Other Staff</span>'
+        + '<span class="sg-count">'+others.length+'</span></div>';
+      html += others.map(cardHtml).join('');
+    }
+    grid.innerHTML = html;
   }
 
-  // Filter button click
-  function setFilter(roleVal, btn){
-    document.querySelectorAll('#staffModal .smf-tab').forEach(function(b){ b.classList.remove('active'); });
-    if (btn) btn.classList.add('active');
-    if (_staffCache) renderCards(_staffCache, roleVal);
-  }
+  // Filter / search removed — kept as harmless no-ops for backward compat.
+  function setFilter(roleVal, btn){ /* no-op: filters removed */ }
   window.setStaffFilter = setFilter;
-
-  // Search input
-  function onSearch(){
-    if (_staffCache) renderCards(_staffCache, currentFilter());
-  }
+  function onSearch(){ /* no-op: search removed */ }
   window.onStaffSearch = onSearch;
 
   // ── Expose staff data for the About page's "Our Staff" tab ──
@@ -1686,22 +1732,32 @@ window.addEventListener('DOMContentLoaded', function() {
     background: #f8fafc;
   }
   #staffModalGrid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .staff-group-hd {
+    font-size: 12px; font-weight: 800; color: #1e3a8a; text-transform: uppercase;
+    letter-spacing: 0.6px; margin: 6px 2px 2px; padding-bottom: 5px;
+    border-bottom: 2px solid #bfdbfe; display: flex; align-items: center; gap: 7px;
+  }
+  .staff-group-hd:first-child { margin-top: 0 }
+  .staff-group-hd .sg-count {
+    background: #dbeafe; color: #1e3a8a; font-size: 10px; padding: 1px 8px;
+    border-radius: 20px; letter-spacing: 0; font-weight: 700;
   }
   .staff-card {
-    background: #fff; border-radius: 14px; padding: 14px;
-    border: 1.5px solid rgba(100,150,255,0.12); box-shadow: 0 2px 8px rgba(26,61,181,0.05);
-    display: flex; align-items: center; gap: 12px;
+    background: #fff; border-radius: 14px; padding: 13px 16px;
+    border: 1.5px solid rgba(100,150,255,0.18); box-shadow: 0 2px 8px rgba(26,61,181,0.05);
+    display: flex; align-items: center; gap: 14px; width: 100%;
   }
   .staff-av-lg {
-    width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+    width: 58px; height: 58px; border-radius: 14px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center; overflow: hidden;
-    border: 2px solid rgba(255,255,255,0.4);
+    border: 2px solid rgba(255,255,255,0.5);
   }
   .staff-av-lg img { width: 100%; height: 100%; object-fit: cover }
-  .staff-name { font-size: 14px; font-weight: 800; color: #0F2B8C; line-height: 1.2 }
-  .staff-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px }
-  .staff-pill { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; white-space: nowrap }
+  .staff-name { font-size: 15px; font-weight: 800; color: #0F2B8C; line-height: 1.25 }
+  .staff-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px }
+  .staff-pill { padding: 2px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 700; white-space: nowrap }
   .sm-footer {
     padding: 10px 20px; font-size: 11px; color: #6b7280; text-align: center;
     border-top: 1px solid #e5e7eb; background: #fff;
@@ -1720,14 +1776,6 @@ window.addEventListener('DOMContentLoaded', function() {
         <div class="sm-sub" id="staffModalCount">Loading…</div>
       </div>
       <button class="sm-close" onclick="closeStaffModal()" aria-label="Close">×</button>
-    </div>
-    <div class="sm-toolbar">
-      <input type="text" id="staffModalSearch" placeholder="Search by name, ward, role…" oninput="onStaffSearch()">
-      <button class="smf-tab active" data-role="all"          onclick="setStaffFilter('all',this)">All</button>
-      <button class="smf-tab"        data-role="PMAM"         onclick="setStaffFilter('PMAM',this)">PMAMs</button>
-      <button class="smf-tab"        data-role="I/C AB-PMJAY" onclick="setStaffFilter('I/C AB-PMJAY',this)">I/C</button>
-      <button class="smf-tab"        data-role="DEO"          onclick="setStaffFilter('DEO',this)">DEO</button>
-      <button class="smf-tab"        data-role="Admin"        onclick="setStaffFilter('Admin',this)">Admin</button>
     </div>
     <div class="sm-body">
       <div id="staffModalGrid"></div>
@@ -1794,6 +1842,12 @@ window.addEventListener('DOMContentLoaded', function() {
   .cm-tbl tbody tr:nth-child(even){background:#f9fafb}
   .cm-tbl tbody tr:hover{background:#eff6ff}
   .cm-tbl tbody tr:last-child td{border-bottom:none}
+
+  /* Gridlined variant — visible row & column borders */
+  .cm-tbl-grid th, .cm-tbl-grid td{ border:1px solid #cbd5e1 !important; }
+  .cm-tbl-grid thead th{ border-color:#1e3a8a !important; }
+  .cm-tbl-grid tbody td{ border-bottom:1px solid #cbd5e1 !important; }
+  .cm-tbl-grid tbody tr:hover{ background:#eff6ff }
 
   /* Pills used in renderers */
   .cm-pill{display:inline-block;padding:2px 9px;border-radius:50px;font-size:10.5px;font-weight:700;letter-spacing:0.2px}
@@ -1933,6 +1987,12 @@ window.addEventListener('DOMContentLoaded', function() {
       LIVE.aboutPage = doc.exists ? (doc.data() || {}) : {};
       if (_openId === 'about' || _openId === 'developer') renderInto(_openId);
     }, function(err){ console.warn('about_page listener:', err && err.message); });
+
+    // Expose the staff group order so the staff modal (a separate IIFE) can
+    // read it when building the grouped staff list.
+    window.lpGetStaffGroupOrder = function(){
+      return (LIVE.aboutPage && LIVE.aboutPage.staffGroupOrder) || null;
+    };
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', subscribe);
@@ -2041,7 +2101,7 @@ window.addEventListener('DOMContentLoaded', function() {
     if (!rows.length) {
       return '<div class="cm-empty">No ward assignments published yet. Admin can add rows from <strong>Nav Bar → Ward Roster</strong>.</div>';
     }
-    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl">'
+    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
       + '<thead><tr><th style="width:42px">#</th><th>PMAM Name</th><th>Ward(s) Assigned</th></tr></thead>'
       + '<tbody>';
     rows.forEach(function(r, i){
@@ -2064,7 +2124,7 @@ window.addEventListener('DOMContentLoaded', function() {
           + wardList.map(function(w){ return (window.WARD_REGISTRY) ? WARD_REGISTRY.pill(w) : esc(w); }).join('')
           + '</span>';
       }
-      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:600">'+(i+1)+'</td>'
+      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
             + '<td style="font-weight:600">'+esc(name)+'</td>'
             + '<td>'+wardCell+'</td></tr>';
     });
@@ -2109,31 +2169,71 @@ window.addEventListener('DOMContentLoaded', function() {
     }
     // Sort by saturday date ascending
     var sorted = rows.slice().sort(function(a,b){ return (a.saturday||'').localeCompare(b.saturday||''); });
-    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl">'
-      + '<thead><tr><th style="width:42px">#</th><th>Saturday</th><th>Sunday</th><th>PMAM 1</th><th>PMAM 2</th></tr></thead>'
+    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
+      + '<thead><tr><th style="width:42px">#</th><th>PMAMs on Duty</th><th>Saturday</th><th>Sunday</th></tr></thead>'
       + '<tbody>';
     sorted.forEach(function(r, i){
-      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:600">'+(i+1)+'</td>'
+      // Combine both PMAM names into one cell, dropping the "1 / 2" labels.
+      var pmams = [r.pmam1, r.pmam2].filter(function(p){ return (p||'').trim(); });
+      var pmamCell = pmams.length
+        ? pmams.map(function(p){ return '<span style="display:inline-block;background:#dbeafe;color:#1e3a8a;padding:2px 10px;border-radius:50px;font-size:11.5px;font-weight:700;margin:2px 4px 2px 0">'+esc(p)+'</span>'; }).join('')
+        : '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
+      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
+            + '<td>'+pmamCell+'</td>'
             + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.saturday))+'</td>'
-            + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td>'
-            + '<td>'+esc(r.pmam1||'—')+'</td>'
-            + '<td>'+esc(r.pmam2||'—')+'</td></tr>';
+            + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td></tr>';
     });
     html += '</tbody></table></div></div>';
     return html;
   }
 
   // ── About Us modal: the AB-PMJAY / SEHAT scheme writeup ──
+  // Render one styled content section (shared by About Us & About Developer).
+  // sec = { title, text, titleColor, textColor, bgColor, font, align }
+  function renderStyledSection(sec){
+    var titleColor = sec.titleColor || '#4c1d95';
+    var textColor  = sec.textColor  || '#334155';
+    var bgColor    = sec.bgColor    || '#ffffff';
+    var font       = sec.font       || 'inherit';
+    var align      = sec.align      || 'left';
+    var FONTS = {
+      'inherit':'inherit',
+      'serif':'Georgia, \'Times New Roman\', serif',
+      'sans':'\'Segoe UI\', Arial, sans-serif',
+      'mono':'\'Courier New\', monospace',
+      'rounded':'\'Trebuchet MS\', \'Segoe UI\', sans-serif'
+    };
+    var fontFamily = FONTS[font] || 'inherit';
+    var border = (bgColor.toLowerCase() === '#ffffff' || bgColor.toLowerCase() === '#fff')
+      ? '1px solid #e5e7eb' : 'none';
+    var html = '<div style="background:' + esc(bgColor) + ';border:' + border
+      + ';border-radius:14px;padding:22px;margin-bottom:14px;text-align:' + esc(align)
+      + ';font-family:' + fontFamily + '">';
+    if (sec.title) {
+      html += '<h3 style="margin:0 0 12px;font-size:18px;font-weight:800;color:' + esc(titleColor)
+        + ';font-family:' + fontFamily + '">' + esc(sec.title) + '</h3>';
+    }
+    if (sec.text) {
+      html += '<div style="font-size:13.5px;line-height:1.75;white-space:pre-wrap;color:' + esc(textColor)
+        + ';font-family:' + fontFamily + '">' + esc(sec.text) + '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
   function renderAbout(){
     var d = LIVE.aboutPage || {};
-    var heading = d.sehatHeading || 'About Ayushman Bharat — PM-JAY / SEHAT';
-    var text = d.sehatBody || '';
-    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:22px">'
-      + '<h3 style="margin:0 0 14px;font-size:18px;color:#4c1d95;font-weight:800">' + esc(heading) + '</h3>'
-      + (text
-          ? '<div style="font-size:13.5px;color:#334155;line-height:1.75;white-space:pre-wrap">' + esc(text) + '</div>'
-          : '<div style="color:#9ca3af;font-style:italic;font-size:13px">No content added yet. The admin can add it from <strong>Nav Bar → About Us</strong>.</div>')
-      + '</div>';
+    var sections = Array.isArray(d.aboutSections) ? d.aboutSections : null;
+    // Legacy fallback: old single heading/body becomes one section.
+    if (!sections || !sections.length) {
+      if (d.sehatHeading || d.sehatBody) {
+        sections = [{ title: d.sehatHeading || 'About Ayushman Bharat — PM-JAY / SEHAT',
+                      text: d.sehatBody || '' }];
+      } else {
+        return '<div class="cm-empty">No content added yet. The admin can add sections from <strong>Nav Bar → About Us</strong>.</div>';
+      }
+    }
+    return sections.map(renderStyledSection).join('');
   }
 
   // ── About Developer modal: name, role, photo and writeup ──
@@ -2141,22 +2241,33 @@ window.addEventListener('DOMContentLoaded', function() {
     var d = LIVE.aboutPage || {};
     var dn = d.devName || '';
     var dr = d.devRole || '';
-    var db_ = d.devBody || '';
     var dp = d.devPhoto || '';
-    if (!dn && !dr && !db_ && !dp) {
+    var sections = Array.isArray(d.devSections) ? d.devSections : null;
+    // Legacy fallback: old devBody becomes one section.
+    if (!sections || !sections.length) {
+      if (d.devBody) sections = [{ title:'', text:d.devBody }];
+      else sections = [];
+    }
+    if (!dn && !dr && !dp && !sections.length) {
       return '<div class="cm-empty">No developer details added yet. The admin can add them from <strong>Nav Bar → About Developer</strong>.</div>';
     }
-    var photo = dp
-      ? '<img src="' + esc(dp) + '" style="width:120px;height:120px;border-radius:16px;object-fit:cover;border:3px solid #e9d5ff;flex-shrink:0">'
-      : '<div style="width:120px;height:120px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#9333ea);display:flex;align-items:center;justify-content:center;font-size:42px;flex-shrink:0">\uD83D\uDC68\u200D\uD83D\uDCBB</div>';
-    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:22px;display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">'
-      + photo
-      + '<div style="flex:1;min-width:220px">'
-      +   (dn ? '<h3 style="margin:0 0 4px;font-size:18px;color:#4c1d95;font-weight:800">' + esc(dn) + '</h3>' : '')
-      +   (dr ? '<div style="font-size:12.5px;color:#7c3aed;font-weight:700;margin-bottom:12px">' + esc(dr) + '</div>' : '')
-      +   (db_ ? '<div style="font-size:13.5px;color:#334155;line-height:1.75;white-space:pre-wrap">' + esc(db_) + '</div>' : '')
-      + '</div>'
-      + '</div>';
+    var html = '';
+    // Header card: photo + name + role
+    if (dn || dr || dp) {
+      var photo = dp
+        ? '<img src="' + esc(dp) + '" style="width:120px;height:120px;border-radius:16px;object-fit:cover;border:3px solid #e9d5ff;flex-shrink:0">'
+        : '<div style="width:120px;height:120px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#9333ea);display:flex;align-items:center;justify-content:center;font-size:42px;flex-shrink:0">\uD83D\uDC68\u200D\uD83D\uDCBB</div>';
+      html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:22px;margin-bottom:14px;display:flex;gap:20px;flex-wrap:wrap;align-items:center">'
+        + photo
+        + '<div style="flex:1;min-width:200px">'
+        +   (dn ? '<h3 style="margin:0 0 4px;font-size:20px;color:#4c1d95;font-weight:800">' + esc(dn) + '</h3>' : '')
+        +   (dr ? '<div style="font-size:13px;color:#7c3aed;font-weight:700">' + esc(dr) + '</div>' : '')
+        + '</div>'
+        + '</div>';
+    }
+    // Styled content sections below the header
+    html += sections.map(renderStyledSection).join('');
+    return html;
   }
 
   function renderOrders(){

@@ -917,24 +917,22 @@ tr:hover td{background:#EEF3FF}
       </div>
       <div class="dmt-pane active" id="dmpane-aboutpage">
         <div class="card" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #d8b4fe;margin-bottom:12px">
-          <div class="card-hd" style="color:#6b21a8">ℹ️ About Us — AB-PMJAY / SEHAT</div>
+          <div class="card-hd" style="color:#6b21a8">ℹ️ About Us Page Editor</div>
           <div style="font-size:12px;color:#6b21a8;line-height:1.6">
-            Edit the content shown when visitors click <strong>About Us</strong> on the landing page.
-            Changes go live instantly after you Save &amp; Publish.
+            Build the <strong>About Us</strong> page from one or more content sections. Each section has
+            its own title, body text, and styling (text colour, background/shape colour, font and
+            alignment). Add as many sections as you need. Changes go live after Save &amp; Publish.
           </div>
         </div>
+
         <div class="card">
-          <div class="card-hd">🏥 About AB-PMJAY SEHAT</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <label style="font-size:11px;font-weight:700;color:#0F2B8C">Heading</label>
-            <input type="text" id="abSehatHeading" placeholder="e.g. Ayushman Bharat — PM-JAY / SEHAT"
-              style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
-            <label style="font-size:11px;font-weight:700;color:#0F2B8C;margin-top:4px">Body text</label>
-            <textarea id="abSehatBody" rows="9" placeholder="Describe the AB-PMJAY / SEHAT scheme, its objectives, coverage, and how it operates at GMC &amp; AH Rajouri…"
-              style="width:100%;padding:10px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit;line-height:1.6;resize:vertical"></textarea>
-            <div style="font-size:10px;color:#9ca3af">Plain text. Line breaks are preserved on the landing page.</div>
+          <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center">
+            <span>📑 Content Sections</span>
+            <button class="btn btn-pri" onclick="abAddSection('about')" style="padding:5px 12px;font-size:11px">+ Add Section</button>
           </div>
+          <div id="abSectionsList" style="display:flex;flex-direction:column;gap:14px"></div>
         </div>
+
         <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:4px">
           <span id="abSaveMsg" style="font-size:11px;font-weight:600"></span>
           <button class="btn btn-pri" onclick="abSave()">💾 Save &amp; Publish</button>
@@ -943,14 +941,15 @@ tr:hover td{background:#EEF3FF}
 
       <div class="dmt-pane" id="dmpane-developer">
         <div class="card" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #d8b4fe;margin-bottom:12px">
-          <div class="card-hd" style="color:#6b21a8">👨‍💻 About Developer</div>
+          <div class="card-hd" style="color:#6b21a8">👨‍💻 About Developer Page Editor</div>
           <div style="font-size:12px;color:#6b21a8;line-height:1.6">
-            Edit the content shown when visitors click <strong>About Developer</strong> on the landing page.
-            Add a name, role, photo and a short writeup. Saved together with the About Us page.
+            Set the developer's photo, name and role for the header card, then add one or more
+            styled content sections below. Saved together with the About Us page.
           </div>
         </div>
+
         <div class="card">
-          <div class="card-hd">👨‍💻 Web Developer Details</div>
+          <div class="card-hd">👤 Header — Photo, Name &amp; Role</div>
           <div style="display:flex;gap:16px;flex-wrap:wrap">
             <div style="flex-shrink:0">
               <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Photo</label>
@@ -971,14 +970,18 @@ tr:hover td{background:#EEF3FF}
                 <input type="text" id="abDevRole" placeholder="e.g. Portal Developer — AB-PMJAY Unit, GMC Rajouri"
                   style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
               </div>
-              <div>
-                <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">About text</label>
-                <textarea id="abDevBody" rows="6" placeholder="A short note about the developer, the technology used, contact info, acknowledgements…"
-                  style="width:100%;padding:10px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit;line-height:1.6;resize:vertical"></textarea>
-              </div>
             </div>
           </div>
         </div>
+
+        <div class="card">
+          <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center">
+            <span>📑 Content Sections</span>
+            <button class="btn btn-pri" onclick="abAddSection('dev')" style="padding:5px 12px;font-size:11px">+ Add Section</button>
+          </div>
+          <div id="devSectionsList" style="display:flex;flex-direction:column;gap:14px"></div>
+        </div>
+
         <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:4px">
           <span id="abDevSaveMsg" style="font-size:11px;font-weight:600"></span>
           <button class="btn btn-pri" onclick="abSave()">💾 Save &amp; Publish</button>
@@ -997,6 +1000,22 @@ tr:hover td{background:#EEF3FF}
             <button class="btn btn-pri" onclick="nbOpenStaffMgmt()">👥 Open Staff Management</button>
           </div>
         </div>
+        <div class="card">
+          <div class="card-hd" style="display:flex;align-items:center;gap:8px">
+            🔀 Group Display Order
+            <span id="sgoSaveMsg" style="margin-left:auto;font-size:11px;font-weight:600"></span>
+          </div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">
+            Set the order in which staff groups appear on the landing page's <strong>Staff</strong> tab.
+            Use ↑ ↓ to reorder, then click <strong>Save Order</strong>. Staff are auto-sorted into
+            these groups by their role; "Other Staff" always appears last.
+          </div>
+          <div id="sgoList" style="display:flex;flex-direction:column;gap:7px"></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px">
+            <button class="btn btn-pri" onclick="sgoSave()" style="padding:6px 14px;font-size:11px">💾 Save Order</button>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-hd">
             Quick Preview
@@ -2005,7 +2024,7 @@ function showNavTab(tab, el){
   if (tab === 'orders')        { if (typeof ordInit === 'function') ordInit(); }
   if (tab === 'aboutpage')     { if (typeof abInit === 'function') abInit(); }
   if (tab === 'developer')     { if (typeof abInit === 'function') abInit(); }
-  if (tab === 'staff')         { if (typeof loadStaffFromUsers === 'function') loadStaffFromUsers(); if (typeof nbStaffPreviewRender === 'function') nbStaffPreviewRender(); }
+  if (tab === 'staff')         { if (typeof loadStaffFromUsers === 'function') loadStaffFromUsers(); if (typeof nbStaffPreviewRender === 'function') nbStaffPreviewRender(); if (typeof sgoInit === 'function') sgoInit(); }
   if (tab === 'navbar')        { if (typeof nbmLoad === 'function') nbmLoad(); }
 }
 
@@ -2862,22 +2881,187 @@ function sendResetOtpFromAdmin(){
 //   sehatHeading, sehatBody, staffShow, devName, devRole, devBody, devPhoto
 // }
 // ══════════════════════════
-var _abDevPhoto = '';  // Base64 data URI for the developer photo
+var _abDevPhoto = '';        // Base64 data URI for the developer photo
+var _abSections = [];        // About Us content sections
+var _devSections = [];       // About Developer content sections
+
+// A blank section with sensible style defaults.
+function abBlankSection(){
+  return {
+    title: '', text: '',
+    titleColor: '#4c1d95',
+    textColor:  '#334155',
+    bgColor:    '#ffffff',
+    font:       'inherit',
+    align:      'left'
+  };
+}
+
+// Available font choices (value -> label). Must mirror the landing page.
+var AB_FONTS = [
+  { v:'inherit', label:'Default' },
+  { v:'serif',   label:'Serif (Georgia)' },
+  { v:'sans',    label:'Sans-serif (Segoe UI)' },
+  { v:'mono',    label:'Monospace (Courier)' },
+  { v:'rounded', label:'Rounded (Trebuchet)' }
+];
 
 function abInit(){
   db.collection('settings').doc('about_page').get().then(function(doc){
     var d = doc.exists ? (doc.data() || {}) : {};
+    // Header fields (developer pane)
     var set = function(id, val){ var el = document.getElementById(id); if (el) el.value = val || ''; };
-    set('abSehatHeading', d.sehatHeading);
-    set('abSehatBody',    d.sehatBody);
-    set('abDevName',      d.devName);
-    set('abDevRole',      d.devRole);
-    set('abDevBody',      d.devBody);
+    set('abDevName', d.devName);
+    set('abDevRole', d.devRole);
     _abDevPhoto = d.devPhoto || '';
     abDevRenderPhoto();
+
+    // About Us sections — fall back to legacy single heading/body.
+    if (Array.isArray(d.aboutSections) && d.aboutSections.length) {
+      _abSections = d.aboutSections.map(abNormalizeSection);
+    } else if (d.sehatHeading || d.sehatBody) {
+      var s = abBlankSection();
+      s.title = d.sehatHeading || '';
+      s.text  = d.sehatBody || '';
+      _abSections = [s];
+    } else {
+      _abSections = [abBlankSection()];
+    }
+
+    // Developer sections — fall back to legacy devBody.
+    if (Array.isArray(d.devSections) && d.devSections.length) {
+      _devSections = d.devSections.map(abNormalizeSection);
+    } else if (d.devBody) {
+      var ds = abBlankSection();
+      ds.text = d.devBody;
+      _devSections = [ds];
+    } else {
+      _devSections = [abBlankSection()];
+    }
+
+    abRenderSections('about');
+    abRenderSections('dev');
   }).catch(function(e){
     if (typeof showToast === 'function') showToast('Could not load About page: ' + e.message, 'error');
+    if (!_abSections.length)  { _abSections  = [abBlankSection()]; abRenderSections('about'); }
+    if (!_devSections.length) { _devSections = [abBlankSection()]; abRenderSections('dev'); }
   });
+}
+
+// Merge a stored section onto blank defaults so missing keys are filled in.
+function abNormalizeSection(s){
+  var base = abBlankSection();
+  if (s && typeof s === 'object') {
+    for (var k in base) { if (s[k] !== undefined && s[k] !== null && s[k] !== '') base[k] = s[k]; }
+    // title/text may legitimately be empty strings
+    if (typeof s.title === 'string') base.title = s.title;
+    if (typeof s.text  === 'string') base.text  = s.text;
+  }
+  return base;
+}
+
+function abSectionsArray(which){ return which === 'dev' ? _devSections : _abSections; }
+function abListElId(which){ return which === 'dev' ? 'devSectionsList' : 'abSectionsList'; }
+
+function abAddSection(which){
+  abSectionsArray(which).push(abBlankSection());
+  abRenderSections(which);
+  abMarkUnsaved();
+}
+
+function abRemoveSection(which, i){
+  var arr = abSectionsArray(which);
+  if (arr.length <= 1) {
+    // keep at least one blank section rather than an empty editor
+    arr[0] = abBlankSection();
+  } else {
+    arr.splice(i, 1);
+  }
+  abRenderSections(which);
+  abMarkUnsaved();
+}
+
+function abMoveSection(which, i, dir){
+  var arr = abSectionsArray(which);
+  var j = i + dir;
+  if (j < 0 || j >= arr.length) return;
+  var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  abRenderSections(which);
+  abMarkUnsaved();
+}
+
+function abMarkUnsaved(){
+  ['abSaveMsg','abDevSaveMsg'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) { el.textContent = '● Unsaved changes'; el.style.color = '#dc2626'; }
+  });
+}
+
+// Render the section-editor cards for one pane.
+function abRenderSections(which){
+  var box = document.getElementById(abListElId(which));
+  if (!box) return;
+  var arr = abSectionsArray(which);
+  box.innerHTML = arr.map(function(s, i){
+    var fontOpts = AB_FONTS.map(function(f){
+      return '<option value="' + f.v + '"' + (s.font === f.v ? ' selected' : '') + '>' + f.label + '</option>';
+    }).join('');
+    var alignOpts = ['left','center','right'].map(function(al){
+      return '<option value="' + al + '"' + (s.align === al ? ' selected' : '') + '>' + al.charAt(0).toUpperCase()+al.slice(1) + '</option>';
+    }).join('');
+    var ref = "'" + which + "'," + i;
+    return '<div style="border:1.5px solid #e9d5ff;border-radius:12px;padding:14px;background:#fdfbff">'
+      // header row: section number + move/delete
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+      +   '<span style="background:#7c3aed;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">' + (i+1) + '</span>'
+      +   '<span style="font-size:12px;font-weight:700;color:#6b21a8">Section ' + (i+1) + '</span>'
+      +   '<div style="margin-left:auto;display:flex;gap:4px">'
+      +     '<button onclick="abMoveSection(' + ref + ',-1)" ' + (i===0?'disabled':'') + ' title="Move up" style="width:26px;height:24px;border:1px solid #d1d5db;background:' + (i===0?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===0?'not-allowed':'pointer') + ';font-size:11px">↑</button>'
+      +     '<button onclick="abMoveSection(' + ref + ',1)" ' + (i===arr.length-1?'disabled':'') + ' title="Move down" style="width:26px;height:24px;border:1px solid #d1d5db;background:' + (i===arr.length-1?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===arr.length-1?'not-allowed':'pointer') + ';font-size:11px">↓</button>'
+      +     '<button onclick="abRemoveSection(' + ref + ')" title="Delete section" style="padding:3px 10px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700">🗑</button>'
+      +   '</div>'
+      + '</div>'
+      // title
+      + '<label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Section Title</label>'
+      + '<input type="text" value="' + escAttr(s.title || '') + '" placeholder="e.g. About AB-PMJAY SEHAT" '
+      +   'onchange="abSectionsArray(\'' + which + '\')[' + i + '].title=this.value;abMarkUnsaved()" '
+      +   'style="width:100%;padding:7px 10px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;outline:none;margin-bottom:10px">'
+      // text
+      + '<label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Body Text</label>'
+      + '<textarea rows="5" placeholder="Section content… line breaks are preserved." '
+      +   'onchange="abSectionsArray(\'' + which + '\')[' + i + '].text=this.value;abMarkUnsaved()" '
+      +   'style="width:100%;padding:8px 10px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;line-height:1.6;outline:none;resize:vertical;margin-bottom:10px">' + escAttr(s.text || '') + '</textarea>'
+      // styling row
+      + '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;background:#fff;border:1px solid #f0e8fb;border-radius:8px;padding:10px">'
+      +   abColorField(which, i, 'titleColor', 'Title colour', s.titleColor)
+      +   abColorField(which, i, 'textColor',  'Text colour',  s.textColor)
+      +   abColorField(which, i, 'bgColor',    'Background / shape', s.bgColor)
+      +   '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Font style</label>'
+      +     '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].font=this.value;abMarkUnsaved()" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + fontOpts + '</select>'
+      +   '</div>'
+      +   '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Alignment</label>'
+      +     '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].align=this.value;abMarkUnsaved()" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + alignOpts + '</select>'
+      +   '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+// A labelled colour input (native picker + hex text), wired to a section key.
+function abColorField(which, i, key, label, value){
+  value = value || '#ffffff';
+  var arrRef = "abSectionsArray('" + which + "')[" + i + "]";
+  return '<div>'
+    + '<label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">' + label + '</label>'
+    + '<div style="display:flex;align-items:center;gap:5px">'
+    +   '<input type="color" value="' + escAttr(value) + '" '
+    +     'oninput="' + arrRef + '.' + key + '=this.value;this.nextElementSibling.value=this.value;abMarkUnsaved()" '
+    +     'style="width:34px;height:30px;border:1px solid #c7d2e8;border-radius:6px;padding:1px;cursor:pointer;background:#fff">'
+    +   '<input type="text" value="' + escAttr(value) + '" '
+    +     'onchange="' + arrRef + '.' + key + '=this.value;if(this.previousElementSibling)this.previousElementSibling.value=this.value;abMarkUnsaved()" '
+    +     'style="width:74px;padding:5px 6px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;font-family:monospace;outline:none">'
+    + '</div>'
+    + '</div>';
 }
 
 function abDevRenderPhoto(){
@@ -2886,7 +3070,7 @@ function abDevRenderPhoto(){
   if (_abDevPhoto) {
     prev.innerHTML = '<img src="' + _abDevPhoto + '" style="width:100%;height:100%;object-fit:cover">';
   } else {
-    prev.innerHTML = '\uD83D\uDC68\u200D\uD83D\uDCBB';
+    prev.innerHTML = '👨‍💻';
   }
 }
 
@@ -2902,6 +3086,7 @@ function abDevPreviewPhoto(input){
   reader.onload = function(e){
     _abDevPhoto = e.target.result;
     abDevRenderPhoto();
+    abMarkUnsaved();
   };
   reader.readAsDataURL(file);
 }
@@ -2911,25 +3096,33 @@ function abDevClearPhoto(){
   var f = document.getElementById('abDevPhotoFile');
   if (f) f.value = '';
   abDevRenderPhoto();
+  abMarkUnsaved();
 }
 
 function abSave(){
-  // Update whichever status element is on screen (About Us pane uses
-  // #abSaveMsg, the Developer pane uses #abDevSaveMsg).
   var msgs = [document.getElementById('abSaveMsg'), document.getElementById('abDevSaveMsg')];
   var setMsg = function(text, color){
     msgs.forEach(function(m){ if (m){ m.textContent = text; m.style.color = color; } });
   };
   var val = function(id){ var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
+
+  // Clean section arrays: trim strings, drop fully-empty sections.
+  var cleanSections = function(arr){
+    return (arr || []).map(abNormalizeSection).map(function(s){
+      s.title = (s.title || '').trim();
+      s.text  = (s.text  || '').trim();
+      return s;
+    }).filter(function(s){ return s.title || s.text; });
+  };
+
   var payload = {
-    sehatHeading: val('abSehatHeading'),
-    sehatBody:    val('abSehatBody'),
-    devName:      val('abDevName'),
-    devRole:      val('abDevRole'),
-    devBody:      val('abDevBody'),
-    devPhoto:     _abDevPhoto || '',
-    updatedAt:    Date.now(),
-    _updatedBy:   (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
+    devName:       val('abDevName'),
+    devRole:       val('abDevRole'),
+    devPhoto:      _abDevPhoto || '',
+    aboutSections: cleanSections(_abSections),
+    devSections:   cleanSections(_devSections),
+    updatedAt:     Date.now(),
+    _updatedBy:    (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
   };
   setMsg('Saving…', '#1A3DB5');
   db.collection('settings').doc('about_page').set(payload, { merge: true })
@@ -2937,7 +3130,10 @@ function abSave(){
       setMsg('✅ Saved & published!', '#166534');
       setTimeout(function(){ setMsg('', '#166534'); }, 3500);
       if (typeof showToast === 'function') showToast('✅ About page published', 'success');
-      if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/about_page', 'about_page', {});
+      if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/about_page', 'about_page', {
+        aboutSections: payload.aboutSections.length,
+        devSections: payload.devSections.length
+      });
     })
     .catch(function(e){
       setMsg('Error: ' + (e && e.message ? e.message : e), '#dc2626');
@@ -5286,6 +5482,89 @@ function nbmSave(){
 }
 
 // \u2500\u2500 Nav Bar > Staff sub-tab: jump button + read-only preview \u2500\u2500
+// \u2500\u2500 Staff Group Display Order \u2500\u2500
+// Mirrors the RANK_GROUPS keys/labels used by the landing page. The admin
+// reorders these; the chosen order is saved to settings/about_page.staffGroupOrder
+// and the landing page reorders its groups to match.
+var SGO_GROUPS = [
+  { key:'principal', label:'Principal',              icon:'\uD83C\uDF93' },
+  { key:'ms',        label:'Medical Superintendent', icon:'\uD83C\uDFE5' },
+  { key:'ic',        label:'I/C AB-PMJAY',           icon:'\uD83D\uDCCB' },
+  { key:'pmam',      label:'PMAMs',                  icon:'\uD83D\uDC65' },
+  { key:'deo',       label:'DEO',                    icon:'\uD83D\uDCBB' }
+];
+var _sgoOrder = [];  // array of keys in the admin-chosen order
+
+function sgoInit(){
+  db.collection('settings').doc('about_page').get().then(function(doc){
+    var saved = (doc.exists && doc.data() && Array.isArray(doc.data().staffGroupOrder))
+      ? doc.data().staffGroupOrder : null;
+    var valid = {};
+    SGO_GROUPS.forEach(function(g){ valid[g.key] = true; });
+    var order = [];
+    if (saved) {
+      saved.forEach(function(k){ if (valid[k] && order.indexOf(k) === -1) order.push(k); });
+    }
+    // append any groups missing from the saved order, in default sequence
+    SGO_GROUPS.forEach(function(g){ if (order.indexOf(g.key) === -1) order.push(g.key); });
+    _sgoOrder = order;
+    sgoRender();
+  }).catch(function(){
+    _sgoOrder = SGO_GROUPS.map(function(g){ return g.key; });
+    sgoRender();
+  });
+}
+
+function sgoRender(){
+  var box = document.getElementById('sgoList');
+  if (!box) return;
+  var byKey = {};
+  SGO_GROUPS.forEach(function(g){ byKey[g.key] = g; });
+  box.innerHTML = _sgoOrder.map(function(key, i){
+    var g = byKey[key];
+    if (!g) return '';
+    return '<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #bfdbfe;border-radius:9px;padding:9px 12px">'
+      + '<span style="font-weight:800;color:#9ca3af;font-size:12px;width:18px;text-align:center">' + (i+1) + '</span>'
+      + '<span style="font-size:16px">' + g.icon + '</span>'
+      + '<span style="flex:1;font-size:12.5px;font-weight:700;color:#0F2B8C">' + g.label + '</span>'
+      + '<div style="display:flex;gap:4px">'
+      +   '<button onclick="sgoMove(' + i + ',-1)" ' + (i===0?'disabled':'') + ' title="Move up" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===0?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===0?'not-allowed':'pointer') + ';font-size:12px">\u2191</button>'
+      +   '<button onclick="sgoMove(' + i + ',1)" ' + (i===_sgoOrder.length-1?'disabled':'') + ' title="Move down" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===_sgoOrder.length-1?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===_sgoOrder.length-1?'not-allowed':'pointer') + ';font-size:12px">\u2193</button>'
+      + '</div>'
+      + '</div>';
+  }).join('')
+  + '<div style="display:flex;align-items:center;gap:10px;background:#f9fafb;border:1.5px dashed #d1d5db;border-radius:9px;padding:9px 12px;opacity:0.7">'
+  +   '<span style="font-weight:800;color:#9ca3af;font-size:12px;width:18px;text-align:center">\u2014</span>'
+  +   '<span style="font-size:16px">\uD83D\uDC64</span>'
+  +   '<span style="flex:1;font-size:12.5px;font-weight:700;color:#6b7280">Other Staff <span style="font-weight:500;font-style:italic">(always last)</span></span>'
+  + '</div>';
+}
+
+function sgoMove(i, dir){
+  var j = i + dir;
+  if (j < 0 || j >= _sgoOrder.length) return;
+  var tmp = _sgoOrder[i]; _sgoOrder[i] = _sgoOrder[j]; _sgoOrder[j] = tmp;
+  sgoRender();
+  var m = document.getElementById('sgoSaveMsg');
+  if (m) { m.textContent = '\u25CF Unsaved'; m.style.color = '#dc2626'; }
+}
+
+function sgoSave(){
+  var m = document.getElementById('sgoSaveMsg');
+  if (m) { m.textContent = 'Saving\u2026'; m.style.color = '#1A3DB5'; }
+  db.collection('settings').doc('about_page').set({
+    staffGroupOrder: _sgoOrder,
+    updatedAt: Date.now(),
+    _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
+  }, { merge: true }).then(function(){
+    if (m) { m.textContent = '\u2705 Saved & published'; m.style.color = '#166534'; setTimeout(function(){ m.textContent=''; }, 3000); }
+    if (typeof showToast === 'function') showToast('\u2705 Staff group order saved', 'success');
+    if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/about_page', 'staffGroupOrder', { order: _sgoOrder });
+  }).catch(function(e){
+    if (m) { m.textContent = 'Error: ' + e.message; m.style.color = '#dc2626'; }
+  });
+}
+
 function nbOpenStaffMgmt(){
   var sbi = document.querySelector('.sidebar .sbi[title="Staff Management"]');
   if (typeof goSec === 'function') goSec('staff', sbi);
