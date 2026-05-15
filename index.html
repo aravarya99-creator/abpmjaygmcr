@@ -248,6 +248,18 @@ a.hero-gc-ci:hover{color:#7c3aed}
   </script>
 </head>
 <body>
+<!-- BUILD MARKER — confirms which version is loaded.
+     If you open DevTools console and DON'T see this banner, the browser
+     is showing a cached/old copy. Hard-refresh: Ctrl+Shift+R (Windows)
+     or Cmd+Shift+R (Mac). -->
+<script>
+  (function(){
+    var BUILD = 'INDEX-2026-05-15-redesign-v3';
+    console.log('%c[Landing page] ' + BUILD,
+      'background:#7c3aed;color:#fff;padding:3px 10px;border-radius:6px;font-weight:700');
+    window.__PORTAL_BUILD__ = BUILD;
+  })();
+</script>
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <div class="header">
