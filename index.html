@@ -21,16 +21,23 @@ a{text-decoration:none;color:inherit}
 .logo-ph{font-size:6px;font-weight:800;color:#047857;text-align:center;line-height:1.2}
 
 .header-brand{display:flex;flex-direction:column;gap:0}
-.hb1{font-size:15px;font-weight:800;color:#16a34a;letter-spacing:0.3px;line-height:1.15}
-.hb2{font-size:16px;font-weight:900;color:#7c3aed;letter-spacing:0.3px;line-height:1.15}
-.hb3{font-size:12px;font-weight:600;color:#ea580c;line-height:1.2;margin-top:1px}
+.hb1{font-size:13px;font-weight:800;color:#16a34a;letter-spacing:0.3px;line-height:1.15}
+.hb2{font-size:14.5px;font-weight:900;color:#7c3aed;letter-spacing:0.3px;line-height:1.15}
+.hb3{font-size:10.5px;font-weight:600;color:#ea580c;line-height:1.2;margin-top:1px}
 
-.nav-area{display:flex;align-items:center;gap:1px;flex:1;justify-content:flex-end;margin-left:24px;flex-wrap:nowrap;min-width:0}
-.nav-item{padding:7px 10px;font-size:12.5px;font-weight:700;color:#334155;cursor:pointer;white-space:nowrap;display:flex;align-items:center;border-radius:50px;transition:all 0.15s;gap:3px;flex-shrink:0}
-.nav-item:hover{background:#f1f5f9;color:#0f172a}
-.nav-item.active{background:#16a34a;color:#fff;padding:8px 14px;box-shadow:0 2px 8px rgba(22,163,74,0.3)}
-.nav-item.active:hover{background:#15803d}
+.nav-area{display:flex;align-items:center;gap:4px;flex:1;justify-content:flex-end;margin-left:16px;flex-wrap:nowrap;min-width:0;overflow-x:auto}
+.nav-area::-webkit-scrollbar{height:0;display:none}
+.nav-item{padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:all 0.15s;flex-shrink:0;line-height:1.1;border:1px solid #e2e8f0;background:#f1f5f9;color:#334155;white-space:nowrap}
+.nav-item .nav-label{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;text-align:center;white-space:nowrap;color:inherit}
+.nav-item .nav-label .nl-row{display:block}
 .nav-arrow{font-size:8px;opacity:0.7}
+
+/* Hover: deepen the grey slightly and lift a touch */
+.nav-item:hover{background:#e2e8f0;border-color:#cbd5e1;color:#0f172a;transform:translateY(-1px);box-shadow:0 2px 6px rgba(15,33,73,0.08)}
+
+/* Active state — bright green pill overrides the grey cleanly. */
+.nav-item.active{background:#16a34a;color:#fff;border-color:#15803d;box-shadow:0 2px 8px rgba(22,163,74,0.3)}
+.nav-item.active:hover{background:#15803d;color:#fff;border-color:#14532d;transform:none}
 
 /* ═══════════════ HERO (UNIFIED LIGHT PURPLE — SINGLE SCREEN) ═══════════════ */
 .hero{position:relative;flex:1;min-height:0;display:flex;background:linear-gradient(135deg,#c4b5fd 0%,#ddd6fe 30%,#ede9fe 55%,#f5f3ff 80%,#faf5ff 100%);overflow:hidden}
@@ -181,7 +188,7 @@ a.hero-gc-ci:hover{color:#7c3aed}
   .nav-toggle{display:flex !important}
   .nav-area{
     position:absolute;top:100%;left:0;right:0;
-    flex-direction:column;align-items:stretch;
+    flex-direction:column;align-items:stretch;flex-wrap:wrap;
     background:#fff;border-top:1px solid #e5e7eb;
     box-shadow:0 8px 24px rgba(15,33,73,0.12);
     padding:8px 12px;gap:4px;margin-left:0;
@@ -190,6 +197,8 @@ a.hero-gc-ci:hover{color:#7c3aed}
   .nav-area.open{max-height:480px;padding:10px 12px}
   .nav-area .nav-item{width:100%;border-radius:8px;padding:11px 14px;font-size:14px;justify-content:flex-start}
   .nav-area .nav-item.active{padding:11px 14px;border-radius:8px}
+  .nav-area .nav-item .nav-label{flex-direction:row;align-items:flex-start;gap:5px;text-align:left}
+  .nav-area .nav-item .nav-label .nl-row{display:inline}
   .header{position:relative;flex-wrap:wrap}
 }
 @media(max-width:600px){
@@ -282,14 +291,33 @@ a.hero-gc-ci:hover{color:#7c3aed}
   </button>
 
   <div class="nav-area" id="lpNavArea">
-    <a class="nav-item" href="#" data-nav="about">About Us</a>
-    <a class="nav-item" href="#" data-nav="developer">About Developer</a>
-    <a class="nav-item" href="#" data-nav="staff">Staff</a>
-    <a class="nav-item" href="#" data-nav="roster">Ward Roster</a>
-    <a class="nav-item" href="#" data-nav="weekend">Weekend Roster</a>
-    <a class="nav-item" href="#" data-nav="holiday">Holiday Roster</a>
-    <a class="nav-item" href="#" data-nav="calendar">Holiday Calendar</a>
-    <a class="nav-item" href="#" data-nav="orders">Orders</a>
+    <a class="nav-item active" href="#" data-nav="home">
+      <span class="nav-label"><span class="nl-row">Home</span></span>
+    </a>
+    <a class="nav-item" href="#" data-nav="about">
+      <span class="nav-label"><span class="nl-row">About</span><span class="nl-row">Us</span></span>
+    </a>
+    <a class="nav-item" href="#" data-nav="developer">
+      <span class="nav-label"><span class="nl-row">Developer</span></span>
+    </a>
+    <a class="nav-item" href="#" data-nav="staff">
+      <span class="nav-label"><span class="nl-row">Staff</span></span>
+    </a>
+    <a class="nav-item" href="#" data-nav="roster">
+      <span class="nav-label"><span class="nl-row">Ward Roster</span></span>
+    </a>
+    <a class="nav-item" href="#" data-nav="weekend">
+      <span class="nav-label"><span class="nl-row">Weekend Roster</span></span>
+    </a>
+    <a class="nav-item" href="#" data-nav="holiday">
+      <span class="nav-label"><span class="nl-row">Holiday Roster</span></span>
+    </a>
+    <a class="nav-item" href="#" data-nav="calendar">
+      <span class="nav-label"><span class="nl-row">Holidays</span></span>
+    </a>
+    <a class="nav-item" href="#" data-nav="orders">
+      <span class="nav-label"><span class="nl-row">Orders</span></span>
+    </a>
   </div>
 </div>
 
@@ -304,8 +332,8 @@ a.hero-gc-ci:hover{color:#7c3aed}
   @keyframes tkPulse { 0%,100% { background:#fee2e2 } 50% { background:#fecaca } }
 </style>
 
-<!-- ═══════════════ HERO (SPLIT SCREEN) ═══════════════ -->
-<section class="hero">
+<!-- ═══════════════ HERO (SPLIT SCREEN) - NOW PAGE-HOME ═══════════════ -->
+<section class="hero page-view" id="page-home">
 
   <!-- LEFT HALF — PMAM Report Status -->
   <div class="hero-left">
@@ -947,14 +975,15 @@ window.addEventListener('DOMContentLoaded', function() {
     // missing any, we append it — so a stale config can never make a working
     // feature (Weekend Roster, Orders, About Us) disappear from the nav.
     var CORE_TABS = [
-      { id:'about',     label:'About Us',         order:0 },
-      { id:'developer', label:'About Developer',  order:1 },
-      { id:'staff',     label:'Staff',            order:2 },
-      { id:'roster',    label:'Ward Roster',      order:3 },
-      { id:'weekend',   label:'Weekend Roster',   order:4 },
-      { id:'holiday',   label:'Holiday Roster',   order:5 },
-      { id:'calendar',  label:'Holiday Calendar', order:6 },
-      { id:'orders',    label:'Orders',           order:7 }
+      { id:'home',      label:'Home',           order:-1 },
+      { id:'about',     label:'About Us',       order:0 },
+      { id:'developer', label:'Developer',      order:1 },
+      { id:'staff',     label:'Staff',          order:2 },
+      { id:'roster',    label:'Ward Roster',    order:3 },
+      { id:'weekend',   label:'Weekend Roster', order:4 },
+      { id:'holiday',   label:'Holiday Roster', order:5 },
+      { id:'calendar',  label:'Holidays',       order:6 },
+      { id:'orders',    label:'Orders',         order:7 }
     ]
 
     function renderNav(items){
@@ -973,19 +1002,24 @@ window.addEventListener('DOMContentLoaded', function() {
         var cid = navIdCanon(it.id || it.label || '');
         if (ALLOWED[cid]) return true;
         // keep genuine custom external links, drop stale known-but-removed ids
-        var REMOVED = { home:true, contact:true, leave:true, staffold:true };
+        var REMOVED = { contact:true, leave:true, staffold:true };
         if (REMOVED[cid]) return false;
         return !!(it.url && /^(https?:|\/\/)/i.test(it.url));
       });
 
       // 1. Start with saved items, then append any missing CORE_TABS.
+      //    Home gets a sentinel low order (-1000) so it ALWAYS renders first,
+      //    even when admin's saved navBar already covers orders 0..7. Other
+      //    missing core tabs are appended after the saved items in their
+      //    canonical order.
       var merged = items.slice();
       var seenForAppend = {};
       items.forEach(function(it){ seenForAppend[navIdCanon(it.id || it.label || '')] = true; });
       var maxOrder = items.reduce(function(m,it){ return Math.max(m, it.order||0); }, 0);
       CORE_TABS.forEach(function(ct){
         if (!seenForAppend[ct.id]) {
-          merged.push({ id:ct.id, label:ct.label, order:maxOrder + 1 + ct.order, visible:true, active:false });
+          var assignedOrder = (ct.id === 'home') ? -1000 : (maxOrder + 1 + ct.order);
+          merged.push({ id:ct.id, label:ct.label, order:assignedOrder, visible:true, active:false });
         }
       });
 
@@ -1011,18 +1045,44 @@ window.addEventListener('DOMContentLoaded', function() {
       var visible = deduped.filter(function(i){ return i.visible !== false; });
       if (visible.length === 0) return;
 
+      // Persist the active tab across Firestore re-renders. Each click sets
+      // window.__activeNavId; if nothing was clicked yet, default to 'home'
+      // so the green pill is shown on the landing tab. The 'active' field on
+      // Firestore items is ignored — UI state lives client-side now.
+      if (typeof window.__activeNavId !== 'string') window.__activeNavId = 'home';
+      var activeId = window.__activeNavId;
+
+      // Build the label as a single-line span. (Earlier the two-word labels
+      // wrapped to two rows inside the pill, but tabs now sit on a single
+      // horizontal row, so each label stays on one line.)
+      function buildLabelHTML(rawLabel){
+        var safe = esc(rawLabel || '');
+        return '<span class="nav-label"><span class="nl-row">'+safe+'</span></span>';
+      }
+
+      // Labels that were renamed. Until the admin re-saves the nav bar,
+      // Firestore still holds the old labels — patch them on read so the
+      // user always sees the new names.
+      var LABEL_RENAMES = {
+        'about developer':  'Developer',
+        'holiday calendar': 'Holidays'
+      };
+
       nav.innerHTML = visible.map(function(it){
-        var cls = 'nav-item' + (it.active ? ' active' : '');
-        var navId = esc(navIdCanon(it.id || it.label || ''));
+        var navIdRaw = navIdCanon(it.id || it.label || '');
+        var isActive = (navIdRaw === activeId);
+        var cls = 'nav-item' + (isActive ? ' active' : '');
+        var navId = esc(navIdRaw);
         var url = (MODAL_IDS.indexOf(navId) !== -1) ? '#' : (it.url || '#');
-        var label = esc(it.label || '');
-        var iconSvg = it.active
-          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>'
-          : '';
+        var rawLabel = (it.label || '').trim();
+        var lowered = rawLabel.toLowerCase();
+        if (LABEL_RENAMES[lowered]) rawLabel = LABEL_RENAMES[lowered];
+        var labelHTML = buildLabelHTML(rawLabel);
         var isExternal = /^(https?:|\/\/)/i.test(url);
         var targetAttr = isExternal ? ' target="_blank" rel="noopener"' : '';
+        // data-nav lets click delegation route the tab regardless of label.
         var dataAttr   = navId ? ' data-nav="'+navId+'"' : '';
-        return '<a class="'+cls+'" href="'+esc(url)+'"'+targetAttr+dataAttr+'>'+iconSvg+label+'</a>';
+        return '<a class="'+cls+'" href="'+esc(url)+'"'+targetAttr+dataAttr+'>'+labelHTML+'</a>';
       }).join('');
     }
 
@@ -1331,26 +1391,6 @@ window.addEventListener('DOMContentLoaded', function() {
 
   function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function openModal(){
-    var modal = document.getElementById('staffModal');
-    if (!modal) return;
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    if (_staffCache) {
-      renderCards(_staffCache, currentFilter());
-    } else {
-      loadStaff();
-    }
-  }
-
-  function closeModal(){
-    var modal = document.getElementById('staffModal');
-    if (!modal) return;
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  window.closeStaffModal = closeModal;
-
   function currentFilter(){
     return 'all';  // search & role filters removed; always show all, grouped by rank
   }
@@ -1466,16 +1506,17 @@ window.addEventListener('DOMContentLoaded', function() {
       return '<span style="font-size:'+(size>70?'24px':'18px')+';font-weight:800;color:#fff">'+escHtml(initials)+'</span>';
     }
 
-    // Large card used inside the Leadership group (photo on top, name, role
-    // badge, optional description). Mirrors mockup image 3.
     function leadershipCard(u, g){
       var roleIco = STAFF_ROLE_ICON[g ? g.roleIcon : 'other'] || STAFF_ROLE_ICON.other;
       var desc = (g && g.desc) ? g.desc : '';
       return '<div class="sx-lead-card">'
         + '<div class="sx-lead-photo">'+photoBox(u,90)+'</div>'
-        + '<div class="sx-lead-badge">'+roleIco+'</div>'
-        + '<div class="sx-lead-name">'+escHtml(u.name||'Unknown')+'</div>'
-        + (desc ? '<div class="sx-lead-desc">'+escHtml(desc)+'</div>' : '')
+        + '<div class="sx-lead-info">'
+        +   '<div class="sx-lead-badge">'+roleIco+'</div>'
+        +   '<div class="sx-lead-name">'+escHtml(u.name||'Unknown')+'</div>'
+        +   '<div class="sx-lead-line"></div>'
+        +   (desc ? '<div class="sx-lead-desc">'+escHtml(desc)+'</div>' : '')
+        + '</div>'
         + '</div>';
     }
 
@@ -1484,9 +1525,10 @@ window.addEventListener('DOMContentLoaded', function() {
       var roleIco = STAFF_ROLE_ICON[g ? g.roleIcon : 'other'] || STAFF_ROLE_ICON.other;
       return '<div class="sx-grid-card">'
         + '<div class="sx-grid-photo">'+photoBox(u,56)+'</div>'
-        + '<div style="flex:1;min-width:0">'
+        + '<div class="sx-grid-info">'
+        +   '<div class="sx-grid-badge">'+roleIco+'</div>'
         +   '<div class="sx-grid-name">'+escHtml(u.name||'Unknown')+'</div>'
-        +   '<div class="sx-grid-role">'+roleIco+'<span>'+escHtml(u.role||'Staff')+'</span></div>'
+        +   '<div class="sx-grid-role">'+escHtml(u.role||'Staff')+'</div>'
         + '</div>'
         + '</div>';
     }
@@ -1646,6 +1688,8 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── Update active visual state ─────────────────────────────────────
+  // Also persists the active id on window.__activeNavId so renderNav()
+  // can restore the green pill after onSnapshot re-renders the bar.
   function setActiveNav(clickedAnchor){
     var nav = document.getElementById('lpNavArea');
     if (!nav) return;
@@ -1653,6 +1697,8 @@ window.addEventListener('DOMContentLoaded', function() {
       el.classList.remove('active');
     });
     clickedAnchor.classList.add('active');
+    var clickedId = (clickedAnchor.getAttribute('data-nav') || '').trim().toLowerCase();
+    if (clickedId) window.__activeNavId = clickedId;
   }
 
   // ─── Bind: set cursor pointer on items that will trigger JS actions ─
@@ -1701,31 +1747,43 @@ window.addEventListener('DOMContentLoaded', function() {
     setActiveNav(a);
     closeMobileNav();
 
+    window.switchPage = function(pageId) {
+      // Hide all pages
+      document.querySelectorAll('.page-view').forEach(function(el) {
+        el.classList.remove('active');
+      });
+      // Show requested page
+      var target = document.getElementById(pageId);
+      if (target) {
+        target.classList.add('active');
+      } else {
+        // Fallback to home
+        document.getElementById('page-home').classList.add('active');
+      }
+      try { window.scrollTo({ top:0, behavior:'smooth' }); } catch(_){ window.scrollTo(0, 0); }
+    };
+
     if (navId === 'staff') {
-      openModal();  // existing Staff modal
+      if (typeof window.lpLoadStaff === 'function') window.lpLoadStaff(); // Make sure data is loaded
+      window.switchPage('page-staff');
       return;
     }
     if (navId === 'home') {
-      // Already on the landing page — smooth-scroll to top
-      try { window.scrollTo({ top:0, behavior:'smooth' }); }
-      catch(_){ window.scrollTo(0, 0); }
+      window.switchPage('page-home');
       return;
     }
-    // Known content ids → open the generic content modal
+    
+    // Known content ids → render and show content page
     var renderers = window.CONTENT_RENDERERS || {};
-    if (typeof window.openContentModal === 'function' && renderers[navId]) {
-      console.log('[nav] Opening content modal for:', navId);
-      window.openContentModal(navId, labelText || navId);
+    var resolvedId = renderers[navId] ? navId : (renderers[navIdCanonLocal(labelText)] ? navIdCanonLocal(labelText) : null);
+    
+    if (resolvedId && typeof window.openContentModal === 'function') {
+      console.log('[nav] Switching to content page for:', resolvedId);
+      window.openContentModal(resolvedId, labelText || resolvedId);
+      window.switchPage('page-content');
       return;
     }
-    // Last resort: resolve straight from the label text in case the id was
-    // stale/missing and getNavId still couldn't land it.
-    var labelId = navIdCanonLocal(labelText);
-    if (labelId && typeof window.openContentModal === 'function' && renderers[labelId]) {
-      console.log('[nav] Opening content modal via label fallback for:', labelId);
-      window.openContentModal(labelId, labelText || labelId);
-      return;
-    }
+    
     console.log('[nav] No renderer for id="'+navId+'" / label="'+labelText+'" — known ids:', Object.keys(renderers));
     showNavToast((labelText || 'This section') + ' — info coming soon.');
   });
@@ -1758,9 +1816,19 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   })();
 
-  // Close on backdrop click or Escape
+  // Go back to home on Escape. Also resets the active nav highlight back
+  // to Home so the green pill follows the page state.
   document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape' && typeof window.switchPage === 'function') {
+      window.switchPage('page-home');
+      window.__activeNavId = 'home';
+      var nav = document.getElementById('lpNavArea');
+      if (nav) {
+        nav.querySelectorAll('a.nav-item').forEach(function(el){
+          el.classList.toggle('active', (el.getAttribute('data-nav') || '') === 'home');
+        });
+      }
+    }
   });
 
   // Initial bind, then re-bind whenever navBar is re-rendered (handled by
@@ -1776,164 +1844,148 @@ window.addEventListener('DOMContentLoaded', function() {
 
 </script>
 
-<!-- ═══════════════ STAFF MODAL ═══════════════ -->
+<!-- ═══════════════ STAFF PAGE ═══════════════ -->
 <style>
-  #staffModal {
-    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9000;
-    display: none; align-items: center; justify-content: center; padding: 20px;
-    animation: smFadeIn 0.18s ease-out;
+  .page-view { display: none; flex: 1; background: #fff; padding: 0; overflow-y: auto; overflow-x: hidden; animation: fadeSlideUp 0.3s ease-out; }
+  .page-view.active { display: flex; flex-direction: column; }
+  #page-home.active { display: flex; flex-direction: row; padding: 0; background: #f8fafc; }
+  
+  @media(max-width:980px) {
+    #page-home.active { flex-direction: column; }
   }
-  #staffModal.open { display: flex; }
-  @keyframes smFadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .sm-card {
-    background: #fff; border-radius: 18px; width: 100%; max-width: 980px;
-    max-height: 88vh; display: flex; flex-direction: column;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.3); overflow: hidden;
-    animation: smSlideUp 0.22s ease-out;
+    background: #fff; width: 100%; min-height: 100%;
+    display: flex; flex-direction: column;
   }
-  @keyframes smSlideUp { from { transform: translateY(20px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
   .sm-header {
-    background: linear-gradient(135deg, #0f172a, #1e3a5f);
-    color: #fff; padding: 18px 24px; display: flex; align-items: center; gap: 14px;
+    background: linear-gradient(135deg, #311873 0%, #46229e 50%, #5d2fc7 100%);
+    color: #fff; padding: 6px 20px; display: flex; align-items: center; gap: 12px; position: relative; overflow: hidden; flex-shrink: 0;
   }
-  .sm-header h2 { margin: 0; font-size: 18px; font-weight: 700; flex: 1 }
-  .sm-header .sm-sub { font-size: 11px; opacity: 0.75; margin-top: 2px }
-  .sm-close {
-    width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.15);
-    border: none; color: #fff; font-size: 18px; cursor: pointer; display: flex;
-    align-items: center; justify-content: center; transition: background 0.15s;
+  .sm-header::before {
+    content: ""; position: absolute; right: 0; bottom: 0; top: 0; width: 500px;
+    background-image: url("data:image/svg+xml,%3Csvg width='500' height='100' viewBox='0 0 500 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 100V60H70V100M75 100V30H140V100M150 100V50H190V100M200 100V20H260V100M270 100V40H320V100M330 100V70H380V100M390 100V45H430V100M440 100V60H480V100' fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='2'/%3E%3Cg fill='rgba(255,255,255,0.05)'%3E%3Crect x='40' y='70' width='8' height='10'/%3E%3Crect x='55' y='70' width='8' height='10'/%3E%3Crect x='85' y='40' width='10' height='12'/%3E%3Crect x='105' y='40' width='10' height='12'/%3E%3Crect x='125' y='40' width='10' height='12'/%3E%3Crect x='85' y='60' width='10' height='12'/%3E%3Crect x='105' y='60' width='10' height='12'/%3E%3Crect x='125' y='60' width='10' height='12'/%3E%3C/g%3E%3C/svg%3E");
+    background-position: bottom right; background-repeat: no-repeat; background-size: cover; z-index: 1;
   }
-  .sm-close:hover { background: rgba(255,255,255,0.28) }
-  .sm-toolbar {
-    padding: 14px 20px; border-bottom: 1px solid #e5e7eb; background: #f9fafb;
-    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
-  }
-  .sm-toolbar input {
-    flex: 1; min-width: 200px; padding: 8px 12px; font-size: 13px;
-    border: 1px solid #d1d5db; border-radius: 8px; outline: none; background: #fff;
-  }
-  .sm-toolbar input:focus { border-color: #2563eb }
-  .smf-tab {
-    padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 50px;
-    border: 1px solid #d1d5db; background: #fff; color: #475569; cursor: pointer;
-    transition: all 0.15s;
-  }
-  .smf-tab:hover { background: #f1f5f9 }
-  .smf-tab.active { background: #16a34a; color: #fff; border-color: #16a34a }
+  .sm-header > * { position: relative; z-index: 2; }
   .sm-body {
-    flex: 1; overflow-y: auto; padding: 20px;
-    background: #f8fafc;
+    flex: 1; padding: 12px 20px; background: #f8fafc;
   }
   #staffModalGrid {
-    display: flex; flex-direction: column; gap: 4px;
+    display: flex; flex-direction: column; gap: 8px;
   }
   /* Intro banner */
   .sx-intro {
-    background:#f1f0fb; border:1px solid #e4e1f5; border-radius:14px;
-    padding:14px 16px; display:flex; gap:13px; align-items:flex-start; margin-bottom:6px;
+    background:#f8fafc; border:1px solid #eef2f6; border-radius:12px;
+    padding:16px 20px; display:flex; gap:16px; align-items:flex-start; margin-bottom:4px;
   }
   .sx-intro-ico {
-    width:42px; height:42px; border-radius:50%; background:#fff;
+    width:48px; height:48px; border-radius:50%; background:#f5f3ff;
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
-    box-shadow:0 1px 4px rgba(76,29,149,0.12);
+    color:#7c3aed;
   }
   /* Group divider header */
   .sx-group-hd {
-    display:flex; align-items:center; gap:9px; margin:18px 2px 12px;
+    display:flex; align-items:center; gap:10px; margin:16px 0 12px;
   }
-  .sx-group-ico { display:flex; align-items:center; }
+  .sx-group-ico { display:flex; align-items:center; color:#4c1d95; }
   .sx-group-label {
-    font-size:14px; font-weight:800; color:#3730a3; letter-spacing:0.2px;
+    font-size:15px; font-weight:800; color:#3730a3; letter-spacing:0.2px;
   }
   .sx-group-count {
-    background:#ede9fe; color:#5b21b6; font-size:10.5px; font-weight:800;
-    padding:1px 9px; border-radius:20px;
+    background:#ede9fe; color:#5b21b6; font-size:11px; font-weight:800;
+    padding:2px 10px; border-radius:20px;
   }
   .sx-group-line {
     flex:1; height:2px; border-radius:2px;
     background:linear-gradient(90deg,#ddd6fe,transparent);
   }
-  /* Leadership large cards */
+  /* Leadership horizontal cards */
   .sx-lead-grid {
-    display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px;
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px;
   }
   .sx-lead-card {
-    background:#fff; border:1px solid #ece9f7; border-radius:16px;
-    padding:18px 16px 20px; text-align:center; position:relative;
-    box-shadow:0 1px 5px rgba(76,29,149,0.06);
+    background:#fff; border:1px solid #eef2f6; border-radius:12px;
+    padding:10px; display:flex; align-items:center; gap:16px;
+    box-shadow:0 4px 12px rgba(15,23,42,0.03);
   }
   .sx-lead-photo {
-    width:104px; height:104px; border-radius:14px; margin:0 auto 12px;
-    background:linear-gradient(160deg,#ede9fe,#c4b5fd); overflow:hidden;
-    display:flex; align-items:center; justify-content:center;
-    border:3px solid #f3f1fc;
+    width:100px; height:110px; border-radius:8px; overflow:hidden; flex-shrink:0;
+    background:linear-gradient(160deg,#ede9fe,#c4b5fd);
+  }
+  .sx-lead-photo img { width:100%; height:100%; object-fit:cover; }
+  .sx-lead-info {
+    flex:1; display:flex; flex-direction:column; align-items:flex-start;
   }
   .sx-lead-badge {
-    position:absolute; top:14px; right:14px; width:30px; height:30px;
-    border-radius:50%; background:#f5f3ff; border:1px solid #e9e5fb;
-    display:flex; align-items:center; justify-content:center;
+    width:24px; height:24px; border-radius:6px; background:#f5f3ff; color:#7c3aed;
+    display:flex; align-items:center; justify-content:center; margin-bottom:8px;
   }
   .sx-lead-name {
-    font-size:15px; font-weight:800; color:#3730a3; line-height:1.3; margin-bottom:6px;
+    font-size:13.5px; font-weight:800; color:#1e1b4b; line-height:1.2; margin-bottom:2px; text-transform:uppercase;
   }
-  .sx-lead-name::after {
-    content:""; display:block; width:24px; height:2.5px; background:#c4b5fd;
-    border-radius:2px; margin:7px auto 0;
+  .sx-lead-line {
+    width:20px; height:3px; background:#7c3aed; border-radius:2px; margin-bottom:4px;
   }
   .sx-lead-desc {
-    font-size:11.5px; color:#64748b; line-height:1.55; margin-top:8px;
+    font-size:11px; color:#64748b; line-height:1.4;
   }
   /* Compact grid cards (PMAMs / DEO / Other) */
   .sx-grid {
-    display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px;
+    display:flex; flex-wrap:wrap; justify-content:center; gap:16px;
   }
   .sx-grid-card {
-    background:#fff; border:1px solid #ece9f7; border-radius:14px;
-    padding:11px 13px; display:flex; align-items:center; gap:12px;
-    box-shadow:0 1px 4px rgba(76,29,149,0.05);
+    width:calc(25% - 12px); min-width:240px;
+    background:#fff; border:1px solid #eef2f6; border-radius:12px;
+    padding:10px; display:flex; align-items:center; gap:14px;
+    box-shadow:0 2px 8px rgba(15,23,42,0.02);
   }
   .sx-grid-photo {
-    width:54px; height:54px; border-radius:12px; flex-shrink:0; overflow:hidden;
+    width:64px; height:64px; border-radius:8px; flex-shrink:0; overflow:hidden;
     background:linear-gradient(160deg,#ede9fe,#c4b5fd);
-    display:flex; align-items:center; justify-content:center;
-    border:2px solid #f3f1fc;
+  }
+  .sx-grid-photo img { width:100%; height:100%; object-fit:cover; }
+  .sx-grid-info {
+    flex:1; display:flex; flex-direction:column; align-items:flex-start; min-width:0;
+  }
+  .sx-grid-badge {
+    width:20px; height:20px; border-radius:4px; background:#f5f3ff; color:#7c3aed;
+    display:flex; align-items:center; justify-content:center; margin-bottom:4px;
   }
   .sx-grid-name {
-    font-size:13.5px; font-weight:800; color:#1e1b4b; line-height:1.25;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    font-size:11.5px; font-weight:800; color:#1e1b4b; line-height:1.2;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:6px; text-transform:uppercase;
   }
   .sx-grid-role {
-    display:inline-flex; align-items:center; gap:5px; margin-top:5px;
-    background:#f5f3ff; border:1px solid #e9e5fb; border-radius:20px;
-    padding:2px 9px 2px 7px; font-size:10px; font-weight:700; color:#5b21b6;
+    background:#f5f3ff; border-radius:4px; padding:2px 8px; font-size:9px; font-weight:800; color:#7c3aed; text-transform:uppercase;
   }
-  /* legacy classes kept harmless */
-  .staff-card { display:none }
-  .staff-pill { padding:2px 9px;border-radius:10px;font-size:10.5px;font-weight:700;white-space:nowrap }
-  .sm-footer {
-    padding: 10px 20px; font-size: 11px; color: #6b7280; text-align: center;
-    border-top: 1px solid #e5e7eb; background: #fff;
+  @media (max-width: 768px) {
+    .sx-grid-card { width:calc(50% - 8px); }
   }
   @media (max-width: 600px) {
     #staffModal { padding: 0 }
     .sm-card { max-height: 100vh; height: 100vh; border-radius: 0 }
+    .sx-grid-card { width:100%; }
   }
 </style>
-<div id="staffModal" onclick="if(event.target===this)closeStaffModal()">
+<div id="page-staff" class="page-view">
   <div class="sm-card">
     <div class="sm-header">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-      <div style="flex:1">
-        <h2>Our Staff</h2>
-        <div class="sm-sub" id="staffModalCount">Loading…</div>
+      <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
       </div>
-      <button class="sm-close" onclick="closeStaffModal()" aria-label="Close">×</button>
+      <div style="flex:1">
+        <h2 style="font-size:20px; font-weight:700; margin:0 0 2px 0">Our Staff</h2>
+        <div class="sm-sub" id="staffModalCount" style="font-size:12px; font-weight:500; opacity:0.9"></div>
+      </div>
     </div>
     <div class="sm-body">
       <div id="staffModalGrid"></div>
-    </div>
-    <div class="sm-footer">
-      AB-PMJAY Unit · Government Medical College &amp; Associated Hospital, Rajouri
     </div>
   </div>
 </div>
@@ -1944,39 +1996,23 @@ window.addEventListener('DOMContentLoaded', function() {
      Auto-publishes whenever admin saves any matching DM tab.
      ════════════════════════════════════════════════════════════════════ -->
 <style>
-  #contentModal{
-    position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:9000;
-    display:none;align-items:center;justify-content:center;padding:20px;
-    animation:cmFadeIn 0.18s ease-out;
-  }
-  #contentModal.open{display:flex}
-  @keyframes cmFadeIn{from{opacity:0}to{opacity:1}}
   .cm-card{
-    background:#fff;border-radius:18px;width:100%;max-width:920px;
-    max-height:88vh;display:flex;flex-direction:column;
-    box-shadow:0 24px 60px rgba(0,0,0,0.3);overflow:hidden;
-    animation:cmSlideUp 0.22s ease-out;
+    background:#fff; width:100%; min-height: 100%;
+    display:flex;flex-direction:column;
   }
-  @keyframes cmSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
   .cm-header{
-    background:linear-gradient(135deg,#4c1d95,#7c3aed);
-    color:#fff;padding:18px 24px;display:flex;align-items:center;gap:14px;flex-shrink:0;
+    background:linear-gradient(135deg, #311873 0%, #46229e 50%, #5d2fc7 100%);
+    color:#fff;padding:6px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0; position:relative; overflow:hidden;
   }
-  .cm-header svg{flex-shrink:0}
-  .cm-header h2{margin:0;font-size:18px;font-weight:700;flex:1;line-height:1.2}
-  .cm-sub{font-size:11px;opacity:0.85;margin-top:2px}
-  .cm-close{
-    width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.18);
-    border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;
-    align-items:center;justify-content:center;transition:background 0.15s;line-height:1;
+  .cm-header::before {
+    content: ""; position: absolute; right: 0; bottom: 0; top: 0; width: 500px;
+    background-image: url("data:image/svg+xml,%3Csvg width='500' height='100' viewBox='0 0 500 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 100V60H70V100M75 100V30H140V100M150 100V50H190V100M200 100V20H260V100M270 100V40H320V100M330 100V70H380V100M390 100V45H430V100M440 100V60H480V100' fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='2'/%3E%3Cg fill='rgba(255,255,255,0.05)'%3E%3Crect x='40' y='70' width='8' height='10'/%3E%3Crect x='55' y='70' width='8' height='10'/%3E%3Crect x='85' y='40' width='10' height='12'/%3E%3Crect x='105' y='40' width='10' height='12'/%3E%3Crect x='125' y='40' width='10' height='12'/%3E%3Crect x='85' y='60' width='10' height='12'/%3E%3Crect x='105' y='60' width='10' height='12'/%3E%3Crect x='125' y='60' width='10' height='12'/%3E%3C/g%3E%3C/svg%3E");
+    background-position: bottom right; background-repeat: no-repeat; background-size: cover; z-index: 1;
   }
-  .cm-close:hover{background:rgba(255,255,255,0.3)}
-  .cm-body{flex:1;overflow-y:auto;padding:18px 20px;background:#f8fafc}
-  .cm-footer{
-    padding:10px 20px;font-size:11px;color:#6b7280;text-align:center;
-    border-top:1px solid #e5e7eb;background:#fff;flex-shrink:0;
-  }
-  .cm-loading{text-align:center;padding:40px 20px;color:#9ca3af;font-style:italic;font-size:13px}
+  .cm-header > * { position: relative; z-index: 2; }
+  .cm-header h2{margin:0;font-size:20px;font-weight:700;flex:1;line-height:1.2}
+  .cm-sub{font-size:12px;font-weight:500;opacity:0.9;margin-top:2px}
+  .cm-body{flex:1;padding:12px 20px;background:#f8fafc}
   .cm-empty{
     text-align:center;padding:30px 20px;color:#6b7280;font-size:13px;
     background:#fff;border-radius:12px;border:1.5px dashed #e5e7eb;
@@ -2018,16 +2054,17 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   .cm-cal-controls select:focus{border-color:#7c3aed}
   .cm-cal-grid{
-    display:grid;grid-template-columns:repeat(7,1fr);gap:4px;
-    background:#fff;border-radius:12px;padding:10px;border:1px solid #e5e7eb;
+    display:grid;grid-template-columns:repeat(7,1fr);
+    background:#fff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;
   }
   .cm-cal-dh{
-    text-align:center;font-size:10px;font-weight:800;color:#6b7280;
-    padding:4px;letter-spacing:0.5px;text-transform:uppercase;
+    text-align:center;font-size:11px;font-weight:800;color:#fff;
+    padding:10px 4px;letter-spacing:0.5px;text-transform:uppercase;
   }
   .cm-cal-day{
-    min-height:54px;border-radius:8px;padding:5px 6px;font-size:11px;
-    border:1.5px solid #f1f5f9;background:#fff;color:#1e293b;
+    min-height:70px;padding:8px;font-size:11px;
+    border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;
+    background:#fff;color:#1e293b;
     display:flex;flex-direction:column;
   }
   .cm-cal-day-num{font-weight:700;font-size:12px}
@@ -2068,21 +2105,18 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 </style>
 
-<div id="contentModal" onclick="if(event.target===this)closeContentModal()">
+<div id="page-content" class="page-view">
   <div class="cm-card">
     <div class="cm-header">
-      <svg id="cmIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+      <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg id="cmIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+      </div>
       <div style="flex:1;min-width:0">
         <h2 id="cmTitle">Title</h2>
-        <div class="cm-sub" id="cmSub">Live data from Admin Portal</div>
       </div>
-      <button class="cm-close" onclick="closeContentModal()" aria-label="Close">×</button>
     </div>
     <div class="cm-body" id="cmBody">
       <div class="cm-loading">Loading…</div>
-    </div>
-    <div class="cm-footer">
-      AB-PMJAY Unit · Government Medical College &amp; Associated Hospital, Rajouri
     </div>
   </div>
 </div>
@@ -2176,36 +2210,50 @@ window.addEventListener('DOMContentLoaded', function() {
     var calState = renderHolidayCalendar._state || (renderHolidayCalendar._state = { year:now.getFullYear(), month:now.getMonth() });
     var years = []; for (var y = now.getFullYear()-1; y <= now.getFullYear()+2; y++) years.push(y);
     var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    var html = '<div class="cm-cal-controls">'
+    
+    var monthHols = holidays.filter(function(h){
+      if (!h.date) return false; var d = new Date(h.date);
+      return d.getFullYear()===calState.year && d.getMonth()===calState.month;
+    }).sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+
+    var html = '<div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">';
+    
+    // LEFT SIDE: Holidays List
+    html += '<div style="flex:1; min-width:280px; max-width:320px;">';
+    html += '<div style="font-size:11px;font-weight:800;color:#4c1d95;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Holidays this month</div>';
+    if (monthHols.length){
+      html += '<div style="display:flex;flex-direction:column;gap:6px">';
+      monthHols.forEach(function(h){
+        var cls = 'cm-pill-' + (h.type||'custom').toLowerCase();
+        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #e5e7eb;flex-wrap:wrap">'
+              + '<span class="cm-pill '+cls+'" style="margin:0">'+esc(h.type||'Custom')+'</span>'
+              + '<span style="font-size:12px;font-weight:700;color:#1e293b">'+esc(fmtDate(h.date))+'</span>'
+              + '<span style="font-size:11.5px;color:#475569;flex:1">'+esc(h.name||'')+'</span>'
+              + '</div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div style="padding:10px; font-size:12px; color:#6b7280; background:#fff; border-radius:8px; border:1px dashed #e5e7eb;">No holidays this month</div>';
+    }
+    html += '</div>';
+
+    // RIGHT SIDE: Calendar
+    html += '<div style="flex:2; min-width:400px;">';
+    html += '<div class="cm-cal-controls">'
       + '<select id="cmCalYear">'+years.map(function(y){return '<option value="'+y+'"'+(y===calState.year?' selected':'')+'>'+y+'</option>';}).join('')+'</select>'
       + '<select id="cmCalMonth">'+months.map(function(m,i){return '<option value="'+i+'"'+(i===calState.month?' selected':'')+'>'+m+'</option>';}).join('')+'</select>'
       + '<span style="font-size:11px;color:#6b7280;margin-left:auto">'+holidays.length+' total holidays</span>'
       + '</div>';
     html += renderCalGrid(calState.year, calState.month, holidays);
-    html += '<div class="cm-legend">'
+    html += '<div class="cm-legend" style="margin-top:12px">'
       +   '<span><i style="background:#fecaca"></i>Sunday</span>'
       +   '<span><i style="background:#ddd6fe"></i>Gazetted</span>'
       +   '<span><i style="background:#fde68a"></i>State</span>'
       +   '<span><i style="background:#bbf7d0"></i>Custom</span>'
       + '</div>';
-    // List below
-    var monthHols = holidays.filter(function(h){
-      if (!h.date) return false; var d = new Date(h.date);
-      return d.getFullYear()===calState.year && d.getMonth()===calState.month;
-    }).sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
-    if (monthHols.length){
-      html += '<div style="margin-top:14px"><div style="font-size:11px;font-weight:800;color:#4c1d95;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">'
-            + 'Holidays this month</div><div style="display:flex;flex-direction:column;gap:6px">';
-      monthHols.forEach(function(h){
-        var cls = 'cm-pill-' + (h.type||'custom').toLowerCase();
-        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #e5e7eb;flex-wrap:wrap">'
-              + '<span class="cm-pill '+cls+'">'+esc(h.type||'Custom')+'</span>'
-              + '<span style="font-size:12px;font-weight:700;color:#1e293b">'+esc(fmtDate(h.date))+'</span>'
-              + '<span style="font-size:11.5px;color:#475569;flex:1">'+esc(h.name||'')+'</span>'
-              + '</div>';
-      });
-      html += '</div></div>';
-    }
+    html += '</div>';
+    
+    html += '</div>'; // End flex container
     return html;
   }
 
@@ -2215,9 +2263,12 @@ window.addEventListener('DOMContentLoaded', function() {
     var today = new Date();
     var hMap = {};
     holidays.forEach(function(h){ if (h.date) hMap[h.date] = h; });
-    var headers = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    var headers = [
+      {d:'SUN',c:'#ff2a5f'}, {d:'MON',c:'#2563eb'}, {d:'TUE',c:'#0ea5e9'},
+      {d:'WED',c:'#84cc16'}, {d:'THU',c:'#f59e0b'}, {d:'FRI',c:'#8b5cf6'}, {d:'SAT',c:'#3b82f6'}
+    ];
     var html = '<div class="cm-cal-grid">';
-    headers.forEach(function(d){ html += '<div class="cm-cal-dh">'+d+'</div>'; });
+    headers.forEach(function(h){ html += '<div class="cm-cal-dh" style="background:'+h.c+'">'+h.d+'</div>'; });
     for (var i = 0; i < firstDay; i++) html += '<div class="cm-cal-day empty"></div>';
     for (var d = 1; d <= daysInMonth; d++) {
       var ds = yr+'-'+String(mon+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
@@ -2238,9 +2289,16 @@ window.addEventListener('DOMContentLoaded', function() {
         cls += ' sun'; name = 'Sunday';
       }
       if (isToday) cls += ' today';
-      html += '<div class="'+cls+'" title="'+esc(name||ds)+'">'
+      var iconHtml = '';
+      if (isSun || (h && (h.type||'').toLowerCase() === 'sunday')) {
+        iconHtml = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;top:6px;right:6px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+      } else if (h) {
+        iconHtml = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;bottom:6px;right:6px;opacity:0.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+      }
+      html += '<div class="'+cls+'" style="position:relative;" title="'+esc(name||ds)+'">'
             +   '<div class="cm-cal-day-num">'+d+'</div>'
             + (name ? '<div class="cm-cal-day-name">'+esc(name)+'</div>' : '')
+            + iconHtml
             + '</div>';
     }
     html += '</div>';
@@ -2395,117 +2453,194 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   function renderAbout(){
-    var d = LIVE.aboutPage || {};
-    var sections = Array.isArray(d.aboutSections) ? d.aboutSections : null;
-    if (!sections || !sections.length) {
-      if (d.sehatHeading || d.sehatBody) {
-        sections = [{ title: d.sehatHeading || 'About Ayushman Bharat — PM-JAY / SEHAT',
-                      text: d.sehatBody || '', icon:'scheme' }];
-      } else {
-        return '<div class="cm-empty">No content added yet. The admin can add sections from <strong>Nav Bar → About Us</strong>.</div>';
-      }
-    }
-    var html = '<div style="display:flex;flex-direction:column;gap:14px">';
-    html += sections.map(renderAboutSectionCard).join('');
-    html += '</div>';
-    // Closing banner strip
-    html += '<div style="margin-top:14px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:14px;'
-      + 'padding:14px 20px;text-align:center;font-size:13.5px;font-weight:600;color:#5b21b6;'
-      + 'display:flex;align-items:center;justify-content:center;gap:8px">'
-      + '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>'
-      + (esc(d.aboutFooter || 'Together, we are building a healthier, stronger and self-reliant India.'))
-      + '</div>';
-    return html;
+    var checkIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    var checkIconPurple = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    
+    return `
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(400px, 1fr));gap:20px;align-items:start;">
+        
+        <!-- Left Column -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <!-- AB-PMJAY Card -->
+          <div style="background:#fff;border:1px solid #eef2f6;border-radius:12px;padding:24px;box-shadow:0 4px 12px rgba(15,23,42,0.03);">
+            <div style="display:flex;gap:16px;align-items:flex-start;">
+              <div style="width:56px;height:56px;border-radius:12px;background:#f5f3ff;color:#7c3aed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                 <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+              </div>
+              <div>
+                <h3 style="margin:0 0 12px 0;font-size:18px;font-weight:800;color:#1e1b4b;line-height:1.3;">Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (AB-PMJAY)</h3>
+                <div style="font-size:13.5px;color:#475569;line-height:1.6;">Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) is the world's largest government-funded healthcare initiative, launched by the Government of India to provide free health coverage of ₹5 lakh per family per year for secondary and tertiary care hospitalization.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PMAMs Card -->
+          <div style="background:#fff;border:1px solid #eef2f6;border-radius:12px;padding:24px;box-shadow:0 4px 12px rgba(15,23,42,0.03);">
+            <div style="display:flex;gap:16px;align-items:flex-start;">
+              <div style="width:56px;height:56px;border-radius:12px;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                 <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+              <div>
+                <h3 style="margin:0 0 12px 0;font-size:15px;font-weight:800;color:#1e1b4b;line-height:1.3;">PMAMs</h3>
+                <div style="font-size:12px;color:#475569;line-height:1.6;">Pradhan Mantri Arogya Mitras (PMAMs) are the backbone of AB-PMJAY. They ensure beneficiaries receive seamless support and guidance throughout their treatment journey.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <!-- Key Features Card -->
+          <div style="background:#fff;border:1px solid #eef2f6;border-radius:12px;padding:24px;box-shadow:0 4px 12px rgba(15,23,42,0.03);">
+            <div style="display:flex;gap:16px;align-items:flex-start;">
+              <div style="width:56px;height:56px;border-radius:12px;background:#f0fdf4;color:#16a34a;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                 <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              </div>
+              <div style="flex:1;">
+                <h3 style="margin:0 0 16px 0;font-size:15px;font-weight:800;color:#1e1b4b;line-height:1.3;">Key Features</h3>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                  <div style="display:flex;gap:10px;font-size:12px;color:#475569;line-height:1.5;">${checkIconPurple} Cashless and paperless treatment at empanelled public and private hospitals across India.</div>
+                  <div style="display:flex;gap:10px;font-size:12px;color:#475569;line-height:1.5;">${checkIconPurple} Coverage for a wide range of medical and surgical procedures.</div>
+                  <div style="display:flex;gap:10px;font-size:12px;color:#475569;line-height:1.5;">${checkIconPurple} No restriction on family size, age, or gender.</div>
+                  <div style="display:flex;gap:10px;font-size:12px;color:#475569;line-height:1.5;">${checkIconPurple} Portability of benefits across all states and union territories implementing the scheme.</div>
+                  <div style="display:flex;gap:10px;font-size:12px;color:#475569;line-height:1.5;">${checkIconPurple} Pre- and post-hospitalization expenses included as per package guidelines.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Role of PMAMs Card -->
+          <div style="background:#fff;border:1px solid #eef2f6;border-radius:12px;padding:24px;box-shadow:0 4px 12px rgba(15,23,42,0.03);">
+            <div style="display:flex;gap:16px;align-items:flex-start;">
+              <div style="width:56px;height:56px;border-radius:12px;background:#fffbeb;color:#d97706;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                 <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              </div>
+              <div style="flex:1;">
+                <h3 style="margin:0 0 16px 0;font-size:15px;font-weight:800;color:#1e1b4b;line-height:1.3;">Role of Pradhan Mantri Arogya Mitras (PMAMs)</h3>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                  <div style="display:flex;gap:10px;font-size:12px;color:#475569;line-height:1.5;">${checkIcon} Eligibility verification</div>
+                  <div style="display:flex;gap:10px;font-size:12px;color:#475569;line-height:1.5;">${checkIcon} Beneficiary registration and e-KYC</div>
+                  <div style="display:flex;gap:10px;font-size:12px;color:#475569;line-height:1.5;">${checkIcon} Hospital admission and package selection</div>
+                  <div style="display:flex;gap:10px;font-size:12px;color:#475569;line-height:1.5;">${checkIcon} Pre-authorization and claim coordination</div>
+                  <div style="display:flex;gap:10px;font-size:12px;color:#475569;line-height:1.5;">${checkIcon} Patient guidance and grievance support</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Mission and Vision -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:20px;">
+        <!-- Mission -->
+        <div style="background:#fef2f2;border:1px solid #fee2e2;border-radius:12px;padding:24px;display:flex;align-items:flex-start;gap:16px;">
+           <div style="width:48px;height:48px;border-radius:10px;background:#ef4444;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+           </div>
+           <div>
+             <h3 style="margin:0 0 8px 0;font-size:15px;font-weight:800;color:#991b1b;">Our Mission</h3>
+             <div style="font-size:11.5px;color:#b91c1c;line-height:1.6;font-weight:500;">To provide accessible, affordable and quality healthcare to every eligible beneficiary and ensure financial protection against catastrophic health expenditure.</div>
+           </div>
+        </div>
+
+        <!-- Vision -->
+        <div style="background:#cffafe;border:1px solid #a5f3fc;border-radius:12px;padding:24px;display:flex;align-items:flex-start;gap:16px;">
+           <div style="width:48px;height:48px;border-radius:10px;background:#06b6d4;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+           </div>
+           <div>
+             <h3 style="margin:0 0 8px 0;font-size:15px;font-weight:800;color:#164e63;">Vision</h3>
+             <div style="font-size:11.5px;color:#0e7490;line-height:1.6;font-weight:500;">To build a healthier India by strengthening healthcare infrastructure and leveraging technology for transparent and efficient healthcare delivery.</div>
+           </div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:16px 20px;text-align:center;font-size:14px;font-weight:700;color:#5b21b6;display:flex;align-items:center;justify-content:center;gap:10px">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        Together, we are building a healthier, stronger and self-reliant India.
+      </div>
+    </div>
+    `;
   }
 
   function renderDeveloper(){
-    var d = LIVE.aboutPage || {};
-    var dn = d.devName || '';
-    var dr = d.devRole || '';
-    var dp = d.devPhoto || '';
-    var email = d.devEmail || '';
-    var phone = d.devPhone || '';
-    var loc   = d.devLocation || '';
-    var sections = Array.isArray(d.devSections) ? d.devSections : null;
-    if (!sections || !sections.length) {
-      if (d.devBody) sections = [{ title:'Overview', text:d.devBody }];
-      else sections = [];
-    }
-    if (!dn && !dr && !dp && !sections.length) {
-      return '<div class="cm-empty">No developer details added yet. The admin can add them from <strong>Nav Bar → About Developer</strong>.</div>';
-    }
+    return `
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <!-- Profile Card -->
+      <div style="background:#fff;border:1px solid #eef2f6;border-radius:12px;padding:16px;display:flex;align-items:center;gap:16px;box-shadow:0 4px 12px rgba(15,23,42,0.03);flex-wrap:wrap;">
+        <div style="width:90px;height:90px;border-radius:12px;background:linear-gradient(160deg,#ede9fe,#c4b5fd);flex-shrink:0;overflow:hidden;border:4px solid #f8fafc;">
+           <img src="https://ui-avatars.com/api/?name=Vinod+Kumar&background=c4b5fd&color=4c1d95&size=90&font-size=0.33" style="width:100%;height:100%;object-fit:cover;" alt="Vinod Kumar">
+        </div>
+        <div style="flex:1;min-width:260px;">
+           <h2 style="margin:0 0 8px 0;font-size:22px;font-weight:800;color:#1e1b4b;text-transform:uppercase;letter-spacing:0.5px;">Vinod Kumar</h2>
+           <div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:20px;text-transform:uppercase;letter-spacing:0.5px;">Web Developer, Software Engineer, Data Analyst, IT Consultant</div>
+           <div style="display:flex;gap:20px;font-size:11.5px;color:#475569;font-weight:600;flex-wrap:wrap;border-top:1px solid #f1f5f9;padding-top:20px;">
+             <span style="display:flex;align-items:center;gap:8px;"><svg width="18" height="18" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-10 5L2 7"></path></svg> vinod.kumar@example.com</span>
+             <span style="display:flex;align-items:center;gap:8px;"><svg width="18" height="18" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"></path></svg> +91 98765 43210</span>
+             <span style="display:flex;align-items:center;gap:8px;"><svg width="18" height="18" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg> Rajouri, Jammu & Kashmir, India</span>
+           </div>
+        </div>
+      </div>
 
-    var html = '<div style="display:flex;flex-direction:column;gap:14px">';
+      <!-- MIS Section -->
+      <div style="background:#fff;border:1px solid #eef2f6;border-radius:12px;padding:16px;box-shadow:0 4px 12px rgba(15,23,42,0.03);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:40px;height:40px;border-radius:10px;background:#fce7f3;color:#db2777;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="m7 11 2-2 2 2 4-4"/></svg>
+          </div>
+          <h3 style="margin:0;font-size:18px;font-weight:800;color:#1e1b4b;">Management Information System (MIS)</h3>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:12px;">
+          <!-- Card 1 -->
+          <div style="background:#f8fafc;border:1px solid #eef2f6;border-radius:12px;padding:16px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+              <div style="width:32px;height:32px;border-radius:8px;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">01</div>
+              <div style="font-size:15px;font-weight:800;color:#1e1b4b;">Overview</div>
+            </div>
+            <div style="width:40px;height:3px;background:#7c3aed;border-radius:2px;margin-bottom:12px;"></div>
+            <div style="font-size:12px;color:#475569;line-height:1.65;">Management Information System (MIS) developed for Government Medical College & Associated Hospital Rajouri to streamline reporting, monitoring, and administrative management under the Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) scheme.</div>
+          </div>
+          <!-- Card 2 -->
+          <div style="background:#f8fafc;border:1px solid #eef2f6;border-radius:12px;padding:16px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+              <div style="width:32px;height:32px;border-radius:8px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">02</div>
+              <div style="font-size:15px;font-weight:800;color:#1e1b4b;">Key Capabilities</div>
+            </div>
+            <div style="width:40px;height:3px;background:#2563eb;border-radius:2px;margin-bottom:12px;"></div>
+            <div style="font-size:12px;color:#475569;line-height:1.65;">The system provides real-time tracking of PMAM activities, monthly performance analysis, ward-wise performance monitoring, account management, staff roster scheduling, and comprehensive reporting tools. It centralizes operational data into a secure and user-friendly digital platform, enabling improved efficiency, data accuracy, and faster decision-making.</div>
+          </div>
+          <!-- Card 3 -->
+          <div style="background:#f8fafc;border:1px solid #eef2f6;border-radius:12px;padding:16px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+              <div style="width:32px;height:32px;border-radius:8px;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;">03</div>
+              <div style="font-size:15px;font-weight:800;color:#1e1b4b;">Impact & Approach</div>
+            </div>
+            <div style="width:40px;height:3px;background:#16a34a;border-radius:2px;margin-bottom:12px;"></div>
+            <div style="font-size:12px;color:#475569;line-height:1.65;">Designed as a complete office automation solution, the portal integrates dashboards, automated reports, and analytics to support effective program management and institutional oversight. This project demonstrates expertise in software engineering, web development, healthcare data management, and information system design.</div>
+          </div>
+        </div>
+      </div>
 
-    // ── Header card: photo + name + role + contact line ──
-    var photo = dp
-      ? '<img src="' + esc(dp) + '" style="width:128px;height:128px;border-radius:16px;object-fit:cover;border:3px solid #ddd6fe">'
-      : '<div style="width:128px;height:128px;border-radius:16px;background:linear-gradient(160deg,#ede9fe,#c4b5fd);display:flex;align-items:center;justify-content:center;font-size:46px">\U0001F468\u200D\U0001F4BB</div>';
-
-    var contactBits = [];
-    var mailIcon = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>';
-    var phoneIcon = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>';
-    var pinIcon = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
-    if (email) contactBits.push('<span style="display:inline-flex;align-items:center;gap:6px">' + mailIcon + esc(email) + '</span>');
-    if (phone) contactBits.push('<span style="display:inline-flex;align-items:center;gap:6px">' + phoneIcon + esc(phone) + '</span>');
-    if (loc)   contactBits.push('<span style="display:inline-flex;align-items:center;gap:6px">' + pinIcon + esc(loc) + '</span>');
-
-    html += '<div style="background:#fff;border:1px solid #ece9f7;border-radius:16px;padding:22px 24px;'
-      + 'display:flex;gap:22px;align-items:center;flex-wrap:wrap;box-shadow:0 1px 4px rgba(76,29,149,0.05)">'
-      + photo
-      + '<div style="flex:1;min-width:220px">'
-      +   (dn ? '<h2 style="margin:0 0 5px;font-size:23px;font-weight:800;color:#1e1b4b;letter-spacing:0.3px">' + esc(dn) + '</h2>' : '')
-      +   (dr ? '<div style="font-size:13px;font-weight:700;color:#7c3aed;line-height:1.5;text-transform:uppercase;letter-spacing:0.3px">' + esc(dr) + '</div>' : '')
-      +   (contactBits.length
-            ? '<div style="display:flex;flex-wrap:wrap;gap:18px;margin-top:13px;padding-top:13px;border-top:1px solid #f1f0fa;font-size:12.5px;color:#475569;font-weight:600">' + contactBits.join('') + '</div>'
-            : '')
-      + '</div>'
-      + '</div>';
-
-    // ── MIS card: a heading row + the numbered sub-sections in a grid ──
-    if (sections.length) {
-      var projIcon = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="m7 11 2-2 2 2 4-4"/></svg>';
-      var numColors = ['#7c3aed','#2563eb','#16a34a','#db2777','#ea580c'];
-      var subCards = sections.map(function(s, i){
-        var c = numColors[i % numColors.length];
-        var tint = { '#7c3aed':'#f5f3ff', '#2563eb':'#eff6ff', '#16a34a':'#f0fdf4', '#db2777':'#fdf2f8', '#ea580c':'#fff7ed' }[c] || '#f8fafc';
-        var num = String(i + 1).padStart(2, '0');
-        return '<div style="background:' + tint + ';border:1px solid #eceaf6;border-radius:13px;padding:16px;flex:1;min-width:200px">'
-          + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">'
-          +   '<span style="width:28px;height:28px;border-radius:50%;background:' + c + ';color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">' + num + '</span>'
-          +   '<span style="font-size:14px;font-weight:800;color:#1e1b4b">' + esc(s.title || ('Section ' + (i+1))) + '</span>'
-          + '</div>'
-          + '<div style="border-top:2px solid ' + c + ';width:34px;margin-bottom:9px"></div>'
-          + '<div style="font-size:12.5px;color:#475569;line-height:1.65;white-space:pre-wrap">' + esc(s.text || '') + '</div>'
-          + '</div>';
-      }).join('');
-      html += '<div style="background:#fff;border:1px solid #ece9f7;border-radius:16px;padding:22px 24px;box-shadow:0 1px 4px rgba(76,29,149,0.05)">'
-        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'
-        +   '<div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);display:flex;align-items:center;justify-content:center;flex-shrink:0">' + projIcon + '</div>'
-        +   '<h3 style="margin:0;font-size:18px;font-weight:800;color:#3730a3">' + esc(d.devProjectTitle || 'Project Details') + '</h3>'
-        + '</div>'
-        + '<div style="display:flex;gap:14px;flex-wrap:wrap">' + subCards + '</div>'
-        + '</div>';
-    }
-
-    // ── Expertise chip row ──
-    var expertise = Array.isArray(d.devExpertise) ? d.devExpertise.filter(Boolean) : [];
-    if (expertise.length) {
-      var chipIcon = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>';
-      html += '<div style="background:#fff;border:1px solid #ece9f7;border-radius:16px;padding:18px 22px;'
-        + 'display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(76,29,149,0.05)">'
-        + '<div style="font-size:13px;font-weight:800;color:#3730a3;position:relative;padding-bottom:4px">Expertise'
-        +   '<span style="position:absolute;left:0;bottom:0;width:26px;height:2.5px;background:#7c3aed;border-radius:2px"></span>'
-        + '</div>'
-        + expertise.map(function(tag){
-            return '<span style="display:inline-flex;align-items:center;gap:7px;background:#faf9ff;border:1px solid #e9e5fb;'
-              + 'border-radius:50px;padding:8px 15px;font-size:12.5px;font-weight:700;color:#3730a3">' + chipIcon + esc(tag) + '</span>';
-          }).join('')
-        + '</div>';
-    }
-
-    html += '</div>';
-    return html;
+      <!-- Expertise Section -->
+      <div style="background:#fff;border:1px solid #eef2f6;border-radius:12px;padding:24px 30px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;box-shadow:0 4px 12px rgba(15,23,42,0.03);">
+        <div style="font-size:16px;font-weight:800;color:#1e1b4b;position:relative;padding-bottom:4px;">
+          Expertise
+          <span style="position:absolute;left:0;bottom:0;width:30px;height:3px;background:#7c3aed;border-radius:2px;"></span>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:8px;background:#f5f3ff;border:1px solid #e9e5fb;border-radius:50px;padding:10px 18px;font-size:13.5px;font-weight:700;color:#5b21b6;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Web Development</span>
+          <span style="display:inline-flex;align-items:center;gap:8px;background:#f5f3ff;border:1px solid #e9e5fb;border-radius:50px;padding:10px 18px;font-size:13.5px;font-weight:700;color:#5b21b6;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Software Engineering</span>
+          <span style="display:inline-flex;align-items:center;gap:8px;background:#f5f3ff;border:1px solid #e9e5fb;border-radius:50px;padding:10px 18px;font-size:13.5px;font-weight:700;color:#5b21b6;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Data Analysis</span>
+          <span style="display:inline-flex;align-items:center;gap:8px;background:#f5f3ff;border:1px solid #e9e5fb;border-radius:50px;padding:10px 18px;font-size:13.5px;font-weight:700;color:#5b21b6;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Healthcare MIS</span>
+          <span style="display:inline-flex;align-items:center;gap:8px;background:#f5f3ff;border:1px solid #e9e5fb;border-radius:50px;padding:10px 18px;font-size:13.5px;font-weight:700;color:#5b21b6;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> System Design</span>
+        </div>
+      </div>
+    </div>
+    `;
   }
 
   // ── Orders / circulars: list with View / Download buttons (Google Drive) ──
@@ -2602,36 +2737,33 @@ window.addEventListener('DOMContentLoaded', function() {
 
   // ─── Public API ─────────────────────────────────────────────────────
   window.openContentModal = function(id, label){
-    var modal = document.getElementById('contentModal');
-    if (!modal) return;
+    var page = document.getElementById('page-content');
+    if (!page) return;
     _openId = id;
     var iconEl = document.getElementById('cmIcon');
-    if (iconEl && ICON[id]) iconEl.outerHTML = ICON[id].replace('<svg', '<svg id="cmIcon"');
-    var titleEl = document.getElementById('cmTitle');
-    var subEl   = document.getElementById('cmSub');
-    if (titleEl) titleEl.textContent = label || id;
-    if (subEl) {
-      var hasData = (
-        (id==='calendar' && LIVE.holidayCalendar) ||
-        (id==='roster'   && LIVE.wardRoster) ||
-        (id==='holiday'  && LIVE.holidayDuty) ||
-        (id==='weekend'  && LIVE.weekendRoster) ||
-        (id==='orders'   && LIVE.orders) ||
-        (id==='about'    && LIVE.aboutPage) ||
-        (id==='developer'&& LIVE.aboutPage)
-      );
-      subEl.textContent = hasData ? 'Live data — auto-syncs from Admin Portal' : 'Loading from server…';
+    if (iconEl && ICON[id]) {
+      var iconContainer = iconEl.parentNode;
+      iconContainer.innerHTML = ICON[id].replace('<svg', '<svg id="cmIcon" width="20" height="20"');
     }
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
+    var titleEl = document.getElementById('cmTitle');
+    var finalLabel = label || id;
+    if (titleEl) titleEl.textContent = finalLabel;
     renderInto(id);
   };
 
   window.closeContentModal = function(){
-    var modal = document.getElementById('contentModal');
-    if (modal) modal.classList.remove('open');
-    document.body.style.overflow = '';
+    if (typeof window.switchPage === 'function') {
+      window.switchPage('page-home');
+    }
     _openId = null;
+    // Sync active highlight back to Home — the user is on the landing tab now.
+    window.__activeNavId = 'home';
+    var nav = document.getElementById('lpNavArea');
+    if (nav) {
+      nav.querySelectorAll('a.nav-item').forEach(function(el){
+        el.classList.toggle('active', (el.getAttribute('data-nav') || '') === 'home');
+      });
+    }
   };
 
   // ESC closes (only this modal — staff modal has its own ESC handler)

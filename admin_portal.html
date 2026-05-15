@@ -295,15 +295,6 @@ tr:hover td{background:#EEF3FF}
   </script>
 </head>
 <body>
-<!-- BUILD MARKER -->
-<script>
-  (function(){
-    var BUILD = 'ADMIN-2026-05-15-redesign-v3';
-    console.log('%c[Admin portal] ' + BUILD,
-      'background:#1e3a8a;color:#fff;padding:3px 10px;border-radius:6px;font-weight:700');
-    window.__PORTAL_BUILD__ = BUILD;
-  })();
-</script>
 
 <!-- ===== BANNER ===== -->
 <div class="banner-wrap">
@@ -942,14 +933,6 @@ tr:hover td{background:#EEF3FF}
           <div id="abSectionsList" style="display:flex;flex-direction:column;gap:14px"></div>
         </div>
 
-        <div class="card">
-          <div class="card-hd">💬 Page Footer Strip</div>
-          <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Footer message</label>
-          <input type="text" id="abAboutFooter" placeholder="e.g. Together, we are building a healthier, stronger and self-reliant India."
-            style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
-          <div style="font-size:10px;color:#9ca3af;margin-top:3px">Shown as the highlighted strip at the very bottom of the About Us page.</div>
-        </div>
-
         <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:4px">
           <span id="abSaveMsg" style="font-size:11px;font-weight:600"></span>
           <button class="btn btn-pri" onclick="abSave()">💾 Save &amp; Publish</button>
@@ -984,54 +967,18 @@ tr:hover td{background:#EEF3FF}
               </div>
               <div>
                 <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Role / Title</label>
-                <input type="text" id="abDevRole" placeholder="e.g. Web Developer, Software Engineer, Data Analyst"
+                <input type="text" id="abDevRole" placeholder="e.g. Portal Developer — AB-PMJAY Unit, GMC Rajouri"
                   style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
               </div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <div style="flex:1;min-width:150px">
-                  <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Email</label>
-                  <input type="text" id="abDevEmail" placeholder="name@example.com"
-                    style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
-                </div>
-                <div style="flex:1;min-width:130px">
-                  <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Phone</label>
-                  <input type="text" id="abDevPhone" placeholder="+91 98765 43210"
-                    style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
-                </div>
-              </div>
-              <div>
-                <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Location</label>
-                <input type="text" id="abDevLocation" placeholder="e.g. Rajouri, Jammu &amp; Kashmir, India"
-                  style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-hd">🗂️ Project Block &amp; Expertise</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div>
-              <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Project Block Title</label>
-              <input type="text" id="abDevProjectTitle" placeholder="e.g. Management Information System (MIS)"
-                style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
-              <div style="font-size:10px;color:#9ca3af;margin-top:3px">This is the big heading above the numbered content sections below.</div>
-            </div>
-            <div>
-              <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Expertise tags</label>
-              <input type="text" id="abDevExpertise" placeholder="Web Development, Software Engineering, Data Analysis, Healthcare MIS, System Design"
-                style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
-              <div style="font-size:10px;color:#9ca3af;margin-top:3px">Comma-separated. Shown as chips in the "Expertise" row at the bottom of the page.</div>
             </div>
           </div>
         </div>
 
         <div class="card">
           <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center">
-            <span>📑 Numbered Content Sections</span>
+            <span>📑 Content Sections</span>
             <button class="btn btn-pri" onclick="abAddSection('dev')" style="padding:5px 12px;font-size:11px">+ Add Section</button>
           </div>
-          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Each section becomes a numbered card (01, 02, 03…) inside the project block. e.g. Overview, Key Capabilities, Impact &amp; Approach.</div>
           <div id="devSectionsList" style="display:flex;flex-direction:column;gap:14px"></div>
         </div>
 
@@ -2946,21 +2893,9 @@ function abBlankSection(){
     textColor:  '#334155',
     bgColor:    '#ffffff',
     font:       'inherit',
-    align:      'left',
-    icon:       'info'
+    align:      'left'
   };
 }
-
-// Icon choices for About Us section cards (value -> label).
-var AB_ICONS = [
-  { v:'scheme',   label:'Scheme / Heart' },
-  { v:'features', label:'Features / Shield' },
-  { v:'pmam',     label:'PMAMs / People' },
-  { v:'role',     label:'Role / Handshake' },
-  { v:'mission',  label:'Mission / Target' },
-  { v:'vision',   label:'Vision / Eye' },
-  { v:'info',     label:'Info (default)' }
-];
 
 // Available font choices (value -> label). Must mirror the landing page.
 var AB_FONTS = [
@@ -2978,12 +2913,6 @@ function abInit(){
     var set = function(id, val){ var el = document.getElementById(id); if (el) el.value = val || ''; };
     set('abDevName', d.devName);
     set('abDevRole', d.devRole);
-    set('abDevEmail', d.devEmail);
-    set('abDevPhone', d.devPhone);
-    set('abDevLocation', d.devLocation);
-    set('abDevProjectTitle', d.devProjectTitle);
-    set('abDevExpertise', Array.isArray(d.devExpertise) ? d.devExpertise.join(', ') : (d.devExpertise || ''));
-    set('abAboutFooter', d.aboutFooter);
     _abDevPhoto = d.devPhoto || '';
     abDevRenderPhoto();
 
@@ -3104,7 +3033,6 @@ function abRenderSections(which){
       +   'style="width:100%;padding:8px 10px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;line-height:1.6;outline:none;resize:vertical;margin-bottom:10px">' + escAttr(s.text || '') + '</textarea>'
       // styling row
       + '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;background:#fff;border:1px solid #f0e8fb;border-radius:8px;padding:10px">'
-      +   (which === 'about' ? abIconField(i, s.icon) : '')
       +   abColorField(which, i, 'titleColor', 'Title colour', s.titleColor)
       +   abColorField(which, i, 'textColor',  'Text colour',  s.textColor)
       +   abColorField(which, i, 'bgColor',    'Background / shape', s.bgColor)
@@ -3117,18 +3045,6 @@ function abRenderSections(which){
       + '</div>'
       + '</div>';
   }).join('');
-}
-
-// A labelled icon dropdown for About Us section cards.
-function abIconField(i, value){
-  value = value || 'info';
-  var opts = AB_ICONS.map(function(ic){
-    return '<option value="' + ic.v + '"' + (value === ic.v ? ' selected' : '') + '>' + ic.label + '</option>';
-  }).join('');
-  return '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Card icon</label>'
-    + '<select onchange="abSectionsArray(\'about\')[' + i + '].icon=this.value;abMarkUnsaved()" '
-    + 'style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">'
-    + opts + '</select></div>';
 }
 
 // A labelled colour input (native picker + hex text), wired to a section key.
@@ -3206,21 +3122,14 @@ function abSave(){
       return;
     }
 
-    var expertiseArr = val('abDevExpertise').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
     var payload = {
-      devName:        val('abDevName'),
-      devRole:        val('abDevRole'),
-      devEmail:       val('abDevEmail'),
-      devPhone:       val('abDevPhone'),
-      devLocation:    val('abDevLocation'),
-      devProjectTitle:val('abDevProjectTitle'),
-      devExpertise:   expertiseArr,
-      aboutFooter:    val('abAboutFooter'),
-      devPhoto:       _abDevPhoto || '',
-      aboutSections:  cleanSections(_abSections),
-      devSections:    cleanSections(_devSections),
-      updatedAt:      Date.now(),
-      _updatedBy:     (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
+      devName:       val('abDevName'),
+      devRole:       val('abDevRole'),
+      devPhoto:      _abDevPhoto || '',
+      aboutSections: cleanSections(_abSections),
+      devSections:   cleanSections(_devSections),
+      updatedAt:     Date.now(),
+      _updatedBy:    (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
     };
     console.log('[abSave] writing about_page payload:', payload);
     setMsg('Saving…', '#1A3DB5');
@@ -5400,21 +5309,21 @@ var _nbmItems = [];  // working copy of the nav items
 // display order. id determines what content opens; label is what the visitor
 // sees and is the only editable field.
 var NBM_DEFAULTS = [
-  { id:'about',     label:'About Us',         order:0 },
-  { id:'developer', label:'About Developer',  order:1 },
-  { id:'staff',     label:'Staff',            order:2 },
-  { id:'roster',    label:'Ward Roster',      order:3 },
-  { id:'weekend',   label:'Weekend Roster',   order:4 },
-  { id:'holiday',   label:'Holiday Roster',   order:5 },
-  { id:'calendar',  label:'Holiday Calendar', order:6 },
-  { id:'orders',    label:'Orders',           order:7 }
+  { id:'about',     label:'About Us',       order:0 },
+  { id:'developer', label:'Developer',      order:1 },
+  { id:'staff',     label:'Staff',          order:2 },
+  { id:'roster',    label:'Ward Roster',    order:3 },
+  { id:'weekend',   label:'Weekend Roster', order:4 },
+  { id:'holiday',   label:'Holiday Roster', order:5 },
+  { id:'calendar',  label:'Holidays',       order:6 },
+  { id:'orders',    label:'Orders',         order:7 }
 ];
 
 // Canonical id -> default label (used when adding an item / repairing data).
 var NBM_KNOWN = {
-  about:'About Us', developer:'About Developer', staff:'Staff',
+  about:'About Us', developer:'Developer', staff:'Staff',
   roster:'Ward Roster', weekend:'Weekend Roster', holiday:'Holiday Roster',
-  calendar:'Holiday Calendar', orders:'Orders'
+  calendar:'Holidays', orders:'Orders'
 };
 
 function nbmSetStatus(msg, color){
@@ -5433,6 +5342,13 @@ function nbmSetStatus(msg, color){
 function nbmReconcile(savedItems){
   var bySaved = [];
   var seen = {};
+  // Labels that were renamed. If the saved doc still has the old label,
+  // upgrade it to the new one on the fly so the admin sees the rename
+  // immediately (and the next Save persists the rename to Firestore).
+  var RENAMED = {
+    'about developer':  'Developer',
+    'holiday calendar': 'Holidays'
+  };
   (savedItems || []).forEach(function(it){
     var id = (it.id || '').toLowerCase();
     // canonicalise a few common legacy variants
@@ -5443,6 +5359,9 @@ function nbmReconcile(savedItems){
     if (!NBM_KNOWN[id] || seen[id]) return;          // drop invalid / duplicate
     seen[id] = true;
     var label = (it.label || '').trim() || NBM_KNOWN[id];  // repair blank label
+    // Apply forced renames (case-insensitive match on the old label).
+    var lowered = label.toLowerCase();
+    if (RENAMED[lowered]) label = RENAMED[lowered];
     bySaved.push({ id:id, label:label });
   });
   // Append any canonical items the saved data didn't include.
