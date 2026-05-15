@@ -1373,6 +1373,23 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // ── Role-icon badges shown on the small circular tag of each card ──
+  var STAFF_ROLE_ICON = {
+    principal: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 8.5 12 2"/></svg>',
+    ms:        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+    ic:        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+    pmam:      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+    deo:       '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    other:     '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>'
+  };
+  // Divider-header icon per group
+  var STAFF_GROUP_ICON = {
+    leadership:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#4c1d95" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3Z"/></svg>',
+    pmam:      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#4c1d95" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    deo:       '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#4c1d95" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    other:     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#4c1d95" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>'
+  };
+
   function renderCards(list, roleFilter){
     var grid = document.getElementById('staffModalGrid');
     if (!grid) return;
@@ -1384,26 +1401,25 @@ window.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    // ── Rank order for the vertical, grouped staff list ──
-    // Principal → Medical Superintendent → I/C AB-PMJAY → PMAMs → DEO → others.
-    // Matching is case-insensitive and tolerant of small naming variations.
+    // ── Rank groups. Leadership = principal + ms + ic shown together as
+    // large cards; pmam / deo / other shown as photo-card grids. ──
     var RANK_GROUPS = [
-      { key:'principal', label:'Principal',                icon:'\uD83C\uDF93',
+      { key:'principal', label:'Principal',              roleIcon:'principal', leadership:true,
+        desc:'Leading the institution with vision and commitment.',
         match:function(r){ return /principal/.test(r); } },
-      { key:'ms',        label:'Medical Superintendent',   icon:'\uD83C\uDFE5',
+      { key:'ms',        label:'Medical Superintendent', roleIcon:'ms', leadership:true,
+        desc:'Overseeing hospital operations and healthcare services.',
         match:function(r){ return /medical\s*superintendent|(^|\b)ms\b/.test(r); } },
-      { key:'ic',        label:'I/C AB-PMJAY',             icon:'\uD83D\uDCCB',
+      { key:'ic',        label:'I/C AB-PMJAY',           roleIcon:'ic', leadership:true,
+        desc:'Managing and coordinating AB-PMJAY activities effectively.',
         match:function(r){ return /i\/?c|in.?charge|incharge/.test(r) && /pmjay|ab-?pmjay|sehat/.test(r); } },
-      { key:'pmam',      label:'PMAMs',                    icon:'\uD83D\uDC65',
+      { key:'pmam',      label:'PMAMs',                  roleIcon:'pmam', leadership:false,
         match:function(r){ return /pmam/.test(r); } },
-      { key:'deo',       label:'DEO',                      icon:'\uD83D\uDCBB',
+      { key:'deo',       label:'DEO',                    roleIcon:'deo', leadership:false,
         match:function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(r); } }
     ];
-    // Admin-configurable order: settings/about_page.staffGroupOrder is an
-    // array of group keys (e.g. ['deo','pmam','ic','ms','principal']).
-    // It lives in a different IIFE's LIVE store, so we read it through the
-    // global accessor exposed there. Any keys not listed keep their default
-    // relative order and are appended after the saved ones.
+
+    // Admin-configurable order (settings/about_page.staffGroupOrder).
     (function applyStaffGroupOrder(){
       var saved = (typeof window.lpGetStaffGroupOrder === 'function')
         ? window.lpGetStaffGroupOrder() : null;
@@ -1424,49 +1440,114 @@ window.addEventListener('DOMContentLoaded', function() {
       return RANK_GROUPS.length; // "Other Staff" bucket
     }
 
-    // Bucket staff into groups, preserving alphabetical order within each.
     var buckets = {};
     list.forEach(function(u){
       var gi = groupFor(u.role);
       (buckets[gi] = buckets[gi] || []).push(u);
     });
 
-    function cardHtml(u){
-      var rc = ROLE_COLORS[u.role] || { bg:'#F3F4F6', fg:'#374151', av:'linear-gradient(135deg,#6b7280,#4b5563)' };
+    function photoBox(u, size){
       var initials = (u.name||'?').split(/\s+/).map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
-      var photoHtml = u.photoBase64
-        ? '<img src="'+u.photoBase64+'" style="width:100%;height:100%;object-fit:cover" alt="">'
-        : '<span style="font-size:20px;font-weight:800;color:#fff">'+escHtml(initials)+'</span>';
-      return '<div class="staff-card">'
-        + '<div class="staff-av-lg" style="background:'+rc.av+'">'+photoHtml+'</div>'
+      if (u.photoBase64) {
+        return '<img src="'+u.photoBase64+'" style="width:100%;height:100%;object-fit:cover" alt="">';
+      }
+      return '<span style="font-size:'+(size>70?'24px':'18px')+';font-weight:800;color:#fff">'+escHtml(initials)+'</span>';
+    }
+
+    // Large card used inside the Leadership group (photo on top, name, role
+    // badge, optional description). Mirrors mockup image 3.
+    function leadershipCard(u, g){
+      var roleIco = STAFF_ROLE_ICON[g ? g.roleIcon : 'other'] || STAFF_ROLE_ICON.other;
+      var desc = (g && g.desc) ? g.desc : '';
+      return '<div class="sx-lead-card">'
+        + '<div class="sx-lead-photo">'+photoBox(u,90)+'</div>'
+        + '<div class="sx-lead-badge">'+roleIco+'</div>'
+        + '<div class="sx-lead-name">'+escHtml(u.name||'Unknown')+'</div>'
+        + (desc ? '<div class="sx-lead-desc">'+escHtml(desc)+'</div>' : '')
+        + '</div>';
+    }
+
+    // Compact card used in PMAM / DEO / Other grids (photo left, name + role pill).
+    function gridCard(u, g){
+      var roleIco = STAFF_ROLE_ICON[g ? g.roleIcon : 'other'] || STAFF_ROLE_ICON.other;
+      return '<div class="sx-grid-card">'
+        + '<div class="sx-grid-photo">'+photoBox(u,56)+'</div>'
         + '<div style="flex:1;min-width:0">'
-        +   '<div class="staff-name">'+escHtml(u.name||'Unknown')+'</div>'
-        +   '<div class="staff-meta">'
-        +     '<span class="staff-pill" style="background:'+rc.bg+';color:'+rc.fg+'">'+escHtml(u.role||'Staff')+'</span>'
-        +     (u.ward ? '<span class="staff-pill" style="background:#F0F4FF;color:#1A3DB5">\uD83D\uDCCD '+escHtml(u.ward)+'</span>' : '')
-        +   '</div>'
+        +   '<div class="sx-grid-name">'+escHtml(u.name||'Unknown')+'</div>'
+        +   '<div class="sx-grid-role">'+roleIco+'<span>'+escHtml(u.role||'Staff')+'</span></div>'
         + '</div>'
         + '</div>';
     }
 
+    function groupHeader(label, iconKey, count){
+      var ico = STAFF_GROUP_ICON[iconKey] || STAFF_GROUP_ICON.other;
+      return '<div class="sx-group-hd">'
+        + '<span class="sx-group-ico">'+ico+'</span>'
+        + '<span class="sx-group-label">'+escHtml(label)+'</span>'
+        + (count ? '<span class="sx-group-count">'+count+'</span>' : '')
+        + '<span class="sx-group-line"></span>'
+        + '</div>';
+    }
+
+    // ── Build the HTML ──
     var html = '';
-    // Defined rank groups first, in order
+
+    // Intro banner
+    html += '<div class="sx-intro">'
+      + '<div class="sx-intro-ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>'
+      + '<div style="font-size:12.5px;color:#475569;line-height:1.6">Meet the dedicated team working behind the success of '
+      +   '<strong style="color:#3730a3">AB-PMJAY Management Information System.</strong> '
+      +   'Together, we ensure efficient implementation, monitoring, and management of the AB-PMJAY scheme.</div>'
+      + '</div>';
+
+    // Are any of the first contiguous leadership groups present? If so, render
+    // them under a single "Leadership" divider as large cards.
+    var leadershipMembers = [];
+    var renderedLeadership = false;
+    RANK_GROUPS.forEach(function(g, gi){
+      if (!g.leadership) return;
+      var members = buckets[gi];
+      if (members && members.length) {
+        members.forEach(function(m){ leadershipMembers.push({ u:m, g:g }); });
+      }
+    });
+
+    function renderLeadershipBlock(){
+      if (renderedLeadership || !leadershipMembers.length) return;
+      renderedLeadership = true;
+      html += groupHeader('Leadership', 'leadership', 0);
+      html += '<div class="sx-lead-grid">'
+        + leadershipMembers.map(function(item){ return leadershipCard(item.u, item.g); }).join('')
+        + '</div>';
+    }
+
+    // Walk the groups in order. The first time we hit a leadership group we
+    // emit the whole Leadership block; non-leadership groups get their own
+    // divider + grid.
     RANK_GROUPS.forEach(function(g, gi){
       var members = buckets[gi];
+      if (g.leadership) {
+        renderLeadershipBlock();
+        return;
+      }
       if (!members || !members.length) return;
-      html += '<div class="staff-group-hd">'
-        + '<span>'+g.icon+'</span><span>'+g.label+'</span>'
-        + '<span class="sg-count">'+members.length+'</span>'
+      html += groupHeader(g.label, g.roleIcon === 'pmam' ? 'pmam' : (g.roleIcon === 'deo' ? 'deo' : 'other'), members.length);
+      html += '<div class="sx-grid">'
+        + members.map(function(m){ return gridCard(m, g); }).join('')
         + '</div>';
-      html += members.map(cardHtml).join('');
     });
-    // Any leftover roles in an "Other Staff" group at the end
+    // In case leadership groups appear only at the very end of the order.
+    renderLeadershipBlock();
+
+    // Leftover roles
     var others = buckets[RANK_GROUPS.length];
     if (others && others.length) {
-      html += '<div class="staff-group-hd"><span>\uD83D\uDC64</span><span>Other Staff</span>'
-        + '<span class="sg-count">'+others.length+'</span></div>';
-      html += others.map(cardHtml).join('');
+      html += groupHeader('Other Staff', 'other', others.length);
+      html += '<div class="sx-grid">'
+        + others.map(function(m){ return gridCard(m, null); }).join('')
+        + '</div>';
     }
+
     grid.innerHTML = html;
   }
 
@@ -1732,32 +1813,91 @@ window.addEventListener('DOMContentLoaded', function() {
     background: #f8fafc;
   }
   #staffModalGrid {
-    display: flex; flex-direction: column; gap: 10px;
+    display: flex; flex-direction: column; gap: 4px;
   }
-  .staff-group-hd {
-    font-size: 12px; font-weight: 800; color: #1e3a8a; text-transform: uppercase;
-    letter-spacing: 0.6px; margin: 6px 2px 2px; padding-bottom: 5px;
-    border-bottom: 2px solid #bfdbfe; display: flex; align-items: center; gap: 7px;
+  /* Intro banner */
+  .sx-intro {
+    background:#f1f0fb; border:1px solid #e4e1f5; border-radius:14px;
+    padding:14px 16px; display:flex; gap:13px; align-items:flex-start; margin-bottom:6px;
   }
-  .staff-group-hd:first-child { margin-top: 0 }
-  .staff-group-hd .sg-count {
-    background: #dbeafe; color: #1e3a8a; font-size: 10px; padding: 1px 8px;
-    border-radius: 20px; letter-spacing: 0; font-weight: 700;
+  .sx-intro-ico {
+    width:42px; height:42px; border-radius:50%; background:#fff;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    box-shadow:0 1px 4px rgba(76,29,149,0.12);
   }
-  .staff-card {
-    background: #fff; border-radius: 14px; padding: 13px 16px;
-    border: 1.5px solid rgba(100,150,255,0.18); box-shadow: 0 2px 8px rgba(26,61,181,0.05);
-    display: flex; align-items: center; gap: 14px; width: 100%;
+  /* Group divider header */
+  .sx-group-hd {
+    display:flex; align-items:center; gap:9px; margin:18px 2px 12px;
   }
-  .staff-av-lg {
-    width: 58px; height: 58px; border-radius: 14px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; overflow: hidden;
-    border: 2px solid rgba(255,255,255,0.5);
+  .sx-group-ico { display:flex; align-items:center; }
+  .sx-group-label {
+    font-size:14px; font-weight:800; color:#3730a3; letter-spacing:0.2px;
   }
-  .staff-av-lg img { width: 100%; height: 100%; object-fit: cover }
-  .staff-name { font-size: 15px; font-weight: 800; color: #0F2B8C; line-height: 1.25 }
-  .staff-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px }
-  .staff-pill { padding: 2px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 700; white-space: nowrap }
+  .sx-group-count {
+    background:#ede9fe; color:#5b21b6; font-size:10.5px; font-weight:800;
+    padding:1px 9px; border-radius:20px;
+  }
+  .sx-group-line {
+    flex:1; height:2px; border-radius:2px;
+    background:linear-gradient(90deg,#ddd6fe,transparent);
+  }
+  /* Leadership large cards */
+  .sx-lead-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px;
+  }
+  .sx-lead-card {
+    background:#fff; border:1px solid #ece9f7; border-radius:16px;
+    padding:18px 16px 20px; text-align:center; position:relative;
+    box-shadow:0 1px 5px rgba(76,29,149,0.06);
+  }
+  .sx-lead-photo {
+    width:104px; height:104px; border-radius:14px; margin:0 auto 12px;
+    background:linear-gradient(160deg,#ede9fe,#c4b5fd); overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    border:3px solid #f3f1fc;
+  }
+  .sx-lead-badge {
+    position:absolute; top:14px; right:14px; width:30px; height:30px;
+    border-radius:50%; background:#f5f3ff; border:1px solid #e9e5fb;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .sx-lead-name {
+    font-size:15px; font-weight:800; color:#3730a3; line-height:1.3; margin-bottom:6px;
+  }
+  .sx-lead-name::after {
+    content:""; display:block; width:24px; height:2.5px; background:#c4b5fd;
+    border-radius:2px; margin:7px auto 0;
+  }
+  .sx-lead-desc {
+    font-size:11.5px; color:#64748b; line-height:1.55; margin-top:8px;
+  }
+  /* Compact grid cards (PMAMs / DEO / Other) */
+  .sx-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px;
+  }
+  .sx-grid-card {
+    background:#fff; border:1px solid #ece9f7; border-radius:14px;
+    padding:11px 13px; display:flex; align-items:center; gap:12px;
+    box-shadow:0 1px 4px rgba(76,29,149,0.05);
+  }
+  .sx-grid-photo {
+    width:54px; height:54px; border-radius:12px; flex-shrink:0; overflow:hidden;
+    background:linear-gradient(160deg,#ede9fe,#c4b5fd);
+    display:flex; align-items:center; justify-content:center;
+    border:2px solid #f3f1fc;
+  }
+  .sx-grid-name {
+    font-size:13.5px; font-weight:800; color:#1e1b4b; line-height:1.25;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .sx-grid-role {
+    display:inline-flex; align-items:center; gap:5px; margin-top:5px;
+    background:#f5f3ff; border:1px solid #e9e5fb; border-radius:20px;
+    padding:2px 9px 2px 7px; font-size:10px; font-weight:700; color:#5b21b6;
+  }
+  /* legacy classes kept harmless */
+  .staff-card { display:none }
+  .staff-pill { padding:2px 9px;border-radius:10px;font-size:10.5px;font-weight:700;white-space:nowrap }
   .sm-footer {
     padding: 10px 20px; font-size: 11px; color: #6b7280; text-align: center;
     border-top: 1px solid #e5e7eb; background: #fff;
@@ -2190,125 +2330,169 @@ window.addEventListener('DOMContentLoaded', function() {
   // ── About Us modal: the AB-PMJAY / SEHAT scheme writeup ──
   // Render one styled content section (shared by About Us & About Developer).
   // sec = { title, text, titleColor, textColor, bgColor, font, align }
-  function renderStyledSection(sec){
-    var titleColor = sec.titleColor || '#4c1d95';
-    var textColor  = sec.textColor  || '#334155';
-    var bgColor    = sec.bgColor    || '#ffffff';
-    var font       = sec.font       || 'inherit';
-    var align      = sec.align      || 'left';
-    var FONTS = {
-      'inherit':'inherit',
-      'serif':'Georgia, \'Times New Roman\', serif',
-      'sans':'\'Segoe UI\', Arial, sans-serif',
-      'mono':'\'Courier New\', monospace',
-      'rounded':'\'Trebuchet MS\', \'Segoe UI\', sans-serif'
-    };
-    var fontFamily = FONTS[font] || 'inherit';
-    var border = (bgColor.toLowerCase() === '#ffffff' || bgColor.toLowerCase() === '#fff')
-      ? '1px solid #e5e7eb' : 'none';
-    var html = '<div style="background:' + esc(bgColor) + ';border:' + border
-      + ';border-radius:14px;padding:22px;margin-bottom:14px;text-align:' + esc(align)
-      + ';font-family:' + fontFamily + '">';
-    if (sec.title) {
-      html += '<h3 style="margin:0 0 12px;font-size:18px;font-weight:800;color:' + esc(titleColor)
-        + ';font-family:' + fontFamily + '">' + esc(sec.title) + '</h3>';
+  // ─── About Us icon set (circular badge icons for each section) ───
+  var ABOUT_ICONS = {
+    scheme:   '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+    features: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
+    pmam:     '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    role:     '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17a4 4 0 0 1-4-4V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3"/><path d="M16 8a2 2 0 0 1 2 2v3a4 4 0 0 1-4 4"/><circle cx="12" cy="20" r="2"/></svg>',
+    mission:  '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    vision:   '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+    info:     '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+  };
+  var CHECK_ICON = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>';
+
+  // Render one About Us section card. A section can be either a paragraph
+  // (sec.text) or a bullet list (sec.text with newlines, when sec.list=true,
+  // OR detected automatically when most lines are short).
+  // sec = { title, text, titleColor, textColor, bgColor, icon, list }
+  function renderAboutSectionCard(sec, idx){
+    var titleColor = sec.titleColor || '#3730a3';
+    var textColor  = sec.textColor  || '#475569';
+    var bg         = sec.bgColor    || '#ffffff';
+    var iconKey    = sec.icon || 'info';
+    var iconSvg    = ABOUT_ICONS[iconKey] || ABOUT_ICONS.info;
+    // Decide list vs paragraph: explicit flag, or auto-detect (2+ lines).
+    var lines = String(sec.text || '').split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean);
+    var asList = sec.list === true || (sec.list !== false && lines.length >= 2);
+
+    var bodyHtml;
+    if (asList && lines.length) {
+      bodyHtml = '<div style="display:flex;flex-direction:column;gap:9px;margin-top:10px">'
+        + lines.map(function(ln){
+            return '<div style="display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:' + esc(textColor) + ';line-height:1.5">'
+              + CHECK_ICON + '<span>' + esc(ln) + '</span></div>';
+          }).join('')
+        + '</div>';
+    } else {
+      bodyHtml = '<div style="font-size:13.5px;color:' + esc(textColor) + ';line-height:1.7;margin-top:8px;white-space:pre-wrap">'
+        + esc(sec.text || '') + '</div>';
     }
-    if (sec.text) {
-      html += '<div style="font-size:13.5px;line-height:1.75;white-space:pre-wrap;color:' + esc(textColor)
-        + ';font-family:' + fontFamily + '">' + esc(sec.text) + '</div>';
-    }
-    html += '</div>';
-    return html;
+
+    return '<div style="background:' + esc(bg) + ';border:1px solid #ece9f7;border-radius:16px;'
+      + 'padding:22px 24px;display:flex;gap:18px;align-items:flex-start;box-shadow:0 1px 4px rgba(76,29,149,0.05)">'
+      // circular icon badge
+      + '<div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#ede9fe,#ddd6fe);'
+      +   'display:flex;align-items:center;justify-content:center;flex-shrink:0">' + iconSvg + '</div>'
+      // content
+      + '<div style="flex:1;min-width:0">'
+      +   '<h3 style="margin:0;font-size:17px;font-weight:800;color:' + esc(titleColor) + ';line-height:1.3">' + esc(sec.title || 'Section') + '</h3>'
+      +   bodyHtml
+      + '</div>'
+      + '</div>';
   }
 
   function renderAbout(){
     var d = LIVE.aboutPage || {};
     var sections = Array.isArray(d.aboutSections) ? d.aboutSections : null;
-    // Legacy fallback: old single heading/body becomes one section.
     if (!sections || !sections.length) {
       if (d.sehatHeading || d.sehatBody) {
         sections = [{ title: d.sehatHeading || 'About Ayushman Bharat — PM-JAY / SEHAT',
-                      text: d.sehatBody || '' }];
+                      text: d.sehatBody || '', icon:'scheme' }];
       } else {
         return '<div class="cm-empty">No content added yet. The admin can add sections from <strong>Nav Bar → About Us</strong>.</div>';
       }
     }
-    return sections.map(renderStyledSection).join('');
+    var html = '<div style="display:flex;flex-direction:column;gap:14px">';
+    html += sections.map(renderAboutSectionCard).join('');
+    html += '</div>';
+    // Closing banner strip
+    html += '<div style="margin-top:14px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:14px;'
+      + 'padding:14px 20px;text-align:center;font-size:13.5px;font-weight:600;color:#5b21b6;'
+      + 'display:flex;align-items:center;justify-content:center;gap:8px">'
+      + '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>'
+      + (esc(d.aboutFooter || 'Together, we are building a healthier, stronger and self-reliant India.'))
+      + '</div>';
+    return html;
   }
 
-  // ── About Developer modal: name, role, photo and writeup ──
   function renderDeveloper(){
     var d = LIVE.aboutPage || {};
     var dn = d.devName || '';
     var dr = d.devRole || '';
     var dp = d.devPhoto || '';
+    var email = d.devEmail || '';
+    var phone = d.devPhone || '';
+    var loc   = d.devLocation || '';
     var sections = Array.isArray(d.devSections) ? d.devSections : null;
-    // Legacy fallback: old devBody becomes one section.
     if (!sections || !sections.length) {
-      if (d.devBody) sections = [{ title:'', text:d.devBody }];
+      if (d.devBody) sections = [{ title:'Overview', text:d.devBody }];
       else sections = [];
     }
     if (!dn && !dr && !dp && !sections.length) {
       return '<div class="cm-empty">No developer details added yet. The admin can add them from <strong>Nav Bar → About Developer</strong>.</div>';
     }
-    var html = '';
-    // Header card: photo + name + role
-    if (dn || dr || dp) {
-      var photo = dp
-        ? '<img src="' + esc(dp) + '" style="width:120px;height:120px;border-radius:16px;object-fit:cover;border:3px solid #e9d5ff;flex-shrink:0">'
-        : '<div style="width:120px;height:120px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#9333ea);display:flex;align-items:center;justify-content:center;font-size:42px;flex-shrink:0">\uD83D\uDC68\u200D\uD83D\uDCBB</div>';
-      html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:22px;margin-bottom:14px;display:flex;gap:20px;flex-wrap:wrap;align-items:center">'
-        + photo
-        + '<div style="flex:1;min-width:200px">'
-        +   (dn ? '<h3 style="margin:0 0 4px;font-size:20px;color:#4c1d95;font-weight:800">' + esc(dn) + '</h3>' : '')
-        +   (dr ? '<div style="font-size:13px;color:#7c3aed;font-weight:700">' + esc(dr) + '</div>' : '')
-        + '</div>'
-        + '</div>';
-    }
-    // Styled content sections below the header
-    html += sections.map(renderStyledSection).join('');
-    return html;
-  }
 
-  function renderOrders(){
-    var data = LIVE.orders || {};
-    var rows = Array.isArray(data.rows) ? data.rows : [];
-    if (!rows.length) {
-      return '<div class="cm-empty">No orders published yet. Admin can add orders from <strong>Nav Bar → Orders</strong> in the Admin Portal.</div>';
-    }
-    var sorted = rows.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
-    var catColor = { 'Office Order':'#dbeafe','Circular':'#fef3c7','Notice':'#fae8ff','Notification':'#dcfce7','Other':'#f1f5f9' };
-    var catFg    = { 'Office Order':'#1e40af','Circular':'#92400e','Notice':'#86198f','Notification':'#166534','Other':'#475569' };
-    var html = '<div style="display:flex;flex-direction:column;gap:10px">';
-    sorted.forEach(function(r){
-      var title = r.title || r.name || 'Untitled order';
-      var cat   = r.category || 'Office Order';
-      var bg = catColor[cat] || '#f1f5f9';
-      var fg = catFg[cat] || '#475569';
-      var link = r.link || '';
-      var openBtn = link
-        ? '<a href="'+esc(link)+'" target="_blank" rel="noopener" '
-          + 'style="display:inline-flex;align-items:center;gap:5px;background:#16a34a;color:#fff;'
-          + 'padding:7px 16px;border-radius:50px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">'
-          + 'View / Download ↗</a>'
-        : '<span style="color:#dc2626;font-size:11px">Link unavailable</span>';
-      html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:13px 15px;'
-            + 'display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
-        +   '<div style="flex:1;min-width:180px">'
-        +     '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
-        +       '<span style="background:'+bg+';color:'+fg+';padding:2px 10px;border-radius:20px;font-size:10px;font-weight:800">'+esc(cat)+'</span>'
-        +       (r.date ? '<span style="font-size:11px;color:#6b7280;font-weight:600">'+esc(fmtDate(r.date))+'</span>' : '')
-        +     '</div>'
-        +     '<div style="font-size:13.5px;font-weight:700;color:#1e293b;line-height:1.4">'+esc(title)+'</div>'
-        +   '</div>'
-        +   openBtn
+    var html = '<div style="display:flex;flex-direction:column;gap:14px">';
+
+    // ── Header card: photo + name + role + contact line ──
+    var photo = dp
+      ? '<img src="' + esc(dp) + '" style="width:128px;height:128px;border-radius:16px;object-fit:cover;border:3px solid #ddd6fe">'
+      : '<div style="width:128px;height:128px;border-radius:16px;background:linear-gradient(160deg,#ede9fe,#c4b5fd);display:flex;align-items:center;justify-content:center;font-size:46px">\U0001F468\u200D\U0001F4BB</div>';
+
+    var contactBits = [];
+    var mailIcon = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>';
+    var phoneIcon = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>';
+    var pinIcon = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+    if (email) contactBits.push('<span style="display:inline-flex;align-items:center;gap:6px">' + mailIcon + esc(email) + '</span>');
+    if (phone) contactBits.push('<span style="display:inline-flex;align-items:center;gap:6px">' + phoneIcon + esc(phone) + '</span>');
+    if (loc)   contactBits.push('<span style="display:inline-flex;align-items:center;gap:6px">' + pinIcon + esc(loc) + '</span>');
+
+    html += '<div style="background:#fff;border:1px solid #ece9f7;border-radius:16px;padding:22px 24px;'
+      + 'display:flex;gap:22px;align-items:center;flex-wrap:wrap;box-shadow:0 1px 4px rgba(76,29,149,0.05)">'
+      + photo
+      + '<div style="flex:1;min-width:220px">'
+      +   (dn ? '<h2 style="margin:0 0 5px;font-size:23px;font-weight:800;color:#1e1b4b;letter-spacing:0.3px">' + esc(dn) + '</h2>' : '')
+      +   (dr ? '<div style="font-size:13px;font-weight:700;color:#7c3aed;line-height:1.5;text-transform:uppercase;letter-spacing:0.3px">' + esc(dr) + '</div>' : '')
+      +   (contactBits.length
+            ? '<div style="display:flex;flex-wrap:wrap;gap:18px;margin-top:13px;padding-top:13px;border-top:1px solid #f1f0fa;font-size:12.5px;color:#475569;font-weight:600">' + contactBits.join('') + '</div>'
+            : '')
+      + '</div>'
+      + '</div>';
+
+    // ── MIS card: a heading row + the numbered sub-sections in a grid ──
+    if (sections.length) {
+      var projIcon = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="m7 11 2-2 2 2 4-4"/></svg>';
+      var numColors = ['#7c3aed','#2563eb','#16a34a','#db2777','#ea580c'];
+      var subCards = sections.map(function(s, i){
+        var c = numColors[i % numColors.length];
+        var tint = { '#7c3aed':'#f5f3ff', '#2563eb':'#eff6ff', '#16a34a':'#f0fdf4', '#db2777':'#fdf2f8', '#ea580c':'#fff7ed' }[c] || '#f8fafc';
+        var num = String(i + 1).padStart(2, '0');
+        return '<div style="background:' + tint + ';border:1px solid #eceaf6;border-radius:13px;padding:16px;flex:1;min-width:200px">'
+          + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">'
+          +   '<span style="width:28px;height:28px;border-radius:50%;background:' + c + ';color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">' + num + '</span>'
+          +   '<span style="font-size:14px;font-weight:800;color:#1e1b4b">' + esc(s.title || ('Section ' + (i+1))) + '</span>'
+          + '</div>'
+          + '<div style="border-top:2px solid ' + c + ';width:34px;margin-bottom:9px"></div>'
+          + '<div style="font-size:12.5px;color:#475569;line-height:1.65;white-space:pre-wrap">' + esc(s.text || '') + '</div>'
+          + '</div>';
+      }).join('');
+      html += '<div style="background:#fff;border:1px solid #ece9f7;border-radius:16px;padding:22px 24px;box-shadow:0 1px 4px rgba(76,29,149,0.05)">'
+        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'
+        +   '<div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);display:flex;align-items:center;justify-content:center;flex-shrink:0">' + projIcon + '</div>'
+        +   '<h3 style="margin:0;font-size:18px;font-weight:800;color:#3730a3">' + esc(d.devProjectTitle || 'Project Details') + '</h3>'
+        + '</div>'
+        + '<div style="display:flex;gap:14px;flex-wrap:wrap">' + subCards + '</div>'
         + '</div>';
-    });
-    html += '</div>';
-    if (data.updatedAt) {
-      html += '<div style="font-size:10.5px;color:#9ca3af;text-align:right;margin-top:10px">Last updated: '
-            + esc(fmtDate(new Date(data.updatedAt).toISOString().slice(0,10)))+'</div>';
     }
+
+    // ── Expertise chip row ──
+    var expertise = Array.isArray(d.devExpertise) ? d.devExpertise.filter(Boolean) : [];
+    if (expertise.length) {
+      var chipIcon = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>';
+      html += '<div style="background:#fff;border:1px solid #ece9f7;border-radius:16px;padding:18px 22px;'
+        + 'display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(76,29,149,0.05)">'
+        + '<div style="font-size:13px;font-weight:800;color:#3730a3;position:relative;padding-bottom:4px">Expertise'
+        +   '<span style="position:absolute;left:0;bottom:0;width:26px;height:2.5px;background:#7c3aed;border-radius:2px"></span>'
+        + '</div>'
+        + expertise.map(function(tag){
+            return '<span style="display:inline-flex;align-items:center;gap:7px;background:#faf9ff;border:1px solid #e9e5fb;'
+              + 'border-radius:50px;padding:8px 15px;font-size:12.5px;font-weight:700;color:#3730a3">' + chipIcon + esc(tag) + '</span>';
+          }).join('')
+        + '</div>';
+    }
+
+    html += '</div>';
     return html;
   }
 

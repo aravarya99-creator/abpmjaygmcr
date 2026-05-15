@@ -933,6 +933,14 @@ tr:hover td{background:#EEF3FF}
           <div id="abSectionsList" style="display:flex;flex-direction:column;gap:14px"></div>
         </div>
 
+        <div class="card">
+          <div class="card-hd">💬 Page Footer Strip</div>
+          <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Footer message</label>
+          <input type="text" id="abAboutFooter" placeholder="e.g. Together, we are building a healthier, stronger and self-reliant India."
+            style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+          <div style="font-size:10px;color:#9ca3af;margin-top:3px">Shown as the highlighted strip at the very bottom of the About Us page.</div>
+        </div>
+
         <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:4px">
           <span id="abSaveMsg" style="font-size:11px;font-weight:600"></span>
           <button class="btn btn-pri" onclick="abSave()">💾 Save &amp; Publish</button>
@@ -967,7 +975,24 @@ tr:hover td{background:#EEF3FF}
               </div>
               <div>
                 <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Role / Title</label>
-                <input type="text" id="abDevRole" placeholder="e.g. Portal Developer — AB-PMJAY Unit, GMC Rajouri"
+                <input type="text" id="abDevRole" placeholder="e.g. Web Developer, Software Engineer, Data Analyst"
+                  style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <div style="flex:1;min-width:150px">
+                  <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Email</label>
+                  <input type="text" id="abDevEmail" placeholder="name@example.com"
+                    style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+                </div>
+                <div style="flex:1;min-width:130px">
+                  <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Phone</label>
+                  <input type="text" id="abDevPhone" placeholder="+91 98765 43210"
+                    style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Location</label>
+                <input type="text" id="abDevLocation" placeholder="e.g. Rajouri, Jammu &amp; Kashmir, India"
                   style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
               </div>
             </div>
@@ -975,10 +1000,29 @@ tr:hover td{background:#EEF3FF}
         </div>
 
         <div class="card">
+          <div class="card-hd">🗂️ Project Block &amp; Expertise</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div>
+              <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Project Block Title</label>
+              <input type="text" id="abDevProjectTitle" placeholder="e.g. Management Information System (MIS)"
+                style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+              <div style="font-size:10px;color:#9ca3af;margin-top:3px">This is the big heading above the numbered content sections below.</div>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Expertise tags</label>
+              <input type="text" id="abDevExpertise" placeholder="Web Development, Software Engineering, Data Analysis, Healthcare MIS, System Design"
+                style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+              <div style="font-size:10px;color:#9ca3af;margin-top:3px">Comma-separated. Shown as chips in the "Expertise" row at the bottom of the page.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
           <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center">
-            <span>📑 Content Sections</span>
+            <span>📑 Numbered Content Sections</span>
             <button class="btn btn-pri" onclick="abAddSection('dev')" style="padding:5px 12px;font-size:11px">+ Add Section</button>
           </div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Each section becomes a numbered card (01, 02, 03…) inside the project block. e.g. Overview, Key Capabilities, Impact &amp; Approach.</div>
           <div id="devSectionsList" style="display:flex;flex-direction:column;gap:14px"></div>
         </div>
 
@@ -2893,9 +2937,21 @@ function abBlankSection(){
     textColor:  '#334155',
     bgColor:    '#ffffff',
     font:       'inherit',
-    align:      'left'
+    align:      'left',
+    icon:       'info'
   };
 }
+
+// Icon choices for About Us section cards (value -> label).
+var AB_ICONS = [
+  { v:'scheme',   label:'Scheme / Heart' },
+  { v:'features', label:'Features / Shield' },
+  { v:'pmam',     label:'PMAMs / People' },
+  { v:'role',     label:'Role / Handshake' },
+  { v:'mission',  label:'Mission / Target' },
+  { v:'vision',   label:'Vision / Eye' },
+  { v:'info',     label:'Info (default)' }
+];
 
 // Available font choices (value -> label). Must mirror the landing page.
 var AB_FONTS = [
@@ -2913,6 +2969,12 @@ function abInit(){
     var set = function(id, val){ var el = document.getElementById(id); if (el) el.value = val || ''; };
     set('abDevName', d.devName);
     set('abDevRole', d.devRole);
+    set('abDevEmail', d.devEmail);
+    set('abDevPhone', d.devPhone);
+    set('abDevLocation', d.devLocation);
+    set('abDevProjectTitle', d.devProjectTitle);
+    set('abDevExpertise', Array.isArray(d.devExpertise) ? d.devExpertise.join(', ') : (d.devExpertise || ''));
+    set('abAboutFooter', d.aboutFooter);
     _abDevPhoto = d.devPhoto || '';
     abDevRenderPhoto();
 
@@ -3033,6 +3095,7 @@ function abRenderSections(which){
       +   'style="width:100%;padding:8px 10px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;line-height:1.6;outline:none;resize:vertical;margin-bottom:10px">' + escAttr(s.text || '') + '</textarea>'
       // styling row
       + '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;background:#fff;border:1px solid #f0e8fb;border-radius:8px;padding:10px">'
+      +   (which === 'about' ? abIconField(i, s.icon) : '')
       +   abColorField(which, i, 'titleColor', 'Title colour', s.titleColor)
       +   abColorField(which, i, 'textColor',  'Text colour',  s.textColor)
       +   abColorField(which, i, 'bgColor',    'Background / shape', s.bgColor)
@@ -3045,6 +3108,18 @@ function abRenderSections(which){
       + '</div>'
       + '</div>';
   }).join('');
+}
+
+// A labelled icon dropdown for About Us section cards.
+function abIconField(i, value){
+  value = value || 'info';
+  var opts = AB_ICONS.map(function(ic){
+    return '<option value="' + ic.v + '"' + (value === ic.v ? ' selected' : '') + '>' + ic.label + '</option>';
+  }).join('');
+  return '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Card icon</label>'
+    + '<select onchange="abSectionsArray(\'about\')[' + i + '].icon=this.value;abMarkUnsaved()" '
+    + 'style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">'
+    + opts + '</select></div>';
 }
 
 // A labelled colour input (native picker + hex text), wired to a section key.
@@ -3122,14 +3197,21 @@ function abSave(){
       return;
     }
 
+    var expertiseArr = val('abDevExpertise').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
     var payload = {
-      devName:       val('abDevName'),
-      devRole:       val('abDevRole'),
-      devPhoto:      _abDevPhoto || '',
-      aboutSections: cleanSections(_abSections),
-      devSections:   cleanSections(_devSections),
-      updatedAt:     Date.now(),
-      _updatedBy:    (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
+      devName:        val('abDevName'),
+      devRole:        val('abDevRole'),
+      devEmail:       val('abDevEmail'),
+      devPhone:       val('abDevPhone'),
+      devLocation:    val('abDevLocation'),
+      devProjectTitle:val('abDevProjectTitle'),
+      devExpertise:   expertiseArr,
+      aboutFooter:    val('abAboutFooter'),
+      devPhoto:       _abDevPhoto || '',
+      aboutSections:  cleanSections(_abSections),
+      devSections:    cleanSections(_devSections),
+      updatedAt:      Date.now(),
+      _updatedBy:     (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
     };
     console.log('[abSave] writing about_page payload:', payload);
     setMsg('Saving…', '#1A3DB5');
