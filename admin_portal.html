@@ -3104,40 +3104,57 @@ function abSave(){
   var setMsg = function(text, color){
     msgs.forEach(function(m){ if (m){ m.textContent = text; m.style.color = color; } });
   };
-  var val = function(id){ var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
+  try {
+    var val = function(id){ var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
 
-  // Clean section arrays: trim strings, drop fully-empty sections.
-  var cleanSections = function(arr){
-    return (arr || []).map(abNormalizeSection).map(function(s){
-      s.title = (s.title || '').trim();
-      s.text  = (s.text  || '').trim();
-      return s;
-    }).filter(function(s){ return s.title || s.text; });
-  };
+    // Clean section arrays: trim strings, drop fully-empty sections.
+    var cleanSections = function(arr){
+      return (arr || []).map(abNormalizeSection).map(function(s){
+        s.title = (s.title || '').trim();
+        s.text  = (s.text  || '').trim();
+        return s;
+      }).filter(function(s){ return s.title || s.text; });
+    };
 
-  var payload = {
-    devName:       val('abDevName'),
-    devRole:       val('abDevRole'),
-    devPhoto:      _abDevPhoto || '',
-    aboutSections: cleanSections(_abSections),
-    devSections:   cleanSections(_devSections),
-    updatedAt:     Date.now(),
-    _updatedBy:    (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
-  };
-  setMsg('Saving…', '#1A3DB5');
-  db.collection('settings').doc('about_page').set(payload, { merge: true })
-    .then(function(){
-      setMsg('✅ Saved & published!', '#166534');
-      setTimeout(function(){ setMsg('', '#166534'); }, 3500);
-      if (typeof showToast === 'function') showToast('✅ About page published', 'success');
-      if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/about_page', 'about_page', {
-        aboutSections: payload.aboutSections.length,
-        devSections: payload.devSections.length
+    if (typeof db === 'undefined' || !db) {
+      setMsg('Error: database not ready — reload the page.', '#dc2626');
+      console.error('[abSave] db is not defined');
+      return;
+    }
+
+    var payload = {
+      devName:       val('abDevName'),
+      devRole:       val('abDevRole'),
+      devPhoto:      _abDevPhoto || '',
+      aboutSections: cleanSections(_abSections),
+      devSections:   cleanSections(_devSections),
+      updatedAt:     Date.now(),
+      _updatedBy:    (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
+    };
+    console.log('[abSave] writing about_page payload:', payload);
+    setMsg('Saving…', '#1A3DB5');
+    db.collection('settings').doc('about_page').set(payload, { merge: true })
+      .then(function(){
+        console.log('[abSave] write succeeded');
+        setMsg('✅ Saved & published! (' + payload.aboutSections.length + ' About + ' + payload.devSections.length + ' Developer section' + (payload.devSections.length===1?'':'s') + ')', '#166534');
+        setTimeout(function(){ setMsg('', '#166534'); }, 4000);
+        if (typeof showToast === 'function') showToast('✅ About page published', 'success');
+        if (typeof writeAudit === 'function') {
+          try { writeAudit('EDIT', 'settings/about_page', 'about_page', {
+            aboutSections: payload.aboutSections.length,
+            devSections: payload.devSections.length
+          }); } catch(ae){ console.warn('[abSave] audit log failed (non-fatal):', ae); }
+        }
+      })
+      .catch(function(e){
+        console.error('[abSave] Firestore write FAILED:', e);
+        setMsg('Save failed: ' + (e && e.message ? e.message : e) + ' — check console.', '#dc2626');
+        if (typeof showToast === 'function') showToast('Save failed: ' + (e && e.message ? e.message : e), 'error');
       });
-    })
-    .catch(function(e){
-      setMsg('Error: ' + (e && e.message ? e.message : e), '#dc2626');
-    });
+  } catch (err) {
+    console.error('[abSave] threw before write:', err);
+    setMsg('Save error: ' + (err && err.message ? err.message : err) + ' — check console.', '#dc2626');
+  }
 }
 
 // ORDERS / CIRCULARS — published via Google Drive links
@@ -5020,6 +5037,10 @@ window.addEventListener('DOMContentLoaded', function(){
       var lbl = document.getElementById('tkEnabledLabel');
       if (lbl) lbl.textContent = enabled.checked ? 'Enabled — show ticker' : 'Disabled — hide ticker';
     });
+    // The Nav Bar section's default-visible sub-tab is "About Us". Its editor
+    // is only populated by abInit(), which normally runs on a tab click — so
+    // initialise it here too, otherwise the editor shows up empty on load.
+    if (typeof abInit === 'function') abInit();
   }, 1500);
 });
 
@@ -5551,18 +5572,40 @@ function sgoMove(i, dir){
 
 function sgoSave(){
   var m = document.getElementById('sgoSaveMsg');
-  if (m) { m.textContent = 'Saving\u2026'; m.style.color = '#1A3DB5'; }
-  db.collection('settings').doc('about_page').set({
-    staffGroupOrder: _sgoOrder,
-    updatedAt: Date.now(),
-    _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
-  }, { merge: true }).then(function(){
-    if (m) { m.textContent = '\u2705 Saved & published'; m.style.color = '#166534'; setTimeout(function(){ m.textContent=''; }, 3000); }
-    if (typeof showToast === 'function') showToast('\u2705 Staff group order saved', 'success');
-    if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/about_page', 'staffGroupOrder', { order: _sgoOrder });
-  }).catch(function(e){
-    if (m) { m.textContent = 'Error: ' + e.message; m.style.color = '#dc2626'; }
-  });
+  try {
+    if (typeof db === 'undefined' || !db) {
+      if (m) { m.textContent = 'Error: database not ready \u2014 reload.'; m.style.color = '#dc2626'; }
+      console.error('[sgoSave] db not defined');
+      return;
+    }
+    if (!Array.isArray(_sgoOrder) || !_sgoOrder.length) {
+      if (m) { m.textContent = 'Nothing to save \u2014 open the Staff tab first.'; m.style.color = '#dc2626'; }
+      console.warn('[sgoSave] _sgoOrder is empty');
+      return;
+    }
+    console.log('[sgoSave] writing staffGroupOrder:', _sgoOrder);
+    if (m) { m.textContent = 'Saving\u2026'; m.style.color = '#1A3DB5'; }
+    db.collection('settings').doc('about_page').set({
+      staffGroupOrder: _sgoOrder,
+      updatedAt: Date.now(),
+      _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
+    }, { merge: true }).then(function(){
+      console.log('[sgoSave] write succeeded');
+      if (m) { m.textContent = '\u2705 Saved & published'; m.style.color = '#166534'; setTimeout(function(){ m.textContent=''; }, 3500); }
+      if (typeof showToast === 'function') showToast('\u2705 Staff group order saved', 'success');
+      if (typeof writeAudit === 'function') {
+        try { writeAudit('EDIT', 'settings/about_page', 'staffGroupOrder', { order: _sgoOrder }); }
+        catch(ae){ console.warn('[sgoSave] audit failed (non-fatal):', ae); }
+      }
+    }).catch(function(e){
+      console.error('[sgoSave] Firestore write FAILED:', e);
+      if (m) { m.textContent = 'Save failed: ' + (e && e.message ? e.message : e) + ' \u2014 check console.'; m.style.color = '#dc2626'; }
+      if (typeof showToast === 'function') showToast('Save failed: ' + (e && e.message ? e.message : e), 'error');
+    });
+  } catch (err) {
+    console.error('[sgoSave] threw before write:', err);
+    if (m) { m.textContent = 'Save error: ' + (err && err.message ? err.message : err); m.style.color = '#dc2626'; }
+  }
 }
 
 function nbOpenStaffMgmt(){
