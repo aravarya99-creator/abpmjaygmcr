@@ -3731,6 +3731,22 @@ function renderStaffCards(list) {
     grid.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:30px;grid-column:1/-1;text-align:center">No staff found.</div>';
     return;
   }
+  // Detect whether the user is currently looking at the PMAM-only filter.
+  // ↑↓ reorder controls only make sense when all visible cards belong to
+  // a single group (otherwise "move up" across groups is nonsense).
+  var activeFilt = document.querySelector('#sec-staff .dmt-tab.active');
+  var activeRole = activeFilt ? (activeFilt.getAttribute('data-role') || 'all') : 'all';
+  var reorderable = (activeRole === 'PMAM');
+
+  // Sort the visible list by (displayOrder asc, name asc). Cards without
+  // an explicit displayOrder sort after ordered ones, alphabetically.
+  var sorted = list.slice().sort(function(a, b){
+    var ao = (typeof a.displayOrder === 'number') ? a.displayOrder : 1e9;
+    var bo = (typeof b.displayOrder === 'number') ? b.displayOrder : 1e9;
+    if (ao !== bo) return ao - bo;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
   var roleColors = {
     'PMAM':         { bg:'#E8EFFF', fg:'#1A3DB5', av:'linear-gradient(135deg,#1A3DB5,#2952D9)' },
     'I/C AB-PMJAY': { bg:'#DCFCE7', fg:'#166534', av:'linear-gradient(135deg,#166534,#16a34a)' },
@@ -3738,7 +3754,7 @@ function renderStaffCards(list) {
     'DEO':          { bg:'#FEF3C7', fg:'#92400e', av:'linear-gradient(135deg,#C94000,#E65800)' },
     'Accountant':   { bg:'#D1FAE5', fg:'#065F46', av:'linear-gradient(135deg,#059669,#047857)' }
   };
-  grid.innerHTML = list.map(function(u) {
+  grid.innerHTML = sorted.map(function(u, idx) {
     var rc = roleColors[u.role] || { bg:'#F3F4F6', fg:'#374151', av:'linear-gradient(135deg,#6b7280,#4b5563)' };
     var initials = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
     var photoHtml = u.photoBase64
@@ -3757,7 +3773,26 @@ function renderStaffCards(list) {
     var toggleBtn = isHidden
       ? '<button onclick="toggleStaffLanding(\''+emailEnc+'\', false)" title="Make this user visible on the public Staff tab" style="padding:7px 12px;background:#fff;color:#166534;border:1.5px solid #86efac;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">👁 Show</button>'
       : '<button onclick="toggleStaffLanding(\''+emailEnc+'\', true)"  title="Hide this user from the public Staff tab on the landing page (does not delete or deactivate)" style="padding:7px 12px;background:#fff;color:#92400e;border:1.5px solid #fcd34d;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">🚫 Hide</button>';
+    // Reorder controls: only rendered when the user is on the PMAM-only
+    // filter, so the buttons act within a single group. The buttons call
+    // movePmamOrder(emailEnc, dir) which patches displayOrder fields on the
+    // affected pair and re-renders.
+    var reorderHtml = '';
+    var posBadge = '';
+    if (reorderable) {
+      var isFirst = (idx === 0);
+      var isLast  = (idx === sorted.length - 1);
+      reorderHtml = '<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0">'
+        +   '<button onclick="movePmamOrder(\''+emailEnc+'\',-1)" ' + (isFirst?'disabled':'') + ' title="Move up — show this PMAM earlier on the public Staff page" '
+        +     'style="width:28px;height:24px;border:1px solid #d1d5db;background:' + (isFirst?'#f3f4f6':'#fff') + ';cursor:' + (isFirst?'not-allowed':'pointer') + ';border-radius:6px;font-size:12px;color:#374151;line-height:1">↑</button>'
+        +   '<button onclick="movePmamOrder(\''+emailEnc+'\',1)" '  + (isLast?'disabled':'')  + ' title="Move down — show this PMAM later on the public Staff page" '
+        +     'style="width:28px;height:24px;border:1px solid #d1d5db;background:' + (isLast?'#f3f4f6':'#fff')  + ';cursor:' + (isLast?'not-allowed':'pointer')  + ';border-radius:6px;font-size:12px;color:#374151;line-height:1">↓</button>'
+        + '</div>';
+      // Position number badge on the left (so admin can see ordering at a glance).
+      posBadge = '<div title="Public display position" style="background:#1A3DB5;color:#fff;font-size:11px;font-weight:800;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (idx + 1) + '</div>';
+    }
     return '<div style="background:#fff;border-radius:16px;padding:16px;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(26,61,181,0.06);display:flex;align-items:center;gap:14px;' + (isHidden ? 'opacity:0.78' : '') + '">'
+      + posBadge
       + '<div style="width:56px;height:56px;border-radius:50%;background:'+rc.av+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:2px solid rgba(255,255,255,0.4)">'+photoHtml+'</div>'
       + '<div style="flex:1;min-width:0">'
       +   '<div style="font-size:14px;font-weight:800;color:#0F2B8C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(u.name||'Unknown')+'</div>'
@@ -3769,6 +3804,7 @@ function renderStaffCards(list) {
       +     landingBadge
       +   '</div>'
       + '</div>'
+      + reorderHtml
       + '<div style="display:flex;gap:6px;flex-shrink:0">'
       +   toggleBtn
       +   '<button onclick="openStaffEdit(\''+emailEnc+'\')" style="padding:7px 14px;background:linear-gradient(135deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer">✏️ Edit</button>'
@@ -3777,15 +3813,68 @@ function renderStaffCards(list) {
   }).join('');
 }
 
+// ─── Reorder a PMAM within the public Staff page ───────────────────────
+// Looks up the current sorted PMAM list, swaps displayOrder values
+// between the clicked card and its neighbor, then persists both writes
+// in parallel. After the writes succeed, refilters the view and
+// re-renders so the ↑↓ buttons update in place.
+function movePmamOrder(encodedEmail, dir) {
+  var email = decodeURIComponent(encodedEmail);
+  // Pull just the PMAMs (visible to the public) in the same sort order
+  // the public Staff page and the admin grid use.
+  var pmams = _allStaff.filter(function(u){
+    return /pmam/i.test(u.role || '');
+  }).sort(function(a, b){
+    var ao = (typeof a.displayOrder === 'number') ? a.displayOrder : 1e9;
+    var bo = (typeof b.displayOrder === 'number') ? b.displayOrder : 1e9;
+    if (ao !== bo) return ao - bo;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+  var i = pmams.findIndex(function(s){ return (s.email === email) || (s._docId === email); });
+  if (i < 0) return;
+  var j = i + dir;
+  if (j < 0 || j >= pmams.length) return;
+  var a = pmams[i], b = pmams[j];
+
+  // Normalise: every PMAM should have a numeric displayOrder by the end
+  // of this operation, otherwise sorting stays alphabetical and ↑↓ feels
+  // unpredictable. We assign indices to every PMAM after the swap.
+  pmams.forEach(function(u, idx){ u.displayOrder = idx; });
+  // Apply the swap (i and j now hold the swapped values via the loop
+  // above iff they were already 0..N-1; for fresh data this still works
+  // because we just sequentially numbered everyone). Now swap a↔b.
+  var tmp = a.displayOrder; a.displayOrder = b.displayOrder; b.displayOrder = tmp;
+
+  // Write back to Firestore in a single batch so all rows update atomically.
+  // We persist every PMAM with its (possibly newly-assigned) displayOrder so
+  // the index stays well-defined even for PMAMs that had no order before.
+  var batch = db.batch();
+  pmams.forEach(function(u){
+    var ref = db.collection('users').doc(u.email || u._docId);
+    batch.set(ref, { displayOrder: u.displayOrder, _updatedAt: Date.now() }, { merge: true });
+  });
+  batch.commit().then(function(){
+    if (typeof showToast === 'function') showToast('✅ Order updated', 'success');
+    if (typeof writeAudit === 'function') writeAudit('EDIT','users',email,{ displayOrder: a.displayOrder, action:'reorder ' + (dir < 0 ? 'up' : 'down') });
+    // Re-render with the current filter in place.
+    var activeFilt = document.querySelector('#sec-staff .dmt-tab.active');
+    var role = activeFilt ? (activeFilt.getAttribute('data-role') || 'all') : 'all';
+    filterStaff(role, activeFilt);
+  }).catch(function(e){
+    console.error('[movePmamOrder] batch failed:', e);
+    if (typeof showToast === 'function') showToast('❌ Reorder failed: ' + e.message, 'error');
+  });
+}
+
 // Toggle a user's landing-page visibility. Writes landingHidden:true/false
 // to the user doc and refreshes the local cache so the badge updates
 // without a full reload. Landing page filters out landingHidden:true users.
 function toggleStaffLanding(encodedEmail, hide) {
   var email = decodeURIComponent(encodedEmail);
-  db.collection('users').doc(email).update({
+  db.collection('users').doc(email).set({
     landingHidden: !!hide,
     _updatedAt: Date.now()
-  }).then(function() {
+  }, { merge: true }).then(function() {
     // Update local cache so the immediate re-render shows the new state.
     var u = _allStaff.find(function(s){ return s.email === email || s._docId === email; });
     if (u) u.landingHidden = !!hide;
@@ -3913,10 +4002,18 @@ function saveStaffEdit() {
   errEl.textContent = 'Saving...';
   var patch = { name: name, ward: ward, status: status, cardColor: cardColor };
   if (_staffPhotoBase64) patch.photoBase64 = _staffPhotoBase64;
-  db.collection('users').doc(email).update(patch).then(function() {
-    // Update local cache
+  // IMPORTANT: use set+merge (not update) so the write succeeds even when
+  // the user doc doesn't exist yet — e.g. the admin row (Vinod Kumar) is a
+  // synthetic record that's never been persisted. With update(), Firestore
+  // throws "No document to update" and the photo silently fails to save.
+  db.collection('users').doc(email).set(patch, { merge: true }).then(function() {
+    // Update local cache so the immediate re-render shows the new state.
     var u = _allStaff.find(function(s){ return s.email === email || s._docId === email; });
-    if (u) { u.name = name; u.ward = ward; u.status = status; u.cardColor = cardColor; if (_staffPhotoBase64) u.photoBase64 = _staffPhotoBase64; }
+    if (u) {
+      u.name = name; u.ward = ward; u.status = status; u.cardColor = cardColor;
+      if (_staffPhotoBase64) u.photoBase64 = _staffPhotoBase64;
+      delete u._synthetic; // once persisted, it's a real record
+    }
     document.getElementById('staffEditModal').classList.remove('open');
     showToast('✅ Staff profile updated','success');
     if (typeof writeAudit === 'function') writeAudit('EDIT','users',email,{name:name,ward:ward,status:status,cardColor:cardColor});
@@ -3926,6 +4023,8 @@ function saveStaffEdit() {
     renderStaffCards(_allStaff);
   }).catch(function(e) {
     errEl.textContent = 'Error: '+e.message;
+    showToast('❌ Save failed: ' + e.message, 'error');
+    console.error('[saveStaffEdit] failed:', e);
   });
 }
 
