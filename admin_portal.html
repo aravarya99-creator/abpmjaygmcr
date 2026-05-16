@@ -3673,7 +3673,17 @@ function renderStaffCards(list) {
     var statusBadge = u.status === 'inactive'
       ? '<span style="background:#FEE2E2;color:#dc2626;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">INACTIVE</span>'
       : '<span style="background:#DCFCE7;color:#166534;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">ACTIVE</span>';
-    return '<div style="background:#fff;border-radius:16px;padding:16px;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(26,61,181,0.06);display:flex;align-items:center;gap:14px">'
+    // Landing-page visibility badge — orange/dashed when hidden, green when shown.
+    var isHidden = (u.landingHidden === true);
+    var landingBadge = isHidden
+      ? '<span title="This user is hidden from the public Staff tab on the landing page" style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;border:1px dashed #fbbf24">🚫 HIDDEN ON LANDING</span>'
+      : '';
+    var emailEnc = encodeURIComponent(u.email || u._docId);
+    // Toggle button: clicking instantly flips landingHidden in Firestore.
+    var toggleBtn = isHidden
+      ? '<button onclick="toggleStaffLanding(\''+emailEnc+'\', false)" title="Make this user visible on the public Staff tab" style="padding:7px 12px;background:#fff;color:#166534;border:1.5px solid #86efac;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">👁 Show</button>'
+      : '<button onclick="toggleStaffLanding(\''+emailEnc+'\', true)"  title="Hide this user from the public Staff tab on the landing page (does not delete or deactivate)" style="padding:7px 12px;background:#fff;color:#92400e;border:1.5px solid #fcd34d;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">🚫 Hide</button>';
+    return '<div style="background:#fff;border-radius:16px;padding:16px;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(26,61,181,0.06);display:flex;align-items:center;gap:14px;' + (isHidden ? 'opacity:0.78' : '') + '">'
       + '<div style="width:56px;height:56px;border-radius:50%;background:'+rc.av+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:2px solid rgba(255,255,255,0.4)">'+photoHtml+'</div>'
       + '<div style="flex:1;min-width:0">'
       +   '<div style="font-size:14px;font-weight:800;color:#0F2B8C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(u.name||'Unknown')+'</div>'
@@ -3682,11 +3692,43 @@ function renderStaffCards(list) {
       +     '<span style="background:'+rc.bg+';color:'+rc.fg+';padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">'+(u.role||'Staff')+'</span>'
       +     statusBadge
       +     (u.ward ? '<span style="background:#F0F4FF;color:#1A3DB5;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600">📍 '+(u.ward)+'</span>' : '')
+      +     landingBadge
       +   '</div>'
       + '</div>'
-      + '<button onclick="openStaffEdit(\''+encodeURIComponent(u.email || u._docId)+'\')" style="padding:7px 14px;background:linear-gradient(135deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">✏️ Edit</button>'
+      + '<div style="display:flex;gap:6px;flex-shrink:0">'
+      +   toggleBtn
+      +   '<button onclick="openStaffEdit(\''+emailEnc+'\')" style="padding:7px 14px;background:linear-gradient(135deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer">✏️ Edit</button>'
+      + '</div>'
       + '</div>';
   }).join('');
+}
+
+// Toggle a user's landing-page visibility. Writes landingHidden:true/false
+// to the user doc and refreshes the local cache so the badge updates
+// without a full reload. Landing page filters out landingHidden:true users.
+function toggleStaffLanding(encodedEmail, hide) {
+  var email = decodeURIComponent(encodedEmail);
+  db.collection('users').doc(email).update({
+    landingHidden: !!hide,
+    _updatedAt: Date.now()
+  }).then(function() {
+    // Update local cache so the immediate re-render shows the new state.
+    var u = _allStaff.find(function(s){ return s.email === email || s._docId === email; });
+    if (u) u.landingHidden = !!hide;
+    // Re-render with the current filter intact.
+    var activeFilt = document.querySelector('#sec-staff .dmt-tab.active');
+    var role = activeFilt ? (activeFilt.getAttribute('data-role') || 'all') : 'all';
+    filterStaff(role, activeFilt);
+    if (typeof showToast === 'function') {
+      showToast(hide ? '🚫 Hidden from landing page' : '👁 Now visible on landing page', 'success');
+    }
+    if (typeof writeAudit === 'function') {
+      writeAudit('EDIT', 'users', email, { landingHidden: !!hide });
+    }
+  }).catch(function(e) {
+    if (typeof showToast === 'function') showToast('❌ ' + e.message, 'error');
+    console.error('[toggleStaffLanding] failed:', e);
+  });
 }
 
 function filterStaff(role, el) {
@@ -5658,8 +5700,10 @@ function sgoLoadCounts(){
     var counts = { principal:0, ms:0, ic:0, pmam:0, deo:0 };
     snap.forEach(function(doc){
       var u = doc.data() || {};
-      // Match the landing page exactly: count only approved/active users.
+      // Match the landing page exactly: count only approved/active users
+      // who are NOT hidden via the per-user landingHidden toggle.
       if (u.status !== 'approved' && u.status !== 'active') return;
+      if (u.landingHidden === true) return;
       var r = (u.role || '').toLowerCase();
       // Walk groups in priority order; first match wins (so an "I/C AB-PMJAY"
       // doesn't also get counted under MS via the bare 'ms' alternative).
