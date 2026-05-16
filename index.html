@@ -2206,8 +2206,7 @@ window.addEventListener('DOMContentLoaded', function() {
     holidayDuty:     null,  // settings/holidays
     weekendRoster:   null,  // settings/weekend_roster
     orders:          null,  // settings/orders
-    aboutPage:       null,  // settings/about_page
-    developer:       null   // users/<ADMIN_EMAIL> — drives Developer page photo
+    aboutPage:       null   // settings/about_page (drives About + Developer pages)
   };
   // Current open modal id (so we can re-render when data updates)
   var _openId = null;
@@ -2252,37 +2251,6 @@ window.addEventListener('DOMContentLoaded', function() {
       // and visitors should see updates immediately without a page reload.
       if (typeof window.lpRefreshStaff === 'function') window.lpRefreshStaff();
     }, function(err){ console.warn('about_page listener:', err && err.message); });
-
-    // Listen for the admin user. We use a query rather than a hardcoded doc
-    // id so it works no matter what email/doc-id the admin row actually has
-    // (handles future renames, multiple admins, or the synthetic-record edge
-    // case where Staff Management writes under a different key). Falls back
-    // to placeholder initials if no admin user is found.
-    db.collection('users').where('role','==','Admin').onSnapshot(function(snap){
-      var found = null;
-      snap.forEach(function(doc){
-        var u = doc.data() || {};
-        // Prefer a record that has a real photo; otherwise take the first.
-        if (!found || (!found.photoBase64 && u.photoBase64)) found = u;
-      });
-      // Belt-and-braces: also try the canonical admin email doc directly,
-      // in case the admin record exists but has role !== 'Admin' for some
-      // reason (e.g. it was created during signup with a different role).
-      if (!found || !found.photoBase64) {
-        var adminEmailLc = (typeof ADMIN_EMAIL === 'string') ? ADMIN_EMAIL : 'aravarya99@gmail.com';
-        db.collection('users').doc(adminEmailLc).get().then(function(doc){
-          if (doc.exists) {
-            var u = doc.data() || {};
-            if (!LIVE.developer || u.photoBase64) {
-              LIVE.developer = u;
-              if (_openId === 'developer') renderInto(_openId);
-            }
-          }
-        }).catch(function(){ /* ignore — the where() result is already used */ });
-      }
-      LIVE.developer = found || {};
-      if (_openId === 'developer') renderInto(_openId);
-    }, function(err){ console.warn('developer admin-user listener:', err && err.message); });
 
     // Expose the staff group order so the staff modal (a separate IIFE) can
     // read it when building the grouped staff list.
@@ -2684,18 +2652,19 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   function renderDeveloper(){
-    // Pull from the admin's user doc (live-synced via LIVE.developer). Falls
-    // back to sensible defaults if the doc isn't there yet.
-    var d = LIVE.developer || {};
-    var devName  = (d.name && d.name.trim()) ? d.name : 'Vinod Kumar';
-    var devTitle = (d.title && d.title.trim())
-      ? d.title
-      : 'Web Developer, Software Engineer, Data Analyst, IT Consultant';
+    // Read from settings/about_page — the doc Admin Portal > Nav Bar >
+    // Developer > "Save & Publish" actually writes to. Falls back to
+    // sensible defaults if those fields are empty.
+    var ap = LIVE.aboutPage || {};
+    var devName  = (ap.devName  && ap.devName.trim())  ? ap.devName  : 'Vinod Kumar';
+    var devTitle = (ap.devRole  && ap.devRole.trim())  ? ap.devRole
+                 : 'Web Developer, Software Engineer, Data Analyst, IT Consultant';
+    var devPhoto = (ap.devPhoto && ap.devPhoto.trim()) ? ap.devPhoto : '';
     var initials = devName.split(/\s+/)
       .map(function(w){ return w[0] || ''; })
       .join('').substring(0,2).toUpperCase();
-    var photoHtml = (d.photoBase64)
-      ? '<img src="' + esc(d.photoBase64) + '" style="width:100%;height:100%;object-fit:cover" alt="' + esc(devName) + '">'
+    var photoHtml = devPhoto
+      ? '<img src="' + esc(devPhoto) + '" style="width:100%;height:100%;object-fit:cover" alt="' + esc(devName) + '">'
       : '<span style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#4c1d95;letter-spacing:1px">' + esc(initials) + '</span>';
 
     return `
