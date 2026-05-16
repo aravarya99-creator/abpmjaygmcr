@@ -5638,8 +5638,52 @@ var SGO_GROUPS = [
 ];
 var _sgoOrder = [];  // array of keys in the admin-chosen order
 
+// ── Role-match regexes — MUST mirror the landing page's RANK_GROUPS so the
+// admin list matches what visitors actually see. (See index.html renderStaff.)
+var SGO_MATCH = {
+  principal: function(r){ return /principal/.test(r); },
+  ms:        function(r){ return /medical\s*superintendent|(^|\b)ms\b/.test(r); },
+  ic:        function(r){ return (/i\/?c|in.?charge|incharge/.test(r)) && (/pmjay|ab-?pmjay|sehat/.test(r)); },
+  pmam:      function(r){ return /pmam/.test(r); },
+  deo:       function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(r); }
+};
+
+// Cache of group → member count. Populated by sgoLoadCounts() and used by
+// sgoRender() to (a) suppress empty groups from the display list and (b)
+// show a member count badge next to each visible group.
+var _sgoCounts = {};
+
+function sgoLoadCounts(){
+  return db.collection('users').get().then(function(snap){
+    var counts = { principal:0, ms:0, ic:0, pmam:0, deo:0 };
+    snap.forEach(function(doc){
+      var u = doc.data() || {};
+      // Match the landing page exactly: count only approved/active users.
+      if (u.status !== 'approved' && u.status !== 'active') return;
+      var r = (u.role || '').toLowerCase();
+      // Walk groups in priority order; first match wins (so an "I/C AB-PMJAY"
+      // doesn't also get counted under MS via the bare 'ms' alternative).
+      var matched = false;
+      ['ic','principal','ms','pmam','deo'].forEach(function(k){
+        if (matched) return;
+        if (SGO_MATCH[k](r)) { counts[k]++; matched = true; }
+      });
+    });
+    _sgoCounts = counts;
+  }).catch(function(e){
+    console.warn('[sgoLoadCounts] failed:', e);
+    _sgoCounts = {};
+  });
+}
+
 function sgoInit(){
-  db.collection('settings').doc('about_page').get().then(function(doc){
+  // Load the saved order and the user counts in parallel; render only after
+  // both are ready so empty groups can be filtered out on the first paint.
+  Promise.all([
+    db.collection('settings').doc('about_page').get(),
+    sgoLoadCounts()
+  ]).then(function(results){
+    var doc = results[0];
     var saved = (doc.exists && doc.data() && Array.isArray(doc.data().staffGroupOrder))
       ? doc.data().staffGroupOrder : null;
     var valid = {};
@@ -5663,16 +5707,45 @@ function sgoRender(){
   if (!box) return;
   var byKey = {};
   SGO_GROUPS.forEach(function(g){ byKey[g.key] = g; });
-  box.innerHTML = _sgoOrder.map(function(key, i){
+
+  // Filter the order to only groups that have ≥1 approved user. Empty
+  // groups (e.g. no Principal has signed up yet) are hidden from this
+  // admin list entirely — they reappear automatically once a matching
+  // user is approved.
+  var visibleKeys = _sgoOrder.filter(function(key){
+    return (_sgoCounts[key] || 0) > 0;
+  });
+
+  if (!visibleKeys.length) {
+    box.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af;font-style:italic;background:#f9fafb;border-radius:8px;font-size:12.5px">'
+      + 'No staff groups have approved members yet. Once users sign up and you approve them under <strong>Staff Management</strong>, their groups will appear here.'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:10px;background:#f9fafb;border:1.5px dashed #d1d5db;border-radius:9px;padding:9px 12px;opacity:0.7;margin-top:8px">'
+      +   '<span style="font-weight:800;color:#9ca3af;font-size:12px;width:18px;text-align:center">\u2014</span>'
+      +   '<span style="font-size:16px">\uD83D\uDC64</span>'
+      +   '<span style="flex:1;font-size:12.5px;font-weight:700;color:#6b7280">Other Staff <span style="font-weight:500;font-style:italic">(always last)</span></span>'
+      + '</div>';
+    return;
+  }
+
+  box.innerHTML = visibleKeys.map(function(key, i){
     var g = byKey[key];
     if (!g) return '';
+    var count = _sgoCounts[key] || 0;
+    var isFirst = (i === 0);
+    var isLast  = (i === visibleKeys.length - 1);
+    // The move-up/down handlers operate on the FULL _sgoOrder array, so we
+    // need the index inside _sgoOrder, not the filtered index `i`.
+    var fullIdx = _sgoOrder.indexOf(key);
     return '<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #bfdbfe;border-radius:9px;padding:9px 12px">'
       + '<span style="font-weight:800;color:#9ca3af;font-size:12px;width:18px;text-align:center">' + (i+1) + '</span>'
       + '<span style="font-size:16px">' + g.icon + '</span>'
-      + '<span style="flex:1;font-size:12.5px;font-weight:700;color:#0F2B8C">' + g.label + '</span>'
+      + '<span style="flex:1;font-size:12.5px;font-weight:700;color:#0F2B8C">' + g.label
+      +   ' <span style="font-weight:600;color:#6b7280;font-size:11px">(' + count + ')</span>'
+      + '</span>'
       + '<div style="display:flex;gap:4px">'
-      +   '<button onclick="sgoMove(' + i + ',-1)" ' + (i===0?'disabled':'') + ' title="Move up" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===0?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===0?'not-allowed':'pointer') + ';font-size:12px">\u2191</button>'
-      +   '<button onclick="sgoMove(' + i + ',1)" ' + (i===_sgoOrder.length-1?'disabled':'') + ' title="Move down" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===_sgoOrder.length-1?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===_sgoOrder.length-1?'not-allowed':'pointer') + ';font-size:12px">\u2193</button>'
+      +   '<button onclick="sgoMoveVisible(\'' + key + '\',-1)" ' + (isFirst?'disabled':'') + ' title="Move up" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (isFirst?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (isFirst?'not-allowed':'pointer') + ';font-size:12px">\u2191</button>'
+      +   '<button onclick="sgoMoveVisible(\'' + key + '\',1)" '  + (isLast?'disabled':'')  + ' title="Move down" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (isLast?'#f3f4f6':'#fff')  + ';border-radius:6px;cursor:' + (isLast?'not-allowed':'pointer')  + ';font-size:12px">\u2193</button>'
       + '</div>'
       + '</div>';
   }).join('')
@@ -5683,10 +5756,20 @@ function sgoRender(){
   + '</div>';
 }
 
-function sgoMove(i, dir){
-  var j = i + dir;
-  if (j < 0 || j >= _sgoOrder.length) return;
-  var tmp = _sgoOrder[i]; _sgoOrder[i] = _sgoOrder[j]; _sgoOrder[j] = tmp;
+// Move a group up/down WITHIN the filtered (visible) list, but operate on
+// the full _sgoOrder so empty groups (which we hide) keep their relative
+// positions stable. Two visible neighbours swap their slots in _sgoOrder.
+function sgoMoveVisible(key, dir){
+  var visibleKeys = _sgoOrder.filter(function(k){ return (_sgoCounts[k] || 0) > 0; });
+  var vi = visibleKeys.indexOf(key);
+  if (vi < 0) return;
+  var vj = vi + dir;
+  if (vj < 0 || vj >= visibleKeys.length) return;
+  var swapWith = visibleKeys[vj];
+  var i1 = _sgoOrder.indexOf(key);
+  var i2 = _sgoOrder.indexOf(swapWith);
+  if (i1 < 0 || i2 < 0) return;
+  var tmp = _sgoOrder[i1]; _sgoOrder[i1] = _sgoOrder[i2]; _sgoOrder[i2] = tmp;
   sgoRender();
   var m = document.getElementById('sgoSaveMsg');
   if (m) { m.textContent = '\u25CF Unsaved'; m.style.color = '#dc2626'; }
