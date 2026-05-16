@@ -1039,20 +1039,35 @@ tr:hover td{background:#EEF3FF}
           </div>
           <div style="font-size:12px;color:#1e3a8a;line-height:1.65">
             Manage the navigation items shown on the <strong>landing page</strong>. You can
-            <strong>edit</strong> a label, <strong>add</strong> an item, or <strong>delete</strong> one.
-            Click <strong>Save</strong> to publish your changes.
+            <strong>edit</strong> a label, <strong>hide / show</strong>, <strong>reorder</strong>,
+            <strong>add</strong>, or <strong>delete</strong> items. Click <strong>Save</strong> to publish.
+            <div style="margin-top:8px;padding:8px 10px;background:rgba(255,255,255,0.6);border-radius:6px;font-size:11px;color:#1e40af">
+              💡 <strong>Note:</strong> "Home" is pinned automatically at the start of the nav bar
+              and is not editable here.
+            </div>
           </div>
+        </div>
+
+        <!-- Live preview -->
+        <div class="card" style="margin-bottom:12px;background:#fafafa;border:1.5px solid #e5e7eb">
+          <div class="card-hd" style="display:flex;align-items:center;gap:6px;color:#374151">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#374151"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            Preview (how it appears on the landing page)
+          </div>
+          <div id="nbm-preview" style="display:flex;flex-wrap:wrap;gap:4px;padding:10px 12px;background:#fff;border-radius:8px;border:1px solid #e5e7eb;min-height:42px;align-items:center"></div>
+          <div style="font-size:10.5px;color:#6b7280;margin-top:6px">Hidden items appear faded. Preview updates as you edit.</div>
         </div>
 
         <!-- Items editor -->
         <div class="card">
-          <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center">
+          <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
             <span style="display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#1A3DB5"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg> Navigation Items</span>
-            <div style="display:flex;gap:6px">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn" onclick="nbmReset()" style="padding:5px 12px;font-size:11px;background:#fff;border:1.5px solid #e5e7eb;color:#374151" title="Restore the 8 default tabs in their default order">↺ Reset to Defaults</button>
               <button class="btn btn-pri" onclick="nbmAdd()" style="padding:5px 12px;font-size:11px">+ Add Item</button>
             </div>
           </div>
-          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Edit a label inline, use ↑ ↓ to reorder, or Delete to remove an item. The order here is the order shown on the landing page. Click <strong>Save Nav Bar</strong> when done.</div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Edit the label, toggle <strong>Show/Hide</strong>, use ↑ ↓ to reorder, or Delete to remove. The order here is the order shown on the landing page. Click <strong>Save Nav Bar</strong> when done.</div>
           <div id="nbm-items-list" style="display:flex;flex-direction:column;gap:8px"></div>
           <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:14px">
             <span id="nbm-save-msg" style="font-size:11px;font-weight:600"></span>
@@ -5362,11 +5377,14 @@ function nbmReconcile(savedItems){
     // Apply forced renames (case-insensitive match on the old label).
     var lowered = label.toLowerCase();
     if (RENAMED[lowered]) label = RENAMED[lowered];
-    bySaved.push({ id:id, label:label });
+    // Preserve visibility (default true if missing) so the admin's Hide
+    // toggle survives reload.
+    var visible = (it.visible === false) ? false : true;
+    bySaved.push({ id:id, label:label, visible:visible });
   });
   // Append any canonical items the saved data didn't include.
   NBM_DEFAULTS.forEach(function(def){
-    if (!seen[def.id]) bySaved.push({ id:def.id, label:def.label });
+    if (!seen[def.id]) bySaved.push({ id:def.id, label:def.label, visible:true });
   });
   bySaved.forEach(function(it, idx){ it.order = idx; });
   return bySaved;
@@ -5393,22 +5411,35 @@ function nbmRender(){
   if (!list) return;
   if (!_nbmItems.length) {
     list.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af;font-style:italic;background:#f9fafb;border-radius:8px">No items. Click "+ Add Item" to begin.</div>';
+    nbmRenderPreview();
     return;
   }
   list.innerHTML = _nbmItems.map(function(it, i){
     var navId = (it.id || '').toLowerCase();
     var known = !!NBM_KNOWN[navId];
-    return '<div style="background:#fff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center">'
+    var isHidden = (it.visible === false);
+    var rowOpacity = isHidden ? '0.55' : '1';
+    var toggleBg = isHidden ? '#fee2e2' : '#dcfce7';
+    var toggleFg = isHidden ? '#991b1b' : '#166534';
+    var toggleBorder = isHidden ? '#fecaca' : '#86efac';
+    var toggleLabel = isHidden ? '👁\u200d🗨 Hidden' : '👁 Showing';
+    return '<div style="background:#fff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center;opacity:' + rowOpacity + ';transition:opacity 0.15s">'
       // number
       + '<div style="font-weight:800;color:#9ca3af;text-align:center;font-size:13px">' + (i+1) + '</div>'
-      // label editor + id badge
+      // label editor + id badge + show/hide toggle
       + '<div style="display:flex;flex-direction:column;gap:5px">'
       +   '<label style="font-size:9.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px">Label (shown on landing page)</label>'
       +   '<input type="text" value="' + escAttr(it.label || '') + '" placeholder="e.g. About Us" '
-      +     'onchange="_nbmItems[' + i + '].label=this.value;nbmSetStatus(\'\u25CF Unsaved changes\',\'#dc2626\')" '
+      +     'onchange="_nbmItems[' + i + '].label=this.value;nbmMarkDirty();nbmRenderPreview()" '
+      +     'oninput="nbmRenderPreview()" '
       +     'style="width:100%;max-width:320px;padding:6px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none" '
       +     'onfocus="this.style.borderColor=\'#2563eb\'" onblur="this.style.borderColor=\'#e5e7eb\'">'
-      +   '<span style="background:' + (known ? '#e0f2fe;color:#0369a1' : '#fef3c7;color:#92400e') + ';padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:monospace;width:fit-content">id: ' + (navId || '(none)') + (known ? '' : ' \u00b7 custom') + '</span>'
+      +   '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">'
+      +     '<span style="background:' + (known ? '#e0f2fe;color:#0369a1' : '#fef3c7;color:#92400e') + ';padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:monospace">id: ' + (navId || '(none)') + (known ? '' : ' \u00b7 custom') + '</span>'
+      +     '<button onclick="nbmToggleVisible(' + i + ')" '
+      +       'style="background:' + toggleBg + ';color:' + toggleFg + ';border:1px solid ' + toggleBorder + ';padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit" '
+      +       'title="' + (isHidden ? 'Click to show this tab on the landing page' : 'Click to hide this tab (without deleting it)') + '">' + toggleLabel + '</button>'
+      +   '</div>'
       + '</div>'
       // actions: reorder + delete
       + '<div style="display:flex;align-items:center;gap:6px">'
@@ -5422,6 +5453,61 @@ function nbmRender(){
       + '</div>'
       + '</div>';
   }).join('');
+  nbmRenderPreview();
+}
+
+// Live preview of how the navbar will look on the landing page. Renders
+// the 8 admin-controlled items plus an implicit "Home" pinned at the start
+// so the admin sees exactly what the visitor will see.
+function nbmRenderPreview(){
+  var box = document.getElementById('nbm-preview');
+  if (!box) return;
+  var html = '<span style="padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;background:#16a34a;color:#fff;border:1px solid #15803d" title="Home is auto-pinned by the landing page">🏠 Home</span>';
+  _nbmItems.forEach(function(it){
+    var label = (it.label || '').trim() || '(no label)';
+    var hidden = (it.visible === false);
+    if (hidden) {
+      html += '<span style="padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;background:#f1f5f9;color:#94a3b8;border:1px dashed #cbd5e1;text-decoration:line-through" title="Hidden — not shown on the landing page">' + escHtml(label) + '</span>';
+    } else {
+      html += '<span style="padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0">' + escHtml(label) + '</span>';
+    }
+  });
+  box.innerHTML = html;
+}
+
+// Tiny HTML-escape helper used by the preview (admin labels can contain &, <, >).
+function escHtml(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// Show/Hide toggle: flip the per-item visible flag and re-render. Hidden
+// items remain in the saved list but the landing page filters them out
+// (renderNav already respects visible:false).
+function nbmToggleVisible(i){
+  if (!_nbmItems[i]) return;
+  _nbmItems[i].visible = (_nbmItems[i].visible === false) ? true : false;
+  nbmMarkDirty();
+  nbmRender();
+}
+
+// Reset to factory defaults: ask first, then restore the 8 canonical items
+// in canonical order, all visible. Doesn't auto-save — admin must click Save.
+function nbmReset(){
+  if (!confirm('Reset the nav bar to the default 8 items in default order?\n\nAll labels, order, and visibility toggles will be reset.\nNothing is saved until you click "Save Nav Bar".')) return;
+  _nbmItems = NBM_DEFAULTS.map(function(d){
+    return { id:d.id, label:d.label, order:d.order, visible:true };
+  });
+  nbmMarkDirty();
+  nbmRender();
+}
+
+// Mark the form as dirty (unsaved changes). Triggers the red status text
+// and arms the beforeunload guard.
+function nbmMarkDirty(){
+  nbmSetStatus('\u25CF Unsaved changes', '#dc2626');
+  window.__nbmDirty = true;
 }
 
 // Move an item up (dir=-1) or down (dir=1) in the list. The new position
@@ -5434,7 +5520,7 @@ function nbmMove(i, dir){
   _nbmItems[j] = tmp;
   _nbmItems.forEach(function(it, idx){ it.order = idx; });
   nbmRender();
-  nbmSetStatus('\u25CF Unsaved changes', '#dc2626');
+  nbmMarkDirty();
 }
 
 function nbmAdd(){
@@ -5454,27 +5540,40 @@ function nbmAdd(){
   var newItem;
   if (n <= available.length) {
     var id = available[n-1];
-    newItem = { id:id, label:NBM_KNOWN[id], order:_nbmItems.length };
+    newItem = { id:id, label:NBM_KNOWN[id], order:_nbmItems.length, visible:true };
   } else {
     var customId = prompt('Enter a custom id (lowercase letters/numbers):', 'item_' + Date.now());
     if (!customId) return;
     customId = customId.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
     if (!customId) return;
     var customLabel = prompt('Label to display on the landing page:', 'New Item') || 'New Item';
-    newItem = { id:customId, label:customLabel.trim(), order:_nbmItems.length };
+    newItem = { id:customId, label:customLabel.trim(), order:_nbmItems.length, visible:true };
   }
   _nbmItems.push(newItem);
   nbmRender();
-  nbmSetStatus('\u25CF Unsaved changes', '#dc2626');
+  nbmMarkDirty();
 }
 
 function nbmRemove(i){
-  var label = (_nbmItems[i] && _nbmItems[i].label) || 'this item';
-  if (!confirm('Delete "' + label + '" from the navigation bar?\n\nClick Save Nav Bar afterwards to publish the change.')) return;
+  if (!_nbmItems[i]) return;
+  var label = _nbmItems[i].label || 'this item';
+  var navId = (_nbmItems[i].id || '').toLowerCase();
+  var known = !!NBM_KNOWN[navId];
+  // Extra caution for the 8 feature tabs — deleting them removes a built-in
+  // landing-page feature. Most admins probably want to HIDE not delete.
+  var msg = 'Delete "' + label + '" from the navigation bar?';
+  if (known) {
+    msg = '⚠️  "' + label + '" is one of the 8 built-in tabs (id: ' + navId + ').\n\n'
+        + 'Deleting it removes this feature from the landing page entirely.\n'
+        + 'If you only want to take it down temporarily, use the "Hide" toggle instead.\n\n'
+        + 'Continue with delete?';
+  }
+  msg += '\n\nClick Save Nav Bar afterwards to publish the change.';
+  if (!confirm(msg)) return;
   _nbmItems.splice(i, 1);
   _nbmItems.forEach(function(it, idx){ it.order = idx; });
   nbmRender();
-  nbmSetStatus('\u25CF Unsaved changes', '#dc2626');
+  nbmMarkDirty();
 }
 
 function nbmSave(){
@@ -5484,10 +5583,11 @@ function nbmSave(){
       return;
     }
   }
-  // Normalise: order by position, ensure visible:true (no hide feature now).
+  // Normalise: order by position. Visibility is preserved per item (set via
+  // the Show/Hide toggle); only fill in a default of true when undefined.
   _nbmItems.forEach(function(it, idx){
     it.order = idx;
-    it.visible = true;
+    if (typeof it.visible === 'undefined') it.visible = true;
     if (typeof it.active === 'undefined') it.active = false;
   });
   nbmSetStatus('Saving\u2026', '#6b7280');
@@ -5501,16 +5601,28 @@ function nbmSave(){
     });
     return db.collection('settings').doc('landing_page').set(payload);
   }).then(function(){
+    window.__nbmDirty = false;
     nbmSetStatus('\u2705 Saved & published to the landing page.', '#166534');
     if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/landing_page', 'navBar', {
       itemCount: _nbmItems.length,
-      items: _nbmItems.map(function(it){ return { id:it.id, label:it.label }; })
+      items: _nbmItems.map(function(it){ return { id:it.id, label:it.label, visible:it.visible }; })
     });
     if (typeof showToast === 'function') showToast('\u2705 Nav bar saved', 'success');
   }).catch(function(e){
     nbmSetStatus('Error: ' + e.message, '#dc2626');
   });
 }
+
+// Beforeunload guard: warn the admin if they try to leave the page with
+// unsaved nav-bar edits. (Browsers show a generic confirmation; the message
+// string is mostly ignored in modern browsers but we still set it.)
+window.addEventListener('beforeunload', function(e){
+  if (window.__nbmDirty) {
+    e.preventDefault();
+    e.returnValue = 'You have unsaved nav bar changes. Leave anyway?';
+    return e.returnValue;
+  }
+});
 
 // \u2500\u2500 Nav Bar > Staff sub-tab: jump button + read-only preview \u2500\u2500
 // \u2500\u2500 Staff Group Display Order \u2500\u2500
