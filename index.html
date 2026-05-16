@@ -1413,7 +1413,8 @@ window.addEventListener('DOMContentLoaded', function() {
             name: u.name || '',
             role: u.role || '',
             ward: u.ward || '',
-            photoBase64: u.photoBase64 || ''
+            photoBase64: u.photoBase64 || '',
+            cardColor: u.cardColor || ''
             // intentionally NOT exposing email/phone on public page
           });
         }
@@ -1474,6 +1475,19 @@ window.addEventListener('DOMContentLoaded', function() {
         match:function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(r); } }
     ];
 
+    // Admin-edited descriptions from settings/about_page.staffLeadershipDescs.
+    // Any provided keys override the defaults; missing keys keep the default.
+    (function applyLeadershipDescs(){
+      var custom = (typeof window.lpGetStaffLeadershipDescs === 'function')
+        ? window.lpGetStaffLeadershipDescs() : null;
+      if (!custom) return;
+      RANK_GROUPS.forEach(function(g){
+        if (g.leadership && typeof custom[g.key] === 'string' && custom[g.key].trim()) {
+          g.desc = custom[g.key].trim();
+        }
+      });
+    })();
+
     // Admin-configurable order (settings/about_page.staffGroupOrder).
     (function applyStaffGroupOrder(){
       var saved = (typeof window.lpGetStaffGroupOrder === 'function')
@@ -1523,11 +1537,24 @@ window.addEventListener('DOMContentLoaded', function() {
         + '</div>';
     }
 
+    // Per-user card color preset (set by admin in Staff Management edit modal).
+    // Keys MUST match the SC_PALETTE in admin_portal.html — keep them in sync.
+    var SC_PALETTE = {
+      lavender: { bg:'#f5f3ff', border:'#ddd6fe' },
+      sky:      { bg:'#eff6ff', border:'#bfdbfe' },
+      peach:    { bg:'#fff7ed', border:'#fed7aa' },
+      mint:     { bg:'#ecfdf5', border:'#a7f3d0' },
+      rose:     { bg:'#fff1f2', border:'#fecdd3' },
+      lemon:    { bg:'#fefce8', border:'#fde68a' }
+    };
+
     // Compact card used in PMAM / DEO / Other grids (photo left, name + role pill).
     function gridCard(u, g){
       var roleIco = STAFF_ROLE_ICON[g ? g.roleIcon : 'other'] || STAFF_ROLE_ICON.other;
-      return '<div class="sx-grid-card">'
-        + '<div class="sx-grid-photo">'+photoBox(u,56)+'</div>'
+      var p = SC_PALETTE[u.cardColor || ''];
+      var cardStyle = p ? ' style="background:' + p.bg + ';border-color:' + p.border + '"' : '';
+      return '<div class="sx-grid-card"' + cardStyle + '>'
+        + '<div class="sx-grid-photo">'+photoBox(u,80)+'</div>'
         + '<div class="sx-grid-info">'
         +   '<div class="sx-grid-badge">'+roleIco+'</div>'
         +   '<div class="sx-grid-name">'+escHtml(u.name||'Unknown')+'</div>'
@@ -1550,11 +1577,28 @@ window.addEventListener('DOMContentLoaded', function() {
     var html = '';
 
     // Intro banner
-    html += '<div class="sx-intro">'
-      + '<div class="sx-intro-ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>'
-      + '<div style="font-size:12.5px;color:#475569;line-height:1.6">Meet the dedicated team working behind the success of '
-      +   '<strong style="color:#3730a3">AB-PMJAY Management Information System.</strong> '
-      +   'Together, we ensure efficient implementation, monitoring, and management of the AB-PMJAY scheme.</div>'
+    // Intro banner — text + background color are admin-editable via
+    // Admin > Nav Bar > Staff > Public Text & Appearance. Keep palette
+    // keys in sync with SPT_PALETTE in admin_portal.html.
+    var SPT_PALETTE = {
+      slate:    { bg:'#f8fafc', border:'#e2e8f0', textColor:'#475569', iconBg:'#f5f3ff', iconColor:'#7c3aed' },
+      blue:     { bg:'#eff6ff', border:'#bfdbfe', textColor:'#1e3a8a', iconBg:'#dbeafe', iconColor:'#1d4ed8' },
+      pink:     { bg:'#fdf2f8', border:'#fbcfe8', textColor:'#9d174d', iconBg:'#fce7f3', iconColor:'#db2777' },
+      amber:    { bg:'#fffbeb', border:'#fde68a', textColor:'#78350f', iconBg:'#fef3c7', iconColor:'#d97706' },
+      green:    { bg:'#ecfdf5', border:'#a7f3d0', textColor:'#064e3b', iconBg:'#d1fae5', iconColor:'#059669' },
+      lavender: { bg:'#f5f3ff', border:'#ddd6fe', textColor:'#4c1d95', iconBg:'#ede9fe', iconColor:'#7c3aed' }
+    };
+    var paletteKey = (typeof window.lpGetStaffIntroPalette === 'function')
+      ? window.lpGetStaffIntroPalette() : null;
+    var introPal = SPT_PALETTE[paletteKey] || SPT_PALETTE.slate;
+    var introText = (typeof window.lpGetStaffIntroText === 'function')
+      ? window.lpGetStaffIntroText() : null;
+    if (!introText) {
+      introText = 'Meet the dedicated team working behind the success of AB-PMJAY Management Information System. Together, we ensure efficient implementation, monitoring, and management of the AB-PMJAY scheme.';
+    }
+    html += '<div class="sx-intro" style="background:' + introPal.bg + ';border-color:' + introPal.border + '">'
+      + '<div class="sx-intro-ico" style="background:' + introPal.iconBg + ';color:' + introPal.iconColor + '"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>'
+      + '<div style="font-size:12.5px;color:' + introPal.textColor + ';line-height:1.55;font-weight:500">' + escHtml(introText) + '</div>'
       + '</div>';
 
     // Are any of the first contiguous leadership groups present? If so, render
@@ -1620,6 +1664,12 @@ window.addEventListener('DOMContentLoaded', function() {
   window.lpLoadStaff = loadStaff;
   window.lpGetStaffCache = function(){ return _staffCache; };
   window.lpRoleColors = ROLE_COLORS;
+  // Re-render the open Staff modal whenever settings/about_page changes
+  // (admin edited the intro text, palette, or leadership descs). Cheap no-op
+  // if the modal isn't open or no staff are cached yet.
+  window.lpRefreshStaff = function(){
+    if (_staffCache) renderCards(_staffCache, currentFilter());
+  };
 
   // ════════════════════════════════════════════════════════════════════
   // GENERAL NAV-BAR CLICK HANDLER
@@ -1882,13 +1932,13 @@ window.addEventListener('DOMContentLoaded', function() {
   #staffModalGrid {
     display: flex; flex-direction: column; gap: 8px;
   }
-  /* Intro banner */
+  /* Intro banner — colored & low-height. Backgrounds/border come from inline styles set by JS. */
   .sx-intro {
-    background:#f8fafc; border:1px solid #eef2f6; border-radius:12px;
-    padding:16px 20px; display:flex; gap:16px; align-items:flex-start; margin-bottom:4px;
+    background:#f8fafc; border:1px solid #eef2f6; border-radius:10px;
+    padding:9px 16px; display:flex; gap:12px; align-items:center; margin-bottom:8px;
   }
   .sx-intro-ico {
-    width:48px; height:48px; border-radius:50%; background:#f5f3ff;
+    width:38px; height:38px; border-radius:50%; background:#f5f3ff;
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
     color:#7c3aed;
   }
@@ -1938,42 +1988,52 @@ window.addEventListener('DOMContentLoaded', function() {
   .sx-lead-desc {
     font-size:11px; color:#64748b; line-height:1.4;
   }
-  /* Compact grid cards (PMAMs / DEO / Other) */
+  /* PMAM / DEO / Other grid — 3 columns desktop, 2 tablet, 1 mobile.
+     Cards are taller so the photo gets real estate; admin can tint each
+     card from a 6-color preset via Staff Management. */
   .sx-grid {
-    display:flex; flex-wrap:wrap; justify-content:center; gap:16px;
+    display:grid; grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:14px; align-items:stretch;
   }
   .sx-grid-card {
-    width:calc(25% - 12px); min-width:240px;
-    background:#fff; border:1px solid #eef2f6; border-radius:12px;
-    padding:10px; display:flex; align-items:center; gap:14px;
-    box-shadow:0 2px 8px rgba(15,23,42,0.02);
+    background:#fff; border:1px solid #eef2f6; border-radius:14px;
+    padding:14px; display:flex; align-items:center; gap:14px; min-height:108px;
+    box-shadow:0 2px 8px rgba(15,23,42,0.04);
   }
   .sx-grid-photo {
-    width:64px; height:64px; border-radius:8px; flex-shrink:0; overflow:hidden;
+    width:88px; height:88px; border-radius:10px; flex-shrink:0; overflow:hidden;
     background:linear-gradient(160deg,#ede9fe,#c4b5fd);
+    display:flex; align-items:center; justify-content:center;
   }
   .sx-grid-photo img { width:100%; height:100%; object-fit:cover; }
   .sx-grid-info {
     flex:1; display:flex; flex-direction:column; align-items:flex-start; min-width:0;
   }
   .sx-grid-badge {
-    width:20px; height:20px; border-radius:4px; background:#f5f3ff; color:#7c3aed;
-    display:flex; align-items:center; justify-content:center; margin-bottom:4px;
+    width:22px; height:22px; border-radius:5px; background:#f5f3ff; color:#7c3aed;
+    display:flex; align-items:center; justify-content:center; margin-bottom:6px;
   }
   .sx-grid-name {
-    font-size:11.5px; font-weight:800; color:#1e1b4b; line-height:1.2;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:6px; text-transform:uppercase;
+    font-size:13px; font-weight:800; color:#1e1b4b; line-height:1.25;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    max-width:100%; margin-bottom:6px; text-transform:uppercase;
   }
   .sx-grid-role {
-    background:#f5f3ff; border-radius:4px; padding:2px 8px; font-size:9px; font-weight:800; color:#7c3aed; text-transform:uppercase;
+    background:rgba(124,58,237,0.10); border-radius:5px; padding:3px 9px;
+    font-size:9.5px; font-weight:800; color:#7c3aed; text-transform:uppercase;
+    letter-spacing:0.3px;
   }
-  @media (max-width: 768px) {
-    .sx-grid-card { width:calc(50% - 8px); }
+  /* 2 columns on tablet (≤1024px) and 1 column on phone (≤640px). */
+  @media (max-width: 1024px) {
+    .sx-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    .sx-grid { grid-template-columns:1fr; }
+    .sx-grid-photo { width:78px; height:78px; }
   }
   @media (max-width: 600px) {
     #staffModal { padding: 0 }
     .sm-card { max-height: 100vh; height: 100vh; border-radius: 0 }
-    .sx-grid-card { width:100%; }
   }
 </style>
 <div id="page-staff" class="page-view">
@@ -2175,12 +2235,26 @@ window.addEventListener('DOMContentLoaded', function() {
     db.collection('settings').doc('about_page').onSnapshot(function(doc){
       LIVE.aboutPage = doc.exists ? (doc.data() || {}) : {};
       if (_openId === 'about' || _openId === 'developer') renderInto(_openId);
+      // Re-render the public Staff modal too — the admin can change the
+      // intro text/colors and leadership descs from Admin > Nav Bar > Staff,
+      // and visitors should see updates immediately without a page reload.
+      if (typeof window.lpRefreshStaff === 'function') window.lpRefreshStaff();
     }, function(err){ console.warn('about_page listener:', err && err.message); });
 
     // Expose the staff group order so the staff modal (a separate IIFE) can
     // read it when building the grouped staff list.
     window.lpGetStaffGroupOrder = function(){
       return (LIVE.aboutPage && LIVE.aboutPage.staffGroupOrder) || null;
+    };
+    // Same idea for the editable Staff page text + intro palette.
+    window.lpGetStaffIntroText = function(){
+      return (LIVE.aboutPage && LIVE.aboutPage.staffIntroText) || null;
+    };
+    window.lpGetStaffIntroPalette = function(){
+      return (LIVE.aboutPage && LIVE.aboutPage.staffIntroPalette) || null;
+    };
+    window.lpGetStaffLeadershipDescs = function(){
+      return (LIVE.aboutPage && LIVE.aboutPage.staffLeadershipDescs) || null;
     };
   }
   if (document.readyState === 'loading') {

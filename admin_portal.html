@@ -534,6 +534,11 @@ tr:hover td{background:#EEF3FF}
               <option>Admin</option><option>Finance</option><option>OPD</option>
             </select>
           </div>
+          <div class="mfld" style="grid-column:1/-1">
+            <label>Card Color (shown on public Staff tab)</label>
+            <input type="hidden" id="seCardColor" value="">
+            <div id="seCardColorPalette" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"></div>
+          </div>
         </div>
         <div id="seErr" style="font-size:11px;color:#dc2626;min-height:14px;margin-top:6px"></div>
         <div class="modal-footer">
@@ -998,6 +1003,75 @@ tr:hover td{background:#EEF3FF}
           </div>
           <div style="margin-top:10px">
             <button class="btn btn-pri" onclick="nbOpenStaffMgmt()">👥 Open Staff Management</button>
+          </div>
+        </div>
+
+        <!-- ─── Public Text & Appearance: editable banner + leadership descs ─── -->
+        <div class="card">
+          <div class="card-hd" style="display:flex;align-items:center;gap:8px">
+            📝 Public Text & Appearance
+            <span id="sptSaveMsg" style="margin-left:auto;font-size:11px;font-weight:600"></span>
+          </div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:12px">
+            Edit the text that appears at the top of the public <strong>Staff</strong> tab, and pick
+            a background color for the intro banner. Leadership descriptions are shown under each
+            role's photo card.
+          </div>
+
+          <!-- Intro banner text -->
+          <div style="margin-bottom:14px">
+            <label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:5px">Intro Banner Text</label>
+            <textarea id="sptIntroText" rows="3"
+              style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none;resize:vertical;line-height:1.5"
+              oninput="sptMarkDirty();sptPreviewIntro()"
+              placeholder="Meet the dedicated team behind…"></textarea>
+            <div style="font-size:10px;color:#9ca3af;margin-top:3px">Plain text only. Will appear in the colored box at the top of the Staff tab.</div>
+          </div>
+
+          <!-- Intro banner background palette -->
+          <div style="margin-bottom:14px">
+            <label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:6px">Intro Banner Background Color</label>
+            <div id="sptIntroPalette" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+            <div style="font-size:10px;color:#9ca3af;margin-top:4px">Click a swatch to choose.</div>
+          </div>
+
+          <!-- Intro preview -->
+          <div style="margin-bottom:14px">
+            <label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:5px">Preview</label>
+            <div id="sptIntroPreview" style="padding:10px 14px;border-radius:10px;font-size:12px;line-height:1.5;border:1px solid #e5e7eb"></div>
+          </div>
+
+          <!-- Leadership descriptions -->
+          <div style="margin-top:6px;padding-top:14px;border-top:1px dashed #e5e7eb">
+            <div style="font-size:11.5px;font-weight:800;color:#1e3a8a;margin-bottom:8px">Leadership Descriptions</div>
+            <div style="font-size:10.5px;color:#6b7280;margin-bottom:10px">
+              Shown under each role's name on the Staff page (e.g. "Managing and coordinating AB-PMJAY activities effectively.").
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div>
+                <label style="font-size:10px;font-weight:700;color:#4c1d95;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:4px">🎓 Principal</label>
+                <input type="text" id="sptDescPrincipal" oninput="sptMarkDirty()"
+                  style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none"
+                  placeholder="Leading the institution with vision and commitment.">
+              </div>
+              <div>
+                <label style="font-size:10px;font-weight:700;color:#4c1d95;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:4px">🏥 Medical Superintendent</label>
+                <input type="text" id="sptDescMs" oninput="sptMarkDirty()"
+                  style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none"
+                  placeholder="Overseeing hospital operations and healthcare services.">
+              </div>
+              <div>
+                <label style="font-size:10px;font-weight:700;color:#4c1d95;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:4px">📋 I/C AB-PMJAY</label>
+                <input type="text" id="sptDescIc" oninput="sptMarkDirty()"
+                  style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none"
+                  placeholder="Managing and coordinating AB-PMJAY activities effectively.">
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:14px">
+            <button class="btn" onclick="sptReset()" style="padding:6px 12px;font-size:11px;background:#fff;border:1.5px solid #e5e7eb;color:#374151" title="Reset to factory defaults">↺ Reset</button>
+            <button class="btn btn-pri" onclick="sptSave()" style="padding:6px 14px;font-size:11px">💾 Save Text & Color</button>
           </div>
         </div>
         <div class="card">
@@ -2039,7 +2113,7 @@ function showNavTab(tab, el){
   if (tab === 'orders')        { if (typeof ordInit === 'function') ordInit(); }
   if (tab === 'aboutpage')     { if (typeof abInit === 'function') abInit(); }
   if (tab === 'developer')     { if (typeof abInit === 'function') abInit(); }
-  if (tab === 'staff')         { if (typeof loadStaffFromUsers === 'function') loadStaffFromUsers(); if (typeof nbStaffPreviewRender === 'function') nbStaffPreviewRender(); if (typeof sgoInit === 'function') sgoInit(); }
+  if (tab === 'staff')         { if (typeof loadStaffFromUsers === 'function') loadStaffFromUsers(); if (typeof nbStaffPreviewRender === 'function') nbStaffPreviewRender(); if (typeof sgoInit === 'function') sgoInit(); if (typeof sptInit === 'function') sptInit(); }
   if (tab === 'navbar')        { if (typeof nbmLoad === 'function') nbmLoad(); }
 }
 
@@ -3760,6 +3834,8 @@ function openStaffEdit(encodedEmail) {
   }
   var wardSel = document.getElementById('seWard');
   if (wardSel) wardSel.value = u.ward || '';
+  // Card color palette (per-user; rendered on the public Staff tab).
+  seRenderCardColorPalette(u.cardColor || '');
   // Photo preview
   var prev = document.getElementById('sePhotoPreview');
   var initials = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
@@ -3773,6 +3849,42 @@ function openStaffEdit(encodedEmail) {
   document.getElementById('seErr').textContent = '';
   document.getElementById('sePhotoFile').value = '';
   document.getElementById('staffEditModal').classList.add('open');
+}
+
+// Per-PMAM card color presets. Keys are saved to user docs (users/{email}.cardColor)
+// and the landing page Staff renderer reads them via the same SC_PALETTE.
+var SC_PALETTE = {
+  '':       { bg:'#fff',    border:'#eef2f6', label:'Default' },
+  lavender: { bg:'#f5f3ff', border:'#ddd6fe', label:'Lavender' },
+  sky:      { bg:'#eff6ff', border:'#bfdbfe', label:'Sky' },
+  peach:    { bg:'#fff7ed', border:'#fed7aa', label:'Peach' },
+  mint:     { bg:'#ecfdf5', border:'#a7f3d0', label:'Mint' },
+  rose:     { bg:'#fff1f2', border:'#fecdd3', label:'Rose' },
+  lemon:    { bg:'#fefce8', border:'#fde68a', label:'Lemon' }
+};
+
+function seRenderCardColorPalette(selectedKey){
+  var input = document.getElementById('seCardColor');
+  var box   = document.getElementById('seCardColorPalette');
+  if (!input || !box) return;
+  // Normalize: if the saved value isn't in our palette, treat as default.
+  if (!Object.prototype.hasOwnProperty.call(SC_PALETTE, selectedKey || '')) selectedKey = '';
+  input.value = selectedKey;
+  box.innerHTML = Object.keys(SC_PALETTE).map(function(key){
+    var p = SC_PALETTE[key];
+    var active = (key === selectedKey);
+    return '<button type="button" onclick="seSetCardColor(\'' + key + '\')" '
+      + 'title="' + p.label + '" '
+      + 'style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 7px;background:#fff;border:2px solid ' + (active ? '#1d4ed8' : '#e5e7eb') + ';border-radius:7px;cursor:pointer;min-width:54px">'
+      +   '<span style="display:block;width:28px;height:20px;border-radius:4px;background:' + p.bg + ';border:1px solid ' + p.border + '"></span>'
+      +   '<span style="font-size:9px;font-weight:700;color:' + (active ? '#1d4ed8' : '#6b7280') + '">' + p.label + (active ? ' ✓' : '') + '</span>'
+      + '</button>';
+  }).join('');
+}
+
+function seSetCardColor(key){
+  if (!Object.prototype.hasOwnProperty.call(SC_PALETTE, key || '')) key = '';
+  seRenderCardColorPalette(key);
 }
 
 function sePreviewPhoto(input) {
@@ -3793,18 +3905,21 @@ function saveStaffEdit() {
   var name = document.getElementById('seName').value.trim();
   var ward = document.getElementById('seWard').value;
   var status = document.getElementById('seStatus').value;
+  var cardColorEl = document.getElementById('seCardColor');
+  var cardColor = cardColorEl ? cardColorEl.value : '';
+  if (!Object.prototype.hasOwnProperty.call(SC_PALETTE, cardColor || '')) cardColor = '';
   var errEl = document.getElementById('seErr');
   if (!name) { errEl.textContent = 'Name is required.'; return; }
   errEl.textContent = 'Saving...';
-  var patch = { name: name, ward: ward, status: status };
+  var patch = { name: name, ward: ward, status: status, cardColor: cardColor };
   if (_staffPhotoBase64) patch.photoBase64 = _staffPhotoBase64;
   db.collection('users').doc(email).update(patch).then(function() {
     // Update local cache
     var u = _allStaff.find(function(s){ return s.email === email || s._docId === email; });
-    if (u) { u.name = name; u.ward = ward; u.status = status; if (_staffPhotoBase64) u.photoBase64 = _staffPhotoBase64; }
+    if (u) { u.name = name; u.ward = ward; u.status = status; u.cardColor = cardColor; if (_staffPhotoBase64) u.photoBase64 = _staffPhotoBase64; }
     document.getElementById('staffEditModal').classList.remove('open');
     showToast('✅ Staff profile updated','success');
-    if (typeof writeAudit === 'function') writeAudit('EDIT','users',email,{name:name,ward:ward,status:status});
+    if (typeof writeAudit === 'function') writeAudit('EDIT','users',email,{name:name,ward:ward,status:status,cardColor:cardColor});
     // Refresh display
     var activeFilt = document.querySelector('#sec-staff .dmt-tab.active');
     var role = activeFilt ? activeFilt.getAttribute('data-role') || 'all' : 'all';
@@ -5855,6 +5970,165 @@ function sgoSave(){
     console.error('[sgoSave] threw before write:', err);
     if (m) { m.textContent = 'Save error: ' + (err && err.message ? err.message : err); m.style.color = '#dc2626'; }
   }
+}
+
+// ─── Staff Public Text & Appearance (spt) ──────────────────────────────
+// Edits the text + intro background that the landing page renders at the
+// top of the Staff tab, and the per-role leadership descriptions. Persists
+// to settings/about_page; the landing page reads those fields on render.
+
+// Preset palettes for the intro banner background. Keys are saved to
+// Firestore; values define the actual rendered look. Keep this list
+// matched with the same palette in index.html (SPT_PALETTE).
+var SPT_PALETTE = {
+  slate:    { bg:'#f8fafc', border:'#e2e8f0', textColor:'#475569', iconBg:'#f5f3ff', iconColor:'#7c3aed', label:'Slate (default)' },
+  blue:     { bg:'#eff6ff', border:'#bfdbfe', textColor:'#1e3a8a', iconBg:'#dbeafe', iconColor:'#1d4ed8', label:'Blue' },
+  pink:     { bg:'#fdf2f8', border:'#fbcfe8', textColor:'#9d174d', iconBg:'#fce7f3', iconColor:'#db2777', label:'Pink' },
+  amber:    { bg:'#fffbeb', border:'#fde68a', textColor:'#78350f', iconBg:'#fef3c7', iconColor:'#d97706', label:'Amber' },
+  green:    { bg:'#ecfdf5', border:'#a7f3d0', textColor:'#064e3b', iconBg:'#d1fae5', iconColor:'#059669', label:'Green' },
+  lavender: { bg:'#f5f3ff', border:'#ddd6fe', textColor:'#4c1d95', iconBg:'#ede9fe', iconColor:'#7c3aed', label:'Lavender' }
+};
+
+// Factory defaults (used by sptReset and as fallback when settings missing).
+var SPT_DEFAULTS = {
+  staffIntroText: 'Meet the dedicated team working behind the success of AB-PMJAY Management Information System. Together, we ensure efficient implementation, monitoring, and management of the AB-PMJAY scheme.',
+  staffIntroPalette: 'slate',
+  staffLeadershipDescs: {
+    principal: 'Leading the institution with vision and commitment.',
+    ms: 'Overseeing hospital operations and healthcare services.',
+    ic: 'Managing and coordinating AB-PMJAY activities effectively.'
+  }
+};
+
+var _sptCurrentPalette = 'slate';
+
+function sptInit(){
+  sptRenderPalette();
+  // Load from Firestore; fall back silently to defaults if doc missing.
+  db.collection('settings').doc('about_page').get().then(function(doc){
+    var d = (doc.exists && doc.data()) ? doc.data() : {};
+    var introText = d.staffIntroText || SPT_DEFAULTS.staffIntroText;
+    var palette   = (d.staffIntroPalette && SPT_PALETTE[d.staffIntroPalette]) ? d.staffIntroPalette : SPT_DEFAULTS.staffIntroPalette;
+    var descs     = d.staffLeadershipDescs || {};
+    var ta = document.getElementById('sptIntroText');
+    var dp = document.getElementById('sptDescPrincipal');
+    var dm = document.getElementById('sptDescMs');
+    var di = document.getElementById('sptDescIc');
+    if (ta) ta.value = introText;
+    if (dp) dp.value = descs.principal || SPT_DEFAULTS.staffLeadershipDescs.principal;
+    if (dm) dm.value = descs.ms        || SPT_DEFAULTS.staffLeadershipDescs.ms;
+    if (di) di.value = descs.ic        || SPT_DEFAULTS.staffLeadershipDescs.ic;
+    sptSetPalette(palette, /*silent*/ true);
+    sptPreviewIntro();
+    sptSetMsg('', '');
+    window.__sptDirty = false;
+  }).catch(function(e){
+    console.warn('[sptInit] load failed; using defaults:', e);
+    var ta = document.getElementById('sptIntroText');
+    if (ta && !ta.value) ta.value = SPT_DEFAULTS.staffIntroText;
+    sptSetPalette('slate', true);
+    sptPreviewIntro();
+  });
+}
+
+// Renders the row of 6 colored swatch buttons. Clicking one updates
+// _sptCurrentPalette and the preview.
+function sptRenderPalette(){
+  var box = document.getElementById('sptIntroPalette');
+  if (!box) return;
+  box.innerHTML = Object.keys(SPT_PALETTE).map(function(key){
+    var p = SPT_PALETTE[key];
+    var active = (key === _sptCurrentPalette);
+    return '<button onclick="sptSetPalette(\'' + key + '\')" '
+      + 'title="' + p.label + '" '
+      + 'style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 8px;background:#fff;border:2px solid ' + (active ? '#1d4ed8' : '#e5e7eb') + ';border-radius:8px;cursor:pointer;transition:all 0.15s;min-width:64px">'
+      +   '<span style="display:block;width:36px;height:24px;border-radius:5px;background:' + p.bg + ';border:1px solid ' + p.border + '"></span>'
+      +   '<span style="font-size:9.5px;font-weight:700;color:' + (active ? '#1d4ed8' : '#6b7280') + '">' + p.label.split(' ')[0] + (active ? ' ✓' : '') + '</span>'
+      + '</button>';
+  }).join('');
+}
+
+function sptSetPalette(key, silent){
+  if (!SPT_PALETTE[key]) return;
+  _sptCurrentPalette = key;
+  sptRenderPalette();
+  sptPreviewIntro();
+  if (!silent) sptMarkDirty();
+}
+
+function sptPreviewIntro(){
+  var prev = document.getElementById('sptIntroPreview');
+  var ta = document.getElementById('sptIntroText');
+  if (!prev) return;
+  var p = SPT_PALETTE[_sptCurrentPalette] || SPT_PALETTE.slate;
+  var text = (ta && ta.value) ? ta.value : SPT_DEFAULTS.staffIntroText;
+  prev.style.background = p.bg;
+  prev.style.borderColor = p.border;
+  prev.style.color = p.textColor;
+  prev.innerHTML =
+      '<div style="display:flex;gap:12px;align-items:flex-start">'
+    +   '<div style="width:34px;height:34px;border-radius:50%;background:' + p.iconBg + ';color:' + p.iconColor + ';display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+    +     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+    +   '</div>'
+    +   '<div style="flex:1">' + escHtml(text) + '</div>'
+    + '</div>';
+}
+
+function sptMarkDirty(){
+  window.__sptDirty = true;
+  sptSetMsg('● Unsaved changes', '#dc2626');
+}
+
+function sptSetMsg(msg, color){
+  var el = document.getElementById('sptSaveMsg');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.style.color = color || '#6b7280';
+}
+
+function sptSave(){
+  var ta = document.getElementById('sptIntroText');
+  var dp = document.getElementById('sptDescPrincipal');
+  var dm = document.getElementById('sptDescMs');
+  var di = document.getElementById('sptDescIc');
+  var payload = {
+    staffIntroText:    (ta && ta.value || '').trim() || SPT_DEFAULTS.staffIntroText,
+    staffIntroPalette: SPT_PALETTE[_sptCurrentPalette] ? _sptCurrentPalette : 'slate',
+    staffLeadershipDescs: {
+      principal: (dp && dp.value || '').trim() || SPT_DEFAULTS.staffLeadershipDescs.principal,
+      ms:        (dm && dm.value || '').trim() || SPT_DEFAULTS.staffLeadershipDescs.ms,
+      ic:        (di && di.value || '').trim() || SPT_DEFAULTS.staffLeadershipDescs.ic
+    },
+    _updatedAt: Date.now(),
+    _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
+  };
+  sptSetMsg('Saving…', '#6b7280');
+  db.collection('settings').doc('about_page').set(payload, { merge: true }).then(function(){
+    window.__sptDirty = false;
+    sptSetMsg('✅ Saved & published', '#166534');
+    if (typeof showToast === 'function') showToast('✅ Staff page text saved', 'success');
+    if (typeof writeAudit === 'function') {
+      writeAudit('EDIT', 'settings/about_page', 'staffIntroText+descs', payload);
+    }
+    setTimeout(function(){ sptSetMsg('', ''); }, 3500);
+  }).catch(function(e){
+    sptSetMsg('Error: ' + e.message, '#dc2626');
+  });
+}
+
+function sptReset(){
+  if (!confirm('Reset the intro text, palette, and leadership descriptions to factory defaults?\n\nNothing is saved until you click "Save Text & Color".')) return;
+  var ta = document.getElementById('sptIntroText');
+  var dp = document.getElementById('sptDescPrincipal');
+  var dm = document.getElementById('sptDescMs');
+  var di = document.getElementById('sptDescIc');
+  if (ta) ta.value = SPT_DEFAULTS.staffIntroText;
+  if (dp) dp.value = SPT_DEFAULTS.staffLeadershipDescs.principal;
+  if (dm) dm.value = SPT_DEFAULTS.staffLeadershipDescs.ms;
+  if (di) di.value = SPT_DEFAULTS.staffLeadershipDescs.ic;
+  sptSetPalette('slate');
+  sptPreviewIntro();
+  sptMarkDirty();
 }
 
 function nbOpenStaffMgmt(){
