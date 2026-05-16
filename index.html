@@ -2253,14 +2253,36 @@ window.addEventListener('DOMContentLoaded', function() {
       if (typeof window.lpRefreshStaff === 'function') window.lpRefreshStaff();
     }, function(err){ console.warn('about_page listener:', err && err.message); });
 
-    // Listen to the admin's user doc so the Developer page picks up changes
-    // to photo / name made via Admin Portal > Staff Management. Source of
-    // truth = users/<ADMIN_EMAIL>; falls back to a placeholder if missing.
-    var adminEmailLc = (typeof ADMIN_EMAIL === 'string') ? ADMIN_EMAIL : 'aravarya99@gmail.com';
-    db.collection('users').doc(adminEmailLc).onSnapshot(function(doc){
-      LIVE.developer = doc.exists ? (doc.data() || {}) : {};
+    // Listen for the admin user. We use a query rather than a hardcoded doc
+    // id so it works no matter what email/doc-id the admin row actually has
+    // (handles future renames, multiple admins, or the synthetic-record edge
+    // case where Staff Management writes under a different key). Falls back
+    // to placeholder initials if no admin user is found.
+    db.collection('users').where('role','==','Admin').onSnapshot(function(snap){
+      var found = null;
+      snap.forEach(function(doc){
+        var u = doc.data() || {};
+        // Prefer a record that has a real photo; otherwise take the first.
+        if (!found || (!found.photoBase64 && u.photoBase64)) found = u;
+      });
+      // Belt-and-braces: also try the canonical admin email doc directly,
+      // in case the admin record exists but has role !== 'Admin' for some
+      // reason (e.g. it was created during signup with a different role).
+      if (!found || !found.photoBase64) {
+        var adminEmailLc = (typeof ADMIN_EMAIL === 'string') ? ADMIN_EMAIL : 'aravarya99@gmail.com';
+        db.collection('users').doc(adminEmailLc).get().then(function(doc){
+          if (doc.exists) {
+            var u = doc.data() || {};
+            if (!LIVE.developer || u.photoBase64) {
+              LIVE.developer = u;
+              if (_openId === 'developer') renderInto(_openId);
+            }
+          }
+        }).catch(function(){ /* ignore — the where() result is already used */ });
+      }
+      LIVE.developer = found || {};
       if (_openId === 'developer') renderInto(_openId);
-    }, function(err){ console.warn('developer user listener:', err && err.message); });
+    }, function(err){ console.warn('developer admin-user listener:', err && err.message); });
 
     // Expose the staff group order so the staff modal (a separate IIFE) can
     // read it when building the grouped staff list.

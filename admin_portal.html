@@ -486,11 +486,11 @@ tr:hover td{background:#EEF3FF}
       <!-- Filter bar -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
         <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px">Filter:</div>
-        <button class="dmt-tab active" id="sf-tab-all" onclick="filterStaff('all',this)">All Staff</button>
-        <button class="dmt-tab" id="sf-tab-pmam" onclick="filterStaff('PMAM',this)">PMAMs</button>
-        <button class="dmt-tab" id="sf-tab-ic" onclick="filterStaff('I/C AB-PMJAY',this)">I/C</button>
-        <button class="dmt-tab" id="sf-tab-deo" onclick="filterStaff('DEO',this)">DEO</button>
-        <button class="dmt-tab" id="sf-tab-admin" onclick="filterStaff('Admin',this)">Admin</button>
+        <button class="dmt-tab active" id="sf-tab-all"   data-role="all"           onclick="filterStaff('all',this)">All Staff</button>
+        <button class="dmt-tab"        id="sf-tab-pmam"  data-role="PMAM"          onclick="filterStaff('PMAM',this)">PMAMs</button>
+        <button class="dmt-tab"        id="sf-tab-ic"    data-role="I/C AB-PMJAY"  onclick="filterStaff('I/C AB-PMJAY',this)">I/C</button>
+        <button class="dmt-tab"        id="sf-tab-deo"   data-role="DEO"           onclick="filterStaff('DEO',this)">DEO</button>
+        <button class="dmt-tab"        id="sf-tab-admin" data-role="Admin"         onclick="filterStaff('Admin',this)">Admin</button>
         <div style="margin-left:auto;font-size:11px;color:#6b7280" id="staffCountBadge"></div>
       </div>
 
@@ -3733,9 +3733,16 @@ function renderStaffCards(list) {
   }
   // Detect whether the user is currently looking at the PMAM-only filter.
   // ↑↓ reorder controls only make sense when all visible cards belong to
-  // a single group (otherwise "move up" across groups is nonsense).
-  var activeFilt = document.querySelector('#sec-staff .dmt-tab.active');
-  var activeRole = activeFilt ? (activeFilt.getAttribute('data-role') || 'all') : 'all';
+  // the PMAM group. We check the active filter via a module-level variable
+  // set by filterStaff() and a data-role attribute as a fallback. (Showing
+  // reorder for other groups would let admins move e.g. an Admin within
+  // PMAMs, which isn't meaningful — and the user explicitly asked for
+  // PMAM-only reorder.)
+  var activeRole = window.__staffFilter;
+  if (!activeRole) {
+    var activeFilt = document.querySelector('#sec-staff .dmt-tab.active');
+    activeRole = activeFilt ? (activeFilt.getAttribute('data-role') || 'all') : 'all';
+  }
   var reorderable = (activeRole === 'PMAM');
 
   // Sort the visible list by (displayOrder asc, name asc). Cards without
@@ -3897,6 +3904,9 @@ function toggleStaffLanding(encodedEmail, hide) {
 function filterStaff(role, el) {
   document.querySelectorAll('#sec-staff .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
   if (el) el.classList.add('active');
+  // Remember the active filter so renderStaffCards can decide whether to
+  // show the ↑↓ reorder controls (only meaningful when one group is shown).
+  window.__staffFilter = role;
   var filtered = role === 'all' ? _allStaff : _allStaff.filter(function(u){
     var r = (u.role || '').toLowerCase();
     if (role === 'DEO')   return r === 'deo' || r.indexOf('mts') === 0;
