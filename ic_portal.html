@@ -285,9 +285,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <div class="sbl">PMAM Wise</div>
     </div>
     <div class="sb-div"></div>
-    <div class="sbi" onclick="goSec('allrecords',this)" title="All Records">
+    <div class="sbi" onclick="goSec('allrecords',this)" title="Audit Log">
       <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-      <div class="sbl">All Records</div>
+      <div class="sbl">Audit Log</div>
     </div>
     <div class="sbi" onclick="goSec('leavereq',this)" title="Leave Requests">
       <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
@@ -495,7 +495,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 
     <!-- ===== ALL RECORDS ===== -->
     <div class="sec" id="sec-allrecords">
-      <div class="page-hd">All Records</div>
+      <div class="page-hd">Audit Log <span style="font-size:11px;color:#6b7280;font-weight:500;margin-left:8px">— Individual entry verification</span></div>
       <div class="card">
         <div class="card-hd">Filter Records — Day-wise View</div>
         <div class="frow" style="align-items:flex-start">
@@ -529,8 +529,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           <div class="fld" style="align-self:flex-end">
             <button class="btn btn-pri" onclick="genAllRecords()">Filter</button>
             <button class="btn btn-sec" onclick="clearAllRecordsFilter()">Clear</button>
-            <button class="btn btn-grn" onclick="exportExcel('allTbl','All_Records')">Export Excel</button>
-            <button class="btn btn-word" onclick="printReport('All Records Report')">Print / PDF</button>
+            <button class="btn" id="arAnomalyBtn" onclick="arToggleAnomalyMode()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">🔍 Highlight Anomalies</button>
+            <button class="btn btn-grn" onclick="exportExcel('allTbl','Audit_Log')">Export Excel</button>
+            <button class="btn btn-word" onclick="printReport('Audit Log')">Print / PDF</button>
           </div>
         </div>
       </div>
@@ -539,8 +540,8 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd">All Entries — Day-wise <span id="arCount" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
         <div class="tbl-wrap">
           <table id="allTbl">
-            <thead><tr><th>S.No</th><th>Date</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Action</th></tr></thead>
-            <tbody id="allTbody"><tr><td colspan="14" class="empty-td">Click Filter to load records</td></tr></tbody>
+            <thead><tr><th>S.No</th><th>Date</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th title="When the report was actually saved (vs report date)">Submitted</th><th title="Same-day / Late / Backdated">Lag</th><th title="Firestore document ID">Entry ID</th><th>Flag</th><th>Action</th></tr></thead>
+            <tbody id="allTbody"><tr><td colspan="18" class="empty-td">Click Filter to load records</td></tr></tbody>
             <tfoot id="allFoot"></tfoot>
           </table>
         </div>
@@ -1037,18 +1038,103 @@ function arToggleMode(){
   document.querySelectorAll('.arModeRange').forEach(el => el.style.display = (mode==='range') ? '' : 'none');
 }
 
+// State: when true, only anomalous records are shown
+var _arAnomalyOnly = false;
+
+function arToggleAnomalyMode(){
+  _arAnomalyOnly = !_arAnomalyOnly;
+  var btn = document.getElementById('arAnomalyBtn');
+  if(btn){
+    if(_arAnomalyOnly){
+      btn.style.background = '#dc2626';
+      btn.style.color = '#fff';
+      btn.style.border = '1.5px solid #dc2626';
+      btn.textContent = '🔍 Showing Anomalies Only — click to clear';
+    } else {
+      btn.style.background = '#fef3c7';
+      btn.style.color = '#92400e';
+      btn.style.border = '1.5px solid #fcd34d';
+      btn.textContent = '🔍 Highlight Anomalies';
+    }
+  }
+  genAllRecords();
+}
+
+// Returns array of anomaly reasons for a record (empty if record is fine)
+function _arDetectAnomalies(r){
+  var issues = [];
+  var ipd = Number(r.ipd||0);
+  var reg = Number(r.reg||0);
+  var pre = Number(r.pre||0);
+  var med = Number(r.med||0);
+  var surg = Number(r.surg||0);
+  var dis = Number(r.dis||0);
+  // 1) Pre-auth absurdly larger than IPD (typo like 12035 vs 35)
+  if(pre > ipd * 5 && pre > 50){
+    issues.push('Pre-Auth (' + pre + ') is implausibly larger than IPD (' + ipd + ')');
+  }
+  // 2) Register > IPD (conv > 100%) — impossible
+  if(reg > ipd && ipd > 0){
+    issues.push('Register (' + reg + ') exceeds IPD (' + ipd + ') — Conv% > 100%');
+  }
+  // 3) Conserv + Surgery > IPD
+  if((med + surg) > ipd && ipd > 0){
+    issues.push('Conserv+Surgery (' + (med+surg) + ') exceeds IPD (' + ipd + ')');
+  }
+  // 4) Discharge > Register
+  if(dis > reg && reg > 0){
+    issues.push('Discharge (' + dis + ') exceeds Register (' + reg + ')');
+  }
+  // 5) Claim without any registration
+  if(Number(r.clm||0) > 0 && reg === 0){
+    issues.push('Claim (₹' + r.clm + ') but no Register');
+  }
+  return issues;
+}
+
+// Format submission timestamp + lag
+function _arFmtSubmission(r){
+  if(!r.timestamp || !r.date) return { ts:'—', lag:'—', lagColor:'#9ca3af' };
+  var sub = new Date(r.timestamp);
+  var rep = new Date(r.date + 'T00:00:00');
+  // Format submission as "DD-MM HH:mm"
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  var subStr = pad(sub.getDate()) + '-' + pad(sub.getMonth()+1) + ' ' + pad(sub.getHours()) + ':' + pad(sub.getMinutes());
+  // Lag = days between report date and submission day
+  var diffMs = (new Date(sub.getFullYear(), sub.getMonth(), sub.getDate())) - rep;
+  var diffDays = Math.round(diffMs / 86400000);
+  var lag, color;
+  if(diffDays < 0){
+    lag = 'Backdated ' + Math.abs(diffDays) + 'd';
+    color = '#dc2626'; // red
+  } else if(diffDays === 0){
+    lag = 'Same day';
+    color = '#16a34a'; // green
+  } else if(diffDays === 1){
+    lag = 'Next day';
+    color = '#ca8a04'; // yellow
+  } else if(diffDays <= 7){
+    lag = diffDays + 'd late';
+    color = '#ea580c'; // orange
+  } else {
+    lag = diffDays + 'd late';
+    color = '#dc2626'; // red
+  }
+  return { ts:subStr, lag:lag, lagColor:color };
+}
+
 function genAllRecords(){
   const mode = (document.getElementById('arMode') || {value:'month'}).value;
   const pmam = document.getElementById('arPmam').value;
   const wardSel = document.getElementById('arWardMulti');
   const selectedWards = wardSel ? Array.from(wardSel.selectedOptions).map(o => o.value).filter(v => v) : [];
 
-  const filtered = allReports.filter(r => {
+  var filtered = allReports.filter(r => {
     if(!r.date) return false;
     const d = new Date(r.date);
     if(mode === 'month'){
-      const monthStr = document.getElementById('arMonth').value; // '' or '01'..'12'
-      const yearStr = document.getElementById('arYear').value;   // '' or e.g. '2026'
+      const monthStr = document.getElementById('arMonth').value;
+      const yearStr = document.getElementById('arYear').value;
       if(yearStr && d.getFullYear() !== parseInt(yearStr)) return false;
       if(monthStr && (d.getMonth()+1) !== parseInt(monthStr)) return false;
     } else {
@@ -1060,35 +1146,55 @@ function genAllRecords(){
     if(pmam && (r.name !== pmam)) return false;
     if(selectedWards.length){
       if(!r.wards || !Array.isArray(r.wards)) return false;
-      // Match if ANY selected ward is present in record
       const hit = selectedWards.some(w => r.wards.includes(w));
       if(!hit) return false;
     }
     return true;
   });
 
-  // Sort by date ASCENDING (1st of month → last)
+  // Anomaly-only filter (toggle button)
+  if(_arAnomalyOnly){
+    filtered = filtered.filter(r => _arDetectAnomalies(r).length > 0);
+  }
+
+  // Sort by date ASCENDING
   filtered.sort((a,b) => {
     if(a.date < b.date) return -1;
     if(a.date > b.date) return  1;
     return 0;
   });
 
-  document.getElementById('arCount').textContent = filtered.length + ' entries';
-  if(!filtered.length) {
-    document.getElementById('allTbody').innerHTML='<tr><td colspan="14" class="empty-td">No records found matching criteria.</td></tr>';
+  var countTxt = filtered.length + ' entries';
+  if(_arAnomalyOnly) countTxt += ' (anomalies only)';
+  document.getElementById('arCount').textContent = countTxt;
+
+  if(!filtered.length){
+    var emptyMsg = _arAnomalyOnly
+      ? '✓ No anomalies detected in the filtered records — data looks healthy.'
+      : 'No records found matching criteria.';
+    document.getElementById('allTbody').innerHTML='<tr><td colspan="18" class="empty-td">' + emptyMsg + '</td></tr>';
     document.getElementById('allFoot').innerHTML='';
     document.getElementById('arMetrics').innerHTML='';
     return;
   }
 
   let tIPD=0, tMed=0, tSurg=0, tReg=0, tPre=0, tPreAmt=0, tDis=0, tClm=0;
+  var anomalyCount = 0;
   document.getElementById('allTbody').innerHTML = filtered.map((r, i) => {
     tIPD+=Number(r.ipd||0); tMed+=Number(r.med||0); tSurg+=Number(r.surg||0);
     tReg+=Number(r.reg||0); tPre+=Number(r.pre||0); tPreAmt+=Number(r.preAmt||0);
     tDis+=Number(r.dis||0); tClm+=Number(r.clm||0);
+    var issues = _arDetectAnomalies(r);
+    var isAnomaly = issues.length > 0;
+    if(isAnomaly) anomalyCount++;
+    var rowBg = isAnomaly ? 'background:#fee2e2' : '';
+    var sub = _arFmtSubmission(r);
+    var entryId = (r.id || '').substring(0, 8); // short hash
+    var flag = isAnomaly
+      ? '<span style="color:#dc2626;font-size:14px;cursor:help" title="' + issues.join(' &#10; ').replace(/"/g,'&quot;') + '">⚠</span>'
+      : '<span style="color:#16a34a;font-size:12px">✓</span>';
     return `
-    <tr>
+    <tr style="${rowBg}">
       <td>${i+1}</td>
       <td>${r.date||''}</td>
       <td><strong>${r.name||''}</strong></td>
@@ -1097,19 +1203,29 @@ function genAllRecords(){
       <td>${r.med||0}</td>
       <td>${r.surg||0}</td>
       <td><strong>${r.reg||0}</strong></td>
-      <td>${r.pre||0}</td>
+      <td${(Number(r.pre||0) > Number(r.ipd||0) * 5 && Number(r.pre||0) > 50) ? ' style="color:#dc2626;font-weight:700"' : ''}>${r.pre||0}</td>
       <td>${fmt(r.preAmt)}</td>
       <td>${r.dis||0}</td>
       <td>${fmt(r.clm)}</td>
       <td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td>
+      <td style="font-size:10px;color:#6b7280;white-space:nowrap">${sub.ts}</td>
+      <td style="font-size:10px;color:${sub.lagColor};font-weight:600;white-space:nowrap">${sub.lag}</td>
+      <td style="font-size:10px;color:#9ca3af;font-family:monospace" title="${r.id||''}">${entryId}</td>
+      <td style="text-align:center">${flag}</td>
       <td><button class="btn btn-word" style="font-size:10px;padding:3px 8px" onclick="window.print()">Print</button></td>
     </tr>
   `}).join('');
 
-  document.getElementById('allFoot').innerHTML = `<tr class="tot-row"><td colspan="4">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td><td></td></tr>`;
-  
+  // Footer: 4 col headers + numeric totals
+  document.getElementById('allFoot').innerHTML = `<tr class="tot-row"><td colspan="4">TOTAL${anomalyCount?' — ⚠ '+anomalyCount+' anomalies':''}</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td><td colspan="5"></td></tr>`;
+
   document.getElementById('arMetrics').innerHTML = [
-    {c:'c1',n:tIPD,l:'Filtered IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Overall Conv%'}
+    {c:'c1',n:tIPD,l:'Filtered IPD'},
+    {c:'c2',n:tReg,l:'Registered'},
+    {c:'c3',n:tPre,l:'Pre-Auth'},
+    {c:'c4',n:tDis,l:'Discharged'},
+    {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'},
+    {c:'c6',n: (anomalyCount > 0 ? '⚠ '+anomalyCount : '✓ 0'), l:'Anomalies'}
   ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
