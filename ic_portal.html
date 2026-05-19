@@ -406,9 +406,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <div class="page-hd">Ward Wise Report</div>
       <div class="card">
         <div class="card-hd">Ward Performance</div>
-        <div class="frow">
+        <div class="frow" style="align-items:flex-end">
           <div class="fld"><label>Select Ward</label>
-            <select id="wrWard" style="width:200px">
+            <select id="wrWard" style="width:200px" onchange="wrUpdateToggleAvailability()">
               <option value="">All Wards</option>
             </select>
           </div>
@@ -418,6 +418,17 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             </select>
           </div>
           <div class="fld"><label>Year</label><select id="rYearWard" style="width:100px"></select></div>
+          <div class="fld" id="wrModeFld" style="align-self:center;padding-bottom:4px">
+            <label style="visibility:hidden">View</label>
+            <div class="ios-toggle" id="wrToggleWrap" title="Select a single ward to enable PMAM-wise breakdown">
+              <span class="ios-label" id="wrModeLabelWard">Ward-wise</span>
+              <label class="ios-switch">
+                <input type="checkbox" id="wrModeToggle" onchange="wrToggleMode()" disabled>
+                <span class="ios-slider"></span>
+              </label>
+              <span class="ios-label off" id="wrModeLabelPmam">PMAM-wise</span>
+            </div>
+          </div>
           <button class="btn btn-pri" onclick="genWard()">Generate</button>
           <button class="btn btn-grn" onclick="exportExcel('wardTbl','Ward_Report')">Export Excel</button>
           <button class="btn btn-word" onclick="printReportOrient('sec-ward','Ward-Wise Performance Report','landscape')">Print / PDF</button>
@@ -428,7 +439,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd">All Wards Comparison — Ranked by Conv% <span id="wardCardSubhead" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
         <div class="tbl-wrap">
           <table id="wardTbl">
-            <thead><tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <thead id="wardThead"><tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
             <tbody id="wardTbody"><tr><td colspan="11" class="empty-td">Click Generate to load data</td></tr></tbody>
             <tfoot id="wardFoot"></tfoot>
           </table>
@@ -725,6 +736,39 @@ function genAnnual(){
 }
 
 // ===== WARD =====
+function wrToggleMode(){
+  var toggle = document.getElementById('wrModeToggle');
+  if(!toggle) return;
+  var isPmam = toggle.checked;
+  var labelWard = document.getElementById('wrModeLabelWard');
+  var labelPmam = document.getElementById('wrModeLabelPmam');
+  if(labelWard) labelWard.classList.toggle('off', isPmam);
+  if(labelPmam) labelPmam.classList.toggle('off', !isPmam);
+}
+
+// Toggle is only enabled when a specific ward is picked (not "All Wards")
+function wrUpdateToggleAvailability(){
+  var wardSel = document.getElementById('wrWard');
+  var toggle = document.getElementById('wrModeToggle');
+  var wrap = document.getElementById('wrToggleWrap');
+  if(!toggle || !wardSel) return;
+  var hasWard = !!wardSel.value;
+  toggle.disabled = !hasWard;
+  if(!hasWard){
+    toggle.checked = false;
+    wrToggleMode();
+    if(wrap){
+      wrap.style.opacity = '0.45';
+      wrap.title = 'Select a single ward to enable PMAM-wise breakdown';
+    }
+  } else {
+    if(wrap){
+      wrap.style.opacity = '1';
+      wrap.title = 'Toggle between Ward-wise and PMAM-wise breakdown';
+    }
+  }
+}
+
 function genWard(){
   const yearSel = document.getElementById('rYearWard');
   const year = yearSel ? parseInt(yearSel.value) : new Date().getFullYear();
@@ -741,20 +785,40 @@ function genWard(){
     return ward === "" || r.wards.includes(ward);
   });
 
-  // Update subhead so the user can see what's being shown
+  // Update subhead
   var subhead = document.getElementById('wardCardSubhead');
+  var monthName = monthStr ? MONTHS[parseInt(monthStr)-1] : 'All Months';
+  var wardLabel = ward || 'All Wards';
+
+  // Ensure toggle availability is in sync with current ward selection
+  wrUpdateToggleAvailability();
+  var toggle = document.getElementById('wrModeToggle');
+  var isPmamMode = toggle && !toggle.disabled && toggle.checked && !!ward;
+
   if(subhead){
-    var monthName = monthStr ? MONTHS[parseInt(monthStr)-1] : 'All Months';
-    var wardLabel = ward || 'All Wards';
-    subhead.textContent = '— ' + wardLabel + ' / ' + monthName + ' ' + year;
+    var modeLabel = isPmamMode ? ' (PMAM breakdown)' : '';
+    subhead.textContent = '— ' + wardLabel + ' / ' + monthName + ' ' + year + modeLabel;
   }
 
   if(!filtered.length){
     document.getElementById('wardMetrics').innerHTML='';
     document.getElementById('wardTbody').innerHTML='<tr><td colspan="11" class="empty-td">No data available for selected filters.</td></tr>';
     var wf=document.getElementById('wardFoot'); if(wf) wf.innerHTML='';
+    // Restore default header
+    document.getElementById('wardThead').innerHTML = '<tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr>';
     return;
   }
+
+  if(isPmamMode){
+    _genWardPmamBreakdown(ward, filtered);
+  } else {
+    _genWardAggregated(ward, filtered);
+  }
+}
+
+function _genWardAggregated(ward, filtered){
+  // Default ward-wise view: one row per ward, PMAMs listed as comma-separated string
+  document.getElementById('wardThead').innerHTML = '<tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr>';
 
   const wardData = {};
   filtered.forEach(r => {
@@ -783,6 +847,47 @@ function genWard(){
 
   document.getElementById('wardMetrics').innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
+  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+}
+
+function _genWardPmamBreakdown(ward, filtered){
+  // PMAM-wise view: one row per PMAM working on this specific ward
+  // Header: Rank | Ward | PMAM | numeric columns | Conv%
+  document.getElementById('wardThead').innerHTML = '<tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr>';
+
+  // Aggregate by PMAM. Use pmam_email FK as the grouping key for stability;
+  // fall back to name when email is missing on legacy records.
+  const byPmam = {};
+  filtered.forEach(r => {
+    if(!Array.isArray(r.wards) || !r.wards.includes(ward)) return;
+    var key = (r.pmam_email && r.pmam_email.trim()) || r.email || r.name || 'unknown';
+    if(!byPmam[key]){
+      byPmam[key] = { key:key, name:r.name||key, ipd:0, med:0, surg:0, reg:0, pre:0, dis:0, clm:0 };
+    }
+    const d = byPmam[key];
+    // Always refresh display name to the latest seen (already normalized at load)
+    if(r.name) d.name = r.name;
+    d.ipd+=Number(r.ipd||0); d.med+=Number(r.med||0); d.surg+=Number(r.surg||0);
+    d.reg+=Number(r.reg||0); d.pre+=Number(r.pre||0); d.dis+=Number(r.dis||0); d.clm+=Number(r.clm||0);
+  });
+
+  // Rank by IPD count descending (busiest first)
+  const rows = Object.values(byPmam).sort((a,b) => b.ipd - a.ipd);
+
+  document.getElementById('wardTbody').innerHTML = rows.map((r,i) => `
+    <tr><td>${i+1}</td><td><strong>${ward}</strong></td><td><strong>${r.name}</strong></td><td>${r.ipd}</td><td>${r.med}</td><td>${r.surg}</td><td>${r.reg}</td><td>${r.pre}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td></tr>
+  `).join('');
+
+  let tIPD=0, tMed=0, tSurg=0, tReg=0, tPre=0, tDis=0, tClm=0;
+  rows.forEach(r => { tIPD+=r.ipd; tMed+=r.med; tSurg+=r.surg; tReg+=r.reg; tPre+=r.pre; tDis+=r.dis; tClm+=r.clm; });
+
+  var wardFoot = document.getElementById('wardFoot');
+  if(wardFoot){
+    wardFoot.innerHTML = `<tr class="tot-row"><td colspan="3">TOTAL — ${rows.length} PMAM(s)</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
+  }
+
+  document.getElementById('wardMetrics').innerHTML = [
+    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:rows.length+' PMAMs',l:'Contributors'}
   ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
