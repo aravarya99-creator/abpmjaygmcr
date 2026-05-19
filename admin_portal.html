@@ -486,11 +486,11 @@ tr:hover td{background:#EEF3FF}
       <!-- Filter bar -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
         <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px">Filter:</div>
-        <button class="dmt-tab active" id="sf-tab-all"   data-role="all"           onclick="filterStaff('all',this)">All Staff</button>
-        <button class="dmt-tab"        id="sf-tab-pmam"  data-role="PMAM"          onclick="filterStaff('PMAM',this)">PMAMs</button>
-        <button class="dmt-tab"        id="sf-tab-ic"    data-role="I/C AB-PMJAY"  onclick="filterStaff('I/C AB-PMJAY',this)">I/C</button>
-        <button class="dmt-tab"        id="sf-tab-deo"   data-role="DEO"           onclick="filterStaff('DEO',this)">DEO</button>
-        <button class="dmt-tab"        id="sf-tab-admin" data-role="Admin"         onclick="filterStaff('Admin',this)">Admin</button>
+        <button class="dmt-tab active" id="sf-tab-all" onclick="filterStaff('all',this)">All Staff</button>
+        <button class="dmt-tab" id="sf-tab-pmam" onclick="filterStaff('PMAM',this)">PMAMs</button>
+        <button class="dmt-tab" id="sf-tab-ic" onclick="filterStaff('I/C AB-PMJAY',this)">I/C</button>
+        <button class="dmt-tab" id="sf-tab-deo" onclick="filterStaff('DEO',this)">DEO</button>
+        <button class="dmt-tab" id="sf-tab-admin" onclick="filterStaff('Admin',this)">Admin</button>
         <div style="margin-left:auto;font-size:11px;color:#6b7280" id="staffCountBadge"></div>
       </div>
 
@@ -534,11 +534,6 @@ tr:hover td{background:#EEF3FF}
               <option>Admin</option><option>Finance</option><option>OPD</option>
             </select>
           </div>
-          <div class="mfld" style="grid-column:1/-1">
-            <label>Card Color (shown on public Staff tab)</label>
-            <input type="hidden" id="seCardColor" value="">
-            <div id="seCardColorPalette" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"></div>
-          </div>
         </div>
         <div id="seErr" style="font-size:11px;color:#dc2626;min-height:14px;margin-top:6px"></div>
         <div class="modal-footer">
@@ -557,6 +552,7 @@ tr:hover td{background:#EEF3FF}
         <button class="dmt-tab active" id="dmt-wardmgmt" onclick="showDmTab('wardmgmt',this)">🏨 Ward Management</button>
         <button class="dmt-tab"        id="dmt-reports"  onclick="showDmTab('reports',this)">📊 Monthly Reports</button>
         <button class="dmt-tab"        id="dmt-leaves"   onclick="showDmTab('leaves',this)">📋 Leave Requests</button>
+        <button class="dmt-tab"        id="dmt-cleanup"  onclick="showDmTab('cleanup',this)">🧹 Data Cleanup</button>
       </div>
 
       <!-- ── TAB: Holiday Calendar ── -->
@@ -720,6 +716,124 @@ tr:hover td{background:#EEF3FF}
         </div>
       </div>
 
+      <!-- ── TAB: Data Cleanup ── -->
+      <div class="dmt-pane" id="dmpane-cleanup">
+
+        <!-- Hero warning card -->
+        <div class="card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fcd34d;margin-bottom:12px">
+          <div class="card-hd" style="color:#92400e;display:flex;align-items:center;gap:8px">
+            <span style="font-size:18px">⚠️</span> Data Cleanup — daily_reports Collection
+          </div>
+          <div style="font-size:12px;color:#78350f;line-height:1.7">
+            This tool permanently rewrites the <code>daily_reports</code> collection in Firestore. Use it to standardize <strong>ward names</strong> (e.g. <code>Onco</code> → <code>Oncology</code>) and <strong>PMAM names</strong> (e.g. <code>Tania manhas</code> → <code>TANIA MANHAS</code>) so reports aggregate correctly across the entire database.
+            <br><br>
+            <strong>Always:</strong> Scan first → Export Backup → Review mappings → Preview → Apply. Migration cannot be undone without the backup file.
+          </div>
+        </div>
+
+        <!-- Inner sub-tabs (Wards vs PMAMs) -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;background:#fff;border-radius:12px;padding:8px 10px;box-shadow:0 2px 6px rgba(26,61,181,0.06)">
+          <button class="dmt-tab active" id="cln-tab-wards" onclick="cleanupShowSubtab('wards',this)">🏥 Ward Names</button>
+          <button class="dmt-tab"        id="cln-tab-pmams" onclick="cleanupShowSubtab('pmams',this)">👤 PMAM Names</button>
+        </div>
+
+        <!-- ── SUBTAB: WARDS ── -->
+        <div class="cln-subpane active" id="cln-sub-wards">
+          <div class="card">
+            <div class="card-hd">Step 1 — Discovery</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <button class="btn btn-pri" onclick="cleanupScanWards()">🔍 Scan Database (Wards)</button>
+              <button class="btn" onclick="cleanupExport()" style="background:#dcfce7;color:#166534;border:1.5px solid #86efac">💾 Export Backup (JSON)</button>
+              <span id="cleanupWardStatus" style="font-size:12px;color:#6b7280"></span>
+            </div>
+          </div>
+
+          <div class="card" id="cleanupWardMapCard" style="display:none">
+            <div class="card-hd">Step 2 — Review Ward Mappings</div>
+            <div style="font-size:11px;color:#6b7280;margin-bottom:10px">
+              <span style="background:#dcfce7;padding:1px 6px;border-radius:4px">Green</span> = already canonical (skipped). <span style="background:#fef3c7;padding:1px 6px;border-radius:4px">Yellow</span> = will migrate. <span style="background:#fee2e2;padding:1px 6px;border-radius:4px">Red</span> = unknown (choose target manually).
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th style="width:50px">Apply?</th><th>Current Name in DB</th><th>Records</th><th>→</th><th>Canonical Target</th><th>Status</th></tr></thead>
+                <tbody id="cleanupWardTbody"></tbody>
+              </table>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center">
+              <button class="btn" onclick="cleanupPreviewWards()" style="background:#dbeafe;color:#1e3a8a;border:1.5px solid #93c5fd">👁 Preview Changes</button>
+              <button class="btn btn-pri" id="cleanupApplyWardsBtn" style="background:#dc2626" onclick="cleanupApplyWards()" disabled>⚠ Apply Migration</button>
+              <span id="cleanupWardPreviewStatus" style="font-size:12px;color:#6b7280"></span>
+            </div>
+          </div>
+
+          <div class="card" id="cleanupWardPreviewCard" style="display:none">
+            <div class="card-hd">Step 3 — Preview (Ward Records That Will Change)</div>
+            <div class="tbl-wrap" style="max-height:380px;overflow-y:auto">
+              <table>
+                <thead><tr><th>Date</th><th>PMAM</th><th>Current Wards</th><th>→</th><th>New Wards</th></tr></thead>
+                <tbody id="cleanupWardPreviewTbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" id="cleanupWardResultCard" style="display:none">
+            <div class="card-hd">Migration Result</div>
+            <div id="cleanupWardResult" style="font-size:13px;line-height:1.7"></div>
+          </div>
+        </div>
+
+        <!-- ── SUBTAB: PMAMs ── -->
+        <div class="cln-subpane" id="cln-sub-pmams" style="display:none">
+          <div class="card" style="background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:12px">
+            <div style="font-size:12px;color:#1e3a8a;line-height:1.7">
+              <strong>How this works:</strong> PMAM names in <code>daily_reports</code> are compared to the canonical names from <code>users</code> collection (Staff Management → PMAM Users). Case-insensitive matching is applied automatically; anything that fuzzy-matches a real PMAM (e.g. <code>Tania manhas</code> ≈ <code>TANIA MANHAS</code>) is auto-suggested. Unmatched names are flagged red — pick the target manually.
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd">Step 1 — Discovery</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <button class="btn btn-pri" onclick="cleanupScanPmams()">🔍 Scan Database (PMAMs)</button>
+              <button class="btn" onclick="cleanupExport()" style="background:#dcfce7;color:#166534;border:1.5px solid #86efac">💾 Export Backup (JSON)</button>
+              <span id="cleanupPmamStatus" style="font-size:12px;color:#6b7280"></span>
+            </div>
+          </div>
+
+          <div class="card" id="cleanupPmamMapCard" style="display:none">
+            <div class="card-hd">Step 2 — Review PMAM Mappings</div>
+            <div style="font-size:11px;color:#6b7280;margin-bottom:10px">
+              <span style="background:#dcfce7;padding:1px 6px;border-radius:4px">Green</span> = exact match to a canonical PMAM. <span style="background:#fef3c7;padding:1px 6px;border-radius:4px">Yellow</span> = fuzzy match (case/whitespace). <span style="background:#fee2e2;padding:1px 6px;border-radius:4px">Red</span> = no match (pick target or keep as-is).
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th style="width:50px">Apply?</th><th>Current Name in DB</th><th>Records</th><th>→</th><th>Canonical Target</th><th>Status</th></tr></thead>
+                <tbody id="cleanupPmamTbody"></tbody>
+              </table>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center">
+              <button class="btn" onclick="cleanupPreviewPmams()" style="background:#dbeafe;color:#1e3a8a;border:1.5px solid #93c5fd">👁 Preview Changes</button>
+              <button class="btn btn-pri" id="cleanupApplyPmamsBtn" style="background:#dc2626" onclick="cleanupApplyPmams()" disabled>⚠ Apply Migration</button>
+              <span id="cleanupPmamPreviewStatus" style="font-size:12px;color:#6b7280"></span>
+            </div>
+          </div>
+
+          <div class="card" id="cleanupPmamPreviewCard" style="display:none">
+            <div class="card-hd">Step 3 — Preview (PMAM Records That Will Change)</div>
+            <div class="tbl-wrap" style="max-height:380px;overflow-y:auto">
+              <table>
+                <thead><tr><th>Date</th><th>Current PMAM</th><th>→</th><th>New PMAM</th><th>Wards</th></tr></thead>
+                <tbody id="cleanupPmamPreviewTbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" id="cleanupPmamResultCard" style="display:none">
+            <div class="card-hd">Migration Result</div>
+            <div id="cleanupPmamResult" style="font-size:13px;line-height:1.7"></div>
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
 
@@ -730,7 +844,7 @@ tr:hover td{background:#EEF3FF}
       <!-- Sub-tab nav -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
         <button class="dmt-tab active" id="nbt-aboutpage"     onclick="showNavTab('aboutpage',this)">ℹ️ About Us</button>
-        <button class="dmt-tab"        id="nbt-developer"     onclick="showNavTab('developer',this)">👨‍💻 Developer</button>
+        <button class="dmt-tab"        id="nbt-developer"     onclick="showNavTab('developer',this)">👨‍💻 About Developer</button>
         <button class="dmt-tab"        id="nbt-staff"         onclick="showNavTab('staff',this)">👥 Staff</button>
         <button class="dmt-tab"        id="nbt-wardroster"    onclick="showNavTab('wardroster',this)">🏥 Ward Roster</button>
         <button class="dmt-tab"        id="nbt-weekendroster" onclick="showNavTab('weekendroster',this)">📆 Weekend Roster</button>
@@ -946,10 +1060,10 @@ tr:hover td{background:#EEF3FF}
 
       <div class="dmt-pane" id="dmpane-developer">
         <div class="card" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #d8b4fe;margin-bottom:12px">
-          <div class="card-hd" style="color:#6b21a8">👨‍💻 Developer Page Editor</div>
+          <div class="card-hd" style="color:#6b21a8">👨‍💻 About Developer Page Editor</div>
           <div style="font-size:12px;color:#6b21a8;line-height:1.6">
             Set the developer's photo, name and role for the header card, then add one or more
-            styled content sections below. Published to the public <strong>Developer</strong> tab.
+            styled content sections below. Saved together with the About Us page.
           </div>
         </div>
 
@@ -1003,75 +1117,6 @@ tr:hover td{background:#EEF3FF}
           </div>
           <div style="margin-top:10px">
             <button class="btn btn-pri" onclick="nbOpenStaffMgmt()">👥 Open Staff Management</button>
-          </div>
-        </div>
-
-        <!-- ─── Public Text & Appearance: editable banner + leadership descs ─── -->
-        <div class="card">
-          <div class="card-hd" style="display:flex;align-items:center;gap:8px">
-            📝 Public Text & Appearance
-            <span id="sptSaveMsg" style="margin-left:auto;font-size:11px;font-weight:600"></span>
-          </div>
-          <div style="font-size:11px;color:#6b7280;margin-bottom:12px">
-            Edit the text that appears at the top of the public <strong>Staff</strong> tab, and pick
-            a background color for the intro banner. Leadership descriptions are shown under each
-            role's photo card.
-          </div>
-
-          <!-- Intro banner text -->
-          <div style="margin-bottom:14px">
-            <label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:5px">Intro Banner Text</label>
-            <textarea id="sptIntroText" rows="3"
-              style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none;resize:vertical;line-height:1.5"
-              oninput="sptMarkDirty();sptPreviewIntro()"
-              placeholder="Meet the dedicated team behind…"></textarea>
-            <div style="font-size:10px;color:#9ca3af;margin-top:3px">Plain text only. Will appear in the colored box at the top of the Staff tab.</div>
-          </div>
-
-          <!-- Intro banner background palette -->
-          <div style="margin-bottom:14px">
-            <label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:6px">Intro Banner Background Color</label>
-            <div id="sptIntroPalette" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-            <div style="font-size:10px;color:#9ca3af;margin-top:4px">Click a swatch to choose.</div>
-          </div>
-
-          <!-- Intro preview -->
-          <div style="margin-bottom:14px">
-            <label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:5px">Preview</label>
-            <div id="sptIntroPreview" style="padding:10px 14px;border-radius:10px;font-size:12px;line-height:1.5;border:1px solid #e5e7eb"></div>
-          </div>
-
-          <!-- Leadership descriptions -->
-          <div style="margin-top:6px;padding-top:14px;border-top:1px dashed #e5e7eb">
-            <div style="font-size:11.5px;font-weight:800;color:#1e3a8a;margin-bottom:8px">Leadership Descriptions</div>
-            <div style="font-size:10.5px;color:#6b7280;margin-bottom:10px">
-              Shown under each role's name on the Staff page (e.g. "Managing and coordinating AB-PMJAY activities effectively.").
-            </div>
-            <div style="display:flex;flex-direction:column;gap:10px">
-              <div>
-                <label style="font-size:10px;font-weight:700;color:#4c1d95;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:4px">🎓 Principal</label>
-                <input type="text" id="sptDescPrincipal" oninput="sptMarkDirty()"
-                  style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none"
-                  placeholder="Leading the institution with vision and commitment.">
-              </div>
-              <div>
-                <label style="font-size:10px;font-weight:700;color:#4c1d95;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:4px">🏥 Medical Superintendent</label>
-                <input type="text" id="sptDescMs" oninput="sptMarkDirty()"
-                  style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none"
-                  placeholder="Overseeing hospital operations and healthcare services.">
-              </div>
-              <div>
-                <label style="font-size:10px;font-weight:700;color:#4c1d95;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:4px">📋 I/C AB-PMJAY</label>
-                <input type="text" id="sptDescIc" oninput="sptMarkDirty()"
-                  style="width:100%;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none"
-                  placeholder="Managing and coordinating AB-PMJAY activities effectively.">
-              </div>
-            </div>
-          </div>
-
-          <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:14px">
-            <button class="btn" onclick="sptReset()" style="padding:6px 12px;font-size:11px;background:#fff;border:1.5px solid #e5e7eb;color:#374151" title="Reset to factory defaults">↺ Reset</button>
-            <button class="btn btn-pri" onclick="sptSave()" style="padding:6px 14px;font-size:11px">💾 Save Text & Color</button>
           </div>
         </div>
         <div class="card">
@@ -2113,7 +2158,7 @@ function showNavTab(tab, el){
   if (tab === 'orders')        { if (typeof ordInit === 'function') ordInit(); }
   if (tab === 'aboutpage')     { if (typeof abInit === 'function') abInit(); }
   if (tab === 'developer')     { if (typeof abInit === 'function') abInit(); }
-  if (tab === 'staff')         { if (typeof loadStaffFromUsers === 'function') loadStaffFromUsers(); if (typeof nbStaffPreviewRender === 'function') nbStaffPreviewRender(); if (typeof sgoInit === 'function') sgoInit(); if (typeof sptInit === 'function') sptInit(); }
+  if (tab === 'staff')         { if (typeof loadStaffFromUsers === 'function') loadStaffFromUsers(); if (typeof nbStaffPreviewRender === 'function') nbStaffPreviewRender(); if (typeof sgoInit === 'function') sgoInit(); }
   if (tab === 'navbar')        { if (typeof nbmLoad === 'function') nbmLoad(); }
 }
 
@@ -2710,6 +2755,440 @@ function wmRunMigration(){
   }).catch(function(e){
     alert('Migration error: '+e.message);
   });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DATA CLEANUP — Ward & PMAM name migration in daily_reports collection
+// Operates on `daily_reports.wards[]` and `daily_reports.name`
+// (separate from wmRunMigration which only touches users.ward and roster)
+// ═══════════════════════════════════════════════════════════════════════
+var _cleanupWardScan = null;   // { wardCounts: {name: count}, rawDocs: [...] }
+var _cleanupWardPlan = null;
+var _cleanupPmamScan = null;   // { pmamCounts: {name: count}, canonicalPmams: [...], rawDocs: [...] }
+var _cleanupPmamPlan = null;
+
+function cleanupShowSubtab(which, btnEl){
+  document.querySelectorAll('#dmpane-cleanup .cln-subpane').forEach(function(p){ p.style.display = 'none'; p.classList.remove('active'); });
+  document.querySelectorAll('#dmpane-cleanup [id^="cln-tab-"]').forEach(function(b){ b.classList.remove('active'); });
+  var pane = document.getElementById('cln-sub-' + which);
+  if (pane){ pane.style.display = ''; pane.classList.add('active'); }
+  if (btnEl) btnEl.classList.add('active');
+}
+
+function _escHtml(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function cleanupExport(){
+  // Shared backup function — same JSON dump regardless of which sub-tab user is on
+  var anyStatus = document.getElementById('cleanupWardStatus') || document.getElementById('cleanupPmamStatus');
+  if (anyStatus){ anyStatus.textContent = 'Building backup…'; anyStatus.style.color = '#6b7280'; }
+  db.collection('daily_reports').get().then(function(snap){
+    var out = [];
+    snap.forEach(function(doc){ out.push({ id: doc.id, data: doc.data() }); });
+    var blob = new Blob([JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      collection: 'daily_reports',
+      recordCount: out.length,
+      records: out
+    }, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'daily_reports_backup_' + new Date().toISOString().replace(/[:.]/g,'-') + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    var msg = '✅ Backup downloaded (' + out.length + ' records).';
+    if (document.getElementById('cleanupWardStatus')){ document.getElementById('cleanupWardStatus').textContent = msg; document.getElementById('cleanupWardStatus').style.color = '#16a34a'; }
+    if (document.getElementById('cleanupPmamStatus')){ document.getElementById('cleanupPmamStatus').textContent = msg; document.getElementById('cleanupPmamStatus').style.color = '#16a34a'; }
+  }).catch(function(err){
+    var emsg = 'Backup error: ' + err.message;
+    if (document.getElementById('cleanupWardStatus')){ document.getElementById('cleanupWardStatus').textContent = emsg; document.getElementById('cleanupWardStatus').style.color = '#dc2626'; }
+    if (document.getElementById('cleanupPmamStatus')){ document.getElementById('cleanupPmamStatus').textContent = emsg; document.getElementById('cleanupPmamStatus').style.color = '#dc2626'; }
+  });
+}
+
+// ── WARDS ──────────────────────────────────────────────────────────────
+function cleanupScanWards(){
+  var statusEl = document.getElementById('cleanupWardStatus');
+  statusEl.textContent = 'Scanning…'; statusEl.style.color = '#6b7280';
+
+  db.collection('daily_reports').get().then(function(snap){
+    var wardCounts = {};
+    var rawDocs = [];
+    snap.forEach(function(doc){
+      var d = doc.data();
+      rawDocs.push({ id: doc.id, data: d });
+      var wards = Array.isArray(d.wards) ? d.wards : [];
+      wards.forEach(function(w){
+        if (!w) return;
+        var name = String(w).trim();
+        if (!name) return;
+        wardCounts[name] = (wardCounts[name] || 0) + 1;
+      });
+    });
+    _cleanupWardScan = { wardCounts: wardCounts, rawDocs: rawDocs };
+    statusEl.textContent = 'Found ' + Object.keys(wardCounts).length + ' unique ward names across ' + rawDocs.length + ' records.';
+    statusEl.style.color = '#16a34a';
+    cleanupRenderWardMappings();
+  }).catch(function(err){
+    statusEl.textContent = 'Error: ' + err.message;
+    statusEl.style.color = '#dc2626';
+  });
+}
+
+function cleanupRenderWardMappings(){
+  if (!_cleanupWardScan) return;
+  var card = document.getElementById('cleanupWardMapCard');
+  var tbody = document.getElementById('cleanupWardTbody');
+  card.style.display = '';
+
+  var canonicalList = (window.WARD_REGISTRY && WARD_REGISTRY.list) ? WARD_REGISTRY.list().map(function(w){return w.label;}) : [];
+  var rows = Object.keys(_cleanupWardScan.wardCounts).sort(function(a,b){
+    return _cleanupWardScan.wardCounts[b] - _cleanupWardScan.wardCounts[a];
+  });
+
+  tbody.innerHTML = rows.map(function(name, idx){
+    var count = _cleanupWardScan.wardCounts[name];
+    var suggested = (window.WARD_REGISTRY && WARD_REGISTRY.canonical) ? WARD_REGISTRY.canonical(name) : name;
+    var isCanonical = (suggested === name) && canonicalList.indexOf(name) !== -1;
+    var willChange = !isCanonical && suggested && suggested !== name;
+    var rowBg = isCanonical ? '#dcfce7' : (willChange ? '#fef3c7' : '#fee2e2');
+    var statusTxt = isCanonical ? '✓ Already canonical' : (willChange ? '↻ Will migrate' : '⚠ Unknown — choose target');
+
+    var options = canonicalList.map(function(c){
+      return '<option value="' + c + '"' + (c === suggested ? ' selected' : '') + '>' + _escHtml(c) + '</option>';
+    }).join('');
+    if (canonicalList.indexOf(suggested) === -1 && suggested) {
+      options = '<option value="' + _escHtml(suggested) + '" selected>' + _escHtml(suggested) + ' (keep as-is)</option>' + options;
+    }
+
+    return '<tr style="background:' + rowBg + '" data-cleanup-from="' + _escHtml(name) + '">'
+      + '<td style="text-align:center"><input type="checkbox" class="cln-w-apply" ' + (willChange ? 'checked' : 'disabled') + '></td>'
+      + '<td><strong>' + _escHtml(name) + '</strong></td>'
+      + '<td>' + count + '</td>'
+      + '<td>→</td>'
+      + '<td><select class="cln-w-target" style="width:200px;padding:4px 8px;font-size:11px;border:1px solid #cbd5e1;border-radius:6px">' + options + '</select></td>'
+      + '<td style="font-size:11px">' + statusTxt + '</td>'
+      + '</tr>';
+  }).join('');
+
+  document.getElementById('cleanupWardPreviewCard').style.display = 'none';
+  document.getElementById('cleanupWardResultCard').style.display = 'none';
+  document.getElementById('cleanupApplyWardsBtn').disabled = true;
+  document.getElementById('cleanupWardPreviewStatus').textContent = '';
+}
+
+function cleanupBuildWardPlan(){
+  if (!_cleanupWardScan) return null;
+  var rows = document.querySelectorAll('#cleanupWardTbody tr');
+  var mappings = [];
+  rows.forEach(function(tr){
+    var from = tr.getAttribute('data-cleanup-from');
+    var applyCb = tr.querySelector('.cln-w-apply');
+    var targetSel = tr.querySelector('.cln-w-target');
+    var to = targetSel ? targetSel.value : from;
+    var apply = applyCb && !applyCb.disabled && applyCb.checked;
+    if (apply && to && to !== from) mappings.push({ from: from, to: to });
+  });
+  var fromSet = {}; mappings.forEach(function(m){ fromSet[m.from] = m.to; });
+  var affected = [];
+  _cleanupWardScan.rawDocs.forEach(function(doc){
+    var wards = Array.isArray(doc.data.wards) ? doc.data.wards : [];
+    var oldWards = wards.map(function(w){ return String(w == null ? '' : w).trim(); });
+    var hit = oldWards.some(function(w){ return fromSet.hasOwnProperty(w); });
+    if (!hit) return;
+    var seen = {}; var newWards = [];
+    oldWards.forEach(function(w){
+      var nw = fromSet.hasOwnProperty(w) ? fromSet[w] : w;
+      if (nw && !seen[nw]){ seen[nw] = 1; newWards.push(nw); }
+    });
+    affected.push({ id: doc.id, date: doc.data.date, name: doc.data.name, oldWards: oldWards, newWards: newWards });
+  });
+  return { mappings: mappings, affected: affected };
+}
+
+function cleanupPreviewWards(){
+  var plan = cleanupBuildWardPlan();
+  _cleanupWardPlan = plan;
+  var statusEl = document.getElementById('cleanupWardPreviewStatus');
+  var applyBtn = document.getElementById('cleanupApplyWardsBtn');
+  if (!plan || !plan.mappings.length){
+    statusEl.textContent = 'Nothing to migrate — no mappings checked.'; statusEl.style.color = '#dc2626';
+    applyBtn.disabled = true; document.getElementById('cleanupWardPreviewCard').style.display = 'none';
+    return;
+  }
+  document.getElementById('cleanupWardPreviewCard').style.display = '';
+  document.getElementById('cleanupWardPreviewTbody').innerHTML = plan.affected.map(function(r){
+    return '<tr>'
+      + '<td style="white-space:nowrap">' + _escHtml(r.date || '—') + '</td>'
+      + '<td>' + _escHtml(r.name || '—') + '</td>'
+      + '<td style="font-size:11px;color:#92400e">' + r.oldWards.map(_escHtml).join(', ') + '</td>'
+      + '<td>→</td>'
+      + '<td style="font-size:11px;color:#166534"><strong>' + r.newWards.map(_escHtml).join(', ') + '</strong></td>'
+      + '</tr>';
+  }).join('');
+  statusEl.textContent = plan.affected.length + ' record(s) will be updated.'; statusEl.style.color = '#16a34a';
+  applyBtn.disabled = (plan.affected.length === 0);
+}
+
+function cleanupApplyWards(){
+  if (!_cleanupWardPlan || !_cleanupWardPlan.affected.length){ alert('Run Preview first.'); return; }
+  var n = _cleanupWardPlan.affected.length;
+  if (!confirm('This will permanently update ' + n + ' record(s) in Firestore (daily_reports.wards).\n\nHave you downloaded the JSON backup? Cancel and run Export Backup if not.\n\nProceed?')) return;
+  if (!confirm('Final confirmation — apply ward migration to ' + n + ' records?\n\nThis CANNOT be undone except from the backup file.')) return;
+
+  var statusEl = document.getElementById('cleanupWardPreviewStatus');
+  statusEl.textContent = 'Applying migration… 0 / ' + n; statusEl.style.color = '#6b7280';
+  var BATCH_SIZE = 400; var affected = _cleanupWardPlan.affected.slice();
+  var done = 0, errors = [];
+
+  function runBatch(){
+    if (!affected.length){
+      var resultEl = document.getElementById('cleanupWardResult');
+      document.getElementById('cleanupWardResultCard').style.display = '';
+      if (errors.length){
+        resultEl.innerHTML = '<div style="color:#dc2626"><strong>Migration completed with ' + errors.length + ' error(s).</strong></div>'
+          + '<div>Successful updates: ' + done + '</div>'
+          + '<div style="font-size:11px;color:#6b7280;margin-top:6px">Errors:<br>' + errors.slice(0,10).map(_escHtml).join('<br>') + '</div>';
+      } else {
+        resultEl.innerHTML = '<div style="color:#16a34a"><strong>✓ Ward migration successful.</strong></div>'
+          + '<div>' + done + ' record(s) updated. Re-Scan to verify.</div>';
+      }
+      statusEl.textContent = 'Done. ' + done + ' / ' + n + ' updated.';
+      statusEl.style.color = errors.length ? '#dc2626' : '#16a34a';
+      document.getElementById('cleanupApplyWardsBtn').disabled = true;
+      return;
+    }
+    var chunk = affected.splice(0, BATCH_SIZE);
+    var batch = db.batch();
+    chunk.forEach(function(r){
+      batch.update(db.collection('daily_reports').doc(r.id), { wards: r.newWards });
+    });
+    batch.commit().then(function(){
+      done += chunk.length;
+      statusEl.textContent = 'Applying migration… ' + done + ' / ' + n;
+      runBatch();
+    }).catch(function(err){
+      errors.push(err.message || String(err));
+      runBatch();
+    });
+  }
+  runBatch();
+}
+
+// ── PMAMs ──────────────────────────────────────────────────────────────
+function cleanupScanPmams(){
+  var statusEl = document.getElementById('cleanupPmamStatus');
+  statusEl.textContent = 'Scanning…'; statusEl.style.color = '#6b7280';
+
+  // Step A: get the canonical PMAM list from users collection (role === 'PMAM')
+  db.collection('users').get().then(function(usersSnap){
+    var canonicalPmams = [];
+    usersSnap.forEach(function(doc){
+      var u = doc.data();
+      if (u && u.role === 'PMAM' && u.name){
+        canonicalPmams.push(String(u.name).trim());
+      }
+    });
+    canonicalPmams = canonicalPmams.filter(Boolean).sort();
+
+    // Step B: scan daily_reports for unique name values
+    return db.collection('daily_reports').get().then(function(snap){
+      var pmamCounts = {};
+      var rawDocs = [];
+      snap.forEach(function(doc){
+        var d = doc.data();
+        rawDocs.push({ id: doc.id, data: d });
+        var nm = d.name ? String(d.name).trim() : '';
+        if (!nm) return;
+        pmamCounts[nm] = (pmamCounts[nm] || 0) + 1;
+      });
+      _cleanupPmamScan = { pmamCounts: pmamCounts, canonicalPmams: canonicalPmams, rawDocs: rawDocs };
+      statusEl.textContent = 'Found ' + Object.keys(pmamCounts).length + ' unique PMAM names in reports; ' + canonicalPmams.length + ' canonical PMAMs in Staff.';
+      statusEl.style.color = '#16a34a';
+      cleanupRenderPmamMappings();
+    });
+  }).catch(function(err){
+    statusEl.textContent = 'Error: ' + err.message;
+    statusEl.style.color = '#dc2626';
+  });
+}
+
+// Fuzzy match a name to the canonical list. Returns { match, score } where
+// score 1 = exact, 0.9 = case-insensitive, 0.8 = whitespace/trim variant,
+// 0.7 = canonical contained or contains, < 0.7 = no good match.
+function _cleanupPmamFuzzy(name, canonicalList){
+  if (!name) return { match: null, score: 0 };
+  var n = String(name).trim();
+  var nL = n.toLowerCase();
+  // 1) exact
+  for (var i=0; i<canonicalList.length; i++){
+    if (canonicalList[i] === n) return { match: canonicalList[i], score: 1 };
+  }
+  // 2) case-insensitive
+  for (var i=0; i<canonicalList.length; i++){
+    if (canonicalList[i].toLowerCase() === nL) return { match: canonicalList[i], score: 0.9 };
+  }
+  // 3) collapse internal whitespace
+  var nCollapsed = nL.replace(/\s+/g, ' ');
+  for (var i=0; i<canonicalList.length; i++){
+    if (canonicalList[i].toLowerCase().replace(/\s+/g,' ') === nCollapsed) return { match: canonicalList[i], score: 0.85 };
+  }
+  // 4) startsWith / contains (catches "ABRAR CHOUDHARY 700" → "ABRAR CHOUDHARY")
+  for (var i=0; i<canonicalList.length; i++){
+    var cL = canonicalList[i].toLowerCase();
+    if (nL.indexOf(cL) === 0 || cL.indexOf(nL) === 0) return { match: canonicalList[i], score: 0.75 };
+  }
+  for (var i=0; i<canonicalList.length; i++){
+    var cL2 = canonicalList[i].toLowerCase();
+    if (nL.indexOf(cL2) !== -1) return { match: canonicalList[i], score: 0.7 };
+  }
+  return { match: null, score: 0 };
+}
+
+function cleanupRenderPmamMappings(){
+  if (!_cleanupPmamScan) return;
+  var card = document.getElementById('cleanupPmamMapCard');
+  var tbody = document.getElementById('cleanupPmamTbody');
+  card.style.display = '';
+
+  var canonicalList = _cleanupPmamScan.canonicalPmams;
+  var rows = Object.keys(_cleanupPmamScan.pmamCounts).sort(function(a,b){
+    return _cleanupPmamScan.pmamCounts[b] - _cleanupPmamScan.pmamCounts[a];
+  });
+
+  tbody.innerHTML = rows.map(function(name){
+    var count = _cleanupPmamScan.pmamCounts[name];
+    var fz = _cleanupPmamFuzzy(name, canonicalList);
+    var suggested = fz.match || name;
+    var isCanonical = fz.score === 1;
+    var willChange = !isCanonical && fz.score >= 0.7 && suggested !== name;
+    var noMatch = fz.score < 0.7;
+    var rowBg = isCanonical ? '#dcfce7' : (willChange ? '#fef3c7' : '#fee2e2');
+    var statusTxt;
+    if (isCanonical) statusTxt = '✓ Exact match';
+    else if (fz.score === 0.9) statusTxt = '↻ Case variant';
+    else if (fz.score === 0.85) statusTxt = '↻ Whitespace variant';
+    else if (fz.score >= 0.7) statusTxt = '↻ Fuzzy match';
+    else statusTxt = '⚠ No match — pick target';
+
+    var options = '<option value="' + _escHtml(name) + '"' + (noMatch ? ' selected' : '') + '>' + _escHtml(name) + ' (keep as-is)</option>'
+      + canonicalList.map(function(c){
+          return '<option value="' + _escHtml(c) + '"' + (c === suggested && !noMatch ? ' selected' : '') + '>' + _escHtml(c) + '</option>';
+        }).join('');
+
+    return '<tr style="background:' + rowBg + '" data-cleanup-from="' + _escHtml(name) + '">'
+      + '<td style="text-align:center"><input type="checkbox" class="cln-p-apply" ' + (willChange ? 'checked' : (isCanonical ? 'disabled' : '')) + '></td>'
+      + '<td><strong>' + _escHtml(name) + '</strong></td>'
+      + '<td>' + count + '</td>'
+      + '<td>→</td>'
+      + '<td><select class="cln-p-target" style="width:220px;padding:4px 8px;font-size:11px;border:1px solid #cbd5e1;border-radius:6px">' + options + '</select></td>'
+      + '<td style="font-size:11px">' + statusTxt + '</td>'
+      + '</tr>';
+  }).join('');
+
+  document.getElementById('cleanupPmamPreviewCard').style.display = 'none';
+  document.getElementById('cleanupPmamResultCard').style.display = 'none';
+  document.getElementById('cleanupApplyPmamsBtn').disabled = true;
+  document.getElementById('cleanupPmamPreviewStatus').textContent = '';
+}
+
+function cleanupBuildPmamPlan(){
+  if (!_cleanupPmamScan) return null;
+  var rows = document.querySelectorAll('#cleanupPmamTbody tr');
+  var mappings = {};
+  rows.forEach(function(tr){
+    var from = tr.getAttribute('data-cleanup-from');
+    var applyCb = tr.querySelector('.cln-p-apply');
+    var targetSel = tr.querySelector('.cln-p-target');
+    var to = targetSel ? targetSel.value : from;
+    var apply = applyCb && !applyCb.disabled && applyCb.checked;
+    if (apply && to && to !== from) mappings[from] = to;
+  });
+  var affected = [];
+  _cleanupPmamScan.rawDocs.forEach(function(doc){
+    var oldName = doc.data.name ? String(doc.data.name).trim() : '';
+    if (!oldName || !mappings.hasOwnProperty(oldName)) return;
+    affected.push({
+      id: doc.id,
+      date: doc.data.date,
+      oldName: oldName,
+      newName: mappings[oldName],
+      wards: doc.data.wards || []
+    });
+  });
+  return { mappings: mappings, affected: affected };
+}
+
+function cleanupPreviewPmams(){
+  var plan = cleanupBuildPmamPlan();
+  _cleanupPmamPlan = plan;
+  var statusEl = document.getElementById('cleanupPmamPreviewStatus');
+  var applyBtn = document.getElementById('cleanupApplyPmamsBtn');
+  if (!plan || !plan.affected.length){
+    statusEl.textContent = 'Nothing to migrate — no PMAM mappings checked.'; statusEl.style.color = '#dc2626';
+    applyBtn.disabled = true; document.getElementById('cleanupPmamPreviewCard').style.display = 'none';
+    return;
+  }
+  document.getElementById('cleanupPmamPreviewCard').style.display = '';
+  document.getElementById('cleanupPmamPreviewTbody').innerHTML = plan.affected.map(function(r){
+    return '<tr>'
+      + '<td style="white-space:nowrap">' + _escHtml(r.date || '—') + '</td>'
+      + '<td style="font-size:11px;color:#92400e"><strong>' + _escHtml(r.oldName) + '</strong></td>'
+      + '<td>→</td>'
+      + '<td style="font-size:11px;color:#166534"><strong>' + _escHtml(r.newName) + '</strong></td>'
+      + '<td style="font-size:10px;color:#6b7280">' + (Array.isArray(r.wards) ? r.wards.map(_escHtml).join(', ') : '') + '</td>'
+      + '</tr>';
+  }).join('');
+  statusEl.textContent = plan.affected.length + ' record(s) will be updated.'; statusEl.style.color = '#16a34a';
+  applyBtn.disabled = (plan.affected.length === 0);
+}
+
+function cleanupApplyPmams(){
+  if (!_cleanupPmamPlan || !_cleanupPmamPlan.affected.length){ alert('Run Preview first.'); return; }
+  var n = _cleanupPmamPlan.affected.length;
+  if (!confirm('This will permanently update ' + n + ' record(s) in Firestore (daily_reports.name).\n\nHave you downloaded the JSON backup? Cancel and run Export Backup if not.\n\nProceed?')) return;
+  if (!confirm('Final confirmation — apply PMAM name migration to ' + n + ' records?\n\nThis CANNOT be undone except from the backup file.')) return;
+
+  var statusEl = document.getElementById('cleanupPmamPreviewStatus');
+  statusEl.textContent = 'Applying migration… 0 / ' + n; statusEl.style.color = '#6b7280';
+  var BATCH_SIZE = 400; var affected = _cleanupPmamPlan.affected.slice();
+  var done = 0, errors = [];
+
+  function runBatch(){
+    if (!affected.length){
+      var resultEl = document.getElementById('cleanupPmamResult');
+      document.getElementById('cleanupPmamResultCard').style.display = '';
+      if (errors.length){
+        resultEl.innerHTML = '<div style="color:#dc2626"><strong>Migration completed with ' + errors.length + ' error(s).</strong></div>'
+          + '<div>Successful updates: ' + done + '</div>'
+          + '<div style="font-size:11px;color:#6b7280;margin-top:6px">Errors:<br>' + errors.slice(0,10).map(_escHtml).join('<br>') + '</div>';
+      } else {
+        resultEl.innerHTML = '<div style="color:#16a34a"><strong>✓ PMAM migration successful.</strong></div>'
+          + '<div>' + done + ' record(s) updated. Re-Scan to verify.</div>';
+      }
+      statusEl.textContent = 'Done. ' + done + ' / ' + n + ' updated.';
+      statusEl.style.color = errors.length ? '#dc2626' : '#16a34a';
+      document.getElementById('cleanupApplyPmamsBtn').disabled = true;
+      return;
+    }
+    var chunk = affected.splice(0, BATCH_SIZE);
+    var batch = db.batch();
+    chunk.forEach(function(r){
+      batch.update(db.collection('daily_reports').doc(r.id), { name: r.newName });
+    });
+    batch.commit().then(function(){
+      done += chunk.length;
+      statusEl.textContent = 'Applying migration… ' + done + ' / ' + n;
+      runBatch();
+    }).catch(function(err){
+      errors.push(err.message || String(err));
+      runBatch();
+    });
+  }
+  runBatch();
 }
 
 // ── Hook to refresh `wards` array + Ward Management UI when registry updates ──
@@ -3731,29 +4210,6 @@ function renderStaffCards(list) {
     grid.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:30px;grid-column:1/-1;text-align:center">No staff found.</div>';
     return;
   }
-  // Detect whether the user is currently looking at the PMAM-only filter.
-  // ↑↓ reorder controls only make sense when all visible cards belong to
-  // the PMAM group. We check the active filter via a module-level variable
-  // set by filterStaff() and a data-role attribute as a fallback. (Showing
-  // reorder for other groups would let admins move e.g. an Admin within
-  // PMAMs, which isn't meaningful — and the user explicitly asked for
-  // PMAM-only reorder.)
-  var activeRole = window.__staffFilter;
-  if (!activeRole) {
-    var activeFilt = document.querySelector('#sec-staff .dmt-tab.active');
-    activeRole = activeFilt ? (activeFilt.getAttribute('data-role') || 'all') : 'all';
-  }
-  var reorderable = (activeRole === 'PMAM');
-
-  // Sort the visible list by (displayOrder asc, name asc). Cards without
-  // an explicit displayOrder sort after ordered ones, alphabetically.
-  var sorted = list.slice().sort(function(a, b){
-    var ao = (typeof a.displayOrder === 'number') ? a.displayOrder : 1e9;
-    var bo = (typeof b.displayOrder === 'number') ? b.displayOrder : 1e9;
-    if (ao !== bo) return ao - bo;
-    return (a.name || '').localeCompare(b.name || '');
-  });
-
   var roleColors = {
     'PMAM':         { bg:'#E8EFFF', fg:'#1A3DB5', av:'linear-gradient(135deg,#1A3DB5,#2952D9)' },
     'I/C AB-PMJAY': { bg:'#DCFCE7', fg:'#166534', av:'linear-gradient(135deg,#166534,#16a34a)' },
@@ -3761,7 +4217,7 @@ function renderStaffCards(list) {
     'DEO':          { bg:'#FEF3C7', fg:'#92400e', av:'linear-gradient(135deg,#C94000,#E65800)' },
     'Accountant':   { bg:'#D1FAE5', fg:'#065F46', av:'linear-gradient(135deg,#059669,#047857)' }
   };
-  grid.innerHTML = sorted.map(function(u, idx) {
+  grid.innerHTML = list.map(function(u) {
     var rc = roleColors[u.role] || { bg:'#F3F4F6', fg:'#374151', av:'linear-gradient(135deg,#6b7280,#4b5563)' };
     var initials = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
     var photoHtml = u.photoBase64
@@ -3770,36 +4226,7 @@ function renderStaffCards(list) {
     var statusBadge = u.status === 'inactive'
       ? '<span style="background:#FEE2E2;color:#dc2626;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">INACTIVE</span>'
       : '<span style="background:#DCFCE7;color:#166534;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">ACTIVE</span>';
-    // Landing-page visibility badge — orange/dashed when hidden, green when shown.
-    var isHidden = (u.landingHidden === true);
-    var landingBadge = isHidden
-      ? '<span title="This user is hidden from the public Staff tab on the landing page" style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;border:1px dashed #fbbf24">🚫 HIDDEN ON LANDING</span>'
-      : '';
-    var emailEnc = encodeURIComponent(u.email || u._docId);
-    // Toggle button: clicking instantly flips landingHidden in Firestore.
-    var toggleBtn = isHidden
-      ? '<button onclick="toggleStaffLanding(\''+emailEnc+'\', false)" title="Make this user visible on the public Staff tab" style="padding:7px 12px;background:#fff;color:#166534;border:1.5px solid #86efac;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">👁 Show</button>'
-      : '<button onclick="toggleStaffLanding(\''+emailEnc+'\', true)"  title="Hide this user from the public Staff tab on the landing page (does not delete or deactivate)" style="padding:7px 12px;background:#fff;color:#92400e;border:1.5px solid #fcd34d;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">🚫 Hide</button>';
-    // Reorder controls: only rendered when the user is on the PMAM-only
-    // filter, so the buttons act within a single group. The buttons call
-    // movePmamOrder(emailEnc, dir) which patches displayOrder fields on the
-    // affected pair and re-renders.
-    var reorderHtml = '';
-    var posBadge = '';
-    if (reorderable) {
-      var isFirst = (idx === 0);
-      var isLast  = (idx === sorted.length - 1);
-      reorderHtml = '<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0">'
-        +   '<button onclick="movePmamOrder(\''+emailEnc+'\',-1)" ' + (isFirst?'disabled':'') + ' title="Move up — show this PMAM earlier on the public Staff page" '
-        +     'style="width:28px;height:24px;border:1px solid #d1d5db;background:' + (isFirst?'#f3f4f6':'#fff') + ';cursor:' + (isFirst?'not-allowed':'pointer') + ';border-radius:6px;font-size:12px;color:#374151;line-height:1">↑</button>'
-        +   '<button onclick="movePmamOrder(\''+emailEnc+'\',1)" '  + (isLast?'disabled':'')  + ' title="Move down — show this PMAM later on the public Staff page" '
-        +     'style="width:28px;height:24px;border:1px solid #d1d5db;background:' + (isLast?'#f3f4f6':'#fff')  + ';cursor:' + (isLast?'not-allowed':'pointer')  + ';border-radius:6px;font-size:12px;color:#374151;line-height:1">↓</button>'
-        + '</div>';
-      // Position number badge on the left (so admin can see ordering at a glance).
-      posBadge = '<div title="Public display position" style="background:#1A3DB5;color:#fff;font-size:11px;font-weight:800;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (idx + 1) + '</div>';
-    }
-    return '<div style="background:#fff;border-radius:16px;padding:16px;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(26,61,181,0.06);display:flex;align-items:center;gap:14px;' + (isHidden ? 'opacity:0.78' : '') + '">'
-      + posBadge
+    return '<div style="background:#fff;border-radius:16px;padding:16px;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(26,61,181,0.06);display:flex;align-items:center;gap:14px">'
       + '<div style="width:56px;height:56px;border-radius:50%;background:'+rc.av+';display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:2px solid rgba(255,255,255,0.4)">'+photoHtml+'</div>'
       + '<div style="flex:1;min-width:0">'
       +   '<div style="font-size:14px;font-weight:800;color:#0F2B8C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(u.name||'Unknown')+'</div>'
@@ -3808,105 +4235,16 @@ function renderStaffCards(list) {
       +     '<span style="background:'+rc.bg+';color:'+rc.fg+';padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">'+(u.role||'Staff')+'</span>'
       +     statusBadge
       +     (u.ward ? '<span style="background:#F0F4FF;color:#1A3DB5;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600">📍 '+(u.ward)+'</span>' : '')
-      +     landingBadge
       +   '</div>'
       + '</div>'
-      + reorderHtml
-      + '<div style="display:flex;gap:6px;flex-shrink:0">'
-      +   toggleBtn
-      +   '<button onclick="openStaffEdit(\''+emailEnc+'\')" style="padding:7px 14px;background:linear-gradient(135deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer">✏️ Edit</button>'
-      + '</div>'
+      + '<button onclick="openStaffEdit(\''+encodeURIComponent(u.email || u._docId)+'\')" style="padding:7px 14px;background:linear-gradient(135deg,#0F2B8C,#1A3DB5);color:#fff;border:none;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">✏️ Edit</button>'
       + '</div>';
   }).join('');
-}
-
-// ─── Reorder a PMAM within the public Staff page ───────────────────────
-// Looks up the current sorted PMAM list, swaps displayOrder values
-// between the clicked card and its neighbor, then persists both writes
-// in parallel. After the writes succeed, refilters the view and
-// re-renders so the ↑↓ buttons update in place.
-function movePmamOrder(encodedEmail, dir) {
-  var email = decodeURIComponent(encodedEmail);
-  // Pull just the PMAMs (visible to the public) in the same sort order
-  // the public Staff page and the admin grid use.
-  var pmams = _allStaff.filter(function(u){
-    return /pmam/i.test(u.role || '');
-  }).sort(function(a, b){
-    var ao = (typeof a.displayOrder === 'number') ? a.displayOrder : 1e9;
-    var bo = (typeof b.displayOrder === 'number') ? b.displayOrder : 1e9;
-    if (ao !== bo) return ao - bo;
-    return (a.name || '').localeCompare(b.name || '');
-  });
-  var i = pmams.findIndex(function(s){ return (s.email === email) || (s._docId === email); });
-  if (i < 0) return;
-  var j = i + dir;
-  if (j < 0 || j >= pmams.length) return;
-  var a = pmams[i], b = pmams[j];
-
-  // Normalise: every PMAM should have a numeric displayOrder by the end
-  // of this operation, otherwise sorting stays alphabetical and ↑↓ feels
-  // unpredictable. We assign indices to every PMAM after the swap.
-  pmams.forEach(function(u, idx){ u.displayOrder = idx; });
-  // Apply the swap (i and j now hold the swapped values via the loop
-  // above iff they were already 0..N-1; for fresh data this still works
-  // because we just sequentially numbered everyone). Now swap a↔b.
-  var tmp = a.displayOrder; a.displayOrder = b.displayOrder; b.displayOrder = tmp;
-
-  // Write back to Firestore in a single batch so all rows update atomically.
-  // We persist every PMAM with its (possibly newly-assigned) displayOrder so
-  // the index stays well-defined even for PMAMs that had no order before.
-  var batch = db.batch();
-  pmams.forEach(function(u){
-    var ref = db.collection('users').doc(u.email || u._docId);
-    batch.set(ref, { displayOrder: u.displayOrder, _updatedAt: Date.now() }, { merge: true });
-  });
-  batch.commit().then(function(){
-    if (typeof showToast === 'function') showToast('✅ Order updated', 'success');
-    if (typeof writeAudit === 'function') writeAudit('EDIT','users',email,{ displayOrder: a.displayOrder, action:'reorder ' + (dir < 0 ? 'up' : 'down') });
-    // Re-render with the current filter in place.
-    var activeFilt = document.querySelector('#sec-staff .dmt-tab.active');
-    var role = activeFilt ? (activeFilt.getAttribute('data-role') || 'all') : 'all';
-    filterStaff(role, activeFilt);
-  }).catch(function(e){
-    console.error('[movePmamOrder] batch failed:', e);
-    if (typeof showToast === 'function') showToast('❌ Reorder failed: ' + e.message, 'error');
-  });
-}
-
-// Toggle a user's landing-page visibility. Writes landingHidden:true/false
-// to the user doc and refreshes the local cache so the badge updates
-// without a full reload. Landing page filters out landingHidden:true users.
-function toggleStaffLanding(encodedEmail, hide) {
-  var email = decodeURIComponent(encodedEmail);
-  db.collection('users').doc(email).set({
-    landingHidden: !!hide,
-    _updatedAt: Date.now()
-  }, { merge: true }).then(function() {
-    // Update local cache so the immediate re-render shows the new state.
-    var u = _allStaff.find(function(s){ return s.email === email || s._docId === email; });
-    if (u) u.landingHidden = !!hide;
-    // Re-render with the current filter intact.
-    var activeFilt = document.querySelector('#sec-staff .dmt-tab.active');
-    var role = activeFilt ? (activeFilt.getAttribute('data-role') || 'all') : 'all';
-    filterStaff(role, activeFilt);
-    if (typeof showToast === 'function') {
-      showToast(hide ? '🚫 Hidden from landing page' : '👁 Now visible on landing page', 'success');
-    }
-    if (typeof writeAudit === 'function') {
-      writeAudit('EDIT', 'users', email, { landingHidden: !!hide });
-    }
-  }).catch(function(e) {
-    if (typeof showToast === 'function') showToast('❌ ' + e.message, 'error');
-    console.error('[toggleStaffLanding] failed:', e);
-  });
 }
 
 function filterStaff(role, el) {
   document.querySelectorAll('#sec-staff .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
   if (el) el.classList.add('active');
-  // Remember the active filter so renderStaffCards can decide whether to
-  // show the ↑↓ reorder controls (only meaningful when one group is shown).
-  window.__staffFilter = role;
   var filtered = role === 'all' ? _allStaff : _allStaff.filter(function(u){
     var r = (u.role || '').toLowerCase();
     if (role === 'DEO')   return r === 'deo' || r.indexOf('mts') === 0;
@@ -3933,8 +4271,6 @@ function openStaffEdit(encodedEmail) {
   }
   var wardSel = document.getElementById('seWard');
   if (wardSel) wardSel.value = u.ward || '';
-  // Card color palette (per-user; rendered on the public Staff tab).
-  seRenderCardColorPalette(u.cardColor || '');
   // Photo preview
   var prev = document.getElementById('sePhotoPreview');
   var initials = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
@@ -3948,42 +4284,6 @@ function openStaffEdit(encodedEmail) {
   document.getElementById('seErr').textContent = '';
   document.getElementById('sePhotoFile').value = '';
   document.getElementById('staffEditModal').classList.add('open');
-}
-
-// Per-PMAM card color presets. Keys are saved to user docs (users/{email}.cardColor)
-// and the landing page Staff renderer reads them via the same SC_PALETTE.
-var SC_PALETTE = {
-  '':       { bg:'#fff',    border:'#eef2f6', label:'Default' },
-  lavender: { bg:'#f5f3ff', border:'#ddd6fe', label:'Lavender' },
-  sky:      { bg:'#eff6ff', border:'#bfdbfe', label:'Sky' },
-  peach:    { bg:'#fff7ed', border:'#fed7aa', label:'Peach' },
-  mint:     { bg:'#ecfdf5', border:'#a7f3d0', label:'Mint' },
-  rose:     { bg:'#fff1f2', border:'#fecdd3', label:'Rose' },
-  lemon:    { bg:'#fefce8', border:'#fde68a', label:'Lemon' }
-};
-
-function seRenderCardColorPalette(selectedKey){
-  var input = document.getElementById('seCardColor');
-  var box   = document.getElementById('seCardColorPalette');
-  if (!input || !box) return;
-  // Normalize: if the saved value isn't in our palette, treat as default.
-  if (!Object.prototype.hasOwnProperty.call(SC_PALETTE, selectedKey || '')) selectedKey = '';
-  input.value = selectedKey;
-  box.innerHTML = Object.keys(SC_PALETTE).map(function(key){
-    var p = SC_PALETTE[key];
-    var active = (key === selectedKey);
-    return '<button type="button" onclick="seSetCardColor(\'' + key + '\')" '
-      + 'title="' + p.label + '" '
-      + 'style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 7px;background:#fff;border:2px solid ' + (active ? '#1d4ed8' : '#e5e7eb') + ';border-radius:7px;cursor:pointer;min-width:54px">'
-      +   '<span style="display:block;width:28px;height:20px;border-radius:4px;background:' + p.bg + ';border:1px solid ' + p.border + '"></span>'
-      +   '<span style="font-size:9px;font-weight:700;color:' + (active ? '#1d4ed8' : '#6b7280') + '">' + p.label + (active ? ' ✓' : '') + '</span>'
-      + '</button>';
-  }).join('');
-}
-
-function seSetCardColor(key){
-  if (!Object.prototype.hasOwnProperty.call(SC_PALETTE, key || '')) key = '';
-  seRenderCardColorPalette(key);
 }
 
 function sePreviewPhoto(input) {
@@ -4004,37 +4304,24 @@ function saveStaffEdit() {
   var name = document.getElementById('seName').value.trim();
   var ward = document.getElementById('seWard').value;
   var status = document.getElementById('seStatus').value;
-  var cardColorEl = document.getElementById('seCardColor');
-  var cardColor = cardColorEl ? cardColorEl.value : '';
-  if (!Object.prototype.hasOwnProperty.call(SC_PALETTE, cardColor || '')) cardColor = '';
   var errEl = document.getElementById('seErr');
   if (!name) { errEl.textContent = 'Name is required.'; return; }
   errEl.textContent = 'Saving...';
-  var patch = { name: name, ward: ward, status: status, cardColor: cardColor };
+  var patch = { name: name, ward: ward, status: status };
   if (_staffPhotoBase64) patch.photoBase64 = _staffPhotoBase64;
-  // IMPORTANT: use set+merge (not update) so the write succeeds even when
-  // the user doc doesn't exist yet — e.g. the admin row (Vinod Kumar) is a
-  // synthetic record that's never been persisted. With update(), Firestore
-  // throws "No document to update" and the photo silently fails to save.
-  db.collection('users').doc(email).set(patch, { merge: true }).then(function() {
-    // Update local cache so the immediate re-render shows the new state.
+  db.collection('users').doc(email).update(patch).then(function() {
+    // Update local cache
     var u = _allStaff.find(function(s){ return s.email === email || s._docId === email; });
-    if (u) {
-      u.name = name; u.ward = ward; u.status = status; u.cardColor = cardColor;
-      if (_staffPhotoBase64) u.photoBase64 = _staffPhotoBase64;
-      delete u._synthetic; // once persisted, it's a real record
-    }
+    if (u) { u.name = name; u.ward = ward; u.status = status; if (_staffPhotoBase64) u.photoBase64 = _staffPhotoBase64; }
     document.getElementById('staffEditModal').classList.remove('open');
     showToast('✅ Staff profile updated','success');
-    if (typeof writeAudit === 'function') writeAudit('EDIT','users',email,{name:name,ward:ward,status:status,cardColor:cardColor});
+    if (typeof writeAudit === 'function') writeAudit('EDIT','users',email,{name:name,ward:ward,status:status});
     // Refresh display
     var activeFilt = document.querySelector('#sec-staff .dmt-tab.active');
     var role = activeFilt ? activeFilt.getAttribute('data-role') || 'all' : 'all';
     renderStaffCards(_allStaff);
   }).catch(function(e) {
     errEl.textContent = 'Error: '+e.message;
-    showToast('❌ Save failed: ' + e.message, 'error');
-    console.error('[saveStaffEdit] failed:', e);
   });
 }
 
@@ -5904,54 +6191,8 @@ var SGO_GROUPS = [
 ];
 var _sgoOrder = [];  // array of keys in the admin-chosen order
 
-// ── Role-match regexes — MUST mirror the landing page's RANK_GROUPS so the
-// admin list matches what visitors actually see. (See index.html renderStaff.)
-var SGO_MATCH = {
-  principal: function(r){ return /principal/.test(r); },
-  ms:        function(r){ return /medical\s*superintendent|(^|\b)ms\b/.test(r); },
-  ic:        function(r){ return (/i\/?c|in.?charge|incharge/.test(r)) && (/pmjay|ab-?pmjay|sehat/.test(r)); },
-  pmam:      function(r){ return /pmam/.test(r); },
-  deo:       function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(r); }
-};
-
-// Cache of group → member count. Populated by sgoLoadCounts() and used by
-// sgoRender() to (a) suppress empty groups from the display list and (b)
-// show a member count badge next to each visible group.
-var _sgoCounts = {};
-
-function sgoLoadCounts(){
-  return db.collection('users').get().then(function(snap){
-    var counts = { principal:0, ms:0, ic:0, pmam:0, deo:0 };
-    snap.forEach(function(doc){
-      var u = doc.data() || {};
-      // Match the landing page exactly: count only approved/active users
-      // who are NOT hidden via the per-user landingHidden toggle.
-      if (u.status !== 'approved' && u.status !== 'active') return;
-      if (u.landingHidden === true) return;
-      var r = (u.role || '').toLowerCase();
-      // Walk groups in priority order; first match wins (so an "I/C AB-PMJAY"
-      // doesn't also get counted under MS via the bare 'ms' alternative).
-      var matched = false;
-      ['ic','principal','ms','pmam','deo'].forEach(function(k){
-        if (matched) return;
-        if (SGO_MATCH[k](r)) { counts[k]++; matched = true; }
-      });
-    });
-    _sgoCounts = counts;
-  }).catch(function(e){
-    console.warn('[sgoLoadCounts] failed:', e);
-    _sgoCounts = {};
-  });
-}
-
 function sgoInit(){
-  // Load the saved order and the user counts in parallel; render only after
-  // both are ready so empty groups can be filtered out on the first paint.
-  Promise.all([
-    db.collection('settings').doc('about_page').get(),
-    sgoLoadCounts()
-  ]).then(function(results){
-    var doc = results[0];
+  db.collection('settings').doc('about_page').get().then(function(doc){
     var saved = (doc.exists && doc.data() && Array.isArray(doc.data().staffGroupOrder))
       ? doc.data().staffGroupOrder : null;
     var valid = {};
@@ -5975,45 +6216,16 @@ function sgoRender(){
   if (!box) return;
   var byKey = {};
   SGO_GROUPS.forEach(function(g){ byKey[g.key] = g; });
-
-  // Filter the order to only groups that have ≥1 approved user. Empty
-  // groups (e.g. no Principal has signed up yet) are hidden from this
-  // admin list entirely — they reappear automatically once a matching
-  // user is approved.
-  var visibleKeys = _sgoOrder.filter(function(key){
-    return (_sgoCounts[key] || 0) > 0;
-  });
-
-  if (!visibleKeys.length) {
-    box.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af;font-style:italic;background:#f9fafb;border-radius:8px;font-size:12.5px">'
-      + 'No staff groups have approved members yet. Once users sign up and you approve them under <strong>Staff Management</strong>, their groups will appear here.'
-      + '</div>'
-      + '<div style="display:flex;align-items:center;gap:10px;background:#f9fafb;border:1.5px dashed #d1d5db;border-radius:9px;padding:9px 12px;opacity:0.7;margin-top:8px">'
-      +   '<span style="font-weight:800;color:#9ca3af;font-size:12px;width:18px;text-align:center">\u2014</span>'
-      +   '<span style="font-size:16px">\uD83D\uDC64</span>'
-      +   '<span style="flex:1;font-size:12.5px;font-weight:700;color:#6b7280">Other Staff <span style="font-weight:500;font-style:italic">(always last)</span></span>'
-      + '</div>';
-    return;
-  }
-
-  box.innerHTML = visibleKeys.map(function(key, i){
+  box.innerHTML = _sgoOrder.map(function(key, i){
     var g = byKey[key];
     if (!g) return '';
-    var count = _sgoCounts[key] || 0;
-    var isFirst = (i === 0);
-    var isLast  = (i === visibleKeys.length - 1);
-    // The move-up/down handlers operate on the FULL _sgoOrder array, so we
-    // need the index inside _sgoOrder, not the filtered index `i`.
-    var fullIdx = _sgoOrder.indexOf(key);
     return '<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #bfdbfe;border-radius:9px;padding:9px 12px">'
       + '<span style="font-weight:800;color:#9ca3af;font-size:12px;width:18px;text-align:center">' + (i+1) + '</span>'
       + '<span style="font-size:16px">' + g.icon + '</span>'
-      + '<span style="flex:1;font-size:12.5px;font-weight:700;color:#0F2B8C">' + g.label
-      +   ' <span style="font-weight:600;color:#6b7280;font-size:11px">(' + count + ')</span>'
-      + '</span>'
+      + '<span style="flex:1;font-size:12.5px;font-weight:700;color:#0F2B8C">' + g.label + '</span>'
       + '<div style="display:flex;gap:4px">'
-      +   '<button onclick="sgoMoveVisible(\'' + key + '\',-1)" ' + (isFirst?'disabled':'') + ' title="Move up" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (isFirst?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (isFirst?'not-allowed':'pointer') + ';font-size:12px">\u2191</button>'
-      +   '<button onclick="sgoMoveVisible(\'' + key + '\',1)" '  + (isLast?'disabled':'')  + ' title="Move down" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (isLast?'#f3f4f6':'#fff')  + ';border-radius:6px;cursor:' + (isLast?'not-allowed':'pointer')  + ';font-size:12px">\u2193</button>'
+      +   '<button onclick="sgoMove(' + i + ',-1)" ' + (i===0?'disabled':'') + ' title="Move up" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===0?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===0?'not-allowed':'pointer') + ';font-size:12px">\u2191</button>'
+      +   '<button onclick="sgoMove(' + i + ',1)" ' + (i===_sgoOrder.length-1?'disabled':'') + ' title="Move down" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===_sgoOrder.length-1?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===_sgoOrder.length-1?'not-allowed':'pointer') + ';font-size:12px">\u2193</button>'
       + '</div>'
       + '</div>';
   }).join('')
@@ -6024,20 +6236,10 @@ function sgoRender(){
   + '</div>';
 }
 
-// Move a group up/down WITHIN the filtered (visible) list, but operate on
-// the full _sgoOrder so empty groups (which we hide) keep their relative
-// positions stable. Two visible neighbours swap their slots in _sgoOrder.
-function sgoMoveVisible(key, dir){
-  var visibleKeys = _sgoOrder.filter(function(k){ return (_sgoCounts[k] || 0) > 0; });
-  var vi = visibleKeys.indexOf(key);
-  if (vi < 0) return;
-  var vj = vi + dir;
-  if (vj < 0 || vj >= visibleKeys.length) return;
-  var swapWith = visibleKeys[vj];
-  var i1 = _sgoOrder.indexOf(key);
-  var i2 = _sgoOrder.indexOf(swapWith);
-  if (i1 < 0 || i2 < 0) return;
-  var tmp = _sgoOrder[i1]; _sgoOrder[i1] = _sgoOrder[i2]; _sgoOrder[i2] = tmp;
+function sgoMove(i, dir){
+  var j = i + dir;
+  if (j < 0 || j >= _sgoOrder.length) return;
+  var tmp = _sgoOrder[i]; _sgoOrder[i] = _sgoOrder[j]; _sgoOrder[j] = tmp;
   sgoRender();
   var m = document.getElementById('sgoSaveMsg');
   if (m) { m.textContent = '\u25CF Unsaved'; m.style.color = '#dc2626'; }
@@ -6079,165 +6281,6 @@ function sgoSave(){
     console.error('[sgoSave] threw before write:', err);
     if (m) { m.textContent = 'Save error: ' + (err && err.message ? err.message : err); m.style.color = '#dc2626'; }
   }
-}
-
-// ─── Staff Public Text & Appearance (spt) ──────────────────────────────
-// Edits the text + intro background that the landing page renders at the
-// top of the Staff tab, and the per-role leadership descriptions. Persists
-// to settings/about_page; the landing page reads those fields on render.
-
-// Preset palettes for the intro banner background. Keys are saved to
-// Firestore; values define the actual rendered look. Keep this list
-// matched with the same palette in index.html (SPT_PALETTE).
-var SPT_PALETTE = {
-  slate:    { bg:'#f8fafc', border:'#e2e8f0', textColor:'#475569', iconBg:'#f5f3ff', iconColor:'#7c3aed', label:'Slate (default)' },
-  blue:     { bg:'#eff6ff', border:'#bfdbfe', textColor:'#1e3a8a', iconBg:'#dbeafe', iconColor:'#1d4ed8', label:'Blue' },
-  pink:     { bg:'#fdf2f8', border:'#fbcfe8', textColor:'#9d174d', iconBg:'#fce7f3', iconColor:'#db2777', label:'Pink' },
-  amber:    { bg:'#fffbeb', border:'#fde68a', textColor:'#78350f', iconBg:'#fef3c7', iconColor:'#d97706', label:'Amber' },
-  green:    { bg:'#ecfdf5', border:'#a7f3d0', textColor:'#064e3b', iconBg:'#d1fae5', iconColor:'#059669', label:'Green' },
-  lavender: { bg:'#f5f3ff', border:'#ddd6fe', textColor:'#4c1d95', iconBg:'#ede9fe', iconColor:'#7c3aed', label:'Lavender' }
-};
-
-// Factory defaults (used by sptReset and as fallback when settings missing).
-var SPT_DEFAULTS = {
-  staffIntroText: 'Meet the dedicated team working behind the success of AB-PMJAY Management Information System. Together, we ensure efficient implementation, monitoring, and management of the AB-PMJAY scheme.',
-  staffIntroPalette: 'slate',
-  staffLeadershipDescs: {
-    principal: 'Leading the institution with vision and commitment.',
-    ms: 'Overseeing hospital operations and healthcare services.',
-    ic: 'Managing and coordinating AB-PMJAY activities effectively.'
-  }
-};
-
-var _sptCurrentPalette = 'slate';
-
-function sptInit(){
-  sptRenderPalette();
-  // Load from Firestore; fall back silently to defaults if doc missing.
-  db.collection('settings').doc('about_page').get().then(function(doc){
-    var d = (doc.exists && doc.data()) ? doc.data() : {};
-    var introText = d.staffIntroText || SPT_DEFAULTS.staffIntroText;
-    var palette   = (d.staffIntroPalette && SPT_PALETTE[d.staffIntroPalette]) ? d.staffIntroPalette : SPT_DEFAULTS.staffIntroPalette;
-    var descs     = d.staffLeadershipDescs || {};
-    var ta = document.getElementById('sptIntroText');
-    var dp = document.getElementById('sptDescPrincipal');
-    var dm = document.getElementById('sptDescMs');
-    var di = document.getElementById('sptDescIc');
-    if (ta) ta.value = introText;
-    if (dp) dp.value = descs.principal || SPT_DEFAULTS.staffLeadershipDescs.principal;
-    if (dm) dm.value = descs.ms        || SPT_DEFAULTS.staffLeadershipDescs.ms;
-    if (di) di.value = descs.ic        || SPT_DEFAULTS.staffLeadershipDescs.ic;
-    sptSetPalette(palette, /*silent*/ true);
-    sptPreviewIntro();
-    sptSetMsg('', '');
-    window.__sptDirty = false;
-  }).catch(function(e){
-    console.warn('[sptInit] load failed; using defaults:', e);
-    var ta = document.getElementById('sptIntroText');
-    if (ta && !ta.value) ta.value = SPT_DEFAULTS.staffIntroText;
-    sptSetPalette('slate', true);
-    sptPreviewIntro();
-  });
-}
-
-// Renders the row of 6 colored swatch buttons. Clicking one updates
-// _sptCurrentPalette and the preview.
-function sptRenderPalette(){
-  var box = document.getElementById('sptIntroPalette');
-  if (!box) return;
-  box.innerHTML = Object.keys(SPT_PALETTE).map(function(key){
-    var p = SPT_PALETTE[key];
-    var active = (key === _sptCurrentPalette);
-    return '<button onclick="sptSetPalette(\'' + key + '\')" '
-      + 'title="' + p.label + '" '
-      + 'style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 8px;background:#fff;border:2px solid ' + (active ? '#1d4ed8' : '#e5e7eb') + ';border-radius:8px;cursor:pointer;transition:all 0.15s;min-width:64px">'
-      +   '<span style="display:block;width:36px;height:24px;border-radius:5px;background:' + p.bg + ';border:1px solid ' + p.border + '"></span>'
-      +   '<span style="font-size:9.5px;font-weight:700;color:' + (active ? '#1d4ed8' : '#6b7280') + '">' + p.label.split(' ')[0] + (active ? ' ✓' : '') + '</span>'
-      + '</button>';
-  }).join('');
-}
-
-function sptSetPalette(key, silent){
-  if (!SPT_PALETTE[key]) return;
-  _sptCurrentPalette = key;
-  sptRenderPalette();
-  sptPreviewIntro();
-  if (!silent) sptMarkDirty();
-}
-
-function sptPreviewIntro(){
-  var prev = document.getElementById('sptIntroPreview');
-  var ta = document.getElementById('sptIntroText');
-  if (!prev) return;
-  var p = SPT_PALETTE[_sptCurrentPalette] || SPT_PALETTE.slate;
-  var text = (ta && ta.value) ? ta.value : SPT_DEFAULTS.staffIntroText;
-  prev.style.background = p.bg;
-  prev.style.borderColor = p.border;
-  prev.style.color = p.textColor;
-  prev.innerHTML =
-      '<div style="display:flex;gap:12px;align-items:flex-start">'
-    +   '<div style="width:34px;height:34px;border-radius:50%;background:' + p.iconBg + ';color:' + p.iconColor + ';display:flex;align-items:center;justify-content:center;flex-shrink:0">'
-    +     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
-    +   '</div>'
-    +   '<div style="flex:1">' + escHtml(text) + '</div>'
-    + '</div>';
-}
-
-function sptMarkDirty(){
-  window.__sptDirty = true;
-  sptSetMsg('● Unsaved changes', '#dc2626');
-}
-
-function sptSetMsg(msg, color){
-  var el = document.getElementById('sptSaveMsg');
-  if (!el) return;
-  el.textContent = msg || '';
-  el.style.color = color || '#6b7280';
-}
-
-function sptSave(){
-  var ta = document.getElementById('sptIntroText');
-  var dp = document.getElementById('sptDescPrincipal');
-  var dm = document.getElementById('sptDescMs');
-  var di = document.getElementById('sptDescIc');
-  var payload = {
-    staffIntroText:    (ta && ta.value || '').trim() || SPT_DEFAULTS.staffIntroText,
-    staffIntroPalette: SPT_PALETTE[_sptCurrentPalette] ? _sptCurrentPalette : 'slate',
-    staffLeadershipDescs: {
-      principal: (dp && dp.value || '').trim() || SPT_DEFAULTS.staffLeadershipDescs.principal,
-      ms:        (dm && dm.value || '').trim() || SPT_DEFAULTS.staffLeadershipDescs.ms,
-      ic:        (di && di.value || '').trim() || SPT_DEFAULTS.staffLeadershipDescs.ic
-    },
-    _updatedAt: Date.now(),
-    _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
-  };
-  sptSetMsg('Saving…', '#6b7280');
-  db.collection('settings').doc('about_page').set(payload, { merge: true }).then(function(){
-    window.__sptDirty = false;
-    sptSetMsg('✅ Saved & published', '#166534');
-    if (typeof showToast === 'function') showToast('✅ Staff page text saved', 'success');
-    if (typeof writeAudit === 'function') {
-      writeAudit('EDIT', 'settings/about_page', 'staffIntroText+descs', payload);
-    }
-    setTimeout(function(){ sptSetMsg('', ''); }, 3500);
-  }).catch(function(e){
-    sptSetMsg('Error: ' + e.message, '#dc2626');
-  });
-}
-
-function sptReset(){
-  if (!confirm('Reset the intro text, palette, and leadership descriptions to factory defaults?\n\nNothing is saved until you click "Save Text & Color".')) return;
-  var ta = document.getElementById('sptIntroText');
-  var dp = document.getElementById('sptDescPrincipal');
-  var dm = document.getElementById('sptDescMs');
-  var di = document.getElementById('sptDescIc');
-  if (ta) ta.value = SPT_DEFAULTS.staffIntroText;
-  if (dp) dp.value = SPT_DEFAULTS.staffLeadershipDescs.principal;
-  if (dm) dm.value = SPT_DEFAULTS.staffLeadershipDescs.ms;
-  if (di) di.value = SPT_DEFAULTS.staffLeadershipDescs.ic;
-  sptSetPalette('slate');
-  sptPreviewIntro();
-  sptMarkDirty();
 }
 
 function nbOpenStaffMgmt(){

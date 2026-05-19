@@ -277,10 +277,6 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
       <div class="sbl">Leave Req</div>
     </div>
-    <div class="sbi" onclick="goSec('cleanup',this)" title="Data Cleanup (Admin)">
-      <svg viewBox="0 0 24 24"><path d="M19.36 2.72L20.78 4.14 15.06 9.85C16.13 11.39 16.28 13.24 15.38 14.44L9.06 8.12C10.26 7.22 12.11 7.37 13.65 8.44L19.36 2.72M5.93 17.57C3.92 15.56 2.69 13.16 2.35 10.92L7.23 8.83 14.67 16.27 12.58 21.15C10.34 20.81 7.94 19.58 5.93 17.57Z"/></svg>
-      <div class="sbl">Cleanup</div>
-    </div>
   </div>
 
   <!-- CONTENT -->
@@ -555,66 +551,6 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
     </div>
 
     <!-- ===== DATA CLEANUP (ADMIN) ===== -->
-    <div class="sec" id="sec-cleanup">
-      <div class="page-hd">Data Cleanup — Ward Name Migration</div>
-
-      <div class="card" style="border-left:4px solid #f59e0b;background:#fffbeb">
-        <div class="card-hd" style="color:#92400e">⚠️ Important — Read Before Running</div>
-        <div style="font-size:12px;color:#78350f;line-height:1.7">
-          This tool permanently rewrites <code>wards[]</code> arrays in the <code>daily_reports</code> Firestore collection to use canonical ward names (e.g. <code>"Onco"</code> → <code>"Oncology"</code>, <code>"Ortho"</code> → <code>"Orthopaedics"</code>).
-          <br><br>
-          <strong>Recommended steps:</strong>
-          <br>1. Click <strong>Scan Database</strong> — discovers all unique ward names currently in use and shows how many records contain each.
-          <br>2. Click <strong>Export Backup (JSON)</strong> — downloads a complete backup of all records. <strong>Keep this file safe.</strong>
-          <br>3. Review the suggested mappings — uncheck any you don't want, edit targets in the dropdown.
-          <br>4. Click <strong>Preview Changes</strong> — shows exactly which records will be updated.
-          <br>5. Click <strong>Apply Migration</strong> — runs the update. Cannot be undone without the backup file.
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-hd">Step 1 — Discovery</div>
-        <div class="frow">
-          <button class="btn btn-pri" onclick="cleanupScan()">🔍 Scan Database</button>
-          <button class="btn btn-grn" onclick="cleanupExport()">💾 Export Backup (JSON)</button>
-          <span id="cleanupScanStatus" style="font-size:12px;color:#6b7280;align-self:center"></span>
-        </div>
-      </div>
-
-      <div class="card" id="cleanupMappingCard" style="display:none">
-        <div class="card-hd">Step 2 — Review Mappings</div>
-        <div style="font-size:11px;color:#6b7280;margin-bottom:10px">
-          Rows highlighted <span style="background:#fef3c7;padding:1px 6px;border-radius:4px">yellow</span> are non-canonical names that will be migrated. Rows in <span style="background:#dcfce7;padding:1px 6px;border-radius:4px">green</span> are already canonical and unchanged.
-        </div>
-        <div class="tbl-wrap">
-          <table id="cleanupTbl">
-            <thead><tr><th style="width:40px">Apply?</th><th>Current Name in DB</th><th>Records</th><th>→</th><th>Canonical Target</th><th>Status</th></tr></thead>
-            <tbody id="cleanupTbody"></tbody>
-          </table>
-        </div>
-        <div class="frow" style="margin-top:14px">
-          <button class="btn btn-sec" onclick="cleanupPreview()">👁 Preview Changes</button>
-          <button class="btn btn-pri" id="cleanupApplyBtn" style="background:#dc2626" onclick="cleanupApply()" disabled>⚠ Apply Migration</button>
-          <span id="cleanupPreviewStatus" style="font-size:12px;color:#6b7280;align-self:center"></span>
-        </div>
-      </div>
-
-      <div class="card" id="cleanupPreviewCard" style="display:none">
-        <div class="card-hd">Step 3 — Preview (Records That Will Change)</div>
-        <div class="tbl-wrap" style="max-height:400px;overflow-y:auto">
-          <table>
-            <thead><tr><th>Date</th><th>PMAM</th><th>Current Wards</th><th>→</th><th>New Wards</th></tr></thead>
-            <tbody id="cleanupPreviewTbody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card" id="cleanupResultCard" style="display:none">
-        <div class="card-hd">Migration Result</div>
-        <div id="cleanupResult" style="font-size:13px;color:#0F2B8C;line-height:1.7"></div>
-      </div>
-    </div>
-
   </div><!-- end content -->
 </div><!-- end layout -->
 
@@ -634,7 +570,6 @@ function goSec(id,el){
   if(id==='monthly')genMonthly();
   else if(id==='leavereq')loadLeaveReq();
   else if(id==='allrecords')genAllRecords();
-  else if(id==='cleanup'){ /* lazy — user clicks Scan to load */ }
 }
 function toggleDD(){document.getElementById('userDD').classList.toggle('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('.user-pill'))document.getElementById('userDD').classList.remove('open');});
@@ -1030,246 +965,6 @@ function populateFilters() {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// DATA CLEANUP — Ward name migration tool (admin)
-// ═══════════════════════════════════════════════════════════════════════
-var _cleanupScan = null;        // { wardCounts: {name: count}, rawDocs: [...] }
-var _cleanupPlan = null;        // { mappings: [{from, to, apply, recordCount}], affectedDocs: [...] }
-
-function cleanupScan(){
-  var statusEl = document.getElementById('cleanupScanStatus');
-  statusEl.textContent = 'Scanning…';
-  statusEl.style.color = '#6b7280';
-
-  db.collection('daily_reports').get().then(function(snap){
-    var wardCounts = {};   // raw ward name → record count
-    var rawDocs = [];      // full docs for later use
-    snap.forEach(function(doc){
-      var d = doc.data();
-      rawDocs.push({ id: doc.id, data: d });
-      var wards = Array.isArray(d.wards) ? d.wards : [];
-      wards.forEach(function(w){
-        if (!w) return;
-        var name = String(w).trim();
-        if (!name) return;
-        wardCounts[name] = (wardCounts[name] || 0) + 1;
-      });
-    });
-    _cleanupScan = { wardCounts: wardCounts, rawDocs: rawDocs };
-    statusEl.textContent = 'Found ' + Object.keys(wardCounts).length + ' unique ward names across ' + rawDocs.length + ' records.';
-    statusEl.style.color = '#16a34a';
-    cleanupRenderMappings();
-  }).catch(function(err){
-    statusEl.textContent = 'Error: ' + err.message;
-    statusEl.style.color = '#dc2626';
-    console.error('cleanupScan error:', err);
-  });
-}
-
-function cleanupRenderMappings(){
-  if (!_cleanupScan) return;
-  var card = document.getElementById('cleanupMappingCard');
-  var tbody = document.getElementById('cleanupTbody');
-  card.style.display = '';
-
-  // Build canonical target list from WARD_REGISTRY
-  var canonicalList = (window.WARD_REGISTRY && WARD_REGISTRY.list) ? WARD_REGISTRY.list().map(function(w){return w.label;}) : [];
-
-  var rows = Object.keys(_cleanupScan.wardCounts).sort(function(a,b){
-    return _cleanupScan.wardCounts[b] - _cleanupScan.wardCounts[a];
-  });
-
-  tbody.innerHTML = rows.map(function(name, idx){
-    var count = _cleanupScan.wardCounts[name];
-    var suggested = (window.WARD_REGISTRY && WARD_REGISTRY.canonical) ? WARD_REGISTRY.canonical(name) : name;
-    var isCanonical = (suggested === name) && canonicalList.indexOf(name) !== -1;
-    var willChange = !isCanonical && suggested && suggested !== name;
-    var rowBg = isCanonical ? '#dcfce7' : (willChange ? '#fef3c7' : '#fee2e2');
-    var statusTxt = isCanonical ? '✓ Already canonical' : (willChange ? '↻ Will migrate' : '⚠ Unknown — choose target');
-
-    var options = canonicalList.map(function(c){
-      return '<option value="' + c + '"' + (c === suggested ? ' selected' : '') + '>' + c + '</option>';
-    }).join('');
-    if (canonicalList.indexOf(suggested) === -1 && suggested) {
-      // Add the suggested value as an option if not in canonical list (defensive)
-      options = '<option value="' + suggested + '" selected>' + suggested + ' (keep as-is)</option>' + options;
-    }
-
-    return '<tr style="background:' + rowBg + '" data-cleanup-idx="' + idx + '" data-cleanup-from="' + name.replace(/"/g,'&quot;') + '">'
-      + '<td style="text-align:center"><input type="checkbox" class="cleanup-apply" ' + (willChange ? 'checked' : 'disabled') + '></td>'
-      + '<td><strong>' + escapeHtmlSimple(name) + '</strong></td>'
-      + '<td>' + count + '</td>'
-      + '<td>→</td>'
-      + '<td><select class="cleanup-target" style="width:200px;padding:4px 8px;font-size:11px">' + options + '</select></td>'
-      + '<td style="font-size:11px">' + statusTxt + '</td>'
-      + '</tr>';
-  }).join('');
-
-  // Reset downstream state
-  document.getElementById('cleanupPreviewCard').style.display = 'none';
-  document.getElementById('cleanupResultCard').style.display = 'none';
-  document.getElementById('cleanupApplyBtn').disabled = true;
-  document.getElementById('cleanupPreviewStatus').textContent = '';
-}
-
-function escapeHtmlSimple(s){
-  return String(s == null ? '' : s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function cleanupExport(){
-  var statusEl = document.getElementById('cleanupScanStatus');
-  statusEl.textContent = 'Building backup…';
-  statusEl.style.color = '#6b7280';
-
-  db.collection('daily_reports').get().then(function(snap){
-    var out = [];
-    snap.forEach(function(doc){ out.push({ id: doc.id, data: doc.data() }); });
-    var blob = new Blob([JSON.stringify({
-      exportedAt: new Date().toISOString(),
-      collection: 'daily_reports',
-      recordCount: out.length,
-      records: out
-    }, null, 2)], { type: 'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'daily_reports_backup_' + new Date().toISOString().replace(/[:.]/g,'-') + '.json';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    statusEl.textContent = 'Backup downloaded (' + out.length + ' records).';
-    statusEl.style.color = '#16a34a';
-  }).catch(function(err){
-    statusEl.textContent = 'Backup error: ' + err.message;
-    statusEl.style.color = '#dc2626';
-  });
-}
-
-function cleanupBuildPlan(){
-  // Read the mapping rows from the UI
-  if (!_cleanupScan) return null;
-  var rows = document.querySelectorAll('#cleanupTbody tr');
-  var mappings = [];   // [{from, to, apply}]
-  rows.forEach(function(tr){
-    var from = tr.getAttribute('data-cleanup-from');
-    var applyCb = tr.querySelector('.cleanup-apply');
-    var targetSel = tr.querySelector('.cleanup-target');
-    var to = targetSel ? targetSel.value : from;
-    var apply = applyCb && !applyCb.disabled && applyCb.checked;
-    if (apply && to && to !== from){
-      mappings.push({ from: from, to: to });
-    }
-  });
-
-  // Build the list of affected docs: those whose wards[] has any "from"
-  var fromSet = {};
-  mappings.forEach(function(m){ fromSet[m.from] = m.to; });
-  var affected = [];
-  _cleanupScan.rawDocs.forEach(function(doc){
-    var wards = Array.isArray(doc.data.wards) ? doc.data.wards : [];
-    var oldWards = wards.map(function(w){ return String(w == null ? '' : w).trim(); });
-    var hit = oldWards.some(function(w){ return fromSet.hasOwnProperty(w); });
-    if (!hit) return;
-    // Compute new wards: replace each "from" with "to", then dedupe
-    var seen = {};
-    var newWards = [];
-    oldWards.forEach(function(w){
-      var nw = fromSet.hasOwnProperty(w) ? fromSet[w] : w;
-      if (nw && !seen[nw]){ seen[nw] = 1; newWards.push(nw); }
-    });
-    affected.push({ id: doc.id, date: doc.data.date, name: doc.data.name, oldWards: oldWards, newWards: newWards });
-  });
-
-  return { mappings: mappings, affected: affected };
-}
-
-function cleanupPreview(){
-  var plan = cleanupBuildPlan();
-  _cleanupPlan = plan;
-  var statusEl = document.getElementById('cleanupPreviewStatus');
-  var applyBtn = document.getElementById('cleanupApplyBtn');
-
-  if (!plan || !plan.mappings.length){
-    statusEl.textContent = 'Nothing to migrate — no mappings checked.';
-    statusEl.style.color = '#dc2626';
-    applyBtn.disabled = true;
-    document.getElementById('cleanupPreviewCard').style.display = 'none';
-    return;
-  }
-
-  var card = document.getElementById('cleanupPreviewCard');
-  var tbody = document.getElementById('cleanupPreviewTbody');
-  card.style.display = '';
-  tbody.innerHTML = plan.affected.map(function(r){
-    return '<tr>'
-      + '<td style="white-space:nowrap">' + escapeHtmlSimple(r.date || '—') + '</td>'
-      + '<td>' + escapeHtmlSimple(r.name || '—') + '</td>'
-      + '<td style="font-size:11px;color:#92400e">' + r.oldWards.map(escapeHtmlSimple).join(', ') + '</td>'
-      + '<td>→</td>'
-      + '<td style="font-size:11px;color:#166534"><strong>' + r.newWards.map(escapeHtmlSimple).join(', ') + '</strong></td>'
-      + '</tr>';
-  }).join('');
-
-  statusEl.textContent = plan.affected.length + ' record(s) will be updated.';
-  statusEl.style.color = '#16a34a';
-  applyBtn.disabled = (plan.affected.length === 0);
-}
-
-function cleanupApply(){
-  if (!_cleanupPlan || !_cleanupPlan.affected.length){
-    alert('Run Preview first.'); return;
-  }
-  var n = _cleanupPlan.affected.length;
-  if (!confirm('This will permanently update ' + n + ' record(s) in Firestore.\n\nHave you downloaded the JSON backup? If not, click Cancel and run Export Backup first.\n\nProceed with migration?')) return;
-  if (!confirm('Final confirmation — type-equivalent check.\n\nApply migration to ' + n + ' records?\n\nThis CANNOT be undone except from the backup file.')) return;
-
-  var statusEl = document.getElementById('cleanupPreviewStatus');
-  statusEl.textContent = 'Applying migration… 0 / ' + n;
-  statusEl.style.color = '#6b7280';
-
-  // Firestore batched writes (max 500 per batch)
-  var BATCH_SIZE = 400;
-  var affected = _cleanupPlan.affected.slice();
-  var done = 0, errors = [];
-
-  function runBatch(){
-    if (!affected.length){
-      var resultEl = document.getElementById('cleanupResult');
-      var resultCard = document.getElementById('cleanupResultCard');
-      resultCard.style.display = '';
-      if (errors.length){
-        resultEl.innerHTML = '<div style="color:#dc2626"><strong>Migration completed with ' + errors.length + ' error(s).</strong></div>'
-          + '<div style="margin-top:6px">Successful updates: ' + done + '</div>'
-          + '<div style="margin-top:6px;font-size:11px;color:#6b7280">Errors:<br>' + errors.slice(0,10).map(escapeHtmlSimple).join('<br>') + '</div>';
-      } else {
-        resultEl.innerHTML = '<div style="color:#16a34a"><strong>✓ Migration successful.</strong></div>'
-          + '<div style="margin-top:6px">' + done + ' record(s) updated. Run Scan Database again to verify all names are now canonical.</div>';
-      }
-      statusEl.textContent = 'Done. ' + done + ' / ' + n + ' updated.';
-      statusEl.style.color = errors.length ? '#dc2626' : '#16a34a';
-      // Disable apply to prevent re-runs
-      document.getElementById('cleanupApplyBtn').disabled = true;
-      return;
-    }
-    var chunk = affected.splice(0, BATCH_SIZE);
-    var batch = db.batch();
-    chunk.forEach(function(r){
-      var ref = db.collection('daily_reports').doc(r.id);
-      batch.update(ref, { wards: r.newWards });
-    });
-    batch.commit().then(function(){
-      done += chunk.length;
-      statusEl.textContent = 'Applying migration… ' + done + ' / ' + n;
-      runBatch();
-    }).catch(function(err){
-      errors.push(err.message || String(err));
-      console.error('Batch error:', err);
-      runBatch(); // continue with next batch
-    });
-  }
-  runBatch();
-}
-
 // ===== LEAVE =====
 function loadLeaveReq(){
   const pending = leaveRequests.filter(l => l.status === 'Pending');
@@ -1550,10 +1245,50 @@ function fetchPmamList(cb){
     });
     _allPmams.sort(function(a,b){ return a.name.localeCompare(b.name); });
     if (cb) cb(_allPmams);
+    // After the canonical list arrives, re-normalize records already loaded
+    // (the first Firestore snapshot may have arrived before _allPmams was ready).
+    if (typeof allReports !== 'undefined' && Array.isArray(allReports) && allReports.length){
+      allReports.forEach(function(r){
+        var canon = canonicalPmamName(r.name);
+        if (canon) r.name = canon;
+      });
+      populateFilters && populateFilters();
+    }
   }).catch(function(e){
     console.warn('fetchPmamList:', e);
     if (cb) cb([]);
   });
+}
+
+// Fuzzy-resolve a free-text PMAM name to its canonical form from the
+// `users` collection (role === 'PMAM'). Returns the canonical name on match,
+// or the original (trimmed) input if no good match is found.
+// Safe to call before _allPmams is loaded — returns input unchanged.
+function canonicalPmamName(name){
+  if (!name) return name;
+  var n = String(name).trim();
+  if (!n) return name;
+  if (!_allPmams || !_allPmams.length) return n;
+  var nL = n.toLowerCase();
+  // 1) exact
+  for (var i=0; i<_allPmams.length; i++){
+    if (_allPmams[i].name === n) return _allPmams[i].name;
+  }
+  // 2) case-insensitive
+  for (var i=0; i<_allPmams.length; i++){
+    if (_allPmams[i].name.toLowerCase() === nL) return _allPmams[i].name;
+  }
+  // 3) collapse whitespace
+  var nC = nL.replace(/\s+/g, ' ');
+  for (var i=0; i<_allPmams.length; i++){
+    if (_allPmams[i].name.toLowerCase().replace(/\s+/g,' ') === nC) return _allPmams[i].name;
+  }
+  // 4) startsWith ("ABRAR CHOUDHARY 700" → "ABRAR CHOUDHARY")
+  for (var i=0; i<_allPmams.length; i++){
+    var cL = _allPmams[i].name.toLowerCase();
+    if (nL.indexOf(cL) === 0 && (nL.length - cL.length) <= 8) return _allPmams[i].name;
+  }
+  return n; // no good match — leave as-is (will appear under its own row in dropdowns)
 }
 
 // ══════════════════════════════════════
@@ -1726,6 +1461,11 @@ function fetchFirebaseData() {
         data.wards = data.wards
           .map(function(w){ return WARD_REGISTRY.canonical(w) || w; })
           .filter(function(w){ if (!w || seen[w]) return false; seen[w] = 1; return true; });
+      }
+      // ── Normalize PMAM name against canonical users list (case/whitespace/suffix variants).
+      // If _allPmams hasn't loaded yet, this is a no-op; fetchPmamList re-normalizes when it arrives.
+      if (data.name && typeof canonicalPmamName === 'function') {
+        data.name = canonicalPmamName(data.name);
       }
       allReports.push({ id: doc.id, ...data });
     });
