@@ -159,6 +159,22 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 .tab{padding:7px 18px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;color:#6b7280;transition:all 0.2s}
 .tab.active{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;box-shadow:0 3px 10px rgba(15,43,140,0.2)}
 .tab-panel{display:none}.tab-panel.active{display:block}
+/* iOS-style toggle switch */
+.ios-toggle{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.3px}
+.ios-toggle .ios-label{transition:opacity 0.2s;cursor:pointer;user-select:none}
+.ios-toggle .ios-label.off{opacity:0.4}
+.ios-switch{position:relative;display:inline-block;width:50px;height:26px;flex-shrink:0}
+.ios-switch input{opacity:0;width:0;height:0}
+.ios-switch .ios-slider{position:absolute;cursor:pointer;inset:0;background:#cbd5e1;transition:0.25s;border-radius:50px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.1)}
+.ios-switch .ios-slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;transition:0.25s;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
+.ios-switch input:checked + .ios-slider{background:linear-gradient(135deg,#1A3DB5,#2952D9)}
+.ios-switch input:checked + .ios-slider:before{transform:translateX(24px)}
+/* Day-wise empty row styling */
+.pmam-empty-day{background:rgba(254,226,226,0.35)}
+.pmam-empty-day td{color:#9ca3af!important;font-style:italic}
+.pmam-empty-day td.miss-flag{color:#dc2626!important;font-weight:700;font-style:normal}
+/* Ward pills in day-wise list */
+.ward-mini{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin:1px 2px;border:1px solid;white-space:nowrap}
 </style>
   <!-- Firebase v10 -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -425,13 +441,29 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <div class="page-hd">PMAM Wise Report</div>
       <div class="card">
         <div class="card-hd">Individual PMAM Performance</div>
-        <div class="frow">
+        <div class="frow" style="align-items:flex-end">
           <div class="fld"><label>Select PMAM</label>
             <select id="prPmam" style="width:200px">
               <option value="">-- Select PMAM --</option>
             </select>
           </div>
+          <div class="fld prModeMonth" style="display:none"><label>Month</label>
+            <select id="prMonth" style="width:130px">
+              <option value="">All Months</option>
+            </select>
+          </div>
           <div class="fld"><label>Year</label><select id="rYearPmam" style="width:100px"></select></div>
+          <div class="fld" style="align-self:center;padding-bottom:4px">
+            <label style="visibility:hidden">View</label>
+            <div class="ios-toggle">
+              <span class="ios-label" id="prModeLabelYear">Year-wise</span>
+              <label class="ios-switch">
+                <input type="checkbox" id="prModeToggle" onchange="prToggleMode()">
+                <span class="ios-slider"></span>
+              </label>
+              <span class="ios-label off" id="prModeLabelDay">Day-wise</span>
+            </div>
+          </div>
           <button class="btn btn-pri" onclick="genPmam()">Generate</button>
           <button class="btn btn-grn" onclick="exportExcel('pmamTbl','PMAM_Report')">Export Excel</button>
           <button class="btn btn-word" onclick="printReportOrient('sec-pmamwise','PMAM-Wise Performance Report','landscape')">Print / PDF</button>
@@ -442,7 +474,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd" id="pmamTitle">Monthly Trend</div>
         <div class="tbl-wrap">
           <table id="pmamTbl">
-            <thead><tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <thead id="pmamThead"><tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
             <tbody id="pmamTbody"><tr><td colspan="10" class="empty-td">Select PMAM and click Generate</td></tr></tbody>
             <tfoot id="pmamFoot"></tfoot>
           </table>
@@ -755,14 +787,45 @@ function genWard(){
 }
 
 // ===== PMAM WISE =====
+function prToggleMode(){
+  var isDay = document.getElementById('prModeToggle').checked;
+  var labelYear = document.getElementById('prModeLabelYear');
+  var labelDay = document.getElementById('prModeLabelDay');
+  if (labelYear) labelYear.classList.toggle('off', isDay);
+  if (labelDay)  labelDay.classList.toggle('off', !isDay);
+  // Show/hide Month dropdown
+  document.querySelectorAll('.prModeMonth').forEach(function(el){
+    el.style.display = isDay ? '' : 'none';
+  });
+}
+
 function genPmam(){
   const pmam = document.getElementById('prPmam').value;
   if(!pmam){ alert('Please select a PMAM'); return; }
   const yearSel = document.getElementById('rYearPmam');
   const year = yearSel ? parseInt(yearSel.value) : new Date().getFullYear();
+  const isDayMode = !!(document.getElementById('prModeToggle') && document.getElementById('prModeToggle').checked);
+
+  // Filter by PMAM (email FK preferred, name fallback) + year
+  const filtered = allReports.filter(r => {
+    if(!r.date) return false;
+    if(new Date(r.date).getFullYear() !== year) return false;
+    // Match by name OR by pmam_email (FK) so renames don't break filtering
+    return r.name === pmam || r.email === pmam || r.pmam_email === pmam;
+  });
+
+  if(isDayMode){
+    _genPmamDayWise(pmam, year, filtered);
+  } else {
+    _genPmamYearWise(pmam, year, filtered);
+  }
+}
+
+function _genPmamYearWise(pmam, year, filtered){
   document.getElementById('pmamTitle').textContent = pmam + ' — Monthly Trend ' + year;
-  
-  const filtered = allReports.filter(r => (r.name === pmam || r.email === pmam) && (r.date && new Date(r.date).getFullYear() === year));
+  // Reset header to monthly columns
+  document.getElementById('pmamThead').innerHTML = '<tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr>';
+
   if(!filtered.length){
     document.getElementById('pmamTbody').innerHTML='<tr><td colspan="10" class="empty-td">No trend data available for ' + pmam + '</td></tr>';
     document.getElementById('pmamFoot').innerHTML='';
@@ -780,18 +843,85 @@ function genPmam(){
     row.reg+=Number(r.reg||0); row.pre+=Number(r.pre||0); row.preAmt+=Number(r.preAmt||0);
     row.dis+=Number(r.dis||0); row.clm+=Number(r.clm||0);
   });
-  
+
   const monthsOrdered = MONTHS.filter(m => byMonth[m]);
   document.getElementById('pmamTbody').innerHTML = monthsOrdered.map(m => {
     const r = byMonth[m];
     tIPD+=r.ipd; tMed+=r.med; tSurg+=r.surg; tReg+=r.reg; tPre+=r.pre; tPreAmt+=r.preAmt; tDis+=r.dis; tClm+=r.clm;
     return `<tr><td>${m}</td><td>${r.ipd}</td><td>${r.med}</td><td>${r.surg}</td><td><strong>${r.reg}</strong></td><td>${r.pre}</td><td>${fmt(r.preAmt)}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td></tr>`;
   }).join('');
-  
+
   document.getElementById('pmamFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
-  
+
   document.getElementById('pmamMetrics').innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c3',n:tReg,l:'Registered'}, {c:'c2',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
+  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+}
+
+function _genPmamDayWise(pmam, year, filtered){
+  // Day-wise: aggregate by date, show ALL days of selected month (or full year)
+  const monthSel = document.getElementById('prMonth');
+  const monthStr = monthSel ? monthSel.value : ''; // '' or '01'..'12'
+  if(!monthStr){
+    // No month picked → fall back to year-wise to avoid 365-row table
+    alert('Please select a month for day-wise view.');
+    return;
+  }
+  const monthNum = parseInt(monthStr); // 1-12
+  const monthName = MONTHS[monthNum-1];
+
+  // Further filter to just this month
+  const inMonth = filtered.filter(r => (new Date(r.date).getMonth()+1) === monthNum);
+
+  document.getElementById('pmamTitle').textContent = pmam + ' — Day-wise ' + monthName + ' ' + year;
+  // Update header for day-wise (replace Month with Date, add Wards column at end before Conv%)
+  document.getElementById('pmamThead').innerHTML = '<tr><th style="width:90px">Date</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th style="min-width:160px">Wards Submitted</th><th>Conv%</th></tr>';
+
+  // Aggregate by date (cumulative across all wards on the same day)
+  const byDate = {}; // 'YYYY-MM-DD' → aggregated record
+  inMonth.forEach(r => {
+    const d = r.date;
+    if(!byDate[d]){
+      byDate[d] = { date:d, ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0, wards:new Set() };
+    }
+    const row = byDate[d];
+    row.ipd+=Number(r.ipd||0); row.med+=Number(r.med||0); row.surg+=Number(r.surg||0);
+    row.reg+=Number(r.reg||0); row.pre+=Number(r.pre||0); row.preAmt+=Number(r.preAmt||0);
+    row.dis+=Number(r.dis||0); row.clm+=Number(r.clm||0);
+    if(Array.isArray(r.wards)) r.wards.forEach(w => row.wards.add(w));
+  });
+
+  // Build full month range (1 to last day of month)
+  const daysInMonth = new Date(year, monthNum, 0).getDate(); // last day of month
+  const rowsHtml = [];
+  let tIPD=0, tMed=0, tSurg=0, tReg=0, tPre=0, tPreAmt=0, tDis=0, tClm=0;
+  let submittedDays = 0;
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = year + '-' + String(monthNum).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const row = byDate[dateStr];
+    const dispDate = String(d).padStart(2,'0') + '-' + String(monthNum).padStart(2,'0') + '-' + year;
+    if(row){
+      submittedDays++;
+      tIPD+=row.ipd; tMed+=row.med; tSurg+=row.surg; tReg+=row.reg; tPre+=row.pre; tPreAmt+=row.preAmt; tDis+=row.dis; tClm+=row.clm;
+      const wardList = Array.from(row.wards).map(w => `<span class="ward-mini" style="background:#dbeafe;color:#1e40af;border-color:#93c5fd">${w}</span>`).join('');
+      rowsHtml.push(`<tr><td style="white-space:nowrap"><strong>${dispDate}</strong></td><td>${row.ipd}</td><td>${row.med}</td><td>${row.surg}</td><td><strong>${row.reg}</strong></td><td>${row.pre}</td><td>${fmt(row.preAmt)}</td><td>${row.dis}</td><td>${fmt(row.clm)}</td><td style="font-size:11px;line-height:1.6">${wardList}</td><td style="font-weight:700;color:${cvColor(row.ipd,row.reg)}">${cv(row.ipd,row.reg)}</td></tr>`);
+    } else {
+      // Missed day — highlight
+      rowsHtml.push(`<tr class="pmam-empty-day"><td style="white-space:nowrap" class="miss-flag">${dispDate} ⚠</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td style="font-size:10px">— no entry —</td><td>—</td></tr>`);
+    }
+  }
+  document.getElementById('pmamTbody').innerHTML = rowsHtml.join('');
+
+  // TOTAL row — note: 11 columns total now (10 data + Wards), so colspan="1" for Date label
+  document.getElementById('pmamFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td style="font-size:11px">${submittedDays} / ${daysInMonth} days</td><td>${cv(tIPD,tReg)}</td></tr>`;
+
+  document.getElementById('pmamMetrics').innerHTML = [
+    {c:'c1',n:tIPD,l:'Total IPD'},
+    {c:'c3',n:tReg,l:'Registered'},
+    {c:'c2',n:tPre,l:'Pre-Auth'},
+    {c:'c4',n:tDis,l:'Discharged'},
+    {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'},
+    {c:'c6',n:submittedDays+'/'+daysInMonth,l:'Days Filed'}
   ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
@@ -936,6 +1066,16 @@ function populateFilters() {
   if(rMonthWardEl){
     const cur = rMonthWardEl.value;
     rMonthWardEl.innerHTML = `<option value="">All Months</option>` + MONTHS.map((m, i) => {
+      const v = String(i+1).padStart(2,'0');
+      return `<option value="${v}" ${v===cur?'selected':''}>${m}</option>`;
+    }).join('');
+  }
+
+  // Month dropdown for PMAM Wise (Day-wise mode)
+  const prMonthEl = document.getElementById('prMonth');
+  if(prMonthEl){
+    const cur = prMonthEl.value || String(new Date().getMonth()+1).padStart(2,'0');
+    prMonthEl.innerHTML = MONTHS.map((m, i) => {
       const v = String(i+1).padStart(2,'0');
       return `<option value="${v}" ${v===cur?'selected':''}>${m}</option>`;
     }).join('');
