@@ -458,33 +458,50 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
     <div class="sec" id="sec-allrecords">
       <div class="page-hd">All Records</div>
       <div class="card">
-        <div class="card-hd">Filter Records</div>
-        <div class="frow">
-          <div class="fld"><label>From Date</label><input type="date" id="arFrom" style="width:145px"></div>
-          <div class="fld"><label>To Date</label><input type="date" id="arTo" style="width:145px"></div>
+        <div class="card-hd">Filter Records — Day-wise View</div>
+        <div class="frow" style="align-items:flex-start">
+          <div class="fld"><label>Mode</label>
+            <select id="arMode" style="width:160px" onchange="arToggleMode()">
+              <option value="month" selected>Month + Year</option>
+              <option value="range">Date Range</option>
+            </select>
+          </div>
           <div class="fld"><label>PMAM</label>
-            <select id="arPmam" style="width:170px">
+            <select id="arPmam" style="width:180px">
               <option value="">All PMAMs</option>
             </select>
           </div>
-          <div class="fld"><label>Ward</label>
-            <select id="arWard" style="width:170px">
-              <option value="">All Wards</option>
+          <div class="fld">
+            <label>Ward(s) <span style="font-size:10px;color:#6b7280;font-weight:400">— Ctrl/Cmd-click for multiple</span></label>
+            <select id="arWardMulti" multiple size="5" style="width:230px;height:auto;padding:6px"></select>
+          </div>
+          <!-- Month + Year fields -->
+          <div class="fld arModeMonth"><label>Month</label>
+            <select id="arMonth" style="width:140px">
+              <option value="">All Months</option>
             </select>
           </div>
-          <button class="btn btn-pri" onclick="genAllRecords()">Filter</button>
-          <button class="btn btn-sec" onclick="clearAllRecordsFilter()">Clear</button>
-          <button class="btn btn-grn" onclick="exportExcel('allTbl','All_Records')">Export Excel</button>
-          <button class="btn btn-word" onclick="printReport('All Records Report')">Print / PDF</button>
+          <div class="fld arModeMonth"><label>Year</label>
+            <select id="arYear" style="width:110px"></select>
+          </div>
+          <!-- Date Range fields (hidden by default) -->
+          <div class="fld arModeRange" style="display:none"><label>From Date</label><input type="date" id="arFrom" style="width:150px"></div>
+          <div class="fld arModeRange" style="display:none"><label>To Date</label><input type="date" id="arTo" style="width:150px"></div>
+          <div class="fld" style="align-self:flex-end">
+            <button class="btn btn-pri" onclick="genAllRecords()">Filter</button>
+            <button class="btn btn-sec" onclick="clearAllRecordsFilter()">Clear</button>
+            <button class="btn btn-grn" onclick="exportExcel('allTbl','All_Records')">Export Excel</button>
+            <button class="btn btn-word" onclick="printReport('All Records Report')">Print / PDF</button>
+          </div>
         </div>
       </div>
       <div class="metrics-grid" id="arMetrics"></div>
       <div class="card">
-        <div class="card-hd">All Entries <span id="arCount" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
+        <div class="card-hd">All Entries — Day-wise <span id="arCount" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
         <div class="tbl-wrap">
           <table id="allTbl">
-            <thead><tr><th>Date</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Action</th></tr></thead>
-            <tbody id="allTbody"><tr><td colspan="13" class="empty-td">Click Filter to load records</td></tr></tbody>
+            <thead><tr><th>S.No</th><th>Date</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Action</th></tr></thead>
+            <tbody id="allTbody"><tr><td colspan="14" class="empty-td">Click Filter to load records</td></tr></tbody>
             <tfoot id="allFoot"></tfoot>
           </table>
         </div>
@@ -768,36 +785,68 @@ function genPmam(){
 }
 
 // ===== ALL RECORDS =====
+function arToggleMode(){
+  const mode = document.getElementById('arMode').value;
+  document.querySelectorAll('.arModeMonth').forEach(el => el.style.display = (mode==='month') ? '' : 'none');
+  document.querySelectorAll('.arModeRange').forEach(el => el.style.display = (mode==='range') ? '' : 'none');
+}
+
 function genAllRecords(){
-  const from = document.getElementById('arFrom').value;
-  const to = document.getElementById('arTo').value;
+  const mode = (document.getElementById('arMode') || {value:'month'}).value;
   const pmam = document.getElementById('arPmam').value;
-  const ward = document.getElementById('arWard').value;
+  const wardSel = document.getElementById('arWardMulti');
+  const selectedWards = wardSel ? Array.from(wardSel.selectedOptions).map(o => o.value).filter(v => v) : [];
 
   const filtered = allReports.filter(r => {
-    if(from && r.date < from) return false;
-    if(to && r.date > to) return false;
+    if(!r.date) return false;
+    const d = new Date(r.date);
+    if(mode === 'month'){
+      const monthStr = document.getElementById('arMonth').value; // '' or '01'..'12'
+      const yearStr = document.getElementById('arYear').value;   // '' or e.g. '2026'
+      if(yearStr && d.getFullYear() !== parseInt(yearStr)) return false;
+      if(monthStr && (d.getMonth()+1) !== parseInt(monthStr)) return false;
+    } else {
+      const from = document.getElementById('arFrom').value;
+      const to = document.getElementById('arTo').value;
+      if(from && r.date < from) return false;
+      if(to && r.date > to) return false;
+    }
     if(pmam && (r.name !== pmam)) return false;
-    if(ward && (!r.wards || !r.wards.includes(ward))) return false;
+    if(selectedWards.length){
+      if(!r.wards || !Array.isArray(r.wards)) return false;
+      // Match if ANY selected ward is present in record
+      const hit = selectedWards.some(w => r.wards.includes(w));
+      if(!hit) return false;
+    }
     return true;
+  });
+
+  // Sort by date ASCENDING (1st of month → last)
+  filtered.sort((a,b) => {
+    if(a.date < b.date) return -1;
+    if(a.date > b.date) return  1;
+    return 0;
   });
 
   document.getElementById('arCount').textContent = filtered.length + ' entries';
   if(!filtered.length) {
-    document.getElementById('allTbody').innerHTML='<tr><td colspan="13" class="empty-td">No records found matching criteria.</td></tr>';
+    document.getElementById('allTbody').innerHTML='<tr><td colspan="14" class="empty-td">No records found matching criteria.</td></tr>';
     document.getElementById('allFoot').innerHTML='';
     document.getElementById('arMetrics').innerHTML='';
     return;
   }
 
-  let tIPD=0, tReg=0, tPre=0, tDis=0, tClm=0;
+  let tIPD=0, tMed=0, tSurg=0, tReg=0, tPre=0, tPreAmt=0, tDis=0, tClm=0;
   document.getElementById('allTbody').innerHTML = filtered.map((r, i) => {
-    tIPD+=Number(r.ipd||0); tReg+=Number(r.reg||0); tPre+=Number(r.pre||0); tDis+=Number(r.dis||0); tClm+=Number(r.clm||0);
+    tIPD+=Number(r.ipd||0); tMed+=Number(r.med||0); tSurg+=Number(r.surg||0);
+    tReg+=Number(r.reg||0); tPre+=Number(r.pre||0); tPreAmt+=Number(r.preAmt||0);
+    tDis+=Number(r.dis||0); tClm+=Number(r.clm||0);
     return `
     <tr>
+      <td>${i+1}</td>
       <td>${r.date||''}</td>
       <td><strong>${r.name||''}</strong></td>
-      <td>${(r.wards||[]).join(', ')}</td>
+      <td style="font-size:11px;max-width:160px;white-space:normal;word-wrap:break-word">${(r.wards||[]).join(', ')}</td>
       <td>${r.ipd||0}</td>
       <td>${r.med||0}</td>
       <td>${r.surg||0}</td>
@@ -806,12 +855,12 @@ function genAllRecords(){
       <td>${fmt(r.preAmt)}</td>
       <td>${r.dis||0}</td>
       <td>${fmt(r.clm)}</td>
-      <td>${r.conv||'—'}</td>
+      <td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td>
       <td><button class="btn btn-word" style="font-size:10px;padding:3px 8px" onclick="window.print()">Print</button></td>
     </tr>
   `}).join('');
 
-  document.getElementById('allFoot').innerHTML = `<tr class="tot-row"><td colspan="3">TOTAL</td><td>${tIPD}</td><td>—</td><td>—</td><td>${tReg}</td><td>${tPre}</td><td>—</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td><td></td></tr>`;
+  document.getElementById('allFoot').innerHTML = `<tr class="tot-row"><td colspan="4">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td><td></td></tr>`;
   
   document.getElementById('arMetrics').innerHTML = [
     {c:'c1',n:tIPD,l:'Filtered IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Overall Conv%'}
@@ -819,10 +868,18 @@ function genAllRecords(){
 }
 
 function clearAllRecordsFilter() {
-  ['arFrom','arTo','arPmam','arWard'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.value = '';
-  });
+  const pm = document.getElementById('arPmam'); if(pm) pm.value = '';
+  const wm = document.getElementById('arWardMulti'); if(wm) Array.from(wm.options).forEach(o => o.selected = false);
+  const mo = document.getElementById('arMonth'); if(mo) mo.value = '';
+  const fr = document.getElementById('arFrom'); if(fr) fr.value = '';
+  const tt = document.getElementById('arTo'); if(tt) tt.value = '';
+  // Year defaults to current year, don't reset to empty
+  const yr = document.getElementById('arYear');
+  if(yr && yr.options.length) {
+    const curY = String(new Date().getFullYear());
+    const has = Array.from(yr.options).some(o => o.value === curY);
+    yr.value = has ? curY : yr.options[0].value;
+  }
   genAllRecords();
 }
 
@@ -840,15 +897,30 @@ function populateFilters() {
   const wardArr = Array.from(wards).sort();
   const yearArr = Array.from(years).sort((a,b)=>b-a);
   if(!yearArr.length) yearArr.push(new Date().getFullYear());
+  const curYear = String(new Date().getFullYear());
 
-  ['rYearMonth', 'rYearAnnual', 'rYearWard', 'rYearPmam'].forEach(id => {
+  // Year selects (reports + All Records day-wise)
+  ['rYearMonth', 'rYearAnnual', 'rYearWard', 'rYearPmam', 'arYear'].forEach(id => {
     const el = document.getElementById(id);
     if(el) {
       const cur = el.value;
-      el.innerHTML = yearArr.map(y => `<option value="${y}" ${y==cur?'selected':''}>${y}</option>`).join('');
+      const useCur = cur && yearArr.some(y => String(y) === cur);
+      const defaultSel = useCur ? cur : (yearArr.some(y=>String(y)===curYear) ? curYear : String(yearArr[0]));
+      el.innerHTML = yearArr.map(y => `<option value="${y}" ${String(y)===defaultSel?'selected':''}>${y}</option>`).join('');
     }
   });
 
+  // Month dropdown for All Records (value = '01'..'12')
+  const arMonthEl = document.getElementById('arMonth');
+  if(arMonthEl){
+    const cur = arMonthEl.value;
+    arMonthEl.innerHTML = `<option value="">All Months</option>` + MONTHS.map((m, i) => {
+      const v = String(i+1).padStart(2,'0');
+      return `<option value="${v}" ${v===cur?'selected':''}>${m}</option>`;
+    }).join('');
+  }
+
+  // PMAM single-selects
   ['prPmam', 'arPmam'].forEach(id => {
     const el = document.getElementById(id);
     if(el) {
@@ -857,13 +929,19 @@ function populateFilters() {
     }
   });
 
-  ['wrWard', 'arWard'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) {
-      const cur = el.value;
-      el.innerHTML = `<option value="">All Wards</option>` + wardArr.map(w => `<option value="${w}" ${w===cur?'selected':''}>${w}</option>`).join('');
-    }
-  });
+  // Ward single-select (Ward Wise Report)
+  const wrEl = document.getElementById('wrWard');
+  if(wrEl) {
+    const cur = wrEl.value;
+    wrEl.innerHTML = `<option value="">All Wards</option>` + wardArr.map(w => `<option value="${w}" ${w===cur?'selected':''}>${w}</option>`).join('');
+  }
+
+  // Ward MULTI-select (All Records day-wise)
+  const arWardMulti = document.getElementById('arWardMulti');
+  if(arWardMulti) {
+    const curSelected = new Set(Array.from(arWardMulti.selectedOptions).map(o => o.value));
+    arWardMulti.innerHTML = wardArr.map(w => `<option value="${w}" ${curSelected.has(w)?'selected':''}>${w}</option>`).join('');
+  }
 }
 
 // ===== LEAVE =====
