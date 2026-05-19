@@ -731,10 +731,11 @@ tr:hover td{background:#EEF3FF}
           </div>
         </div>
 
-        <!-- Inner sub-tabs (Wards vs PMAMs) -->
+        <!-- Inner sub-tabs (Wards vs PMAMs vs Backfill) -->
         <div style="display:flex;gap:6px;margin-bottom:14px;background:#fff;border-radius:12px;padding:8px 10px;box-shadow:0 2px 6px rgba(26,61,181,0.06)">
           <button class="dmt-tab active" id="cln-tab-wards" onclick="cleanupShowSubtab('wards',this)">🏥 Ward Names</button>
           <button class="dmt-tab"        id="cln-tab-pmams" onclick="cleanupShowSubtab('pmams',this)">👤 PMAM Names</button>
+          <button class="dmt-tab"        id="cln-tab-keys"  onclick="cleanupShowSubtab('keys',this)">🔑 FK Backfill</button>
         </div>
 
         <!-- ── SUBTAB: WARDS ── -->
@@ -829,6 +830,52 @@ tr:hover td{background:#EEF3FF}
           <div class="card" id="cleanupPmamResultCard" style="display:none">
             <div class="card-hd">Migration Result</div>
             <div id="cleanupPmamResult" style="font-size:13px;line-height:1.7"></div>
+          </div>
+        </div>
+
+        <!-- ── SUBTAB: FK BACKFILL ── -->
+        <div class="cln-subpane" id="cln-sub-keys" style="display:none">
+          <div class="card" style="background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:12px">
+            <div style="font-size:12px;color:#1e3a8a;line-height:1.7">
+              <strong>What this does:</strong> Adds <code>pmam_email</code> and <code>ward_ids[]</code> fields to old records that don't have them. These are the <strong>immutable foreign keys</strong> used by the new architecture — once added, future renames of PMAM names or ward labels won't break historical reports.
+              <br><br>
+              <strong>How it works:</strong> For each record without <code>pmam_email</code>, the tool looks up the PMAM by matching the record's <code>name</code> to a user in <code>users</code> collection (fuzzy match supported). For each record without <code>ward_ids[]</code>, it converts the <code>wards[]</code> labels to slug IDs via <code>WARD_REGISTRY</code>.
+              <br><br>
+              <strong>Read-only display:</strong> This tool only ADDS new fields. Existing <code>name</code> and <code>wards[]</code> fields are untouched.
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd">Step 1 — Discovery</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <button class="btn btn-pri" onclick="cleanupScanKeys()">🔍 Scan Database (Missing FKs)</button>
+              <button class="btn" onclick="cleanupExport()" style="background:#dcfce7;color:#166534;border:1.5px solid #86efac">💾 Export Backup (JSON)</button>
+              <span id="cleanupKeyStatus" style="font-size:12px;color:#6b7280"></span>
+            </div>
+          </div>
+
+          <div class="card" id="cleanupKeySummaryCard" style="display:none">
+            <div class="card-hd">Step 2 — Summary</div>
+            <div id="cleanupKeySummary" style="font-size:13px;line-height:1.8;color:#0F2B8C"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center">
+              <button class="btn" onclick="cleanupPreviewKeys()" style="background:#dbeafe;color:#1e3a8a;border:1.5px solid #93c5fd">👁 Preview Changes</button>
+              <button class="btn btn-pri" id="cleanupApplyKeysBtn" style="background:#dc2626" onclick="cleanupApplyKeys()" disabled>⚠ Apply Backfill</button>
+              <span id="cleanupKeyPreviewStatus" style="font-size:12px;color:#6b7280"></span>
+            </div>
+          </div>
+
+          <div class="card" id="cleanupKeyPreviewCard" style="display:none">
+            <div class="card-hd">Step 3 — Preview (FK Fields That Will Be Added)</div>
+            <div class="tbl-wrap" style="max-height:380px;overflow-y:auto">
+              <table>
+                <thead><tr><th>Date</th><th>PMAM</th><th>+ pmam_email</th><th>Wards</th><th>+ ward_ids</th></tr></thead>
+                <tbody id="cleanupKeyPreviewTbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" id="cleanupKeyResultCard" style="display:none">
+            <div class="card-hd">Backfill Result</div>
+            <div id="cleanupKeyResult" style="font-size:13px;line-height:1.7"></div>
           </div>
         </div>
 
@@ -3182,6 +3229,225 @@ function cleanupApplyPmams(){
     batch.commit().then(function(){
       done += chunk.length;
       statusEl.textContent = 'Applying migration… ' + done + ' / ' + n;
+      runBatch();
+    }).catch(function(err){
+      errors.push(err.message || String(err));
+      runBatch();
+    });
+  }
+  runBatch();
+}
+
+// ── FK BACKFILL ─────────────────────────────────────────────────────────
+// Scans daily_reports for records missing pmam_email and/or ward_ids[],
+// computes those fields from the existing name/wards, and writes them back.
+// This is the one-time DB-level fix that makes the new FK architecture work
+// retroactively across all historical records.
+var _cleanupKeyScan = null;   // { rawDocs, canonicalPmams, plan: [{id, sets:{...}}] }
+var _cleanupKeyPlan = null;
+
+function _cleanupKeyMatchPmam(name, email, canonicalPmams){
+  // Returns { email, name } of matched canonical PMAM, or null if no match.
+  if (email){
+    var eL = String(email).toLowerCase().trim();
+    for (var i=0; i<canonicalPmams.length; i++){
+      if ((canonicalPmams[i].email || '').toLowerCase() === eL) return canonicalPmams[i];
+    }
+  }
+  if (!name) return null;
+  var n = String(name).trim(); var nL = n.toLowerCase();
+  // exact, case-insensitive, whitespace, startsWith — same ladder as fuzzy matcher
+  for (var i=0; i<canonicalPmams.length; i++){
+    if (canonicalPmams[i].name === n) return canonicalPmams[i];
+  }
+  for (var i=0; i<canonicalPmams.length; i++){
+    if ((canonicalPmams[i].name || '').toLowerCase() === nL) return canonicalPmams[i];
+  }
+  var nC = nL.replace(/\s+/g,' ');
+  for (var i=0; i<canonicalPmams.length; i++){
+    if ((canonicalPmams[i].name || '').toLowerCase().replace(/\s+/g,' ') === nC) return canonicalPmams[i];
+  }
+  for (var i=0; i<canonicalPmams.length; i++){
+    var cL = (canonicalPmams[i].name || '').toLowerCase();
+    if (cL && nL.indexOf(cL) === 0 && (nL.length - cL.length) <= 8) return canonicalPmams[i];
+  }
+  return null;
+}
+
+function _cleanupKeyWardLabelToId(label){
+  if (!label) return null;
+  if (window.WARD_REGISTRY && typeof WARD_REGISTRY.byLabel === 'function'){
+    var w = WARD_REGISTRY.byLabel(label);
+    if (w && w.id) return w.id;
+  }
+  // Fallback slug derivation
+  return String(label).toLowerCase()
+    .replace(/&/g,'and').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+}
+
+function cleanupScanKeys(){
+  var statusEl = document.getElementById('cleanupKeyStatus');
+  statusEl.textContent = 'Scanning…'; statusEl.style.color = '#6b7280';
+
+  // Load canonical PMAMs from users collection (any role — we want all named users)
+  db.collection('users').get().then(function(usersSnap){
+    var canonicalPmams = [];
+    usersSnap.forEach(function(doc){
+      var u = doc.data();
+      if (u && u.name){
+        canonicalPmams.push({ name: String(u.name).trim(), email: String(u.email || doc.id).trim() });
+      }
+    });
+
+    return db.collection('daily_reports').get().then(function(snap){
+      var rawDocs = []; snap.forEach(function(doc){ rawDocs.push({ id: doc.id, data: doc.data() }); });
+
+      var plan = []; // [{id, date, name, wards, sets:{pmam_email?, ward_ids?}, pmamUnresolved}]
+      var stats = {
+        total: rawDocs.length,
+        missingPmamEmail: 0,
+        missingWardIds: 0,
+        bothPresent: 0,
+        pmamResolved: 0,
+        pmamUnresolved: 0,
+        wardIdsResolved: 0
+      };
+
+      rawDocs.forEach(function(doc){
+        var d = doc.data || {};
+        var needsPmamEmail = !d.pmam_email;
+        var needsWardIds = !Array.isArray(d.ward_ids) || d.ward_ids.length === 0;
+        if (!needsPmamEmail && !needsWardIds){ stats.bothPresent++; return; }
+
+        var sets = {};
+        var pmamUnresolved = false;
+        if (needsPmamEmail){
+          stats.missingPmamEmail++;
+          var match = _cleanupKeyMatchPmam(d.name, d.email, canonicalPmams);
+          if (match && match.email){
+            sets.pmam_email = match.email.toLowerCase();
+            stats.pmamResolved++;
+          } else if (d.email){
+            sets.pmam_email = String(d.email).toLowerCase().trim();
+            stats.pmamResolved++;
+          } else {
+            pmamUnresolved = true;
+            stats.pmamUnresolved++;
+          }
+        }
+        if (needsWardIds){
+          stats.missingWardIds++;
+          var labels = Array.isArray(d.wards) ? d.wards : [];
+          var ids = labels.map(_cleanupKeyWardLabelToId).filter(Boolean);
+          if (ids.length){
+            sets.ward_ids = ids;
+            stats.wardIdsResolved++;
+          }
+        }
+
+        if (Object.keys(sets).length > 0){
+          plan.push({
+            id: doc.id, date: d.date, name: d.name, wards: d.wards,
+            existingEmail: d.email, sets: sets, pmamUnresolved: pmamUnresolved
+          });
+        }
+      });
+
+      _cleanupKeyScan = { rawDocs: rawDocs, canonicalPmams: canonicalPmams, plan: plan, stats: stats };
+      cleanupRenderKeySummary();
+      statusEl.textContent = '✓ Scan complete.'; statusEl.style.color = '#16a34a';
+    });
+  }).catch(function(err){
+    statusEl.textContent = 'Error: ' + err.message; statusEl.style.color = '#dc2626';
+  });
+}
+
+function cleanupRenderKeySummary(){
+  if (!_cleanupKeyScan) return;
+  var s = _cleanupKeyScan.stats;
+  var card = document.getElementById('cleanupKeySummaryCard');
+  var summary = document.getElementById('cleanupKeySummary');
+  card.style.display = '';
+
+  summary.innerHTML = ''
+    + '<div><strong>Total records scanned:</strong> ' + s.total + '</div>'
+    + '<div style="color:#16a34a"><strong>Already complete (have both FKs):</strong> ' + s.bothPresent + '</div>'
+    + '<div style="margin-top:10px;color:#92400e"><strong>Records missing pmam_email:</strong> ' + s.missingPmamEmail
+      + ' (will resolve: ' + s.pmamResolved + ', unresolvable: ' + s.pmamUnresolved + ')</div>'
+    + '<div style="color:#92400e"><strong>Records missing ward_ids[]:</strong> ' + s.missingWardIds
+      + ' (will resolve: ' + s.wardIdsResolved + ')</div>'
+    + '<div style="margin-top:10px;font-weight:700">Plan: ' + _cleanupKeyScan.plan.length + ' record(s) will be updated.</div>'
+    + (s.pmamUnresolved > 0
+        ? '<div style="margin-top:8px;padding:8px;background:#fef3c7;color:#92400e;border-radius:6px;font-size:12px">⚠ ' + s.pmamUnresolved + ' record(s) have a PMAM name that doesn\'t match any user in the users collection. Those records will get ward_ids[] but no pmam_email. Run PMAM Names cleanup first to fix mismatches, then re-run this.</div>'
+        : '');
+
+  document.getElementById('cleanupKeyPreviewCard').style.display = 'none';
+  document.getElementById('cleanupKeyResultCard').style.display = 'none';
+  document.getElementById('cleanupApplyKeysBtn').disabled = true;
+  document.getElementById('cleanupKeyPreviewStatus').textContent = '';
+}
+
+function cleanupPreviewKeys(){
+  if (!_cleanupKeyScan || !_cleanupKeyScan.plan.length){ alert('Nothing to preview — scan first or nothing to backfill.'); return; }
+  _cleanupKeyPlan = _cleanupKeyScan.plan;
+  var card = document.getElementById('cleanupKeyPreviewCard');
+  card.style.display = '';
+  document.getElementById('cleanupKeyPreviewTbody').innerHTML = _cleanupKeyPlan.slice(0, 200).map(function(r){
+    return '<tr>'
+      + '<td style="white-space:nowrap;font-size:11px">' + _escHtml(r.date || '—') + '</td>'
+      + '<td style="font-size:11px">' + _escHtml(r.name || '—') + '</td>'
+      + '<td style="font-size:10px;color:' + (r.sets.pmam_email ? '#166534' : '#9ca3af') + '">'
+        + (r.sets.pmam_email ? _escHtml(r.sets.pmam_email) : '<em>unresolved</em>')
+      + '</td>'
+      + '<td style="font-size:10px;color:#6b7280">' + (Array.isArray(r.wards) ? r.wards.map(_escHtml).join(', ') : '') + '</td>'
+      + '<td style="font-size:10px;color:#166534">'
+        + (r.sets.ward_ids ? r.sets.ward_ids.map(_escHtml).join(', ') : '<em>already present</em>')
+      + '</td>'
+      + '</tr>';
+  }).join('') + (_cleanupKeyPlan.length > 200 ? '<tr><td colspan="5" style="text-align:center;font-style:italic;color:#6b7280;padding:8px">… and ' + (_cleanupKeyPlan.length - 200) + ' more records (preview limited to 200 rows)</td></tr>' : '');
+  var statusEl = document.getElementById('cleanupKeyPreviewStatus');
+  statusEl.textContent = _cleanupKeyPlan.length + ' record(s) will get FK fields added.';
+  statusEl.style.color = '#16a34a';
+  document.getElementById('cleanupApplyKeysBtn').disabled = false;
+}
+
+function cleanupApplyKeys(){
+  if (!_cleanupKeyPlan || !_cleanupKeyPlan.length){ alert('Run Preview first.'); return; }
+  var n = _cleanupKeyPlan.length;
+  if (!confirm('Backfill FK fields (pmam_email, ward_ids) into ' + n + ' record(s) in daily_reports?\n\nThis ADDS new fields — does not modify existing name/wards data.\n\nHave you downloaded the JSON backup? Cancel and run Export Backup if not.\n\nProceed?')) return;
+  if (!confirm('Final confirmation — apply FK backfill to ' + n + ' records?')) return;
+
+  var statusEl = document.getElementById('cleanupKeyPreviewStatus');
+  statusEl.textContent = 'Applying backfill… 0 / ' + n; statusEl.style.color = '#6b7280';
+  var BATCH_SIZE = 400; var queue = _cleanupKeyPlan.slice();
+  var done = 0, errors = [];
+
+  function runBatch(){
+    if (!queue.length){
+      var resultEl = document.getElementById('cleanupKeyResult');
+      document.getElementById('cleanupKeyResultCard').style.display = '';
+      if (errors.length){
+        resultEl.innerHTML = '<div style="color:#dc2626"><strong>Backfill completed with ' + errors.length + ' error(s).</strong></div>'
+          + '<div>Successful updates: ' + done + '</div>'
+          + '<div style="font-size:11px;color:#6b7280;margin-top:6px">Errors:<br>' + errors.slice(0,10).map(_escHtml).join('<br>') + '</div>';
+      } else {
+        resultEl.innerHTML = '<div style="color:#16a34a"><strong>✓ FK Backfill complete.</strong></div>'
+          + '<div>' + done + ' record(s) updated with FK fields. The new email/ward_id architecture is now active for ALL historical records. Future PMAM name or ward renames will not affect data integrity.</div>'
+          + '<div style="margin-top:6px;font-size:11px;color:#6b7280">Tip: re-scan to verify — should show "Already complete: ' + done + '" with 0 records to update.</div>';
+      }
+      statusEl.textContent = 'Done. ' + done + ' / ' + n + ' updated.';
+      statusEl.style.color = errors.length ? '#dc2626' : '#16a34a';
+      document.getElementById('cleanupApplyKeysBtn').disabled = true;
+      return;
+    }
+    var chunk = queue.splice(0, BATCH_SIZE);
+    var batch = db.batch();
+    chunk.forEach(function(r){
+      batch.update(db.collection('daily_reports').doc(r.id), r.sets);
+    });
+    batch.commit().then(function(){
+      done += chunk.length;
+      statusEl.textContent = 'Applying backfill… ' + done + ' / ' + n;
       runBatch();
     }).catch(function(err){
       errors.push(err.message || String(err));

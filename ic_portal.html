@@ -1249,8 +1249,11 @@ function fetchPmamList(cb){
     // (the first Firestore snapshot may have arrived before _allPmams was ready).
     if (typeof allReports !== 'undefined' && Array.isArray(allReports) && allReports.length){
       allReports.forEach(function(r){
-        var canon = canonicalPmamName(r.name);
-        if (canon) r.name = canon;
+        // Re-resolve PMAM name via email FK (preferred) or fuzzy name (fallback)
+        if (typeof canonicalPmamName === 'function'){
+          var canon = canonicalPmamName(r.name, r.pmam_email);
+          if (canon) r.name = canon;
+        }
       });
       populateFilters && populateFilters();
     }
@@ -1260,15 +1263,27 @@ function fetchPmamList(cb){
   });
 }
 
-// Fuzzy-resolve a free-text PMAM name to its canonical form from the
-// `users` collection (role === 'PMAM'). Returns the canonical name on match,
-// or the original (trimmed) input if no good match is found.
-// Safe to call before _allPmams is loaded — returns input unchanged.
-function canonicalPmamName(name){
+// Resolve a PMAM record to its canonical display name. Priority order:
+//   1) If email is provided AND matches a user → use that user's CURRENT name
+//      (this is the FK-based lookup — survives any name rename)
+//   2) Else fuzzy-match the free-text name against the users collection
+//   3) Else return the input unchanged
+// Safe to call before _allPmams loads — returns input unchanged.
+function canonicalPmamName(name, email){
+  if (!_allPmams || !_allPmams.length) {
+    return name ? String(name).trim() : name;
+  }
+  // ── PRIMARY: email lookup (immutable foreign key) ──
+  if (email){
+    var eL = String(email).toLowerCase().trim();
+    for (var i=0; i<_allPmams.length; i++){
+      if ((_allPmams[i].email || '').toLowerCase() === eL) return _allPmams[i].name;
+    }
+  }
+  // ── FALLBACK: fuzzy name match (for legacy records with no email) ──
   if (!name) return name;
   var n = String(name).trim();
   if (!n) return name;
-  if (!_allPmams || !_allPmams.length) return n;
   var nL = n.toLowerCase();
   // 1) exact
   for (var i=0; i<_allPmams.length; i++){
@@ -1288,7 +1303,22 @@ function canonicalPmamName(name){
     var cL = _allPmams[i].name.toLowerCase();
     if (nL.indexOf(cL) === 0 && (nL.length - cL.length) <= 8) return _allPmams[i].name;
   }
-  return n; // no good match — leave as-is (will appear under its own row in dropdowns)
+  return n;
+}
+
+// Similar resolver for ward labels: looks up by ward_id (immutable FK) first,
+// falls back to WARD_REGISTRY.canonical(label) for legacy records.
+function canonicalWardLabel(label, wardId){
+  if (wardId && window.WARD_REGISTRY && typeof WARD_REGISTRY.list === 'function'){
+    var list = WARD_REGISTRY.list();
+    for (var i=0; i<list.length; i++){
+      if (list[i].id === wardId) return list[i].label;
+    }
+  }
+  if (label && window.WARD_REGISTRY && typeof WARD_REGISTRY.canonical === 'function'){
+    return WARD_REGISTRY.canonical(label) || label;
+  }
+  return label;
 }
 
 // ══════════════════════════════════════
@@ -1455,18 +1485,45 @@ function fetchFirebaseData() {
     allReports = [];
     snap.forEach(doc => {
       var data = doc.data();
-      // ── Normalize ward names through WARD_REGISTRY (legacy "Onco" → "Oncology", etc.)
-      if (Array.isArray(data.wards) && window.WARD_REGISTRY && typeof WARD_REGISTRY.canonical === 'function') {
+
+      // ── Step 1: Derive FK fields (pmam_email, ward_ids[]) if missing on legacy records ──
+      if (!data.pmam_email && data.email) {
+        data.pmam_email = String(data.email).toLowerCase().trim();
+      } else if (data.pmam_email) {
+        data.pmam_email = String(data.pmam_email).toLowerCase().trim();
+      }
+      if (!Array.isArray(data.ward_ids)) {
+        data.ward_ids = (Array.isArray(data.wards) ? data.wards : [])
+          .map(function(label){
+            if (window.WARD_REGISTRY && typeof WARD_REGISTRY.byLabel === 'function') {
+              var w = WARD_REGISTRY.byLabel(label);
+              if (w && w.id) return w.id;
+            }
+            return String(label || '').toLowerCase()
+              .replace(/&/g,'and').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+          })
+          .filter(Boolean);
+      }
+
+      // ── Step 2: Refresh display names from CURRENT registries (handles renames) ──
+      // PMAM name: lookup by email FK first, then fuzzy-match name as fallback
+      if (typeof canonicalPmamName === 'function') {
+        data.name = canonicalPmamName(data.name, data.pmam_email);
+      }
+      // Ward labels: lookup each by ward_id FK first, then canonical(label) fallback
+      if (Array.isArray(data.wards) || Array.isArray(data.ward_ids)){
+        var labels = [];
+        var ids = data.ward_ids || [];
+        var oldLabels = Array.isArray(data.wards) ? data.wards : [];
+        var maxLen = Math.max(ids.length, oldLabels.length);
         var seen = {};
-        data.wards = data.wards
-          .map(function(w){ return WARD_REGISTRY.canonical(w) || w; })
-          .filter(function(w){ if (!w || seen[w]) return false; seen[w] = 1; return true; });
+        for (var i=0; i<maxLen; i++){
+          var resolved = canonicalWardLabel(oldLabels[i], ids[i]);
+          if (resolved && !seen[resolved]){ seen[resolved] = 1; labels.push(resolved); }
+        }
+        data.wards = labels;
       }
-      // ── Normalize PMAM name against canonical users list (case/whitespace/suffix variants).
-      // If _allPmams hasn't loaded yet, this is a no-op; fetchPmamList re-normalizes when it arrives.
-      if (data.name && typeof canonicalPmamName === 'function') {
-        data.name = canonicalPmamName(data.name);
-      }
+
       allReports.push({ id: doc.id, ...data });
     });
     populateFilters();

@@ -1145,11 +1145,30 @@ function saveEntry() {
   var clm    = parseInt(document.getElementById('eClm').value)    || 0;
   var conv   = ipd > 0 ? ((reg / ipd) * 100).toFixed(1) + '%' : '—';
   var u = getPmjayUser();
+
+  // ── Derive immutable foreign keys (FK) for stable filtering across renames ──
+  // pmam_email and ward_ids[] are the persistent identifiers used by the I/C
+  // portal for filtering and aggregation. The free-text `name` and `wards[]`
+  // fields are still saved as display snapshots, but should never be used as
+  // primary keys in any query. See cleanup tool for backfill of old records.
+  var pmamEmail = (u.email || '').toLowerCase().trim();
+  var wardIds = selWards.map(function(label){
+    if (window.WARD_REGISTRY && typeof WARD_REGISTRY.byLabel === 'function') {
+      var w = WARD_REGISTRY.byLabel(label);
+      if (w && w.id) return w.id;
+    }
+    // Fallback: derive slug from label
+    return String(label).toLowerCase()
+      .replace(/&/g,'and').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+  });
+
   var entry  = {
     date:date, wards:selWards.slice(), ipd:ipd, med:med, surg:surg,
     reg:reg, pre:pre, preAmt:preAmt, dis:dis, clm:clm, conv:conv,
-    email: u.email || 'unknown',
-    name: u.name || 'PMAM User',
+    email: u.email || 'unknown',                  // legacy field — kept for backwards compat
+    pmam_email: pmamEmail,                        // ← canonical FK to users collection
+    name: u.name || 'PMAM User',                  // display snapshot only
+    ward_ids: wardIds,                            // ← canonical FK array (parallel to wards[])
     timestamp: Date.now()
   };
 
