@@ -97,8 +97,8 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .card-hd{font-size:13px;font-weight:800;color:#0F2B8C;margin-bottom:12px;padding-bottom:8px;border-bottom:1.5px solid rgba(26,61,181,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 
 /* METRICS */
-.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
-.mcard{border-radius:16px;padding:12px 14px;background:#fff;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(30,80,200,0.06);position:relative;overflow:hidden}
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:14px}
+.mcard{border-radius:16px;padding:12px 14px;background:#fff;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(30,80,200,0.06);position:relative;overflow:hidden;min-width:0}
 .mcard::before{content:"";position:absolute;bottom:0;left:0;right:0;height:4px;border-radius:0 0 14px 14px}
 .mcard.c1::before{background:linear-gradient(90deg,#1A3DB5,#2952D9)}
 .mcard.c2::before{background:linear-gradient(90deg,#166534,#16a34a)}
@@ -106,8 +106,9 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .mcard.c4::before{background:linear-gradient(90deg,#005F52,#00897B)}
 .mcard.c5::before{background:linear-gradient(90deg,#6A1B9A,#9C27B0)}
 .mcard.c6::before{background:linear-gradient(90deg,#0F1F6E,#1A3DB5)}
-.mcard-num{font-size:26px;font-weight:800;color:#0F2B8C;line-height:1;margin-bottom:4px}
-.mcard-label{font-size:10px;color:#666;font-weight:600}
+.mcard-num{font-size:24px;font-weight:800;color:#0F2B8C;line-height:1.05;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.4px}
+.mcard.has-currency .mcard-num{font-size:20px}
+.mcard-label{font-size:10px;color:#666;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* FORM ROW */
 .frow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
@@ -664,7 +665,7 @@ function genMonthly(){
     {c:'c4',n:totDis,l:'Discharged'},
     {c:'c5',n:'₹'+fmt(totClm),l:'Claim Amt'},
     {c:'c6',n:cv(totIPD,totReg),l:'Conv%'}
-  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 
   document.getElementById('monthlyTbody').innerHTML=rows.map((r,i)=>{
     const wardsArr=Array.from(r.wardsSet||[]);
@@ -733,7 +734,7 @@ function genAnnual(){
 
   document.getElementById('annualMetrics').innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
-  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 // ===== WARD =====
@@ -848,7 +849,7 @@ function _genWardAggregated(ward, filtered){
 
   document.getElementById('wardMetrics').innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
-  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 function _genWardPmamBreakdown(ward, filtered){
@@ -889,7 +890,7 @@ function _genWardPmamBreakdown(ward, filtered){
 
   document.getElementById('wardMetrics').innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:rows.length+' PMAMs',l:'Contributors'}
-  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 // ===== PMAM WISE =====
@@ -961,7 +962,7 @@ function _genPmamYearWise(pmam, year, filtered){
 
   document.getElementById('pmamMetrics').innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c3',n:tReg,l:'Registered'}, {c:'c2',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
-  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 function _genPmamDayWise(pmam, year, filtered){
@@ -1028,7 +1029,7 @@ function _genPmamDayWise(pmam, year, filtered){
     {c:'c4',n:tDis,l:'Discharged'},
     {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'},
     {c:'c6',n:submittedDays+'/'+daysInMonth,l:'Days Filed'}
-  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 // ===== ALL RECORDS =====
@@ -1060,6 +1061,42 @@ function arToggleAnomalyMode(){
   genAllRecords();
 }
 
+// Pre-computed PMAM baselines (median daily values) — populated by _arBuildBaselines
+var _arBaselines = null;
+
+function _arBuildBaselines(){
+  // For each PMAM (keyed by pmam_email or name), compute median IPD/Reg/Claim
+  // per single-record entry. Use median so a single outlier doesn't poison
+  // the baseline.
+  var grouped = {}; // key → { ipds:[], regs:[], clms:[], pres:[] }
+  (allReports || []).forEach(function(r){
+    var key = (r.pmam_email && r.pmam_email.trim()) || r.email || r.name || 'unknown';
+    if (!grouped[key]) grouped[key] = { ipds:[], regs:[], clms:[], pres:[] };
+    grouped[key].ipds.push(Number(r.ipd||0));
+    grouped[key].regs.push(Number(r.reg||0));
+    grouped[key].clms.push(Number(r.clm||0));
+    grouped[key].pres.push(Number(r.pre||0));
+  });
+  function median(arr){
+    if (!arr.length) return 0;
+    var s = arr.slice().sort(function(a,b){return a-b;});
+    var m = Math.floor(s.length/2);
+    return s.length % 2 ? s[m] : (s[m-1]+s[m])/2;
+  }
+  var out = {};
+  Object.keys(grouped).forEach(function(k){
+    var g = grouped[k];
+    out[k] = {
+      ipdMedian: median(g.ipds),
+      regMedian: median(g.regs),
+      clmMedian: median(g.clms),
+      preMedian: median(g.pres),
+      count: g.ipds.length
+    };
+  });
+  _arBaselines = out;
+}
+
 // Returns array of anomaly reasons for a record (empty if record is fine)
 function _arDetectAnomalies(r){
   var issues = [];
@@ -1089,6 +1126,32 @@ function _arDetectAnomalies(r){
   if(Number(r.clm||0) > 0 && reg === 0){
     issues.push('Claim (₹' + r.clm + ') but no Register');
   }
+
+  // 6) STATISTICAL OUTLIER — catches "whole month dumped into one day" pattern
+  // If this PMAM has at least 5 records and the current record's IPD is >= 8×
+  // their median daily IPD, flag it. (Median is robust against the outlier
+  // itself.) Same logic for Register and Claim — any one of the three being
+  // a wild outlier raises the flag.
+  if (_arBaselines){
+    var key = (r.pmam_email && r.pmam_email.trim()) || r.email || r.name || 'unknown';
+    var base = _arBaselines[key];
+    if (base && base.count >= 5){
+      var outlierReasons = [];
+      if (base.ipdMedian > 0 && ipd >= base.ipdMedian * 8 && ipd >= 20){
+        outlierReasons.push('IPD ' + ipd + ' is ~' + Math.round(ipd/base.ipdMedian) + '× this PMAM\'s typical daily IPD (median ' + base.ipdMedian + ')');
+      }
+      if (base.regMedian > 0 && reg >= base.regMedian * 8 && reg >= 20){
+        outlierReasons.push('Register ' + reg + ' is ~' + Math.round(reg/base.regMedian) + '× this PMAM\'s typical (median ' + base.regMedian + ')');
+      }
+      if (base.clmMedian > 0 && Number(r.clm||0) >= base.clmMedian * 8 && Number(r.clm||0) >= 50000){
+        outlierReasons.push('Claim ₹' + r.clm + ' is ~' + Math.round(Number(r.clm)/base.clmMedian) + '× this PMAM\'s typical claim (median ₹' + base.clmMedian + ')');
+      }
+      if (outlierReasons.length){
+        issues.push('⚠ STATISTICAL OUTLIER (possibly whole-month data on one day): ' + outlierReasons.join('; '));
+      }
+    }
+  }
+
   return issues;
 }
 
@@ -1124,6 +1187,9 @@ function _arFmtSubmission(r){
 }
 
 function genAllRecords(){
+  // Build PMAM baselines from all records (used by statistical outlier detection)
+  _arBuildBaselines();
+
   const mode = (document.getElementById('arMode') || {value:'month'}).value;
   const pmam = document.getElementById('arPmam').value;
   const wardSel = document.getElementById('arWardMulti');
@@ -1226,7 +1292,7 @@ function genAllRecords(){
     {c:'c4',n:tDis,l:'Discharged'},
     {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'},
     {c:'c6',n: (anomalyCount > 0 ? '⚠ '+anomalyCount : '✓ 0'), l:'Anomalies'}
-  ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 function clearAllRecordsFilter() {
@@ -1803,7 +1869,8 @@ function genDaily(){
       { c:'c5', n:totals.dis, l:'Discharged' },
       { c:'c6', n:inrFmt(totals.clm), l:'Claim Amt' }
     ].map(function(m){
-      return '<div class="mcard '+m.c+'"><div class="mcard-num">'+m.n+'</div><div class="mcard-label">'+m.l+'</div></div>';
+      var isCurr = String(m.n).indexOf('₹') >= 0 ? ' has-currency' : '';
+      return '<div class="mcard '+m.c+isCurr+'"><div class="mcard-num">'+m.n+'</div><div class="mcard-label">'+m.l+'</div></div>';
     }).join('');
   });
 }

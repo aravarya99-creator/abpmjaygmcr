@@ -81,8 +81,8 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .card-hd{font-size:13px;font-weight:800;color:#0F2B8C;margin-bottom:12px;padding-bottom:8px;border-bottom:1.5px solid rgba(26,61,181,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 
 /* METRICS */
-.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
-.mcard{border-radius:16px;padding:12px 14px;background:#fff;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(30,80,200,0.06);position:relative;overflow:hidden}
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:14px}
+.mcard{border-radius:16px;padding:12px 14px;background:#fff;border:1.5px solid rgba(100,150,255,0.12);box-shadow:0 2px 8px rgba(30,80,200,0.06);position:relative;overflow:hidden;min-width:0}
 .mcard::before{content:"";position:absolute;bottom:0;left:0;right:0;height:4px;border-radius:0 0 14px 14px}
 .mcard.c1::before{background:linear-gradient(90deg,#1A3DB5,#2952D9)}
 .mcard.c2::before{background:linear-gradient(90deg,#166534,#16a34a)}
@@ -90,8 +90,9 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .mcard.c4::before{background:linear-gradient(90deg,#7c3aed,#9333ea)}
 .mcard.c5::before{background:linear-gradient(90deg,#005F52,#00897B)}
 .mcard.c6::before{background:linear-gradient(90deg,#0F1F6E,#1A3DB5)}
-.mcard-num{font-size:26px;font-weight:800;color:#0F2B8C;line-height:1;margin-bottom:4px}
-.mcard-label{font-size:10px;color:#666;font-weight:600}
+.mcard-num{font-size:24px;font-weight:800;color:#0F2B8C;line-height:1.05;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.4px}
+.mcard.has-currency .mcard-num{font-size:20px}
+.mcard-label{font-size:10px;color:#666;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* BUTTONS */
 .btn{height:36px;padding:0 18px;border-radius:50px;font-size:12px;cursor:pointer;font-weight:700;border:none;transition:all 0.15s;font-family:"Inter",sans-serif}

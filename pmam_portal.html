@@ -310,8 +310,8 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .nfield-box.nfield-disabled .nfield-icon{background:#EBEBF0!important;border-right-color:#DDE0EC}
 
 /* METRICS */
-.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
-.mcard{border-radius:16px;padding:12px 14px;position:relative;overflow:hidden;box-shadow:0 2px 10px rgba(26,61,181,0.08);border:1.5px solid rgba(100,150,255,0.12);background:#fff}
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:14px}
+.mcard{border-radius:16px;padding:12px 14px;position:relative;overflow:hidden;box-shadow:0 2px 10px rgba(26,61,181,0.08);border:1.5px solid rgba(100,150,255,0.12);background:#fff;min-width:0}
 .mcard::before{content:"";position:absolute;bottom:0;left:0;right:0;height:4px;border-radius:0 0 14px 14px}
 .mcard.c1::before{background:linear-gradient(90deg,#1A3DB5,#2952D9)}
 .mcard.c2::before{background:linear-gradient(90deg,#166534,#16a34a)}
@@ -319,8 +319,9 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .mcard.c4::before{background:linear-gradient(90deg,#005F52,#00897B)}
 .mcard.c5::before{background:linear-gradient(90deg,#6A1B9A,#9C27B0)}
 .mcard.c6::before{background:linear-gradient(90deg,#0F1F6E,#1A3DB5)}
-.mcard-num{font-size:26px;font-weight:800;color:#0F2B8C;line-height:1;margin-bottom:4px}
-.mcard-label{font-size:10px;color:#666;font-weight:600}
+.mcard-num{font-size:24px;font-weight:800;color:#0F2B8C;line-height:1.05;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.4px}
+.mcard.has-currency .mcard-num{font-size:20px}
+.mcard-label{font-size:10px;color:#666;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* TABLE */
 .tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid rgba(26,61,181,0.1)}
@@ -483,7 +484,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div class="mcard c2"><div class="mcard-num" id="dReg">0</div><div class="mcard-label">Total Register</div></div>
         <div class="mcard c3"><div class="mcard-num" id="dPre">0</div><div class="mcard-label">Total Preauth</div></div>
         <div class="mcard c4"><div class="mcard-num" id="dDis">0</div><div class="mcard-label">Total Discharge</div></div>
-        <div class="mcard c5"><div class="mcard-num" id="dClm">₹0</div><div class="mcard-label">Total Claim</div></div>
+        <div class="mcard c5 has-currency"><div class="mcard-num" id="dClm">₹0</div><div class="mcard-label">Total Claim</div></div>
         <div class="mcard c6"><div class="mcard-num" id="dConv">—</div><div class="mcard-label">Overall Conv%</div></div>
       </div>
       <div class="card">
