@@ -396,18 +396,14 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd">Ward Performance</div>
         <div class="frow">
           <div class="fld"><label>Select Ward</label>
-            <select id="wrWard" style="width:200px" data-ward-select="1" data-ward-extras="All Wards">
+            <select id="wrWard" style="width:200px">
               <option value="">All Wards</option>
-              <option>Orthopaedics</option><option>Male Surgery Ward</option>
-              <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
-              <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
-              <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
-              <option>Optha</option><option>Onco</option><option>Gynae</option>
-              <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
             </select>
           </div>
           <div class="fld"><label>Month</label>
-            <select style="width:130px"><option selected>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option><option>January</option><option>February</option><option>March</option></select>
+            <select id="rMonthWard" style="width:130px">
+              <option value="">All Months</option>
+            </select>
           </div>
           <div class="fld"><label>Year</label><select id="rYearWard" style="width:100px"></select></div>
           <button class="btn btn-pri" onclick="genWard()">Generate</button>
@@ -417,7 +413,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       </div>
       <div class="metrics-grid" id="wardMetrics"></div>
       <div class="card">
-        <div class="card-hd">All Wards Comparison — Ranked by Conv%</div>
+        <div class="card-hd">All Wards Comparison — Ranked by Conv% <span id="wardCardSubhead" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
         <div class="tbl-wrap">
           <table id="wardTbl">
             <thead><tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
@@ -765,16 +761,30 @@ function genAnnual(){
 function genWard(){
   const yearSel = document.getElementById('rYearWard');
   const year = yearSel ? parseInt(yearSel.value) : new Date().getFullYear();
+  const monthSel = document.getElementById('rMonthWard');
+  const monthStr = monthSel ? monthSel.value : ''; // '' or '01'..'12'
   const ward = document.getElementById('wrWard').value;
+
   const filtered = allReports.filter(r => {
-    if(!r.date || new Date(r.date).getFullYear() !== year) return false;
+    if(!r.date) return false;
+    const d = new Date(r.date);
+    if(d.getFullYear() !== year) return false;
+    if(monthStr && (d.getMonth()+1) !== parseInt(monthStr)) return false;
     if(!r.wards) return false;
     return ward === "" || r.wards.includes(ward);
   });
 
+  // Update subhead so the user can see what's being shown
+  var subhead = document.getElementById('wardCardSubhead');
+  if(subhead){
+    var monthName = monthStr ? MONTHS[parseInt(monthStr)-1] : 'All Months';
+    var wardLabel = ward || 'All Wards';
+    subhead.textContent = '— ' + wardLabel + ' / ' + monthName + ' ' + year;
+  }
+
   if(!filtered.length){
     document.getElementById('wardMetrics').innerHTML='';
-    document.getElementById('wardTbody').innerHTML='<tr><td colspan="11" class="empty-td">No data available.</td></tr>';
+    document.getElementById('wardTbody').innerHTML='<tr><td colspan="11" class="empty-td">No data available for selected filters.</td></tr>';
     var wf=document.getElementById('wardFoot'); if(wf) wf.innerHTML='';
     return;
   }
@@ -981,6 +991,16 @@ function populateFilters() {
   if(arMonthEl){
     const cur = arMonthEl.value;
     arMonthEl.innerHTML = `<option value="">All Months</option>` + MONTHS.map((m, i) => {
+      const v = String(i+1).padStart(2,'0');
+      return `<option value="${v}" ${v===cur?'selected':''}>${m}</option>`;
+    }).join('');
+  }
+
+  // Month dropdown for Ward Wise (value = '01'..'12')
+  const rMonthWardEl = document.getElementById('rMonthWard');
+  if(rMonthWardEl){
+    const cur = rMonthWardEl.value;
+    rMonthWardEl.innerHTML = `<option value="">All Months</option>` + MONTHS.map((m, i) => {
       const v = String(i+1).padStart(2,'0');
       return `<option value="${v}" ${v===cur?'selected':''}>${m}</option>`;
     }).join('');
