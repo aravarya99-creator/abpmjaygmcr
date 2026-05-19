@@ -416,8 +416,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd">All Wards Comparison — Ranked by Conv%</div>
         <div class="tbl-wrap">
           <table id="wardTbl">
-            <thead><tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
-            <tbody id="wardTbody"><tr><td colspan="9" class="empty-td">Click Generate to load data</td></tr></tbody>
+            <thead><tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <tbody id="wardTbody"><tr><td colspan="11" class="empty-td">Click Generate to load data</td></tr></tbody>
+            <tfoot id="wardFoot"></tfoot>
           </table>
         </div>
       </div>
@@ -594,8 +595,8 @@ function genMonthly(){
   });
 
   const rows=Object.values(byPmam).sort((a,b)=>b.reg-a.reg);
-  let totIPD=0,totReg=0,totPre=0,totDis=0,totClm=0;
-  rows.forEach(r=>{totIPD+=r.ipd;totReg+=r.reg;totPre+=r.pre;totDis+=r.dis;totClm+=r.clm;});
+  let totIPD=0,totMed=0,totSurg=0,totReg=0,totPre=0,totPreAmt=0,totDis=0,totClm=0;
+  rows.forEach(r=>{totIPD+=r.ipd;totMed+=r.med;totSurg+=r.surg;totReg+=r.reg;totPre+=r.pre;totPreAmt+=r.preAmt;totDis+=r.dis;totClm+=r.clm;});
 
   // Metrics
   document.getElementById('monthlyMetrics').innerHTML=[
@@ -622,7 +623,7 @@ function genMonthly(){
     </tr>
   `;
   }).join('');
-  document.getElementById('monthlyFoot').innerHTML=`<tr class="tot-row"><td colspan="2">TOTAL</td><td>—</td><td>${totIPD}</td><td>—</td><td>—</td><td>${totReg}</td><td>${totPre}</td><td>—</td><td>${totDis}</td><td>${fmt(totClm)}</td><td>${cv(totIPD,totReg)}</td></tr>`;
+  document.getElementById('monthlyFoot').innerHTML=`<tr class="tot-row"><td colspan="2">TOTAL</td><td>—</td><td>${totIPD}</td><td>${totMed}</td><td>${totSurg}</td><td>${totReg}</td><td>${totPre}</td><td>${fmt(totPreAmt)}</td><td>${totDis}</td><td>${fmt(totClm)}</td><td>${cv(totIPD,totReg)}</td></tr>`;
 }
 
 // ===== ANNUAL =====
@@ -649,15 +650,15 @@ function genAnnual(){
   });
 
   const monthsOrdered = MONTHS.filter(m => byMonth[m]);
-  let tIPD=0, tReg=0, tPre=0, tDis=0, tClm=0;
+  let tIPD=0, tMed=0, tSurg=0, tReg=0, tPre=0, tPreAmt=0, tDis=0, tClm=0;
 
   document.getElementById('annualTbody').innerHTML = monthsOrdered.map(m => {
     const r = byMonth[m];
-    tIPD+=r.ipd; tReg+=r.reg; tPre+=r.pre; tDis+=r.dis; tClm+=r.clm;
+    tIPD+=r.ipd; tMed+=r.med; tSurg+=r.surg; tReg+=r.reg; tPre+=r.pre; tPreAmt+=r.preAmt; tDis+=r.dis; tClm+=r.clm;
     return `<tr><td>${m}</td><td>${r.ipd}</td><td>${r.med}</td><td>${r.surg}</td><td><strong>${r.reg}</strong></td><td>${r.pre}</td><td>${fmt(r.preAmt)}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td></tr>`;
   }).join('');
 
-  document.getElementById('annualFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>—</td><td>—</td><td>${tReg}</td><td>${tPre}</td><td>—</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
+  document.getElementById('annualFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
   
   // Ranking by PMAM
   const pmamTotals = {};
@@ -690,7 +691,8 @@ function genWard(){
 
   if(!filtered.length){
     document.getElementById('wardMetrics').innerHTML='';
-    document.getElementById('wardTbody').innerHTML='<tr><td colspan="9" class="empty-td">No data available.</td></tr>';
+    document.getElementById('wardTbody').innerHTML='<tr><td colspan="11" class="empty-td">No data available.</td></tr>';
+    var wf=document.getElementById('wardFoot'); if(wf) wf.innerHTML='';
     return;
   }
 
@@ -698,20 +700,27 @@ function genWard(){
   filtered.forEach(r => {
     (r.wards||[]).forEach(w => {
       if(ward !== "" && w !== ward) return;
-      if(!wardData[w]) wardData[w] = {name:w, pmams:new Set(), ipd:0, reg:0, pre:0, dis:0, clm:0};
+      if(!wardData[w]) wardData[w] = {name:w, pmams:new Set(), ipd:0, med:0, surg:0, reg:0, pre:0, dis:0, clm:0};
       const d = wardData[w];
       d.pmams.add(r.name);
-      d.ipd+=Number(r.ipd||0); d.reg+=Number(r.reg||0); d.pre+=Number(r.pre||0); d.dis+=Number(r.dis||0); d.clm+=Number(r.clm||0);
+      d.ipd+=Number(r.ipd||0); d.med+=Number(r.med||0); d.surg+=Number(r.surg||0);
+      d.reg+=Number(r.reg||0); d.pre+=Number(r.pre||0); d.dis+=Number(r.dis||0); d.clm+=Number(r.clm||0);
     });
   });
 
   const rows = Object.values(wardData).sort((a,b) => cvN(b.ipd,b.reg) - cvN(a.ipd,a.reg));
   document.getElementById('wardTbody').innerHTML = rows.map((r,i) => `
-    <tr><td>${i+1}</td><td><strong>${r.name}</strong></td><td>${Array.from(r.pmams).join(', ')}</td><td>${r.ipd}</td><td>${r.reg}</td><td>${r.pre}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td></tr>
+    <tr><td>${i+1}</td><td><strong>${r.name}</strong></td><td>${Array.from(r.pmams).join(', ')}</td><td>${r.ipd}</td><td>${r.med}</td><td>${r.surg}</td><td>${r.reg}</td><td>${r.pre}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td></tr>
   `).join('');
 
-  let tIPD=0, tReg=0, tPre=0, tDis=0, tClm=0;
-  rows.forEach(r => { tIPD+=r.ipd; tReg+=r.reg; tPre+=r.pre; tDis+=r.dis; tClm+=r.clm; });
+  let tIPD=0, tMed=0, tSurg=0, tReg=0, tPre=0, tDis=0, tClm=0;
+  rows.forEach(r => { tIPD+=r.ipd; tMed+=r.med; tSurg+=r.surg; tReg+=r.reg; tPre+=r.pre; tDis+=r.dis; tClm+=r.clm; });
+
+  var wardFoot = document.getElementById('wardFoot');
+  if(wardFoot){
+    wardFoot.innerHTML = `<tr class="tot-row"><td colspan="3">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
+  }
+
   document.getElementById('wardMetrics').innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
   ].map(m=>`<div class="mcard ${m.c}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
@@ -734,7 +743,7 @@ function genPmam(){
   }
 
   const byMonth = {};
-  let tIPD=0, tReg=0, tPre=0, tDis=0, tClm=0;
+  let tIPD=0, tMed=0, tSurg=0, tReg=0, tPre=0, tPreAmt=0, tDis=0, tClm=0;
   filtered.forEach(r => {
     const m = MONTHS[new Date(r.date).getMonth()];
     if(!byMonth[m]) byMonth[m] = {name:m, ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0};
@@ -747,11 +756,11 @@ function genPmam(){
   const monthsOrdered = MONTHS.filter(m => byMonth[m]);
   document.getElementById('pmamTbody').innerHTML = monthsOrdered.map(m => {
     const r = byMonth[m];
-    tIPD+=r.ipd; tReg+=r.reg; tPre+=r.pre; tDis+=r.dis; tClm+=r.clm;
+    tIPD+=r.ipd; tMed+=r.med; tSurg+=r.surg; tReg+=r.reg; tPre+=r.pre; tPreAmt+=r.preAmt; tDis+=r.dis; tClm+=r.clm;
     return `<tr><td>${m}</td><td>${r.ipd}</td><td>${r.med}</td><td>${r.surg}</td><td><strong>${r.reg}</strong></td><td>${r.pre}</td><td>${fmt(r.preAmt)}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td style="font-weight:700;color:${cvColor(r.ipd,r.reg)}">${cv(r.ipd,r.reg)}</td></tr>`;
   }).join('');
   
-  document.getElementById('pmamFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>—</td><td>—</td><td>${tReg}</td><td>${tPre}</td><td>—</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
+  document.getElementById('pmamFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
   
   document.getElementById('pmamMetrics').innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c3',n:tReg,l:'Registered'}, {c:'c2',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
