@@ -536,8 +536,8 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             </div>
             <div class="fr-field" style="flex:0.5;min-width:160px">
               <label>Select Ward</label>
-              <div style="display:flex;gap:8px;align-items:center">
-                <select id="eWard" style="flex:1;height:38px;padding:0 10px;border:1.5px solid #CE93D8;border-radius:8px;font-size:12px;background:#fff;color:#2D2D2D;outline:none;font-family:Inter,sans-serif" data-ward-select="1">
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <select id="eWard" style="flex:1;min-width:140px;height:38px;padding:0 10px;border:1.5px solid #CE93D8;border-radius:8px;font-size:12px;background:#fff;color:#2D2D2D;outline:none;font-family:Inter,sans-serif" data-ward-select="1">
                   <option value="">-- Select Ward --</option>
                   <option>Orthopaedics</option><option>Male Surgery Ward</option>
                   <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
@@ -547,10 +547,10 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
                   <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
                 </select>
                 <button class="fr-ward-btn" onclick="addWard()">+ Add</button>
+                <span id="wardTags" class="fr-ward-inline"></span>
               </div>
             </div>
           </div>
-          <div class="fr-ward-row" id="wardTags"></div>
         </div>
         <div class="fr-divider"></div>
         <div class="fr-sec-banner">Case Data</div>
@@ -558,15 +558,15 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <div class="fr-fields-row" style="flex-wrap:nowrap">
             <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eIPD">
               <label>Ward IPD</label>
-              <input type="number" id="eIPD" placeholder="0-30" min="0" max="30" oninput="capInput(this,30)">
+              <input type="number" id="eIPD" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Ward IPD')">
             </div>
             <div class="fr-field" style="flex:1;min-width:95px" id="wrap-eMed">
               <label>Conservative</label>
-              <input type="number" id="eMed" placeholder="0-30" min="0" max="30" oninput="capInput(this,30);autoReg()">
+              <input type="number" id="eMed" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Conservative');autoReg()">
             </div>
             <div class="fr-field" style="flex:1;min-width:85px" id="wrap-eSurg">
               <label>Surgery Cases</label>
-              <input type="number" id="eSurg" placeholder="0-30" min="0" max="30" oninput="capInput(this,30);autoReg()">
+              <input type="number" id="eSurg" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Surgery Cases');autoReg()">
             </div>
             <div class="fr-field" style="flex:1;min-width:80px;position:relative" id="wrap-eReg">
               <label>Register</label>
@@ -587,7 +587,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             </div>
             <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eDis">
               <label>Discharge</label>
-              <input type="number" id="eDis" placeholder="0-30" min="0" max="30" oninput="capInput(this,30)">
+              <input type="number" id="eDis" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Discharge')">
             </div>
             <div class="fr-field" style="flex:1;min-width:105px" id="wrap-eClm">
               <label>Claim Amt (₹)</label>
@@ -1091,10 +1091,29 @@ function addWard() {
   var v = s.value;
   if (!v || selWards.includes(v)) return;
 
-  // Block if already has a ward selected
+  // ── Check: has this PMAM already submitted this ward for the selected date? ──
+  var dateEl = document.getElementById('eDate');
+  var selectedDate = dateEl ? dateEl.value : '';
+  if (selectedDate && typeof allEntries !== 'undefined' && Array.isArray(allEntries)){
+    var alreadyFiled = allEntries.some(function(e){
+      return e.date === selectedDate && Array.isArray(e.wards) && e.wards.indexOf(v) !== -1;
+    });
+    if (alreadyFiled){
+      var msg = document.getElementById('entryMsg');
+      if (msg){
+        msg.style.color = '#dc2626';
+        msg.textContent = '⛔ You have already filled "' + v + '" report for ' + selectedDate + '. You can edit it in the Records section.';
+        clearTimeout(window._warnTimer);
+        window._warnTimer = setTimeout(function(){ if(msg.textContent.indexOf('already filled')!==-1) msg.textContent = ''; }, 6000);
+      }
+      s.value = '';
+      return;
+    }
+  }
+
+  // Block if already has a ward selected (one ward at a time)
   if (selWards.length >= 1) {
     var msg = document.getElementById('entryMsg');
-    // Check if any data has been entered
     var hasData = ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].some(function(id){
       var el = document.getElementById(id);
       return el && String(el.value).trim() !== '' && parseInt(el.value) > 0;
@@ -1113,20 +1132,19 @@ function addWard() {
   selWards.push(v);
   s.value = '';
   renderSelWards();
-  // Apply case type config for the selected ward
   applyWardCaseConfig(v);
 }
 function renderSelWards() {
   updateWardStatus();
   var d = document.getElementById('wardTags');
+  if (!d) return;
   if (selWards.length === 0) {
-    d.innerHTML = '<span style="font-size:11px;color:#BDBDBD;font-style:italic">No wards selected</span>';
+    d.innerHTML = '';
     resetWardCaseConfig();
   } else {
     d.innerHTML = selWards.map(function(w, i) {
-      return '<span class="wtag">' + w + '<span style="cursor:pointer;margin-left:2px;font-weight:800" onclick="selWards.splice(' + i + ',1);renderSelWards()">×</span></span>';
+      return '<span class="fr-wtag">' + w + '<span class="fr-wtag-x" onclick="selWards.splice(' + i + ',1);renderSelWards()">×</span></span>';
     }).join('');
-    // Re-apply config for currently selected ward
     if (selWards.length > 0) applyWardCaseConfig(selWards[0]);
   }
 }
@@ -1143,19 +1161,46 @@ function autoReg() {
   if (preEl) preEl.value = sum || '';
 }
 
-// Cap any numeric input at max value and 2 digits. Called on every input event.
-function capInput(el, maxVal) {
+// Warn user when value > 20 (so they can verify) and HARD-CAP at maxVal (30).
+// Field-aware: shows the actual field label in the warning message.
+function warnAndCap(el, maxVal, fieldName) {
   if (!el) return;
+  var msg = document.getElementById('entryMsg');
   var v = el.value;
-  if (v === '' || v === '-') return;
-  // Strip non-digits (keeps it integer-only)
+  if (v === '' || v === '-') {
+    if (msg) msg.textContent = '';
+    return;
+  }
+  // Strip non-digits (integer-only)
   v = v.replace(/[^0-9]/g, '');
-  // Trim to 2 chars max
-  if (v.length > 2) v = v.slice(0, 2);
   var n = parseInt(v, 10);
+
+  // Hard-cap: value > maxVal not allowed
   if (!isNaN(n) && n > maxVal) {
     v = String(maxVal);
+    if (msg) {
+      msg.style.color = '#dc2626';
+      msg.textContent = '⛔ ' + fieldName + ' cannot exceed ' + maxVal + '. Value capped at ' + maxVal + '.';
+      clearTimeout(window._warnTimer);
+      window._warnTimer = setTimeout(function(){ if(msg.textContent.indexOf('cannot exceed')!==-1) msg.textContent = ''; }, 4000);
+    }
   }
+  // Warning zone: between 21 and 30
+  else if (!isNaN(n) && n > 20) {
+    if (msg) {
+      msg.style.color = '#92400e';
+      msg.textContent = '⚠ Kindly check your ' + fieldName + ' — value ' + n + ' looks high.';
+      clearTimeout(window._warnTimer);
+      window._warnTimer = setTimeout(function(){ if(msg.textContent.indexOf('looks high')!==-1) msg.textContent = ''; }, 5000);
+    }
+  }
+  // Normal range: clear any previous warning
+  else if (!isNaN(n)) {
+    if (msg && (msg.textContent.indexOf('looks high')!==-1 || msg.textContent.indexOf('cannot exceed')!==-1)){
+      msg.textContent = '';
+    }
+  }
+
   if (el.value !== v) el.value = v;
 }
 function clearForm() {
@@ -1989,6 +2034,37 @@ window.addEventListener('DOMContentLoaded', function() {
       if(mNameEl) mNameEl.value = n;
       var mInitEl = document.getElementById('mInitials');
       if(mInitEl) mInitEl.textContent = initials;
+
+      // ── Fetch profile photo from admin's users collection (photoBase64) ──
+      // Admin uploads photos in their PMAM Users → Edit dialog. We fetch the
+      // same photoBase64 string and apply it to the header avatar img.
+      if (u.email && typeof db !== 'undefined'){
+        db.collection('users').doc(u.email).get().then(function(snap){
+          if (!snap.exists) return;
+          var d = snap.data() || {};
+          var photoData = d.photoBase64 || d.photoUrl || d.photoURL || null;
+          if (!photoData) return;
+          var hPhotoEl = document.getElementById('hPhoto');
+          var hIniEl = document.getElementById('hInitials');
+          if (hPhotoEl){
+            hPhotoEl.src = photoData;
+            hPhotoEl.style.display = 'block';
+            hPhotoEl.style.width = '100%';
+            hPhotoEl.style.height = '100%';
+            hPhotoEl.style.objectFit = 'cover';
+            hPhotoEl.style.borderRadius = '50%';
+          }
+          if (hIniEl) hIniEl.style.display = 'none';
+          // Also update the profile modal preview if it has one
+          var mPhotoEl = document.getElementById('mPhoto');
+          if (mPhotoEl){
+            mPhotoEl.src = photoData;
+            mPhotoEl.style.display = 'block';
+          }
+        }).catch(function(err){
+          console.warn('Photo fetch failed:', err);
+        });
+      }
     } catch(e) {}
   }
 });
@@ -2081,8 +2157,10 @@ window.addEventListener('DOMContentLoaded', function(){
 .fr-field input[readonly]{background:#F3E5F5;color:#4A148C;border-color:#AB47BC;font-weight:700;cursor:default}
 .fr-auto-tag{position:absolute;right:8px;top:50%;transform:translateY(4px);font-size:8px;background:#AB47BC;color:#fff;padding:1px 5px;border-radius:4px;font-weight:700;pointer-events:none}
 .fr-ward-row{display:flex;flex-wrap:wrap;gap:5px;min-height:24px;align-items:center;padding:6px 0}
-.fr-wtag{background:#EDE7F6;color:#4A148C;font-size:11px;padding:3px 10px;border-radius:10px;display:inline-flex;align-items:center;gap:4px;font-weight:500;border:1px solid #CE93D8}
-.fr-wtag span{cursor:pointer;font-weight:700;color:#7B1FA2;margin-left:2px}
+.fr-wtag{background:#EDE7F6;color:#4A148C;font-size:14px;padding:6px 14px;border-radius:18px;display:inline-flex;align-items:center;gap:6px;font-weight:600;border:1.5px solid #CE93D8;line-height:1.2}
+.fr-wtag span.fr-wtag-x{cursor:pointer;font-weight:800;color:#7B1FA2;margin-left:4px;font-size:16px;line-height:1}
+.fr-wtag span.fr-wtag-x:hover{color:#dc2626}
+.fr-ward-inline{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
 .fr-ward-status{display:inline-flex;align-items:center;padding:5px 16px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid #CE93D8;background:#F3E5F5;color:#5B2D8E;white-space:nowrap;gap:6px;align-self:flex-end;height:38px}
 .fr-ward-status.has-ward{background:#E8F5E9;border-color:#A5D6A7;color:#2E7D32}
 .fr-ward-btn{height:38px;padding:0 16px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:700;background:#1A3DB5;color:#fff;border:none;white-space:nowrap;font-family:Inter,sans-serif}
@@ -2354,21 +2432,10 @@ function formatDate(d){
 
 // ── Ward status pill update ──
 function updateWardStatus(){
-  var pill = document.getElementById('wardStatusPill');
-  var txt  = document.getElementById('wardStatusText');
-  var tags = document.getElementById('wardTags');
-  if(!pill || !txt) return;
-  if(typeof selWards !== 'undefined' && selWards && selWards.length > 0){
-    pill.className = 'fr-ward-status has-ward';
-    txt.textContent = selWards.join(', ');
-    if(tags) tags.innerHTML = selWards.map(function(w,i){
-      return '<span class="fr-wtag">'+w+'<span onclick="selWards.splice('+i+',1);renderSelWards()">×</span></span>';
-    }).join('');
-  } else {
-    pill.className = 'fr-ward-status';
-    txt.textContent = 'No Ward Selected';
-    if(tags) tags.innerHTML = '';
-  }
+  // No-op — `renderSelWards` is now the single source of truth for chip rendering.
+  // (The old `wardStatusPill` element was removed; this stub stays to prevent
+  // any stale callers from throwing.)
+  return;
 }
 </script>
 
