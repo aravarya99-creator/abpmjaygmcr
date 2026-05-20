@@ -1,0 +1,436 @@
+/* ============================================================================
+   GMC RAJOURI — SHARED HEADERS STYLESHEET
+   Used by all 6 portals on https://aravarya99-creator.github.io/abpmjaygmcr
+   Contains styles for THREE header formats:
+     1) AB PM-JAY landscape report header   (.abpmjay-wrap)
+     2) Medical Superintendent portrait report header (.ms-page + .ms-header)
+     3) Medical Superintendent portrait LETTER (.ms-page + letter body)
+   Bump ?v=N on each portal's <link> tag whenever this file changes.
+   ============================================================================ */
+
+
+/* ===========================================================================
+   FORMAT 1 — AB PM-JAY REPORT HEADER (landscape A4)
+   Markup root: <div class="abpmjay-wrap">…</div>
+   =========================================================================== */
+.abpmjay-wrap {
+  width: 100%;
+  font-family: 'Eras Demi ITC', 'Eras ITC', 'Trebuchet MS', 'Verdana', sans-serif;
+}
+
+.abpmjay-banner {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 20px;
+  border: 2.5px dashed #000;
+  background: #ffffff;
+  display: grid;
+  grid-template-columns: 95px 1fr 95px;
+  align-items: center;
+  column-gap: 20px;
+}
+
+.abpmjay-banner__logo--gmc,
+.abpmjay-banner__logo--pmjay {
+  width: 95px;
+  height: 95px;
+  object-fit: contain;
+  display: block;
+}
+
+.abpmjay-banner__center {
+  text-align: center;
+  line-height: 1.15;
+  min-width: 0;
+  padding: 4px 0;
+}
+
+.abpmjay-banner__title-1a {
+  margin: 0 0 2px 0;
+  font-size: 22pt;
+  font-weight: bold;
+  color: #1e88e5;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.abpmjay-banner__title-1b {
+  margin: 0 0 4px 0;
+  font-size: 18pt;
+  font-weight: bold;
+  color: #1e88e5;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.abpmjay-banner__title-2 {
+  margin: 0;
+  font-size: 14pt;
+  font-weight: bold;
+  color: #e53935;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.abpmjay-report-title-row {
+  width: 100%;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.abpmjay-report-title {
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  padding: 6px 38px;
+  font-size: 13pt;
+  font-weight: bold;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  min-width: 220px;
+  text-align: center;
+  font-family: 'Eras Demi ITC', 'Eras ITC', 'Trebuchet MS', 'Verdana', sans-serif;
+}
+
+.abpmjay-report-title[contenteditable="true"] {
+  background: #000;
+  outline: 2px dashed #fbbf24;
+  cursor: text;
+  border-radius: 3px;
+}
+.abpmjay-report-title[contenteditable="true"]:hover { outline: 2px dashed #fde68a; }
+.abpmjay-report-title[contenteditable="true"]:focus { outline: 2px solid  #fbbf24; }
+
+/* --- AB PM-JAY: PORTRAIT variant ---
+   Used when GMCHeaders.abpmjayReport({ orientation: 'portrait' }) is called.
+   Shrinks logos, reduces title sizes, allows long titles to wrap to 2 lines. */
+.abpmjay-wrap--portrait .abpmjay-banner {
+  grid-template-columns: 70px 1fr 70px;
+  column-gap: 12px;
+  padding: 8px 14px;
+}
+.abpmjay-wrap--portrait .abpmjay-banner__logo--gmc,
+.abpmjay-wrap--portrait .abpmjay-banner__logo--pmjay {
+  width: 70px;
+  height: 70px;
+}
+.abpmjay-wrap--portrait .abpmjay-banner__title-1a { font-size: 16pt; white-space: normal; }
+.abpmjay-wrap--portrait .abpmjay-banner__title-1b { font-size: 14pt; white-space: normal; }
+.abpmjay-wrap--portrait .abpmjay-banner__title-2  { font-size: 10.5pt; white-space: normal; line-height: 1.2; }
+.abpmjay-wrap--portrait .abpmjay-report-title {
+  padding: 5px 24px;
+  font-size: 12pt;
+  min-width: 180px;
+}
+
+
+/* ===========================================================================
+   FORMAT 2 & 3 — MEDICAL SUPERINTENDENT HEADER (portrait A4)
+   Shared by ms-report and ms-letter formats.
+   Markup root for both: <div class="ms-page"> with <header class="ms-header">.
+   =========================================================================== */
+.ms-page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 0;
+  background: #ffffff;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  box-sizing: border-box;
+  position: relative;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+/* --- MS PAGE: LANDSCAPE variant ---
+   Used when GMCHeaders.msReport({ orientation: 'landscape' }) is called.
+   Swaps page dimensions and stretches header width while keeping logo positions
+   the same in millimetres (they still align with the GMC/Emblem/Swachh layout). */
+.ms-page--landscape {
+  width: 297mm;
+  min-height: 210mm;
+}
+.ms-page--landscape .ms-header {
+  width: 297mm;
+  height: 55mm;
+}
+/* center the 3 title lines & contact across the wider page */
+.ms-page--landscape .ms-header__title,
+.ms-page--landscape .ms-header__contact {
+  left: 0;
+  width: 297mm;
+}
+/* stretch the divider across the wider page */
+.ms-page--landscape .ms-header__divider {
+  left: 14mm;
+  width: 269mm;
+}
+/* nudge the right-hand Swachh logo to balance the wider header */
+.ms-page--landscape .ms-header__swachh {
+  left: 240mm;
+}
+/* nudge the emblem (centre-ish logo) to a more central spot */
+.ms-page--landscape .ms-header__emblem {
+  left: 139.4mm;
+}
+
+.ms-header {
+  position: relative;
+  width: 210mm;
+  height: 60mm;
+  font-family: 'Times New Roman', Times, serif;
+  color: #000;
+  box-sizing: border-box;
+}
+
+.ms-header__gmc {
+  position: absolute;
+  left: 19.9mm; top: 5.9mm;
+  width: 27.3mm; height: 27.3mm;
+}
+.ms-header__emblem {
+  position: absolute;
+  left: 95.9mm; top: 3.1mm;
+  width: 18.3mm; height: 30mm;
+}
+.ms-header__swachh {
+  position: absolute;
+  left: 153.2mm; top: 12.5mm;
+  width: 33.9mm; height: 18.5mm;
+}
+
+.ms-header__title {
+  position: absolute;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+  line-height: 1.1;
+  width: 100%;
+  left: 0;
+}
+.ms-header__title-1 { top: 31mm;   font-size: 16pt; }
+.ms-header__title-2 { top: 36.5mm; font-size: 14pt; }
+.ms-header__title-3 { top: 41.4mm; font-size: 13pt; }
+
+.ms-header__contact {
+  position: absolute;
+  top: 46.9mm; left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 11pt;
+  margin: 0;
+}
+.ms-header__contact a {
+  color: #0033cc;
+  text-decoration: underline;
+}
+.ms-header__contact .gap {
+  display: inline-block;
+  width: 14px;
+}
+
+.ms-header__divider {
+  position: absolute;
+  top: 54.1mm; left: 10.4mm;
+  width: 189.7mm;
+  border: none;
+  border-top: 1.2pt solid #000;
+  margin: 0;
+}
+
+
+/* ===========================================================================
+   FORMAT 2 — MS REPORT BODY (generic content area below header)
+   =========================================================================== */
+.ms-body {
+  padding: 0 15mm 20mm 15mm;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #000;
+}
+.ms-body p { margin: 4mm 0; }
+
+
+/* ===========================================================================
+   FORMAT 3 — MS LETTER BODY (formal letter layout)
+   =========================================================================== */
+.ms-letter-body {
+  padding: 0 18mm 18mm 18mm;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 12pt;
+  color: #000;
+  line-height: 1.5;
+}
+
+.ms-to {
+  margin-top: 4mm;
+  margin-bottom: 4mm;
+}
+.ms-to__line { display: block; }
+
+.ms-refrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 3mm 0;
+  font-size: 12pt;
+}
+.ms-refrow__no, .ms-refrow__date { white-space: nowrap; }
+
+.ms-subject {
+  margin: 2mm 0 4mm 0;
+  font-weight: bold;
+}
+.ms-subject__label { display: inline-block; min-width: 22mm; }
+
+.ms-body-text {
+  text-align: justify;
+  margin: 3mm 0;
+  text-indent: 8mm;
+}
+
+.ms-signature {
+  margin-top: 15mm;
+  text-align: right;
+  line-height: 1.3;
+}
+.ms-signature__name,
+.ms-signature__role,
+.ms-signature__org {
+  font-weight: bold;
+  font-size: 12pt;
+  margin: 0;
+}
+
+.ms-footer {
+  margin-top: 10mm;
+  font-size: 12pt;
+}
+.ms-encl { margin: 2mm 0; }
+.ms-encl__label { font-weight: bold; }
+
+.ms-copy { margin: 2mm 0; }
+.ms-copy__label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 1mm;
+}
+.ms-copy__list {
+  padding-left: 10mm;
+  margin: 0;
+  list-style: decimal;
+}
+.ms-copy__list li { margin: 1mm 0; }
+
+
+/* ===========================================================================
+   EDITABLE FIELD HIGHLIGHT (letter mode)
+   =========================================================================== */
+.ms-letter-body [contenteditable="true"] {
+  background: #fffbe6;
+  padding: 0 4px;
+  border-radius: 3px;
+  outline: 1px dashed #d4a017;
+  cursor: text;
+  min-width: 20px;
+  transition: background 0.15s;
+}
+.ms-letter-body [contenteditable="true"]:hover { background: #fff3a3; }
+.ms-letter-body [contenteditable="true"]:focus {
+  background: #fff;
+  outline: 2px solid #0d3b66;
+}
+
+
+/* ===========================================================================
+   COPY-TO add/remove controls (letter only)
+   =========================================================================== */
+.ms-copy__controls {
+  margin-top: 2mm;
+  display: flex;
+  gap: 6px;
+}
+.ms-copy__btn {
+  background: #e0e7ee;
+  color: #0d3b66;
+  border: 1px solid #94a3b8;
+  padding: 4px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.ms-copy__btn:hover { background: #cbd5e1; }
+.ms-copy__remove {
+  background: #fee;
+  color: #c00;
+  border: 1px solid #fcc;
+  padding: 2px 8px;
+  font-size: 11px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-left: 6px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.ms-copy__remove:hover { background: #fdd; }
+
+
+/* ===========================================================================
+   PRINT RULES — apply when any of the 3 formats is on the page
+   Each format keeps its own page size.
+   =========================================================================== */
+@media print {
+  body {
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* hide any editor outlines globally on print */
+  [contenteditable="true"] {
+    background: transparent !important;
+    outline: none !important;
+    padding: 0 !important;
+  }
+  .abpmjay-report-title[contenteditable="true"] {
+    background: #000 !important;
+    outline: none !important;
+  }
+  /* MS page (portrait by default) */
+  .ms-page {
+    box-shadow: none !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+  }
+  /* MS page (landscape override) */
+  .ms-page--landscape {
+    width: 297mm !important;
+    min-height: 210mm !important;
+  }
+  .ms-header__gmc,
+  .ms-header__emblem,
+  .ms-header__swachh {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+  /* letter-only controls hidden in print */
+  .ms-copy__controls,
+  .ms-copy__remove { display: none !important; }
+}
+
+/* AB PM-JAY uses LANDSCAPE; this @page rule applies to the document.
+   Pages that include the ab-pmjay header should call gmcSetPage('landscape')
+   from headers.js, or set this directly. We provide a body-class hook: */
+body.abpmjay-print-landscape @page,
+body.abpmjay-print-landscape {
+  /* Note: @page cannot be nested; the actual rule must be set per-page.
+     headers.js injects the correct @page rule when needed. */
+}
