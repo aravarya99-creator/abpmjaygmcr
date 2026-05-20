@@ -269,6 +269,16 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .btn-pri{background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff}
 .btn-sec{background:#F0F4FF;color:#1A3DB5;border:1.5px solid rgba(26,61,181,0.2)}
 .wtag{background:#E8EFFF;color:#1A3DB5;font-size:10px;padding:2px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;margin:2px;font-weight:600}
+/* iOS-style toggle */
+.ios-toggle{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.3px}
+.ios-toggle .ios-label{transition:opacity 0.2s;cursor:pointer;user-select:none}
+.ios-toggle .ios-label.off{opacity:0.4}
+.ios-switch{position:relative;display:inline-block;width:50px;height:26px;flex-shrink:0}
+.ios-switch input{opacity:0;width:0;height:0}
+.ios-switch .ios-slider{position:absolute;cursor:pointer;inset:0;background:#cbd5e1;transition:0.25s;border-radius:50px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.1)}
+.ios-switch .ios-slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;transition:0.25s;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
+.ios-switch input:checked + .ios-slider{background:linear-gradient(135deg,#1A3DB5,#2952D9)}
+.ios-switch input:checked + .ios-slider:before{transform:translateX(24px)}
 .sec-lbl{font-size:10px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .sec-lbl::before{content:"";width:4px;height:12px;background:#1A3DB5;border-radius:2px;display:inline-block}
 .sec-lbl::after{content:"";flex:1;height:1px;background:rgba(26,61,181,0.15)}
@@ -539,10 +549,6 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
                 <button class="fr-ward-btn" onclick="addWard()">+ Add</button>
               </div>
             </div>
-            <div class="fr-ward-status" id="wardStatusPill">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="#CE93D8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-              <span id="wardStatusText">No Ward Selected</span>
-            </div>
           </div>
           <div class="fr-ward-row" id="wardTags"></div>
         </div>
@@ -552,24 +558,25 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <div class="fr-fields-row" style="flex-wrap:nowrap">
             <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eIPD">
               <label>Ward IPD</label>
-              <input type="number" id="eIPD" placeholder="Ward IPD" min="0">
+              <input type="number" id="eIPD" placeholder="0-30" min="0" max="30" oninput="capInput(this,30)">
             </div>
             <div class="fr-field" style="flex:1;min-width:95px" id="wrap-eMed">
               <label>Conservative</label>
-              <input type="number" id="eMed" placeholder="Conservative" min="0" oninput="autoReg()">
+              <input type="number" id="eMed" placeholder="0-30" min="0" max="30" oninput="capInput(this,30);autoReg()">
             </div>
             <div class="fr-field" style="flex:1;min-width:85px" id="wrap-eSurg">
               <label>Surgery Cases</label>
-              <input type="number" id="eSurg" placeholder="Surgery" min="0" oninput="autoReg()">
+              <input type="number" id="eSurg" placeholder="0-30" min="0" max="30" oninput="capInput(this,30);autoReg()">
             </div>
             <div class="fr-field" style="flex:1;min-width:80px;position:relative" id="wrap-eReg">
               <label>Register</label>
               <input type="number" id="eReg" placeholder="Auto" readonly>
               <span class="fr-auto-tag">AUTO</span>
             </div>
-            <div class="fr-field" style="flex:1;min-width:95px" id="wrap-ePre">
+            <div class="fr-field" style="flex:1;min-width:95px;position:relative" id="wrap-ePre">
               <label>Preauth Init</label>
-              <input type="number" id="ePre" placeholder="Preauth No." min="0">
+              <input type="number" id="ePre" placeholder="Auto" readonly>
+              <span class="fr-auto-tag">AUTO</span>
             </div>
             <div class="fr-field" style="flex:1;min-width:105px" id="wrap-ePreAmt">
               <label>Preauth Amt (₹)</label>
@@ -580,7 +587,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             </div>
             <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eDis">
               <label>Discharge</label>
-              <input type="number" id="eDis" placeholder="Discharge" min="0">
+              <input type="number" id="eDis" placeholder="0-30" min="0" max="30" oninput="capInput(this,30)">
             </div>
             <div class="fr-field" style="flex:1;min-width:105px" id="wrap-eClm">
               <label>Claim Amt (₹)</label>
@@ -620,7 +627,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <span id="recCount" style="background:rgba(26,61,181,0.1);color:#1A3DB5;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700"></span>
         </div>
         <!-- FILTERS -->
-        <div class="frow" style="margin-bottom:14px">
+        <div class="frow" style="margin-bottom:14px;align-items:flex-end">
           <div class="fld"><label>From Date</label><input type="date" id="recFrom" style="width:150px"></div>
           <div class="fld"><label>To Date</label><input type="date" id="recTo" style="width:150px"></div>
           <div class="fld"><label>Ward</label>
@@ -633,6 +640,17 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
               <option>Optha</option><option>Onco</option><option>Gynae</option>
               <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
             </select>
+          </div>
+          <div class="fld" style="align-self:center;padding-bottom:4px">
+            <label style="visibility:hidden">View</label>
+            <div class="ios-toggle" title="Toggle between per-entry and day-cumulative view">
+              <span class="ios-label" id="recModeLabelEntry">Per-Entry</span>
+              <label class="ios-switch">
+                <input type="checkbox" id="recModeToggle" onchange="recToggleDayMode()">
+                <span class="ios-slider"></span>
+              </label>
+              <span class="ios-label off" id="recModeLabelDay">Day-Cumulative</span>
+            </div>
           </div>
           <button class="btn btn-pri" style="margin-top:18px" onclick="filterRecords()">Filter</button>
           <button class="btn btn-sec" style="margin-top:18px" onclick="clearRecordsFilter()">Clear</button>
@@ -932,7 +950,10 @@ function goSec(id, el) {
   if (sec) sec.classList.add('active');
   document.querySelectorAll('.sbi').forEach(function(s) { s.classList.remove('active'); });
   if (el) el.classList.add('active');
-  if (id === 'myRecords') renderRecords(allEntries);
+  if (id === 'myRecords') {
+    _recApplyCurrentMonthDefault();
+    filterRecords();
+  }
   if (id === 'dashboard') updateDashboard();
 }
 function toggleDD() {
@@ -1114,8 +1135,28 @@ function autoReg() {
   var surgInput = document.getElementById('eSurg');
   var m = (medInput  && !medInput.disabled)  ? (parseInt(medInput.value)  || 0) : 0;
   var s = (surgInput && !surgInput.disabled) ? (parseInt(surgInput.value) || 0) : 0;
+  var sum = m + s;
   var regEl = document.getElementById('eReg');
-  if (regEl) regEl.value = (m + s) || '';
+  if (regEl) regEl.value = sum || '';
+  // Preauth Init = Register (same as conservative + surgery)
+  var preEl = document.getElementById('ePre');
+  if (preEl) preEl.value = sum || '';
+}
+
+// Cap any numeric input at max value and 2 digits. Called on every input event.
+function capInput(el, maxVal) {
+  if (!el) return;
+  var v = el.value;
+  if (v === '' || v === '-') return;
+  // Strip non-digits (keeps it integer-only)
+  v = v.replace(/[^0-9]/g, '');
+  // Trim to 2 chars max
+  if (v.length > 2) v = v.slice(0, 2);
+  var n = parseInt(v, 10);
+  if (!isNaN(n) && n > maxVal) {
+    v = String(maxVal);
+  }
+  if (el.value !== v) el.value = v;
 }
 function clearForm() {
   ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].forEach(function(id) {
@@ -1262,6 +1303,20 @@ function updateDashboard() {
 // ══════════════════════════════════════
 // MY RECORDS
 // ══════════════════════════════════════
+// State: when true, group entries by date (one row per date, cumulative)
+var _recDayMode = false;
+
+function recToggleDayMode(){
+  var t = document.getElementById('recModeToggle');
+  if(!t) return;
+  _recDayMode = t.checked;
+  var labelEntry = document.getElementById('recModeLabelEntry');
+  var labelDay = document.getElementById('recModeLabelDay');
+  if(labelEntry) labelEntry.classList.toggle('off', _recDayMode);
+  if(labelDay) labelDay.classList.toggle('off', !_recDayMode);
+  filterRecords();
+}
+
 function filterRecords() {
   var from = document.getElementById('recFrom').value;
   var to   = document.getElementById('recTo').value;
@@ -1272,13 +1327,40 @@ function filterRecords() {
     if (ward && !e.wards.includes(ward)) return false;
     return true;
   });
-  renderRecords(filtered);
+  // Sort by date DESCENDING (newest first)
+  filtered.sort(function(a,b){
+    if(a.date > b.date) return -1;
+    if(a.date < b.date) return  1;
+    return (b.timestamp||0) - (a.timestamp||0); // tie-break: latest submission first
+  });
+  if(_recDayMode){
+    renderRecordsDayCumulative(filtered);
+  } else {
+    renderRecords(filtered);
+  }
 }
 function clearRecordsFilter() {
   ['recFrom','recTo'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('recWard').value = '';
-  renderRecords(allEntries);
+  _recApplyCurrentMonthDefault();
+  filterRecords();
 }
+
+// On open, default filters to the CURRENT month's window (1st → today)
+function _recApplyCurrentMonthDefault(){
+  var fromEl = document.getElementById('recFrom');
+  var toEl = document.getElementById('recTo');
+  if(!fromEl || !toEl) return;
+  // Only auto-set if both empty (don't override user's existing choice)
+  if(fromEl.value || toEl.value) return;
+  var now = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  var y = now.getFullYear();
+  var m = pad(now.getMonth()+1);
+  fromEl.value = y + '-' + m + '-01';
+  toEl.value   = y + '-' + m + '-' + pad(now.getDate());
+}
+
 function renderRecords(data) {
   var tb = document.getElementById('recTbody');
   document.getElementById('recCount').textContent = data.length ? data.length + ' entries' : '';
@@ -1302,6 +1384,56 @@ function renderRecords(data) {
       + '<td>' + e.dis + '</td><td>' + e.clm.toLocaleString('en-IN') + '</td>'
       + '<td style="font-weight:700;color:' + (parseFloat(e.conv)>=60?'#166534':'#92400e') + '">' + e.conv + '</td>'
       + '<td><button onclick="deleteRecord(\'' + (e.id||'') + '\')" style="background:#FEE2E2;color:#dc2626;border:none;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer">Del</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+// Day-cumulative view: one row per date, all wards summed
+function renderRecordsDayCumulative(data) {
+  var tb = document.getElementById('recTbody');
+  // Group by date
+  var byDate = {};
+  data.forEach(function(e){
+    if(!byDate[e.date]){
+      byDate[e.date] = { date:e.date, wards:new Set(), ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0, count:0 };
+    }
+    var d = byDate[e.date];
+    (e.wards||[]).forEach(function(w){ d.wards.add(w); });
+    d.ipd+=Number(e.ipd||0); d.med+=Number(e.med||0); d.surg+=Number(e.surg||0);
+    d.reg+=Number(e.reg||0); d.pre+=Number(e.pre||0); d.preAmt+=Number(e.preAmt||0);
+    d.dis+=Number(e.dis||0); d.clm+=Number(e.clm||0); d.count++;
+  });
+  // Sort dates desc
+  var dates = Object.values(byDate).sort(function(a,b){
+    if(a.date > b.date) return -1;
+    if(a.date < b.date) return  1;
+    return 0;
+  });
+  document.getElementById('recCount').textContent = dates.length ? dates.length + ' days (' + data.length + ' entries)' : '';
+  var tIPD=0, tReg=0, tPre=0, tDis=0, tClm=0;
+  dates.forEach(function(d){ tIPD+=d.ipd; tReg+=d.reg; tPre+=d.pre; tDis+=d.dis; tClm+=d.clm; });
+  var setEl = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
+  setEl('rec-s-ipd',  tIPD||'—');
+  setEl('rec-s-reg',  tReg||'—');
+  setEl('rec-s-pre',  tPre||'—');
+  setEl('rec-s-dis',  tDis||'—');
+  setEl('rec-s-clm',  tClm ? '₹'+(tClm/100000).toFixed(1)+'L' : '—');
+  setEl('rec-s-conv', tIPD>0 ? ((tReg/tIPD)*100).toFixed(1)+'%' : '—');
+  if (!dates.length) { tb.innerHTML='<tr><td colspan="12" class="empty-td">No records found</td></tr>'; return; }
+  tb.innerHTML = dates.map(function(d){
+    var conv = d.ipd > 0 ? ((d.reg/d.ipd)*100).toFixed(1)+'%' : '—';
+    var convColor = parseFloat(conv) >= 60 ? '#166534' : '#92400e';
+    var wardsHtml = Array.from(d.wards).map(function(w){return '<span class="wtag">'+w+'</span>';}).join('');
+    var multi = d.count > 1 ? ' <span style="display:inline-block;background:#dbeafe;color:#1e40af;border-radius:10px;padding:1px 7px;font-size:9px;font-weight:700;margin-left:4px">'+d.count+' wards</span>' : '';
+    return '<tr>'
+      + '<td style="font-weight:600;white-space:nowrap">' + d.date + multi + '</td>'
+      + '<td>' + wardsHtml + '</td>'
+      + '<td><strong>' + d.ipd + '</strong></td><td>' + d.med + '</td><td>' + d.surg + '</td>'
+      + '<td><strong>' + d.reg + '</strong></td><td>' + d.pre + '</td>'
+      + '<td>' + d.preAmt.toLocaleString('en-IN') + '</td>'
+      + '<td>' + d.dis + '</td><td>' + d.clm.toLocaleString('en-IN') + '</td>'
+      + '<td style="font-weight:700;color:' + convColor + '">' + conv + '</td>'
+      + '<td style="font-size:10px;color:#9ca3af;text-align:center">—</td>'
       + '</tr>';
   }).join('');
 }
@@ -1810,7 +1942,7 @@ function fetchPmamReports() {
       updateDashboard();
       if (document.getElementById('sec-myRecords') &&
           document.getElementById('sec-myRecords').classList.contains('active')) {
-        renderRecords(allEntries);
+        filterRecords();
       }
     }, function(err) {
       console.error('Error loading daily reports:', err);
