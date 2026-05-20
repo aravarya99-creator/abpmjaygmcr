@@ -593,6 +593,38 @@ tr:hover td{background:#EEF3FF}
           <div id="wmSaveMsg" style="font-size:11.5px;font-weight:600;margin-top:12px;min-height:16px"></div>
         </div>
 
+        <!-- ── FIELD LIMITS — controls PMAM portal numeric validation ── -->
+        <div class="card">
+          <div class="card-hd">
+            <span style="display:flex;align-items:center;gap:6px">📏 Field Limits — Daily Report Validation</span>
+          </div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:11.5px;color:#1e3a8a;line-height:1.7">
+            Controls the validation rules in the PMAM portal's Fill Report form. Changes take effect immediately on all PMAMs (live sync via Firestore). Saved to <code>settings/field_limits</code>.
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+            <div>
+              <label style="font-size:10.5px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:5px">Max Value (Hard Cap)</label>
+              <input type="number" id="flMaxValue" min="1" max="200" placeholder="30" style="width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;outline:none">
+              <div style="font-size:10px;color:#6b7280;margin-top:4px">PMAM cannot enter values above this for <strong>Ward IPD, Conservative, Surgery, Discharge</strong>. Recommended: <strong>30</strong></div>
+            </div>
+            <div>
+              <label style="font-size:10.5px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:5px">Warning Threshold</label>
+              <input type="number" id="flWarnThreshold" min="1" max="200" placeholder="20" style="width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;outline:none">
+              <div style="font-size:10px;color:#6b7280;margin-top:4px">Values above this show a "kindly check" warning (but are still accepted up to Max). Recommended: <strong>20</strong></div>
+            </div>
+            <div>
+              <label style="font-size:10.5px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:5px">Amount Max Digits</label>
+              <input type="number" id="flAmountMaxDigits" min="3" max="10" placeholder="6" style="width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;outline:none">
+              <div style="font-size:10px;color:#6b7280;margin-top:4px">Cap currency fields (<strong>Preauth Amt, Claim Amt</strong>) to this many digits. <strong>6</strong> = ₹999,999 max. <strong>7</strong> = ₹99,99,999 max.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-pri" onclick="flSave()">💾 Save Limits</button>
+            <button class="btn" onclick="flReset()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">↺ Reset to Defaults (30/20/6)</button>
+            <span id="flSaveMsg" style="font-size:11.5px;font-weight:600;align-self:center"></span>
+          </div>
+        </div>
+
         <!-- Edit modal -->
         <div id="wmEditModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:9100;align-items:center;justify-content:center;padding:20px">
           <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.3)">
@@ -2677,6 +2709,85 @@ function wmSaveEdit(){
   wmRender();
   wmSetStatus('● Unsaved changes', '#dc2626');
 }
+
+// ── FIELD LIMITS — Admin controls for PMAM portal numeric validation ──
+function _flLoad(){
+  if (typeof db === 'undefined') return;
+  db.collection('settings').doc('field_limits').get().then(function(snap){
+    var d = (snap.exists ? snap.data() : null) || {};
+    var setVal = function(id, v){ var el = document.getElementById(id); if (el && v != null) el.value = v; };
+    setVal('flMaxValue',        d.maxValue        != null ? d.maxValue        : 30);
+    setVal('flWarnThreshold',   d.warnThreshold   != null ? d.warnThreshold   : 20);
+    setVal('flAmountMaxDigits', d.amountMaxDigits != null ? d.amountMaxDigits : 6);
+  }).catch(function(err){
+    console.warn('field_limits load failed:', err);
+    var setVal = function(id, v){ var el = document.getElementById(id); if (el) el.value = v; };
+    setVal('flMaxValue', 30); setVal('flWarnThreshold', 20); setVal('flAmountMaxDigits', 6);
+  });
+}
+
+function flSave(){
+  var msg = document.getElementById('flSaveMsg');
+  var maxVal = parseInt(document.getElementById('flMaxValue').value, 10);
+  var warn   = parseInt(document.getElementById('flWarnThreshold').value, 10);
+  var digits = parseInt(document.getElementById('flAmountMaxDigits').value, 10);
+
+  // Validation
+  if (isNaN(maxVal) || maxVal < 1 || maxVal > 200){
+    msg.style.color = '#dc2626';
+    msg.textContent = '✗ Max Value must be between 1 and 200.';
+    return;
+  }
+  if (isNaN(warn) || warn < 1 || warn > 200){
+    msg.style.color = '#dc2626';
+    msg.textContent = '✗ Warning Threshold must be between 1 and 200.';
+    return;
+  }
+  if (warn >= maxVal){
+    msg.style.color = '#dc2626';
+    msg.textContent = '✗ Warning Threshold must be LESS than Max Value.';
+    return;
+  }
+  if (isNaN(digits) || digits < 3 || digits > 10){
+    msg.style.color = '#dc2626';
+    msg.textContent = '✗ Amount Max Digits must be between 3 and 10.';
+    return;
+  }
+
+  msg.style.color = '#6b7280';
+  msg.textContent = 'Saving…';
+  db.collection('settings').doc('field_limits').set({
+    maxValue: maxVal,
+    warnThreshold: warn,
+    amountMaxDigits: digits,
+    updatedAt: new Date().toISOString()
+  }, { merge: true }).then(function(){
+    msg.style.color = '#16a34a';
+    msg.textContent = '✓ Saved. PMAMs will see updated limits on their next form interaction.';
+    setTimeout(function(){ if(msg.textContent.indexOf('Saved')!==-1) msg.textContent = ''; }, 4000);
+  }).catch(function(err){
+    msg.style.color = '#dc2626';
+    msg.textContent = '✗ Save failed: ' + err.message;
+  });
+}
+
+function flReset(){
+  if (!confirm('Reset limits to factory defaults (Max=30, Warn=20, Digits=6)?')) return;
+  document.getElementById('flMaxValue').value = 30;
+  document.getElementById('flWarnThreshold').value = 20;
+  document.getElementById('flAmountMaxDigits').value = 6;
+  flSave();
+}
+
+// Load field limits on tab open
+(function bindFlLoader(){
+  function tryLoad(){
+    if (typeof db === 'undefined'){ setTimeout(tryLoad, 300); return; }
+    _flLoad();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryLoad);
+  else tryLoad();
+})();
 
 function wmAddWard(){
   var newWard = {

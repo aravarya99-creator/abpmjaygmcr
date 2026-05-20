@@ -570,19 +570,19 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             </div>
             <div class="fr-field" style="flex:1;min-width:80px;position:relative" id="wrap-eReg">
               <label>Register</label>
-              <input type="number" id="eReg" placeholder="Auto" readonly>
+              <input type="number" id="eReg" placeholder="" readonly>
               <span class="fr-auto-tag">AUTO</span>
             </div>
             <div class="fr-field" style="flex:1;min-width:95px;position:relative" id="wrap-ePre">
               <label>Preauth Init</label>
-              <input type="number" id="ePre" placeholder="Auto" readonly>
+              <input type="number" id="ePre" placeholder="" readonly>
               <span class="fr-auto-tag">AUTO</span>
             </div>
             <div class="fr-field" style="flex:1;min-width:105px" id="wrap-ePreAmt">
               <label>Preauth Amt (₹)</label>
               <div class="fr-rupee-wrap" onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'" onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
                 <span class="fr-rupee-sym">₹</span>
-                <input type="number" id="ePreAmt" placeholder="Amount" min="0" class="fr-rupee-input">
+                <input type="number" id="ePreAmt" placeholder="Amount" min="0" class="fr-rupee-input" oninput="capAmount(this,'Preauth Amt')">
               </div>
             </div>
             <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eDis">
@@ -593,7 +593,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
               <label>Claim Amt (₹)</label>
               <div class="fr-rupee-wrap" onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'" onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
                 <span class="fr-rupee-sym">₹</span>
-                <input type="number" id="eClm" placeholder="Amount" min="0" class="fr-rupee-input">
+                <input type="number" id="eClm" placeholder="Amount" min="0" class="fr-rupee-input" oninput="capAmount(this,'Claim Amt')">
               </div>
             </div>
           </div>
@@ -1161,21 +1161,47 @@ function autoReg() {
   if (preEl) preEl.value = sum || '';
 }
 
-// Warn user when value > 20 (so they can verify) and HARD-CAP at maxVal (30).
+// ──────────────────────────────────────────────────────────────────────
+// FIELD LIMITS — read from Firestore at settings/field_limits, with safe
+// defaults. Admin can change these from the admin portal anytime.
+// ──────────────────────────────────────────────────────────────────────
+var FIELD_LIMITS = {
+  maxValue:        30,       // hard cap for IPD/Conserv/Surgery/Discharge
+  warnThreshold:   20,       // values above this trigger warning
+  amountMaxDigits: 6         // currency fields capped at 999999 (6 digits)
+};
+
+function _loadFieldLimits(){
+  if (typeof db === 'undefined') return;
+  db.collection('settings').doc('field_limits').onSnapshot(function(snap){
+    if (!snap.exists) return;
+    var d = snap.data() || {};
+    if (typeof d.maxValue === 'number' && d.maxValue > 0)             FIELD_LIMITS.maxValue = d.maxValue;
+    if (typeof d.warnThreshold === 'number' && d.warnThreshold > 0)   FIELD_LIMITS.warnThreshold = d.warnThreshold;
+    if (typeof d.amountMaxDigits === 'number' && d.amountMaxDigits > 0) FIELD_LIMITS.amountMaxDigits = d.amountMaxDigits;
+    // Update HTML `max` attribute so browser validation also reflects the new value
+    ['eIPD','eMed','eSurg','eDis'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.setAttribute('max', String(FIELD_LIMITS.maxValue));
+    });
+  }, function(err){ console.warn('field_limits load failed:', err); });
+}
+
+// Warn user when value > warnThreshold and HARD-CAP at maxValue.
 // Field-aware: shows the actual field label in the warning message.
-function warnAndCap(el, maxVal, fieldName) {
+function warnAndCap(el, _legacyMax, fieldName) {
   if (!el) return;
+  var maxVal = FIELD_LIMITS.maxValue;
+  var warnAt = FIELD_LIMITS.warnThreshold;
   var msg = document.getElementById('entryMsg');
   var v = el.value;
   if (v === '' || v === '-') {
     if (msg) msg.textContent = '';
     return;
   }
-  // Strip non-digits (integer-only)
   v = v.replace(/[^0-9]/g, '');
   var n = parseInt(v, 10);
 
-  // Hard-cap: value > maxVal not allowed
   if (!isNaN(n) && n > maxVal) {
     v = String(maxVal);
     if (msg) {
@@ -1185,8 +1211,7 @@ function warnAndCap(el, maxVal, fieldName) {
       window._warnTimer = setTimeout(function(){ if(msg.textContent.indexOf('cannot exceed')!==-1) msg.textContent = ''; }, 4000);
     }
   }
-  // Warning zone: between 21 and 30
-  else if (!isNaN(n) && n > 20) {
+  else if (!isNaN(n) && n > warnAt) {
     if (msg) {
       msg.style.color = '#92400e';
       msg.textContent = '⚠ Kindly check your ' + fieldName + ' — value ' + n + ' looks high.';
@@ -1194,7 +1219,6 @@ function warnAndCap(el, maxVal, fieldName) {
       window._warnTimer = setTimeout(function(){ if(msg.textContent.indexOf('looks high')!==-1) msg.textContent = ''; }, 5000);
     }
   }
-  // Normal range: clear any previous warning
   else if (!isNaN(n)) {
     if (msg && (msg.textContent.indexOf('looks high')!==-1 || msg.textContent.indexOf('cannot exceed')!==-1)){
       msg.textContent = '';
@@ -1203,10 +1227,34 @@ function warnAndCap(el, maxVal, fieldName) {
 
   if (el.value !== v) el.value = v;
 }
+
+// Currency cap: trim to N digits max (default 6 → 999,999)
+function capAmount(el, fieldName){
+  if (!el) return;
+  var maxDigits = FIELD_LIMITS.amountMaxDigits || 6;
+  var maxVal = Math.pow(10, maxDigits) - 1; // e.g. 6 → 999999
+  var v = el.value;
+  if (v === '' || v === '-') return;
+  v = v.replace(/[^0-9]/g, '');
+  if (v.length > maxDigits) v = v.slice(0, maxDigits);
+  var n = parseInt(v, 10);
+  if (!isNaN(n) && n > maxVal) v = String(maxVal);
+  if (el.value !== v) el.value = v;
+  // Show informative warning if value is at the cap (PMAM tried to enter more)
+  if (parseInt(el.value, 10) >= maxVal){
+    var msg = document.getElementById('entryMsg');
+    if (msg){
+      msg.style.color = '#dc2626';
+      msg.textContent = '⛔ ' + fieldName + ' cannot exceed ₹' + maxVal.toLocaleString('en-IN') + ' (' + maxDigits + ' digits). Please verify.';
+      clearTimeout(window._warnTimer);
+      window._warnTimer = setTimeout(function(){ if(msg.textContent.indexOf('digits')!==-1) msg.textContent = ''; }, 5000);
+    }
+  }
+}
 function clearForm() {
   ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].forEach(function(id) {
     var el = document.getElementById(id);
-    if (el) { el.value = ''; el.disabled = false; el.placeholder = id === 'eReg' ? '0' : 'Enter number'; }
+    if (el) { el.value = ''; el.disabled = false; el.placeholder = (id === 'eReg' || id === 'ePre') ? '' : 'Enter number'; }
   });
   var medBox  = document.getElementById('box-eMed');
   var surgBox = document.getElementById('box-eSurg');
@@ -1275,7 +1323,7 @@ function saveEntry() {
       renderSelWards();
       ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].forEach(function(id){
         var el = document.getElementById(id);
-        if (el) { el.value = ''; el.disabled = false; el.placeholder = id === 'eReg' ? '0' : 'Enter number'; }
+        if (el) { el.value = ''; el.disabled = false; el.placeholder = (id === 'eReg' || id === 'ePre') ? '' : 'Enter number'; }
       });
       var medBox2  = document.getElementById('box-eMed');
       var surgBox2 = document.getElementById('box-eSurg');
@@ -2000,6 +2048,7 @@ function fetchPmamReports() {
 window.addEventListener('DOMContentLoaded', function() {
   fetchPmamLeaves();
   fetchPmamReports();
+  _loadFieldLimits();
   var ustr = sessionStorage.getItem('pmjay_user');
   if (ustr) {
     try {
@@ -2157,8 +2206,8 @@ window.addEventListener('DOMContentLoaded', function(){
 .fr-field input[readonly]{background:#F3E5F5;color:#4A148C;border-color:#AB47BC;font-weight:700;cursor:default}
 .fr-auto-tag{position:absolute;right:8px;top:50%;transform:translateY(4px);font-size:8px;background:#AB47BC;color:#fff;padding:1px 5px;border-radius:4px;font-weight:700;pointer-events:none}
 .fr-ward-row{display:flex;flex-wrap:wrap;gap:5px;min-height:24px;align-items:center;padding:6px 0}
-.fr-wtag{background:#EDE7F6;color:#4A148C;font-size:14px;padding:6px 14px;border-radius:18px;display:inline-flex;align-items:center;gap:6px;font-weight:600;border:1.5px solid #CE93D8;line-height:1.2}
-.fr-wtag span.fr-wtag-x{cursor:pointer;font-weight:800;color:#7B1FA2;margin-left:4px;font-size:16px;line-height:1}
+.fr-wtag{background:#DCFCE7;color:#166534;font-size:14px;padding:6px 14px;border-radius:18px;display:inline-flex;align-items:center;gap:6px;font-weight:600;border:1.5px solid #86EFAC;line-height:1.2}
+.fr-wtag span.fr-wtag-x{cursor:pointer;font-weight:800;color:#166534;margin-left:4px;font-size:16px;line-height:1}
 .fr-wtag span.fr-wtag-x:hover{color:#dc2626}
 .fr-ward-inline{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
 .fr-ward-status{display:inline-flex;align-items:center;padding:5px 16px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid #CE93D8;background:#F3E5F5;color:#5B2D8E;white-space:nowrap;gap:6px;align-self:flex-end;height:38px}
@@ -2394,7 +2443,7 @@ function submitDispute(idx){
         if (typeof renderSelWards === 'function') renderSelWards();
         ['eIPD','eMed','eSurg','eReg','ePre','ePreAmt','eDis','eClm'].forEach(function(id){
           var el = document.getElementById(id);
-          if (el) { el.value = ''; el.disabled = false; el.placeholder = id === 'eReg' ? '0' : 'Enter number'; }
+          if (el) { el.value = ''; el.disabled = false; el.placeholder = (id === 'eReg' || id === 'ePre') ? '' : 'Enter number'; }
         });
         var mc = document.getElementById('box-eMed');
         var sc = document.getElementById('box-eSurg');
