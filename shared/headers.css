@@ -110,7 +110,8 @@
 
 /* --- AB PM-JAY: PORTRAIT variant ---
    Used when GMCHeaders.abpmjayReport({ orientation: 'portrait' }) is called.
-   Shrinks logos, reduces title sizes, allows long titles to wrap to 2 lines. */
+   Shrinks logos and title font sizes to fit A4 portrait width (~170mm content).
+   white-space: nowrap is preserved so titles never wrap mid-text. */
 .abpmjay-wrap--portrait .abpmjay-banner {
   grid-template-columns: 70px 1fr 70px;
   column-gap: 12px;
@@ -121,9 +122,9 @@
   width: 70px;
   height: 70px;
 }
-.abpmjay-wrap--portrait .abpmjay-banner__title-1a { font-size: 16pt; white-space: normal; }
-.abpmjay-wrap--portrait .abpmjay-banner__title-1b { font-size: 14pt; white-space: normal; }
-.abpmjay-wrap--portrait .abpmjay-banner__title-2  { font-size: 10.5pt; white-space: normal; line-height: 1.2; }
+.abpmjay-wrap--portrait .abpmjay-banner__title-1a { font-size: 15pt; }
+.abpmjay-wrap--portrait .abpmjay-banner__title-1b { font-size: 13pt; }
+.abpmjay-wrap--portrait .abpmjay-banner__title-2  { font-size: 9.5pt; letter-spacing: 0.2px; }
 .abpmjay-wrap--portrait .abpmjay-report-title {
   padding: 5px 24px;
   font-size: 12pt;
