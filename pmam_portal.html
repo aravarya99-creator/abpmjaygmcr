@@ -1806,13 +1806,12 @@ function printLeaveForm() {
   var today = new Date();
   var todayStr = today.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
 
-  // Letterhead now built by GMCHeaders.msReport() from shared/headers.js
+  // Letterhead now built by GMCHeaders.abpmjayReport() from shared/headers.js
   var FORM_TITLE = 'LEAVE APPLICATION FORM';
 
-  // Build the body content (everything that goes inside the GMC letterhead)
+  // Build the body content (everything that goes below the AB PM-JAY letterhead)
+  // Note: the title is rendered by abpmjayReport() itself, so we skip form-title-bar here.
   var bodyHTML = ''
-    + '<div class="form-title-bar">' + FORM_TITLE + '</div>'
-
     /* ── DATE ── */
     + '<div class="date-row"><strong>Date:</strong> ' + todayStr + '</div>'
 
@@ -1851,9 +1850,27 @@ function printLeaveForm() {
     + '<span class="footer-brand">Computer generated leave application. | PMAM Reporting Portal @ MIS AB-PMJAY GMCR</span>'
     + '</div>';
 
-  // Wrap in the shared MS-Report letterhead (GMC Rajouri header strip on top).
-  // GMCHeaders.msReport() returns <div class="ms-page">...header...<div class="ms-body">bodyHTML</div></div>
-  var pageContent = GMCHeaders.msReport({ bodyHTML: bodyHTML, orientation: 'portrait' });
+  // Build header using AB PM-JAY report format (with title injected)
+  // abpmjayReport() returns just the header banner; body content goes after it.
+  // Safety guard: if shared/headers.js failed to load, fall back to bare body
+  // with a visible warning, so the print never silently hangs.
+  var pageContent;
+  if (typeof GMCHeaders !== 'undefined' && GMCHeaders && typeof GMCHeaders.abpmjayReport === 'function') {
+    try {
+      var headerHTML = GMCHeaders.abpmjayReport({
+        title: FORM_TITLE,
+        editable: false,
+        orientation: 'portrait'
+      });
+      pageContent = '<div class="page-wrap">' + headerHTML + '<div class="page-body">' + bodyHTML + '</div></div>';
+    } catch (e) {
+      console.error('GMCHeaders.abpmjayReport threw:', e);
+      pageContent = '<div style="padding:14mm 14mm;color:#dc2626;font-weight:bold;">⚠ Letterhead failed to render: ' + e.message + '</div>' + '<div style="padding:0 14mm 14mm;">' + bodyHTML + '</div>';
+    }
+  } else {
+    console.error('GMCHeaders not loaded — check shared/headers.js path');
+    pageContent = '<div style="padding:14mm 14mm;color:#dc2626;font-weight:bold;">⚠ Shared letterhead (GMCHeaders) not loaded. Check that shared/headers.js exists on the server.</div>' + '<div style="padding:0 14mm 14mm;">' + bodyHTML + '</div>';
+  }
 
   // Resolve absolute URLs for shared assets so the popup can load them
   var baseHref = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
@@ -1865,7 +1882,9 @@ function printLeaveForm() {
     + '<style>'
     + '*{box-sizing:border-box;margin:0;padding:0}'
     + 'body{font-family:"Times New Roman",Times,serif;background:#fff;font-size:11pt;color:#111}'
-    + '/* ── FORM CONTENT STYLES (inside ms-body) ── */'
+    + '.page-wrap{padding:8mm 14mm 10mm;max-width:210mm;margin:0 auto}'
+    + '.page-body{margin-top:6mm}'
+    + '/* ── FORM CONTENT STYLES ── */'
     + '.form-title-bar{background:#000;color:#fff;text-align:center;font-size:13pt;font-weight:900;letter-spacing:2px;padding:5px 0;text-transform:uppercase;border-radius:0 0 6px 6px;margin-bottom:6mm}'
     + '.date-row{text-align:right;font-size:9.5pt;margin-bottom:5mm;color:#444}'
     + 'table{width:100%;border-collapse:separate;border-spacing:0;font-size:10.5pt;border:2px solid #1a1a1a;border-radius:10px;overflow:hidden;margin-bottom:4mm}'
@@ -1891,6 +1910,10 @@ function printLeaveForm() {
     + '</body></html>';
 
   var pw = window.open('','_blank','width=900,height=700');
+  if (!pw) {
+    alert('Popup blocked! Please allow popups for this site and try again.');
+    return;
+  }
   pw.document.open();
   pw.document.write(page);
   pw.document.close();
