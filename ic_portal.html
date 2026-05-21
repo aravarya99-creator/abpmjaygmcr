@@ -1602,21 +1602,48 @@ function _doPrintReport(areaId, title, format, orientation){
     return;
   }
 
-  // Build the letterhead via the shared system
-  var headerHTML;
+  // Build the body content shared by both formats: title bar, info row, content, footer.
+  var footerHTML = ''
+    + '<div style="margin-top:30px;text-align:right;">'
+    +   '<div style="display:inline-block;border-top:1px solid #000;padding-top:6px;min-width:220px;text-align:center;">'
+    +     '<div style="font-weight:700;font-size:14px;">I/C AB-PMJAY</div>'
+    +     '<div style="font-size:11px;color:#666;">GMC &amp; AH, Rajouri</div>'
+    +   '</div>'
+    + '</div>';
+
+  // For MS format, render the title as a banner below the header.
+  // For AB PM-JAY, title is already in the letterhead.
+  var titleBlock = (fmt === 'ms')
+    ? '<div style="text-align:center;"><span class="report-title-bar">' + title + '</span></div>'
+    : '';
+
+  var commonBody = ''
+    + titleBlock
+    + '<div class="info-row">'
+    +   '<div>' + (periodText ? 'Period: ' + periodText : '') + '</div>'
+    +   '<div>Generated: ' + dateStr + '</div>'
+    + '</div>'
+    + contentHTML
+    + footerHTML
+    + '<div class="footer-note">This is a computer-generated report<br><b>MIS AB-PMJAY \u2014 GMC &amp; AH Rajouri</b></div>';
+
+  // Build the page HTML via the shared letterhead system.
+  // - abpmjayReport returns just a header banner; body content follows as siblings.
+  // - msReport wraps everything inside .ms-page > .ms-header + .ms-body (positioned page).
+  var pageContent;
   try {
     if (fmt === 'ms') {
-      // MS Report: the body HTML wraps inside ms-body. We'll just use the header strip
-      // and put title + body separately so it matches the AB PM-JAY layout pattern.
-      headerHTML = GMCHeaders.msReport({ bodyHTML: '', orientation: orient });
-      // strip the trailing empty body wrapper so we can add our own structured content
-      headerHTML = headerHTML.replace(/<div class="ms-body">\s*<\/div>\s*<\/div>\s*$/, '</div>');
+      // Pass the entire body into msReport so it lands inside .ms-body
+      // (which already has correct page padding and is positioned below the header).
+      pageContent = GMCHeaders.msReport({ bodyHTML: commonBody, orientation: orient });
     } else {
-      headerHTML = GMCHeaders.abpmjayReport({
+      var headerHTML = GMCHeaders.abpmjayReport({
         title: title,
         editable: false,
         orientation: orient
       });
+      // AB PM-JAY: header on top + content below, wrapped in a print container
+      pageContent = '<div class="print-wrap">' + headerHTML + commonBody + '</div>';
     }
   } catch (e) {
     alert('Letterhead failed to render: ' + e.message);
@@ -1648,20 +1675,7 @@ function _doPrintReport(areaId, title, format, orientation){
     + '.tbl-wrap { overflow: visible; max-height: none; }'
     + '.report-title-bar { display: inline-block; border: 2px solid #1e3a5f; padding: 4px 18px; font-size: 13px; font-weight: bold; background: #d9e2ec; border-radius: 6px; color: #1e3a5f; margin: 6px 0 10px 0; }';
 
-  var footerHTML = ''
-    + '<div style="margin-top:30px;text-align:right;">'
-    +   '<div style="display:inline-block;border-top:1px solid #000;padding-top:6px;min-width:220px;text-align:center;">'
-    +     '<div style="font-weight:700;font-size:14px;">I/C AB-PMJAY</div>'
-    +     '<div style="font-size:11px;color:#666;">GMC &amp; AH, Rajouri</div>'
-    +   '</div>'
-    + '</div>';
-
-  // For MS format, render the title as a banner below the header.
-  // For AB PM-JAY, title is already in the letterhead, so just add an info row.
-  var titleBlock = (fmt === 'ms')
-    ? '<div style="text-align:center;"><span class="report-title-bar">' + title + '</span></div>'
-    : '';
-
+  // Remove old duplicate declarations and old html assembly
   var triggerScript = '<' + 'script>(function(){'
     + 'var closed=false;var printCalled=false;'
     + 'function returnAndClose(){'
@@ -1697,17 +1711,7 @@ function _doPrintReport(areaId, title, format, orientation){
     + '<script src="shared/logos.js?v=6"><\/script>'
     + '<style>' + pageCSS + '</style>'
     + '</head><body>'
-    +   '<div class="print-wrap">'
-    +     headerHTML
-    +     titleBlock
-    +     '<div class="info-row">'
-    +       '<div>' + (periodText ? 'Period: ' + periodText : '') + '</div>'
-    +       '<div>Generated: ' + dateStr + '</div>'
-    +     '</div>'
-    +     contentHTML
-    +     footerHTML
-    +     '<div class="footer-note">This is a computer-generated report<br><b>MIS AB-PMJAY \u2014 GMC &amp; AH Rajouri</b></div>'
-    +   '</div>'
+    +   pageContent
     +   triggerScript
     + '</body></html>';
 
