@@ -37,6 +37,9 @@
   height: 95px;
   object-fit: contain;
   display: block;
+  /* Blends any white/near-white PNG padding into the white banner so the
+     rectangular edge of the bitmap doesn't show. Works because banner bg is #fff. */
+  mix-blend-mode: multiply;
 }
 
 .abpmjay-banner__center {
@@ -194,16 +197,19 @@
   position: absolute;
   left: 19.9mm; top: 5.9mm;
   width: 27.3mm; height: 27.3mm;
+  mix-blend-mode: multiply;
 }
 .ms-header__emblem {
   position: absolute;
   left: 95.9mm; top: 3.1mm;
   width: 18.3mm; height: 30mm;
+  mix-blend-mode: multiply;
 }
 .ms-header__swachh {
   position: absolute;
   left: 153.2mm; top: 12.5mm;
   width: 33.9mm; height: 18.5mm;
+  mix-blend-mode: multiply;
 }
 
 .ms-header__title {
