@@ -42,6 +42,13 @@
   mix-blend-mode: multiply;
 }
 
+/* GMC logo PNG has opaque near-white strips along left/right edges that
+   show as faint vertical lines. Crop them off with clip-path. The original
+   PNG is 600×600 with actual logo content in pixels 41–573 × 28–553. */
+.abpmjay-banner__logo--gmc {
+  clip-path: inset(5% 4% 8% 7%);
+}
+
 .abpmjay-banner__center {
   text-align: center;
   line-height: 1.15;
@@ -198,6 +205,8 @@
   left: 19.9mm; top: 5.9mm;
   width: 27.3mm; height: 27.3mm;
   mix-blend-mode: multiply;
+  /* Crop opaque white strips from the source PNG (600×600, content 41–573 × 28–553) */
+  clip-path: inset(5% 4% 8% 7%);
 }
 .ms-header__emblem {
   position: absolute;
