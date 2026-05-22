@@ -622,7 +622,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <span class="fr-tbl-note">Only today's data — check Records for other dates</span>
         </div>
         <div class="tbl-wrap">
-          <table><thead><tr><th>Date</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Del</th></tr></thead>
+          <table><thead><tr><th>Date</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Action</th></tr></thead>
           <tbody id="entryTbody"><tr><td colspan="12" class="empty-td">No entries today yet</td></tr></tbody></table>
         </div>
       </div>
@@ -812,10 +812,10 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
                 <th style="background:#0F2B8C;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap;border-radius:0 8px 0 0">Leave Date Requested</th>
               </tr></thead>
               <tbody>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff">1</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd1_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="text" id="cd1_hol" placeholder="e.g. Eid" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd1_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF">2</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><input type="date" id="cd2_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><input type="text" id="cd2_hol" placeholder="e.g. Diwali" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><input type="date" id="cd2_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff">3</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd3_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="text" id="cd3_hol" placeholder="Holiday name" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd3_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;background:#F8FAFF">4</td><td style="padding:6px 8px;background:#F8FAFF"><input type="date" id="cd4_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;background:#F8FAFF"><input type="text" id="cd4_hol" placeholder="Holiday name" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;background:#F8FAFF"><input type="date" id="cd4_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
+                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff">1</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd1_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><select id="cd1_hol" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif;appearance:auto;background:#fff;cursor:pointer"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd1_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
+                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF">2</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><input type="date" id="cd2_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><select id="cd2_hol" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif;appearance:auto;background:#fff;cursor:pointer"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><input type="date" id="cd2_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
+                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff">3</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd3_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><select id="cd3_hol" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif;appearance:auto;background:#fff;cursor:pointer"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd3_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
+                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;background:#F8FAFF">4</td><td style="padding:6px 8px;background:#F8FAFF"><input type="date" id="cd4_date" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;background:#F8FAFF"><select id="cd4_hol" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif;appearance:auto;background:#fff;cursor:pointer"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px;background:#F8FAFF"><input type="date" id="cd4_req" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
               </tbody>
             </table>
           </div>
@@ -1488,7 +1488,8 @@ function renderRecords(data) {
       + '<td>' + e.preAmt.toLocaleString('en-IN') + '</td>'
       + '<td>' + e.dis + '</td><td>' + e.clm.toLocaleString('en-IN') + '</td>'
       + '<td style="font-weight:700;color:' + (parseFloat(e.conv)>=60?'#166534':'#92400e') + '">' + e.conv + '</td>'
-      + '<td><button onclick="deleteRecord(\'' + (e.id||'') + '\')" style="background:#FEE2E2;color:#dc2626;border:none;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer">Del</button></td>'
+      + '<td style="white-space:nowrap"><button onclick="editRecord(\'' + (e.id||'') + '\')" style="background:#DBEAFE;color:#1e40af;border:none;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;margin-right:4px" title="Edit this entry">Edit</button>'
+      + '<button onclick="deleteRecord(\'' + (e.id||'') + '\')" style="background:#FEE2E2;color:#dc2626;border:none;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer" title="Delete this entry">Del</button></td>'
       + '</tr>';
   }).join('');
 }
@@ -1550,6 +1551,47 @@ function deleteRecord(id) {
       // onSnapshot will auto-refresh the UI; no manual splice needed.
     })
     .catch(function(e) { alert('Error deleting: ' + e.message); });
+}
+
+// editRecord — load an existing daily_reports doc, populate Fill Report form,
+// and switch the saveEntry() handler into update mode so save overwrites the
+// same Firestore doc instead of creating a duplicate. PMAM can adjust any
+// field (date, wards, IPD, Reg, etc.) and re-save without first deleting.
+window._editingRecordId = null;
+function editRecord(id) {
+  if (!id) { alert('Cannot edit: missing record id.'); return; }
+  db.collection('daily_reports').doc(id).get().then(function(doc){
+    if (!doc.exists) { alert('Record no longer exists.'); return; }
+    var d = doc.data();
+    // Switch to Fill Report section
+    if (typeof goSec === 'function') {
+      var sbi = document.querySelector('.sbi[data-goto="fillReport"]') || null;
+      goSec('fillReport', sbi);
+    }
+    // Pre-fill form fields
+    var setVal = function(elId, v){ var el = document.getElementById(elId); if (el) el.value = (v == null ? '' : v); };
+    setVal('eDate',   d.date || '');
+    setVal('eIPD',    d.ipd || '');
+    setVal('eMed',    d.med || '');
+    setVal('eSurg',   d.surg || '');
+    setVal('eReg',    d.reg || '');
+    setVal('ePre',    d.pre || '');
+    setVal('ePreAmt', d.preAmt || '');
+    setVal('eDis',    d.dis || '');
+    setVal('eClm',    d.clm || '');
+    // Pre-fill wards
+    if (Array.isArray(d.wards)) {
+      selWards = d.wards.slice();
+      if (typeof renderSelWards === 'function') renderSelWards();
+    }
+    // Set edit mode
+    window._editingRecordId = id;
+    var msg = document.getElementById('entryMsg');
+    if (msg) { msg.style.color = '#1e40af'; msg.textContent = '✏️ Editing existing entry. Save will overwrite the original record.'; }
+    // Visually mark the Save button as "Update" mode
+    var btn = document.querySelector('.fr-btn-pri[onclick*="saveEntry"]');
+    if (btn) { btn.textContent = '💾 Update Report'; btn.style.background = '#1e40af'; }
+  }).catch(function(e){ alert('Error loading record: ' + e.message); });
 }
 
 // ══════════════════════════════════════
@@ -1726,11 +1768,12 @@ function submitLeave() {
 // ═══════════════════════════════════════════════════════════════
 // HOLIDAY CALENDAR — fetched from Firestore (same source as admin portal)
 // Path: settings/holiday_calendar → { holidays: [{date,name,type}, …] }
-// Used by leave application's Compensatory Leave Details rows to
-// auto-fill the Holiday Name once the user picks a "Date on Duty".
+// Used by leave application's Compensatory Leave Details rows:
+// the user PICKS a holiday from a dropdown, and the date auto-fills.
 // ═══════════════════════════════════════════════════════════════
 var _pmamHolidays = [];
 var _pmamHolidaysLoaded = false;
+
 function loadPmamHolidays(cb) {
   if (_pmamHolidaysLoaded) { if (cb) cb(); return; }
   if (typeof db === 'undefined') { _pmamHolidaysLoaded = true; if (cb) cb(); return; }
@@ -1739,50 +1782,86 @@ function loadPmamHolidays(cb) {
       _pmamHolidays = doc.data().holidays;
     }
     _pmamHolidaysLoaded = true;
+    console.log('[PMAM] Holiday calendar loaded:', _pmamHolidays.length, 'holidays');
+    if (_pmamHolidays.length === 0) {
+      console.warn('[PMAM] No holidays in settings/holiday_calendar. Admin must add holidays first.');
+    }
+    populateHolidayDropdowns();
     if (cb) cb();
-  }).catch(function(){ _pmamHolidaysLoaded = true; if (cb) cb(); });
+  }).catch(function(err){
+    console.error('[PMAM] Failed to load holidays:', err);
+    _pmamHolidaysLoaded = true;
+    if (cb) cb();
+  });
 }
 
-// Auto-fill the Holiday Name input for row i when its Date on Duty changes.
-// If the picked date matches a holiday in the calendar → fill name + lock field.
-// If no match → clear field and let user type manually.
-function autoFillHolidayFor(i) {
-  var dateEl = document.getElementById('cd'+i+'_date');
-  var holEl  = document.getElementById('cd'+i+'_hol');
-  if (!dateEl || !holEl) return;
-  var dateStr = dateEl.value; // YYYY-MM-DD
-  if (!dateStr) { holEl.value = ''; holEl.removeAttribute('readonly'); holEl.style.background=''; return; }
-  // Search loaded holidays
-  var match = _pmamHolidays.find(function(h){ return h.date === dateStr; });
-  if (match) {
-    holEl.value = match.name + (match.type ? ' (' + match.type + ')' : '');
-    holEl.setAttribute('readonly', 'readonly');
-    holEl.style.background = '#dcfce7'; // light green tint to show auto-filled
-    holEl.title = 'Auto-filled from Holiday Calendar';
+// Format YYYY-MM-DD → "DD MMM YYYY — Name" for readable dropdown labels
+function _formatHolidayLabel(h) {
+  var d = h.date ? new Date(h.date) : null;
+  var dateStr = '';
+  if (d && !isNaN(d.getTime())) {
+    var dd = String(d.getDate()).padStart(2,'0');
+    var mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    dateStr = dd + ' ' + mons[d.getMonth()] + ' ' + d.getFullYear();
   } else {
-    // Date isn't a known holiday — let the user type manually,
-    // but show a soft yellow hint that no calendar match was found.
-    holEl.removeAttribute('readonly');
-    holEl.style.background = '#fef3c7'; // light amber tint
-    holEl.title = 'No matching holiday in calendar — please enter name manually';
-    if (!holEl.value || holEl.dataset.lastAuto === '1') {
-      holEl.value = '';
-    }
-    holEl.dataset.lastAuto = '0';
+    dateStr = h.date || '';
+  }
+  return dateStr + ' — ' + (h.name || 'Unnamed');
+}
+
+// Build <option> list for all 4 holiday dropdowns from _pmamHolidays.
+// Sundays excluded (not normally compensable). Sorted by date ascending.
+function populateHolidayDropdowns() {
+  var sorted = _pmamHolidays.slice()
+    .filter(function(h){ return h.type !== 'Sunday'; })
+    .sort(function(a,b){
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+    });
+
+  for (var i=1; i<=4; i++) {
+    var sel = document.getElementById('cd'+i+'_hol');
+    if (!sel) continue;
+    var prev = sel.value; // preserve current selection if possible
+    var html = '<option value="">-- Select Holiday --</option>';
+    sorted.forEach(function(h){
+      // Encode date+name as JSON in value so the change handler can recover both
+      var v = JSON.stringify({date: h.date, name: h.name, type: h.type||''});
+      html += '<option value="'+v.replace(/"/g,'&quot;')+'">'+_formatHolidayLabel(h)+'</option>';
+    });
+    sel.innerHTML = html;
+    if (prev) { try { sel.value = prev; } catch(e){} }
   }
 }
 
-// Wire change listeners to all 4 Compensatory Leave date inputs on page load,
-// and pre-fetch the holiday calendar.
+// When the user picks a holiday from the dropdown, parse it and fill the date input.
+function onHolidayPicked(i) {
+  var holEl  = document.getElementById('cd'+i+'_hol');
+  var dateEl = document.getElementById('cd'+i+'_date');
+  if (!holEl || !dateEl) return;
+  if (!holEl.value) { dateEl.value = ''; dateEl.style.background=''; return; }
+  try {
+    var obj = JSON.parse(holEl.value);
+    if (obj && obj.date) {
+      dateEl.value = obj.date; // YYYY-MM-DD — matches <input type="date"> format
+      dateEl.style.background = '#dcfce7';
+      dateEl.title = 'Auto-filled from holiday calendar';
+    }
+  } catch(e) {
+    console.warn('[PMAM] Could not parse holiday option value:', holEl.value, e);
+  }
+}
+
+// Wire change listeners + pre-fetch the holiday calendar on page load.
 window.addEventListener('DOMContentLoaded', function(){
   loadPmamHolidays();
   for (var i=1; i<=4; i++) {
     (function(idx){
-      var dateEl = document.getElementById('cd'+idx+'_date');
-      if (dateEl) {
-        dateEl.addEventListener('change', function(){
-          // Ensure holidays are loaded before lookup
-          loadPmamHolidays(function(){ autoFillHolidayFor(idx); });
+      var holEl = document.getElementById('cd'+idx+'_hol');
+      if (holEl) {
+        holEl.addEventListener('change', function(){
+          loadPmamHolidays(function(){ onHolidayPicked(idx); });
         });
       }
     })(i);
@@ -1801,9 +1880,9 @@ function clearLeaveForm() {
     ['date','hol','req'].forEach(function(f){
       var el=document.getElementById('cd'+i+'_'+f); if(el) el.value='';
     });
-    // Reset the holiday auto-fill UI state
-    var holEl = document.getElementById('cd'+i+'_hol');
-    if (holEl) { holEl.removeAttribute('readonly'); holEl.style.background=''; holEl.title=''; holEl.dataset.lastAuto='0'; }
+    // Reset visual hints
+    var dEl = document.getElementById('cd'+i+'_date');
+    if (dEl) { dEl.style.background=''; dEl.title=''; }
   }
   lvSelWards = [];
   lvRenderTags();
@@ -1861,8 +1940,14 @@ function printLeaveForm() {
   if (isComp) {
     for (var i=1;i<=4;i++) {
       var cd=document.getElementById('cd'+i+'_date').value;
-      var ch=document.getElementById('cd'+i+'_hol').value;
+      var chRaw=document.getElementById('cd'+i+'_hol').value;
       var cr=document.getElementById('cd'+i+'_req').value;
+      // Holiday Name dropdown stores JSON {date,name,type} as value — parse for readable name
+      var ch = '';
+      if (chRaw) {
+        try { var obj = JSON.parse(chRaw); ch = obj.name || ''; if (obj.type) ch += ' ('+obj.type+')'; }
+        catch(e) { ch = chRaw; }
+      }
       if (cd||ch||cr) cRows += '<tr><td class="tc">'+i+'</td><td>'+fmtDate(cd)+'</td><td>'+ch+'</td><td>'+fmtDate(cr)+'</td></tr>';
     }
   }
@@ -1903,14 +1988,14 @@ function printLeaveForm() {
     /* ── UNDERTAKING (from substitute PMAM's perspective) ── */
     + '<p class="undertaking">I hereby undertake that during his/her leave period, I shall assume full responsibility for all duties, work, and responsibilities assigned to him/her.</p>'
 
-    /* ── SIGNATURES ── */
+    /* ── SIGNATURES (clean 2-row layout, no line) ── */
     + '<div class="sig-row">'
-    + '<div class="sig-box"><div class="sig-line">Signature of Applicant<div class="sig-desig">' + name + '<br>PMAM — ' + ward + '</div></div></div>'
-    + '<div class="sig-box"><div class="sig-line">Signature of Substitute PMAM<div class="sig-desig">' + duty + '<br>PMAM</div></div></div>'
+    + '<div class="sig-box"><div class="sig-label">Signature of Applicant</div><div class="sig-desig">' + name + '<br>PMAM — ' + ward + '</div></div>'
+    + '<div class="sig-box"><div class="sig-label">Signature of Substitute PMAM</div><div class="sig-desig">' + duty + '<br>PMAM</div></div>'
     + '</div>'
-    + '<div class="sig-row" style="margin-top:5mm">'
-    + '<div class="sig-box"><div class="sig-line">I/C AB-PMJAY<div class="sig-desig">GMC &amp; AH, Rajouri</div></div></div>'
-    + '<div class="sig-box"><div class="sig-line">Medical Superintendent<div class="sig-desig">GMC &amp; AH, Rajouri</div></div></div>'
+    + '<div class="sig-row" style="margin-top:18mm">'
+    + '<div class="sig-box"><div class="sig-label">I/C AB-PMJAY</div><div class="sig-desig">GMC &amp; AH, Rajouri</div></div>'
+    + '<div class="sig-box"><div class="sig-label">Medical Superintendent</div><div class="sig-desig">GMC &amp; AH, Rajouri</div></div>'
     + '</div>'
 
     /* ── FOOTER (centered, no date) ── */
@@ -1965,10 +2050,10 @@ function printLeaveForm() {
     + '.tc{text-align:center}'
     + '.section-title{font-weight:700;font-size:11pt;margin:5mm 0 2mm;color:#1a2340;text-transform:uppercase;letter-spacing:0.5px}'
     + '.undertaking{font-size:11pt;line-height:1.7;margin:6mm 0;font-style:italic;color:#333;border-left:3px solid #1a2340;padding-left:8px}'
-    + '.sig-row{display:flex;justify-content:space-between;margin-top:7mm;gap:4mm}'
+    + '.sig-row{display:flex;justify-content:space-between;margin-top:15mm;gap:8mm}'
     + '.sig-box{flex:1;text-align:center}'
-    + '.sig-line{border-top:1.5px solid #1a2340;margin:7mm auto 0;padding-top:3mm;font-weight:700;font-size:11pt;color:#1a2340;width:55%;max-width:70mm}'
-    + '.sig-desig{font-size:10pt;font-weight:normal;color:#555;margin-top:2px}'
+    + '.sig-label{font-weight:700;font-size:11pt;color:#1a2340;line-height:1.25;height:10mm;display:flex;align-items:center;justify-content:center;padding:0 2mm}'
+    + '.sig-desig{font-size:10pt;font-weight:normal;color:#555;margin-top:2mm;line-height:1.3;min-height:8mm}'
     + '.print-footer{border-top:2px solid #1a2340;margin-top:10mm;padding-top:3mm;text-align:center;font-size:10pt;color:#555}'
     + '.footer-brand{font-weight:700;color:#1a2340}'
     + '@media print{body{margin:0}@page{size:A4 portrait;margin:8mm 10mm}}'
