@@ -1831,22 +1831,21 @@ function printLeaveForm() {
     /* ── COMPENSATORY SECTION ── */
     + compSection
 
-    /* ── UNDERTAKING ── */
-    + '<p class="undertaking">I hereby undertake that during my leave period, the colleague named above shall assume full responsibility for all duties, work, and responsibilities assigned to me. I further certify that the information furnished above is true to the best of my knowledge.</p>'
+    /* ── UNDERTAKING (from substitute PMAM's perspective) ── */
+    + '<p class="undertaking">I hereby undertake that during his/her leave period, I shall assume full responsibility for all duties, work, and responsibilities assigned to him/her.</p>'
 
     /* ── SIGNATURES ── */
     + '<div class="sig-row">'
     + '<div class="sig-box"><div class="sig-line">Signature of Applicant<div class="sig-desig">' + name + '<br>PMAM — ' + ward + '</div></div></div>'
     + '<div class="sig-box"><div class="sig-line">Signature of Substitute PMAM<div class="sig-desig">' + duty + '<br>PMAM</div></div></div>'
     + '</div>'
-    + '<div class="sig-row" style="margin-top:10mm">'
+    + '<div class="sig-row" style="margin-top:5mm">'
     + '<div class="sig-box"><div class="sig-line">I/C AB-PMJAY<div class="sig-desig">GMC &amp; AH, Rajouri</div></div></div>'
     + '<div class="sig-box"><div class="sig-line">Medical Superintendent<div class="sig-desig">GMC &amp; AH, Rajouri</div></div></div>'
     + '</div>'
 
-    /* ── FOOTER ── */
+    /* ── FOOTER (centered, no date) ── */
     + '<div class="print-footer">'
-    + '<span>Date: ' + todayStr + '</span>'
     + '<span class="footer-brand">Computer generated leave application. | PMAM Reporting Portal @ MIS AB-PMJAY GMCR</span>'
     + '</div>';
 
@@ -1881,27 +1880,27 @@ function printLeaveForm() {
     + '<script src="shared/logos.js?v=6"><\/script>'
     + '<style>'
     + '*{box-sizing:border-box;margin:0;padding:0}'
-    + 'body{font-family:"Times New Roman",Times,serif;background:#fff;font-size:11pt;color:#111}'
+    + 'body{font-family:Tahoma,Verdana,Arial,sans-serif;background:#fff;font-size:12pt;color:#111}'
     + '.page-wrap{padding:8mm 14mm 10mm;max-width:210mm;margin:0 auto}'
     + '.page-body{margin-top:6mm}'
     + '/* ── FORM CONTENT STYLES ── */'
-    + '.form-title-bar{background:#000;color:#fff;text-align:center;font-size:13pt;font-weight:900;letter-spacing:2px;padding:5px 0;text-transform:uppercase;border-radius:0 0 6px 6px;margin-bottom:6mm}'
-    + '.date-row{text-align:right;font-size:9.5pt;margin-bottom:5mm;color:#444}'
-    + 'table{width:100%;border-collapse:separate;border-spacing:0;font-size:10.5pt;border:2px solid #1a1a1a;border-radius:10px;overflow:hidden;margin-bottom:4mm}'
-    + 'thead tr th{background:#1a1a1a;color:#fff;padding:6px 10px;font-size:10pt;text-align:left;font-weight:700}'
+    + '.form-title-bar{background:#000;color:#fff;text-align:center;font-size:14pt;font-weight:900;letter-spacing:2px;padding:5px 0;text-transform:uppercase;border-radius:0 0 6px 6px;margin-bottom:6mm}'
+    + '.date-row{text-align:right;font-size:11pt;margin-bottom:5mm;color:#444}'
+    + 'table{width:100%;border-collapse:separate;border-spacing:0;font-size:12pt;border:2px solid #1a1a1a;border-radius:10px;overflow:hidden;margin-bottom:4mm}'
+    + 'thead tr th{background:#1a1a1a;color:#fff;padding:6px 10px;font-size:11pt;text-align:left;font-weight:700}'
     + 'tbody tr:nth-child(even){background:#f7f8fc}'
     + 'tbody tr:nth-child(odd){background:#fff}'
     + 'td{padding:7px 10px;border-bottom:1px solid #dde2ee;vertical-align:middle}'
     + 'tbody tr:last-child td{border-bottom:none}'
     + '.lbl{font-weight:700;width:70mm;color:#1a2340;border-right:2px solid #dde2ee}'
     + '.tc{text-align:center}'
-    + '.section-title{font-weight:700;font-size:10pt;margin:5mm 0 2mm;color:#1a2340;text-transform:uppercase;letter-spacing:0.5px}'
-    + '.undertaking{font-size:9.5pt;line-height:1.9;margin:6mm 0;font-style:italic;color:#333;border-left:3px solid #1a2340;padding-left:8px}'
-    + '.sig-row{display:flex;justify-content:space-between;margin-top:14mm;gap:4mm}'
+    + '.section-title{font-weight:700;font-size:11pt;margin:5mm 0 2mm;color:#1a2340;text-transform:uppercase;letter-spacing:0.5px}'
+    + '.undertaking{font-size:11pt;line-height:1.7;margin:6mm 0;font-style:italic;color:#333;border-left:3px solid #1a2340;padding-left:8px}'
+    + '.sig-row{display:flex;justify-content:space-between;margin-top:7mm;gap:4mm}'
     + '.sig-box{flex:1;text-align:center}'
-    + '.sig-line{border-top:1.5px solid #1a2340;margin-top:14mm;padding-top:3mm;font-weight:700;font-size:9.5pt;color:#1a2340}'
-    + '.sig-desig{font-size:8.5pt;font-weight:normal;color:#555;margin-top:2px}'
-    + '.print-footer{border-top:2px solid #1a2340;margin-top:10mm;padding-top:3mm;display:flex;justify-content:space-between;align-items:center;font-size:8.5pt;color:#555}'
+    + '.sig-line{border-top:1.5px solid #1a2340;margin-top:7mm;padding-top:3mm;font-weight:700;font-size:11pt;color:#1a2340}'
+    + '.sig-desig{font-size:10pt;font-weight:normal;color:#555;margin-top:2px}'
+    + '.print-footer{border-top:2px solid #1a2340;margin-top:10mm;padding-top:3mm;text-align:center;font-size:10pt;color:#555}'
     + '.footer-brand{font-weight:700;color:#1a2340}'
     + '@media print{body{margin:0}@page{size:A4 portrait;margin:8mm 10mm}}'
     + '</style></head><body>'
