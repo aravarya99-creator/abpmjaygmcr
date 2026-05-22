@@ -696,7 +696,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
       <!-- FORM CARD -->
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:13px;font-weight:700;color:#0F2B8C;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(26,61,181,0.1)">Fill Leave Application</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">
 
           <!-- Name -->
           <div class="fld"><label>Name of the Official</label>
@@ -774,31 +774,112 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           </div>
         </div>
 
-        <!-- Reason + Type of Leave -->
+        <!-- Reason + Type of Leave (icon-card design) -->
+        <style>
+          .lvc-section{background:#fff;border:1px solid rgba(26,61,181,0.1);border-radius:14px;padding:14px 16px}
+          .lvc-section h4{display:flex;align-items:center;gap:8px;margin:0 0 12px 0;font-size:12px;font-weight:700;color:#0F2B8C;text-transform:uppercase;letter-spacing:0.4px}
+          .lvc-section h4 .lvc-hdr-ico{width:22px;height:22px;background:#EFF6FF;border-radius:6px;display:inline-flex;align-items:center;justify-content:center}
+          .lvc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+          .lvc-list{display:flex;flex-direction:column;gap:8px}
+          .lvc-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:12px;cursor:pointer;background:#fff;transition:all .15s ease;position:relative}
+          .lvc-card:hover{border-color:#93C5FD;background:#F9FBFF}
+          .lvc-card input[type=radio]{width:16px;height:16px;accent-color:#1A3DB5;cursor:pointer;flex-shrink:0}
+          .lvc-card.lvc-checked{border-color:#1A3DB5;background:#EFF6FF;box-shadow:0 0 0 1px #1A3DB5 inset}
+          .lvc-ico{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+          .lvc-lbl{font-size:12px;font-weight:700;color:#1F2937;line-height:1.25}
+          .lvc-sub{font-size:11px;font-weight:400;color:#6B7280;display:block;margin-top:1px}
+          .lvc-type-card{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid #E5E7EB;border-radius:10px;cursor:pointer;background:#fff;transition:all .15s ease;margin-bottom:0}
+          .lvc-type-card:hover{border-color:#93C5FD;background:#F9FBFF}
+          .lvc-type-card.lvc-checked{border-color:#1A3DB5;background:#EFF6FF;box-shadow:0 0 0 1px #1A3DB5 inset}
+          .lvc-type-card input[type=radio]{width:16px;height:16px;accent-color:#1A3DB5;cursor:pointer;flex-shrink:0}
+          .lvc-type-ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#EFF6FF}
+        </style>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
-          <div class="fld">
-            <label>Reason for Leave</label>
-            <div style="margin-top:6px">
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:8px"><input type="radio" name="lvReason" id="r1" value="Personal Work (Home)" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Personal Work (Home)</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:8px"><input type="radio" name="lvReason" id="r2" value="Health Issue (Self/Family)" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Health Issue (Self/Family)</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer">
-                <input type="radio" name="lvReason" id="r3" value="other" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer">
-                Any Other:&nbsp;<input type="text" id="lvOther" placeholder="specify..." style="width:120px;height:26px;padding:2px 8px;margin-left:2px;border:1px solid rgba(100,150,255,0.3);border-radius:6px;font-size:11px;outline:none;font-family:Inter,sans-serif">
+
+          <!-- ── REASON FOR LEAVE ── -->
+          <div class="lvc-section">
+            <h4><span class="lvc-hdr-ico">📋</span> Reason for Leave</h4>
+            <div class="lvc-grid">
+              <label class="lvc-card" for="r1">
+                <input type="radio" name="lvReason" id="r1" value="Personal Work (Home)">
+                <div class="lvc-ico" style="background:#EFF6FF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A3DB5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+                <div class="lvc-lbl">Personal Work<span class="lvc-sub">(Home)</span></div>
+              </label>
+              <label class="lvc-card" for="r2">
+                <input type="radio" name="lvReason" id="r2" value="Health Issue (Self/Family)">
+                <div class="lvc-ico" style="background:#ECFDF5"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+                <div class="lvc-lbl">Health Issue<span class="lvc-sub">(Self/Family)</span></div>
+              </label>
+              <label class="lvc-card" for="r4">
+                <input type="radio" name="lvReason" id="r4" value="Family Function">
+                <div class="lvc-ico" style="background:#F5F3FF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                <div class="lvc-lbl">Family Function</div>
+              </label>
+              <label class="lvc-card" for="r3">
+                <input type="radio" name="lvReason" id="r3" value="other">
+                <div class="lvc-ico" style="background:#FFF7ED"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5" fill="#F97316"/><circle cx="12" cy="12" r="1.5" fill="#F97316"/><circle cx="19" cy="12" r="1.5" fill="#F97316"/></svg></div>
+                <div class="lvc-lbl">Any Other</div>
+              </label>
+            </div>
+            <div style="margin-top:10px">
+              <div style="font-size:11px;color:#6B7280;margin-bottom:4px">Please specify reason</div>
+              <input type="text" id="lvOther" placeholder="Specify reason..." style="width:100%;padding:8px 12px;border:1px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px;outline:none;font-family:Inter,sans-serif">
+            </div>
+          </div>
+
+          <!-- ── TYPE OF LEAVE ── -->
+          <div class="lvc-section">
+            <h4><span class="lvc-hdr-ico">🗓️</span> Type of Leave</h4>
+            <div class="lvc-list">
+              <label class="lvc-type-card" for="lt1">
+                <input type="radio" name="lvType" id="lt1" value="Casual" onchange="toggleComp()">
+                <div class="lvc-type-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A3DB5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                <div class="lvc-lbl">Casual Leave</div>
+              </label>
+              <label class="lvc-type-card" for="lt2">
+                <input type="radio" name="lvType" id="lt2" value="Compensatory" onchange="toggleComp()">
+                <div class="lvc-type-ico" style="background:#FEF3C7"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4-9 4-9-4 9-4z"/><path d="M3 7v6c0 2 4 4 9 4s9-2 9-4V7"/></svg></div>
+                <div class="lvc-lbl">Compensatory <span class="lvc-sub" style="display:inline">(Fill details below)</span></div>
+              </label>
+              <label class="lvc-type-card" for="lt3">
+                <input type="radio" name="lvType" id="lt3" value="Medical Leave" onchange="toggleComp()">
+                <div class="lvc-type-ico" style="background:#FEE2E2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg></div>
+                <div class="lvc-lbl">Medical Leave</div>
+              </label>
+              <label class="lvc-type-card" for="lt4">
+                <input type="radio" name="lvType" id="lt4" value="Maternity Leave" onchange="toggleComp()">
+                <div class="lvc-type-ico" style="background:#FCE7F3"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#BE185D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="3"/><path d="M12 9c-3 0-6 2-6 5v8h12v-8c0-3-3-5-6-5z"/></svg></div>
+                <div class="lvc-lbl">Maternity Leave</div>
+              </label>
+              <label class="lvc-type-card" for="lt5">
+                <input type="radio" name="lvType" id="lt5" value="Paternity Leave" onchange="toggleComp()">
+                <div class="lvc-type-ico" style="background:#DBEAFE"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg></div>
+                <div class="lvc-lbl">Paternity Leave</div>
+              </label>
+              <label class="lvc-type-card" for="lt6">
+                <input type="radio" name="lvType" id="lt6" value="Leave Without Pay" onchange="toggleComp()">
+                <div class="lvc-type-ico" style="background:#E0E7FF"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4338CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                <div class="lvc-lbl">Leave Without Pay</div>
               </label>
             </div>
           </div>
-          <div class="fld">
-            <label>Type of Leave</label>
-            <div style="margin-top:6px">
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt1" value="Casual" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Casual Leave</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt2" value="Compensatory" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Compensatory (Fill details below)</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt3" value="Medical Leave" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Medical Leave</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt4" value="Maternity Leave" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Maternity Leave</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;margin-bottom:7px"><input type="radio" name="lvType" id="lt5" value="Paternity Leave" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Paternity Leave</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer"><input type="radio" name="lvType" id="lt6" value="Leave Without Pay" onchange="toggleComp()" style="width:15px;height:15px;accent-color:#1A3DB5;cursor:pointer"> Leave Without Pay</label>
-            </div>
-          </div>
         </div>
+        <script>
+          // Add "lvc-checked" class to the parent card when its radio gets selected
+          (function(){
+            function syncCheckedClass(){
+              document.querySelectorAll('.lvc-card, .lvc-type-card').forEach(function(card){
+                var r = card.querySelector('input[type=radio]');
+                if (r && r.checked) card.classList.add('lvc-checked');
+                else card.classList.remove('lvc-checked');
+              });
+            }
+            document.addEventListener('change', function(e){
+              if (e.target && e.target.matches('input[name=lvReason], input[name=lvType]')) syncCheckedClass();
+            });
+            window.addEventListener('DOMContentLoaded', syncCheckedClass);
+          })();
+        </script>
 
         <!-- COMPENSATORY TABLE (shows only when Compensatory selected) -->
         <div id="compSection" style="display:none;margin-top:10px">
@@ -1990,10 +2071,10 @@ function printLeaveForm() {
 
     /* ── SIGNATURES (clean 2-row layout, no line) ── */
     + '<div class="sig-row">'
-    + '<div class="sig-box"><div class="sig-label">Signature of Applicant</div><div class="sig-desig">' + name + '<br>PMAM — ' + ward + '</div></div>'
-    + '<div class="sig-box"><div class="sig-label">Signature of Substitute PMAM</div><div class="sig-desig">' + duty + '<br>PMAM</div></div>'
+    + '<div class="sig-box"><div class="sig-label">Signature of Applicant - PMAM</div><div class="sig-desig">' + name + '</div></div>'
+    + '<div class="sig-box"><div class="sig-label">Signature of Substitute PMAM</div><div class="sig-desig">' + duty + '</div></div>'
     + '</div>'
-    + '<div class="sig-row" style="margin-top:18mm">'
+    + '<div class="sig-row" style="margin-top:10mm">'
     + '<div class="sig-box"><div class="sig-label">I/C AB-PMJAY</div><div class="sig-desig">GMC &amp; AH, Rajouri</div></div>'
     + '<div class="sig-box"><div class="sig-label">Medical Superintendent</div><div class="sig-desig">GMC &amp; AH, Rajouri</div></div>'
     + '</div>'
@@ -2035,28 +2116,28 @@ function printLeaveForm() {
     + '<style>'
     + '*{box-sizing:border-box;margin:0;padding:0}'
     + 'body{font-family:Tahoma,Verdana,Arial,sans-serif;background:#fff;font-size:12pt;color:#111}'
-    + '.page-wrap{padding:8mm 14mm 10mm;max-width:210mm;margin:0 auto}'
-    + '.page-body{margin-top:6mm}'
+    + '.page-wrap{padding:5mm 14mm 6mm;max-width:210mm;margin:0 auto}'
+    + '.page-body{margin-top:3mm}'
     + '/* ── FORM CONTENT STYLES ── */'
-    + '.form-title-bar{background:#000;color:#fff;text-align:center;font-size:14pt;font-weight:900;letter-spacing:2px;padding:5px 0;text-transform:uppercase;border-radius:0 0 6px 6px;margin-bottom:6mm}'
-    + '.date-row{text-align:right;font-size:11pt;margin-bottom:5mm;color:#444}'
-    + 'table{width:100%;border-collapse:separate;border-spacing:0;font-size:12pt;border:2px solid #1a1a1a;border-radius:10px;overflow:hidden;margin-bottom:4mm}'
-    + 'thead tr th{background:#1a1a1a;color:#fff;padding:6px 10px;font-size:11pt;text-align:left;font-weight:700}'
+    + '.form-title-bar{background:#000;color:#fff;text-align:center;font-size:14pt;font-weight:900;letter-spacing:2px;padding:4px 0;text-transform:uppercase;border-radius:0 0 6px 6px;margin-bottom:3mm}'
+    + '.date-row{text-align:right;font-size:11pt;margin-bottom:3mm;color:#444}'
+    + 'table{width:100%;border-collapse:separate;border-spacing:0;font-size:12pt;border:2px solid #1a1a1a;border-radius:10px;overflow:hidden;margin-bottom:3mm}'
+    + 'thead tr th{background:#1a1a1a;color:#fff;padding:4px 10px;font-size:11pt;text-align:left;font-weight:700}'
     + 'tbody tr:nth-child(even){background:#f7f8fc}'
     + 'tbody tr:nth-child(odd){background:#fff}'
-    + 'td{padding:7px 10px;border-bottom:1px solid #dde2ee;vertical-align:middle}'
+    + 'td{padding:4px 10px;border-bottom:1px solid #dde2ee;vertical-align:middle}'
     + 'tbody tr:last-child td{border-bottom:none}'
     + '.lbl{font-weight:700;width:70mm;color:#1a2340;border-right:2px solid #dde2ee}'
     + '.tc{text-align:center}'
-    + '.section-title{font-weight:700;font-size:11pt;margin:5mm 0 2mm;color:#1a2340;text-transform:uppercase;letter-spacing:0.5px}'
-    + '.undertaking{font-size:11pt;line-height:1.7;margin:6mm 0;font-style:italic;color:#333;border-left:3px solid #1a2340;padding-left:8px}'
-    + '.sig-row{display:flex;justify-content:space-between;margin-top:15mm;gap:8mm}'
+    + '.section-title{font-weight:700;font-size:11pt;margin:3mm 0 1mm;color:#1a2340;text-transform:uppercase;letter-spacing:0.5px}'
+    + '.undertaking{font-size:11pt;line-height:1.45;margin:3mm 0;font-style:italic;color:#333;border-left:3px solid #1a2340;padding-left:8px}'
+    + '.sig-row{display:flex;justify-content:space-between;margin-top:8mm;gap:8mm}'
     + '.sig-box{flex:1;text-align:center}'
-    + '.sig-label{font-weight:700;font-size:11pt;color:#1a2340;line-height:1.25;height:10mm;display:flex;align-items:center;justify-content:center;padding:0 2mm}'
-    + '.sig-desig{font-size:10pt;font-weight:normal;color:#555;margin-top:2mm;line-height:1.3;min-height:8mm}'
-    + '.print-footer{border-top:2px solid #1a2340;margin-top:10mm;padding-top:3mm;text-align:center;font-size:10pt;color:#555}'
+    + '.sig-label{font-weight:700;font-size:11pt;color:#1a2340;line-height:1.25;height:9mm;display:flex;align-items:center;justify-content:center;padding:0 2mm}'
+    + '.sig-desig{font-size:10pt;font-weight:normal;color:#555;margin-top:1mm;line-height:1.3;min-height:6mm}'
+    + '.print-footer{border-top:2px solid #1a2340;margin-top:6mm;padding-top:2mm;text-align:center;font-size:10pt;color:#555}'
     + '.footer-brand{font-weight:700;color:#1a2340}'
-    + '@media print{body{margin:0}@page{size:A4 portrait;margin:8mm 10mm}}'
+    + '@media print{body{margin:0}@page{size:A4 portrait;margin:6mm 10mm}}'
     + '</style></head><body>'
     + pageContent
     + '<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script>'
