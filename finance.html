@@ -1232,22 +1232,26 @@
       return _cache.locked.includes(monthKey);
     }
 
-    // Export utilities
+    // Export utilities — universal headers/footers via exportToWord / exportToExcel
     function exportActiveTable(format) {
       const tables = Array.from(document.querySelectorAll('main section[style=""]:not([style*="display: none"]) table')).filter(t => t.offsetParent !== null && t.id);
       if(tables.length === 0) { alert('No visible table to export.'); return; }
-      const table = tables[0]; 
+      const table = tables[0];
 
       if(format === 'print') {
         window.print();
       } else if(format === 'excel') {
-        const uri = 'data:application/vnd.ms-excel;base64,';
-        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body><table border="1">${table.innerHTML}</table></body></html>`;
-        const link = document.createElement('a'); link.href = uri + btoa(unescape(encodeURIComponent(html))); link.download = table.id + '.xls'; link.click();
+        exportToExcel({
+          title: (table.id || 'Report').toUpperCase().replace(/_/g,' '),
+          bodyHTML: '<table>' + table.innerHTML + '</table>',
+          filename: table.id + '.xls'
+        });
       } else if(format === 'word') {
-        const uri = 'data:application/vnd.ms-word;base64,';
-        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body><table border="1">${table.innerHTML}</table></body></html>`;
-        const link = document.createElement('a'); link.href = uri + btoa(unescape(encodeURIComponent(html))); link.download = table.id + '.doc'; link.click();
+        exportToWord({
+          title: (table.id || 'Report').toUpperCase().replace(/_/g,' '),
+          bodyHTML: '<table>' + table.innerHTML + '</table>',
+          filename: table.id + '.doc'
+        });
       }
     }
 
@@ -2220,10 +2224,18 @@
         });
         return;
       }
-      const uri = format === 'excel' ? 'data:application/vnd.ms-excel;base64,' : 'data:application/vnd.ms-word;base64,';
-      const ext = format === 'excel' ? 'xls' : 'doc';
-      const h = `<html><head><meta charset="UTF-8"></head><body><table border="1">${table.innerHTML}</table></body></html>`;
-      const a = document.createElement('a'); a.href = uri + btoa(unescape(encodeURIComponent(h))); a.download = 'stats_report.' + ext; a.click();
+      // Word/Excel export via centralized helpers
+      var fy2 = $('statsRepFy') ? $('statsRepFy').value : '';
+      var mo2 = $('statsRepMonth') ? $('statsRepMonth').value : '';
+      var statsPeriod = _periodStr ? _periodStr(fy2,mo2) : ((fy2?'FY: '+fy2:'All FY')+(mo2?' | Month: '+monthKeyToLabel(mo2):''));
+      var exportOpts = {
+        title: 'HOSPITAL STATISTICS REPORT',
+        periodInfo: statsPeriod,
+        bodyHTML: '<table>' + table.innerHTML + '</table>',
+        filename: 'stats_report'
+      };
+      if (format === 'excel') exportToExcel(exportOpts);
+      else exportToWord(exportOpts);
     }
 
     $('statsForm')?.addEventListener('submit', function(e){
@@ -2418,28 +2430,36 @@
     function exportSshaExcel() {
       const table = $('repFundTable');
       if(!table) return;
-      const uri = 'data:application/vnd.ms-excel;base64,';
-      const html2 = `<html><head><meta charset="UTF-8"></head><body><table border="1">${table.innerHTML}</table></body></html>`;
-      const link = document.createElement('a'); link.href = uri + btoa(unescape(encodeURIComponent(html2))); link.download = 'sha_share_report.xls'; link.click();
+      exportToExcel({
+        title: 'SHA SHARE REPORT',
+        bodyHTML: '<table>' + table.innerHTML + '</table>',
+        filename: 'sha_share_report'
+      });
     }
     function exportSshaWord() {
       const table = $('repFundTable'); if(!table) return;
-      const uri='data:application/vnd.ms-word;base64,';
-      const h=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="UTF-8"></head><body><table border="1">${table.innerHTML}</table></body></html>`;
-      const a=document.createElement('a');a.href=uri+btoa(unescape(encodeURIComponent(h)));a.download='sha_share_report.doc';a.click();
+      exportToWord({
+        title: 'SHA SHARE REPORT',
+        bodyHTML: '<table>' + table.innerHTML + '</table>',
+        filename: 'sha_share_report'
+      });
     }
     function exportShaExcel() {
       const table = $('repShaNewTable');
       if(!table) return;
-      const uri = 'data:application/vnd.ms-excel;base64,';
-      const h2 = `<html><head><meta charset="UTF-8"></head><body><table border="1">${table.innerHTML}</table></body></html>`;
-      const link = document.createElement('a'); link.href = uri + btoa(unescape(encodeURIComponent(h2))); link.download = 'sha_report.xls'; link.click();
+      exportToExcel({
+        title: 'SHA REPORT',
+        bodyHTML: '<table>' + table.innerHTML + '</table>',
+        filename: 'sha_report'
+      });
     }
     function exportShaWord() {
       const table = $('repShaNewTable'); if(!table) return;
-      const uri='data:application/vnd.ms-word;base64,';
-      const h=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="UTF-8"></head><body><table border="1">${table.innerHTML}</table></body></html>`;
-      const a=document.createElement('a');a.href=uri+btoa(unescape(encodeURIComponent(h)));a.download='sha_report.doc';a.click();
+      exportToWord({
+        title: 'SHA REPORT',
+        bodyHTML: '<table>' + table.innerHTML + '</table>',
+        filename: 'sha_report'
+      });
     }
 
     // ---------- LEDGER ----------
@@ -2496,6 +2516,153 @@
     // REPORT PRINTER — Fancy header with Ayushman logo + print/export
     // =========================================================================
     // LOGO_AYUSHMAN_RPT removed — now uses shared/logos.js (GMCLogos.pmjay)
+
+    // ═══════════════════════════════════════════════════════════════
+    // CENTRALIZED WORD/EXCEL EXPORTS — universal header/footer.
+    // Every Word/Excel export from the finance portal MUST use these
+    // two functions. Callers pass options; header/footer are universal.
+    // ═══════════════════════════════════════════════════════════════
+
+    // exportToWord(opts) — Word .doc download with full GMC letterhead.
+    // Word renders HTML+CSS+base64 images, so the output looks identical
+    // to the print preview. opts = { title, periodInfo, generatedInfo,
+    // bodyHTML, filename }.
+    function exportToWord(opts) {
+      opts = opts || {};
+      var title         = opts.title         || "REPORT";
+      var periodInfo    = opts.periodInfo    || "";
+      var generatedInfo = opts.generatedInfo || ("Generated: " + new Date().toLocaleString('en-IN'));
+      var bodyHTML      = opts.bodyHTML      || "<p>No content provided.</p>";
+      var filename      = (opts.filename     || title.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''));
+      if (!filename) filename = 'report';
+      if (!/\.doc$/i.test(filename)) filename += '.doc';
+
+      // Pull logos from shared/logos.js (loaded in head)
+      var gmcLogo   = (typeof GMCLogos !== 'undefined' && GMCLogos.gmc)   ? GMCLogos.gmc   : '';
+      var pmjayLogo = (typeof GMCLogos !== 'undefined' && GMCLogos.pmjay) ? GMCLogos.pmjay : '';
+
+      var letterhead = ''
+        + '<table style="width:100%;border:3px dashed #000;border-radius:12px;margin-bottom:14px;" cellpadding="6">'
+        +   '<tr>'
+        +     '<td style="width:90px;vertical-align:middle;text-align:center;">'
+        +       (gmcLogo ? '<img src="'+gmcLogo+'" width="80" height="80" alt="GMC">' : '')
+        +     '</td>'
+        +     '<td style="text-align:center;vertical-align:middle;">'
+        +       '<div style="font-family:Arial Black,Arial,sans-serif;font-size:18pt;font-weight:900;color:#1976d2;letter-spacing:-0.3px;">GOVERNMENT MEDICAL COLLEGE &amp;</div>'
+        +       '<div style="font-family:Arial Black,Arial,sans-serif;font-size:18pt;font-weight:900;color:#1976d2;letter-spacing:-0.3px;">ASSOCIATED HOSPITAL RAJOURI</div>'
+        +       '<div style="font-family:Arial Black,Arial,sans-serif;font-size:12pt;font-weight:900;color:#d32f2f;margin-top:4px;">AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA</div>'
+        +       '<div style="display:inline-block;background:#000;color:#fff;padding:3px 18px;margin-top:6px;font-family:Arial Black,Arial,sans-serif;font-size:12pt;border-radius:6px;">'+title+'</div>'
+        +     '</td>'
+        +     '<td style="width:90px;vertical-align:middle;text-align:center;">'
+        +       (pmjayLogo ? '<img src="'+pmjayLogo+'" width="80" height="80" alt="PMJAY">' : '')
+        +     '</td>'
+        +   '</tr>'
+        + '</table>';
+
+      var infoRow = ''
+        + '<table style="width:100%;margin:6px 0 8px 0;font-size:11pt;font-weight:600;" cellpadding="0">'
+        +   '<tr>'
+        +     '<td style="text-align:left;">'+periodInfo+'</td>'
+        +     '<td style="text-align:right;">'+generatedInfo+'</td>'
+        +   '</tr>'
+        + '</table>';
+
+      var universalFooter = ''
+        + '<table style="width:100%;margin-top:40px;" cellpadding="0"><tr>'
+        +   '<td style="width:60%;"></td>'
+        +   '<td style="width:40%;text-align:center;">'
+        +     '<div style="height:55px;border-bottom:1px solid #000;margin-bottom:6px;"></div>'
+        +     '<div style="font-weight:700;font-size:12pt;">Medical Superintendent</div>'
+        +     '<div style="font-size:10pt;font-weight:600;color:#333;">GMC &amp; AH, Rajouri</div>'
+        +   '</td>'
+        + '</tr></table>'
+        + '<div style="text-align:center;font-size:9pt;color:#555;border-top:1px dotted #999;padding-top:8px;margin-top:30px;">'
+        +   'Computer-generated report &nbsp;|&nbsp; <b>AB-PMJAY Finance MIS — GMC &amp; AH, Rajouri</b>'
+        + '</div>';
+
+      // MS Office Word XML namespace declarations are required so Word renders correctly.
+      var fullHTML = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+        + '<head><meta charset="UTF-8"><title>'+title+'</title>'
+        +   '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
+        +   '<style>body{font-family:Arial,sans-serif;font-size:11pt;color:#000;} table{border-collapse:collapse;} th,td{padding:6px 10px;border:1px solid #999;} th{background:#8b5cf6;color:#fff;font-weight:700;}</style>'
+        + '</head><body>'
+        +   letterhead
+        +   infoRow
+        +   bodyHTML
+        +   universalFooter
+        + '</body></html>';
+
+      var uri = 'data:application/vnd.ms-word;base64,';
+      var a = document.createElement('a');
+      a.href = uri + btoa(unescape(encodeURIComponent(fullHTML)));
+      a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    // exportToExcel(opts) — Excel .xls download with clean text-based header/footer.
+    // Excel doesn't render images reliably, so we use text rows for the letterhead.
+    // opts = { title, periodInfo, generatedInfo, bodyHTML (must be a <table>), filename }.
+    function exportToExcel(opts) {
+      opts = opts || {};
+      var title         = opts.title         || "REPORT";
+      var periodInfo    = opts.periodInfo    || "";
+      var generatedInfo = opts.generatedInfo || ("Generated: " + new Date().toLocaleString('en-IN'));
+      var bodyHTML      = opts.bodyHTML      || "<table><tr><td>No content provided.</td></tr></table>";
+      var filename      = (opts.filename     || title.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''));
+      if (!filename) filename = 'report';
+      if (!/\.xls$/i.test(filename)) filename += '.xls';
+
+      // Extract table content from bodyHTML — find first <table> and grab its rows
+      // so we can prepend header rows and append footer rows inside the same table.
+      var tmpDiv = document.createElement('div');
+      tmpDiv.innerHTML = bodyHTML;
+      var sourceTable = tmpDiv.querySelector('table');
+      var tableRows = sourceTable ? sourceTable.innerHTML : '<tr><td>No table found.</td></tr>';
+
+      // Determine column count from the first row to span the header/footer correctly
+      var firstRow = sourceTable ? sourceTable.querySelector('tr') : null;
+      var colCount = 1;
+      if (firstRow) {
+        var cells = firstRow.querySelectorAll('th, td');
+        colCount = 0;
+        cells.forEach(function(c){
+          var span = parseInt(c.getAttribute('colspan') || '1', 10);
+          colCount += isNaN(span) ? 1 : span;
+        });
+        if (colCount < 1) colCount = 1;
+      }
+
+      // Header rows: 4 styled rows spanning all columns
+      var headerRows = ''
+        + '<tr><td colspan="'+colCount+'" style="text-align:center;font-weight:900;font-size:16pt;color:#1976d2;background:#e3f2fd;padding:8px;">GOVERNMENT MEDICAL COLLEGE &amp; ASSOCIATED HOSPITAL RAJOURI</td></tr>'
+        + '<tr><td colspan="'+colCount+'" style="text-align:center;font-weight:700;font-size:11pt;color:#d32f2f;background:#fff3e0;padding:4px;">AYUSHMAN BHARAT — PRADHAN MANTRI JAN AROGYA YOJANA</td></tr>'
+        + '<tr><td colspan="'+colCount+'" style="text-align:center;font-weight:900;font-size:13pt;color:#fff;background:#000;padding:6px;">'+title+'</td></tr>'
+        + '<tr><td colspan="'+colCount+'" style="text-align:left;font-size:10pt;font-weight:600;padding:4px 8px;background:#f5f5f5;">'+periodInfo+' &nbsp;&nbsp;|&nbsp;&nbsp; '+generatedInfo+'</td></tr>'
+        + '<tr><td colspan="'+colCount+'" style="height:6px;"></td></tr>';
+
+      // Footer rows: signature + computer-generated note
+      var footerRows = ''
+        + '<tr><td colspan="'+colCount+'" style="height:30px;"></td></tr>'
+        + '<tr><td colspan="'+colCount+'" style="text-align:right;font-weight:700;font-size:11pt;padding:4px 8px;">Medical Superintendent &nbsp;—&nbsp; GMC &amp; AH, Rajouri</td></tr>'
+        + '<tr><td colspan="'+colCount+'" style="text-align:center;font-size:9pt;color:#555;font-style:italic;padding:4px;border-top:1px dotted #999;">Computer-generated report &nbsp;|&nbsp; AB-PMJAY Finance MIS — GMC &amp; AH, Rajouri</td></tr>';
+
+      var fullHTML = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">'
+        + '<head><meta charset="UTF-8">'
+        +   '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>'+title.substring(0,30)+'</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->'
+        + '</head><body>'
+        +   '<table border="1">'
+        +     headerRows
+        +     tableRows
+        +     footerRows
+        +   '</table>'
+        + '</body></html>';
+
+      var uri = 'data:application/vnd.ms-excel;base64,';
+      var a = document.createElement('a');
+      a.href = uri + btoa(unescape(encodeURIComponent(fullHTML)));
+      a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
 
     // ─── Print options modal ──────────────────────────────────────
     // Shows dropdowns for format (AB PM-JAY / MS) + orientation (P / L)
@@ -3071,30 +3238,25 @@
 
     function exportDhsExcel(){
       if(!_dhsLastBodyHTML){ renderDhsPreview(); if(!_dhsLastBodyHTML) return; }
-      var uri = 'data:application/vnd.ms-excel;base64,';
-      var h = '<html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;}</style></head><body>'
-            + '<h3>DHS REPORT — AB-PMJAY/SEHAT (GMC & AH RAJOURI)</h3>'
-            + '<div>' + _dhsLastPeriod + '</div>'
-            + _dhsLastBodyHTML
-            + '</body></html>';
-      var a = document.createElement('a');
-      a.href = uri + btoa(unescape(encodeURIComponent(h)));
-      a.download = 'dhs_report.xls';
-      a.click();
+      // _dhsLastBodyHTML contains multiple tables — pick the first or wrap all in one
+      exportToExcel({
+        title: 'DHS REPORT — AB-PMJAY/SEHAT',
+        periodInfo: _dhsLastPeriod || '',
+        bodyHTML: _dhsLastBodyHTML,
+        filename: 'dhs_report'
+      });
     }
     // ═══════════════════════════════════════════════════════════════
 
     function exportLedgerTable(tableId, format) {
       var table = document.getElementById(tableId); if(!table) return;
-      if(format==='excel'){
-        var uri='data:application/vnd.ms-excel;base64,';
-        var h='<html><head><meta charset="UTF-8"></head><body><table border="1">'+table.innerHTML+'</table></body></html>';
-        var a=document.createElement('a');a.href=uri+btoa(unescape(encodeURIComponent(h)));a.download=tableId+'.xls';a.click();
-      } else if(format==='word'){
-        var uri='data:application/vnd.ms-word;base64,';
-        var h='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="UTF-8"></head><body><table border="1">'+table.innerHTML+'</table></body></html>';
-        var a=document.createElement('a');a.href=uri+btoa(unescape(encodeURIComponent(h)));a.download=tableId+'.doc';a.click();
-      }
+      var opts = {
+        title: tableId.toUpperCase().replace(/_/g,' '),
+        bodyHTML: '<table>' + table.innerHTML + '</table>',
+        filename: tableId
+      };
+      if(format==='excel') exportToExcel(opts);
+      else if(format==='word') exportToWord(opts);
     }
 
     // =========================================================================
@@ -3376,12 +3538,12 @@
       if(action === 'print'){
         printReport({title:title, periodInfo:prd, generatedInfo:'Generated: '+new Date().toLocaleString('en-IN'), bodyHTML:bodyHTML, pageOrientation:orient});
       } else if(action === 'excel'){
-        var uri = 'data:application/vnd.ms-excel;base64,';
-        var h = '<html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;}</style></head><body><h3>'+title+'</h3><div>'+prd+'</div>'+bodyHTML+'</body></html>';
-        var a = document.createElement('a');
-        a.href = uri + btoa(unescape(encodeURIComponent(h)));
-        a.download = 'custom_report.xls';
-        a.click();
+        exportToExcel({
+          title: title,
+          periodInfo: prd,
+          bodyHTML: bodyHTML,
+          filename: 'custom_report'
+        });
       }
     }
     function printCustomReport(){ _doCustomReport('print'); }
@@ -3508,22 +3670,32 @@
     function exportFaExcel() {
       var t1=document.getElementById('repFundAllocTable');
       var t2=document.getElementById('repFundAllocMonthTable');
-      var uri='data:application/vnd.ms-excel;base64,';
-      var h='<html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;}th,td{border:1px solid #999;padding:6px;}</style></head><body>'
-        +(t1?'<table>'+t1.innerHTML+'</table>':'')+'<br>'
-        +(t2&&$('faMonthWiseWrap')&&$('faMonthWiseWrap').style.display!=='none'?'<table>'+t2.innerHTML+'</table>':'')
-        +'</body></html>';
-      var a=document.createElement('a');a.href=uri+btoa(unescape(encodeURIComponent(h)));a.download='fund_allocation.xls';a.click();
+      // Excel can only show one table cleanly with the universal header/footer,
+      // so we concatenate both tables' rows into a single body table.
+      var bodyHTML = '';
+      if (t1) bodyHTML += '<table>'+t1.innerHTML+'</table>';
+      if (t2 && $('faMonthWiseWrap') && $('faMonthWiseWrap').style.display!=='none') {
+        bodyHTML += '<br><table>'+t2.innerHTML+'</table>';
+      }
+      exportToExcel({
+        title: 'FUND ALLOCATION REPORT',
+        bodyHTML: bodyHTML,
+        filename: 'fund_allocation'
+      });
     }
     function exportFaWord() {
       var t1=document.getElementById('repFundAllocTable');
       var t2=document.getElementById('repFundAllocMonthTable');
-      var uri='data:application/vnd.ms-word;base64,';
-      var hcontent='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="UTF-8"></head><body>'
-        +(t1?'<table border="1">'+t1.innerHTML+'</table>':'')+'<br>'
-        +(t2&&$('faMonthWiseWrap')&&$('faMonthWiseWrap').style.display!=='none'?'<table border="1">'+t2.innerHTML+'</table>':'')
-        +'</body></html>';
-      var a=document.createElement('a');a.href=uri+btoa(unescape(encodeURIComponent(hcontent)));a.download='fund_allocation.doc';a.click();
+      var bodyHTML = '';
+      if (t1) bodyHTML += '<table border="1">'+t1.innerHTML+'</table>';
+      if (t2 && $('faMonthWiseWrap') && $('faMonthWiseWrap').style.display!=='none') {
+        bodyHTML += '<br><br><table border="1">'+t2.innerHTML+'</table>';
+      }
+      exportToWord({
+        title: 'FUND ALLOCATION REPORT',
+        bodyHTML: bodyHTML,
+        filename: 'fund_allocation'
+      });
     }
 
 
