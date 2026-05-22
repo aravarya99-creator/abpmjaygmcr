@@ -2816,8 +2816,9 @@
       // Page CSS: body styling + table styles. Letterhead CSS comes from shared/headers.css.
       var pageCSS = ''
         + '@page{size:'+pageSize+' '+orient+';margin:12mm;}'
-        + '*{box-sizing:border-box;}'
-        + 'body{margin:0;padding:0;font-family:Arial,sans-serif;color:#000;font-size:12px;background:#fff;}'
+        + '*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}'
+        + 'img{image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;}'
+        + 'body{margin:0;padding:0;font-family:Arial,sans-serif;color:#000;font-size:12px;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
         + '.print-wrap{padding:0 4px;}'
         + 'table{width:100%;border-collapse:collapse;margin-top:10px;}'
         + 'th,td{border:1px solid #999;padding:6px 10px;text-align:left;font-size:11px;}'

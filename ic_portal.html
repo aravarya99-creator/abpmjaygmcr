@@ -1660,8 +1660,9 @@ function _doPrintReport(areaId, title, format, orientation){
   // No more hardcoded letterhead CSS; that comes from shared/headers.css.
   var pageCSS = ''
     + '@page { size: ' + pageSize + ' ' + orient + '; margin: 12mm; }'
-    + '* { box-sizing: border-box; }'
-    + 'body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: #000; font-size: 12px; background: #fff; }'
+    + '* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }'
+    + 'img { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }'
+    + 'body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: #000; font-size: 12px; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }'
     + '.print-wrap { padding: 0 4px; }'
     + 'table { width: 100%; border-collapse: collapse; margin-top: 6px; }'
     + 'th, td { border: 1px solid #999; padding: 4px 6px; text-align: center; vertical-align: middle; font-size: 10px; }'
