@@ -2210,16 +2210,12 @@
           + '</style>';
         // Clone the report table content, inject our class
         var cloneHTML = '<table class="stats-print-table">' + table.innerHTML + '</table>';
-        var sig = '<div class="stats-print-sig">'
-          + '<div style="height:50px;"></div>'
-          + '<div style="font-weight:700;font-size:12px;">Medical Superintendent</div>'
-          + '<div style="font-size:11px;">GMC & AH Rajouri</div>'
-          + '</div>';
+        // Signature is now rendered universally by printReport() — no inline sig here.
         printReport({
           title:'HOSPITAL STATISTICS REPORT — GMC & AH RAJOURI',
           periodInfo:_periodStr ? _periodStr(fy,mo) : ((fy?'FY: '+fy:'All FY')+(mo?' | Month: '+monthKeyToLabel(mo):'')),
           generatedInfo:'Generated: ' + new Date().toLocaleString('en-IN'),
-          bodyHTML: styles + cloneHTML + sig,
+          bodyHTML: styles + cloneHTML,
           pageOrientation:'landscape'
         });
         return;
@@ -2583,16 +2579,31 @@
     }
 
     // _doPrintReport — actual print runner. Uses shared GMCHeaders.* for letterhead.
+    // UNIVERSAL FOOTER: every finance report ends with the same signature block
+    // (Medical Superintendent / GMC & AH, Rajouri) + computer-generated note.
+    // Callers MUST NOT include their own signature in bodyHTML.
     function _doPrintReport(opts, format, orientation) {
       opts = opts || {};
       var title         = opts.title           || "REPORT";
       var periodInfo    = opts.periodInfo      || "";
       var generatedInfo = opts.generatedInfo   || ("Generated: " + new Date().toLocaleString('en-IN'));
       var bodyHTML      = opts.bodyHTML        || "<p>No content provided.</p>";
-      var footerHTML    = opts.footerHTML      || "<div style='margin-top:40px;text-align:right;'><div style='display:inline-block;text-align:center;min-width:260px;'><div style='height:55px;border-bottom:1px solid #000;margin-bottom:6px;'></div><div style='font-weight:700;font-size:14px;letter-spacing:0.3px;'>Medical Superintendent</div><div style='font-size:12px;font-weight:600;color:#333;'>GMC &amp; AH, Rajouri</div></div></div>";
       var orient        = orientation === 'landscape' ? 'landscape' : 'portrait';
       var fmt           = format === 'ms' ? 'ms' : 'abpmjay';
       var pageSize      = opts.pageSize        || "A4";
+
+      // Universal footer — single source of truth. NEVER duplicated anywhere else.
+      var universalFooter = ''
+        + "<div class='print-footer-sig' style='margin-top:40px;text-align:right;page-break-inside:avoid;break-inside:avoid;'>"
+        +   "<div style='display:inline-block;text-align:center;min-width:260px;'>"
+        +     "<div style='height:55px;border-bottom:1px solid #000;margin-bottom:6px;'></div>"
+        +     "<div style='font-weight:700;font-size:14px;letter-spacing:0.3px;'>Medical Superintendent</div>"
+        +     "<div style='font-size:12px;font-weight:600;color:#333;'>GMC &amp; AH, Rajouri</div>"
+        +   "</div>"
+        + "</div>"
+        + "<div class='footer-note' style='text-align:center;font-size:10px;color:#555;border-top:1px dotted #999;padding-top:8px;margin-top:25px;'>"
+        +   "Computer-generated report &nbsp;|&nbsp; <b>AB-PMJAY Finance MIS — GMC &amp; AH, Rajouri</b>"
+        + "</div>";
 
       // Safety guard: shared/headers.js must be loaded
       if (typeof GMCHeaders === 'undefined' || !GMCHeaders) {
@@ -2600,7 +2611,7 @@
         return;
       }
 
-      // Body common to both formats (title bar for MS, info row, content, signature, footer note)
+      // Body common to both formats (title bar for MS, info row, content, universal footer)
       var titleBlock = (fmt === 'ms')
         ? "<div style='text-align:center;'><span style='display:inline-block;border:2px solid #1e3a5f;padding:4px 18px;font-size:13px;font-weight:bold;background:#d9e2ec;border-radius:6px;color:#1e3a5f;margin:6px 0 14px 0;'>"+title+"</span></div>"
         : "";
@@ -2609,8 +2620,7 @@
         + titleBlock
         + "<div class='info-row'><div>"+periodInfo+"</div><div>"+generatedInfo+"</div></div>"
         + bodyHTML
-        + footerHTML
-        + "<div class='footer-note'>Computer-generated report &nbsp;|&nbsp; <b>AB-PMJAY Finance MIS — GMC &amp; AH, Rajouri</b></div>";
+        + universalFooter;
 
       // Build the page via the shared letterhead system
       var pageContent;
@@ -2647,7 +2657,6 @@
         + 'th{background:#8b5cf6;color:#fff;font-weight:700;}'
         + 'tr:nth-child(even) td{background:#f9f5ff;}'
         + '.info-row{display:flex;justify-content:space-between;margin:8px 0 4px 0;font-size:12px;font-weight:600;}'
-        + '.footer-note{text-align:center;font-size:10px;color:#555;border-top:1px dotted #999;padding-top:8px;margin-top:25px;}'
         + '.fund-flow{text-align:center;margin:12px 0;}'
         + '.flow-box{display:inline-block;padding:10px 18px;border-radius:6px;font-weight:800;font-size:12px;color:#fff;margin:4px;min-width:150px;}'
         + '.flow-green{background:#6db33f;} .flow-blue{background:#27a6d1;} .flow-orange{background:#f5a623;}';
@@ -3022,15 +3031,7 @@
         +     '</tbody></table>'
         + '</div>';
 
-      // Signature block (Medical Superintendent / GMC Rajouri) — kept on same page via avoid-break-inside
-      var sig = ''
-        + '<div class="dhs-sig">'
-        +   '<div style="text-align:right;">'
-        +     '<div style="height:50px;"></div>'
-        +     '<div style="font-weight:700;font-size:12px;">Medical Superintendent</div>'
-        +     '<div style="font-size:11px;">GMC & AH Rajouri</div>'
-        +   '</div>'
-        + '</div>';
+      // Signature is now rendered universally by printReport() — no inline sig here.
 
       var styles = '<style>'
         + '.dhs-card{margin-bottom:10px;background:#fff;page-break-inside:avoid;break-inside:avoid;}'
@@ -3039,10 +3040,9 @@
         + '.dhs-table th,.dhs-table td{border:1px solid '+BORDER+';padding:4px 6px;}'
         + '.dhs-table thead th{background:'+HDR_BG+';color:'+HDR_FG+';font-weight:700;text-align:center;}'
         + '.dhs-table tbody tr{background:'+ROW_BG+';}'
-        + '.dhs-sig{margin-top:14px;page-break-inside:avoid;break-inside:avoid;}'
         + '@media print{ @page { size:A4 landscape; margin:10mm; } body{font-size:10pt;} .dhs-card{page-break-inside:avoid;} }'
         + '</style>';
-      return styles + t1 + t2 + t3 + sig;
+      return styles + t1 + t2 + t3;
     }
 
     function renderDhsPreview(){
