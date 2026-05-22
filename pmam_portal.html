@@ -1723,6 +1723,72 @@ function submitLeave() {
       msg.textContent = 'Error submitting: ' + e.message;
     });
 }
+// ═══════════════════════════════════════════════════════════════
+// HOLIDAY CALENDAR — fetched from Firestore (same source as admin portal)
+// Path: settings/holiday_calendar → { holidays: [{date,name,type}, …] }
+// Used by leave application's Compensatory Leave Details rows to
+// auto-fill the Holiday Name once the user picks a "Date on Duty".
+// ═══════════════════════════════════════════════════════════════
+var _pmamHolidays = [];
+var _pmamHolidaysLoaded = false;
+function loadPmamHolidays(cb) {
+  if (_pmamHolidaysLoaded) { if (cb) cb(); return; }
+  if (typeof db === 'undefined') { _pmamHolidaysLoaded = true; if (cb) cb(); return; }
+  db.collection('settings').doc('holiday_calendar').get().then(function(doc){
+    if (doc.exists && Array.isArray(doc.data().holidays)) {
+      _pmamHolidays = doc.data().holidays;
+    }
+    _pmamHolidaysLoaded = true;
+    if (cb) cb();
+  }).catch(function(){ _pmamHolidaysLoaded = true; if (cb) cb(); });
+}
+
+// Auto-fill the Holiday Name input for row i when its Date on Duty changes.
+// If the picked date matches a holiday in the calendar → fill name + lock field.
+// If no match → clear field and let user type manually.
+function autoFillHolidayFor(i) {
+  var dateEl = document.getElementById('cd'+i+'_date');
+  var holEl  = document.getElementById('cd'+i+'_hol');
+  if (!dateEl || !holEl) return;
+  var dateStr = dateEl.value; // YYYY-MM-DD
+  if (!dateStr) { holEl.value = ''; holEl.removeAttribute('readonly'); holEl.style.background=''; return; }
+  // Search loaded holidays
+  var match = _pmamHolidays.find(function(h){ return h.date === dateStr; });
+  if (match) {
+    holEl.value = match.name + (match.type ? ' (' + match.type + ')' : '');
+    holEl.setAttribute('readonly', 'readonly');
+    holEl.style.background = '#dcfce7'; // light green tint to show auto-filled
+    holEl.title = 'Auto-filled from Holiday Calendar';
+  } else {
+    // Date isn't a known holiday — let the user type manually,
+    // but show a soft yellow hint that no calendar match was found.
+    holEl.removeAttribute('readonly');
+    holEl.style.background = '#fef3c7'; // light amber tint
+    holEl.title = 'No matching holiday in calendar — please enter name manually';
+    if (!holEl.value || holEl.dataset.lastAuto === '1') {
+      holEl.value = '';
+    }
+    holEl.dataset.lastAuto = '0';
+  }
+}
+
+// Wire change listeners to all 4 Compensatory Leave date inputs on page load,
+// and pre-fetch the holiday calendar.
+window.addEventListener('DOMContentLoaded', function(){
+  loadPmamHolidays();
+  for (var i=1; i<=4; i++) {
+    (function(idx){
+      var dateEl = document.getElementById('cd'+idx+'_date');
+      if (dateEl) {
+        dateEl.addEventListener('change', function(){
+          // Ensure holidays are loaded before lookup
+          loadPmamHolidays(function(){ autoFillHolidayFor(idx); });
+        });
+      }
+    })(i);
+  }
+});
+
 function clearLeaveForm() {
   ['lvDesig','lvFrom','lvTo','lvDays','lvReturn','lvOther'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.value='';
@@ -1735,6 +1801,9 @@ function clearLeaveForm() {
     ['date','hol','req'].forEach(function(f){
       var el=document.getElementById('cd'+i+'_'+f); if(el) el.value='';
     });
+    // Reset the holiday auto-fill UI state
+    var holEl = document.getElementById('cd'+i+'_hol');
+    if (holEl) { holEl.removeAttribute('readonly'); holEl.style.background=''; holEl.title=''; holEl.dataset.lastAuto='0'; }
   }
   lvSelWards = [];
   lvRenderTags();
@@ -1898,7 +1967,7 @@ function printLeaveForm() {
     + '.undertaking{font-size:11pt;line-height:1.7;margin:6mm 0;font-style:italic;color:#333;border-left:3px solid #1a2340;padding-left:8px}'
     + '.sig-row{display:flex;justify-content:space-between;margin-top:7mm;gap:4mm}'
     + '.sig-box{flex:1;text-align:center}'
-    + '.sig-line{border-top:1.5px solid #1a2340;margin-top:7mm;padding-top:3mm;font-weight:700;font-size:11pt;color:#1a2340}'
+    + '.sig-line{border-top:1.5px solid #1a2340;margin:7mm auto 0;padding-top:3mm;font-weight:700;font-size:11pt;color:#1a2340;width:55%;max-width:70mm}'
     + '.sig-desig{font-size:10pt;font-weight:normal;color:#555;margin-top:2px}'
     + '.print-footer{border-top:2px solid #1a2340;margin-top:10mm;padding-top:3mm;text-align:center;font-size:10pt;color:#555}'
     + '.footer-brand{font-weight:700;color:#1a2340}'
