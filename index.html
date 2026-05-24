@@ -2460,182 +2460,35 @@ window.addEventListener('DOMContentLoaded', function() {
       + '</div>';
   }
 
-  // Default sections shown if admin hasn't published anything yet — matches the
-  // original hard-coded layout so a fresh install isn't empty.
-  var ABOUT_DEFAULT_SECTIONS = [
-    { title:'Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (AB-PMJAY)',
-      text:"Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) is the world's largest government-funded healthcare initiative, launched by the Government of India to provide free health coverage of \u20B95 lakh per family per year for secondary and tertiary care hospitalization.",
-      titleColor:'#312e81', textColor:'#4338ca', bgColor:'#eef2ff', icon:'scheme', list:false },
-    { title:'Key Features',
-      text:'Cashless and paperless treatment at empanelled public and private hospitals across India.\nCoverage for a wide range of medical and surgical procedures.\nNo restriction on family size, age, or gender.\nPortability of benefits across all states and union territories implementing the scheme.\nPre- and post-hospitalization expenses included as per package guidelines.',
-      titleColor:'#064e3b', textColor:'#047857', bgColor:'#ecfdf5', icon:'features', list:true },
-    { title:'PMAMs',
-      text:'Pradhan Mantri Arogya Mitras (PMAMs) are the backbone of AB-PMJAY. They ensure beneficiaries receive seamless support and guidance throughout their treatment journey.',
-      titleColor:'#1e3a8a', textColor:'#1d4ed8', bgColor:'#eff6ff', icon:'pmam', list:false },
-    { title:'Role of Pradhan Mantri Arogya Mitras (PMAMs)',
-      text:'Eligibility verification\nBeneficiary registration and e-KYC\nHospital admission and package selection\nPre-authorization and claim coordination\nPatient guidance and grievance support',
-      titleColor:'#78350f', textColor:'#b45309', bgColor:'#fffbeb', icon:'role', list:true },
-    { title:'Our Mission',
-      text:'To provide accessible, affordable and quality healthcare to every eligible beneficiary and ensure financial protection against catastrophic health expenditure.',
-      titleColor:'#991b1b', textColor:'#b91c1c', bgColor:'#fef2f2', icon:'mission', list:false },
-    { title:'Vision',
-      text:'To build a healthier India by strengthening healthcare infrastructure and leveraging technology for transparent and efficient healthcare delivery.',
-      titleColor:'#164e63', textColor:'#0e7490', bgColor:'#cffafe', icon:'vision', list:false }
-  ];
-
   function renderAbout(){
-    // Pull live sections from settings/about_page (set by admin). Empty/missing
-    // → use the defaults above so the page is never blank.
+    // Pure Firestore-driven About Us. No hardcoded defaults — if admin
+    // hasn't published any sections, show a friendly empty state instead.
     var live = (window.LIVE && LIVE.aboutPage) || {};
     var secs = Array.isArray(live.aboutSections) ? live.aboutSections.slice() : [];
-    var sourceLabel;
-    if (!secs.length && !live.aboutSections) {
-      sourceLabel = 'no admin data yet — showing built-in defaults';
-    } else if (!secs.length) {
-      sourceLabel = 'admin saved 0 sections — showing built-in defaults';
-    } else {
-      sourceLabel = 'Showing ' + secs.length + ' section' + (secs.length===1?'':'s') + ' published by admin';
-    }
     secs = secs.filter(function(s){ return s && (s.title || s.text); });
-    if (!secs.length) secs = ABOUT_DEFAULT_SECTIONS;
 
-    console.log('[renderAbout] BUILD=v2026-05-24-firestore-wired |', sourceLabel,
-                '| updatedAt=', live.updatedAt || 'never');
+    // Empty state — happens before admin has saved anything.
+    if (!secs.length) {
+      return ''
+        + '<div style="background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:12px;padding:40px 24px;text-align:center;color:#64748b">'
+        +   '<div style="font-size:36px;margin-bottom:10px">\u{1F4DD}</div>'
+        +   '<div style="font-size:15px;font-weight:700;color:#334155;margin-bottom:6px">No content yet</div>'
+        +   '<div style="font-size:12.5px;line-height:1.6">The About Us page is being prepared. Please check back shortly.</div>'
+        + '</div>';
+    }
 
     var cardsHtml = secs.map(function(s, i){ return renderAboutSectionCard(s, i); }).join('');
 
-    // Tiny visible build-marker strip at the top — so the user can confirm
-    // the new code is live without opening DevTools.
-    var when = live.updatedAt ? new Date(live.updatedAt).toLocaleString() : '—';
-    var marker = '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:6px 12px;font-size:11px;color:#166534;display:flex;align-items:center;gap:8px;font-weight:600">'
-      + '<span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;flex-shrink:0"></span>'
-      + '<span>' + esc(sourceLabel) + '</span>'
-      + '<span style="margin-left:auto;color:#6b7280;font-weight:500">build v2 · last save: ' + esc(when) + '</span>'
-      + '</div>';
-
     return ''
       + '<div style="display:flex;flex-direction:column;gap:18px">'
-      +   marker
       +   '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(380px, 1fr));gap:18px;align-items:start">'
       +     cardsHtml
       +   '</div>'
-      +   '<div style="margin-top:6px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:16px 20px;text-align:center;font-size:14px;font-weight:700;color:#5b21b6;display:flex;align-items:center;justify-content:center;gap:10px">'
-      +     '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>'
-      +     'Together, we are building a healthier, stronger and self-reliant India.'
+      +   '<div style="margin-top:6px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #ddd6fe;border-radius:12px;padding:16px 20px;text-align:center;font-size:14px;font-weight:700;color:#5b21b6;display:flex;align-items:center;justify-content:center;gap:10px">'
+      +     '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M8 14h2M14 14h2M8 18h2M14 18h2"/></svg>'
+      +     'Transforming Manual Records into Digital Data'
       +   '</div>'
       + '</div>';
-  }
-
-  // ── ORIGINAL HARDCODED ABOUT (kept as reference, no longer used) ──
-  function _renderAbout_legacy(){
-    return `
-    <div style="display:flex;flex-direction:column;gap:20px;">
-      
-      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(400px, 1fr));gap:20px;align-items:start;">
-        
-        <!-- Left Column -->
-        <div style="display:flex;flex-direction:column;gap:20px;">
-          <!-- AB-PMJAY Card (indigo pastel) -->
-          <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:12px;padding:24px;">
-            <div style="display:flex;gap:16px;align-items:flex-start;">
-              <div style="width:48px;height:48px;border-radius:10px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
-              </div>
-              <div>
-                <h3 style="margin:0 0 10px 0;font-size:16px;font-weight:800;color:#312e81;line-height:1.3;">Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (AB-PMJAY)</h3>
-                <div style="font-size:12.5px;color:#4338ca;line-height:1.65;font-weight:500;">Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) is the world's largest government-funded healthcare initiative, launched by the Government of India to provide free health coverage of ₹5 lakh per family per year for secondary and tertiary care hospitalization.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- PMAMs Card (blue pastel) -->
-          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:24px;">
-            <div style="display:flex;gap:16px;align-items:flex-start;">
-              <div style="width:48px;height:48px;border-radius:10px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-              </div>
-              <div>
-                <h3 style="margin:0 0 10px 0;font-size:15px;font-weight:800;color:#1e3a8a;line-height:1.3;">PMAMs</h3>
-                <div style="font-size:12.5px;color:#1d4ed8;line-height:1.65;font-weight:500;">Pradhan Mantri Arogya Mitras (PMAMs) are the backbone of AB-PMJAY. They ensure beneficiaries receive seamless support and guidance throughout their treatment journey.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Column -->
-        <div style="display:flex;flex-direction:column;gap:20px;">
-          <!-- Key Features Card (emerald pastel) -->
-          <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;padding:24px;">
-            <div style="display:flex;gap:16px;align-items:flex-start;">
-              <div style="width:48px;height:48px;border-radius:10px;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-              </div>
-              <div style="flex:1;">
-                <h3 style="margin:0 0 14px 0;font-size:15px;font-weight:800;color:#064e3b;line-height:1.3;">Key Features</h3>
-                <div style="display:flex;flex-direction:column;gap:10px;">
-                  <div style="display:flex;gap:10px;font-size:12px;color:#047857;line-height:1.5;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Cashless and paperless treatment at empanelled public and private hospitals across India.</div>
-                  <div style="display:flex;gap:10px;font-size:12px;color:#047857;line-height:1.5;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Coverage for a wide range of medical and surgical procedures.</div>
-                  <div style="display:flex;gap:10px;font-size:12px;color:#047857;line-height:1.5;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg> No restriction on family size, age, or gender.</div>
-                  <div style="display:flex;gap:10px;font-size:12px;color:#047857;line-height:1.5;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Portability of benefits across all states and union territories implementing the scheme.</div>
-                  <div style="display:flex;gap:10px;font-size:12px;color:#047857;line-height:1.5;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Pre- and post-hospitalization expenses included as per package guidelines.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Role of PMAMs Card (amber pastel) -->
-          <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:24px;">
-            <div style="display:flex;gap:16px;align-items:flex-start;">
-              <div style="width:48px;height:48px;border-radius:10px;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-              </div>
-              <div style="flex:1;">
-                <h3 style="margin:0 0 14px 0;font-size:15px;font-weight:800;color:#78350f;line-height:1.3;">Role of Pradhan Mantri Arogya Mitras (PMAMs)</h3>
-                <div style="display:flex;flex-direction:column;gap:10px;">
-                  <div style="display:flex;gap:10px;font-size:12px;color:#b45309;line-height:1.5;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Eligibility verification</div>
-                  <div style="display:flex;gap:10px;font-size:12px;color:#b45309;line-height:1.5;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Beneficiary registration and e-KYC</div>
-                  <div style="display:flex;gap:10px;font-size:12px;color:#b45309;line-height:1.5;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Hospital admission and package selection</div>
-                  <div style="display:flex;gap:10px;font-size:12px;color:#b45309;line-height:1.5;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Pre-authorization and claim coordination</div>
-                  <div style="display:flex;gap:10px;font-size:12px;color:#b45309;line-height:1.5;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Patient guidance and grievance support</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Mission and Vision -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:20px;">
-        <!-- Mission (red pastel) -->
-        <div style="background:#fef2f2;border:1px solid #fee2e2;border-radius:12px;padding:24px;display:flex;align-items:flex-start;gap:16px;">
-           <div style="width:48px;height:48px;border-radius:10px;background:#ef4444;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-           </div>
-           <div>
-             <h3 style="margin:0 0 8px 0;font-size:15px;font-weight:800;color:#991b1b;">Our Mission</h3>
-             <div style="font-size:12px;color:#b91c1c;line-height:1.65;font-weight:500;">To provide accessible, affordable and quality healthcare to every eligible beneficiary and ensure financial protection against catastrophic health expenditure.</div>
-           </div>
-        </div>
-
-        <!-- Vision (cyan pastel) -->
-        <div style="background:#cffafe;border:1px solid #a5f3fc;border-radius:12px;padding:24px;display:flex;align-items:flex-start;gap:16px;">
-           <div style="width:48px;height:48px;border-radius:10px;background:#06b6d4;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-           </div>
-           <div>
-             <h3 style="margin:0 0 8px 0;font-size:15px;font-weight:800;color:#164e63;">Vision</h3>
-             <div style="font-size:12px;color:#0e7490;line-height:1.65;font-weight:500;">To build a healthier India by strengthening healthcare infrastructure and leveraging technology for transparent and efficient healthcare delivery.</div>
-           </div>
-        </div>
-      </div>
-
-      <div style="margin-top:10px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:16px 20px;text-align:center;font-size:14px;font-weight:700;color:#5b21b6;display:flex;align-items:center;justify-content:center;gap:10px">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-        Together, we are building a healthier, stronger and self-reliant India.
-      </div>
-    </div>
-    `;
   }
 
   function renderDeveloper(){
