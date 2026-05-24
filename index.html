@@ -2173,10 +2173,47 @@ window.addEventListener('DOMContentLoaded', function() {
       if (_openId === 'orders') renderInto(_openId);
     }, function(err){ console.warn('orders listener:', err && err.message); });
 
+    console.log('[contentModal] Subscribing to settings/about_page…');
+    var aboutPageFired = false;
     db.collection('settings').doc('about_page').onSnapshot(function(doc){
+      aboutPageFired = true;
+      console.log('[about_page listener] FIRED. doc.exists=', doc.exists,
+                  '| data keys:', doc.exists ? Object.keys(doc.data() || {}) : '(none)');
       LIVE.aboutPage = doc.exists ? (doc.data() || {}) : {};
-      if (_openId === 'about' || _openId === 'developer') renderInto(_openId);
-    }, function(err){ console.warn('about_page listener:', err && err.message); });
+      console.log('[about_page listener] LIVE.aboutPage.aboutSections =',
+                  LIVE.aboutPage && LIVE.aboutPage.aboutSections
+                    ? LIVE.aboutPage.aboutSections.length + ' sections'
+                    : '(none)');
+      if (_openId === 'about' || _openId === 'developer') {
+        console.log('[about_page listener] Modal is open → re-rendering');
+        renderInto(_openId);
+      }
+    }, function(err){
+      console.error('[about_page listener] ERROR — read FAILED:', err);
+      console.error('[about_page listener] code:', err && err.code, '| message:', err && err.message);
+      if (err && err.code === 'permission-denied') {
+        console.error('[about_page listener] >>> FIRESTORE SECURITY RULES are blocking the public read of settings/about_page. Update rules to allow read access. <<<');
+      }
+    });
+    // Fallback: if the listener never fires within 6s, do a one-shot read so
+    // we can distinguish "no data" from "blocked by rules" vs "subscribed OK".
+    setTimeout(function(){
+      if (!aboutPageFired) {
+        console.warn('[about_page listener] No snapshot in 6s — trying one-shot .get() to diagnose…');
+        db.collection('settings').doc('about_page').get()
+          .then(function(doc){
+            console.log('[about_page one-shot] doc.exists=', doc.exists,
+                        '| keys:', doc.exists ? Object.keys(doc.data() || {}) : '(none)');
+            if (!LIVE.aboutPage || !LIVE.aboutPage.aboutSections) {
+              LIVE.aboutPage = doc.exists ? (doc.data() || {}) : {};
+              if (_openId === 'about' || _openId === 'developer') renderInto(_openId);
+            }
+          })
+          .catch(function(e){
+            console.error('[about_page one-shot] FAILED — definitely a rules/network issue:', e);
+          });
+      }
+    }, 6000);
 
     // Expose the staff group order so the staff modal (a separate IIFE) can
     // read it when building the grouped staff list.
