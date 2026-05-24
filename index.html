@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Defeat GitHub Pages/browser caching so admin edits show up after deploy -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>MIS — GMC & AH Rajouri</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -2482,19 +2486,36 @@ window.addEventListener('DOMContentLoaded', function() {
   function renderAbout(){
     // Pull live sections from settings/about_page (set by admin). Empty/missing
     // → use the defaults above so the page is never blank.
-    console.log('[renderAbout] v2026-05-24-firestore-wired — sections from Firestore:',
-      (window.LIVE && LIVE.aboutPage && Array.isArray(LIVE.aboutPage.aboutSections))
-        ? LIVE.aboutPage.aboutSections.length + ' sections'
-        : 'none yet (will use defaults)');
     var live = (window.LIVE && LIVE.aboutPage) || {};
     var secs = Array.isArray(live.aboutSections) ? live.aboutSections.slice() : [];
+    var sourceLabel;
+    if (!secs.length && !live.aboutSections) {
+      sourceLabel = 'no admin data yet — showing built-in defaults';
+    } else if (!secs.length) {
+      sourceLabel = 'admin saved 0 sections — showing built-in defaults';
+    } else {
+      sourceLabel = 'Showing ' + secs.length + ' section' + (secs.length===1?'':'s') + ' published by admin';
+    }
     secs = secs.filter(function(s){ return s && (s.title || s.text); });
     if (!secs.length) secs = ABOUT_DEFAULT_SECTIONS;
 
+    console.log('[renderAbout] BUILD=v2026-05-24-firestore-wired |', sourceLabel,
+                '| updatedAt=', live.updatedAt || 'never');
+
     var cardsHtml = secs.map(function(s, i){ return renderAboutSectionCard(s, i); }).join('');
+
+    // Tiny visible build-marker strip at the top — so the user can confirm
+    // the new code is live without opening DevTools.
+    var when = live.updatedAt ? new Date(live.updatedAt).toLocaleString() : '—';
+    var marker = '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:6px 12px;font-size:11px;color:#166534;display:flex;align-items:center;gap:8px;font-weight:600">'
+      + '<span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;flex-shrink:0"></span>'
+      + '<span>' + esc(sourceLabel) + '</span>'
+      + '<span style="margin-left:auto;color:#6b7280;font-weight:500">build v2 · last save: ' + esc(when) + '</span>'
+      + '</div>';
 
     return ''
       + '<div style="display:flex;flex-direction:column;gap:18px">'
+      +   marker
       +   '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(380px, 1fr));gap:18px;align-items:start">'
       +     cardsHtml
       +   '</div>'
