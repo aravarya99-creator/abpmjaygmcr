@@ -2500,9 +2500,15 @@ window.addEventListener('DOMContentLoaded', function() {
   function renderAbout(){
     // Pure Firestore-driven About Us. No hardcoded defaults — if admin
     // hasn't published any sections, show a friendly empty state instead.
-    var live = (window.LIVE && LIVE.aboutPage) || {};
-    var secs = Array.isArray(live.aboutSections) ? live.aboutSections.slice() : [];
-    secs = secs.filter(function(s){ return s && (s.title || s.text); });
+    // NOTE: LIVE is the closure variable for this IIFE — NOT window.LIVE.
+    var live = LIVE.aboutPage || {};
+    var rawSecs = Array.isArray(live.aboutSections) ? live.aboutSections.slice() : [];
+    console.log('[renderAbout] CALLED.',
+                '| LIVE.aboutPage exists?', !!LIVE.aboutPage,
+                '| raw aboutSections isArray:', Array.isArray(live.aboutSections),
+                '| raw length:', rawSecs.length);
+    var secs = rawSecs.filter(function(s){ return s && (s.title || s.text); });
+    console.log('[renderAbout] After filter:', secs.length, 'sections');
 
     // Empty state — happens before admin has saved anything.
     if (!secs.length) {
