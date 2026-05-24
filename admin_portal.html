@@ -1136,7 +1136,7 @@ tr:hover td{background:#EEF3FF}
 
         <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:4px">
           <span id="abSaveMsg" style="font-size:11px;font-weight:600"></span>
-          <button class="btn btn-pri" onclick="abSave()">💾 Save &amp; Publish</button>
+          <button class="btn btn-pri" onclick="abSave('about')">💾 Save &amp; Publish</button>
         </div>
       </div>
 
@@ -1163,12 +1163,12 @@ tr:hover td{background:#EEF3FF}
             <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:8px">
               <div>
                 <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Developer Name</label>
-                <input type="text" id="abDevName" placeholder="e.g. Dr. Arya Sharma"
+                <input type="text" id="abDevName" placeholder="e.g. Dr. Arya Sharma" oninput="abMarkUnsaved('dev')"
                   style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
               </div>
               <div>
                 <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Role / Title</label>
-                <input type="text" id="abDevRole" placeholder="e.g. Portal Developer — AB-PMJAY Unit, GMC Rajouri"
+                <input type="text" id="abDevRole" placeholder="e.g. Portal Developer — AB-PMJAY Unit, GMC Rajouri" oninput="abMarkUnsaved('dev')"
                   style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
               </div>
             </div>
@@ -1185,7 +1185,7 @@ tr:hover td{background:#EEF3FF}
 
         <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:4px">
           <span id="abDevSaveMsg" style="font-size:11px;font-weight:600"></span>
-          <button class="btn btn-pri" onclick="abSave()">💾 Save &amp; Publish</button>
+          <button class="btn btn-pri" onclick="abSave('dev')">💾 Save &amp; Publish</button>
         </div>
       </div>
 
@@ -3891,7 +3891,7 @@ function abApplyPreset(which, i, presetName){
   s.titleColor = p.title;
   s.textColor  = p.text;
   abRenderSections(which);
-  abMarkUnsaved();
+  abMarkUnsaved(which);
 }
 
 function abInit(){
@@ -3954,7 +3954,7 @@ function abListElId(which){ return which === 'dev' ? 'devSectionsList' : 'abSect
 function abAddSection(which){
   abSectionsArray(which).push(abBlankSection());
   abRenderSections(which);
-  abMarkUnsaved();
+  abMarkUnsaved(which);
 }
 
 function abRemoveSection(which, i){
@@ -3966,7 +3966,7 @@ function abRemoveSection(which, i){
     arr.splice(i, 1);
   }
   abRenderSections(which);
-  abMarkUnsaved();
+  abMarkUnsaved(which);
 }
 
 function abMoveSection(which, i, dir){
@@ -3975,11 +3975,16 @@ function abMoveSection(which, i, dir){
   if (j < 0 || j >= arr.length) return;
   var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
   abRenderSections(which);
-  abMarkUnsaved();
+  abMarkUnsaved(which);
 }
 
-function abMarkUnsaved(){
-  ['abSaveMsg','abDevSaveMsg'].forEach(function(id){
+function abMarkUnsaved(which){
+  // which = 'about' | 'dev' | undefined (= mark both, used for global ops).
+  var ids;
+  if (which === 'about')      ids = ['abSaveMsg'];
+  else if (which === 'dev')   ids = ['abDevSaveMsg'];
+  else                        ids = ['abSaveMsg','abDevSaveMsg'];
+  ids.forEach(function(id){
     var el = document.getElementById(id);
     if (el) { el.textContent = '● Unsaved changes'; el.style.color = '#dc2626'; }
   });
@@ -4040,7 +4045,7 @@ function abRenderSections(which){
     var iconPicker = AB_ICON_SET.map(function(ic){
       var on = (s.icon || 'info') === ic.v;
       return '<button title="' + escAttr(ic.label) + '" '
-        +   'onclick="abSectionsArray(\'' + which + '\')[' + i + '].icon=\'' + ic.v + '\';abRenderSections(\'' + which + '\');abMarkUnsaved()" '
+        +   'onclick="abSectionsArray(\'' + which + '\')[' + i + '].icon=\'' + ic.v + '\';abRenderSections(\'' + which + '\');abMarkUnsaved(\'' + which + '\')" '
         +   'style="width:34px;height:34px;border-radius:50%;border:2px solid ' + (on?'#7c3aed':'#e5e7eb') + ';'
         +     'background:' + (on?'linear-gradient(135deg,#ede9fe,#ddd6fe)':'#fff') + ';'
         +     'display:inline-flex;align-items:center;justify-content:center;cursor:pointer;'
@@ -4097,12 +4102,12 @@ function abRenderSections(which){
       // title
       +   '<label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Section Title</label>'
       +   '<input type="text" value="' + escAttr(s.title || '') + '" placeholder="e.g. About AB-PMJAY SEHAT" '
-      +     'oninput="abSectionsArray(\'' + which + '\')[' + i + '].title=this.value;abMarkUnsaved();abUpdatePreview(' + ref + ')" '
+      +     'oninput="abSectionsArray(\'' + which + '\')[' + i + '].title=this.value;abMarkUnsaved(\'' + which + '\');abUpdatePreview(' + ref + ')" '
       +     'style="width:100%;padding:7px 10px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;outline:none;margin-bottom:10px">'
       // body
       +   '<label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Body Text <span style="color:#9ca3af;font-weight:500;text-transform:none;letter-spacing:0">— one line per bullet, or a paragraph</span></label>'
       +   '<textarea rows="5" placeholder="Type one line per bullet point, OR a single paragraph.\nE.g.:\nEligibility verification\nBeneficiary registration\n…" '
-      +     'oninput="abSectionsArray(\'' + which + '\')[' + i + '].text=this.value;abMarkUnsaved();abUpdatePreview(' + ref + ')" '
+      +     'oninput="abSectionsArray(\'' + which + '\')[' + i + '].text=this.value;abMarkUnsaved(\'' + which + '\');abUpdatePreview(' + ref + ')" '
       +     'style="width:100%;padding:8px 10px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;line-height:1.6;outline:none;resize:vertical;margin-bottom:10px">' + escAttr(s.text || '') + '</textarea>'
 
       // ICON picker
@@ -4119,13 +4124,13 @@ function abRenderSections(which){
       +     abColorField(which, i, 'textColor',  'Text colour',  s.textColor)
       +     abColorField(which, i, 'bgColor',    'Background / shape', s.bgColor)
       +     '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Font style</label>'
-      +       '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].font=this.value;abMarkUnsaved();abUpdatePreview(' + ref + ')" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + fontOptsSel + '</select>'
+      +       '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].font=this.value;abMarkUnsaved(\'' + which + '\');abUpdatePreview(' + ref + ')" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + fontOptsSel + '</select>'
       +     '</div>'
       +     '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Alignment</label>'
-      +       '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].align=this.value;abMarkUnsaved();abUpdatePreview(' + ref + ')" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + alignOpts + '</select>'
+      +       '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].align=this.value;abMarkUnsaved(\'' + which + '\');abUpdatePreview(' + ref + ')" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + alignOpts + '</select>'
       +     '</div>'
       +     '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Display as</label>'
-      +       '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].list=this.value;abMarkUnsaved();abUpdatePreview(' + ref + ')" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + listOpts + '</select>'
+      +       '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].list=this.value;abMarkUnsaved(\'' + which + '\');abUpdatePreview(' + ref + ')" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + listOpts + '</select>'
       +     '</div>'
       +   '</div>'
       + '</div>'
@@ -4159,10 +4164,10 @@ function abColorField(which, i, key, label, value){
     + '<label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">' + label + '</label>'
     + '<div style="display:flex;align-items:center;gap:5px">'
     +   '<input type="color" value="' + escAttr(value) + '" '
-    +     'oninput="' + arrRef + '.' + key + '=this.value;this.nextElementSibling.value=this.value;abMarkUnsaved();abUpdatePreview(' + refPrev + ')" '
+    +     'oninput="' + arrRef + '.' + key + '=this.value;this.nextElementSibling.value=this.value;abMarkUnsaved(\'' + which + '\');abUpdatePreview(' + refPrev + ')" '
     +     'style="width:34px;height:30px;border:1px solid #c7d2e8;border-radius:6px;padding:1px;cursor:pointer;background:#fff">'
     +   '<input type="text" value="' + escAttr(value) + '" '
-    +     'onchange="' + arrRef + '.' + key + '=this.value;if(this.previousElementSibling)this.previousElementSibling.value=this.value;abMarkUnsaved();abUpdatePreview(' + refPrev + ')" '
+    +     'onchange="' + arrRef + '.' + key + '=this.value;if(this.previousElementSibling)this.previousElementSibling.value=this.value;abMarkUnsaved(\'' + which + '\');abUpdatePreview(' + refPrev + ')" '
     +     'style="width:74px;padding:5px 6px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;font-family:monospace;outline:none">'
     + '</div>'
     + '</div>';
@@ -4190,7 +4195,7 @@ function abDevPreviewPhoto(input){
   reader.onload = function(e){
     _abDevPhoto = e.target.result;
     abDevRenderPhoto();
-    abMarkUnsaved();
+    abMarkUnsaved('dev');
   };
   reader.readAsDataURL(file);
 }
@@ -4200,13 +4205,30 @@ function abDevClearPhoto(){
   var f = document.getElementById('abDevPhotoFile');
   if (f) f.value = '';
   abDevRenderPhoto();
-  abMarkUnsaved();
+  abMarkUnsaved('dev');
 }
 
-function abSave(){
-  var msgs = [document.getElementById('abSaveMsg'), document.getElementById('abDevSaveMsg')];
+function abSave(which){
+  // which = 'about' | 'dev' | undefined. Tells us which pane triggered the
+  // save so the success message reflects what the user was just editing.
+  // The Firestore write ALWAYS writes both arrays (single doc), that's by
+  // design — the message is purely cosmetic.
+  var aboutMsg = document.getElementById('abSaveMsg');
+  var devMsg   = document.getElementById('abDevSaveMsg');
   var setMsg = function(text, color){
-    msgs.forEach(function(m){ if (m){ m.textContent = text; m.style.color = color; } });
+    // Show on BOTH panes if context is unknown, else only the relevant one.
+    if (which === 'about') { if (aboutMsg){ aboutMsg.textContent = text; aboutMsg.style.color = color; } }
+    else if (which === 'dev') { if (devMsg){ devMsg.textContent = text; devMsg.style.color = color; } }
+    else {
+      if (aboutMsg){ aboutMsg.textContent = text; aboutMsg.style.color = color; }
+      if (devMsg)  { devMsg.textContent   = text; devMsg.style.color   = color; }
+    }
+  };
+  // Also clear the OTHER pane's stale "Unsaved" so it doesn't look wrong
+  // after we save (both arrays really did get written).
+  var clearOther = function(){
+    if (which === 'about' && devMsg)   { devMsg.textContent = ''; }
+    if (which === 'dev'   && aboutMsg) { aboutMsg.textContent = ''; }
   };
   try {
     var val = function(id){ var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
@@ -4235,18 +4257,34 @@ function abSave(){
       updatedAt:     Date.now(),
       _updatedBy:    (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
     };
-    console.log('[abSave] writing about_page payload:', payload);
+    console.log('[abSave] writing about_page payload (triggered by:', which || 'unknown', ')', payload);
     setMsg('Saving…', '#1A3DB5');
     db.collection('settings').doc('about_page').set(payload, { merge: true })
       .then(function(){
         console.log('[abSave] write succeeded');
-        setMsg('✅ Saved & published! (' + payload.aboutSections.length + ' About + ' + payload.devSections.length + ' Developer section' + (payload.devSections.length===1?'':'s') + ')', '#166534');
+        clearOther();
+        // Context-aware success message
+        var msg, toastMsg;
+        if (which === 'about') {
+          var n = payload.aboutSections.length;
+          msg = '✅ Saved & published! (' + n + ' About section' + (n===1?'':'s') + ')';
+          toastMsg = '✅ About Us page published';
+        } else if (which === 'dev') {
+          var d = payload.devSections.length;
+          msg = '✅ Saved & published! (' + d + ' Developer section' + (d===1?'':'s') + ')';
+          toastMsg = '✅ About Developer page published';
+        } else {
+          msg = '✅ Saved & published! (' + payload.aboutSections.length + ' About + ' + payload.devSections.length + ' Developer section' + (payload.devSections.length===1?'':'s') + ')';
+          toastMsg = '✅ About page published';
+        }
+        setMsg(msg, '#166534');
         setTimeout(function(){ setMsg('', '#166534'); }, 4000);
-        if (typeof showToast === 'function') showToast('✅ About page published', 'success');
+        if (typeof showToast === 'function') showToast(toastMsg, 'success');
         if (typeof writeAudit === 'function') {
-          try { writeAudit('EDIT', 'settings/about_page', 'about_page', {
+          try { writeAudit('EDIT', 'settings/about_page', which || 'about_page', {
             aboutSections: payload.aboutSections.length,
-            devSections: payload.devSections.length
+            devSections: payload.devSections.length,
+            triggeredBy: which || 'unknown'
           }); } catch(ae){ console.warn('[abSave] audit log failed (non-fatal):', ae); }
         }
       })
