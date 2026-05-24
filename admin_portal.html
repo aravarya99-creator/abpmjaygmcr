@@ -1118,9 +1118,11 @@ tr:hover td{background:#EEF3FF}
         <div class="card" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #d8b4fe;margin-bottom:12px">
           <div class="card-hd" style="color:#6b21a8">ℹ️ About Us Page Editor</div>
           <div style="font-size:12px;color:#6b21a8;line-height:1.6">
-            Build the <strong>About Us</strong> page from one or more content sections. Each section has
-            its own title, body text, and styling (text colour, background/shape colour, font and
-            alignment). Add as many sections as you need. Changes go live after Save &amp; Publish.
+            Build the <strong>About Us</strong> page from one or more content sections. Each section has its own
+            <strong>title</strong>, <strong>body text</strong>, <strong>icon</strong>, <strong>colours</strong>, <strong>font</strong> and <strong>alignment</strong>.
+            <br>💡 <strong>Tip:</strong> type one line per bullet in the body to create a checklist (like Key Features),
+            or write a paragraph to get plain text. Use the <strong>colour presets</strong> for one-click theming
+            that matches the landing page. Changes go live the instant you click Save &amp; Publish.
           </div>
         </div>
 
@@ -3839,7 +3841,9 @@ function abBlankSection(){
     textColor:  '#334155',
     bgColor:    '#ffffff',
     font:       'inherit',
-    align:      'left'
+    align:      'left',
+    icon:       'info',
+    list:       'auto'   // 'auto' | 'bullets' | 'paragraph'
   };
 }
 
@@ -3851,6 +3855,44 @@ var AB_FONTS = [
   { v:'mono',    label:'Monospace (Courier)' },
   { v:'rounded', label:'Rounded (Trebuchet)' }
 ];
+
+// Icon set — keys MUST match ABOUT_ICONS in index.html renderAboutSectionCard.
+// label shown in the picker; svg is the inline preview drawn in admin.
+var AB_ICON_SET = [
+  { v:'scheme',   label:'Heart',  svg:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>' },
+  { v:'features', label:'Shield', svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>' },
+  { v:'pmam',     label:'Users',  svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
+  { v:'role',     label:'File',   svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>' },
+  { v:'mission',  label:'Target', svg:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>' },
+  { v:'vision',   label:'Eye',    svg:'<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>' },
+  { v:'info',     label:'Info',   svg:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>' },
+  { v:'star',     label:'Star',   svg:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' }
+];
+
+// One-click colour presets — match the pastel cards on the landing page.
+var AB_COLOR_PRESETS = [
+  { name:'Indigo',  bg:'#eef2ff', title:'#312e81', text:'#4338ca' },
+  { name:'Emerald', bg:'#ecfdf5', title:'#064e3b', text:'#047857' },
+  { name:'Blue',    bg:'#eff6ff', title:'#1e3a8a', text:'#1d4ed8' },
+  { name:'Amber',   bg:'#fffbeb', title:'#78350f', text:'#b45309' },
+  { name:'Red',     bg:'#fef2f2', title:'#991b1b', text:'#b91c1c' },
+  { name:'Cyan',    bg:'#cffafe', title:'#164e63', text:'#0e7490' },
+  { name:'Purple',  bg:'#faf5ff', title:'#4c1d95', text:'#6b21a8' },
+  { name:'Slate',   bg:'#f8fafc', title:'#0f172a', text:'#334155' }
+];
+
+// Apply a preset to one section, then re-render and live-preview.
+function abApplyPreset(which, i, presetName){
+  var p = AB_COLOR_PRESETS.filter(function(x){ return x.name === presetName; })[0];
+  if (!p) return;
+  var s = abSectionsArray(which)[i];
+  if (!s) return;
+  s.bgColor    = p.bg;
+  s.titleColor = p.title;
+  s.textColor  = p.text;
+  abRenderSections(which);
+  abMarkUnsaved();
+}
 
 function abInit(){
   db.collection('settings').doc('about_page').get().then(function(doc){
@@ -3943,68 +3985,184 @@ function abMarkUnsaved(){
   });
 }
 
+// Build an inline SVG preview for an icon entry (used inside the icon picker).
+function abIconSvg(iconKey, color){
+  var entry = AB_ICON_SET.filter(function(x){ return x.v === iconKey; })[0] || AB_ICON_SET[6];
+  return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="' + (color||'#7c3aed') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + entry.svg + '</svg>';
+}
+
+// Render the mini preview card for one section — mirrors the landing-page look.
+function abMiniPreview(s){
+  var bg    = s.bgColor    || '#ffffff';
+  var tc    = s.titleColor || '#3730a3';
+  var txtc  = s.textColor  || '#475569';
+  var lines = String(s.text || '').split(/\r?\n/).map(function(x){ return x.trim(); }).filter(Boolean);
+  var asList = s.list === 'bullets' || (s.list !== 'paragraph' && lines.length >= 2);
+  var body;
+  if (asList && lines.length) {
+    body = '<div style="display:flex;flex-direction:column;gap:5px;margin-top:6px">'
+         + lines.map(function(ln){
+             return '<div style="display:flex;align-items:flex-start;gap:6px;font-size:10.5px;color:' + escAttr(txtc) + ';line-height:1.45">'
+               + '<span style="color:' + escAttr(tc) + ';font-weight:800;flex-shrink:0">\u2713</span>'
+               + '<span>' + escAttr(ln) + '</span></div>';
+           }).join('')
+         + '</div>';
+  } else {
+    body = '<div style="font-size:10.5px;color:' + escAttr(txtc) + ';line-height:1.55;margin-top:5px;white-space:pre-wrap">' + escAttr(s.text || '(no body text)') + '</div>';
+  }
+  return '<div style="background:' + escAttr(bg) + ';border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">'
+       +   '<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#ede9fe,#ddd6fe);display:flex;align-items:center;justify-content:center;flex-shrink:0">' + abIconSvg(s.icon || 'info', '#7c3aed') + '</div>'
+       +   '<div style="flex:1;min-width:0">'
+       +     '<div style="font-weight:800;font-size:12px;color:' + escAttr(tc) + ';line-height:1.3">' + (escAttr(s.title || '') || '<span style="opacity:0.5">(no title)</span>') + '</div>'
+       +     body
+       +   '</div>'
+       + '</div>';
+}
+
 // Render the section-editor cards for one pane.
 function abRenderSections(which){
   var box = document.getElementById(abListElId(which));
   if (!box) return;
   var arr = abSectionsArray(which);
+
+  // Empty state
+  if (!arr.length) {
+    box.innerHTML = '<div style="border:1.5px dashed #d8b4fe;border-radius:12px;padding:30px;text-align:center;background:#faf5ff;color:#6b21a8;font-size:12px;font-weight:600">No sections yet. Click <strong>+ Add Section</strong> above to start building the page.</div>';
+    return;
+  }
+
+  var fontOpts = AB_FONTS.map(function(f){ return '<option value="' + f.v + '">' + f.label + '</option>'; }).join('');
+
   box.innerHTML = arr.map(function(s, i){
-    var fontOpts = AB_FONTS.map(function(f){
+    var ref = "'" + which + "'," + i;
+
+    // ── Icon picker ── 8 circular buttons, currently-chosen one highlighted.
+    var iconPicker = AB_ICON_SET.map(function(ic){
+      var on = (s.icon || 'info') === ic.v;
+      return '<button title="' + escAttr(ic.label) + '" '
+        +   'onclick="abSectionsArray(\'' + which + '\')[' + i + '].icon=\'' + ic.v + '\';abRenderSections(\'' + which + '\');abMarkUnsaved()" '
+        +   'style="width:34px;height:34px;border-radius:50%;border:2px solid ' + (on?'#7c3aed':'#e5e7eb') + ';'
+        +     'background:' + (on?'linear-gradient(135deg,#ede9fe,#ddd6fe)':'#fff') + ';'
+        +     'display:inline-flex;align-items:center;justify-content:center;cursor:pointer;'
+        +     'box-shadow:' + (on?'0 2px 6px rgba(124,58,237,0.25)':'none') + ';transition:all 0.15s">'
+        +   abIconSvg(ic.v, on?'#7c3aed':'#9ca3af')
+        +   '</button>';
+    }).join('');
+
+    // ── Colour preset chips ── one click = bg+title+text trio
+    var presetChips = AB_COLOR_PRESETS.map(function(p){
+      return '<button onclick="abApplyPreset(' + ref + ',\'' + p.name + '\')" '
+        +   'title="' + escAttr(p.name) + ' preset" '
+        +   'style="display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border:1px solid #e5e7eb;background:#fff;border-radius:14px;cursor:pointer;font-size:10.5px;font-weight:600;color:#374151">'
+        +   '<span style="width:11px;height:11px;border-radius:50%;background:' + p.bg + ';border:1px solid #d1d5db;display:inline-block"></span>'
+        +   '<span style="width:11px;height:11px;border-radius:50%;background:' + p.title + ';display:inline-block"></span>'
+        +   p.name
+        +   '</button>';
+    }).join('');
+
+    // ── List mode select ──
+    var listMode = s.list || 'auto';
+    var listOpts = [
+      ['auto','Auto (smart)'],
+      ['bullets','Always bullets'],
+      ['paragraph','Always paragraph']
+    ].map(function(o){
+      return '<option value="' + o[0] + '"' + (listMode===o[0]?' selected':'') + '>' + o[1] + '</option>';
+    }).join('');
+
+    var fontOptsSel = AB_FONTS.map(function(f){
       return '<option value="' + f.v + '"' + (s.font === f.v ? ' selected' : '') + '>' + f.label + '</option>';
     }).join('');
     var alignOpts = ['left','center','right'].map(function(al){
       return '<option value="' + al + '"' + (s.align === al ? ' selected' : '') + '>' + al.charAt(0).toUpperCase()+al.slice(1) + '</option>';
     }).join('');
-    var ref = "'" + which + "'," + i;
-    return '<div style="border:1.5px solid #e9d5ff;border-radius:12px;padding:14px;background:#fdfbff">'
-      // header row: section number + move/delete
+
+    return '<div style="border:1.5px solid #e9d5ff;border-radius:14px;padding:14px;background:#fdfbff">'
+      // header row
       + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
       +   '<span style="background:#7c3aed;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">' + (i+1) + '</span>'
-      +   '<span style="font-size:12px;font-weight:700;color:#6b21a8">Section ' + (i+1) + '</span>'
+      +   '<span style="font-size:12px;font-weight:700;color:#6b21a8">Section ' + (i+1) + (s.title?' — '+escAttr(s.title.slice(0,40))+(s.title.length>40?'…':''):'') + '</span>'
       +   '<div style="margin-left:auto;display:flex;gap:4px">'
-      +     '<button onclick="abMoveSection(' + ref + ',-1)" ' + (i===0?'disabled':'') + ' title="Move up" style="width:26px;height:24px;border:1px solid #d1d5db;background:' + (i===0?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===0?'not-allowed':'pointer') + ';font-size:11px">↑</button>'
-      +     '<button onclick="abMoveSection(' + ref + ',1)" ' + (i===arr.length-1?'disabled':'') + ' title="Move down" style="width:26px;height:24px;border:1px solid #d1d5db;background:' + (i===arr.length-1?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===arr.length-1?'not-allowed':'pointer') + ';font-size:11px">↓</button>'
-      +     '<button onclick="abRemoveSection(' + ref + ')" title="Delete section" style="padding:3px 10px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700">🗑</button>'
+      +     '<button onclick="abMoveSection(' + ref + ',-1)" ' + (i===0?'disabled':'') + ' title="Move up" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===0?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===0?'not-allowed':'pointer') + ';font-size:12px">\u2191</button>'
+      +     '<button onclick="abMoveSection(' + ref + ',1)" '  + (i===arr.length-1?'disabled':'') + ' title="Move down" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===arr.length-1?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===arr.length-1?'not-allowed':'pointer') + ';font-size:12px">\u2193</button>'
+      +     '<button onclick="abRemoveSection(' + ref + ')" title="Delete section" style="padding:4px 11px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700">\uD83D\uDDD1 Delete</button>'
       +   '</div>'
       + '</div>'
+
+      // ── two-column layout: editor left, live preview right ──
+      + '<div style="display:grid;grid-template-columns:1fr 280px;gap:12px;align-items:start">'
+
+      // LEFT — editor
+      + '<div>'
       // title
-      + '<label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Section Title</label>'
-      + '<input type="text" value="' + escAttr(s.title || '') + '" placeholder="e.g. About AB-PMJAY SEHAT" '
-      +   'onchange="abSectionsArray(\'' + which + '\')[' + i + '].title=this.value;abMarkUnsaved()" '
-      +   'style="width:100%;padding:7px 10px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;outline:none;margin-bottom:10px">'
-      // text
-      + '<label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Body Text</label>'
-      + '<textarea rows="5" placeholder="Section content… line breaks are preserved." '
-      +   'onchange="abSectionsArray(\'' + which + '\')[' + i + '].text=this.value;abMarkUnsaved()" '
-      +   'style="width:100%;padding:8px 10px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;line-height:1.6;outline:none;resize:vertical;margin-bottom:10px">' + escAttr(s.text || '') + '</textarea>'
-      // styling row
-      + '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;background:#fff;border:1px solid #f0e8fb;border-radius:8px;padding:10px">'
-      +   abColorField(which, i, 'titleColor', 'Title colour', s.titleColor)
-      +   abColorField(which, i, 'textColor',  'Text colour',  s.textColor)
-      +   abColorField(which, i, 'bgColor',    'Background / shape', s.bgColor)
-      +   '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Font style</label>'
-      +     '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].font=this.value;abMarkUnsaved()" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + fontOpts + '</select>'
-      +   '</div>'
-      +   '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Alignment</label>'
-      +     '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].align=this.value;abMarkUnsaved()" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + alignOpts + '</select>'
+      +   '<label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Section Title</label>'
+      +   '<input type="text" value="' + escAttr(s.title || '') + '" placeholder="e.g. About AB-PMJAY SEHAT" '
+      +     'oninput="abSectionsArray(\'' + which + '\')[' + i + '].title=this.value;abMarkUnsaved();abUpdatePreview(' + ref + ')" '
+      +     'style="width:100%;padding:7px 10px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;outline:none;margin-bottom:10px">'
+      // body
+      +   '<label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px">Body Text <span style="color:#9ca3af;font-weight:500;text-transform:none;letter-spacing:0">— one line per bullet, or a paragraph</span></label>'
+      +   '<textarea rows="5" placeholder="Type one line per bullet point, OR a single paragraph.\nE.g.:\nEligibility verification\nBeneficiary registration\n…" '
+      +     'oninput="abSectionsArray(\'' + which + '\')[' + i + '].text=this.value;abMarkUnsaved();abUpdatePreview(' + ref + ')" '
+      +     'style="width:100%;padding:8px 10px;border:1.5px solid #c7d2e8;border-radius:7px;font-size:12px;font-family:inherit;line-height:1.6;outline:none;resize:vertical;margin-bottom:10px">' + escAttr(s.text || '') + '</textarea>'
+
+      // ICON picker
+      +   '<label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:5px">Icon</label>'
+      +   '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">' + iconPicker + '</div>'
+
+      // COLOUR presets
+      +   '<label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:5px">Quick Colour Preset <span style="color:#9ca3af;font-weight:500;text-transform:none;letter-spacing:0">— one click fills bg + title + text</span></label>'
+      +   '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">' + presetChips + '</div>'
+
+      // STYLING row (manual colour pickers + font + align + list mode)
+      +   '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;background:#fff;border:1px solid #f0e8fb;border-radius:8px;padding:10px">'
+      +     abColorField(which, i, 'titleColor', 'Title colour', s.titleColor)
+      +     abColorField(which, i, 'textColor',  'Text colour',  s.textColor)
+      +     abColorField(which, i, 'bgColor',    'Background / shape', s.bgColor)
+      +     '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Font style</label>'
+      +       '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].font=this.value;abMarkUnsaved();abUpdatePreview(' + ref + ')" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + fontOptsSel + '</select>'
+      +     '</div>'
+      +     '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Alignment</label>'
+      +       '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].align=this.value;abMarkUnsaved();abUpdatePreview(' + ref + ')" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + alignOpts + '</select>'
+      +     '</div>'
+      +     '<div><label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">Display as</label>'
+      +       '<select onchange="abSectionsArray(\'' + which + '\')[' + i + '].list=this.value;abMarkUnsaved();abUpdatePreview(' + ref + ')" style="padding:5px 8px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;background:#fff;font-family:inherit">' + listOpts + '</select>'
+      +     '</div>'
       +   '</div>'
       + '</div>'
-      + '</div>';
+
+      // RIGHT — live preview
+      + '<div style="position:sticky;top:8px">'
+      +   '<div style="font-size:9.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;display:flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block"></span>Live Preview</div>'
+      +   '<div id="abPreview_' + which + '_' + i + '">' + abMiniPreview(s) + '</div>'
+      + '</div>'
+
+      + '</div>'  // /grid
+      + '</div>'; // /card
   }).join('');
+}
+
+// Targeted preview refresh — called on every keystroke so the preview tracks
+// the editor without re-rendering the whole list (which would lose focus).
+function abUpdatePreview(which, i){
+  var s = abSectionsArray(which)[i];
+  if (!s) return;
+  var el = document.getElementById('abPreview_' + which + '_' + i);
+  if (el) el.innerHTML = abMiniPreview(s);
 }
 
 // A labelled colour input (native picker + hex text), wired to a section key.
 function abColorField(which, i, key, label, value){
   value = value || '#ffffff';
   var arrRef = "abSectionsArray('" + which + "')[" + i + "]";
+  var refPrev = "'" + which + "'," + i;
   return '<div>'
     + '<label style="font-size:9.5px;font-weight:700;color:#6b7280;display:block;margin-bottom:3px">' + label + '</label>'
     + '<div style="display:flex;align-items:center;gap:5px">'
     +   '<input type="color" value="' + escAttr(value) + '" '
-    +     'oninput="' + arrRef + '.' + key + '=this.value;this.nextElementSibling.value=this.value;abMarkUnsaved()" '
+    +     'oninput="' + arrRef + '.' + key + '=this.value;this.nextElementSibling.value=this.value;abMarkUnsaved();abUpdatePreview(' + refPrev + ')" '
     +     'style="width:34px;height:30px;border:1px solid #c7d2e8;border-radius:6px;padding:1px;cursor:pointer;background:#fff">'
     +   '<input type="text" value="' + escAttr(value) + '" '
-    +     'onchange="' + arrRef + '.' + key + '=this.value;if(this.previousElementSibling)this.previousElementSibling.value=this.value;abMarkUnsaved()" '
+    +     'onchange="' + arrRef + '.' + key + '=this.value;if(this.previousElementSibling)this.previousElementSibling.value=this.value;abMarkUnsaved();abUpdatePreview(' + refPrev + ')" '
     +     'style="width:74px;padding:5px 6px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:11px;font-family:monospace;outline:none">'
     + '</div>'
     + '</div>';
