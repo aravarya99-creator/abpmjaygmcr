@@ -2482,6 +2482,10 @@ window.addEventListener('DOMContentLoaded', function() {
   function renderAbout(){
     // Pull live sections from settings/about_page (set by admin). Empty/missing
     // → use the defaults above so the page is never blank.
+    console.log('[renderAbout] v2026-05-24-firestore-wired — sections from Firestore:',
+      (window.LIVE && LIVE.aboutPage && Array.isArray(LIVE.aboutPage.aboutSections))
+        ? LIVE.aboutPage.aboutSections.length + ' sections'
+        : 'none yet (will use defaults)');
     var live = (window.LIVE && LIVE.aboutPage) || {};
     var secs = Array.isArray(live.aboutSections) ? live.aboutSections.slice() : [];
     secs = secs.filter(function(s){ return s && (s.title || s.text); });
