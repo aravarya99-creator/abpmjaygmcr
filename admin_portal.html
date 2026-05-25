@@ -535,6 +535,12 @@ tr:hover td{background:#EEF3FF}
               <option>Admin</option><option>Finance</option><option>OPD</option>
             </select>
           </div>
+          <div class="mfld" style="grid-column:1/-1; margin-top:2px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:12px;color:#1e293b;text-transform:none">
+              <input type="checkbox" id="seHideOnIndex" style="width:16px;height:16px;cursor:pointer">
+              Hide this staff member from the public Landing Page (Index)
+            </label>
+          </div>
         </div>
         <div id="seErr" style="font-size:11px;color:#dc2626;min-height:14px;margin-top:6px"></div>
         <div class="modal-footer">
@@ -5141,6 +5147,8 @@ function openStaffEdit(encodedEmail) {
   }
   var wardSel = document.getElementById('seWard');
   if (wardSel) wardSel.value = u.ward || '';
+  var hideCheckbox = document.getElementById('seHideOnIndex');
+  if (hideCheckbox) hideCheckbox.checked = !!u.hideOnIndex;
   // Photo preview
   var prev = document.getElementById('sePhotoPreview');
   var initials = (u.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
@@ -5174,15 +5182,17 @@ function saveStaffEdit() {
   var name = document.getElementById('seName').value.trim();
   var ward = document.getElementById('seWard').value;
   var status = document.getElementById('seStatus').value;
+  var hideCheckbox = document.getElementById('seHideOnIndex');
+  var hideOnIndex = hideCheckbox ? hideCheckbox.checked : false;
   var errEl = document.getElementById('seErr');
   if (!name) { errEl.textContent = 'Name is required.'; return; }
   errEl.textContent = 'Saving...';
-  var patch = { name: name, ward: ward, status: status };
+  var patch = { name: name, ward: ward, status: status, hideOnIndex: hideOnIndex };
   if (_staffPhotoBase64) patch.photoBase64 = _staffPhotoBase64;
   db.collection('users').doc(email).update(patch).then(function() {
     // Update local cache
     var u = _allStaff.find(function(s){ return s.email === email || s._docId === email; });
-    if (u) { u.name = name; u.ward = ward; u.status = status; if (_staffPhotoBase64) u.photoBase64 = _staffPhotoBase64; }
+    if (u) { u.name = name; u.ward = ward; u.status = status; u.hideOnIndex = hideOnIndex; if (_staffPhotoBase64) u.photoBase64 = _staffPhotoBase64; }
     document.getElementById('staffEditModal').classList.remove('open');
     showToast('✅ Staff profile updated','success');
     if (typeof writeAudit === 'function') writeAudit('EDIT','users',email,{name:name,ward:ward,status:status});
