@@ -3918,6 +3918,12 @@ var AB_ICON_SET = [
 ];
 
 // One-click colour presets — match the pastel cards on the landing page.
+function abIconSvg(iconKey, color, size) {
+  var entry = AB_ICON_SET.find(function(i){ return i.v === iconKey; }) || AB_ICON_SET[0];
+  var s = size || 18;
+  return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="' + (color||'#7c3aed') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + entry.svg + '</svg>';
+}
+
 var AB_COLOR_PRESETS = [
   { name:'Indigo',  bg:'#eef2ff', title:'#312e81', text:'#4338ca' },
   { name:'Emerald', bg:'#ecfdf5', title:'#064e3b', text:'#047857' },
