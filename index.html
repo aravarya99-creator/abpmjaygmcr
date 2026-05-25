@@ -1460,18 +1460,12 @@ window.addEventListener('DOMContentLoaded', function() {
     // ── Rank groups. Leadership = principal + ms + ic shown together as
     // large cards; pmam / deo / other shown as photo-card grids. ──
     var RANK_GROUPS = [
-      { key:'principal', label:'Principal',              roleIcon:'principal', leadership:true,
-        desc:'Leading the institution with vision and commitment.',
-        match:function(r){ return /principal/.test(r); } },
-      { key:'ms',        label:'Medical Superintendent', roleIcon:'ms', leadership:true,
-        desc:'Overseeing hospital operations and healthcare services.',
-        match:function(r){ return /medical\s*superintendent|(^|\b)ms\b/.test(r); } },
       { key:'ic',        label:'I/C AB-PMJAY',           roleIcon:'ic', leadership:true,
         desc:'Managing and coordinating AB-PMJAY activities effectively.',
         match:function(r){ return /i\/?c|in.?charge|incharge/.test(r) && /pmjay|ab-?pmjay|sehat/.test(r); } },
       { key:'pmam',      label:'PMAMs',                  roleIcon:'pmam', leadership:false,
         match:function(r){ return /pmam/.test(r); } },
-      { key:'deo',       label:'DEO',                    roleIcon:'deo', leadership:false,
+      { key:'mts',       label:'MTS',                    roleIcon:'deo', leadership:false,
         match:function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(r); } }
     ];
 
@@ -1527,7 +1521,7 @@ window.addEventListener('DOMContentLoaded', function() {
     // Compact card used in PMAM / DEO / Other grids (photo left, name + role pill).
     function gridCard(u, g){
       var roleIco = STAFF_ROLE_ICON[g ? g.roleIcon : 'other'] || STAFF_ROLE_ICON.other;
-      var wardHtml = u.ward ? '<div style="font-size:9.5px;font-weight:700;color:#6366f1;background:#e0e7ff;padding:3px 6px;border-radius:4px;margin-top:2px;">'+escHtml(u.ward)+'</div>' : '';
+      var wardHtml = (u.ward && g && g.roleIcon === 'pmam') ? '<div style="font-size:9.5px;font-weight:700;color:#6366f1;background:#e0e7ff;padding:3px 6px;border-radius:4px;margin-top:2px;">'+escHtml(u.ward)+'</div>' : '';
       return '<div class="sx-grid-card">'
         + '<div class="sx-grid-photo">'+photoBox(u,56)+'</div>'
         + '<div class="sx-grid-info">'
