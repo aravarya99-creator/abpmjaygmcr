@@ -1261,9 +1261,7 @@ tr:hover td{background:#EEF3FF}
             <span id="sgoSaveMsg" style="margin-left:auto;font-size:11px;font-weight:600"></span>
           </div>
           <div style="font-size:11px;color:#6b7280;margin-bottom:10px">
-            Set the order in which staff groups appear on the landing page's <strong>Staff</strong> tab.
-            Use ↑ ↓ to reorder, then click <strong>Save Order</strong>. Staff are auto-sorted into
-            these groups by their role; "Other Staff" always appears last.
+            Use ↑ ↓ to reorder, then click <strong>Save Order</strong>. Staff and groups are auto-sorted by their role.
           </div>
           <div id="sgoList" style="display:flex;flex-direction:column;gap:7px"></div>
           <div style="display:flex;justify-content:flex-end;margin-top:12px">
@@ -7066,7 +7064,7 @@ var SGO_GROUPS = [
   { key:'ic',        label:'I/C AB-PMJAY',           icon:'\uD83D\uDCCB', match:function(r){ return /i\/?c|in.?charge|incharge/.test(String(r||'').toLowerCase()) && /pmjay|ab-?pmjay|sehat/.test(String(r||'').toLowerCase()); } },
   { key:'pmam',      label:'PMAMs',                  icon:'\uD83D\uDC65', match:function(r){ return /pmam/.test(String(r||'').toLowerCase()); } },
   { key:'mts',       label:'MTS',                    icon:'\uD83D\uDCBB', match:function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(String(r||'').toLowerCase()); } },
-  { key:'other',     label:'Other Staff',            icon:'\uD83D\uDC64', match:function(r){ return true; } }
+  { key:'other',     label:'Administrative Staff',   icon:'\uD83D\uDC64', match:function(r){ return true; } }
 ];
 var _sgoOrder = [];  // array of keys in the admin-chosen order
 var _sgoMemberOrder = []; // array of emails representing member order

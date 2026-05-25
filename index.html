@@ -1467,7 +1467,7 @@ window.addEventListener('DOMContentLoaded', function() {
         match:function(r){ return /pmam/.test(r); } },
       { key:'mts',       label:'MTS',                    roleIcon:'deo', leadership:false,
         match:function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(r); } },
-      { key:'other',     label:'Other Staff',            roleIcon:'other', leadership:false,
+      { key:'other',     label:'Administrative Staff',   roleIcon:'other', leadership:false,
         match:function(r){ return true; } }
     ];
 
@@ -1604,7 +1604,7 @@ window.addEventListener('DOMContentLoaded', function() {
       }
       if (!members || !members.length) return;
       html += groupHeader(g.label, g.roleIcon === 'pmam' ? 'pmam' : (g.roleIcon === 'deo' ? 'deo' : 'other'), members.length);
-      html += '<div class="sx-grid">'
+      html += '<div class="sx-grid ' + (g.roleIcon === 'pmam' ? 'sx-grid-pmam' : '') + '">'
         + members.map(function(m){ return gridCard(m, g); }).join('')
         + '</div>';
     });
@@ -1950,6 +1950,8 @@ window.addEventListener('DOMContentLoaded', function() {
   .sx-grid {
     display:flex; flex-wrap:wrap; justify-content:center; gap:16px;
   }
+  .sx-grid-pmam > .sx-grid-card { width: calc(33.333% - 11px); }
+  .sx-grid-pmam > .sx-grid-card:first-child { width: 100%; max-width: 600px; margin: 0 auto; }
   .sx-grid-card {
     width:calc(25% - 12px); min-width:240px;
     background:#fff; border:1.5px solid #d8b4fe; border-radius:12px;
