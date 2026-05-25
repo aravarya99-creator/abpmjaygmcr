@@ -1140,34 +1140,36 @@ tr:hover td{background:#EEF3FF}
         </div>
       </div>
 
+
       <div class="dmt-pane" id="dmpane-developer">
         <div class="card" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #d8b4fe;margin-bottom:12px">
           <div class="card-hd" style="color:#6b21a8">👨‍💻 About Developer Page Editor</div>
           <div style="font-size:12px;color:#6b21a8;line-height:1.6">
-            Set the developer's photo, name and role for the header card, then add one or more
-            styled content sections below. Saved together with the About Us page.
+            Build the <strong>Developer</strong> page from photo + name + role pills + About Me + Qualifications +
+            project sections + Expertise tags. Each editor has a live preview. Saved together with the About Us page.
           </div>
         </div>
 
+        <!-- 1. Header — Photo + Name -->
         <div class="card">
-          <div class="card-hd">👤 Header — Photo, Name &amp; Role</div>
+          <div class="card-hd">👤 Header — Photo &amp; Name</div>
           <div style="display:flex;gap:16px;flex-wrap:wrap">
             <div style="flex-shrink:0">
               <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Photo</label>
-              <div id="abDevPhotoPreview" style="width:96px;height:96px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#9333ea);display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;overflow:hidden;border:3px solid #e9d5ff">👨‍💻</div>
+              <div id="abDevPhotoPreview" style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#9333ea);display:flex;align-items:center;justify-content:center;font-size:42px;color:#fff;overflow:hidden;border:4px solid #fff;box-shadow:0 2px 8px rgba(76,29,149,0.20)">👨‍💻</div>
               <input type="file" id="abDevPhotoFile" accept="image/*" onchange="abDevPreviewPhoto(this)"
-                style="font-size:10px;padding:5px;margin-top:6px;border:1px solid #d1d5db;border-radius:6px;width:96px;background:#fff">
-              <div style="font-size:9px;color:#9ca3af;margin-top:2px;width:96px">Max ~300KB · stored as Base64</div>
+                style="font-size:10px;padding:5px;margin-top:8px;border:1px solid #d1d5db;border-radius:6px;width:120px;background:#fff">
+              <div style="font-size:9px;color:#9ca3af;margin-top:2px;width:120px">Max ~300KB · stored as Base64</div>
               <button onclick="abDevClearPhoto()" style="margin-top:4px;font-size:10px;color:#dc2626;background:none;border:none;cursor:pointer;padding:0;font-weight:700">Remove photo</button>
             </div>
-            <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:8px">
+            <div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:10px">
               <div>
                 <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Developer Name</label>
-                <input type="text" id="abDevName" placeholder="e.g. Dr. Arya Sharma" oninput="abMarkUnsaved('dev')"
-                  style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
+                <input type="text" id="abDevName" placeholder="e.g. VINOD KUMAR" oninput="abMarkUnsaved('dev')"
+                  style="width:100%;padding:9px 14px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;font-weight:700">
               </div>
               <div>
-                <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Role / Title</label>
+                <label style="font-size:11px;font-weight:700;color:#0F2B8C;display:block;margin-bottom:4px">Role / Title <span style="color:#9ca3af;font-weight:500">(optional fallback if no pills are set)</span></label>
                 <input type="text" id="abDevRole" placeholder="e.g. Portal Developer — AB-PMJAY Unit, GMC Rajouri" oninput="abMarkUnsaved('dev')"
                   style="width:100%;padding:8px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-family:inherit">
               </div>
@@ -1175,12 +1177,59 @@ tr:hover td{background:#EEF3FF}
           </div>
         </div>
 
+        <!-- 2. Role Pills -->
         <div class="card">
           <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center">
-            <span>📑 Content Sections</span>
+            <span>🏷️ Role Pills <span style="font-size:11px;color:#6b7280;font-weight:500">— small coloured badges under the name (max 6)</span></span>
+            <button class="btn btn-pri" onclick="dpAddPill()" style="padding:5px 12px;font-size:11px">+ Add Pill</button>
+          </div>
+          <div id="dpPillsList" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+        </div>
+
+        <!-- 3. About Me -->
+        <div class="card">
+          <div class="card-hd">📝 About Me <span style="font-size:11px;color:#6b7280;font-weight:500">— short bio paragraph, shown on the left of the header card</span></div>
+          <textarea id="abDevAboutMe" rows="4" placeholder="e.g. Passionate about building scalable web solutions, data-driven systems, and digital platforms that improve efficiency and decision-making."
+            oninput="abMarkUnsaved('dev');dpUpdateAboutPreview()"
+            style="width:100%;padding:10px 12px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;line-height:1.65;resize:vertical;margin-top:8px"></textarea>
+          <div style="display:flex;gap:14px;align-items:center;margin-top:8px;padding:10px 12px;background:#f8fafc;border-radius:8px">
+            <span style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase">Preview</span>
+            <div id="dpAboutPreview" style="flex:1;font-size:12.5px;color:#475569;line-height:1.6;font-style:italic">(empty)</div>
+          </div>
+        </div>
+
+        <!-- 4. Qualifications -->
+        <div class="card">
+          <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center">
+            <span>🎓 Qualifications <span style="font-size:11px;color:#6b7280;font-weight:500">— degree cards on the right of the header</span></span>
+            <button class="btn btn-pri" onclick="dpAddQual()" style="padding:5px 12px;font-size:11px">+ Add Qualification</button>
+          </div>
+          <div id="dpQualsList" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+        </div>
+
+        <!-- 5. Project / Section title -->
+        <div class="card">
+          <div class="card-hd">📂 Project Title <span style="font-size:11px;color:#6b7280;font-weight:500">— heading shown above the numbered section cards</span></div>
+          <input type="text" id="abDevProjectTitle" placeholder="e.g. Management Information System (MIS)" oninput="abMarkUnsaved('dev')"
+            style="width:100%;padding:9px 14px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:13px;outline:none;font-family:inherit;font-weight:700;margin-top:8px">
+        </div>
+
+        <!-- 6. Sections (numbered cards 01/02/03) -->
+        <div class="card">
+          <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center">
+            <span>📑 Project Sections <span style="font-size:11px;color:#6b7280;font-weight:500">— numbered 01, 02, 03... cards under the Project Title</span></span>
             <button class="btn btn-pri" onclick="abAddSection('dev')" style="padding:5px 12px;font-size:11px">+ Add Section</button>
           </div>
-          <div id="devSectionsList" style="display:flex;flex-direction:column;gap:14px"></div>
+          <div id="devSectionsList" style="display:flex;flex-direction:column;gap:14px;margin-top:8px"></div>
+        </div>
+
+        <!-- 7. Expertise Pills -->
+        <div class="card">
+          <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center">
+            <span>⭐ Expertise Pills <span style="font-size:11px;color:#6b7280;font-weight:500">— bottom row of pills (skills/expertise)</span></span>
+            <button class="btn btn-pri" onclick="dpAddExp()" style="padding:5px 12px;font-size:11px">+ Add Expertise</button>
+          </div>
+          <div id="dpExpertiseList" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
         </div>
 
         <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:4px">
@@ -1188,7 +1237,6 @@ tr:hover td{background:#EEF3FF}
           <button class="btn btn-pri" onclick="abSave('dev')">💾 Save &amp; Publish</button>
         </div>
       </div>
-
       <div class="dmt-pane" id="dmpane-staff">
         <div class="card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;margin-bottom:12px">
           <div class="card-hd" style="color:#1e3a8a">👥 Staff</div>
@@ -3899,10 +3947,42 @@ function abInit(){
     var d = doc.exists ? (doc.data() || {}) : {};
     // Header fields (developer pane)
     var set = function(id, val){ var el = document.getElementById(id); if (el) el.value = val || ''; };
-    set('abDevName', d.devName);
-    set('abDevRole', d.devRole);
+    set('abDevName',         d.devName);
+    set('abDevRole',         d.devRole);
+    set('abDevAboutMe',      d.devAboutMe);
+    set('abDevProjectTitle', d.devProjectTitle);
+    // Legacy single-string Email/Phone/Location/Expertise kept for backward compat,
+    // but the new UI no longer has these inputs (Expertise became a structured list).
     _abDevPhoto = d.devPhoto || '';
     abDevRenderPhoto();
+
+    // ── Developer page structured arrays (new) ────────────────────────
+    // Pills — accept new array shape; ignore anything malformed.
+    _dpPills = Array.isArray(d.devPills)
+      ? d.devPills.filter(function(p){ return p && typeof p === 'object'; })
+                  .map(function(p){
+                    return { label:p.label||'', icon:p.icon||'code', color:p.color||'#7c3aed' };
+                  })
+      : [];
+    _dpQuals = Array.isArray(d.devQualifications)
+      ? d.devQualifications.filter(function(q){ return q && typeof q === 'object'; })
+                           .map(function(q){
+                             return { abbr:q.abbr||'', full:q.full||'', icon:q.icon||'grad', color:q.color||'#7c3aed' };
+                           })
+      : [];
+    // Expertise: new shape is array of {label,icon,color}; legacy was array of strings
+    _dpExpertise = Array.isArray(d.devExpertise)
+      ? d.devExpertise.map(function(t, i){
+          if (typeof t === 'string') return { label:t, icon:'star', color: DP_COLORS[i % DP_COLORS.length] };
+          if (t && typeof t === 'object') return { label:t.label||'', icon:t.icon||'star', color:t.color || DP_COLORS[i % DP_COLORS.length] };
+          return null;
+        }).filter(Boolean)
+      : [];
+
+    dpRenderPills();
+    dpRenderQuals();
+    dpRenderExp();
+    dpUpdateAboutPreview();
 
     // About Us sections — fall back to legacy single heading/body.
     if (Array.isArray(d.aboutSections) && d.aboutSections.length) {
@@ -3933,6 +4013,7 @@ function abInit(){
     if (typeof showToast === 'function') showToast('Could not load About page: ' + e.message, 'error');
     if (!_abSections.length)  { _abSections  = [abBlankSection()]; abRenderSections('about'); }
     if (!_devSections.length) { _devSections = [abBlankSection()]; abRenderSections('dev'); }
+    dpRenderPills(); dpRenderQuals(); dpRenderExp();
   });
 }
 
@@ -3990,11 +4071,201 @@ function abMarkUnsaved(which){
   });
 }
 
-// Build an inline SVG preview for an icon entry (used inside the icon picker).
-function abIconSvg(iconKey, color){
-  var entry = AB_ICON_SET.filter(function(x){ return x.v === iconKey; })[0] || AB_ICON_SET[6];
-  return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="' + (color||'#7c3aed') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + entry.svg + '</svg>';
+// ═════════════════════════════════════════════════════════════════════
+// Developer Page editors — pills / qualifications / expertise
+// State lives in three global arrays; renderers paint UI from them.
+// ═════════════════════════════════════════════════════════════════════
+
+// Shared tag icon library (mirrors TAG_ICONS in index.html)
+var DP_TAG_ICONS = {
+  code:      { label:'Code',         svg:'<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>' },
+  gear:      { label:'Gear',         svg:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>' },
+  chart:     { label:'Chart',        svg:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>' },
+  briefcase: { label:'Briefcase',    svg:'<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>' },
+  grad:      { label:'Grad cap',     svg:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>' },
+  heart:     { label:'Heart',        svg:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' },
+  shield:    { label:'Shield',       svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' },
+  star:      { label:'Star',         svg:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' },
+  globe:     { label:'Globe',        svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>' },
+  database:  { label:'Database',     svg:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>' },
+  wrench:    { label:'Wrench',       svg:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>' },
+  book:      { label:'Book',         svg:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' },
+  award:     { label:'Award',        svg:'<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>' },
+  layers:    { label:'Layers',       svg:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>' },
+  activity:  { label:'Activity',     svg:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' },
+  cpu:       { label:'CPU',          svg:'<rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>' }
+};
+
+// Color palette for pills/quals/expertise — same hues as About-Us presets
+var DP_COLORS = ['#7c3aed','#2563eb','#10b981','#f59e0b','#dc2626','#0e7490','#db2777','#475569'];
+
+// Build a single colored SVG (used in the picker buttons and previews)
+function dpIconSvg(iconKey, color, size){
+  var entry = DP_TAG_ICONS[iconKey] || DP_TAG_ICONS.code;
+  var s = size || 18;
+  return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="' + (color||'#7c3aed') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + entry.svg + '</svg>';
 }
+
+// ── State arrays (populated by abInit, read by abSave) ─────────────────
+var _dpPills      = [];   // [{ label, icon, color }]
+var _dpQuals      = [];   // [{ abbr, full, icon, color }]
+var _dpExpertise  = [];   // [{ label, icon, color }]
+
+// ── Generic editor for a list of "label+icon+color" items ──────────────
+// (used by pills and expertise; quals has slightly more fields)
+function dpRenderTagList(opts){
+  // opts = { listId, arr, placeholder, defaultIcon, max, refName }
+  var box = document.getElementById(opts.listId);
+  if (!box) return;
+  if (!opts.arr.length) {
+    box.innerHTML = '<div style="border:1.5px dashed #d8b4fe;border-radius:10px;padding:18px;text-align:center;color:#6b21a8;font-size:11.5px;font-weight:600">No ' + opts.singular + ' yet. Click <strong>+ Add</strong> above to start.</div>';
+    return;
+  }
+  box.innerHTML = opts.arr.map(function(item, i){
+    var color = item.color || DP_COLORS[i % DP_COLORS.length];
+    // Icon picker — small circular buttons
+    var iconPicker = Object.keys(DP_TAG_ICONS).map(function(k){
+      var on = (item.icon || opts.defaultIcon) === k;
+      return '<button title="' + DP_TAG_ICONS[k].label + '" '
+        +   'onclick="' + opts.refName + '[' + i + '].icon=\'' + k + '\';dpRender' + opts.fnSuffix + '();abMarkUnsaved(\'dev\')" '
+        +   'style="width:28px;height:28px;border-radius:50%;border:2px solid ' + (on?color:'#e5e7eb') + ';'
+        +     'background:' + (on?color+'1a':'#fff') + ';display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s">'
+        +   dpIconSvg(k, on?color:'#9ca3af', 14)
+        +   '</button>';
+    }).join('');
+    // Color swatch picker
+    var colorPicker = DP_COLORS.map(function(c){
+      var on = color === c;
+      return '<button onclick="' + opts.refName + '[' + i + '].color=\'' + c + '\';dpRender' + opts.fnSuffix + '();abMarkUnsaved(\'dev\')" '
+        + 'title="' + c + '" '
+        + 'style="width:22px;height:22px;border-radius:50%;background:' + c + ';border:' + (on?'3px solid #1e1b4b':'1.5px solid #e5e7eb') + ';cursor:pointer;padding:0"></button>';
+    }).join('');
+    // Label input(s) — pills/expertise have 1 field, quals have 2
+    var fields;
+    if (opts.kind === 'qual') {
+      fields = '<div style="display:flex;gap:8px;flex:1;min-width:200px">'
+        + '<input type="text" value="' + escAttr(item.abbr || '') + '" placeholder="Abbr (e.g. B.Sc.)" '
+        +   'oninput="' + opts.refName + '[' + i + '].abbr=this.value;abMarkUnsaved(\'dev\')" '
+        +   'style="width:100px;padding:7px 9px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none;font-family:inherit;font-weight:700">'
+        + '<input type="text" value="' + escAttr(item.full || '') + '" placeholder="Full name (e.g. Bachelor of Science)" '
+        +   'oninput="' + opts.refName + '[' + i + '].full=this.value;abMarkUnsaved(\'dev\')" '
+        +   'style="flex:1;padding:7px 9px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none;font-family:inherit">'
+        + '</div>';
+    } else {
+      fields = '<input type="text" value="' + escAttr(item.label || '') + '" placeholder="' + escAttr(opts.placeholder) + '" '
+        + 'oninput="' + opts.refName + '[' + i + '].label=this.value;abMarkUnsaved(\'dev\')" '
+        + 'style="flex:1;min-width:160px;padding:7px 9px;border:1.5px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none;font-family:inherit">';
+    }
+    // Live preview chip
+    var preview;
+    if (opts.kind === 'qual') {
+      preview = '<div style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #f1f5f9;border-radius:9px;padding:6px 10px">'
+        + '<div style="width:24px;height:24px;border-radius:50%;background:' + color + '1a;display:flex;align-items:center;justify-content:center">'
+        +   dpIconSvg(item.icon || opts.defaultIcon, color, 13)
+        + '</div>'
+        + '<div style="font-size:11.5px"><div style="font-weight:800;color:#1e1b4b;line-height:1.1">' + (escAttr(item.abbr || '') || '?') + '</div>'
+        + '<div style="font-size:9px;color:#64748b">' + (escAttr(item.full || '') || '(full name)') + '</div></div>'
+        + '</div>';
+    } else {
+      preview = '<span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid ' + color + '33;border-radius:50px;padding:5px 11px;font-size:11px;font-weight:700;color:#1e293b">'
+        + dpIconSvg(item.icon || opts.defaultIcon, color, 13)
+        + (escAttr(item.label || '') || '?')
+        + '</span>';
+    }
+
+    return '<div style="border:1.5px solid #e9d5ff;border-radius:10px;padding:10px 12px;background:#fdfbff">'
+      // top row: number + label input + move/delete
+      + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+      +   '<span style="background:#7c3aed;color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">' + (i+1) + '</span>'
+      +   fields
+      +   '<div style="display:flex;gap:3px;margin-left:auto">'
+      +     '<button onclick="dpMove' + opts.fnSuffix + '(' + i + ',-1)" ' + (i===0?'disabled':'') + ' title="Up" style="width:26px;height:26px;border:1px solid #d1d5db;background:' + (i===0?'#f3f4f6':'#fff') + ';border-radius:5px;cursor:' + (i===0?'not-allowed':'pointer') + ';font-size:11px">↑</button>'
+      +     '<button onclick="dpMove' + opts.fnSuffix + '(' + i + ',1)" '  + (i===opts.arr.length-1?'disabled':'') + ' title="Down" style="width:26px;height:26px;border:1px solid #d1d5db;background:' + (i===opts.arr.length-1?'#f3f4f6':'#fff') + ';border-radius:5px;cursor:' + (i===opts.arr.length-1?'not-allowed':'pointer') + ';font-size:11px">↓</button>'
+      +     '<button onclick="dpRemove' + opts.fnSuffix + '(' + i + ')" title="Delete" style="padding:3px 9px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;border-radius:5px;cursor:pointer;font-size:10px;font-weight:700">🗑</button>'
+      +   '</div>'
+      + '</div>'
+      // icons + colors + preview
+      + '<div style="display:flex;gap:14px;align-items:center;margin-top:8px;flex-wrap:wrap">'
+      +   '<div><div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:3px">Icon</div><div style="display:flex;flex-wrap:wrap;gap:3px;max-width:280px">' + iconPicker + '</div></div>'
+      +   '<div><div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:3px">Color</div><div style="display:flex;gap:4px">' + colorPicker + '</div></div>'
+      +   '<div style="margin-left:auto"><div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:3px">Preview</div>' + preview + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+// ── Pills (role badges under the name) ─────────────────────────────────
+function dpRenderPills(){
+  dpRenderTagList({
+    listId:'dpPillsList', arr:_dpPills, kind:'pill',
+    placeholder:'e.g. Web Developer', defaultIcon:'code',
+    singular:'pill', fnSuffix:'Pills', refName:'_dpPills', max:6
+  });
+}
+function dpAddPill(){
+  if (_dpPills.length >= 6) {
+    if (typeof showToast === 'function') showToast('Maximum 6 pills allowed', 'warning');
+    return;
+  }
+  _dpPills.push({ label:'', icon:'code', color: DP_COLORS[_dpPills.length % DP_COLORS.length] });
+  dpRenderPills();
+  abMarkUnsaved('dev');
+}
+function dpRemovePills(i){ _dpPills.splice(i,1); dpRenderPills(); abMarkUnsaved('dev'); }
+function dpMovePills(i, dir){
+  var j = i+dir; if (j<0||j>=_dpPills.length) return;
+  var t = _dpPills[i]; _dpPills[i]=_dpPills[j]; _dpPills[j]=t;
+  dpRenderPills(); abMarkUnsaved('dev');
+}
+
+// ── Qualifications (abbr + full + icon + color) ────────────────────────
+function dpRenderQuals(){
+  dpRenderTagList({
+    listId:'dpQualsList', arr:_dpQuals, kind:'qual',
+    placeholder:'', defaultIcon:'grad',
+    singular:'qualification', fnSuffix:'Quals', refName:'_dpQuals'
+  });
+}
+function dpAddQual(){
+  _dpQuals.push({ abbr:'', full:'', icon:'grad', color: DP_COLORS[_dpQuals.length % DP_COLORS.length] });
+  dpRenderQuals(); abMarkUnsaved('dev');
+}
+function dpRemoveQuals(i){ _dpQuals.splice(i,1); dpRenderQuals(); abMarkUnsaved('dev'); }
+function dpMoveQuals(i, dir){
+  var j = i+dir; if (j<0||j>=_dpQuals.length) return;
+  var t = _dpQuals[i]; _dpQuals[i]=_dpQuals[j]; _dpQuals[j]=t;
+  dpRenderQuals(); abMarkUnsaved('dev');
+}
+
+// ── Expertise (bottom pill row) ────────────────────────────────────────
+function dpRenderExp(){
+  dpRenderTagList({
+    listId:'dpExpertiseList', arr:_dpExpertise, kind:'pill',
+    placeholder:'e.g. Web Development', defaultIcon:'star',
+    singular:'expertise tag', fnSuffix:'Exp', refName:'_dpExpertise'
+  });
+}
+function dpAddExp(){
+  _dpExpertise.push({ label:'', icon:'star', color: DP_COLORS[_dpExpertise.length % DP_COLORS.length] });
+  dpRenderExp(); abMarkUnsaved('dev');
+}
+function dpRemoveExp(i){ _dpExpertise.splice(i,1); dpRenderExp(); abMarkUnsaved('dev'); }
+function dpMoveExp(i, dir){
+  var j = i+dir; if (j<0||j>=_dpExpertise.length) return;
+  var t = _dpExpertise[i]; _dpExpertise[i]=_dpExpertise[j]; _dpExpertise[j]=t;
+  dpRenderExp(); abMarkUnsaved('dev');
+}
+
+// About Me live preview text
+function dpUpdateAboutPreview(){
+  var ta = document.getElementById('abDevAboutMe');
+  var pv = document.getElementById('dpAboutPreview');
+  if (!ta || !pv) return;
+  var v = (ta.value || '').trim();
+  pv.textContent = v || '(empty)';
+  pv.style.fontStyle = v ? 'normal' : 'italic';
+}
+
 
 // Render the mini preview card for one section — mirrors the landing-page look.
 function abMiniPreview(s){
@@ -4251,14 +4522,30 @@ function abSave(which){
       return;
     }
 
+    // Clean the structured pill/qual/expertise arrays — drop empty entries
+    var cleanPills = _dpPills.map(function(p){
+      return { label:(p.label||'').trim(), icon:p.icon||'code', color:p.color||'#7c3aed' };
+    }).filter(function(p){ return p.label; });
+    var cleanQuals = _dpQuals.map(function(q){
+      return { abbr:(q.abbr||'').trim(), full:(q.full||'').trim(), icon:q.icon||'grad', color:q.color||'#7c3aed' };
+    }).filter(function(q){ return q.abbr || q.full; });
+    var cleanExpertise = _dpExpertise.map(function(t){
+      return { label:(t.label||'').trim(), icon:t.icon||'star', color:t.color||'#7c3aed' };
+    }).filter(function(t){ return t.label; });
+
     var payload = {
-      devName:       val('abDevName'),
-      devRole:       val('abDevRole'),
-      devPhoto:      _abDevPhoto || '',
-      aboutSections: cleanSections(_abSections),
-      devSections:   cleanSections(_devSections),
-      updatedAt:     Date.now(),
-      _updatedBy:    (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
+      devName:           val('abDevName'),
+      devRole:           val('abDevRole'),
+      devPhoto:          _abDevPhoto || '',
+      devAboutMe:        val('abDevAboutMe'),
+      devProjectTitle:   val('abDevProjectTitle'),
+      devPills:          cleanPills,
+      devQualifications: cleanQuals,
+      devExpertise:      cleanExpertise,
+      aboutSections:     cleanSections(_abSections),
+      devSections:       cleanSections(_devSections),
+      updatedAt:         Date.now(),
+      _updatedBy:        (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
     };
     console.log('[abSave] writing about_page payload (triggered by:', which || 'unknown', ')', payload);
     setMsg('Saving…', '#1A3DB5');

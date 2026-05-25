@@ -267,7 +267,7 @@ a.hero-gc-ci:hover{color:#7c3aed}
      or Cmd+Shift+R (Mac). -->
 <script>
   (function(){
-    var BUILD = 'INDEX-2026-05-24-v6-blank-page-fix';
+    var BUILD = 'INDEX-2026-05-25-v8-developer-design-match';
     console.log('%c[Landing page] ' + BUILD,
       'background:#10b981;color:#fff;padding:3px 10px;border-radius:6px;font-weight:700;font-size:13px');
     window.__PORTAL_BUILD__ = BUILD;
@@ -2422,6 +2422,36 @@ window.addEventListener('DOMContentLoaded', function() {
   };
   var CHECK_ICON = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>';
 
+  // ─── Tag icon library — used by role pills, qualifications & expertise tags ───
+  // 15 icons. Each value is the SVG INNER markup only (no <svg> wrapper, no
+  // stroke/colour — those are added at render time so the icon is recoloured
+  // to match the surrounding pill's accent.
+  var TAG_ICONS = {
+    code:      '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+    gear:      '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    chart:     '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+    briefcase: '<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+    grad:      '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+    heart:     '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+    shield:    '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    star:      '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    globe:     '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+    database:  '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>',
+    wrench:    '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+    book:      '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    award:     '<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>',
+    layers:    '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+    activity:  '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    cpu:       '<rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>'
+  };
+
+  // Build a coloured tag-icon SVG. iconKey from TAG_ICONS, color is the stroke.
+  function tagIconSvg(iconKey, color, size){
+    var inner = TAG_ICONS[iconKey] || TAG_ICONS.code;
+    var s = size || 16;
+    return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="' + esc(color || '#7c3aed') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>';
+  }
+
   // Render one About Us section card. A section can be either a paragraph
   // (sec.text) or a bullet list (sec.text with newlines, when sec.list=true,
   // OR detected automatically when most lines are short).
@@ -2507,84 +2537,213 @@ window.addEventListener('DOMContentLoaded', function() {
       + '</div>';
   }
 
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Developer page — fully Firestore-driven, matches the design mockup
+  // Reads from settings/about_page:
+  //   devName, devRole, devPhoto
+  //   devPills     [{ label, icon, color }]      role badges under the name
+  //   devAboutMe   string                        "About Me" paragraph
+  //   devQualifications [{ abbr, full, icon, color }]
+  //   devProjectTitle string                     wrapper title above section cards
+  //   devSections  [{ title, text, titleColor, textColor, bgColor, list, icon }]
+  //   devExpertise [{ label, icon, color }]      pill row at the bottom
+  // ─────────────────────────────────────────────────────────────────────
   function renderDeveloper(){
-    return `
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <!-- Profile Card -->
-      <div style="background:#fff;border:1px solid #eef2f6;border-radius:12px;padding:16px;display:flex;align-items:center;gap:16px;box-shadow:0 4px 12px rgba(15,23,42,0.03);flex-wrap:wrap;">
-        <div style="width:90px;height:90px;border-radius:12px;background:linear-gradient(160deg,#ede9fe,#c4b5fd);flex-shrink:0;overflow:hidden;border:4px solid #f8fafc;">
-           <img src="https://ui-avatars.com/api/?name=Vinod+Kumar&background=c4b5fd&color=4c1d95&size=90&font-size=0.33" style="width:100%;height:100%;object-fit:cover;" alt="Vinod Kumar">
-        </div>
-        <div style="flex:1;min-width:260px;">
-           <h2 style="margin:0 0 8px 0;font-size:22px;font-weight:800;color:#1e1b4b;text-transform:uppercase;letter-spacing:0.5px;">Vinod Kumar</h2>
-           <div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:20px;text-transform:uppercase;letter-spacing:0.5px;">Web Developer, Software Engineer, Data Analyst, IT Consultant</div>
-           <div style="display:flex;gap:20px;font-size:11.5px;color:#475569;font-weight:600;flex-wrap:wrap;border-top:1px solid #f1f5f9;padding-top:20px;">
-             <span style="display:flex;align-items:center;gap:8px;"><svg width="18" height="18" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-10 5L2 7"></path></svg> vinod.kumar@example.com</span>
-             <span style="display:flex;align-items:center;gap:8px;"><svg width="18" height="18" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"></path></svg> +91 98765 43210</span>
-             <span style="display:flex;align-items:center;gap:8px;"><svg width="18" height="18" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg> Rajouri, Jammu & Kashmir, India</span>
-           </div>
-        </div>
-      </div>
+    var live = LIVE.aboutPage || {};
+    var name         = (live.devName         || '').trim();
+    var role         = (live.devRole         || '').trim();
+    var photo        = (live.devPhoto        || '').trim();
+    var aboutMe      = (live.devAboutMe      || '').trim();
+    var projectTitle = (live.devProjectTitle || '').trim();
+    var pills        = Array.isArray(live.devPills)          ? live.devPills.filter(function(p){ return p && p.label; })          : [];
+    var quals        = Array.isArray(live.devQualifications) ? live.devQualifications.filter(function(q){ return q && (q.abbr||q.full); }) : [];
+    var sections     = Array.isArray(live.devSections)       ? live.devSections.filter(function(s){ return s && (s.title||s.text); })   : [];
+    var expertise    = Array.isArray(live.devExpertise)      ? live.devExpertise.filter(function(t){ return t && t.label; })            : [];
 
-      <!-- MIS Section -->
-      <div style="background:#fff;border:1px solid #eef2f6;border-radius:12px;padding:16px;box-shadow:0 4px 12px rgba(15,23,42,0.03);">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-          <div style="width:40px;height:40px;border-radius:10px;background:#fce7f3;color:#db2777;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="m7 11 2-2 2 2 4-4"/></svg>
-          </div>
-          <h3 style="margin:0;font-size:18px;font-weight:800;color:#1e1b4b;">Management Information System (MIS)</h3>
-        </div>
-        
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:12px;">
-          <!-- Card 1: Overview (purple pastel) -->
-          <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:18px;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:36px;height:36px;border-radius:8px;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;">01</div>
-              <div style="font-size:15px;font-weight:800;color:#4c1d95;">Overview</div>
-            </div>
-            <div style="width:40px;height:3px;background:#7c3aed;border-radius:2px;margin-bottom:12px;"></div>
-            <div style="font-size:12px;color:#5b21b6;line-height:1.65;font-weight:500;">Management Information System (MIS) developed for Government Medical College & Associated Hospital Rajouri to streamline reporting, monitoring, and administrative management under the Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) scheme.</div>
-          </div>
-          <!-- Card 2: Key Capabilities (blue pastel) -->
-          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:36px;height:36px;border-radius:8px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;">02</div>
-              <div style="font-size:15px;font-weight:800;color:#1e3a8a;">Key Capabilities</div>
-            </div>
-            <div style="width:40px;height:3px;background:#2563eb;border-radius:2px;margin-bottom:12px;"></div>
-            <div style="font-size:12px;color:#1d4ed8;line-height:1.65;font-weight:500;">The system provides real-time tracking of PMAM activities, monthly performance analysis, ward-wise performance monitoring, account management, staff roster scheduling, and comprehensive reporting tools. It centralizes operational data into a secure and user-friendly digital platform, enabling improved efficiency, data accuracy, and faster decision-making.</div>
-          </div>
-          <!-- Card 3: Impact & Approach (green pastel) -->
-          <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;padding:18px;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-              <div style="width:36px;height:36px;border-radius:8px;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;">03</div>
-              <div style="font-size:15px;font-weight:800;color:#064e3b;">Impact & Approach</div>
-            </div>
-            <div style="width:40px;height:3px;background:#10b981;border-radius:2px;margin-bottom:12px;"></div>
-            <div style="font-size:12px;color:#047857;line-height:1.65;font-weight:500;">Designed as a complete office automation solution, the portal integrates dashboards, automated reports, and analytics to support effective program management and institutional oversight. This project demonstrates expertise in software engineering, web development, healthcare data management, and information system design.</div>
-          </div>
-        </div>
-      </div>
+    console.log('[renderDeveloper] name=', name || '(empty)',
+                '| pills=', pills.length, '| quals=', quals.length,
+                '| sections=', sections.length, '| expertise=', expertise.length);
 
-      <!-- Expertise Section -->
-      <div style="background:#fff;border:1px solid #eef2f6;border-radius:12px;padding:24px 30px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;box-shadow:0 4px 12px rgba(15,23,42,0.03);">
-        <div style="font-size:16px;font-weight:800;color:#1e1b4b;position:relative;padding-bottom:4px;">
-          Expertise
-          <span style="position:absolute;left:0;bottom:0;width:30px;height:3px;background:#7c3aed;border-radius:2px;"></span>
-        </div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-          <span style="display:inline-flex;align-items:center;gap:8px;background:#f5f3ff;border:1px solid #e9e5fb;border-radius:50px;padding:10px 18px;font-size:13.5px;font-weight:700;color:#5b21b6;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Web Development</span>
-          <span style="display:inline-flex;align-items:center;gap:8px;background:#f5f3ff;border:1px solid #e9e5fb;border-radius:50px;padding:10px 18px;font-size:13.5px;font-weight:700;color:#5b21b6;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Software Engineering</span>
-          <span style="display:inline-flex;align-items:center;gap:8px;background:#f5f3ff;border:1px solid #e9e5fb;border-radius:50px;padding:10px 18px;font-size:13.5px;font-weight:700;color:#5b21b6;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Data Analysis</span>
-          <span style="display:inline-flex;align-items:center;gap:8px;background:#f5f3ff;border:1px solid #e9e5fb;border-radius:50px;padding:10px 18px;font-size:13.5px;font-weight:700;color:#5b21b6;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Healthcare MIS</span>
-          <span style="display:inline-flex;align-items:center;gap:8px;background:#f5f3ff;border:1px solid #e9e5fb;border-radius:50px;padding:10px 18px;font-size:13.5px;font-weight:700;color:#5b21b6;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> System Design</span>
-        </div>
-      </div>
-    </div>
-    `;
+    // Empty state — nothing saved yet
+    if (!name && !role && !aboutMe && !pills.length && !quals.length && !sections.length && !expertise.length) {
+      return '<div style="background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:12px;padding:40px 24px;text-align:center;color:#64748b">'
+        +   '<div style="font-size:36px;margin-bottom:10px">\u{1F468}\u200D\u{1F4BB}</div>'
+        +   '<div style="font-size:15px;font-weight:700;color:#334155;margin-bottom:6px">Developer information not yet published</div>'
+        +   '<div style="font-size:12.5px;line-height:1.6">Admin can publish this page from Admin Portal &rarr; About Us &rarr; Developer tab.</div>'
+        + '</div>';
+    }
+
+    // ── Photo (Base64 upload OR coloured initials avatar) ─────────────────
+    var initials = (name || 'D').split(/\s+/).map(function(s){ return s.charAt(0).toUpperCase(); }).slice(0,2).join('');
+    var photoHtml = photo
+      ? '<img src="' + esc(photo) + '" alt="' + esc(name || 'Developer') + '" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:50%">'
+      : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ede9fe,#c4b5fd);color:#4c1d95;font-size:48px;font-weight:800;letter-spacing:1px;border-radius:50%">' + esc(initials) + '</div>';
+
+    // ── Role pills under the name ─────────────────────────────────────────
+    var pillsHtml = '';
+    if (pills.length) {
+      pillsHtml = '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:14px">'
+        + pills.map(function(p){
+            var c = p.color || '#7c3aed';
+            return '<span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid ' + esc(c) + '33;border-radius:50px;padding:8px 16px;font-size:13px;font-weight:700;color:#1e293b;box-shadow:0 1px 3px rgba(15,23,42,0.05)">'
+              + tagIconSvg(p.icon || 'code', c, 16)
+              + '<span>' + esc(p.label) + '</span></span>';
+          }).join('')
+        + '</div>';
+    } else if (role) {
+      // Fallback: if no pills configured but role is set, show role as a single pill
+      pillsHtml = '<div style="font-size:13px;font-weight:800;color:#7c3aed;margin-top:12px;text-transform:uppercase;letter-spacing:0.5px">' + esc(role) + '</div>';
+    }
+
+    // ── About Me + Qualification side-by-side block ───────────────────────
+    var aboutQualHtml = '';
+    if (aboutMe || quals.length) {
+      var aboutColumn = '';
+      if (aboutMe) {
+        aboutColumn = '<div style="flex:1;min-width:260px;padding-right:12px;border-right:' + (quals.length ? '1px solid #f1f5f9' : 'none') + '">'
+          + '<div style="display:inline-block;font-size:14px;font-weight:800;color:#4c1d95;padding-bottom:5px;border-bottom:2.5px solid #7c3aed;margin-bottom:12px">About Me</div>'
+          + '<div style="font-size:13px;color:#475569;line-height:1.65;font-weight:500;white-space:pre-wrap">' + esc(aboutMe) + '</div>'
+          + '</div>';
+      }
+      var qualColumn = '';
+      if (quals.length) {
+        var qualCards = quals.map(function(q){
+          var c = q.color || '#7c3aed';
+          return '<div style="background:#fff;border:1px solid #f1f5f9;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:11px;min-width:140px;box-shadow:0 1px 3px rgba(15,23,42,0.04)">'
+            + '<div style="width:36px;height:36px;border-radius:50%;background:' + esc(c) + '1a;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+            +   tagIconSvg(q.icon || 'grad', c, 18)
+            + '</div>'
+            + '<div>'
+            +   '<div style="font-size:14px;font-weight:800;color:#1e1b4b;line-height:1.2">' + esc(q.abbr || '') + '</div>'
+            +   '<div style="font-size:10.5px;color:#64748b;font-weight:500;line-height:1.3;margin-top:1px">' + esc(q.full || '') + '</div>'
+            + '</div>'
+            + '</div>';
+        }).join('');
+        qualColumn = '<div style="flex:1.3;min-width:300px;padding-left:' + (aboutMe ? '16px' : '0') + '">'
+          + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+          +   '<div style="width:30px;height:30px;border-radius:8px;background:#ede9fe;display:flex;align-items:center;justify-content:center">'
+          +     tagIconSvg('grad', '#7c3aed', 16)
+          +   '</div>'
+          +   '<div style="font-size:14px;font-weight:800;color:#4c1d95">Qualification</div>'
+          + '</div>'
+          + '<div style="display:flex;flex-wrap:wrap;gap:10px">' + qualCards + '</div>'
+          + '</div>';
+      }
+      aboutQualHtml = '<div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:18px;padding-top:18px;border-top:1px solid #f1f5f9">'
+        + aboutColumn + qualColumn
+        + '</div>';
+    }
+
+    // ── PROFILE CARD (big hero with photo, name, pills, about+qual) ──────
+    var profileCard = '<div style="background:linear-gradient(135deg,#fafaff 0%,#f3f0ff 100%);border:1px solid #ece9f7;border-radius:18px;padding:24px 26px;box-shadow:0 4px 16px rgba(76,29,149,0.06);position:relative;overflow:hidden">'
+      // decorative blurry purple blob (matches the mockup's subtle bg)
+      + '<div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,#c4b5fd33,transparent 70%);pointer-events:none"></div>'
+      + '<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;position:relative">'
+      // Big circular photo
+      +   '<div style="width:130px;height:130px;border-radius:50%;flex-shrink:0;overflow:hidden;border:5px solid #fff;box-shadow:0 4px 14px rgba(76,29,149,0.15)">' + photoHtml + '</div>'
+      // Name + pills
+      +   '<div style="flex:1;min-width:260px">'
+      +     '<h2 style="margin:0;font-size:28px;font-weight:800;color:#1e1b4b;letter-spacing:0.5px;line-height:1.1;text-transform:uppercase">' + esc(name || 'Developer') + '</h2>'
+      +     pillsHtml
+      +   '</div>'
+      + '</div>'
+      + aboutQualHtml
+      + '</div>';
+
+    // ── PROJECT SECTIONS CARD (numbered 01, 02, 03 ... cards) ────────────
+    var sectionsCard = '';
+    if (sections.length) {
+      var THEMES = [
+        { bg:'#f5f3ff', border:'#ddd6fe', accent:'#7c3aed', title:'#4c1d95', text:'#5b21b6' }, // purple
+        { bg:'#eff6ff', border:'#bfdbfe', accent:'#2563eb', title:'#1e3a8a', text:'#1d4ed8' }, // blue
+        { bg:'#ecfdf5', border:'#a7f3d0', accent:'#10b981', title:'#064e3b', text:'#047857' }, // green
+        { bg:'#fff7ed', border:'#fed7aa', accent:'#ea580c', title:'#7c2d12', text:'#c2410c' }  // orange
+      ];
+      var innerCards = sections.map(function(s, i){
+        var theme   = THEMES[i % THEMES.length];
+        var bg      = s.bgColor    || theme.bg;
+        var titleC  = s.titleColor || theme.title;
+        var textC   = s.textColor  || theme.text;
+        var accent  = theme.accent;
+        var border  = theme.border;
+        var num     = String(i+1).padStart(2,'0');
+        var iconKey = s.icon || ['code','chart','activity','layers','cpu'][i % 5];
+
+        var lines = String(s.text || '').split(/\r?\n/).map(function(x){ return x.trim(); }).filter(Boolean);
+        var asList;
+        if (s.list === 'bullets' || s.list === true)            asList = true;
+        else if (s.list === 'paragraph' || s.list === false)    asList = false;
+        else asList = lines.length >= 2;
+        var body;
+        if (asList && lines.length) {
+          body = '<div style="display:flex;flex-direction:column;gap:7px;position:relative">'
+            + lines.map(function(ln){
+                return '<div style="display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:' + esc(textC) + ';line-height:1.55;font-weight:500">'
+                  + '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="' + esc(accent) + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>'
+                  + '<span>' + esc(ln) + '</span></div>';
+              }).join('')
+            + '</div>';
+        } else {
+          body = '<div style="font-size:12.5px;color:' + esc(textC) + ';line-height:1.65;font-weight:500;white-space:pre-wrap;position:relative">' + esc(s.text || '') + '</div>';
+        }
+
+        return '<div style="background:' + esc(bg) + ';border:1px solid ' + esc(border) + ';border-radius:14px;padding:20px;position:relative;overflow:hidden">'
+          // decorative oversized icon in background (subtle)
+          + '<div style="position:absolute;right:-20px;bottom:-20px;opacity:0.07;pointer-events:none">'
+          +   '<svg viewBox="0 0 24 24" width="140" height="140" fill="none" stroke="' + esc(accent) + '" stroke-width="1.2">' + (TAG_ICONS[iconKey] || TAG_ICONS.code) + '</svg>'
+          + '</div>'
+          // number badge + small icon row
+          + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;position:relative">'
+          +   '<div style="width:38px;height:38px;border-radius:9px;background:' + esc(accent) + ';color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0">' + num + '</div>'
+          +   '<div style="width:36px;height:36px;border-radius:50%;background:' + esc(accent) + '1a;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+          +     tagIconSvg(iconKey, accent, 18)
+          +   '</div>'
+          + '</div>'
+          // title
+          + '<div style="font-size:17px;font-weight:800;color:' + esc(titleC) + ';margin-bottom:6px;position:relative">' + esc(s.title || ('Section ' + (i+1))) + '</div>'
+          + '<div style="width:40px;height:3px;background:' + esc(accent) + ';border-radius:2px;margin-bottom:12px;position:relative"></div>'
+          + body
+          + '</div>';
+      }).join('');
+
+      var wrapperTitle = projectTitle || 'Management Information System (MIS)';
+      sectionsCard = '<div style="background:#fff;border:1px solid #eef2f6;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(15,23,42,0.04)">'
+        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'
+        +   '<div style="width:42px;height:42px;border-radius:10px;background:#fce7f3;color:#db2777;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +     '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="m7 11 2-2 2 2 4-4"/></svg>'
+        +   '</div>'
+        +   '<h3 style="margin:0;font-size:19px;font-weight:800;color:#1e1b4b">' + esc(wrapperTitle) + '</h3>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">' + innerCards + '</div>'
+        + '</div>';
+    }
+
+    // ── EXPERTISE pills row ─────────────────────────────────────────────
+    var expertiseCard = '';
+    if (expertise.length) {
+      var tagsHtml = expertise.map(function(t){
+        var c = t.color || '#7c3aed';
+        return '<span style="display:inline-flex;align-items:center;gap:9px;background:#fff;border:1.5px solid ' + esc(c) + '33;border-radius:50px;padding:9px 18px;font-size:13px;font-weight:700;color:#1e293b;box-shadow:0 1px 3px rgba(15,23,42,0.05)">'
+          + '<span style="width:26px;height:26px;border-radius:50%;background:' + esc(c) + '1a;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">' + tagIconSvg(t.icon || 'code', c, 15) + '</span>'
+          + '<span>' + esc(t.label) + '</span></span>';
+      }).join('');
+      expertiseCard = '<div style="background:#fff;border:1px solid #eef2f6;border-radius:16px;padding:18px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;box-shadow:0 4px 12px rgba(15,23,42,0.04)">'
+        + '<div style="display:flex;align-items:center;gap:10px">'
+        +   '<div style="width:38px;height:38px;border-radius:9px;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center">' + tagIconSvg('code','#fff',18) + '</div>'
+        +   '<div style="font-size:16px;font-weight:800;color:#1e1b4b;position:relative;padding-bottom:3px">'
+        +     'Expertise'
+        +     '<span style="position:absolute;left:0;bottom:0;width:24px;height:2.5px;background:#7c3aed;border-radius:2px"></span>'
+        +   '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:10px;flex-wrap:wrap">' + tagsHtml + '</div>'
+        + '</div>';
+    }
+
+    return '<div style="display:flex;flex-direction:column;gap:14px">' + profileCard + sectionsCard + expertiseCard + '</div>';
   }
 
-  // ── Orders / circulars: list with View / Download buttons (Google Drive) ──
+
   function renderOrders(){
     var data = LIVE.orders || {};
     var rows = Array.isArray(data.rows) ? data.rows : [];
