@@ -1486,10 +1486,15 @@ window.addEventListener('DOMContentLoaded', function() {
 
     function groupFor(role){
       var r = String(role || '').toLowerCase();
+      // First try to match explicit roles
       for (var i = 0; i < RANK_GROUPS.length; i++) {
-        if (RANK_GROUPS[i].match(r)) return i;
+        if (RANK_GROUPS[i].key !== 'other' && RANK_GROUPS[i].match(r)) return i;
       }
-      return RANK_GROUPS.length; // "Other Staff" bucket
+      // Fallback to Administrative Staff (other)
+      for (var i = 0; i < RANK_GROUPS.length; i++) {
+        if (RANK_GROUPS[i].key === 'other') return i;
+      }
+      return RANK_GROUPS.length; // Failsafe
     }
 
     var memberOrder = (typeof window.lpGetStaffMemberOrder === 'function')
