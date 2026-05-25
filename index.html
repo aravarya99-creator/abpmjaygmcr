@@ -1559,7 +1559,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
     function groupHeader(label, iconKey, count){
       var ico = STAFF_GROUP_ICON[iconKey] || STAFF_GROUP_ICON.other;
-      return '<div class="sx-group-hd" style="margin-top:28px; padding-bottom:8px; border-bottom:2px solid #ddd6fe; margin-bottom:16px;">'
+      return '<div class="sx-group-hd" style="margin-top:28px; padding-bottom:8px; border-bottom:2px solid red; margin-bottom:16px;">'
         + '<span class="sx-group-ico">'+ico+'</span>'
         + '<span class="sx-group-label" style="color:#4c1d95; font-size:16px;">'+escHtml(label)+'</span>'
         + (count ? '<span class="sx-group-count" style="background:#ddd6fe; color:#4c1d95;">'+count+'</span>' : '')
@@ -1609,9 +1609,19 @@ window.addEventListener('DOMContentLoaded', function() {
       }
       if (!members || !members.length) return;
       html += groupHeader(g.label, g.roleIcon === 'pmam' ? 'pmam' : (g.roleIcon === 'deo' ? 'deo' : 'other'), members.length);
-      html += '<div class="sx-grid ' + (g.roleIcon === 'pmam' ? 'sx-grid-pmam' : '') + '">'
-        + members.map(function(m){ return gridCard(m, g); }).join('')
-        + '</div>';
+      
+      if (g.roleIcon === 'pmam' && members.length > 0) {
+        html += '<div class="sx-grid sx-grid-pmam-top">' + gridCard(members[0], g) + '</div>';
+        if (members.length > 1) {
+          html += '<div class="sx-grid sx-grid-pmam-rest" style="margin-top:16px;">' 
+            + members.slice(1).map(function(m){ return gridCard(m, g); }).join('') 
+            + '</div>';
+        }
+      } else {
+        html += '<div class="sx-grid">'
+          + members.map(function(m){ return gridCard(m, g); }).join('')
+          + '</div>';
+      }
     });
     // In case leadership groups appear only at the very end of the order.
     renderLeadershipBlock();
@@ -1955,8 +1965,7 @@ window.addEventListener('DOMContentLoaded', function() {
   .sx-grid {
     display:flex; flex-wrap:wrap; justify-content:center; gap:16px;
   }
-  .sx-grid-pmam > .sx-grid-card { width: calc(33.333% - 11px); }
-  .sx-grid-pmam > .sx-grid-card:first-child { width: 100%; max-width: 600px; margin: 0 auto; }
+  .sx-grid-pmam-top > .sx-grid-card, .sx-grid-pmam-rest > .sx-grid-card { width: calc(33.333% - 11px); }
   .sx-grid-card {
     width:calc(25% - 12px); min-width:240px;
     background:#fff; border:1.5px solid #d8b4fe; border-radius:12px;
@@ -1968,7 +1977,7 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   .sx-grid-photo {
     width:64px; height:64px; border-radius:10px; flex-shrink:0; overflow:hidden;
-    background:linear-gradient(160deg,#ede9fe,#c4b5fd); border:2px solid #ede9fe;
+    background:linear-gradient(160deg, #10b981, #3b82f6, #8b5cf6); border:2px solid #3b82f6;
   }
   .sx-grid-photo img { width:100%; height:100%; object-fit:cover; }
   .sx-grid-info {
