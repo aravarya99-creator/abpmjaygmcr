@@ -2583,11 +2583,11 @@ window.addEventListener('DOMContentLoaded', function() {
     // ── Role pills under the name ─────────────────────────────────────────
     var pillsHtml = '';
     if (pills.length) {
-      pillsHtml = '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:14px">'
+      pillsHtml = '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px">'
         + pills.map(function(p){
             var c = p.color || '#7c3aed';
-            return '<span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid ' + esc(c) + '33;border-radius:50px;padding:8px 16px;font-size:13px;font-weight:700;color:#1e293b;box-shadow:0 1px 3px rgba(15,23,42,0.05)">'
-              + tagIconSvg(p.icon || 'code', c, 16)
+            return '<span style="display:inline-flex;align-items:center;gap:6px;background:' + esc(c) + '15;border-radius:50px;padding:6px 14px;font-size:12px;font-weight:700;color:' + esc(c) + ';">'
+              + tagIconSvg(p.icon || 'code', c, 14)
               + '<span>' + esc(p.label) + '</span></span>';
           }).join('')
         + '</div>';
@@ -2601,54 +2601,53 @@ window.addEventListener('DOMContentLoaded', function() {
     if (aboutMe || quals.length) {
       var aboutColumn = '';
       if (aboutMe) {
-        aboutColumn = '<div style="flex:1;min-width:260px;padding-right:12px;border-right:' + (quals.length ? '1px solid #f1f5f9' : 'none') + '">'
-          + '<div style="display:inline-block;font-size:14px;font-weight:800;color:#4c1d95;padding-bottom:5px;border-bottom:2.5px solid #7c3aed;margin-bottom:12px">About Me</div>'
-          + '<div style="font-size:13px;color:#475569;line-height:1.65;font-weight:500;white-space:pre-wrap">' + esc(aboutMe) + '</div>'
+        aboutColumn = '<div style="flex:1;min-width:240px;padding-right:24px;border-right:' + (quals.length ? '1px solid #e2e8f0' : 'none') + '">'
+          + '<div style="font-size:13.5px;color:#334155;line-height:1.65;font-weight:500;white-space:pre-wrap">' + esc(aboutMe) + '</div>'
           + '</div>';
       }
       var qualColumn = '';
       if (quals.length) {
         var qualCards = quals.map(function(q){
           var c = q.color || '#7c3aed';
-          return '<div style="background:#fff;border:1px solid #f1f5f9;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:11px;min-width:140px;box-shadow:0 1px 3px rgba(15,23,42,0.04)">'
-            + '<div style="width:36px;height:36px;border-radius:50%;background:' + esc(c) + '1a;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
-            +   tagIconSvg(q.icon || 'grad', c, 18)
+          return '<div style="background:#fff;border:1px solid #f1f5f9;border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 3px rgba(15,23,42,0.04)">'
+            + '<div style="width:32px;height:32px;border-radius:50%;background:' + esc(c) + '1a;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+            +   tagIconSvg(q.icon || 'grad', c, 16)
             + '</div>'
             + '<div>'
-            +   '<div style="font-size:14px;font-weight:800;color:#1e1b4b;line-height:1.2">' + esc(q.abbr || '') + '</div>'
-            +   '<div style="font-size:10.5px;color:#64748b;font-weight:500;line-height:1.3;margin-top:1px">' + esc(q.full || '') + '</div>'
+            +   '<div style="font-size:13px;font-weight:800;color:#0f172a;line-height:1.2">' + esc(q.abbr || '') + '</div>'
+            +   '<div style="font-size:10px;color:#64748b;font-weight:500;line-height:1.2;margin-top:2px">' + esc(q.full || '') + '</div>'
             + '</div>'
             + '</div>';
         }).join('');
-        qualColumn = '<div style="flex:1.3;min-width:300px;padding-left:' + (aboutMe ? '16px' : '0') + '">'
-          + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
-          +   '<div style="width:30px;height:30px;border-radius:8px;background:#ede9fe;display:flex;align-items:center;justify-content:center">'
-          +     tagIconSvg('grad', '#7c3aed', 16)
+        qualColumn = '<div style="flex:1.2;min-width:280px;padding-left:' + (aboutMe ? '24px' : '0') + '">'
+          + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+          +   '<div style="width:28px;height:28px;border-radius:8px;background:#f8fafc;display:flex;align-items:center;justify-content:center">'
+          +     tagIconSvg('grad', '#0f172a', 15)
           +   '</div>'
-          +   '<div style="font-size:14px;font-weight:800;color:#4c1d95">Qualification</div>'
+          +   '<div style="font-size:13px;font-weight:800;color:#0f172a">Qualification</div>'
           + '</div>'
           + '<div style="display:flex;flex-wrap:wrap;gap:10px">' + qualCards + '</div>'
           + '</div>';
       }
-      aboutQualHtml = '<div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:18px;padding-top:18px;border-top:1px solid #f1f5f9">'
+      aboutQualHtml = '<div style="display:flex;flex-wrap:wrap;gap:0;margin-top:16px">'
         + aboutColumn + qualColumn
         + '</div>';
     }
 
     // ── PROFILE CARD (big hero with photo, name, pills, about+qual) ──────
-    var profileCard = '<div style="background:linear-gradient(135deg,#fafaff 0%,#f3f0ff 100%);border:1px solid #ece9f7;border-radius:18px;padding:24px 26px;box-shadow:0 4px 16px rgba(76,29,149,0.06);position:relative;overflow:hidden">'
+    var profileCard = '<div style="background:linear-gradient(135deg,#fafaff 0%,#f3f0ff 100%);border:1px solid #ece9f7;border-radius:18px;padding:32px 32px;box-shadow:0 4px 16px rgba(76,29,149,0.06);position:relative;overflow:hidden">'
       // decorative blurry purple blob (matches the mockup's subtle bg)
-      + '<div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,#c4b5fd33,transparent 70%);pointer-events:none"></div>'
-      + '<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;position:relative">'
+      + '<div style="position:absolute;top:-40px;right:-40px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,#c4b5fd33,transparent 70%);pointer-events:none"></div>'
+      + '<div style="display:flex;gap:36px;align-items:center;flex-wrap:wrap;position:relative">'
       // Big circular photo
-      +   '<div style="width:130px;height:130px;border-radius:50%;flex-shrink:0;overflow:hidden;border:5px solid #fff;box-shadow:0 4px 14px rgba(76,29,149,0.15)">' + photoHtml + '</div>'
-      // Name + pills
-      +   '<div style="flex:1;min-width:260px">'
-      +     '<h2 style="margin:0;font-size:28px;font-weight:800;color:#1e1b4b;letter-spacing:0.5px;line-height:1.1;text-transform:uppercase">' + esc(name || 'Developer') + '</h2>'
+      +   '<div style="width:170px;height:170px;border-radius:50%;flex-shrink:0;overflow:hidden;border:4px solid #fff;box-shadow:0 0 0 4px #bfdbfe, 0 4px 14px rgba(76,29,149,0.15)">' + photoHtml + '</div>'
+      // Name + pills + about + qual (all together in the right column)
+      +   '<div style="flex:1;min-width:260px;display:flex;flex-direction:column;gap:4px">'
+      +     '<h2 style="margin:0;font-size:36px;font-weight:900;color:#0f172a;letter-spacing:0px;line-height:1.1;text-transform:uppercase">' + esc(name || 'Developer') + '</h2>'
       +     pillsHtml
+      +     aboutQualHtml
       +   '</div>'
       + '</div>'
-      + aboutQualHtml
       + '</div>';
 
     // ── PROJECT SECTIONS CARD (numbered 01, 02, 03 ... cards) ────────────
@@ -2724,19 +2723,19 @@ window.addEventListener('DOMContentLoaded', function() {
     if (expertise.length) {
       var tagsHtml = expertise.map(function(t){
         var c = t.color || '#7c3aed';
-        return '<span style="display:inline-flex;align-items:center;gap:9px;background:#fff;border:1.5px solid ' + esc(c) + '33;border-radius:50px;padding:9px 18px;font-size:13px;font-weight:700;color:#1e293b;box-shadow:0 1px 3px rgba(15,23,42,0.05)">'
-          + '<span style="width:26px;height:26px;border-radius:50%;background:' + esc(c) + '1a;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">' + tagIconSvg(t.icon || 'code', c, 15) + '</span>'
+        return '<span style="display:inline-flex;align-items:center;gap:8px;background:' + esc(c) + '15;border-radius:50px;padding:8px 18px;font-size:13px;font-weight:700;color:' + esc(c) + ';">'
+          + '<span style="display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">' + tagIconSvg(t.icon || 'code', c, 16) + '</span>'
           + '<span>' + esc(t.label) + '</span></span>';
       }).join('');
-      expertiseCard = '<div style="background:#fff;border:1px solid #eef2f6;border-radius:16px;padding:18px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;box-shadow:0 4px 12px rgba(15,23,42,0.04)">'
-        + '<div style="display:flex;align-items:center;gap:10px">'
-        +   '<div style="width:38px;height:38px;border-radius:9px;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center">' + tagIconSvg('code','#fff',18) + '</div>'
-        +   '<div style="font-size:16px;font-weight:800;color:#1e1b4b;position:relative;padding-bottom:3px">'
+      expertiseCard = '<div style="background:#fff;border:1px solid #eef2f6;border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;box-shadow:0 4px 12px rgba(15,23,42,0.04)">'
+        + '<div style="display:flex;align-items:center;gap:12px">'
+        +   '<div style="width:42px;height:42px;border-radius:10px;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center">' + tagIconSvg('code','#fff',20) + '</div>'
+        +   '<div style="font-size:18px;font-weight:900;color:#0f172a;position:relative;padding-bottom:3px">'
         +     'Expertise'
-        +     '<span style="position:absolute;left:0;bottom:0;width:24px;height:2.5px;background:#7c3aed;border-radius:2px"></span>'
+        +     '<span style="position:absolute;left:0;bottom:0;width:24px;height:3px;background:#7c3aed;border-radius:2px"></span>'
         +   '</div>'
         + '</div>'
-        + '<div style="display:flex;gap:10px;flex-wrap:wrap">' + tagsHtml + '</div>'
+        + '<div style="display:flex;gap:12px;flex-wrap:wrap">' + tagsHtml + '</div>'
         + '</div>';
     }
 
