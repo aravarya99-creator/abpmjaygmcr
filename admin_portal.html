@@ -7063,16 +7063,22 @@ window.addEventListener('beforeunload', function(e){
 // reorders these; the chosen order is saved to settings/about_page.staffGroupOrder
 // and the landing page reorders its groups to match.
 var SGO_GROUPS = [
-  { key:'ic',        label:'I/C AB-PMJAY',           icon:'\uD83D\uDCCB' },
-  { key:'pmam',      label:'PMAMs',                  icon:'\uD83D\uDC65' },
-  { key:'mts',       label:'MTS',                    icon:'\uD83D\uDCBB' }
+  { key:'ic',        label:'I/C AB-PMJAY',           icon:'\uD83D\uDCCB', match:function(r){ return /i\/?c|in.?charge|incharge/.test(String(r||'').toLowerCase()) && /pmjay|ab-?pmjay|sehat/.test(String(r||'').toLowerCase()); } },
+  { key:'pmam',      label:'PMAMs',                  icon:'\uD83D\uDC65', match:function(r){ return /pmam/.test(String(r||'').toLowerCase()); } },
+  { key:'mts',       label:'MTS',                    icon:'\uD83D\uDCBB', match:function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(String(r||'').toLowerCase()); } },
+  { key:'other',     label:'Other Staff',            icon:'\uD83D\uDC64', match:function(r){ return true; } }
 ];
 var _sgoOrder = [];  // array of keys in the admin-chosen order
+var _sgoMemberOrder = []; // array of emails representing member order
+var _currentSgoBuckets = {}; // transient storage for rendering/moving
 
 function sgoInit(){
   db.collection('settings').doc('about_page').get().then(function(doc){
     var saved = (doc.exists && doc.data() && Array.isArray(doc.data().staffGroupOrder))
       ? doc.data().staffGroupOrder : null;
+    var savedMembers = (doc.exists && doc.data() && Array.isArray(doc.data().staffMemberOrder))
+      ? doc.data().staffMemberOrder : [];
+    _sgoMemberOrder = savedMembers;
     var valid = {};
     SGO_GROUPS.forEach(function(g){ valid[g.key] = true; });
     var order = [];
@@ -7094,24 +7100,93 @@ function sgoRender(){
   if (!box) return;
   var byKey = {};
   SGO_GROUPS.forEach(function(g){ byKey[g.key] = g; });
+  
+  // Group staff into buckets
+  var buckets = {};
+  _sgoOrder.forEach(function(k){ buckets[k] = []; });
+  if (typeof _allStaff !== 'undefined' && _allStaff) {
+    _allStaff.forEach(function(u){
+      var matchedKey = 'other';
+      for(var i=0; i<SGO_GROUPS.length; i++){
+        if (SGO_GROUPS[i].match && SGO_GROUPS[i].match(u.role)) {
+          matchedKey = SGO_GROUPS[i].key;
+          break;
+        }
+      }
+      if (buckets[matchedKey]) buckets[matchedKey].push(u);
+    });
+  }
+
+  // Sort each bucket by _sgoMemberOrder
+  for (var k in buckets) {
+    buckets[k].sort(function(a,b){
+      var idA = a.email || a._docId;
+      var idB = b.email || b._docId;
+      var idxA = _sgoMemberOrder.indexOf(idA);
+      var idxB = _sgoMemberOrder.indexOf(idB);
+      if (idxA===-1) idxA = 999999;
+      if (idxB===-1) idxB = 999999;
+      return idxA - idxB;
+    });
+  }
+  _currentSgoBuckets = buckets;
+
   box.innerHTML = _sgoOrder.map(function(key, i){
     var g = byKey[key];
     if (!g) return '';
-    return '<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #bfdbfe;border-radius:9px;padding:9px 12px">'
+    var members = buckets[key] || [];
+    
+    var membersHtml = '';
+    if (members.length > 0) {
+      membersHtml = '<div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;padding-left:14px;border-left:2px solid #e2e8f0;margin-left:8px;">'
+        + members.map(function(u, j){
+            return '<div style="display:flex;align-items:center;gap:8px;background:#f8fafc;padding:6px 10px;border-radius:6px;border:1px solid #e2e8f0;">'
+              + '<span style="font-size:12px;font-weight:600;color:#475569;width:16px;">'+(j+1)+'</span>'
+              + '<span style="flex:1;font-size:12px;color:#334155;font-weight:500;">'+(u.name || 'Unknown')+' <span style="color:#94a3b8;font-weight:400;">('+ (u.role||'Staff') +')</span></span>'
+              + '<div style="display:flex;gap:3px">'
+              +   '<button onclick="sgoMoveMember(\''+key+'\', '+j+', -1)" '+(j===0?'disabled':'')+' style="width:22px;height:22px;border:1px solid #cbd5e1;background:'+(j===0?'#f1f5f9':'#fff')+';border-radius:4px;cursor:'+(j===0?'not-allowed':'pointer')+';font-size:10px" title="Move member up">\u2191</button>'
+              +   '<button onclick="sgoMoveMember(\''+key+'\', '+j+', 1)" '+(j===members.length-1?'disabled':'')+' style="width:22px;height:22px;border:1px solid #cbd5e1;background:'+(j===members.length-1?'#f1f5f9':'#fff')+';border-radius:4px;cursor:'+(j===members.length-1?'not-allowed':'pointer')+';font-size:10px" title="Move member down">\u2193</button>'
+              + '</div>'
+              + '</div>';
+          }).join('')
+        + '</div>';
+    }
+
+    return '<div style="display:flex;flex-direction:column;background:#fff;border:1.5px solid #bfdbfe;border-radius:9px;padding:9px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.02)">'
+      + '<div style="display:flex;align-items:center;gap:10px;">'
       + '<span style="font-weight:800;color:#9ca3af;font-size:12px;width:18px;text-align:center">' + (i+1) + '</span>'
       + '<span style="font-size:16px">' + g.icon + '</span>'
-      + '<span style="flex:1;font-size:12.5px;font-weight:700;color:#0F2B8C">' + g.label + '</span>'
+      + '<span style="flex:1;font-size:13px;font-weight:700;color:#0F2B8C">' + g.label + '</span>'
       + '<div style="display:flex;gap:4px">'
-      +   '<button onclick="sgoMove(' + i + ',-1)" ' + (i===0?'disabled':'') + ' title="Move up" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===0?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===0?'not-allowed':'pointer') + ';font-size:12px">\u2191</button>'
-      +   '<button onclick="sgoMove(' + i + ',1)" ' + (i===_sgoOrder.length-1?'disabled':'') + ' title="Move down" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===_sgoOrder.length-1?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===_sgoOrder.length-1?'not-allowed':'pointer') + ';font-size:12px">\u2193</button>'
+      +   '<button onclick="sgoMove(' + i + ',-1)" ' + (i===0?'disabled':'') + ' title="Move group up" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===0?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===0?'not-allowed':'pointer') + ';font-size:12px">\u2191</button>'
+      +   '<button onclick="sgoMove(' + i + ',1)" ' + (i===_sgoOrder.length-1?'disabled':'') + ' title="Move group down" style="width:28px;height:26px;border:1px solid #d1d5db;background:' + (i===_sgoOrder.length-1?'#f3f4f6':'#fff') + ';border-radius:6px;cursor:' + (i===_sgoOrder.length-1?'not-allowed':'pointer') + ';font-size:12px">\u2193</button>'
       + '</div>'
+      + '</div>'
+      + membersHtml
       + '</div>';
-  }).join('')
-  + '<div style="display:flex;align-items:center;gap:10px;background:#f9fafb;border:1.5px dashed #d1d5db;border-radius:9px;padding:9px 12px;opacity:0.7">'
-  +   '<span style="font-weight:800;color:#9ca3af;font-size:12px;width:18px;text-align:center">\u2014</span>'
-  +   '<span style="font-size:16px">\uD83D\uDC64</span>'
-  +   '<span style="flex:1;font-size:12.5px;font-weight:700;color:#6b7280">Other Staff <span style="font-weight:500;font-style:italic">(always last)</span></span>'
-  + '</div>';
+  }).join('');
+}
+
+function sgoMoveMember(groupKey, index, dir) {
+  var members = _currentSgoBuckets[groupKey];
+  if (!members) return;
+  var target = index + dir;
+  if (target < 0 || target >= members.length) return;
+  var tmp = members[index];
+  members[index] = members[target];
+  members[target] = tmp;
+  
+  _sgoMemberOrder = [];
+  _sgoOrder.forEach(function(k){
+    if (_currentSgoBuckets[k]) {
+      _currentSgoBuckets[k].forEach(function(u){
+        _sgoMemberOrder.push(u.email || u._docId);
+      });
+    }
+  });
+  sgoRender();
+  var m = document.getElementById('sgoSaveMsg');
+  if (m) { m.textContent = '\u25CF Unsaved'; m.style.color = '#dc2626'; }
 }
 
 function sgoMove(i, dir){
@@ -7140,6 +7215,7 @@ function sgoSave(){
     if (m) { m.textContent = 'Saving\u2026'; m.style.color = '#1A3DB5'; }
     db.collection('settings').doc('about_page').set({
       staffGroupOrder: _sgoOrder,
+      staffMemberOrder: _sgoMemberOrder,
       updatedAt: Date.now(),
       _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
     }, { merge: true }).then(function(){
@@ -7147,7 +7223,7 @@ function sgoSave(){
       if (m) { m.textContent = '\u2705 Saved & published'; m.style.color = '#166534'; setTimeout(function(){ m.textContent=''; }, 3500); }
       if (typeof showToast === 'function') showToast('\u2705 Staff group order saved', 'success');
       if (typeof writeAudit === 'function') {
-        try { writeAudit('EDIT', 'settings/about_page', 'staffGroupOrder', { order: _sgoOrder }); }
+        try { writeAudit('EDIT', 'settings/about_page', 'staffGroupOrder', { order: _sgoOrder, memberOrder: _sgoMemberOrder }); }
         catch(ae){ console.warn('[sgoSave] audit failed (non-fatal):', ae); }
       }
     }).catch(function(e){

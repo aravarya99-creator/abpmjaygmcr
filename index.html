@@ -1466,7 +1466,9 @@ window.addEventListener('DOMContentLoaded', function() {
       { key:'pmam',      label:'PMAMs',                  roleIcon:'pmam', leadership:false,
         match:function(r){ return /pmam/.test(r); } },
       { key:'mts',       label:'MTS',                    roleIcon:'deo', leadership:false,
-        match:function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(r); } }
+        match:function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(r); } },
+      { key:'other',     label:'Other Staff',            roleIcon:'other', leadership:false,
+        match:function(r){ return true; } }
     ];
 
     // Admin-configurable order (settings/about_page.staffGroupOrder).
@@ -1490,11 +1492,26 @@ window.addEventListener('DOMContentLoaded', function() {
       return RANK_GROUPS.length; // "Other Staff" bucket
     }
 
+    var memberOrder = (typeof window.lpGetStaffMemberOrder === 'function')
+      ? window.lpGetStaffMemberOrder() : [];
+
     var buckets = {};
     list.forEach(function(u){
       var gi = groupFor(u.role);
       (buckets[gi] = buckets[gi] || []).push(u);
     });
+
+    for (var gi in buckets) {
+      buckets[gi].sort(function(a,b){
+        var idA = a.email || a.id || a._docId;
+        var idB = b.email || b.id || b._docId;
+        var idxA = memberOrder.indexOf(idA);
+        var idxB = memberOrder.indexOf(idB);
+        if (idxA === -1) idxA = 999999;
+        if (idxB === -1) idxB = 999999;
+        return idxA - idxB;
+      });
+    }
 
     function photoBox(u, size){
       var initials = (u.name||'?').split(/\s+/).map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
@@ -1593,15 +1610,6 @@ window.addEventListener('DOMContentLoaded', function() {
     });
     // In case leadership groups appear only at the very end of the order.
     renderLeadershipBlock();
-
-    // Leftover roles
-    var others = buckets[RANK_GROUPS.length];
-    if (others && others.length) {
-      html += groupHeader('Other Staff', 'other', others.length);
-      html += '<div class="sx-grid">'
-        + others.map(function(m){ return gridCard(m, null); }).join('')
-        + '</div>';
-    }
 
     grid.innerHTML = html;
   }
@@ -2191,6 +2199,9 @@ window.addEventListener('DOMContentLoaded', function() {
     // read it when building the grouped staff list.
     window.lpGetStaffGroupOrder = function(){
       return (LIVE.aboutPage && LIVE.aboutPage.staffGroupOrder) || null;
+    };
+    window.lpGetStaffMemberOrder = function(){
+      return (LIVE.aboutPage && LIVE.aboutPage.staffMemberOrder) || [];
     };
   }
   if (document.readyState === 'loading') {
