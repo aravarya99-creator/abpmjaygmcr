@@ -2442,6 +2442,13 @@ window.addEventListener('DOMContentLoaded', function() {
     award:     '<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>',
     layers:    '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
     activity:  '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    scheme:    '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+    features:  '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+    pmam:      '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    role:      '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+    mission:   '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    vision:    '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    info:      '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
     cpu:       '<rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>'
   };
 
@@ -2583,7 +2590,7 @@ window.addEventListener('DOMContentLoaded', function() {
     // ── Role pills under the name ─────────────────────────────────────────
     var pillsHtml = '';
     if (pills.length) {
-      pillsHtml = '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px">'
+      pillsHtml = '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:12px">'
         + pills.map(function(p){
             var c = p.color || '#7c3aed';
             return '<span style="display:inline-flex;align-items:center;gap:6px;background:' + esc(c) + '15;border-radius:50px;padding:6px 14px;font-size:12px;font-weight:700;color:' + esc(c) + ';">'
@@ -2631,7 +2638,7 @@ window.addEventListener('DOMContentLoaded', function() {
           + '<div style="display:flex;flex-wrap:wrap;gap:10px">' + qualCards + '</div>'
           + '</div>';
       }
-      aboutQualHtml = '<div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:20px">'
+      aboutQualHtml = '<div style="flex:1;min-width:300px;display:flex;flex-wrap:wrap;gap:20px;align-content:flex-start">'
         + aboutColumn + qualColumn
         + '</div>';
     }
@@ -2640,15 +2647,15 @@ window.addEventListener('DOMContentLoaded', function() {
     var profileCard = '<div style="background:linear-gradient(135deg, #d1fae5 0%, #bfdbfe 50%, #e9d5ff 100%);border:2px solid #ddd6fe;border-radius:18px;padding:32px 32px;box-shadow:0 4px 16px rgba(76,29,149,0.06);position:relative;overflow:hidden">'
       // decorative blurry purple blob (matches the mockup's subtle bg)
       + '<div style="position:absolute;top:-40px;right:-40px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,#c4b5fd44,transparent 70%);pointer-events:none"></div>'
-      + '<div style="display:flex;gap:36px;align-items:flex-start;flex-wrap:wrap;position:relative">'
-      // Big circular photo
-      +   '<div style="width:170px;height:170px;border-radius:50%;flex-shrink:0;overflow:hidden;border:4px solid #fff;background:#e0e7ff;box-shadow:0 0 0 4px #bfdbfe, 0 4px 14px rgba(76,29,149,0.15)">' + photoHtml + '</div>'
-      // Name + pills + about + qual (all together in the right column)
-      +   '<div style="flex:1;min-width:260px;display:flex;flex-direction:column;gap:4px">'
-      +     '<h2 style="margin:0;font-size:36px;font-weight:900;color:#0f172a;letter-spacing:0px;line-height:1.1;text-transform:uppercase">' + esc(name || 'Developer') + '</h2>'
+      + '<div style="display:flex;gap:36px;align-items:stretch;flex-wrap:wrap;position:relative">'
+      // Left Column: Photo, Name, Pills
+      +   '<div style="width:240px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;text-align:center">'
+      +     '<div style="width:170px;height:170px;border-radius:50%;overflow:hidden;border:4px solid #fff;background:#e0e7ff;box-shadow:0 0 0 4px #bfdbfe, 0 4px 14px rgba(76,29,149,0.15)">' + photoHtml + '</div>'
+      +     '<h2 style="margin:20px 0 0 0;font-size:28px;font-weight:900;color:#0f172a;letter-spacing:0px;line-height:1.1;text-transform:uppercase">' + esc(name || 'Developer') + '</h2>'
       +     pillsHtml
-      +     aboutQualHtml
       +   '</div>'
+      // Right Column: About Us and Qualifications
+      +   aboutQualHtml
       + '</div>'
       + '</div>';
 
