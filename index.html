@@ -1556,12 +1556,6 @@ window.addEventListener('DOMContentLoaded', function() {
     // ── Build the HTML ──
     var html = '';
 
-    // Intro banner
-    html += '<div class="sx-intro" style="background: linear-gradient(135deg, #60a5fa, #3b82f6); border:none; box-shadow: 0 4px 12px rgba(59,130,246,0.3); width: 100%; margin: 0 auto 16px auto;">'
-      + '<div class="sx-intro-ico" style="background: rgba(255,255,255,0.2);"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>'
-      + '<div style="font-size:13px;color:#fff;line-height:1.6;font-weight:500;">Meet the dedicated team (v4) working behind the success of AB-PMJAY Scheme at GMC & AH Rajouri. Together, we ensure efficient implementation, monitoring, and management of the AB-PMJAY scheme.</div>'
-      + '</div>';
-
     // Are any of the first contiguous leadership groups present? If so, render
     // them under a single "Leadership" divider as large cards.
     var leadershipMembers = [];
@@ -1882,7 +1876,7 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   .sm-header > * { position: relative; z-index: 2; }
   .sm-body {
-    flex: 1; padding: 12px 20px; background: #f8fafc;
+    flex: 1; padding: 12px 20px; background: linear-gradient(135deg, #ccfbf1, #dbeafe, #f3e8ff);
   }
   #staffModalGrid {
     display: flex; flex-direction: column; gap: 8px;
@@ -1920,7 +1914,7 @@ window.addEventListener('DOMContentLoaded', function() {
   .sx-grid-pmam-top > .sx-grid-card { width: 100%; max-width: 340px; margin: 0 auto; }
   .sx-grid-card {
     width:calc(25% - 12px); min-width:240px;
-    background: linear-gradient(135deg, #d1fae5, #dbeafe, #ede9fe); border:1.5px solid #d8b4fe; border-radius:12px;
+    background: #ffffff; border:none; border-radius:12px;
     padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;
     box-shadow:0 4px 14px rgba(124,58,237,0.06); transition: all 0.2s;
   }
