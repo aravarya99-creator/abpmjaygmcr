@@ -2134,8 +2134,46 @@ window.addEventListener('DOMContentLoaded', function() {
       if (_openId === 'holiday') renderInto(_openId);
     }, function(err){ console.warn('holidays listener:', err && err.message); });
 
+    function autoAdvanceRoster(rows) {
+      if (!rows || !rows.length) return false;
+      var now = new Date();
+      var p = function(n){ return n < 10 ? '0'+n : n; };
+      var todayStr = now.getFullYear() + '-' + p(now.getMonth()+1) + '-' + p(now.getDate());
+      var cycleDays = rows.length * 7;
+      var updated = false;
+      function addDays(ymd, days) {
+        if (!ymd) return ymd;
+        var pts = ymd.split('-');
+        if (pts.length !== 3) return ymd;
+        var d = new Date(Date.UTC(parseInt(pts[0],10), parseInt(pts[1],10)-1, parseInt(pts[2],10)));
+        d.setUTCDate(d.getUTCDate() + days);
+        return d.toISOString().split('T')[0];
+      }
+      rows.forEach(function(r) {
+        if (!r.sunday || !r.saturday) return;
+        var safety = 0;
+        while (r.sunday < todayStr && safety < 100) {
+          r.saturday = addDays(r.saturday, cycleDays);
+          r.sunday = addDays(r.sunday, cycleDays);
+          if (!r.sunday || r.sunday.indexOf('NaN') !== -1) break;
+          updated = true;
+          safety++;
+        }
+      });
+      if (updated) {
+        rows.sort(function(a, b){
+          var da = a.saturday || '';
+          var db = b.saturday || '';
+          return da.localeCompare(db);
+        });
+      }
+      return updated;
+    }
+
     db.collection('settings').doc('weekend_roster').onSnapshot(function(doc){
-      LIVE.weekendRoster = doc.exists ? (doc.data() || {}) : {};
+      var data = doc.exists ? (doc.data() || {}) : {};
+      if (data.rows) autoAdvanceRoster(data.rows);
+      LIVE.weekendRoster = data;
       if (_openId === 'weekend') renderInto(_openId);
     }, function(err){ console.warn('weekend_roster listener:', err && err.message); });
 
