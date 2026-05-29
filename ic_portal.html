@@ -181,6 +181,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
@@ -1406,8 +1407,13 @@ function populateFilters() {
 
 // ===== LEAVE =====
 function loadLeaveReq(){
-  const pending = leaveRequests.filter(l => l.status === 'Pending');
-  const history = leaveRequests.filter(l => l.status !== 'Pending');
+  // Digitally-signed leaves (signEnabled === true) are handled by the
+  // DSig Sign Inbox, NOT the legacy Approve/Reject screen. Exclude them here
+  // so the I/C signs them with their PIN via the chain instead of the old
+  // status-only Approve button (which would not advance the signing chain).
+  const legacyLeaves = leaveRequests.filter(l => l.signEnabled !== true);
+  const pending = legacyLeaves.filter(l => l.status === 'Pending');
+  const history = legacyLeaves.filter(l => l.status !== 'Pending');
   
   document.getElementById('lv-pending').textContent = pending.length;
   document.getElementById('lv-approved').textContent = history.filter(l=>l.status==='Approved').length;
@@ -2089,12 +2095,14 @@ function fetchFirebaseData() {
 
 // Keep the counter badges in sync across all sections.
 function updateLeaveBadges() {
-  var pending  = leaveRequests.filter(l => l.status === 'Pending').length;
-  var approved = leaveRequests.filter(l => l.status === 'Approved').length;
-  var rejected = leaveRequests.filter(l => l.status === 'Rejected').length;
+  // Exclude digitally-signed leaves — they're counted in the DSig Sign Inbox.
+  var legacy   = leaveRequests.filter(l => l.signEnabled !== true);
+  var pending  = legacy.filter(l => l.status === 'Pending').length;
+  var approved = legacy.filter(l => l.status === 'Approved').length;
+  var rejected = legacy.filter(l => l.status === 'Rejected').length;
   // "On Leave Today" — Approved requests whose date range includes today
   var today = new Date().toISOString().split('T')[0];
-  var onLeaveToday = leaveRequests.filter(function(l){
+  var onLeaveToday = legacy.filter(function(l){
     return l.status === 'Approved' && l.from && l.to && l.from <= today && l.to >= today;
   }).length;
 
@@ -2607,6 +2615,24 @@ window.addEventListener('DOMContentLoaded', function(){
 
 })();
 
+</script>
+
+<!-- ═══ DIGITAL SIGNATURE MODULE ═══ -->
+<script src="digital_signature.js?v=1"></script>
+<script>
+  // This portal reads the session inline rather than via a helper, so define
+  // getPmjayUser() if it's not already present — the DSig module needs it.
+  if (typeof getPmjayUser !== 'function') {
+    window.getPmjayUser = function(){
+      try { var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); return (u && u.email) ? u : {}; }
+      catch(e){ return {}; }
+    };
+  }
+  (function waitForDb(){
+    if (typeof db === 'undefined') { return setTimeout(waitForDb, 300); }
+    if (!getPmjayUser().email) return;
+    DSig.init({ portal: 'ic' });
+  })();
 </script>
 </body>
 </html>

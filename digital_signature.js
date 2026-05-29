@@ -169,11 +169,12 @@ DSig.init = function(opts){
   opts = opts || {};
   DSig.portal = opts.portal || 'pmam';
   injectStyles();
+  // Read session: prefer host's getPmjayUser(), else read sessionStorage directly.
   if (typeof getPmjayUser === 'function') {
     DSig.user = getPmjayUser();
   } else {
-    console.error('[DSig] getPmjayUser() not found in host portal');
-    return;
+    try { DSig.user = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); }
+    catch(e){ DSig.user = {}; }
   }
   if (!DSig.user || !DSig.user.email) {
     console.warn('[DSig] No session — module idle');
