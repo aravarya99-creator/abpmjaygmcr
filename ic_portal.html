@@ -181,7 +181,6 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
@@ -543,7 +542,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           <div class="fld" style="align-self:flex-end">
             <button class="btn btn-pri" onclick="genAllRecords()">Filter</button>
             <button class="btn btn-sec" onclick="clearAllRecordsFilter()">Clear</button>
-            <button class="btn" id="arAnomalyBtn" onclick="arToggleAnomalyMode()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">🔍 Highlight Anomalies</button>
+            <button class="btn" id="arAnomalyBtn" onclick="arToggleAnomalyMode()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">🔍 Show Missing Reports</button>
             <button class="btn btn-grn" onclick="exportExcel('allTbl','Audit_Log')">Export Excel</button>
             <button class="btn btn-word" onclick="printReport('Audit Log')">Print / PDF</button>
           </div>
@@ -1063,12 +1062,12 @@ function arToggleAnomalyMode(){
       btn.style.background = '#dc2626';
       btn.style.color = '#fff';
       btn.style.border = '1.5px solid #dc2626';
-      btn.textContent = '🔍 Showing Anomalies Only — click to clear';
+      btn.textContent = '🔍 Showing Missing Reports Only — click to clear';
     } else {
       btn.style.background = '#fef3c7';
       btn.style.color = '#92400e';
       btn.style.border = '1.5px solid #fcd34d';
-      btn.textContent = '🔍 Highlight Anomalies';
+      btn.textContent = '🔍 Show Missing Reports';
     }
   }
   genAllRecords();
@@ -1208,6 +1207,83 @@ function genAllRecords(){
   const wardSel = document.getElementById('arWardMulti');
   const selectedWards = wardSel ? Array.from(wardSel.selectedOptions).map(o => o.value).filter(v => v) : [];
 
+  if(_arAnomalyOnly){
+    let startDate, endDate;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if (mode === 'month') {
+      const monthStr = document.getElementById('arMonth').value;
+      const yearStr = document.getElementById('arYear').value;
+      const y = parseInt(yearStr) || today.getFullYear();
+      if (monthStr) {
+        const m = parseInt(monthStr) - 1;
+        startDate = new Date(y, m, 1);
+        endDate = new Date(y, m + 1, 0); 
+      } else {
+        startDate = new Date(y, 0, 1);
+        endDate = new Date(y, 11, 31);
+      }
+    } else {
+      const fromVal = document.getElementById('arFrom').value;
+      const toVal = document.getElementById('arTo').value;
+      if(!fromVal || !toVal) {
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        endDate = today;
+      } else {
+        startDate = new Date(fromVal);
+        endDate = new Date(toVal);
+      }
+    }
+
+    if (endDate > today) endDate = today;
+
+    const allPmams = Array.from(new Set(allReports.map(r => r.name).filter(n => n))).sort();
+    const pmamsToCheck = pmam ? [pmam] : allPmams;
+
+    const submissions = new Set();
+    allReports.forEach(r => {
+      if(r.date && r.name) submissions.add(r.date + '|' + r.name);
+    });
+
+    const missingRecords = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      pmamsToCheck.forEach(p => {
+        if (!submissions.has(dateStr + '|' + p)) {
+          missingRecords.push({ date: dateStr, name: p });
+        }
+      });
+    }
+
+    missingRecords.sort((a,b) => b.date.localeCompare(a.date));
+
+    document.getElementById('arCount').textContent = missingRecords.length + ' missing reports';
+
+    if (!missingRecords.length) {
+      document.getElementById('allTbody').innerHTML = '<tr><td colspan="18" class="empty-td">✓ No missing reports found in this period.</td></tr>';
+      document.getElementById('allFoot').innerHTML = '';
+      document.getElementById('arMetrics').innerHTML = '';
+      return;
+    }
+    
+    document.getElementById('allTbody').innerHTML = missingRecords.map((r, i) => `
+      <tr class="pmam-empty-day">
+        <td>${i+1}</td>
+        <td class="miss-flag">${r.date}</td>
+        <td><strong>${r.name}</strong></td>
+        <td colspan="15" style="color:#dc2626; text-align:center; font-weight:600; font-style:italic;">Report Not Filled</td>
+      </tr>
+    `).join('');
+    
+    document.getElementById('allFoot').innerHTML = `<tr class="tot-row"><td colspan="18" style="text-align:center">Total Missing Reports: ${missingRecords.length}</td></tr>`;
+    
+    document.getElementById('arMetrics').innerHTML = `
+      <div class="mcard c1"><div class="mcard-num">${missingRecords.length}</div><div class="mcard-label">Missing Reports</div></div>
+    `;
+    return;
+  }
+
   var filtered = allReports.filter(r => {
     if(!r.date) return false;
     const d = new Date(r.date);
@@ -1231,11 +1307,6 @@ function genAllRecords(){
     return true;
   });
 
-  // Anomaly-only filter (toggle button)
-  if(_arAnomalyOnly){
-    filtered = filtered.filter(r => _arDetectAnomalies(r).length > 0);
-  }
-
   // Sort by date ASCENDING
   filtered.sort((a,b) => {
     if(a.date < b.date) return -1;
@@ -1244,13 +1315,10 @@ function genAllRecords(){
   });
 
   var countTxt = filtered.length + ' entries';
-  if(_arAnomalyOnly) countTxt += ' (anomalies only)';
   document.getElementById('arCount').textContent = countTxt;
 
   if(!filtered.length){
-    var emptyMsg = _arAnomalyOnly
-      ? '✓ No anomalies detected in the filtered records — data looks healthy.'
-      : 'No records found matching criteria.';
+    var emptyMsg = 'No records found matching criteria.';
     document.getElementById('allTbody').innerHTML='<tr><td colspan="18" class="empty-td">' + emptyMsg + '</td></tr>';
     document.getElementById('allFoot').innerHTML='';
     document.getElementById('arMetrics').innerHTML='';
@@ -1407,13 +1475,8 @@ function populateFilters() {
 
 // ===== LEAVE =====
 function loadLeaveReq(){
-  // Digitally-signed leaves (signEnabled === true) are handled by the
-  // DSig Sign Inbox, NOT the legacy Approve/Reject screen. Exclude them here
-  // so the I/C signs them with their PIN via the chain instead of the old
-  // status-only Approve button (which would not advance the signing chain).
-  const legacyLeaves = leaveRequests.filter(l => l.signEnabled !== true);
-  const pending = legacyLeaves.filter(l => l.status === 'Pending');
-  const history = legacyLeaves.filter(l => l.status !== 'Pending');
+  const pending = leaveRequests.filter(l => l.status === 'Pending');
+  const history = leaveRequests.filter(l => l.status !== 'Pending');
   
   document.getElementById('lv-pending').textContent = pending.length;
   document.getElementById('lv-approved').textContent = history.filter(l=>l.status==='Approved').length;
@@ -2095,14 +2158,12 @@ function fetchFirebaseData() {
 
 // Keep the counter badges in sync across all sections.
 function updateLeaveBadges() {
-  // Exclude digitally-signed leaves — they're counted in the DSig Sign Inbox.
-  var legacy   = leaveRequests.filter(l => l.signEnabled !== true);
-  var pending  = legacy.filter(l => l.status === 'Pending').length;
-  var approved = legacy.filter(l => l.status === 'Approved').length;
-  var rejected = legacy.filter(l => l.status === 'Rejected').length;
+  var pending  = leaveRequests.filter(l => l.status === 'Pending').length;
+  var approved = leaveRequests.filter(l => l.status === 'Approved').length;
+  var rejected = leaveRequests.filter(l => l.status === 'Rejected').length;
   // "On Leave Today" — Approved requests whose date range includes today
   var today = new Date().toISOString().split('T')[0];
-  var onLeaveToday = legacy.filter(function(l){
+  var onLeaveToday = leaveRequests.filter(function(l){
     return l.status === 'Approved' && l.from && l.to && l.from <= today && l.to >= today;
   }).length;
 
@@ -2615,24 +2676,6 @@ window.addEventListener('DOMContentLoaded', function(){
 
 })();
 
-</script>
-
-<!-- ═══ DIGITAL SIGNATURE MODULE ═══ -->
-<script src="digital_signature.js?v=1"></script>
-<script>
-  // This portal reads the session inline rather than via a helper, so define
-  // getPmjayUser() if it's not already present — the DSig module needs it.
-  if (typeof getPmjayUser !== 'function') {
-    window.getPmjayUser = function(){
-      try { var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); return (u && u.email) ? u : {}; }
-      catch(e){ return {}; }
-    };
-  }
-  (function waitForDb(){
-    if (typeof db === 'undefined') { return setTimeout(waitForDb, 300); }
-    if (!getPmjayUser().email) return;
-    DSig.init({ portal: 'ic' });
-  })();
 </script>
 </body>
 </html>
