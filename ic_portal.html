@@ -1246,40 +1246,50 @@ function genAllRecords(){
       if(r.date && r.name) submissions.add(r.date + '|' + r.name);
     });
 
-    const missingRecords = [];
+    const missingByPmam = {};
+    let totalMissing = 0;
+    
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      const dispDate = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear();
       pmamsToCheck.forEach(p => {
         if (!submissions.has(dateStr + '|' + p)) {
-          missingRecords.push({ date: dateStr, name: p });
+          if (!missingByPmam[p]) missingByPmam[p] = [];
+          missingByPmam[p].push(dispDate);
+          totalMissing++;
         }
       });
     }
 
-    missingRecords.sort((a,b) => b.date.localeCompare(a.date));
+    const missingPmams = Object.keys(missingByPmam).sort();
 
-    document.getElementById('arCount').textContent = missingRecords.length + ' missing reports';
+    document.getElementById('arCount').textContent = totalMissing + ' missing reports';
 
-    if (!missingRecords.length) {
+    if (totalMissing === 0) {
       document.getElementById('allTbody').innerHTML = '<tr><td colspan="18" class="empty-td">✓ No missing reports found in this period.</td></tr>';
       document.getElementById('allFoot').innerHTML = '';
       document.getElementById('arMetrics').innerHTML = '';
       return;
     }
     
-    document.getElementById('allTbody').innerHTML = missingRecords.map((r, i) => `
+    document.getElementById('allTbody').innerHTML = missingPmams.map((p, i) => {
+      const dates = missingByPmam[p];
+      const datePills = dates.map(d => `<span style="display:inline-block; background:#fee2e2; color:#991b1b; padding:3px 8px; margin:2px 4px; border-radius:6px; font-size:11px; font-weight:600; border:1px solid #fca5a5;">${d}</span>`).join('');
+      return `
       <tr class="pmam-empty-day">
         <td>${i+1}</td>
-        <td class="miss-flag">${r.date}</td>
-        <td><strong>${r.name}</strong></td>
-        <td colspan="15" style="color:#dc2626; text-align:center; font-weight:600; font-style:italic;">Report Not Filled</td>
+        <td style="color:#9ca3af; font-style:italic;">Summary</td>
+        <td><strong style="color:#1e3a8a; font-size:13px;">${p}</strong><br><span style="font-size:10px; color:#ef4444; font-weight:600;">${dates.length} missing</span></td>
+        <td colspan="15" style="line-height:2">${datePills}</td>
       </tr>
-    `).join('');
+      `;
+    }).join('');
     
-    document.getElementById('allFoot').innerHTML = `<tr class="tot-row"><td colspan="18" style="text-align:center">Total Missing Reports: ${missingRecords.length}</td></tr>`;
+    document.getElementById('allFoot').innerHTML = `<tr class="tot-row"><td colspan="18" style="text-align:center">Total Missing Reports: ${totalMissing} (across ${missingPmams.length} PMAMs)</td></tr>`;
     
     document.getElementById('arMetrics').innerHTML = `
-      <div class="mcard c1"><div class="mcard-num">${missingRecords.length}</div><div class="mcard-label">Missing Reports</div></div>
+      <div class="mcard c1"><div class="mcard-num">${totalMissing}</div><div class="mcard-label">Total Missing</div></div>
+      <div class="mcard c3"><div class="mcard-num">${missingPmams.length}</div><div class="mcard-label">PMAMs Affected</div></div>
     `;
     return;
   }
