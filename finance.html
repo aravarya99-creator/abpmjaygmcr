@@ -2394,7 +2394,7 @@
       
       const totalClaim = filtered.reduce((s,i)=> s + Number(i.claim||0), 0);
       const totalInterest = filtered.reduce((s,i)=> s + Number(i.interest||0), 0);
-      const totalAmount = totalClaim + totalInterest;
+      const totalAmount = totalClaim; // Changed from totalClaim + totalInterest
       const tied = totalAmount * 0.75;
       const untied = totalAmount * 0.25;
       const incentive = totalAmount * 0.20;
