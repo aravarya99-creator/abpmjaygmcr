@@ -557,7 +557,29 @@ table tr {
   table th { background: #e5e7eb !important; color: #000 !important; }
   table, table th, table td { border: 1px solid #000; }
 }
-</style></head>
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
+</head>
 <body>
 <header>
   <!-- LEFT: Logo + 3-line title block -->
@@ -585,7 +607,7 @@ table tr {
       <div id="psp-avatar" style="width:36px; height:36px; background:rgba(255,255,255,0.25); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.85rem; border:2px solid rgba(255,255,255,0.4);">AU</div>
       <div style="line-height: 1.2;">
         <div id="psp-name" style="font-size: 0.8rem; font-weight: 700; color: #fff;">Active User <i class="fas fa-chevron-down" style="font-size:0.6rem; margin-left:4px; opacity:0.7;"></i></div>
-        <div id="psp-role" style="font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 0.5px;">DEO</div>
+        <div id="psp-role" style="font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 0.5px;">MTS</div>
       </div>
     </div>
     <button class="btn-l" style="border: 1px solid rgba(255,255,255,0.5); border-radius: 8px; padding: 7px 16px; font-size: 0.78rem; display: flex; align-items: center; gap: 8px; background: transparent; color: #fff; cursor: pointer; font-weight: 600;" onclick="pspLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -598,7 +620,7 @@ table tr {
   var sess = null;
   try { sess = JSON.parse(sessionStorage.getItem('pmjay_user')); } catch(e) {}
   if (!sess || !sess.email) { window.location.href = 'index.html'; return; }
-  if (sess.role !== 'DEO') { window.location.href = 'index.html'; return; }
+  if (sess.role !== 'MTS') { window.location.href = 'index.html'; return; }
   // Populate user pill
   var name = sess.name || 'Active User';
   var initials = name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2) || 'AU';
@@ -1137,10 +1159,7 @@ function genOrderNo(prefix){
   return prefix+"/"+y+"/"+mo+"/"+String(n).padStart(3,"0");
 }
 
-function fmtBadge(v,yes,no){
-  if(v===yes)return"<span class=\"badge bg2\">"+yes+"</span>";
-  return"<span class=\"badge br2\">"+no+"</span>";
-}
+
 
 // ===== DASHBOARD =====
 
@@ -1640,6 +1659,28 @@ th {
 .green { color: green; }
 .red { color: red; }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
 </head>
 
 <body>
@@ -1862,7 +1903,29 @@ function diaPrintRecords() {
     +"th{font-weight:700;}"
     +".flex-between{display:flex;justify-content:space-between;margin-top:20px;font-size:0.9rem;font-weight:600;}"
     +getReportHeaderCSS()
-    +"</style></head><body>"
+    +"</style>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
+</head><body>"
     +getReportHeaderHTML("DIALYSIS SUPPLY REPORT")
     +"<div class=\"flex-between\">"
     +"<span>Period: "+periodStr+"</span>"
@@ -1896,11 +1959,7 @@ var ctHierarchy = {
   "Abdomen & Thorax": ["CECT Abdomen & Thorax", "NCCT Abdomen & Thorax"]
 };
 
-function selectOptions(sel, values) {
-  Array.from(sel.options).forEach(o => {
-    o.selected = values.includes(o.value);
-  });
-}
+
 
 function showCtView(v) {
   ["issue", "tracking", "records"].forEach(x => {
@@ -2337,6 +2396,28 @@ th {
 .green { color: green; }
 .red { color: red; }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
 </head>
 
 <body>
@@ -2513,7 +2594,29 @@ function ctPrintRecords(){
     +"th{font-weight:700;}"
     +".flex-between{display:flex;justify-content:space-between;margin-top:20px;font-size:0.9rem;font-weight:600;}"
     +getReportHeaderCSS()
-    +"</style></head><body>"
+    +"</style>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
+</head><body>"
     +getReportHeaderHTML("CT SCAN RECORDS REPORT")
     +"<div class=\"flex-between\">"
     +"<span>Period: "+periodStr+"</span>"
@@ -2556,7 +2659,7 @@ function outInit(){
   showOutView("issue");
 }
 
-function outSetVendor(){}
+
 
 function outSubmit(){
   var err=document.getElementById("out-err");
@@ -2832,6 +2935,28 @@ th {
 .green { color: green; }
 .red { color: red; }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
 </head>
 
 <body>
@@ -3003,7 +3128,29 @@ function outPrintRecords(){
     +"th{font-weight:700;}"
     +".flex-between{display:flex;justify-content:space-between;margin-top:20px;font-size:0.9rem;font-weight:600;}"
     +getReportHeaderCSS()
-    +"</style></head><body>"
+    +"</style>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
+</head><body>"
     +getReportHeaderHTML("OUTSOURCE INVESTIGATION REPORT")
     +"<div class=\"flex-between\">"
     +"<span>Period: "+periodStr+"</span>"
@@ -3045,7 +3192,7 @@ function inInit(){
   showInView("issue");
 }
 
-function inAddDept(){}
+
 
 function inSubmit(){
   var err=document.getElementById("in-err");
@@ -3322,6 +3469,28 @@ th {
 .green { color: green; }
 .red { color: red; }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
 </head>
 
 <body>
@@ -3493,7 +3662,29 @@ function inPrintRecords(){
     +"th{font-weight:700;}"
     +".flex-between{display:flex;justify-content:space-between;margin-top:20px;font-size:0.9rem;font-weight:600;}"
     +getReportHeaderCSS()
-    +"</style></head><body>"
+    +"</style>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
+      authDomain: "gmcrajouri-pmam.firebaseapp.com",
+      projectId: "gmcrajouri-pmam",
+      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
+      messagingSenderId: "115490476421",
+      appId: "1:115490476421:web:871a91987e1a92a45f34ec"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db   = firebase.firestore();
+    var auth = firebase.auth();
+    var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
+    var EMAILJS_SERVICE    = 'service_1x9ecam';
+    var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
+    if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+  </script>
+</head><body>"
     +getReportHeaderHTML("IN-HOUSE INVESTIGATION REPORT")
     +"<div class=\"flex-between\">"
     +"<span>Period: "+periodStr+"</span>"
@@ -3517,31 +3708,9 @@ function inPrintRecords(){
 var activeModule = "dashboard";
 function setActiveModule(m) { activeModule = m; }
 
-function resetActiveModule() {
-  if(activeModule === "dialysis") diaReset();
-  else if(activeModule === "ct") ctReset();
-  else if(activeModule === "out") outReset();
-  else if(activeModule === "in") inReset();
-}
-function printActiveModule() {
-  if(activeModule === "dialysis") {
-    var v = document.getElementById("dia-view-issue");
-    if(!v.classList.contains("hidden")) diaPrint();
-    else {
-      var rec = document.getElementById("dia-view-records");
-      if(!rec.classList.contains("hidden")) diaPrintRecords();
-    }
-  }
-  else if(activeModule === "ct") ctPrint();
-  else if(activeModule === "out") outPrint();
-  else if(activeModule === "in") inPrint();
-}
-function submitActiveModule() {
-  if(activeModule === "dialysis") diaSubmit();
-  else if(activeModule === "ct") ctSubmit();
-  else if(activeModule === "out") outSubmit();
-  else if(activeModule === "in") inSubmit();
-}
+
+
+
 
 function show(m){
   ["dashboard","dialysis","ct","out","in"].forEach(x=>{

@@ -268,8 +268,7 @@ a.hero-gc-ci:hover{color:#7c3aed}
 <script>
   (function(){
     var BUILD = 'INDEX-2026-05-25-v8-developer-design-match';
-    console.log('%c[Landing page] ' + BUILD,
-      'background:#10b981;color:#fff;padding:3px 10px;border-radius:6px;font-weight:700;font-size:13px');
+    
     window.__PORTAL_BUILD__ = BUILD;
   })();
 </script>
@@ -519,7 +518,7 @@ a.hero-gc-ci:hover{color:#7c3aed}
                 <option value="">-- Select Your Role --</option>
                 <option value="PMAM">PMAM</option>
                 <option value="I/C AB-PMJAY">I/C AB-PMJAY</option>
-                <option value="DEO">DEO (Patient Services)</option>
+                <option value="MTS">MTS (Patient Services)</option>
                 <option value="Accountant">Accountant (Finance)</option>
               </select>
             </div>
@@ -747,7 +746,7 @@ function doLogin() {
     setTimeout(function(){
       if (email===ADMIN_EMAIL)           window.location.href='admin_portal.html';
       else if (u.role==='I/C AB-PMJAY')  window.location.href='ic_portal.html';
-      else if (u.role==='DEO')           window.location.href='patient_service_portal.html';
+      else if (u.role==='MTS')           window.location.href='patient_service_portal.html';
       else if (u.role==='Accountant')    window.location.href='finance.html';
       else                               window.location.href='pmam_portal.html';
     }, 800);
@@ -871,7 +870,7 @@ window.addEventListener('DOMContentLoaded', function() {
     if (sess.email) {
       if (sess.email===ADMIN_EMAIL)          window.location.href='admin_portal.html';
       else if (sess.role==='I/C AB-PMJAY')   window.location.href='ic_portal.html';
-      else if (sess.role==='DEO')            window.location.href='patient_service_portal.html';
+      else if (sess.role==='MTS')            window.location.href='patient_service_portal.html';
       else if (sess.role==='Accountant')     window.location.href='finance.html';
       else                                   window.location.href='pmam_portal.html';
     }
@@ -1155,16 +1154,7 @@ window.addEventListener('DOMContentLoaded', function() {
 // Used by all portals — not index (login page has no session to timeout)
 // Copy this block into every portal's <script> section
 // ══════════════════════════════════════
-// function initSessionTimeout() {
-//   var SESSION_TIMEOUT = 2 * 60 * 60 * 1000; // 2 hours
-//   var _sessionTimer;
-//   function resetSessionTimer() {
-//     clearTimeout(_sessionTimer);
-//     _sessionTimer = setTimeout(function() {
-//       sessionStorage.removeItem('pmjay_user');
-//       alert('Session expired due to inactivity. Please login again.');
-//       window.location.href = 'index.html';
-//     }, SESSION_TIMEOUT);
+, SESSION_TIMEOUT);
 //   }
 //   document.addEventListener('mousemove', resetSessionTimer);
 //   document.addEventListener('keypress', resetSessionTimer);
@@ -1302,8 +1292,8 @@ window.addEventListener('DOMContentLoaded', function() {
     // Prints once per render. Safe to leave in production; logs only.
     try {
       console.groupCollapsed('[PMAM Status] '+pmams.length+' PMAMs · '+reports.length+' reports in window');
-      console.log('PMAMs (key used for lookup):', pmams.map(function(p){return p.email+' = '+p.name;}));
-      console.log('Reports (raw email/name/date):',
+      :', pmams.map(function(p){return p.email+' = '+p.name;}));
+      :',
         reports.map(function(r){
           return {
             email: r.email || r.pmamEmail || '(none)',
@@ -1389,7 +1379,7 @@ window.addEventListener('DOMContentLoaded', function() {
     'PMAM':         { bg:'#E8EFFF', fg:'#1A3DB5', av:'linear-gradient(135deg,#1A3DB5,#2952D9)' },
     'I/C AB-PMJAY': { bg:'#DCFCE7', fg:'#166534', av:'linear-gradient(135deg,#166534,#16a34a)' },
     'Admin':        { bg:'#F3E8FF', fg:'#7c3aed', av:'linear-gradient(135deg,#7c3aed,#9333ea)' },
-    'DEO':          { bg:'#FEF3C7', fg:'#92400e', av:'linear-gradient(135deg,#C94000,#E65800)' },
+    'MTS':          { bg:'#FEF3C7', fg:'#92400e', av:'linear-gradient(135deg,#C94000,#E65800)' },
     'Accountant':   { bg:'#D1FAE5', fg:'#065F46', av:'linear-gradient(135deg,#059669,#047857)' }
   };
 
@@ -1741,7 +1731,7 @@ window.addEventListener('DOMContentLoaded', function() {
     var href  = a.getAttribute('href') || '';
     var navId = getNavId(a);
     var labelText = (a.textContent || '').trim().replace(/[▾▼]/g,'').trim();
-    console.log('[nav] click intercepted — id:"'+navId+'" label:"'+labelText+'" href:"'+href+'"');
+    
 
     // A "real URL" is one that actually navigates somewhere: http://, https://,
     // protocol-relative //, or a path like /page or ./page or page.html.
@@ -1780,13 +1770,13 @@ window.addEventListener('DOMContentLoaded', function() {
     var resolvedId = renderers[navId] ? navId : (renderers[navIdCanonLocal(labelText)] ? navIdCanonLocal(labelText) : null);
     
     if (resolvedId && typeof window.openContentModal === 'function') {
-      console.log('[nav] Switching to content page for:', resolvedId);
+      
       window.openContentModal(resolvedId, labelText || resolvedId);
       window.switchPage('page-content');
       return;
     }
     
-    console.log('[nav] No renderer for id="'+navId+'" / label="'+labelText+'" — known ids:', Object.keys(renderers));
+    );
     showNavToast((labelText || 'This section') + ' — info coming soon.');
   });
 
@@ -1907,7 +1897,7 @@ window.addEventListener('DOMContentLoaded', function() {
     flex:1; height:2px; border-radius:2px;
     background:linear-gradient(90deg,#ddd6fe,transparent);
   }
-  /* Compact grid cards (PMAMs / DEO / Other) */
+  /* Compact grid cards (PMAMs / MTS / Other) */
   .sx-grid {
     display:flex; flex-wrap:wrap; justify-content:center; gap:16px;
   }
@@ -2184,8 +2174,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
     db.collection('settings').doc('about_page').onSnapshot(function(doc){
       LIVE.aboutPage = doc.exists ? (doc.data() || {}) : {};
-      console.log('[about_page] live update —',
-                  LIVE.aboutPage.aboutSections ? LIVE.aboutPage.aboutSections.length + ' sections' : 'no sections');
+      
       if (_openId === 'about' || _openId === 'developer') renderInto(_openId);
     }, function(err){
       console.error('[about_page listener] ERROR:', err && err.code, err && err.message);
@@ -2531,7 +2520,7 @@ window.addEventListener('DOMContentLoaded', function() {
     var live = LIVE.aboutPage || {};
     var rawSecs = Array.isArray(live.aboutSections) ? live.aboutSections.slice() : [];
     var secs = rawSecs.filter(function(s){ return s && (s.title || s.text); });
-    console.log('[renderAbout] rendering', secs.length, 'sections');
+    
 
     // Empty state — happens before admin has saved anything.
     if (!secs.length) {
@@ -2581,7 +2570,7 @@ window.addEventListener('DOMContentLoaded', function() {
     var sections     = Array.isArray(live.devSections)       ? live.devSections.filter(function(s){ return s && (s.title||s.text); })   : [];
     var expertise    = Array.isArray(live.devExpertise)      ? live.devExpertise.filter(function(t){ return t && t.label; })            : [];
 
-    console.log('[renderDeveloper] name=', name || '(empty)',
+    ',
                 '| pills=', pills.length, '| quals=', quals.length,
                 '| sections=', sections.length, '| expertise=', expertise.length);
 
@@ -2834,7 +2823,7 @@ window.addEventListener('DOMContentLoaded', function() {
   _reg('orders',    typeof renderOrders        !== 'undefined' ? renderOrders        : null, 'renderOrders');
   _reg('about',     typeof renderAbout         !== 'undefined' ? renderAbout         : null, 'renderAbout');
   _reg('developer', typeof renderDeveloper     !== 'undefined' ? renderDeveloper     : null, 'renderDeveloper');
-  console.log('[contentModal] Initialized. Known ids:', Object.keys(window.CONTENT_RENDERERS));
+  );
 
   function renderInto(id){
     var body = document.getElementById('cmBody');

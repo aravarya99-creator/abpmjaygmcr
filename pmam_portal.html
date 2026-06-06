@@ -15,7 +15,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script>
   var firebaseConfig = {
     apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
@@ -903,18 +902,10 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           </div>
         </div>
 
-        <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:linear-gradient(90deg,#dbeafe,#e0f2fe);border:1.5px dashed #0F2B8C;border-radius:10px;margin:10px 0">
-          <input type="checkbox" id="lvUseDsig" style="width:18px;height:18px;cursor:pointer;accent-color:#0F2B8C;margin-top:1px">
-          <div>
-            <label for="lvUseDsig" style="font-size:12px;font-weight:700;color:#0F2B8C;cursor:pointer">Apply digital signature workflow</label>
-            <div style="font-size:10px;color:#374151;margin-top:2px">My PIN signs as Applicant &rarr; routes to Substitute PMAM &rarr; I/C AB-PMJAY &rarr; Medical Superintendent. (If unticked, submits the normal way.)</div>
-          </div>
-        </div>
-
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
           <button class="btn btn-sec" onclick="clearLeaveForm()">Clear</button>
           <button class="btn btn-pri" style="background:linear-gradient(90deg,#166534,#16a34a)" onclick="printLeaveForm()">&#128424; Print Application</button>
-          <button class="btn btn-pri" onclick="submitLeaveSmart()">Submit Request</button>
+          <button class="btn btn-pri" onclick="submitLeave()">Submit Request</button>
         </div>
         <div id="leaveMsg" style="font-size:12px;text-align:right;margin-top:8px;min-height:18px;color:#166534"></div>
       </div>
@@ -1125,20 +1116,8 @@ var WARD_CASE_TYPE = {
 };
 
 // ── Focus/blur helpers for nfield boxes ──
-function focusBox(boxId) {
-  var b = document.getElementById(boxId);
-  if (b && !b.classList.contains('nfield-disabled')) {
-    b.style.borderColor = '#1A3DB5';
-    b.style.boxShadow = '0 0 0 3px rgba(26,61,181,0.08)';
-  }
-}
-function blurBox(boxId) {
-  var b = document.getElementById(boxId);
-  if (b && !b.classList.contains('nfield-disabled')) {
-    b.style.borderColor = '';
-    b.style.boxShadow = '';
-  }
-}
+
+
 
 function applyWardCaseConfig(wardName) {
   var type;
@@ -1811,63 +1790,6 @@ function fetchPmamLeaves() {
     });
 }
 // Call this when page loads or navigation reaches Leave section
-// ═══════════════════════════════════════════════════════════════
-// DIGITAL SIGNATURE — Smart submit wrapper.
-// If checkbox unchecked: uses legacy submitLeave() (unchanged below).
-// If checked: uses DSig module for the signed workflow.
-// ═══════════════════════════════════════════════════════════════
-function submitLeaveSmart() {
-  var useDsig = document.getElementById('lvUseDsig');
-  if (!useDsig || !useDsig.checked) { return submitLeave(); }
-  if (typeof DSig === 'undefined' || !DSig.initiateSignedLeave) {
-    var m0 = document.getElementById('leaveMsg');
-    m0.style.color = '#dc2626';
-    m0.textContent = 'Digital signature module not loaded yet. Please refresh the page and try again.';
-    return;
-  }
-  var msg = document.getElementById('leaveMsg');
-  var name = document.getElementById('lvName').value;
-  if (!name) { msg.style.color='#dc2626'; msg.textContent='Please select your name.'; return; }
-  if (!document.getElementById('lvDuty').value) { msg.style.color='#dc2626'; msg.textContent='Please assign duty to a substitute PMAM.'; return; }
-  if (!document.getElementById('lvFrom').value) { msg.style.color='#dc2626'; msg.textContent='Please select From date.'; return; }
-  var rEl = document.querySelector('input[name=lvReason]:checked');
-  var tEl = document.querySelector('input[name=lvType]:checked');
-  var reason = rEl ? (rEl.value==='other' ? document.getElementById('lvOther').value : rEl.value) : '—';
-  var u = getPmjayUser();
-  var leaveReq = {
-    name: name,
-    email: u.email || 'unknown',
-    ward: getLvWard() || '—',
-    ltype: tEl ? tEl.value : '—',
-    fromDt: document.getElementById('lvFrom').value,
-    toDt: document.getElementById('lvTo').value,
-    days: document.getElementById('lvDays').value || '—',
-    ret: document.getElementById('lvReturn').value,
-    duty: document.getElementById('lvDuty').value,
-    reason: reason,
-    status: 'Pending',
-    desig: 'PMAM',
-    timestamp: Date.now()
-  };
-  var pin = prompt('Enter your 4–6 digit signing PIN to sign this leave as applicant.\n\n(First-time: any PIN entered becomes your permanent signing PIN.)');
-  if (!pin) { msg.textContent = ''; return; }
-  pin = pin.trim();
-  if (pin.length < 4) { msg.style.color='#dc2626'; msg.textContent='PIN must be at least 4 digits.'; return; }
-  msg.style.color = '#1A3DB5';
-  msg.textContent = 'Signing and submitting…';
-  DSig.initiateSignedLeave(leaveReq, pin).then(function(res){
-    msg.style.color = '#166534';
-    msg.textContent = '✅ Signed & sent for approval. Ref: ' + res.refNo;
-    setTimeout(function(){ msg.textContent=''; }, 6000);
-    var hist = document.getElementById('leaveHistCard');
-    if (hist) hist.style.display = 'block';
-    if (typeof clearLeaveForm === 'function') clearLeaveForm();
-  }).catch(function(e){
-    msg.style.color = '#dc2626';
-    msg.textContent = '❌ ' + e.message;
-  });
-}
-
 function submitLeave() {
   var msg  = document.getElementById('leaveMsg');
   var name = document.getElementById('lvName').value;
@@ -1929,7 +1851,7 @@ function loadPmamHolidays(cb) {
       _pmamHolidays = doc.data().holidays;
     }
     _pmamHolidaysLoaded = true;
-    console.log('[PMAM] Holiday calendar loaded:', _pmamHolidays.length, 'holidays');
+    
     if (_pmamHolidays.length === 0) {
       console.warn('[PMAM] No holidays in settings/holiday_calendar. Admin must add holidays first.');
     }
@@ -2310,7 +2232,7 @@ function getPmjayUser() {
     return;
   }
   // Route guard: only PMAM should be here. Admin → admin_portal,
-  // I/C → ic_portal, DEO → patient_services_portal. Otherwise stay.
+  // I/C → ic_portal, MTS → patient_services_portal. Otherwise stay.
   if (u.email === ADMIN_EMAIL) {
     window.location.replace('admin_portal.html');
     return;
@@ -2319,7 +2241,7 @@ function getPmjayUser() {
     window.location.replace('ic_portal.html');
     return;
   }
-  if (u.role === 'DEO') {
+  if (u.role === 'MTS') {
     window.location.replace('patient_services_portal.html');
     return;
   }
@@ -3106,18 +3028,6 @@ function updateWardStatus(){
 
 })();
 
-</script>
-
-<!-- ═══ DIGITAL SIGNATURE MODULE ═══ -->
-<script src="digital_signature.js?v=1"></script>
-<script>
-  (function waitForDb(){
-    if (typeof db === 'undefined' || typeof getPmjayUser !== 'function') {
-      return setTimeout(waitForDb, 300);
-    }
-    if (!getPmjayUser().email) return;
-    DSig.init({ portal: 'pmam' });
-  })();
 </script>
 </body>
 </html>

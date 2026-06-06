@@ -1619,24 +1619,7 @@ function printReport(title){
   printReportOrient(null, title || 'Report', 'portrait');
 }
 
-function _ensurePrintLogos(cb){
-  if (window._printLogosCache) { cb(window._printLogosCache); return; }
-  // Fallback comes from shared/logos.js
-  var sharedGmc = (typeof GMCLogos !== 'undefined' && GMCLogos.gmc) ? GMCLogos.gmc : '';
-  db.collection('settings').doc('portal').get().then(function(doc){
-    var d = doc.exists ? (doc.data() || {}) : {};
-    var cache = {
-      logo1: d.logo1 || '',
-      logo2: d.logo2 || sharedGmc
-    };
-    window._printLogosCache = cache;
-    cb(cache);
-  }).catch(function(){
-    var cache = { logo1: '', logo2: sharedGmc };
-    window._printLogosCache = cache;
-    cb(cache);
-  });
-}
+
 
 // printReportOrient — opens the print options modal with sensible defaults
 // for this report. The actual print happens in _doPrintReport after the user
@@ -2064,9 +2047,7 @@ function genDaily(){
 }
 
 // PRINT
-function printReport_DEPRECATED(title){
-  window.print();
-}
+
 
 // INIT — load monthly on start
 let allReports = [];
@@ -2081,7 +2062,7 @@ window.addEventListener('load',()=>{
   if (!u || !u.email) { window.location.replace('index.html'); return; }
   if (u.email !== ADMIN_EMAIL && u.role !== 'I/C AB-PMJAY') {
     // Wrong role for this portal → send to the correct one.
-    if (u.role === 'DEO') window.location.replace('patient_services_portal.html');
+    if (u.role === 'MTS') window.location.replace('patient_services_portal.html');
     else                  window.location.replace('pmam_portal.html');
     return;
   }
