@@ -268,7 +268,8 @@ a.hero-gc-ci:hover{color:#7c3aed}
 <script>
   (function(){
     var BUILD = 'INDEX-2026-05-25-v8-developer-design-match';
-    
+    console.log('%c[Landing page] ' + BUILD,
+      'background:#10b981;color:#fff;padding:3px 10px;border-radius:6px;font-weight:700;font-size:13px');
     window.__PORTAL_BUILD__ = BUILD;
   })();
 </script>
@@ -518,7 +519,7 @@ a.hero-gc-ci:hover{color:#7c3aed}
                 <option value="">-- Select Your Role --</option>
                 <option value="PMAM">PMAM</option>
                 <option value="I/C AB-PMJAY">I/C AB-PMJAY</option>
-                <option value="MTS">MTS (Patient Services)</option>
+                <option value="DEO">DEO (Patient Services)</option>
                 <option value="Accountant">Accountant (Finance)</option>
               </select>
             </div>
@@ -746,7 +747,7 @@ function doLogin() {
     setTimeout(function(){
       if (email===ADMIN_EMAIL)           window.location.href='admin_portal.html';
       else if (u.role==='I/C AB-PMJAY')  window.location.href='ic_portal.html';
-      else if (u.role==='MTS')           window.location.href='patient_service_portal.html';
+      else if (u.role==='DEO')           window.location.href='patient_service_portal.html';
       else if (u.role==='Accountant')    window.location.href='finance.html';
       else                               window.location.href='pmam_portal.html';
     }, 800);
@@ -870,7 +871,7 @@ window.addEventListener('DOMContentLoaded', function() {
     if (sess.email) {
       if (sess.email===ADMIN_EMAIL)          window.location.href='admin_portal.html';
       else if (sess.role==='I/C AB-PMJAY')   window.location.href='ic_portal.html';
-      else if (sess.role==='MTS' || sess.role==='DEO' || sess.role==='Data Entry Operator') window.location.href='patient_service_portal.html';
+      else if (sess.role==='DEO')            window.location.href='patient_service_portal.html';
       else if (sess.role==='Accountant')     window.location.href='finance.html';
       else                                   window.location.href='pmam_portal.html';
     }
@@ -1154,10 +1155,19 @@ window.addEventListener('DOMContentLoaded', function() {
 // Used by all portals — not index (login page has no session to timeout)
 // Copy this block into every portal's <script> section
 // ══════════════════════════════════════
-
-
-
-
+// function initSessionTimeout() {
+//   var SESSION_TIMEOUT = 2 * 60 * 60 * 1000; // 2 hours
+//   var _sessionTimer;
+//   function resetSessionTimer() {
+//     clearTimeout(_sessionTimer);
+//     _sessionTimer = setTimeout(function() {
+//       sessionStorage.removeItem('pmjay_user');
+//       alert('Session expired due to inactivity. Please login again.');
+//       window.location.href = 'index.html';
+//     }, SESSION_TIMEOUT);
+//   }
+//   document.addEventListener('mousemove', resetSessionTimer);
+//   document.addEventListener('keypress', resetSessionTimer);
 //   document.addEventListener('click', resetSessionTimer);
 //   resetSessionTimer();
 // }
@@ -1290,7 +1300,1532 @@ window.addEventListener('DOMContentLoaded', function() {
 
     // Debug logger — open browser console to see why a row shows ✗.
     // Prints once per render. Safe to leave in production; logs only.
+    try {
+      console.groupCollapsed('[PMAM Status] '+pmams.length+' PMAMs · '+reports.length+' reports in window');
+      console.log('PMAMs (key used for lookup):', pmams.map(function(p){return p.email+' = '+p.name;}));
+      console.log('Reports (raw email/name/date):',
+        reports.map(function(r){
+          return {
+            email: r.email || r.pmamEmail || '(none)',
+            name:  r.name  || r.pmamName  || '(none)',
+            date:  r.date  || r.reportDate || '(none)'
+          };
+        })
+      );
+      if (unmatched.length) console.warn('Reports with no email AND no name:', unmatched);
+      console.groupEnd();
+    } catch(_) {}
+
+    var todayFilled=0, todayNotFilled=0;
+
+    if(!pmams.length){
+      tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#9ca3af;font-style:italic">No PMAM users found.</td></tr>';
+    } else {
+      tbody.innerHTML=pmams.map(function(p,i){
+        var pname = (p.name || '').trim().toLowerCase();
+        var cells='<td class="name-cell">'+p.name+'</td>';
+        dates.forEach(function(d){
+          // Try email match first, then fall back to name match.
+          var filled = !!repMap['e:' + p.email + '|' + d.str]
+                    || !!repMap['n:' + pname    + '|' + d.str];
+          if(d.isToday){ if(filled) todayFilled++; else todayNotFilled++; }
+          cells+='<td>'+checkIcon(filled)+'</td>';
+        });
+        return '<tr>'+cells+'</tr>';
+      }).join('');
+    }
+
+    // Update stats
+    var total=pmams.length;
+    var pct=total>0?Math.round(todayFilled/total*100):0;
+    var set=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v;};
+    set('rsTotalPmam',total);
+    set('rsFilledToday',todayFilled);
+    set('rsNotFilled',todayNotFilled);
+    set('rsCompletion',pct+'%');
+
+    // Timestamp
+    var now=new Date();
+    var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var h=now.getHours(),mi=String(now.getMinutes()).padStart(2,'0'),ap=h>=12?'PM':'AM';
+    h=h%12||12;
+    var ts=String(now.getDate()).padStart(2,'0')+' '+months[now.getMonth()]+' '+now.getFullYear()+', '+h+':'+mi+' '+ap;
+    set('rsLastUpdated',ts);
+
+    // Start countdown
+    startCountdown();
+  }
+
+  function startCountdown(){
+    clearInterval(_countdownTimer);
+    clearTimeout(_refreshTimer);
+    var left=REFRESH_SECS;
+    _countdownTimer=setInterval(function(){
+      left--;
+      var el=document.getElementById('rsCountdown');
+      if(el) el.textContent=Math.floor(left/60)+':'+(String(left%60).padStart(2,'0'));
+      if(left<=0){ clearInterval(_countdownTimer); loadStatus(); }
+    },1000);
+  }
+
+  // Fire on page load
+  window.addEventListener('DOMContentLoaded', function(){
+    setTimeout(loadStatus, 800);
+  });
+})();
+
+// ══════════════════════════════════════════════════════════════════════
+// STAFF MODAL — opens when visitor clicks the "Staff" nav item.
+// Pulls live from Firebase 'users' collection (excludes pending/rejected,
+// hides emails for privacy on the public page).
+// Auto-rebinds whenever the nav bar is re-rendered from settings/landing_page.
+// ══════════════════════════════════════════════════════════════════════
+(function setupStaffModal(){
+  var _staffCache = null;
+  var _staffLoading = false;
+
+  // Role color palette — matches admin portal for visual continuity
+  var ROLE_COLORS = {
+    'PMAM':         { bg:'#E8EFFF', fg:'#1A3DB5', av:'linear-gradient(135deg,#1A3DB5,#2952D9)' },
+    'I/C AB-PMJAY': { bg:'#DCFCE7', fg:'#166534', av:'linear-gradient(135deg,#166534,#16a34a)' },
+    'Admin':        { bg:'#F3E8FF', fg:'#7c3aed', av:'linear-gradient(135deg,#7c3aed,#9333ea)' },
+    'DEO':          { bg:'#FEF3C7', fg:'#92400e', av:'linear-gradient(135deg,#C94000,#E65800)' },
+    'Accountant':   { bg:'#D1FAE5', fg:'#065F46', av:'linear-gradient(135deg,#059669,#047857)' }
+  };
+
+  function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function currentFilter(){
+    return 'all';  // search & role filters removed; always show all, grouped by rank
+  }
+
+  function loadStaff(){
+    if (_staffLoading) return;
+    _staffLoading = true;
+    var grid = document.getElementById('staffModalGrid');
+    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#6b7280">Loading staff…</div>';
+    db.collection('users').get().then(function(snap){
+      var list = [];
+      snap.forEach(function(doc){
+        var u = doc.data();
+        if ((u.status === 'approved' || u.status === 'active') && !u.hideOnIndex) {
+          list.push({
+            _docId: doc.id,
+            name: u.name || '',
+            role: u.role || '',
+            ward: u.ward || '',
+            photoBase64: u.photoBase64 || ''
+            // keeping _docId for sorting purposes
+          });
+        }
+      });
+      list.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+      _staffCache = list;
+      _staffLoading = false;
+      renderCards(list, currentFilter());
+    }).catch(function(e){
+      _staffLoading = false;
+      if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#dc2626">Could not load staff: '+escHtml(e.message)+'</div>';
+    });
+  }
+
+  // ── Role-icon badges shown on the small circular tag of each card ──
+  var STAFF_ROLE_ICON = {
+    principal: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 8.5 12 2"/></svg>',
+    ms:        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+    ic:        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+    pmam:      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+    deo:       '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    other:     '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>'
+  };
+  // Divider-header icon per group
+  var STAFF_GROUP_ICON = {
+    leadership:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#4c1d95" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3Z"/></svg>',
+    pmam:      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#4c1d95" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    deo:       '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#4c1d95" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    other:     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#4c1d95" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>'
+  };
+
+  function renderCards(list, roleFilter){
+    var grid = document.getElementById('staffModalGrid');
+    if (!grid) return;
+
+    var countEl = document.getElementById('staffModalCount');
+    if (countEl) countEl.textContent = list.length + (list.length === 1 ? ' member' : ' members');
+    if (!list.length) {
+      grid.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#9ca3af;font-style:italic">No staff published yet.</div>';
+      return;
+    }
+
+    // ── Rank groups. Leadership = principal + ms + ic shown together as
+    // large cards; pmam / deo / other shown as photo-card grids. ──
+    var RANK_GROUPS = [
+      { key:'ic',        label:'I/C AB-PMJAY',           roleIcon:'ic', leadership:true,
+        desc:'Managing and coordinating AB-PMJAY activities effectively.',
+        match:function(r){ return /i\/?c|in.?charge|incharge/.test(r) && /pmjay|ab-?pmjay|sehat/.test(r); } },
+      { key:'pmam',      label:'PMAMs',                  roleIcon:'pmam', leadership:false,
+        match:function(r){ return /pmam/.test(r); } },
+      { key:'mts',       label:'MTS',                    roleIcon:'deo', leadership:false,
+        match:function(r){ return /(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(r); } },
+      { key:'other',     label:'Administrative Staff',   roleIcon:'other', leadership:false,
+        match:function(r){ return true; } }
+    ];
+
+    // Admin-configurable order (settings/about_page.staffGroupOrder).
+    (function applyStaffGroupOrder(){
+      var saved = (typeof window.lpGetStaffGroupOrder === 'function')
+        ? window.lpGetStaffGroupOrder() : null;
+      if (!saved || !Array.isArray(saved) || !saved.length) return;
+      var byKey = {};
+      RANK_GROUPS.forEach(function(g){ byKey[g.key] = g; });
+      var ordered = [];
+      saved.forEach(function(k){ if (byKey[k] && ordered.indexOf(byKey[k]) === -1) ordered.push(byKey[k]); });
+      RANK_GROUPS.forEach(function(g){ if (ordered.indexOf(g) === -1) ordered.push(g); });
+      RANK_GROUPS = ordered;
+    })();
+
+    function groupFor(role){
+      var r = String(role || '').toLowerCase();
+      // First try to match explicit roles
+      for (var i = 0; i < RANK_GROUPS.length; i++) {
+        if (RANK_GROUPS[i].key !== 'other' && RANK_GROUPS[i].match(r)) return i;
+      }
+      // Fallback to Administrative Staff (other)
+      for (var i = 0; i < RANK_GROUPS.length; i++) {
+        if (RANK_GROUPS[i].key === 'other') return i;
+      }
+      return RANK_GROUPS.length; // Failsafe
+    }
+
+    var memberOrder = (typeof window.lpGetStaffMemberOrder === 'function')
+      ? window.lpGetStaffMemberOrder() : [];
+
+    var buckets = {};
+    list.forEach(function(u){
+      var gi = groupFor(u.role);
+      (buckets[gi] = buckets[gi] || []).push(u);
+    });
+
+    for (var gi in buckets) {
+      buckets[gi].sort(function(a,b){
+        var idA = a.email || a.id || a._docId;
+        var idB = b.email || b.id || b._docId;
+        var idxA = memberOrder.indexOf(idA);
+        var idxB = memberOrder.indexOf(idB);
+        if (idxA === -1) idxA = 999999;
+        if (idxB === -1) idxB = 999999;
+        return idxA - idxB;
+      });
+    }
+
+    function photoBox(u, size){
+      var initials = (u.name||'?').split(/\s+/).map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+      if (u.photoBase64) {
+        return '<img src="'+u.photoBase64+'" style="width:100%;height:100%;object-fit:cover" alt="">';
+      }
+      return '<span style="font-size:'+(size>70?'24px':'18px')+';font-weight:800;color:#fff">'+escHtml(initials)+'</span>';
+    }
+
+    // Compact card used in all grids (photo top, name + role pill).
+    function gridCard(u, g){
+      var roleIco = STAFF_ROLE_ICON[g ? g.roleIcon : 'other'] || STAFF_ROLE_ICON.other;
+      var wardHtml = (u.ward && g && g.roleIcon === 'pmam') ? '<div style="font-size:9.5px;font-weight:700;color:#6366f1;background:#e0e7ff;padding:3px 6px;border-radius:4px;margin-top:2px;">'+escHtml(u.ward)+'</div>' : '';
+      return '<div class="sx-grid-card">'
+        + '<div class="sx-grid-photo">'+photoBox(u,56)+'</div>'
+        + '<div class="sx-grid-info">'
+        +   '<div class="sx-grid-badge">'+roleIco+'</div>'
+        +   '<div class="sx-grid-name">'+escHtml(u.name||'Unknown')+'</div>'
+        +   '<div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-top:4px; align-items:center;">'
+        +     '<div class="sx-grid-role">'+escHtml(u.role||'Staff')+'</div>'
+        +     wardHtml
+        +   '</div>'
+        +   ((g && g.desc) ? '<div style="font-size:11px;color:#64748b;margin-top:10px;">'+escHtml(g.desc)+'</div>' : '')
+        + '</div>'
+        + '</div>';
+    }
+
+    function groupHeader(label, iconKey, count){
+      var ico = STAFF_GROUP_ICON[iconKey] || STAFF_GROUP_ICON.other;
+      return '<div class="sx-group-hd" style="margin-top:28px; padding-bottom:8px; border-bottom:2px solid #10b981; margin-bottom:16px;">'
+        + '<span class="sx-group-ico">'+ico+'</span>'
+        + '<span class="sx-group-label" style="color:#4c1d95; font-size:16px;">'+escHtml(label)+'</span>'
+        + (count ? '<span class="sx-group-count" style="background:#ddd6fe; color:#4c1d95;">'+count+'</span>' : '')
+        + '</div>';
+    }
+
+    // ── Build the HTML ──
+    var html = '';
+
+    // Are any of the first contiguous leadership groups present? If so, render
+    // them under a single "Leadership" divider as large cards.
+    var leadershipMembers = [];
+    var renderedLeadership = false;
+    RANK_GROUPS.forEach(function(g, gi){
+      if (!g.leadership) return;
+      var members = buckets[gi];
+      if (members && members.length) {
+        members.forEach(function(m){ leadershipMembers.push({ u:m, g:g }); });
+      }
+    });
+
+    function renderLeadershipBlock(){
+      if (renderedLeadership || !leadershipMembers.length) return;
+      renderedLeadership = true;
+      html += groupHeader('Leadership', 'leadership', 0);
+      html += '<div class="sx-grid">'
+        + leadershipMembers.map(function(item){ return gridCard(item.u, item.g); }).join('')
+        + '</div>';
+    }
+
+    // Walk the groups in order. The first time we hit a leadership group we
+    // emit the whole Leadership block; non-leadership groups get their own
+    // divider + grid.
+    RANK_GROUPS.forEach(function(g, gi){
+      var members = buckets[gi];
+      if (g.leadership) {
+        renderLeadershipBlock();
+        return;
+      }
+      if (!members || !members.length) return;
+      html += groupHeader(g.label, g.roleIcon === 'pmam' ? 'pmam' : (g.roleIcon === 'deo' ? 'deo' : 'other'), members.length);
+      
+      if (g.roleIcon === 'pmam' && members.length > 0) {
+        html += '<div class="sx-grid sx-grid-pmam-top">' + gridCard(members[0], g) + '</div>';
+        if (members.length > 1) {
+          html += '<div class="sx-grid sx-grid-pmam-rest" style="margin-top:16px;">' 
+            + members.slice(1).map(function(m){ return gridCard(m, g); }).join('') 
+            + '</div>';
+        }
+      } else {
+        html += '<div class="sx-grid">'
+          + members.map(function(m){ return gridCard(m, g); }).join('')
+          + '</div>';
+      }
+    });
+    // In case leadership groups appear only at the very end of the order.
+    renderLeadershipBlock();
+
+    grid.innerHTML = html;
+  }
+
+  // Filter / search removed — kept as harmless no-ops for backward compat.
+  function setFilter(roleVal, btn){ /* no-op: filters removed */ }
+  window.setStaffFilter = setFilter;
+  function onSearch(){ /* no-op: search removed */ }
+  window.onStaffSearch = onSearch;
+
+  // ── Expose staff data for the About page's "Our Staff" tab ──
+  // The About modal lives in a different IIFE, so it can't see _staffCache
+  // directly. These globals let it pull the same public staff list.
+  window.lpLoadStaff = loadStaff;
+  window.lpGetStaffCache = function(){ return _staffCache; };
+  window.lpRoleColors = ROLE_COLORS;
+
+  // ════════════════════════════════════════════════════════════════════
+  // GENERAL NAV-BAR CLICK HANDLER
+  // Handles every tab in the nav bar (static fallback + dynamic from
+  // Firestore settings/landing_page.navBar). Behaviour per tab:
+  //
+  //   1. If href is a real URL (not '', not '#') → let browser navigate
+  //   2. If data-nav === 'staff' and no URL    → open Staff modal
+  //   3. If data-nav === 'home'  and no URL    → smooth-scroll to top
+  //   4. Any other tab with no URL              → show "Coming soon" toast
+  //
+  // Also: clicking any tab updates the .active visual state for feedback.
+  // Uses event delegation on document so dynamically rendered items work
+  // automatically (renderNav re-emits innerHTML on every Firestore snapshot).
+  // ════════════════════════════════════════════════════════════════════
+
+  // ─── Toast helper ───────────────────────────────────────────────────
+  function showNavToast(msg){
+    var t = document.getElementById('navToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'navToast';
+      t.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);'
+                      + 'background:rgba(15,23,42,0.95);color:#fff;padding:11px 20px;border-radius:10px;'
+                      + 'font-size:13px;font-weight:600;font-family:Inter,Arial,sans-serif;z-index:9999;'
+                      + 'box-shadow:0 8px 24px rgba(0,0,0,0.25);opacity:0;transition:all 0.25s ease;'
+                      + 'pointer-events:none;max-width:90vw;text-align:center;line-height:1.4';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    // Force reflow then animate in
+    void t.offsetWidth;
+    t.style.opacity = '1';
+    t.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(t._hideTimer);
+    t._hideTimer = setTimeout(function(){
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(-50%) translateY(20px)';
+    }, 2400);
+  }
+
+  // ─── Resolve nav id from element (data-nav preferred, label fallback) ─
+  // Local copy of the canonical normaliser so this block never depends on
+  // script load order.
+  function navIdCanonLocal(raw){
+    var s = String(raw || '').toLowerCase().replace(/^#/, '').replace(/[^a-z]/g, '');
+    if (!s) return '';
+    var M = {
+      home:'home', staff:'staff', about:'about', aboutus:'about',
+      calendar:'calendar', holidaycalendar:'calendar', holidaycal:'calendar',
+      roster:'roster', wardroster:'roster', ward:'roster', wards:'roster',
+      holiday:'holiday', holidayduty:'holiday', holidayroster:'holiday', holidayrost:'holiday',
+      weekend:'weekend', weekendroster:'weekend', weekendrost:'weekend', weekendduty:'weekend',
+      contact:'contact', contactus:'contact',
+      orders:'orders', order:'orders', officeorders:'orders', circulars:'orders', notices:'orders',
+      developer:'developer', aboutdeveloper:'developer', aboutdev:'developer', dev:'developer', webdeveloper:'developer'
+    };
+    return M[s] || s;
+  }
+  var KNOWN_MODAL_IDS = ['calendar','roster','holiday','weekend','orders','about','developer'];
+  var ACTION_IDS = ['home','staff','contact'];
+  function getNavId(a){
+    var fromId    = navIdCanonLocal((a.getAttribute('data-nav') || '').trim());
+    var fromLabel = navIdCanonLocal((a.textContent || '').trim().replace(/[▾▼]/g,'').trim());
+    // Prefer whichever resolves to a real modal/action id.
+    if (KNOWN_MODAL_IDS.indexOf(fromId) !== -1 || ACTION_IDS.indexOf(fromId) !== -1) return fromId;
+    if (KNOWN_MODAL_IDS.indexOf(fromLabel) !== -1 || ACTION_IDS.indexOf(fromLabel) !== -1) return fromLabel;
+    return fromId || fromLabel;
+  }
+
+  // ─── Update active visual state ─────────────────────────────────────
+  // Also persists the active id on window.__activeNavId so renderNav()
+  // can restore the green pill after onSnapshot re-renders the bar.
+  function setActiveNav(clickedAnchor){
+    var nav = document.getElementById('lpNavArea');
+    if (!nav) return;
+    nav.querySelectorAll('a.nav-item').forEach(function(el){
+      el.classList.remove('active');
+    });
+    clickedAnchor.classList.add('active');
+    var clickedId = (clickedAnchor.getAttribute('data-nav') || '').trim().toLowerCase();
+    if (clickedId) window.__activeNavId = clickedId;
+  }
+
+  // ─── Bind: set cursor pointer on items that will trigger JS actions ─
+  function bindNavTriggers(){
+    var nav = document.getElementById('lpNavArea');
+    if (!nav) return;
+    nav.querySelectorAll('a.nav-item').forEach(function(a){
+      var href = a.getAttribute('href') || '';
+      if (href === '' || href === '#') {
+        a.style.cursor = 'pointer';
+      }
+    });
+  }
+
+  // ─── switchPage — defined early so it's available immediately ───────
+  window.switchPage = function(pageId) {
+    document.querySelectorAll('.page-view').forEach(function(el) {
+      el.classList.remove('active');
+    });
+    var target = document.getElementById(pageId);
+    if (target) {
+      target.classList.add('active');
+    } else {
+      var home = document.getElementById('page-home');
+      if (home) home.classList.add('active');
+    }
+    try { window.scrollTo({ top:0, behavior:'smooth' }); } catch(_){ window.scrollTo(0, 0); }
+  };
+
+  // ─── Single delegated click handler for every nav tab ───────────────
+  document.addEventListener('click', function(e){
+    var a = e.target.closest('a.nav-item');
+    if (!a) return;
+    // Only intercept tabs inside the landing-page nav area
+    if (!a.closest('#lpNavArea')) return;
+
+    var href  = a.getAttribute('href') || '';
+    var navId = getNavId(a);
+    var labelText = (a.textContent || '').trim().replace(/[▾▼]/g,'').trim();
+    console.log('[nav] click intercepted — id:"'+navId+'" label:"'+labelText+'" href:"'+href+'"');
+
+    // A "real URL" is one that actually navigates somewhere: http://, https://,
+    // protocol-relative //, or a path like /page or ./page or page.html.
+    // Anything starting with '#' (anchor) is NOT a real URL — older saved nav
+    // data had `url:'#orders'` etc., but those anchors don't point anywhere
+    // and should fall through to id-based modal routing.
+    var isRealUrl = href && href.charAt(0) !== '#' && (
+      /^(https?:|\/\/)/i.test(href) ||  // external
+      /^[./]/.test(href) ||              // relative path (./ or /)
+      /^[a-z0-9_-]+\.[a-z]+/i.test(href) // bare filename like "page.html"
+    );
+
+    if (isRealUrl) {
+      setActiveNav(a);
+      closeMobileNav();
+      return;
+    }
+
+    // No real URL — always intercept and route by nav id
+    e.preventDefault();
+    setActiveNav(a);
+    closeMobileNav();
+
+    if (navId === 'staff') {
+      if (typeof window.lpLoadStaff === 'function') window.lpLoadStaff(); // Make sure data is loaded
+      window.switchPage('page-staff');
+      return;
+    }
+    if (navId === 'home') {
+      window.switchPage('page-home');
+      return;
+    }
     
+    // Known content ids → render and show content page
+    var renderers = window.CONTENT_RENDERERS || {};
+    var resolvedId = renderers[navId] ? navId : (renderers[navIdCanonLocal(labelText)] ? navIdCanonLocal(labelText) : null);
+    
+    if (resolvedId && typeof window.openContentModal === 'function') {
+      console.log('[nav] Switching to content page for:', resolvedId);
+      window.openContentModal(resolvedId, labelText || resolvedId);
+      window.switchPage('page-content');
+      return;
+    }
+    
+    console.log('[nav] No renderer for id="'+navId+'" / label="'+labelText+'" — known ids:', Object.keys(renderers));
+    showNavToast((labelText || 'This section') + ' — info coming soon.');
+  });
+
+  // Helper: close mobile nav after a click
+  function closeMobileNav(){
+    var nav = document.getElementById('lpNavArea');
+    var btn = document.getElementById('navToggle');
+    if (nav) nav.classList.remove('open');
+    if (btn) { btn.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+  }
+
+  // Hamburger toggle
+  (function bindHamburger(){
+    function bind(){
+      var btn = document.getElementById('navToggle');
+      var nav = document.getElementById('lpNavArea');
+      if (!btn || !nav || btn._bound) return;
+      btn._bound = true;
+      btn.addEventListener('click', function(){
+        var isOpen = nav.classList.toggle('open');
+        btn.classList.toggle('open', isOpen);
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bind);
+    } else {
+      bind();
+    }
+  })();
+
+  // Go back to home on Escape. Also resets the active nav highlight back
+  // to Home so the green pill follows the page state.
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && typeof window.switchPage === 'function') {
+      window.switchPage('page-home');
+      window.__activeNavId = 'home';
+      var nav = document.getElementById('lpNavArea');
+      if (nav) {
+        nav.querySelectorAll('a.nav-item').forEach(function(el){
+          el.classList.toggle('active', (el.getAttribute('data-nav') || '') === 'home');
+        });
+      }
+    }
+  });
+
+  // Initial bind, then re-bind whenever navBar is re-rendered (handled by
+  // the click delegation above, but we still mark items with cursor:pointer).
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindNavTriggers);
+  } else {
+    bindNavTriggers();
+  }
+  // The navBar is also re-rendered by setupLandingPageSync's onSnapshot —
+  // since we use event delegation on document, that's automatically covered.
+})();
+
+</script>
+
+<!-- ═══════════════ STAFF PAGE ═══════════════ -->
+<style>
+  .page-view { display: none; flex: 1; background: #fff; padding: 0; overflow-y: auto; overflow-x: hidden; animation: fadeSlideUp 0.3s ease-out; }
+  .page-view.active { display: flex; flex-direction: column; }
+  #page-home.active { display: flex; flex-direction: row; padding: 0; background: #f8fafc; }
+  
+  @media(max-width:980px) {
+    #page-home.active { flex-direction: column; }
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .sm-card {
+    background: #fff; width: 100%; min-height: 100%;
+    display: flex; flex-direction: column;
+  }
+  .sm-header {
+    background: linear-gradient(135deg, #311873 0%, #46229e 50%, #5d2fc7 100%);
+    color: #fff; padding: 6px 20px; display: flex; align-items: center; gap: 12px; position: relative; overflow: hidden; flex-shrink: 0;
+  }
+  .sm-header::before {
+    content: ""; position: absolute; right: 0; bottom: 0; top: 0; width: 500px;
+    background-image: url("data:image/svg+xml,%3Csvg width='500' height='100' viewBox='0 0 500 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 100V60H70V100M75 100V30H140V100M150 100V50H190V100M200 100V20H260V100M270 100V40H320V100M330 100V70H380V100M390 100V45H430V100M440 100V60H480V100' fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='2'/%3E%3Cg fill='rgba(255,255,255,0.05)'%3E%3Crect x='40' y='70' width='8' height='10'/%3E%3Crect x='55' y='70' width='8' height='10'/%3E%3Crect x='85' y='40' width='10' height='12'/%3E%3Crect x='105' y='40' width='10' height='12'/%3E%3Crect x='125' y='40' width='10' height='12'/%3E%3Crect x='85' y='60' width='10' height='12'/%3E%3Crect x='105' y='60' width='10' height='12'/%3E%3Crect x='125' y='60' width='10' height='12'/%3E%3C/g%3E%3C/svg%3E");
+    background-position: bottom right; background-repeat: no-repeat; background-size: cover; z-index: 1;
+  }
+  .sm-header > * { position: relative; z-index: 2; }
+  .sm-body {
+    flex: 1; padding: 12px 20px; background: linear-gradient(to right, #d1fae5, #dbeafe, #f3e8ff);
+  }
+  #staffModalGrid {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  /* Intro banner */
+  .sx-intro {
+    background:#f8fafc; border:1px solid #eef2f6; border-radius:12px;
+    padding:16px 20px; display:flex; gap:16px; align-items:flex-start; margin-bottom:4px;
+  }
+  .sx-intro-ico {
+    width:48px; height:48px; border-radius:50%; background:#f5f3ff;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    color:#7c3aed;
+  }
+  /* Group divider header */
+  .sx-group-hd {
+    display:flex; align-items:center; gap:10px; margin:16px 0 12px;
+  }
+  .sx-group-ico { display:flex; align-items:center; color:#4c1d95; }
+  .sx-group-label {
+    font-size:15px; font-weight:800; color:#3730a3; letter-spacing:0.2px;
+  }
+  .sx-group-count {
+    background:#ede9fe; color:#5b21b6; font-size:11px; font-weight:800;
+    padding:2px 10px; border-radius:20px;
+  }
+  .sx-group-line {
+    flex:1; height:2px; border-radius:2px;
+    background:linear-gradient(90deg,#ddd6fe,transparent);
+  }
+  /* Compact grid cards (PMAMs / DEO / Other) */
+  .sx-grid {
+    display:flex; flex-wrap:wrap; justify-content:center; gap:16px;
+  }
+  .sx-grid-pmam-top > .sx-grid-card { width: 100%; max-width: 340px; margin: 0 auto; }
+  .sx-grid-card {
+    width:calc(25% - 12px); min-width:240px;
+    background: #f8fafc; border:none; border-radius:12px;
+    padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;
+    box-shadow:0 4px 14px rgba(124,58,237,0.06); transition: all 0.2s;
+  }
+  .sx-grid-card:hover {
+    border-color: #a78bfa; box-shadow:0 6px 18px rgba(124,58,237,0.1); transform: translateY(-2px);
+  }
+  .sx-grid-photo {
+    width:100px; height:100px; border-radius:50%; flex-shrink:0; overflow:hidden;
+    background:#fff; border:3px solid #3b82f6; margin-bottom:4px;
+  }
+  .sx-grid-photo img { width:100%; height:100%; object-fit:cover; }
+  .sx-grid-info {
+    flex:1; display:flex; flex-direction:column; align-items:center; min-width:0; width:100%;
+  }
+  .sx-grid-badge {
+    display:none; /* Hide badge since we are centering and focusing on photo */
+  }
+  .sx-grid-name {
+    font-size:13px; font-weight:800; color:#1e1b4b; line-height:1.2;
+    margin-bottom:6px; text-transform:uppercase;
+  }
+  .sx-grid-role {
+    background:#fff; border-radius:4px; padding:3px 10px; font-size:10px; font-weight:800; color:#7c3aed; text-transform:uppercase;
+  }
+  @media (max-width: 768px) {
+    .sx-grid-card { width:calc(50% - 8px); }
+  }
+  @media (max-width: 600px) {
+    #staffModal { padding: 0 }
+    .sm-card { max-height: 100vh; height: 100vh; border-radius: 0 }
+    .sx-grid-card { width:100%; }
+  }
+</style>
+<div id="page-staff" class="page-view">
+  <div class="sm-card">
+    <div class="sm-header">
+      <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div style="flex:1">
+        <h2 style="font-size:20px; font-weight:700; margin:0 0 2px 0">Our Staff</h2>
+        <div class="sm-sub" id="staffModalCount" style="font-size:12px; font-weight:500; opacity:0.9"></div>
+      </div>
+    </div>
+    <div class="sm-body">
+      <div id="staffModalGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     GENERIC CONTENT MODAL — Holiday Calendar / Ward Roster /
+     Holiday Duty / Weekend Roster, fed by live Firestore data.
+     Auto-publishes whenever admin saves any matching DM tab.
+     ════════════════════════════════════════════════════════════════════ -->
+<style>
+  .cm-card{
+    background:#fff; width:100%; min-height: 100%;
+    display:flex;flex-direction:column;
+  }
+  .cm-header{
+    background:linear-gradient(135deg, #311873 0%, #46229e 50%, #5d2fc7 100%);
+    color:#fff;padding:6px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0; position:relative; overflow:hidden;
+  }
+  .cm-header::before {
+    content: ""; position: absolute; right: 0; bottom: 0; top: 0; width: 500px;
+    background-image: url("data:image/svg+xml,%3Csvg width='500' height='100' viewBox='0 0 500 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 100V60H70V100M75 100V30H140V100M150 100V50H190V100M200 100V20H260V100M270 100V40H320V100M330 100V70H380V100M390 100V45H430V100M440 100V60H480V100' fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='2'/%3E%3Cg fill='rgba(255,255,255,0.05)'%3E%3Crect x='40' y='70' width='8' height='10'/%3E%3Crect x='55' y='70' width='8' height='10'/%3E%3Crect x='85' y='40' width='10' height='12'/%3E%3Crect x='105' y='40' width='10' height='12'/%3E%3Crect x='125' y='40' width='10' height='12'/%3E%3Crect x='85' y='60' width='10' height='12'/%3E%3Crect x='105' y='60' width='10' height='12'/%3E%3Crect x='125' y='60' width='10' height='12'/%3E%3C/g%3E%3C/svg%3E");
+    background-position: bottom right; background-repeat: no-repeat; background-size: cover; z-index: 1;
+  }
+  .cm-header > * { position: relative; z-index: 2; }
+  .cm-header h2{margin:0;font-size:20px;font-weight:700;flex:1;line-height:1.2}
+  .cm-sub{font-size:12px;font-weight:500;opacity:0.9;margin-top:2px}
+  .cm-body{flex:1;padding:12px 20px;background:#f8fafc}
+  .cm-empty{
+    text-align:center;padding:30px 20px;color:#6b7280;font-size:13px;
+    background:#fff;border-radius:12px;border:1.5px dashed #e5e7eb;
+  }
+
+  /* Generic data tables inside the modal */
+  .cm-tbl-wrap{background:#fff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden}
+  .cm-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+  .cm-tbl thead th{
+    background:linear-gradient(135deg,#1e3a8a,#1d4ed8);color:#fff;padding:9px 12px;
+    text-align:left;font-weight:700;letter-spacing:0.2px;white-space:nowrap;font-size:11.5px;
+    text-transform:uppercase;
+  }
+  .cm-tbl tbody td{padding:9px 12px;border-bottom:1px solid #f1f5f9;color:#1e293b;line-height:1.45}
+  .cm-tbl tbody tr:nth-child(even){background:#f9fafb}
+  .cm-tbl tbody tr:hover{background:#eff6ff}
+  .cm-tbl tbody tr:last-child td{border-bottom:none}
+
+  /* Gridlined variant — visible row & column borders */
+  .cm-tbl-grid th, .cm-tbl-grid td{ border:1px solid #cbd5e1 !important; }
+  .cm-tbl-grid thead th{ border-color:#1e3a8a !important; }
+  .cm-tbl-grid tbody td{ border-bottom:1px solid #cbd5e1 !important; }
+  .cm-tbl-grid tbody tr:hover{ background:#eff6ff }
+
+  /* Pills used in renderers */
+  .cm-pill{display:inline-block;padding:2px 9px;border-radius:50px;font-size:10.5px;font-weight:700;letter-spacing:0.2px}
+  .cm-pill-gazetted{background:#ddd6fe;color:#5b21b6}
+  .cm-pill-state{background:#fde68a;color:#92400e}
+  .cm-pill-custom{background:#bbf7d0;color:#166534}
+  .cm-pill-sunday{background:#fecaca;color:#dc2626}
+  .cm-pill-pmam{background:#dbeafe;color:#1e3a8a;margin:2px 3px 2px 0}
+
+  /* Calendar grid */
+  .cm-cal-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .cm-cal-controls select{
+    padding:6px 12px;border:1.5px solid #ddd6fe;border-radius:8px;
+    font-size:12px;background:#fff;color:#4c1d95;font-weight:600;cursor:pointer;
+    font-family:inherit;outline:none;
+  }
+  .cm-cal-controls select:focus{border-color:#7c3aed}
+  .cm-cal-grid{
+    display:grid;grid-template-columns:repeat(7,1fr);
+    background:#fff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;
+  }
+  .cm-cal-dh{
+    text-align:center;font-size:11px;font-weight:800;color:#fff;
+    padding:10px 4px;letter-spacing:0.5px;text-transform:uppercase;
+  }
+  .cm-cal-day{
+    min-height:70px;padding:8px;font-size:11px;
+    border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;
+    background:#fff;color:#1e293b;
+    display:flex;flex-direction:column;
+  }
+  .cm-cal-day-num{font-weight:700;font-size:12px}
+  .cm-cal-day-name{font-size:9.5px;line-height:1.2;margin-top:2px;word-break:break-word}
+  .cm-cal-day.sun{background:#fef2f2;border-color:#fecaca;color:#dc2626}
+  .cm-cal-day.gaz{background:#f5f3ff;border-color:#ddd6fe;color:#5b21b6}
+  .cm-cal-day.state{background:#fffbeb;border-color:#fde68a;color:#92400e}
+  .cm-cal-day.custom{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+  .cm-cal-day.today{box-shadow:0 0 0 2px #7c3aed;font-weight:800}
+  .cm-cal-day.empty{background:transparent;border:none}
+
+  .cm-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:10.5px;margin-top:10px;color:#475569}
+  .cm-legend span{display:inline-flex;align-items:center;gap:5px}
+  .cm-legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  /* Mobile responsive */
+  @media(max-width:768px){
+    #contentModal{padding:0}
+    .cm-card{max-height:100vh;height:100vh;border-radius:0;max-width:100%}
+    .cm-header{padding:14px 16px;gap:10px}
+    .cm-header h2{font-size:16px}
+    .cm-body{padding:12px}
+    .cm-tbl{font-size:11.5px}
+    .cm-tbl thead th{padding:7px 9px;font-size:10.5px}
+    .cm-tbl tbody td{padding:7px 9px}
+    .cm-cal-day{min-height:42px;font-size:10px;padding:3px 4px}
+    .cm-cal-day-name{font-size:8.5px}
+    .cm-cal-grid{padding:6px;gap:2px}
+    .cm-cal-dh{font-size:9px;padding:2px}
+    /* Allow horizontal scroll for very wide tables */
+    .cm-scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .cm-scroll-x .cm-tbl{min-width:520px}
+  }
+  @media(max-width:480px){
+    .cm-header h2{font-size:14.5px}
+    .cm-sub{font-size:10px}
+    .cm-tbl{font-size:11px}
+  }
+</style>
+
+<div id="page-content" class="page-view">
+  <div class="cm-card">
+    <div class="cm-header">
+      <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg id="cmIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <h2 id="cmTitle">Title</h2>
+      </div>
+    </div>
+    <div class="cm-body" id="cmBody">
+      <div class="cm-loading">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ─── Live data store: each key holds latest Firestore snapshot ─────
+  var LIVE = {
+    holidayCalendar: null,  // settings/holiday_calendar
+    wardRoster:      null,  // settings/roster
+    holidayDuty:     null,  // settings/holidays
+    weekendRoster:   null,  // settings/weekend_roster
+    orders:          null,  // settings/orders
+    aboutPage:       null   // settings/about_page
+  };
+  // Current open modal id (so we can re-render when data updates)
+  var _openId = null;
+
+  // ─── Firestore real-time subscriptions ──────────────────────────────
+  // Each updates LIVE and re-renders the modal if currently visible.
+  function subscribe(){
+    if (typeof db === 'undefined' || !db.collection) {
+      console.warn('[contentModal] Firestore not ready; will retry…');
+      return setTimeout(subscribe, 800);
+    }
+    db.collection('settings').doc('holiday_calendar').onSnapshot(function(doc){
+      LIVE.holidayCalendar = doc.exists ? (doc.data() || {}) : {};
+      if (_openId === 'calendar') renderInto(_openId);
+    }, function(err){ console.warn('holiday_calendar listener:', err && err.message); });
+
+    db.collection('settings').doc('roster').onSnapshot(function(doc){
+      LIVE.wardRoster = doc.exists ? (doc.data() || {}) : {};
+      if (_openId === 'roster') renderInto(_openId);
+    }, function(err){ console.warn('roster listener:', err && err.message); });
+
+    db.collection('settings').doc('holidays').onSnapshot(function(doc){
+      LIVE.holidayDuty = doc.exists ? (doc.data() || {}) : {};
+      if (_openId === 'holiday') renderInto(_openId);
+    }, function(err){ console.warn('holidays listener:', err && err.message); });
+
+    function autoAdvanceRoster(rows) {
+      if (!rows || !rows.length) return false;
+      var now = new Date();
+      var p = function(n){ return n < 10 ? '0'+n : n; };
+      var todayStr = now.getFullYear() + '-' + p(now.getMonth()+1) + '-' + p(now.getDate());
+      var cycleDays = rows.length * 7;
+      var updated = false;
+      function addDays(ymd, days) {
+        if (!ymd) return ymd;
+        var pts = ymd.split('-');
+        if (pts.length !== 3) return ymd;
+        var d = new Date(Date.UTC(parseInt(pts[0],10), parseInt(pts[1],10)-1, parseInt(pts[2],10)));
+        d.setUTCDate(d.getUTCDate() + days);
+        return d.toISOString().split('T')[0];
+      }
+      rows.forEach(function(r) {
+        if (!r.sunday || !r.saturday) return;
+        var safety = 0;
+        while (r.sunday < todayStr && safety < 100) {
+          r.saturday = addDays(r.saturday, cycleDays);
+          r.sunday = addDays(r.sunday, cycleDays);
+          if (!r.sunday || r.sunday.indexOf('NaN') !== -1) break;
+          updated = true;
+          safety++;
+        }
+      });
+      if (updated) {
+        rows.sort(function(a, b){
+          var da = a.saturday || '';
+          var db = b.saturday || '';
+          return da.localeCompare(db);
+        });
+      }
+      return updated;
+    }
+
+    db.collection('settings').doc('weekend_roster').onSnapshot(function(doc){
+      var data = doc.exists ? (doc.data() || {}) : {};
+      if (data.rows) autoAdvanceRoster(data.rows);
+      LIVE.weekendRoster = data;
+      if (_openId === 'weekend') renderInto(_openId);
+    }, function(err){ console.warn('weekend_roster listener:', err && err.message); });
+
+    db.collection('settings').doc('orders').onSnapshot(function(doc){
+      LIVE.orders = doc.exists ? (doc.data() || {}) : {};
+      if (_openId === 'orders') renderInto(_openId);
+    }, function(err){ console.warn('orders listener:', err && err.message); });
+
+    db.collection('settings').doc('about_page').onSnapshot(function(doc){
+      LIVE.aboutPage = doc.exists ? (doc.data() || {}) : {};
+      console.log('[about_page] live update —',
+                  LIVE.aboutPage.aboutSections ? LIVE.aboutPage.aboutSections.length + ' sections' : 'no sections');
+      if (_openId === 'about' || _openId === 'developer') renderInto(_openId);
+    }, function(err){
+      console.error('[about_page listener] ERROR:', err && err.code, err && err.message);
+      if (err && err.code === 'permission-denied') {
+        console.error('>>> Firestore rules block public read of settings/about_page — update rules. <<<');
+      }
+    });
+
+    // Expose the staff group order so the staff modal (a separate IIFE) can
+    // read it when building the grouped staff list.
+    window.lpGetStaffGroupOrder = function(){
+      return (LIVE.aboutPage && LIVE.aboutPage.staffGroupOrder) || null;
+    };
+    window.lpGetStaffMemberOrder = function(){
+      return (LIVE.aboutPage && LIVE.aboutPage.staffMemberOrder) || [];
+    };
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', subscribe);
+  } else {
+    subscribe();
+  }
+
+  // ─── Helpers ─────────────────────────────────────────────────────────
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function fmtDate(iso){
+    if (!iso) return '—';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+  }
+  function weekday(iso){
+    if (!iso) return '';
+    var d = new Date(iso); if (isNaN(d.getTime())) return '';
+    return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+  }
+
+  // ─── Per-id renderers ───────────────────────────────────────────────
+  function renderHolidayCalendar(){
+    var data = LIVE.holidayCalendar || {};
+    var holidays = Array.isArray(data.holidays) ? data.holidays : [];
+    var now = new Date();
+    // Year + month picker (default: current)
+    var calState = renderHolidayCalendar._state || (renderHolidayCalendar._state = { year:now.getFullYear(), month:now.getMonth() });
+    var years = []; for (var y = now.getFullYear()-1; y <= now.getFullYear()+2; y++) years.push(y);
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    
+    var monthHols = holidays.filter(function(h){
+      if (!h.date) return false; var d = new Date(h.date);
+      return d.getFullYear()===calState.year && d.getMonth()===calState.month;
+    }).sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+
+    var html = '<div style="display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start;">';
+    
+    // LEFT SIDE: Holidays List
+    html += '<div style="flex:1; min-width:280px; max-width:320px;">';
+    html += '<div style="font-size:11px;font-weight:800;color:#4c1d95;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Holidays this month</div>';
+    if (monthHols.length){
+      html += '<div style="display:flex;flex-direction:column;gap:6px">';
+      monthHols.forEach(function(h){
+        var cls = 'cm-pill-' + (h.type||'custom').toLowerCase();
+        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #e5e7eb;flex-wrap:wrap">'
+              + '<span class="cm-pill '+cls+'" style="margin:0">'+esc(h.type||'Custom')+'</span>'
+              + '<span style="font-size:12px;font-weight:700;color:#1e293b">'+esc(fmtDate(h.date))+'</span>'
+              + '<span style="font-size:11.5px;color:#475569;flex:1">'+esc(h.name||'')+'</span>'
+              + '</div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div style="padding:10px; font-size:12px; color:#6b7280; background:#fff; border-radius:8px; border:1px dashed #e5e7eb;">No holidays this month</div>';
+    }
+    html += '</div>';
+
+    // RIGHT SIDE: Calendar
+    html += '<div style="flex:2; min-width:400px;">';
+    html += '<div class="cm-cal-controls">'
+      + '<select id="cmCalYear">'+years.map(function(y){return '<option value="'+y+'"'+(y===calState.year?' selected':'')+'>'+y+'</option>';}).join('')+'</select>'
+      + '<select id="cmCalMonth">'+months.map(function(m,i){return '<option value="'+i+'"'+(i===calState.month?' selected':'')+'>'+m+'</option>';}).join('')+'</select>'
+      + '<span style="font-size:11px;color:#6b7280;margin-left:auto">'+holidays.length+' total holidays</span>'
+      + '</div>';
+    html += renderCalGrid(calState.year, calState.month, holidays);
+    html += '<div class="cm-legend" style="margin-top:12px">'
+      +   '<span><i style="background:#fecaca"></i>Sunday</span>'
+      +   '<span><i style="background:#ddd6fe"></i>Gazetted</span>'
+      +   '<span><i style="background:#fde68a"></i>State</span>'
+      +   '<span><i style="background:#bbf7d0"></i>Custom</span>'
+      + '</div>';
+    html += '</div>';
+    
+    html += '</div>'; // End flex container
+    return html;
+  }
+
+  function renderCalGrid(yr, mon, holidays){
+    var firstDay = new Date(yr, mon, 1).getDay();
+    var daysInMonth = new Date(yr, mon+1, 0).getDate();
+    var today = new Date();
+    var hMap = {};
+    holidays.forEach(function(h){ if (h.date) hMap[h.date] = h; });
+    var headers = [
+      {d:'SUN',c:'#ff2a5f'}, {d:'MON',c:'#2563eb'}, {d:'TUE',c:'#0ea5e9'},
+      {d:'WED',c:'#84cc16'}, {d:'THU',c:'#f59e0b'}, {d:'FRI',c:'#8b5cf6'}, {d:'SAT',c:'#3b82f6'}
+    ];
+    var html = '<div class="cm-cal-grid">';
+    headers.forEach(function(h){ html += '<div class="cm-cal-dh" style="background:'+h.c+'">'+h.d+'</div>'; });
+    for (var i = 0; i < firstDay; i++) html += '<div class="cm-cal-day empty"></div>';
+    for (var d = 1; d <= daysInMonth; d++) {
+      var ds = yr+'-'+String(mon+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      var dateObj = new Date(yr, mon, d);
+      var isSun = dateObj.getDay() === 0;
+      var isToday = (dateObj.getFullYear()===today.getFullYear() && dateObj.getMonth()===today.getMonth() && dateObj.getDate()===today.getDate());
+      var h = hMap[ds];
+      var cls = 'cm-cal-day';
+      var name = '';
+      if (h) {
+        var t = (h.type||'').toLowerCase();
+        if (t === 'gazetted') cls += ' gaz';
+        else if (t === 'state') cls += ' state';
+        else if (t === 'sunday') cls += ' sun';
+        else cls += ' custom';
+        name = h.name || '';
+      } else if (isSun) {
+        cls += ' sun'; name = 'Sunday';
+      }
+      if (isToday) cls += ' today';
+      var iconHtml = '';
+      if (isSun || (h && (h.type||'').toLowerCase() === 'sunday')) {
+        iconHtml = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;top:6px;right:6px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+      } else if (h) {
+        iconHtml = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;bottom:6px;right:6px;opacity:0.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+      }
+      html += '<div class="'+cls+'" style="position:relative;" title="'+esc(name||ds)+'">'
+            +   '<div class="cm-cal-day-num">'+d+'</div>'
+            + (name ? '<div class="cm-cal-day-name">'+esc(name)+'</div>' : '')
+            + iconHtml
+            + '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function renderWardRoster(){
+    var data = LIVE.wardRoster || {};
+    var rows = Array.isArray(data.rows) ? data.rows : [];
+    if (!rows.length) {
+      return '<div class="cm-empty">No ward assignments published yet. Admin can add rows from <strong>Nav Bar → Ward Roster</strong>.</div>';
+    }
+    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
+      + '<thead><tr><th style="width:42px">#</th><th>PMAM Name</th><th>Ward(s) Assigned</th></tr></thead>'
+      + '<tbody>';
+    rows.forEach(function(r, i){
+      var name = r.pmam || r.name || '';
+      var wardList;
+      if (Array.isArray(r.wards)) {
+        wardList = r.wards;
+      } else if (typeof r.ward === 'string' && r.ward.trim()) {
+        wardList = r.ward.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+      } else if (Array.isArray(r.ward)) {
+        wardList = r.ward;
+      } else {
+        wardList = [];
+      }
+      var wardCell;
+      if (!wardList.length) {
+        wardCell = '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
+      } else {
+        wardCell = '<span style="display:inline-flex;flex-wrap:wrap;gap:4px">'
+          + wardList.map(function(w){ return (window.WARD_REGISTRY) ? WARD_REGISTRY.pill(w) : esc(w); }).join('')
+          + '</span>';
+      }
+      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
+            + '<td style="font-weight:600">'+esc(name)+'</td>'
+            + '<td>'+wardCell+'</td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+    if (data.updatedAt) {
+      html += '<div style="font-size:10.5px;color:#9ca3af;text-align:right;margin-top:6px">Last updated: '+fmtDate(new Date(data.updatedAt).toISOString().slice(0,10))+'</div>';
+    }
+    return html;
+  }
+
+  function renderHolidayDuty(){
+    var data = LIVE.holidayDuty || {};
+    var rows = Array.isArray(data.rows) ? data.rows : [];
+    if (!rows.length) {
+      return '<div class="cm-empty">No holiday duty roster published yet. Admin can add rows from <strong>Data Management → Holiday Duty Roster</strong>.</div>';
+    }
+    // Sort by date ascending
+    var sorted = rows.slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl">'
+      + '<thead><tr><th style="width:42px">#</th><th>Date</th><th>Day</th><th>Holiday</th><th>PMAMs on Duty</th></tr></thead>'
+      + '<tbody>';
+    sorted.forEach(function(r, i){
+      var pmams = Array.isArray(r.pmams) ? r.pmams.filter(function(p){ return (p||'').trim(); }) : [];
+      var pmamHtml = pmams.length
+        ? pmams.map(function(p){ return '<span class="cm-pill cm-pill-pmam">'+esc(p)+'</span>'; }).join('')
+        : '<span style="color:#9ca3af;font-style:italic;font-size:11px">No PMAMs assigned</span>';
+      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:600">'+(i+1)+'</td>'
+            + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.date))+'</td>'
+            + '<td style="color:#475569">'+esc(weekday(r.date))+'</td>'
+            + '<td style="font-weight:600">'+esc(r.name||'')+'</td>'
+            + '<td>'+pmamHtml+'</td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+    return html;
+  }
+
+  function renderWeekendRoster(){
+    var data = LIVE.weekendRoster || {};
+    var rows = Array.isArray(data.rows) ? data.rows : [];
+    if (!rows.length) {
+      return '<div class="cm-empty">No weekend roster published yet. Admin can add rows from <strong>Data Management → Weekend Roster</strong>.</div>';
+    }
+    // Sort by saturday date ascending
+    var sorted = rows.slice().sort(function(a,b){ return (a.saturday||'').localeCompare(b.saturday||''); });
+    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
+      + '<thead><tr><th style="width:42px">#</th><th>PMAMs on Duty</th><th>Saturday</th><th>Sunday</th></tr></thead>'
+      + '<tbody>';
+    sorted.forEach(function(r, i){
+      // Combine both PMAM names into one cell, dropping the "1 / 2" labels.
+      var pmams = [r.pmam1, r.pmam2].filter(function(p){ return (p||'').trim(); });
+      var pmamCell = pmams.length
+        ? pmams.map(function(p){ return '<span style="display:inline-block;background:#dbeafe;color:#1e3a8a;padding:2px 10px;border-radius:50px;font-size:11.5px;font-weight:700;margin:2px 4px 2px 0">'+esc(p)+'</span>'; }).join('')
+        : '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
+      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
+            + '<td>'+pmamCell+'</td>'
+            + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.saturday))+'</td>'
+            + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+    return html;
+  }
+
+  // ── About Us modal: the AB-PMJAY / SEHAT scheme writeup ──
+  // Render one styled content section (shared by About Us & About Developer).
+  // sec = { title, text, titleColor, textColor, bgColor, font, align }
+  // ─── About Us icon set (circular badge icons for each section) ───
+  var ABOUT_ICONS = {
+    scheme:   '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+    features: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
+    pmam:     '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    role:     '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17a4 4 0 0 1-4-4V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3"/><path d="M16 8a2 2 0 0 1 2 2v3a4 4 0 0 1-4 4"/><circle cx="12" cy="20" r="2"/></svg>',
+    mission:  '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    vision:   '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+    info:     '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+  };
+  var CHECK_ICON = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7c3aed" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>';
+
+  // ─── Tag icon library — used by role pills, qualifications & expertise tags ───
+  // 15 icons. Each value is the SVG INNER markup only (no <svg> wrapper, no
+  // stroke/colour — those are added at render time so the icon is recoloured
+  // to match the surrounding pill's accent.
+  var TAG_ICONS = {
+    code:      '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+    gear:      '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    chart:     '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+    briefcase: '<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+    grad:      '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+    heart:     '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+    shield:    '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    star:      '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    globe:     '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+    database:  '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>',
+    wrench:    '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+    book:      '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    award:     '<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>',
+    layers:    '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+    activity:  '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    scheme:    '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+    features:  '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+    pmam:      '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    role:      '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+    mission:   '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    vision:    '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    info:      '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+    cpu:       '<rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>'
+  };
+
+  // Build a coloured tag-icon SVG. iconKey from TAG_ICONS, color is the stroke.
+  function tagIconSvg(iconKey, color, size){
+    var inner = TAG_ICONS[iconKey] || TAG_ICONS.code;
+    var s = size || 16;
+    return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="' + esc(color || '#7c3aed') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>';
+  }
+
+  // Render one About Us section card. A section can be either a paragraph
+  // (sec.text) or a bullet list (sec.text with newlines, when sec.list=true,
+  // OR detected automatically when most lines are short).
+  // sec = { title, text, titleColor, textColor, bgColor, icon, list }
+  function renderAboutSectionCard(sec, idx){
+    var titleColor = sec.titleColor || '#3730a3';
+    var textColor  = sec.textColor  || '#475569';
+    var bg         = sec.bgColor    || '#ffffff';
+    var iconKey    = sec.icon || 'info';
+    // Recolour the icon stroke to match this section's title colour so each
+    // card has a coordinated look (purple card → purple icon, green → green).
+    var rawIcon    = ABOUT_ICONS[iconKey] || ABOUT_ICONS.info;
+    var iconSvg    = rawIcon.replace(/stroke="#[0-9a-fA-F]+"/g, 'stroke="' + esc(titleColor) + '"');
+    // Build a per-card check icon in the matching colour for bullet rows.
+    var checkIcon  = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="' + esc(titleColor) + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>';
+    // Decide list vs paragraph. New admin saves a string ('auto'|'bullets'|
+    // 'paragraph'); legacy data may have boolean or be missing entirely.
+    var lines = String(sec.text || '').split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean);
+    var asList;
+    if (sec.list === 'bullets' || sec.list === true)      asList = true;
+    else if (sec.list === 'paragraph' || sec.list === false) asList = false;
+    else asList = lines.length >= 2;   // 'auto' or undefined
+
+    var bodyHtml;
+    if (asList && lines.length) {
+      bodyHtml = '<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">'
+        + lines.map(function(ln){
+            return '<div style="display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:' + esc(textColor) + ';line-height:1.55;font-weight:500">'
+              + checkIcon + '<span>' + esc(ln) + '</span></div>';
+          }).join('')
+        + '</div>';
+    } else {
+      bodyHtml = '<div style="font-size:13px;color:' + esc(textColor) + ';line-height:1.7;margin-top:10px;white-space:pre-wrap;font-weight:500">'
+        + esc(sec.text || '') + '</div>';
+    }
+
+    // Lighten title colour for the icon-badge background so it's a subtle
+    // tint that matches the card theme without overpowering.
+    return '<div style="background:' + esc(bg) + ';border:2px solid #cbd5e1;border-radius:14px;'
+      + 'padding:20px 22px;display:flex;gap:16px;align-items:flex-start;box-shadow:0 1px 3px rgba(15,23,42,0.04)">'
+      // circular icon badge — tinted with the section's title colour
+      + '<div style="width:52px;height:52px;border-radius:12px;background:rgba(255,255,255,0.6);'
+      +   'display:flex;align-items:center;justify-content:center;flex-shrink:0;'
+      +   'border:1px solid rgba(0,0,0,0.04)">' + iconSvg + '</div>'
+      // content
+      + '<div style="flex:1;min-width:0">'
+      +   '<h3 style="margin:0;font-size:16px;font-weight:800;color:' + esc(titleColor) + ';line-height:1.3">' + esc(sec.title || 'Section') + '</h3>'
+      +   bodyHtml
+      + '</div>'
+      + '</div>';
+  }
+
+  function renderAbout(){
+    // Pure Firestore-driven About Us. No hardcoded defaults — if admin
+    // hasn't published any sections, show a friendly empty state instead.
+    // NOTE: LIVE is the closure variable for this IIFE — NOT window.LIVE.
+    var live = LIVE.aboutPage || {};
+    var rawSecs = Array.isArray(live.aboutSections) ? live.aboutSections.slice() : [];
+    var secs = rawSecs.filter(function(s){ return s && (s.title || s.text); });
+    console.log('[renderAbout] rendering', secs.length, 'sections');
+
+    // Empty state — happens before admin has saved anything.
+    if (!secs.length) {
+      return ''
+        + '<div style="background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:12px;padding:40px 24px;text-align:center;color:#64748b">'
+        +   '<div style="font-size:36px;margin-bottom:10px">\u{1F4DD}</div>'
+        +   '<div style="font-size:15px;font-weight:700;color:#334155;margin-bottom:6px">No content yet</div>'
+        +   '<div style="font-size:12.5px;line-height:1.6">The About Us page is being prepared. Please check back shortly.</div>'
+        + '</div>';
+    }
+
+    var cardsHtml = secs.map(function(s, i){ return renderAboutSectionCard(s, i); }).join('');
+
+    return ''
+      + '<div style="display:flex;flex-direction:column;gap:18px">'
+      +   '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(380px, 1fr));gap:18px;align-items:start">'
+      +     cardsHtml
+      +   '</div>'
+      +   '<div style="margin-top:6px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #ddd6fe;border-radius:12px;padding:16px 20px;text-align:center;font-size:14px;font-weight:700;color:#5b21b6;display:flex;align-items:center;justify-content:center;gap:10px">'
+      +     '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M8 14h2M14 14h2M8 18h2M14 18h2"/></svg>'
+      +     'Transforming Manual Records into Digital Data'
+      +   '</div>'
+      + '</div>';
+  }
+
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Developer page — fully Firestore-driven, matches the design mockup
+  // Reads from settings/about_page:
+  //   devName, devRole, devPhoto
+  //   devPills     [{ label, icon, color }]      role badges under the name
+  //   devAboutMe   string                        "About Me" paragraph
+  //   devQualifications [{ abbr, full, icon, color }]
+  //   devProjectTitle string                     wrapper title above section cards
+  //   devSections  [{ title, text, titleColor, textColor, bgColor, list, icon }]
+  //   devExpertise [{ label, icon, color }]      pill row at the bottom
+  // ─────────────────────────────────────────────────────────────────────
+  function renderDeveloper(){
+    var live = LIVE.aboutPage || {};
+    var name         = (live.devName         || '').trim();
+    var role         = (live.devRole         || '').trim();
+    var photo        = (live.devPhoto        || '').trim();
+    var aboutMe      = (live.devAboutMe      || '').trim();
+    var projectTitle = (live.devProjectTitle || '').trim();
+    var pills        = Array.isArray(live.devPills)          ? live.devPills.filter(function(p){ return p && p.label; })          : [];
+    var quals        = Array.isArray(live.devQualifications) ? live.devQualifications.filter(function(q){ return q && (q.abbr||q.full); }) : [];
+    var sections     = Array.isArray(live.devSections)       ? live.devSections.filter(function(s){ return s && (s.title||s.text); })   : [];
+    var expertise    = Array.isArray(live.devExpertise)      ? live.devExpertise.filter(function(t){ return t && t.label; })            : [];
+
+    console.log('[renderDeveloper] name=', name || '(empty)',
+                '| pills=', pills.length, '| quals=', quals.length,
+                '| sections=', sections.length, '| expertise=', expertise.length);
+
+    // Empty state — nothing saved yet
+    if (!name && !role && !aboutMe && !pills.length && !quals.length && !sections.length && !expertise.length) {
+      return '<div style="background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:12px;padding:40px 24px;text-align:center;color:#64748b">'
+        +   '<div style="font-size:36px;margin-bottom:10px">\u{1F468}\u200D\u{1F4BB}</div>'
+        +   '<div style="font-size:15px;font-weight:700;color:#334155;margin-bottom:6px">Developer information not yet published</div>'
+        +   '<div style="font-size:12.5px;line-height:1.6">Admin can publish this page from Admin Portal &rarr; About Us &rarr; Developer tab.</div>'
+        + '</div>';
+    }
+
+    // ── Photo (Base64 upload OR coloured initials avatar) ─────────────────
+    var initials = (name || 'D').split(/\s+/).map(function(s){ return s.charAt(0).toUpperCase(); }).slice(0,2).join('');
+    var photoHtml = photo
+      ? '<img src="' + esc(photo) + '" alt="' + esc(name || 'Developer') + '" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:50%">'
+      : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ede9fe,#c4b5fd);color:#4c1d95;font-size:48px;font-weight:800;letter-spacing:1px;border-radius:50%">' + esc(initials) + '</div>';
+
+    // ── Role pills under the name ─────────────────────────────────────────
+    var pillsHtml = '';
+    if (pills.length) {
+      pillsHtml = '<div style="display:flex;flex-wrap:nowrap;justify-content:center;gap:8px;margin-top:16px">'
+        + pills.map(function(p){
+            var c = p.color || '#7c3aed';
+            return '<span style="display:inline-flex;align-items:center;gap:6px;background:' + esc(c) + '15;border-radius:50px;padding:8px 16px;font-size:12px;font-weight:700;color:' + esc(c) + ';white-space:nowrap;">'
+              + tagIconSvg(p.icon || 'code', c, 14)
+              + '<span>' + esc(p.label) + '</span></span>';
+          }).join('')
+        + '</div>';
+    } else if (role) {
+      // Fallback: if no pills configured but role is set, show role as a single pill
+      pillsHtml = '<div style="font-size:13px;font-weight:800;color:#7c3aed;margin-top:12px;text-transform:uppercase;letter-spacing:0.5px">' + esc(role) + '</div>';
+    }
+
+    // ── About Me + Qualification side-by-side block ───────────────────────
+    var aboutQualHtml = '';
+    if (aboutMe || quals.length || pills.length || role) {
+      var aboutColumn = '';
+      if (aboutMe) {
+        aboutColumn = '<div style="flex:1;min-width:240px;background:rgba(255,255,255,0.6);border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.02)">'
+          + '<div style="font-size:13px;font-weight:800;color:#0f172a;margin-bottom:10px;display:flex;align-items:center;gap:6px">'
+          + tagIconSvg('info','#1e293b',16) + 'About Me</div>'
+          + '<div style="font-size:13.5px;color:#334155;line-height:1.7;text-align:justify">' + esc(aboutMe) + '</div>'
+          + '</div>';
+      }
+      var qualColumn = '';
+      if (quals.length) {
+        var qualCards = quals.map(function(q){
+          var c = q.color || '#7c3aed';
+          return '<div style="background:#fff;border:1px solid rgba(255,255,255,0.8);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 4px rgba(0,0,0,0.04)">'
+            + '<div style="width:32px;height:32px;border-radius:50%;background:' + esc(c) + '1a;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+            +   tagIconSvg(q.icon || 'grad', c, 16)
+            + '</div>'
+            + '<div>'
+            +   '<div style="font-size:13px;font-weight:800;color:#0f172a;line-height:1.2">' + esc(q.abbr || '') + '</div>'
+            +   '<div style="font-size:10px;color:#64748b;font-weight:500;line-height:1.2;margin-top:2px">' + esc(q.full || '') + '</div>'
+            + '</div>'
+            + '</div>';
+        }).join('');
+        qualColumn = '<div style="flex:1.2;min-width:280px;background:rgba(255,255,255,0.6);border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.02)">'
+          + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+          +   '<div style="width:28px;height:28px;border-radius:8px;background:#f8fafc;display:flex;align-items:center;justify-content:center">'
+          +     tagIconSvg('grad', '#0f172a', 15)
+          +   '</div>'
+          +   '<div style="font-size:13px;font-weight:800;color:#0f172a">Qualifications</div>'
+          + '</div>'
+          + '<div style="display:flex;flex-wrap:wrap;gap:10px">' + qualCards + '</div>'
+          + '</div>';
+      }
+      aboutQualHtml = '<div style="flex:1;min-width:300px;display:flex;flex-wrap:wrap;gap:20px;align-content:flex-start">'
+        + aboutColumn + qualColumn
+        + '</div>';
+    }
+
+    // ── PROFILE CARD (big hero with photo, name, pills, about+qual) ──────
+    var profileCard = '<div style="background:linear-gradient(135deg, #d1fae5 0%, #bfdbfe 50%, #e9d5ff 100%);border:2px solid #ddd6fe;border-radius:18px;padding:32px 32px;box-shadow:0 4px 16px rgba(76,29,149,0.06);position:relative;overflow:hidden">'
+      // decorative blurry purple blob (matches the mockup's subtle bg)
+      + '<div style="position:absolute;top:-40px;right:-40px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,#c4b5fd44,transparent 70%);pointer-events:none"></div>'
+      + '<div style="display:flex;gap:36px;align-items:stretch;flex-wrap:wrap;position:relative">'
+      // Left Column: Photo, Name, Pills
+      +   '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;text-align:center">'
+      +     '<div style="width:170px;height:170px;border-radius:50%;overflow:hidden;border:4px solid #fff;background:#e0e7ff;box-shadow:0 0 0 4px #bfdbfe, 0 4px 14px rgba(76,29,149,0.15)">' + photoHtml + '</div>'
+      +     '<h2 style="margin:20px 0 0 0;font-size:28px;font-weight:900;color:#0f172a;letter-spacing:0px;line-height:1.1;text-transform:uppercase;white-space:nowrap">' + esc(name || 'Developer') + '</h2>'
+      +     pillsHtml
+      +   '</div>'
+      // Right Column: Pills, About Us and Qualifications
+      +   aboutQualHtml
+      + '</div>'
+      + '</div>';
+
+    // ── PROJECT SECTIONS CARD (numbered 01, 02, 03 ... cards) ────────────
+    var sectionsCard = '';
+    if (sections.length) {
+      var THEMES = [
+        { bg:'#f5f3ff', border:'#ddd6fe', accent:'#7c3aed', title:'#4c1d95', text:'#5b21b6' }, // purple
+        { bg:'#eff6ff', border:'#bfdbfe', accent:'#2563eb', title:'#1e3a8a', text:'#1d4ed8' }, // blue
+        { bg:'#ecfdf5', border:'#a7f3d0', accent:'#10b981', title:'#064e3b', text:'#047857' }, // green
+        { bg:'#fff7ed', border:'#fed7aa', accent:'#ea580c', title:'#7c2d12', text:'#c2410c' }  // orange
+      ];
+      var innerCards = sections.map(function(s, i){
+        var theme   = THEMES[i % THEMES.length];
+        var bg      = s.bgColor    || theme.bg;
+        var titleC  = s.titleColor || theme.title;
+        var textC   = s.textColor  || theme.text;
+        var accent  = theme.accent;
+        var border  = theme.border;
+        var num     = String(i+1).padStart(2,'0');
+        var iconKey = s.icon || ['code','chart','activity','layers','cpu'][i % 5];
+
+        var lines = String(s.text || '').split(/\r?\n/).map(function(x){ return x.trim(); }).filter(Boolean);
+        var asList;
+        if (s.list === 'bullets' || s.list === true)            asList = true;
+        else if (s.list === 'paragraph' || s.list === false)    asList = false;
+        else asList = lines.length >= 2;
+        var body;
+        if (asList && lines.length) {
+          body = '<div style="display:flex;flex-direction:column;gap:7px;position:relative">'
+            + lines.map(function(ln){
+                return '<div style="display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:' + esc(textC) + ';line-height:1.55;font-weight:500">'
+                  + '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="' + esc(accent) + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>'
+                  + '<span>' + esc(ln) + '</span></div>';
+              }).join('')
+            + '</div>';
+        } else {
+          body = '<div style="font-size:12.5px;color:' + esc(textC) + ';line-height:1.65;font-weight:500;white-space:pre-wrap;position:relative">' + esc(s.text || '') + '</div>';
+        }
+
+        return '<div style="background:' + esc(bg) + ';border:1px solid ' + esc(border) + ';border-radius:14px;padding:20px;position:relative;overflow:hidden">'
+          // decorative oversized icon in background (subtle)
+          + '<div style="position:absolute;right:-20px;bottom:-20px;opacity:0.07;pointer-events:none">'
+          +   '<svg viewBox="0 0 24 24" width="140" height="140" fill="none" stroke="' + esc(accent) + '" stroke-width="1.2">' + (TAG_ICONS[iconKey] || TAG_ICONS.code) + '</svg>'
+          + '</div>'
+          // number badge + small icon row
+          + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;position:relative">'
+          +   '<div style="width:38px;height:38px;border-radius:9px;background:' + esc(accent) + ';color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0">' + num + '</div>'
+          +   '<div style="width:36px;height:36px;border-radius:50%;background:' + esc(accent) + '1a;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+          +     tagIconSvg(iconKey, accent, 18)
+          +   '</div>'
+          + '</div>'
+          // title
+          + '<div style="font-size:17px;font-weight:800;color:' + esc(titleC) + ';margin-bottom:6px;position:relative">' + esc(s.title || ('Section ' + (i+1))) + '</div>'
+          + '<div style="width:40px;height:3px;background:' + esc(accent) + ';border-radius:2px;margin-bottom:12px;position:relative"></div>'
+          + body
+          + '</div>';
+      }).join('');
+
+      var wrapperTitle = projectTitle || 'Management Information System (MIS)';
+      sectionsCard = '<div style="background:#fffafc;border:2px solid #fbcfe8;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(15,23,42,0.04)">'
+        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'
+        +   '<div style="width:42px;height:42px;border-radius:10px;background:#fce7f3;color:#db2777;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +     '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="m7 11 2-2 2 2 4-4"/></svg>'
+        +   '</div>'
+        +   '<h3 style="margin:0;font-size:19px;font-weight:800;color:#1e1b4b">' + esc(wrapperTitle) + '</h3>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">' + innerCards + '</div>'
+        + '</div>';
+    }
+
+    // ── EXPERTISE pills row ─────────────────────────────────────────────
+    var expertiseCard = '';
+    if (expertise.length) {
+      var tagsHtml = expertise.map(function(t){
+        var c = t.color || '#7c3aed';
+        return '<span style="display:inline-flex;align-items:center;gap:8px;background:' + esc(c) + '15;border-radius:50px;padding:8px 18px;font-size:13px;font-weight:700;color:' + esc(c) + ';">'
+          + '<span style="display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">' + tagIconSvg(t.icon || 'code', c, 16) + '</span>'
+          + '<span>' + esc(t.label) + '</span></span>';
+      }).join('');
+      expertiseCard = '<div style="background:#f8fafc;border:2px solid #cbd5e1;border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;box-shadow:0 4px 12px rgba(15,23,42,0.04)">'
+        + '<div style="display:flex;align-items:center;gap:12px">'
+        +   '<div style="width:42px;height:42px;border-radius:10px;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center">' + tagIconSvg('code','#fff',20) + '</div>'
+        +   '<div style="font-size:18px;font-weight:900;color:#0f172a;position:relative;padding-bottom:3px">'
+        +     'Expertise'
+        +     '<span style="position:absolute;left:0;bottom:0;width:24px;height:3px;background:#7c3aed;border-radius:2px"></span>'
+        +   '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:12px;flex-wrap:wrap">' + tagsHtml + '</div>'
+        + '</div>';
+    }
+
+    return '<div style="display:flex;flex-direction:column;gap:14px">' + profileCard + sectionsCard + expertiseCard + '</div>';
+  }
+
+
+  function renderOrders(){
+    var data = LIVE.orders || {};
+    var rows = Array.isArray(data.rows) ? data.rows : [];
+    if (!rows.length) {
+      return '<div class="cm-empty">No orders published yet. Admin can add orders from <strong>Nav Bar &rarr; Orders</strong> in the Admin Portal.</div>';
+    }
+    var sorted = rows.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    var catColor = { 'Office Order':'#dbeafe','Circular':'#fef3c7','Notice':'#fae8ff','Notification':'#dcfce7','Other':'#f1f5f9' };
+    var catFg    = { 'Office Order':'#1e40af','Circular':'#92400e','Notice':'#86198f','Notification':'#166534','Other':'#475569' };
+    var html = '<div style="display:flex;flex-direction:column;gap:10px">';
+    sorted.forEach(function(r){
+      var title = r.title || r.name || 'Untitled order';
+      var cat   = r.category || 'Office Order';
+      var bg = catColor[cat] || '#f1f5f9';
+      var fg = catFg[cat] || '#475569';
+      var link = r.link || '';
+      var openBtn = link
+        ? '<a href="' + esc(link) + '" target="_blank" rel="noopener" '
+          + 'style="display:inline-flex;align-items:center;gap:6px;background:#16a34a;color:#fff;'
+          + 'padding:8px 16px;border-radius:50px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">'
+          + 'View / Download &nearr;</a>'
+        : '<span style="color:#dc2626;font-size:11px;font-weight:600">Link unavailable</span>';
+      html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:13px 16px;'
+            + 'display:flex;align-items:center;gap:14px;flex-wrap:wrap">'
+        +   '<div style="flex:1;min-width:180px">'
+        +     '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">'
+        +       '<span style="background:' + bg + ';color:' + fg + ';padding:2px 10px;border-radius:20px;font-size:10px;font-weight:800">' + esc(cat) + '</span>'
+        +       (r.date ? '<span style="font-size:11px;color:#6b7280;font-weight:600">' + esc(fmtDate(r.date)) + '</span>' : '')
+        +     '</div>'
+        +     '<div style="font-size:13.5px;font-weight:700;color:#1e293b;line-height:1.4">' + esc(title) + '</div>'
+        +   '</div>'
+        +   openBtn
+        + '</div>';
+    });
+    html += '</div>';
+    if (data.updatedAt) {
+      html += '<div style="font-size:10.5px;color:#9ca3af;text-align:right;margin-top:10px">Last updated: '
+            + esc(fmtDate(new Date(data.updatedAt).toISOString().slice(0,10))) + '</div>';
+    }
+    return html;
+  }
+
+  // ─── Renderer registry (exposed globally so click handler can check) ─
+  var ICON = {
+    calendar: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    roster:   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l7-3 7 3z"/></svg>',
+    holiday:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+    weekend:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    orders:   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+    about:    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    developer:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
+  };
+  // Register renderers individually inside try/typeof guards. If any single
+  // renderer is undefined or throws, the OTHERS still register — so one
+  // bad apple can't take down the whole content-modal system.
+  window.CONTENT_RENDERERS = window.CONTENT_RENDERERS || {};
+  function _reg(id, fn, name){
+    try {
+      if (typeof fn === 'function') window.CONTENT_RENDERERS[id] = fn;
+      else console.warn('[contentModal] renderer "' + name + '" for id="' + id + '" is not defined; skipping');
+    } catch(e){ console.error('[contentModal] failed to register "' + name + '":', e); }
   }
   _reg('calendar',  typeof renderHolidayCalendar !== 'undefined' ? renderHolidayCalendar : null, 'renderHolidayCalendar');
   _reg('roster',    typeof renderWardRoster    !== 'undefined' ? renderWardRoster    : null, 'renderWardRoster');
@@ -1299,6 +2834,7 @@ window.addEventListener('DOMContentLoaded', function() {
   _reg('orders',    typeof renderOrders        !== 'undefined' ? renderOrders        : null, 'renderOrders');
   _reg('about',     typeof renderAbout         !== 'undefined' ? renderAbout         : null, 'renderAbout');
   _reg('developer', typeof renderDeveloper     !== 'undefined' ? renderDeveloper     : null, 'renderDeveloper');
+  console.log('[contentModal] Initialized. Known ids:', Object.keys(window.CONTENT_RENDERERS));
 
   function renderInto(id){
     var body = document.getElementById('cmBody');

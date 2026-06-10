@@ -1116,8 +1116,20 @@ var WARD_CASE_TYPE = {
 };
 
 // ── Focus/blur helpers for nfield boxes ──
-
-
+function focusBox(boxId) {
+  var b = document.getElementById(boxId);
+  if (b && !b.classList.contains('nfield-disabled')) {
+    b.style.borderColor = '#1A3DB5';
+    b.style.boxShadow = '0 0 0 3px rgba(26,61,181,0.08)';
+  }
+}
+function blurBox(boxId) {
+  var b = document.getElementById(boxId);
+  if (b && !b.classList.contains('nfield-disabled')) {
+    b.style.borderColor = '';
+    b.style.boxShadow = '';
+  }
+}
 
 function applyWardCaseConfig(wardName) {
   var type;
@@ -1851,7 +1863,7 @@ function loadPmamHolidays(cb) {
       _pmamHolidays = doc.data().holidays;
     }
     _pmamHolidaysLoaded = true;
-    
+    console.log('[PMAM] Holiday calendar loaded:', _pmamHolidays.length, 'holidays');
     if (_pmamHolidays.length === 0) {
       console.warn('[PMAM] No holidays in settings/holiday_calendar. Admin must add holidays first.');
     }
@@ -2232,7 +2244,7 @@ function getPmjayUser() {
     return;
   }
   // Route guard: only PMAM should be here. Admin → admin_portal,
-  // I/C → ic_portal, MTS → patient_services_portal. Otherwise stay.
+  // I/C → ic_portal, DEO → patient_services_portal. Otherwise stay.
   if (u.email === ADMIN_EMAIL) {
     window.location.replace('admin_portal.html');
     return;
@@ -2241,7 +2253,7 @@ function getPmjayUser() {
     window.location.replace('ic_portal.html');
     return;
   }
-  if (u.role === 'MTS') {
+  if (u.role === 'DEO') {
     window.location.replace('patient_services_portal.html');
     return;
   }
