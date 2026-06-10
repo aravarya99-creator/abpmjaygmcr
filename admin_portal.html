@@ -462,7 +462,7 @@ tr:hover td{background:#EEF3FF}
       </div>
 
       <div class="section-wrap">
-        <div class="section-hd"><div class="section-title">DEO Users (Patient Services)</div></div>
+        <div class="section-hd"><div class="section-title">MTS Users (Patient Services)</div></div>
         <div class="users-grid" id="deoGrid"></div>
       </div>
 
@@ -490,7 +490,7 @@ tr:hover td{background:#EEF3FF}
         <button class="dmt-tab active" id="sf-tab-all" onclick="filterStaff('all',this)">All Staff</button>
         <button class="dmt-tab" id="sf-tab-pmam" onclick="filterStaff('PMAM',this)">PMAMs</button>
         <button class="dmt-tab" id="sf-tab-ic" onclick="filterStaff('I/C AB-PMJAY',this)">I/C</button>
-        <button class="dmt-tab" id="sf-tab-deo" onclick="filterStaff('DEO',this)">DEO</button>
+        <button class="dmt-tab" id="sf-tab-deo" onclick="filterStaff('MTS',this)">MTS</button>
         <button class="dmt-tab" id="sf-tab-admin" onclick="filterStaff('Admin',this)">Admin</button>
         <div style="margin-left:auto;font-size:11px;color:#6b7280" id="staffCountBadge"></div>
       </div>
@@ -1916,7 +1916,7 @@ tr:hover td{background:#EEF3FF}
     <div class="mfld"><label>Email Address</label><input type="email" id="newEmail" placeholder="Enter email"></div>
     <div class="mfld"><label>Role</label>
       <select id="newRole" onchange="toggleWardField()">
-        <option>PMAM</option><option>I/C AB-PMJAY</option><option>Admin</option><option>DEO</option>
+        <option>PMAM</option><option>I/C AB-PMJAY</option><option>Admin</option><option>MTS</option>
       </select>
     </div>
     <div class="mfld" id="wardFieldWrap"><label>Ward Assigned</label>
@@ -1967,7 +1967,7 @@ tr:hover td{background:#EEF3FF}
   <div class="modal-box">
     <div class="modal-title">Add Staff Member</div>
     <div class="mfld"><label>Full Name</label><input type="text" id="sName" placeholder="Enter full name"></div>
-    <div class="mfld"><label>Designation</label><input type="text" id="sDesig" placeholder="e.g. PMAM, DEO, Principal"></div>
+    <div class="mfld"><label>Designation</label><input type="text" id="sDesig" placeholder="e.g. PMAM, MTS, Principal"></div>
     <div class="mfld"><label>Ward / Department</label><input type="text" id="sWard" placeholder="e.g. Orthopaedics, Admin"></div>
     <div class="modal-footer">
       <button class="mbtn mbtn-sec" onclick="document.getElementById('addStaffModal').classList.remove('open')">Cancel</button>
@@ -2098,7 +2098,7 @@ function renderPmams(){
 function renderOthers(){
   const adminUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'Admin');
   const icUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'I/C AB-PMJAY');
-  const deoUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'DEO' || x.u.role === 'MTS(patient services )' || x.u.role === 'MTS(patient services)' || x.u.role === 'MTS');
+  const deoUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'MTS' || x.u.role === 'DEO' || x.u.role.startsWith('MTS') || x.u.role.startsWith('DEO'));
   const accountantUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'Accountant');
 
   document.getElementById('adminGrid').innerHTML=adminUsers.map(({u,i})=>`
@@ -2147,7 +2147,7 @@ function renderOthers(){
         <div class="user-email">${u.email}</div>
         <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
           ${statusDot(u.status)}
-          <span class="user-role role-deo">${u.role.startsWith('MTS') ? 'DEO' : u.role}</span>
+          <span class="user-role role-deo">${u.role.startsWith('MTS') ? 'MTS' : u.role}</span>
         </div>
       </div>
       <div class="user-actions">
@@ -2156,7 +2156,7 @@ function renderOthers(){
         <button class="act-btn ${u.status==='active'?'act-disable':'act-enable'}" onclick="toggleUser(${i},'other')">${u.status==='active'?'Disable':'Enable'}</button>
         <button class="act-btn" style="background:#fee2e2;color:#991b1b" onclick="deleteUser(${i},'other')">Delete</button>
       </div>
-    </div>`).join('') : '<div style="color:#9ca3af;font-style:italic;font-size:12px">No DEO users registered</div>';
+    </div>`).join('') : '<div style="color:#9ca3af;font-style:italic;font-size:12px">No MTS users registered</div>';
 
   document.getElementById('accountantGrid').innerHTML=accountantUsers.length ? accountantUsers.map(({u,i})=>`
     <div class="user-card">
@@ -3769,7 +3769,7 @@ function cleanupApplyKeys(){
 // Back-compat: legacy code calls renderWards() — route to wmRender if available
 function renderWards(){ if (typeof wmRender === 'function') wmRender(); }
 function addWard(){ wmAddWard(); }
-function saveWardsToDb(){ wmSave(); }
+
 
 
 // ── Ward Roster: add a blank row ──
@@ -4340,12 +4340,8 @@ function dpAddPill(){
   dpRenderPills();
   abMarkUnsaved('dev');
 }
-function dpRemovePills(i){ _dpPills.splice(i,1); dpRenderPills(); abMarkUnsaved('dev'); }
-function dpMovePills(i, dir){
-  var j = i+dir; if (j<0||j>=_dpPills.length) return;
-  var t = _dpPills[i]; _dpPills[i]=_dpPills[j]; _dpPills[j]=t;
-  dpRenderPills(); abMarkUnsaved('dev');
-}
+
+
 
 // ── Qualifications (abbr + full + icon + color) ────────────────────────
 function dpRenderQuals(){
@@ -4359,12 +4355,8 @@ function dpAddQual(){
   _dpQuals.push({ abbr:'', full:'', icon:'grad', color: DP_COLORS[_dpQuals.length % DP_COLORS.length] });
   dpRenderQuals(); abMarkUnsaved('dev');
 }
-function dpRemoveQuals(i){ _dpQuals.splice(i,1); dpRenderQuals(); abMarkUnsaved('dev'); }
-function dpMoveQuals(i, dir){
-  var j = i+dir; if (j<0||j>=_dpQuals.length) return;
-  var t = _dpQuals[i]; _dpQuals[i]=_dpQuals[j]; _dpQuals[j]=t;
-  dpRenderQuals(); abMarkUnsaved('dev');
-}
+
+
 
 // ── Expertise (bottom pill row) ────────────────────────────────────────
 function dpRenderExp(){
@@ -4378,12 +4370,8 @@ function dpAddExp(){
   _dpExpertise.push({ label:'', icon:'star', color: DP_COLORS[_dpExpertise.length % DP_COLORS.length] });
   dpRenderExp(); abMarkUnsaved('dev');
 }
-function dpRemoveExp(i){ _dpExpertise.splice(i,1); dpRenderExp(); abMarkUnsaved('dev'); }
-function dpMoveExp(i, dir){
-  var j = i+dir; if (j<0||j>=_dpExpertise.length) return;
-  var t = _dpExpertise[i]; _dpExpertise[i]=_dpExpertise[j]; _dpExpertise[j]=t;
-  dpRenderExp(); abMarkUnsaved('dev');
-}
+
+
 
 // About Me live preview text
 function dpUpdateAboutPreview(){
@@ -4676,11 +4664,11 @@ function abSave(which){
       updatedAt:         Date.now(),
       _updatedBy:        (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
     };
-    console.log('[abSave] writing about_page payload (triggered by:', which || 'unknown', ')', payload);
+    ', payload);
     setMsg('Saving…', '#1A3DB5');
     db.collection('settings').doc('about_page').set(payload, { merge: true })
       .then(function(){
-        console.log('[abSave] write succeeded');
+        
         clearOther();
         // Context-aware success message
         var msg, toastMsg;
@@ -4875,31 +4863,7 @@ function saveHolidayToDb() {
     .catch(function(e) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; });
 }
 
-function saveQuickLinks() {
-  var links = {
-    pmam:        document.getElementById('qlPmam').value.trim(),
-    pmamLabel:   document.getElementById('qlPmamLabel').value.trim() || 'PMAM Portal',
-    ic:          document.getElementById('qlIc').value.trim(),
-    icLabel:     document.getElementById('qlIcLabel').value.trim() || 'I/C Portal',
-    admin:       document.getElementById('qlAdmin').value.trim(),
-    adminLabel:  document.getElementById('qlAdminLabel').value.trim() || 'Admin Portal',
-    nha:         document.getElementById('qlNha').value.trim(),
-    nhaLabel:    document.getElementById('qlNhaLabel').value.trim() || 'NHA Portal',
-    link5Label:  document.getElementById('qlLink5Label').value.trim(),
-    link5Url:    document.getElementById('qlLink5Url').value.trim(),
-    _updatedBy:  (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
-    _updatedAt:  Date.now()
-  };
-  var msg = document.getElementById('qlSaveMsg');
-  msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…';
-  db.collection('settings').doc('quicklinks').set(links, { merge: true })
-    .then(function() {
-      msg.style.color='#166534'; msg.textContent='✅ Quick links saved! Landing page will pick up changes on next refresh.';
-      if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/quicklinks', 'quicklinks', links);
-      setTimeout(function(){msg.textContent='';},4000);
-    })
-    .catch(function(e) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; });
-}
+
 
 function loadQuickLinks() {
   db.collection('settings').doc('quicklinks').get().then(function(doc){
@@ -4917,26 +4881,7 @@ function loadQuickLinks() {
 // ══════════════════════════════════════
 // CONTACT US — save / load
 // ══════════════════════════════════════
-function saveContactUs() {
-  var data = {
-    name:        document.getElementById('cuName').value.trim(),
-    designation: document.getElementById('cuDesig').value.trim(),
-    mobile:      document.getElementById('cuMobile').value.trim(),
-    email:       document.getElementById('cuEmail').value.trim(),
-    address:     document.getElementById('cuAddr').value.trim(),
-    _updatedBy:  (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
-    _updatedAt:  Date.now()
-  };
-  var msg = document.getElementById('cuSaveMsg');
-  msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…';
-  db.collection('settings').doc('contactus').set(data, { merge: true })
-    .then(function() {
-      msg.style.color = '#166534'; msg.textContent = '✅ Contact info saved! Landing page will pick up changes on next refresh.';
-      if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/contactus', 'contactus', data);
-      setTimeout(function(){msg.textContent='';},4000);
-    })
-    .catch(function(e) { msg.style.color = '#dc2626'; msg.textContent = 'Error: '+e.message; });
-}
+
 
 function loadContactUs() {
   db.collection('settings').doc('contactus').get().then(function(doc){
@@ -5078,15 +5023,9 @@ function refreshSysStats() {
 // (Legacy renderOrders removed — superseded by the Orders/Circulars block
 //  above which targets #ordersBody and the new order data shape.)
 
-function saveTicker() {
-  const txt = document.getElementById('tickerTxt').value.trim();
-  if(!txt) return showToast('Please enter a ticker message', 'error');
-  db.collection('settings').doc('portal').set({ tickerMessage: txt }, { merge: true })
-    .then(function() { showToast('Ticker saved successfully', 'success'); })
-    .catch(function(e) { showToast('Error: ' + e.message, 'error'); });
-}
 
-async function savePortalInfo() {} // removed; see brSaveAll() instead
+
+async  // removed; see brSaveAll() instead
 
 
 // ══════════════════════════════════════
@@ -5207,7 +5146,7 @@ function renderStaffCards(list) {
     'PMAM':         { bg:'#E8EFFF', fg:'#1A3DB5', av:'linear-gradient(135deg,#1A3DB5,#2952D9)' },
     'I/C AB-PMJAY': { bg:'#DCFCE7', fg:'#166534', av:'linear-gradient(135deg,#166534,#16a34a)' },
     'Admin':        { bg:'#F3E8FF', fg:'#7c3aed', av:'linear-gradient(135deg,#7c3aed,#9333ea)' },
-    'DEO':          { bg:'#FEF3C7', fg:'#92400e', av:'linear-gradient(135deg,#C94000,#E65800)' },
+    'MTS':          { bg:'#FEF3C7', fg:'#92400e', av:'linear-gradient(135deg,#C94000,#E65800)' },
     'Accountant':   { bg:'#D1FAE5', fg:'#065F46', av:'linear-gradient(135deg,#059669,#047857)' }
   };
   grid.innerHTML = list.map(function(u) {
@@ -5240,7 +5179,7 @@ function filterStaff(role, el) {
   if (el) el.classList.add('active');
   var filtered = role === 'all' ? _allStaff : _allStaff.filter(function(u){
     var r = (u.role || '').toLowerCase();
-    if (role === 'DEO')   return r === 'deo' || r.indexOf('mts') === 0;
+    if (role === 'MTS' || role === 'DEO')   return r === 'deo' || r.indexOf('mts') === 0;
     if (role === 'Admin') return r === 'admin' || r === 'administrator';
     return u.role === role;
   });
@@ -5555,7 +5494,7 @@ function adminUnlockStart(){
   document.getElementById('adminOtpModal').classList.add('open');
 }
 // Alias kept for backward compatibility
-function adminOtpOpen(){ adminUnlockStart(); }
+
 function adminOtpClose(){ document.getElementById('adminOtpModal').classList.remove('open'); }
 function adminOtpSend(){
   var btn = document.getElementById('adminOtpSendBtn');
@@ -5654,22 +5593,7 @@ function writeAudit(action, collection, recordId, details){
 }
 
 // --- Tab switcher ---
-function dmShowTab(tab, el){
-  document.querySelectorAll('.dm-tab').forEach(function(b){
-    b.classList.remove('dm-tab-active');
-    if (b.dataset.tab === 'reports' || b.dataset.tab === 'leaves') {
-      b.style.background = '#F3F4F6'; b.style.color = '#374151';
-    } else if (b.dataset.tab === 'bulk') {
-      b.style.background = '#FEE2E2'; b.style.color = '#991b1b';
-    }
-  });
-  el.classList.add('dm-tab-active');
-  el.style.background = '#1A3DB5'; el.style.color = '#fff';
-  document.querySelectorAll('.dm-pane').forEach(function(p){ p.style.display='none'; });
-  var pane = document.getElementById('dm-pane-' + tab);
-  if (pane) pane.style.display = 'block';
-  if (tab === 'bulk') refreshBulkCounts();
-}
+
 
 // --- Load filter dropdowns (PMAMs and Wards) from existing users collection ---
 var _dmPmamList = [];
@@ -6743,19 +6667,7 @@ function lpeUpdate(sectionKey, idx, field, value){
 }
 
 // ── Add a new blank item ──
-function lpeAdd(sectionKey){
-  var schema = LPE_SCHEMA[sectionKey];
-  var newItem = { id: sectionKey + '_' + Date.now(), order: (_lpeData[sectionKey] || []).length };
-  schema.fields.forEach(function(f){
-    if (f.type === 'checkbox') newItem[f.key] = (f.default !== undefined ? f.default : true);
-    else if (f.type === 'select') newItem[f.key] = f.options[0];
-    else newItem[f.key] = '';
-  });
-  if (!_lpeData[sectionKey]) _lpeData[sectionKey] = [];
-  _lpeData[sectionKey].push(newItem);
-  lpeRenderSection(sectionKey);
-  lpeMarkDirty();
-}
+
 
 // ── Delete an item ──
 function lpeDelete(sectionKey, idx){
@@ -6795,31 +6707,7 @@ function lpeMarkLoading(){
 }
 
 // ── Save all sections to Firebase ──
-function lpeSaveAll(){
-  // Re-number order for each section just in case
-  ['navBar','quickLinks','getInTouch','importantLinks'].forEach(function(k){
-    if (_lpeData[k]) _lpeData[k].forEach(function(it,i){ it.order = i; });
-  });
-  var payload = Object.assign({}, _lpeData, {
-    _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
-    _updatedAt: Date.now(),
-    _updatedAtReadable: new Date().toLocaleString('en-IN')
-  });
-  var st = document.getElementById('lpe-status');
-  if (st) { st.textContent = 'Saving…'; st.style.color = '#6b7280'; }
-  db.collection('settings').doc('landing_page').set(payload).then(function(){
-    lpeMarkSaved();
-    if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/landing_page', 'landing_page', {
-      navBarCount: (_lpeData.navBar||[]).length,
-      quickLinksCount: (_lpeData.quickLinks||[]).length,
-      getInTouchCount: (_lpeData.getInTouch||[]).length,
-      importantLinksCount: (_lpeData.importantLinks||[]).length
-    });
-    if (typeof showToast === 'function') showToast('✅ Landing page saved · changes are now live', 'success');
-  }).catch(function(e){
-    if (st) { st.textContent = 'Error: '+e.message; st.style.color = '#dc2626'; }
-  });
-}
+
 
 // ── Load from Firebase (or fall back to defaults) ──
 function lpeLoad(){
@@ -6848,18 +6736,10 @@ function lpeLoad(){
 }
 
 // ── Reload from Firebase (discards in-memory changes) ──
-function lpeReload(){
-  if (!confirm('Discard all unsaved changes and reload from Firebase?')) return;
-  lpeLoad();
-}
+
 
 // ── Reset to factory defaults (without saving) ──
-function lpeResetToDefaults(){
-  if (!confirm('Reset all 4 sections to factory defaults?\n\nThis will REPLACE all current items with default values. You must click Save to persist.')) return;
-  _lpeData = JSON.parse(JSON.stringify(LPE_DEFAULTS));
-  ['navBar','quickLinks','getInTouch','importantLinks'].forEach(lpeRenderSection);
-  lpeMarkDirty();
-}
+
 
 
 // ══════════════════════════════════════════════════════════════════════
@@ -7328,7 +7208,7 @@ function sgoSave(){
       console.warn('[sgoSave] _sgoOrder is empty');
       return;
     }
-    console.log('[sgoSave] writing staffGroupOrder:', _sgoOrder);
+    
     if (m) { m.textContent = 'Saving\u2026'; m.style.color = '#1A3DB5'; }
     db.collection('settings').doc('about_page').set({
       staffGroupOrder: _sgoOrder,
@@ -7336,7 +7216,7 @@ function sgoSave(){
       updatedAt: Date.now(),
       _updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
     }, { merge: true }).then(function(){
-      console.log('[sgoSave] write succeeded');
+      
       if (m) { m.textContent = '\u2705 Saved & published'; m.style.color = '#166534'; setTimeout(function(){ m.textContent=''; }, 3500); }
       if (typeof showToast === 'function') showToast('\u2705 Staff group order saved', 'success');
       if (typeof writeAudit === 'function') {
@@ -7377,7 +7257,7 @@ function nbStaffPreviewRender(){
       return;
     }
     var rc = { 'PMAM':{bg:'#E8EFFF',fg:'#1A3DB5'}, 'I/C AB-PMJAY':{bg:'#DCFCE7',fg:'#166534'},
-               'Admin':{bg:'#F3E8FF',fg:'#7c3aed'}, 'DEO':{bg:'#FEF3C7',fg:'#92400e'} };
+               'Admin':{bg:'#F3E8FF',fg:'#7c3aed'}, 'MTS':{bg:'#FEF3C7',fg:'#92400e'} };
     box.innerHTML = list.map(function(u){
       var c = rc[u.role] || { bg:'#F3F4F6', fg:'#374151' };
       var initials = (u.name||'?').split(/\s+/).map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
@@ -7467,7 +7347,7 @@ window.addEventListener('DOMContentLoaded', function() {
   if (!u || !u.email) { window.location.replace('index.html'); return; }
   if (u.email !== ADMIN_EMAIL) {
     if (u.role === 'I/C AB-PMJAY') window.location.replace('ic_portal.html');
-    else if (u.role === 'DEO')         window.location.replace('patient_service_portal.html');
+    else if (u.role === 'MTS' || u.role === 'DEO')         window.location.replace('patient_service_portal.html');
       else if (u.role === 'Accountant') window.location.replace('finance.html');
     else                           window.location.replace('pmam_portal.html');
     return;

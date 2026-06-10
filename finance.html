@@ -706,7 +706,7 @@
             <div class="row">
               <div><label>Financial Year <span class="req">*</span></label><select id="statsFy" required></select></div>
               <div><label>Month <span class="req">*</span></label><select id="statsMonth" required></select></div>
-              <div><label>Patients Treated <span class="req">*</span></label><input id="statsPatients" type="number" min="0" required></div>
+              <div><label>Patients Treated <span class="req">*</span></label><input id="statsPatients" type="number" min="0" required readonly style="background:#f1f5f9; cursor:not-allowed;"></div>
               <div><label>Golden Cards Generated <span class="req">*</span></label><input id="statsCards" type="number" min="0" required></div>
               <div>
                 <label>Claim Received (₹) <span style="color:#16a34a;font-size:10px;font-weight:700;">AUTO</span></label>
@@ -797,7 +797,7 @@
                 <div style="font-size:10px;color:#a16207;font-weight:700;margin-bottom:4px;">✏️ MANUAL ENTRY</div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">No. of IPDs</label><input id="dhsIpdCount" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;" oninput="syncDhsTotalIPDs()"></div>
-                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pre-Auth Raised</label><input id="dhsPreAuth" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
+                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pre-Auth Raised</label><input id="dhsPreAuth" type="number" min="0" placeholder="0" readonly style="width:100%;padding:8px;border:1.5px solid #e5e7eb;border-radius:6px;background:#f1f5f9; cursor:not-allowed;"></div>
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Claim Settled per TMS (₹)</label><input id="dhsTmsSettled" type="number" min="0" step="0.01" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Actual Claim Received (₹)</label><input id="dhsActualRecvd" type="number" min="0" step="0.01" placeholder="auto if blank" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pending at SHA Level</label><input id="dhsPendingSHA" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
@@ -824,7 +824,7 @@
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
                   <div><label style="font-size:11px;color:#c2410c;font-weight:700;display:block;margin-bottom:3px;">Short-Stay IPDs (D)</label><input id="dhsShortStay" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fed7aa;border-radius:6px;background:#fff;"></div>
                   <div><label style="font-size:11px;color:#c2410c;font-weight:700;display:block;margin-bottom:3px;">IPDs Not Covered — C-section etc. (E)</label><input id="dhsExcludedIPDs" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fed7aa;border-radius:6px;background:#fff;"></div>
-                  <div><label style="font-size:11px;color:#c2410c;font-weight:700;display:block;margin-bottom:3px;">Converted to AB-PMJAY IPDs (G)</label><input id="dhsConvertedIPDs" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #fed7aa;border-radius:6px;background:#fff;"></div>
+                  <div><label style="font-size:11px;color:#c2410c;font-weight:700;display:block;margin-bottom:3px;">Converted to AB-PMJAY IPDs (G)</label><input id="dhsConvertedIPDs" type="number" min="0" placeholder="0" readonly style="width:100%;padding:8px;border:1.5px solid #e5e7eb;border-radius:6px;background:#f1f5f9; cursor:not-allowed;"></div>
                 </div>
               </div>
             </div>
@@ -2590,7 +2590,64 @@
         +   infoRow
         +   bodyHTML
         +   universalFooter
-        + '</body></html>';
+        + '
+<script>
+// --- AUTO-FETCH LOGIC FROM IC PORTAL (daily_reports) ---
+setTimeout(function() {
+    if(typeof loadDhsForm === 'function') {
+        const originalLoadDhsForm = loadDhsForm;
+        loadDhsForm = async function() {
+            originalLoadDhsForm(); // Call original to setup the form
+            var monthKey = document.getElementById('dhsMonth').value;
+            if(monthKey) {
+                document.getElementById('dhsPreAuth').value = '';
+                document.getElementById('dhsConvertedIPDs').value = '';
+                try {
+                    const startStr = monthKey + '-01';
+                    const endStr = monthKey + '-31';
+                    const snap = await db.collection('daily_reports')
+                        .where('date','>=',startStr)
+                        .where('date','<=',endStr).get();
+                    let pre = 0, reg = 0;
+                    snap.forEach(doc => { 
+                        let d = doc.data();
+                        pre += Number(d.pre||0);
+                        reg += Number(d.reg||0);
+                    });
+                    document.getElementById('dhsPreAuth').value = pre;
+                    document.getElementById('dhsConvertedIPDs').value = reg;
+                    if(typeof syncDhsTotalIPDs === 'function') syncDhsTotalIPDs();
+                } catch(e) { console.error("Error fetching IC portal stats:", e); }
+            }
+        };
+    }
+
+    async function updateStatsPatients() {
+        var fy = document.getElementById('statsFy').value;
+        var monthKey = document.getElementById('statsMonth').value;
+        if(fy && monthKey) {
+            document.getElementById('statsPatients').value = '';
+            try {
+                const startStr = monthKey + '-01';
+                const endStr = monthKey + '-31';
+                const snap = await db.collection('daily_reports')
+                    .where('date','>=',startStr)
+                    .where('date','<=',endStr).get();
+                let totalReg = 0;
+                snap.forEach(doc => { totalReg += Number(doc.data().reg || 0); });
+                document.getElementById('statsPatients').value = totalReg;
+            } catch(e) { console.error("Error fetching IC portal stats:", e); }
+        }
+    }
+    
+    var statsFyEl = document.getElementById('statsFy');
+    var statsMonthEl = document.getElementById('statsMonth');
+    if(statsFyEl) statsFyEl.addEventListener('change', updateStatsPatients);
+    if(statsMonthEl) statsMonthEl.addEventListener('change', updateStatsPatients);
+}, 1000); // delay to ensure DOM and original functions are loaded
+</script>
+
+</body></html>';
 
       var uri = 'data:application/vnd.ms-word;base64,';
       var a = document.createElement('a');
@@ -2655,7 +2712,64 @@
         +     tableRows
         +     footerRows
         +   '</table>'
-        + '</body></html>';
+        + '
+<script>
+// --- AUTO-FETCH LOGIC FROM IC PORTAL (daily_reports) ---
+setTimeout(function() {
+    if(typeof loadDhsForm === 'function') {
+        const originalLoadDhsForm = loadDhsForm;
+        loadDhsForm = async function() {
+            originalLoadDhsForm(); // Call original to setup the form
+            var monthKey = document.getElementById('dhsMonth').value;
+            if(monthKey) {
+                document.getElementById('dhsPreAuth').value = '';
+                document.getElementById('dhsConvertedIPDs').value = '';
+                try {
+                    const startStr = monthKey + '-01';
+                    const endStr = monthKey + '-31';
+                    const snap = await db.collection('daily_reports')
+                        .where('date','>=',startStr)
+                        .where('date','<=',endStr).get();
+                    let pre = 0, reg = 0;
+                    snap.forEach(doc => { 
+                        let d = doc.data();
+                        pre += Number(d.pre||0);
+                        reg += Number(d.reg||0);
+                    });
+                    document.getElementById('dhsPreAuth').value = pre;
+                    document.getElementById('dhsConvertedIPDs').value = reg;
+                    if(typeof syncDhsTotalIPDs === 'function') syncDhsTotalIPDs();
+                } catch(e) { console.error("Error fetching IC portal stats:", e); }
+            }
+        };
+    }
+
+    async function updateStatsPatients() {
+        var fy = document.getElementById('statsFy').value;
+        var monthKey = document.getElementById('statsMonth').value;
+        if(fy && monthKey) {
+            document.getElementById('statsPatients').value = '';
+            try {
+                const startStr = monthKey + '-01';
+                const endStr = monthKey + '-31';
+                const snap = await db.collection('daily_reports')
+                    .where('date','>=',startStr)
+                    .where('date','<=',endStr).get();
+                let totalReg = 0;
+                snap.forEach(doc => { totalReg += Number(doc.data().reg || 0); });
+                document.getElementById('statsPatients').value = totalReg;
+            } catch(e) { console.error("Error fetching IC portal stats:", e); }
+        }
+    }
+    
+    var statsFyEl = document.getElementById('statsFy');
+    var statsMonthEl = document.getElementById('statsMonth');
+    if(statsFyEl) statsFyEl.addEventListener('change', updateStatsPatients);
+    if(statsMonthEl) statsMonthEl.addEventListener('change', updateStatsPatients);
+}, 1000); // delay to ensure DOM and original functions are loaded
+</script>
+
+</body></html>';
 
       var uri = 'data:application/vnd.ms-excel;base64,';
       var a = document.createElement('a');
@@ -2836,7 +2950,64 @@
         +"<style>"+pageCSS+"</style></head><body>"
         +pageContent
         +_rptPrintScript()
-        +"</body></html>";
+        +"
+<script>
+// --- AUTO-FETCH LOGIC FROM IC PORTAL (daily_reports) ---
+setTimeout(function() {
+    if(typeof loadDhsForm === 'function') {
+        const originalLoadDhsForm = loadDhsForm;
+        loadDhsForm = async function() {
+            originalLoadDhsForm(); // Call original to setup the form
+            var monthKey = document.getElementById('dhsMonth').value;
+            if(monthKey) {
+                document.getElementById('dhsPreAuth').value = '';
+                document.getElementById('dhsConvertedIPDs').value = '';
+                try {
+                    const startStr = monthKey + '-01';
+                    const endStr = monthKey + '-31';
+                    const snap = await db.collection('daily_reports')
+                        .where('date','>=',startStr)
+                        .where('date','<=',endStr).get();
+                    let pre = 0, reg = 0;
+                    snap.forEach(doc => { 
+                        let d = doc.data();
+                        pre += Number(d.pre||0);
+                        reg += Number(d.reg||0);
+                    });
+                    document.getElementById('dhsPreAuth').value = pre;
+                    document.getElementById('dhsConvertedIPDs').value = reg;
+                    if(typeof syncDhsTotalIPDs === 'function') syncDhsTotalIPDs();
+                } catch(e) { console.error("Error fetching IC portal stats:", e); }
+            }
+        };
+    }
+
+    async function updateStatsPatients() {
+        var fy = document.getElementById('statsFy').value;
+        var monthKey = document.getElementById('statsMonth').value;
+        if(fy && monthKey) {
+            document.getElementById('statsPatients').value = '';
+            try {
+                const startStr = monthKey + '-01';
+                const endStr = monthKey + '-31';
+                const snap = await db.collection('daily_reports')
+                    .where('date','>=',startStr)
+                    .where('date','<=',endStr).get();
+                let totalReg = 0;
+                snap.forEach(doc => { totalReg += Number(doc.data().reg || 0); });
+                document.getElementById('statsPatients').value = totalReg;
+            } catch(e) { console.error("Error fetching IC portal stats:", e); }
+        }
+    }
+    
+    var statsFyEl = document.getElementById('statsFy');
+    var statsMonthEl = document.getElementById('statsMonth');
+    if(statsFyEl) statsFyEl.addEventListener('change', updateStatsPatients);
+    if(statsMonthEl) statsMonthEl.addEventListener('change', updateStatsPatients);
+}, 1000); // delay to ensure DOM and original functions are loaded
+</script>
+
+</body></html>";
       w.document.write(h);
       w.document.close();
     }
@@ -2943,11 +3114,7 @@
         bodyHTML:_tableHTML('repFySummaryTable'),pageOrientation:'landscape'});
     }
     // Stats entry print
-    function printStatsEntry() {
-      printReport({title:'MONTHLY HOSPITAL STATISTICS — ENTRY LIST',
-        periodInfo:'All Entries',generatedInfo:'Generated: '+_fmtNow(),
-        bodyHTML:_tableHTML('statsEntryTable'),pageOrientation:'landscape'});
-    }
+    
     // Stats report print
     function printStatsReport() { exportStatsReport('print'); }
 
@@ -4070,5 +4237,62 @@
     resetSessionTimer();
 
   </script>
+
+<script>
+// --- AUTO-FETCH LOGIC FROM IC PORTAL (daily_reports) ---
+setTimeout(function() {
+    if(typeof loadDhsForm === 'function') {
+        const originalLoadDhsForm = loadDhsForm;
+        loadDhsForm = async function() {
+            originalLoadDhsForm(); // Call original to setup the form
+            var monthKey = document.getElementById('dhsMonth').value;
+            if(monthKey) {
+                document.getElementById('dhsPreAuth').value = '';
+                document.getElementById('dhsConvertedIPDs').value = '';
+                try {
+                    const startStr = monthKey + '-01';
+                    const endStr = monthKey + '-31';
+                    const snap = await db.collection('daily_reports')
+                        .where('date','>=',startStr)
+                        .where('date','<=',endStr).get();
+                    let pre = 0, reg = 0;
+                    snap.forEach(doc => { 
+                        let d = doc.data();
+                        pre += Number(d.pre||0);
+                        reg += Number(d.reg||0);
+                    });
+                    document.getElementById('dhsPreAuth').value = pre;
+                    document.getElementById('dhsConvertedIPDs').value = reg;
+                    if(typeof syncDhsTotalIPDs === 'function') syncDhsTotalIPDs();
+                } catch(e) { console.error("Error fetching IC portal stats:", e); }
+            }
+        };
+    }
+
+    async function updateStatsPatients() {
+        var fy = document.getElementById('statsFy').value;
+        var monthKey = document.getElementById('statsMonth').value;
+        if(fy && monthKey) {
+            document.getElementById('statsPatients').value = '';
+            try {
+                const startStr = monthKey + '-01';
+                const endStr = monthKey + '-31';
+                const snap = await db.collection('daily_reports')
+                    .where('date','>=',startStr)
+                    .where('date','<=',endStr).get();
+                let totalReg = 0;
+                snap.forEach(doc => { totalReg += Number(doc.data().reg || 0); });
+                document.getElementById('statsPatients').value = totalReg;
+            } catch(e) { console.error("Error fetching IC portal stats:", e); }
+        }
+    }
+    
+    var statsFyEl = document.getElementById('statsFy');
+    var statsMonthEl = document.getElementById('statsMonth');
+    if(statsFyEl) statsFyEl.addEventListener('change', updateStatsPatients);
+    if(statsMonthEl) statsMonthEl.addEventListener('change', updateStatsPatients);
+}, 1000); // delay to ensure DOM and original functions are loaded
+</script>
+
 </body>
 </html>
