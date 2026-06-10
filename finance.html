@@ -2590,64 +2590,7 @@
         +   infoRow
         +   bodyHTML
         +   universalFooter
-        + '
-<script>
-// --- AUTO-FETCH LOGIC FROM IC PORTAL (daily_reports) ---
-setTimeout(function() {
-    if(typeof loadDhsForm === 'function') {
-        const originalLoadDhsForm = loadDhsForm;
-        loadDhsForm = async function() {
-            originalLoadDhsForm(); // Call original to setup the form
-            var monthKey = document.getElementById('dhsMonth').value;
-            if(monthKey) {
-                document.getElementById('dhsPreAuth').value = '';
-                document.getElementById('dhsConvertedIPDs').value = '';
-                try {
-                    const startStr = monthKey + '-01';
-                    const endStr = monthKey + '-31';
-                    const snap = await db.collection('daily_reports')
-                        .where('date','>=',startStr)
-                        .where('date','<=',endStr).get();
-                    let pre = 0, reg = 0;
-                    snap.forEach(doc => { 
-                        let d = doc.data();
-                        pre += Number(d.pre||0);
-                        reg += Number(d.reg||0);
-                    });
-                    document.getElementById('dhsPreAuth').value = pre;
-                    document.getElementById('dhsConvertedIPDs').value = reg;
-                    if(typeof syncDhsTotalIPDs === 'function') syncDhsTotalIPDs();
-                } catch(e) { console.error("Error fetching IC portal stats:", e); }
-            }
-        };
-    }
-
-    async function updateStatsPatients() {
-        var fy = document.getElementById('statsFy').value;
-        var monthKey = document.getElementById('statsMonth').value;
-        if(fy && monthKey) {
-            document.getElementById('statsPatients').value = '';
-            try {
-                const startStr = monthKey + '-01';
-                const endStr = monthKey + '-31';
-                const snap = await db.collection('daily_reports')
-                    .where('date','>=',startStr)
-                    .where('date','<=',endStr).get();
-                let totalReg = 0;
-                snap.forEach(doc => { totalReg += Number(doc.data().reg || 0); });
-                document.getElementById('statsPatients').value = totalReg;
-            } catch(e) { console.error("Error fetching IC portal stats:", e); }
-        }
-    }
-    
-    var statsFyEl = document.getElementById('statsFy');
-    var statsMonthEl = document.getElementById('statsMonth');
-    if(statsFyEl) statsFyEl.addEventListener('change', updateStatsPatients);
-    if(statsMonthEl) statsMonthEl.addEventListener('change', updateStatsPatients);
-}, 1000); // delay to ensure DOM and original functions are loaded
-</script>
-
-</body></html>';
+        + '</body></html>';
 
       var uri = 'data:application/vnd.ms-word;base64,';
       var a = document.createElement('a');
@@ -2712,64 +2655,7 @@ setTimeout(function() {
         +     tableRows
         +     footerRows
         +   '</table>'
-        + '
-<script>
-// --- AUTO-FETCH LOGIC FROM IC PORTAL (daily_reports) ---
-setTimeout(function() {
-    if(typeof loadDhsForm === 'function') {
-        const originalLoadDhsForm = loadDhsForm;
-        loadDhsForm = async function() {
-            originalLoadDhsForm(); // Call original to setup the form
-            var monthKey = document.getElementById('dhsMonth').value;
-            if(monthKey) {
-                document.getElementById('dhsPreAuth').value = '';
-                document.getElementById('dhsConvertedIPDs').value = '';
-                try {
-                    const startStr = monthKey + '-01';
-                    const endStr = monthKey + '-31';
-                    const snap = await db.collection('daily_reports')
-                        .where('date','>=',startStr)
-                        .where('date','<=',endStr).get();
-                    let pre = 0, reg = 0;
-                    snap.forEach(doc => { 
-                        let d = doc.data();
-                        pre += Number(d.pre||0);
-                        reg += Number(d.reg||0);
-                    });
-                    document.getElementById('dhsPreAuth').value = pre;
-                    document.getElementById('dhsConvertedIPDs').value = reg;
-                    if(typeof syncDhsTotalIPDs === 'function') syncDhsTotalIPDs();
-                } catch(e) { console.error("Error fetching IC portal stats:", e); }
-            }
-        };
-    }
-
-    async function updateStatsPatients() {
-        var fy = document.getElementById('statsFy').value;
-        var monthKey = document.getElementById('statsMonth').value;
-        if(fy && monthKey) {
-            document.getElementById('statsPatients').value = '';
-            try {
-                const startStr = monthKey + '-01';
-                const endStr = monthKey + '-31';
-                const snap = await db.collection('daily_reports')
-                    .where('date','>=',startStr)
-                    .where('date','<=',endStr).get();
-                let totalReg = 0;
-                snap.forEach(doc => { totalReg += Number(doc.data().reg || 0); });
-                document.getElementById('statsPatients').value = totalReg;
-            } catch(e) { console.error("Error fetching IC portal stats:", e); }
-        }
-    }
-    
-    var statsFyEl = document.getElementById('statsFy');
-    var statsMonthEl = document.getElementById('statsMonth');
-    if(statsFyEl) statsFyEl.addEventListener('change', updateStatsPatients);
-    if(statsMonthEl) statsMonthEl.addEventListener('change', updateStatsPatients);
-}, 1000); // delay to ensure DOM and original functions are loaded
-</script>
-
-</body></html>';
+        + '</body></html>';
 
       var uri = 'data:application/vnd.ms-excel;base64,';
       var a = document.createElement('a');
@@ -2950,64 +2836,7 @@ setTimeout(function() {
         +"<style>"+pageCSS+"</style></head><body>"
         +pageContent
         +_rptPrintScript()
-        +"
-<script>
-// --- AUTO-FETCH LOGIC FROM IC PORTAL (daily_reports) ---
-setTimeout(function() {
-    if(typeof loadDhsForm === 'function') {
-        const originalLoadDhsForm = loadDhsForm;
-        loadDhsForm = async function() {
-            originalLoadDhsForm(); // Call original to setup the form
-            var monthKey = document.getElementById('dhsMonth').value;
-            if(monthKey) {
-                document.getElementById('dhsPreAuth').value = '';
-                document.getElementById('dhsConvertedIPDs').value = '';
-                try {
-                    const startStr = monthKey + '-01';
-                    const endStr = monthKey + '-31';
-                    const snap = await db.collection('daily_reports')
-                        .where('date','>=',startStr)
-                        .where('date','<=',endStr).get();
-                    let pre = 0, reg = 0;
-                    snap.forEach(doc => { 
-                        let d = doc.data();
-                        pre += Number(d.pre||0);
-                        reg += Number(d.reg||0);
-                    });
-                    document.getElementById('dhsPreAuth').value = pre;
-                    document.getElementById('dhsConvertedIPDs').value = reg;
-                    if(typeof syncDhsTotalIPDs === 'function') syncDhsTotalIPDs();
-                } catch(e) { console.error("Error fetching IC portal stats:", e); }
-            }
-        };
-    }
-
-    async function updateStatsPatients() {
-        var fy = document.getElementById('statsFy').value;
-        var monthKey = document.getElementById('statsMonth').value;
-        if(fy && monthKey) {
-            document.getElementById('statsPatients').value = '';
-            try {
-                const startStr = monthKey + '-01';
-                const endStr = monthKey + '-31';
-                const snap = await db.collection('daily_reports')
-                    .where('date','>=',startStr)
-                    .where('date','<=',endStr).get();
-                let totalReg = 0;
-                snap.forEach(doc => { totalReg += Number(doc.data().reg || 0); });
-                document.getElementById('statsPatients').value = totalReg;
-            } catch(e) { console.error("Error fetching IC portal stats:", e); }
-        }
-    }
-    
-    var statsFyEl = document.getElementById('statsFy');
-    var statsMonthEl = document.getElementById('statsMonth');
-    if(statsFyEl) statsFyEl.addEventListener('change', updateStatsPatients);
-    if(statsMonthEl) statsMonthEl.addEventListener('change', updateStatsPatients);
-}, 1000); // delay to ensure DOM and original functions are loaded
-</script>
-
-</body></html>";
+        +"</body></html>";
       w.document.write(h);
       w.document.close();
     }
@@ -4238,6 +4067,7 @@ setTimeout(function() {
 
   </script>
 
+
 <script>
 // --- AUTO-FETCH LOGIC FROM IC PORTAL (daily_reports) ---
 setTimeout(function() {
@@ -4293,6 +4123,5 @@ setTimeout(function() {
     if(statsMonthEl) statsMonthEl.addEventListener('change', updateStatsPatients);
 }, 1000); // delay to ensure DOM and original functions are loaded
 </script>
-
 </body>
 </html>

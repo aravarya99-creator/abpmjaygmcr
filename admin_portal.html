@@ -4664,7 +4664,7 @@ function abSave(which){
       updatedAt:         Date.now(),
       _updatedBy:        (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')
     };
-    ', payload);
+    
     setMsg('Saving…', '#1A3DB5');
     db.collection('settings').doc('about_page').set(payload, { merge: true })
       .then(function(){
