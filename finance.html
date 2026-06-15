@@ -1752,6 +1752,12 @@
 
     function renderMonthlyReport(){
       const fy = $('repFy').value;
+      const now = new Date();
+      const currYear = now.getFullYear();
+      const currMonth = now.getMonth() + 1;
+      const currMonthKey = currYear + '-' + String(currMonth).padStart(2, '0');
+      const currentFyStartYear = currMonth >= 4 ? currYear : currYear - 1;
+      const currentFyStr = currentFyStartYear + '-' + String(currentFyStartYear + 1).slice(-2);
       // Populate month dropdown for selected FY
       const repMonthSel = $('repMonth');
       if(repMonthSel && fy) {
@@ -1767,14 +1773,17 @@
       
       let totClaim=0, totInt=0, totInc=0, totExp=0;
       const filteredRows = selectedMonth ? rows.filter(r => r.monthKey === selectedMonth) : rows;
+      let renderedRows = [];
       filteredRows.forEach(r=>{
+        if(fy === currentFyStr && r.monthKey > currMonthKey && r.incomeTotal === 0 && r.expTotal === 0) return;
+        renderedRows.push(r);
         totClaim+=r.claim; totInt+=r.interest; totInc+=r.incomeTotal; totExp+=r.expTotal;
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${r.label}</td><td>${fmt(r.opening)}</td><td>${fmt(r.claim)}</td><td>${fmt(r.interest)}</td><td>${fmt(r.incomeTotal)}</td><td>${fmt(r.expTotal)}</td><td>${fmt(r.closing)}</td>`;
         tbody.appendChild(tr);
       });
-      if(filteredRows.length>0 && !selectedMonth) {
-        tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td>TOTAL</td><td>-</td><td>${fmt(totClaim)}</td><td>${fmt(totInt)}</td><td>${fmt(totInc)}</td><td>${fmt(totExp)}</td><td>${fmt(filteredRows[filteredRows.length-1].closing)}</td></tr>`);
+      if(renderedRows.length>0 && !selectedMonth) {
+        tbody.insertAdjacentHTML('beforeend', `<tr style="font-weight:bold;background:#e2e8f0;color:#000;"><td>TOTAL</td><td>-</td><td>${fmt(totClaim)}</td><td>${fmt(totInt)}</td><td>${fmt(totInc)}</td><td>${fmt(totExp)}</td><td>${fmt(renderedRows[renderedRows.length-1].closing)}</td></tr>`);
       }
     }
     
@@ -1937,6 +1946,13 @@
       const selectedFy = shaFySel.value;
       const selectedMonth = ($('shaMonthFilter') ? $('shaMonthFilter').value : '');
       
+      const now = new Date();
+      const currYear = now.getFullYear();
+      const currMonth = now.getMonth() + 1;
+      const currMonthKey = currYear + '-' + String(currMonth).padStart(2, '0');
+      const currentFyStartYear = currMonth >= 4 ? currYear : currYear - 1;
+      const currentFyStr = currentFyStartYear + '-' + String(currentFyStartYear + 1).slice(-2);
+
       let carryOpening = 0;
       
       let tClaim=0, tInt=0, tIncTotal=0, tDrugs=0, tMach=0, tHosp=0, tLab=0, tSha=0, tSal=0, tInc=0, tMisc=0, tExpTot=0;
@@ -1964,6 +1980,7 @@
           
           if(selectedMonth && r.monthKey !== selectedMonth) return;
           if(r.incomeTotal === 0 && r.expTotal === 0 && r.opening === 0) return;
+          if(f.name === currentFyStr && r.monthKey > currMonthKey && r.incomeTotal === 0 && r.expTotal === 0) return;
           hasData=true;
           
           tClaim+=r.claim; tInt+=r.interest; tIncTotal+=r.incomeTotal; tDrugs+=drugs; tMach+=mach; tHosp+=hosp; tLab+=lab; tSha+=sha; tSal+=salary; tInc+=inc; tMisc+=misc; tExpTot+=r.expTotal; lastClosing=r.closing;
