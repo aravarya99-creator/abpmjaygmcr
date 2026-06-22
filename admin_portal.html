@@ -1047,6 +1047,7 @@ tr:hover td{background:#EEF3FF}
             </table>
           </div>
           <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:14px">
+            <button class="btn btn-sec" onclick="showWrHistoryModal()" style="padding:10px 22px;border-radius:50px;font-size:13px;font-weight:700">View History</button>
             <span id="wrSaveMsg" style="font-size:11px;font-weight:600"></span>
             <button class="btn btn-pri" onclick="wrSave()" style="padding:10px 22px;border-radius:50px;font-size:13px;font-weight:700">Save &amp; Publish</button>
           </div>
@@ -2529,8 +2530,10 @@ function hcSaveAll(){
 // ══════════════════════════════════════════════════════
 var _wrRows = []; // [{pmam1, pmam2, saturday, sunday}]
 
-function autoAdvanceRoster(rows) {
+function autoAdvanceRoster(data) {
+  var rows = data.rows;
   if (!rows || !rows.length) return false;
+  var history = data.history || [];
   var now = new Date();
   var p = function(n){ return n < 10 ? '0'+n : n; };
   var todayStr = now.getFullYear() + '-' + p(now.getMonth()+1) + '-' + p(now.getDate());
@@ -2548,6 +2551,12 @@ function autoAdvanceRoster(rows) {
     if (!r.sunday || !r.saturday) return;
     var safety = 0;
     while (r.sunday < todayStr && safety < 100) {
+      history.push({
+        saturday: r.saturday,
+        sunday: r.sunday,
+        pmam1: r.pmam1,
+        pmam2: r.pmam2
+      });
       r.saturday = addDays(r.saturday, cycleDays);
       r.sunday = addDays(r.sunday, cycleDays);
       if (!r.sunday || r.sunday.indexOf('NaN') !== -1) break;
@@ -2556,6 +2565,9 @@ function autoAdvanceRoster(rows) {
     }
   });
   if (updated) {
+    var hmap = {};
+    history.forEach(function(h){ hmap[h.saturday] = h; });
+    data.history = Object.keys(hmap).map(function(k){return hmap[k];}).sort(function(a,b){ return a.saturday.localeCompare(b.saturday); });
     rows.sort(function(a, b){
       var da = a.saturday || '';
       var db = b.saturday || '';
@@ -2565,13 +2577,76 @@ function autoAdvanceRoster(rows) {
   return updated;
 }
 
+function ymdFormat(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function fmtDate(ymd) {
+  if (!ymd) return '';
+  var pts = ymd.split('-');
+  if (pts.length !== 3) return ymd;
+  var d = new Date(ymd);
+  var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return d.getDate() + ' ' + m[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function showWrHistoryModal() {
+  db.collection('settings').doc('weekend_roster').get().then(function(doc){
+    var data = doc.exists ? doc.data() : {rows:[], history:[]};
+    var all = (data.history || []).concat(data.rows || []);
+    // deduplicate
+    var map = {};
+    all.forEach(function(r){ map[r.saturday] = r; });
+    var combined = Object.keys(map).map(function(k){return map[k];});
+    combined.sort(function(a,b){ return b.saturday.localeCompare(a.saturday); }); // desc
+    
+    var html = '<table style="width:100%; border-collapse:collapse; font-size:12px;">'
+      + '<thead><tr><th>#</th><th>PMAM 1</th><th>PMAM 2</th><th>SATURDAY</th><th>SUNDAY</th></tr></thead><tbody>';
+    
+    if(!combined.length) {
+      html += '<tr><td colspan="5" style="text-align:center;padding:20px;color:#9ca3af;font-style:italic">No history found.</td></tr>';
+    } else {
+      combined.forEach(function(r, i){
+        html += '<tr>'
+          + '<td style="color:#6b7280;font-weight:600;padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+(i+1)+'</td>'
+          + '<td style="padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+(r.pmam1||'-')+'</td>'
+          + '<td style="padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+(r.pmam2||'-')+'</td>'
+          + '<td style="font-weight:600;padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+fmtDate(r.saturday)+'</td>'
+          + '<td style="font-weight:600;padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+fmtDate(r.sunday)+'</td>'
+          + '</tr>';
+      });
+    }
+    html += '</tbody></table>';
+    
+    // Add modal if it doesn't exist
+    if(!document.getElementById('wrHistoryModal')) {
+      var modalHtml = '<div class="modal-bg" id="wrHistoryModal">'
+        + '<div class="modal-box" style="max-width:600px; max-height:85vh; display:flex; flex-direction:column;">'
+        + '  <div class="modal-title" style="margin-bottom:12px;">🕰️ Weekend Roster History</div>'
+        + '  <div style="overflow-y:auto; flex:1; border:1px solid rgba(26,61,181,0.1); border-radius:8px;" id="wrHistoryContent"></div>'
+        + '  <div class="modal-footer" style="margin-top:16px;">'
+        + '    <button class="mbtn mbtn-sec" onclick="document.getElementById(\'wrHistoryModal\').classList.remove(\'open\')">Close</button>'
+        + '  </div>'
+        + '</div></div>';
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+    
+    document.getElementById('wrHistoryContent').innerHTML = html;
+    document.getElementById('wrHistoryModal').classList.add('open');
+  }).catch(function(err){
+    showToast('Failed to load history: ' + err.message, 'danger');
+  });
+}
+
 function wrInit(){
   db.collection('settings').doc('weekend_roster').get().then(function(doc){
     if (doc.exists && Array.isArray(doc.data().rows)) {
-      _wrRows = doc.data().rows;
-      if (autoAdvanceRoster(_wrRows)) {
+      var data = doc.data();
+      _wrRows = data.rows;
+      if (autoAdvanceRoster(data)) {
+        _wrRows = data.rows;
         // Auto-save advanced dates so database reflects reality
-        db.collection('settings').doc('weekend_roster').set({rows: _wrRows}, {merge:true});
+        db.collection('settings').doc('weekend_roster').set({rows: data.rows, history: data.history}, {merge:true});
       }
     } else {
       _wrRows = [];
