@@ -2394,24 +2394,24 @@ window.addEventListener('DOMContentLoaded', function() {
     return html;
   }
 
-  function renderWeekendRosterHistory() {
+  function renderWeekendRoster(){
     var data = LIVE.weekendRoster || {};
-    var all = (data.history || []).concat(data.rows || []);
-    // deduplicate
-    var map = {};
-    all.forEach(function(r){ map[r.saturday] = r; });
-    var combined = Object.keys(map).map(function(k){return map[k];});
-    combined.sort(function(a,b){ return b.saturday.localeCompare(a.saturday); }); // desc
-
-    var html = '<div class="cm-empty" style="text-align:left; margin-bottom:10px;"><button onclick="document.getElementById(\'modalBody\').innerHTML = renderWeekendRoster();" style="padding:4px 12px; background:#e0e7ff; color:#1e3a8a; border:none; border-radius:6px; font-weight:700; cursor:pointer;">&larr; Back to Current Roster</button></div>'
-      + '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
-      + '<thead><tr><th style="width:42px">#</th><th>PMAMs on Duty</th><th>Saturday</th><th>Sunday</th></tr></thead>'
-      + '<tbody>';
+    var rows = Array.isArray(data.rows) ? data.rows : [];
+    var history = Array.isArray(data.history) ? data.history : [];
     
-    if(!combined.length) {
-      html += '<tr><td colspan="4" style="text-align:center;padding:20px;color:#9ca3af;font-style:italic">No history found.</td></tr>';
-    } else {
-      combined.forEach(function(r, i){
+    if (!rows.length && !history.length) {
+      return '<div class="cm-empty">No weekend roster published yet. Admin can add rows from <strong>Data Management &rarr; Weekend Roster</strong>.</div>';
+    }
+
+    var html = '';
+
+    // Current Roster Table
+    if (rows.length) {
+      var sorted = rows.slice().sort(function(a,b){ return (a.saturday||'').localeCompare(b.saturday||''); });
+      html += '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
+        + '<thead><tr><th style="width:42px">#</th><th>PMAMs on Duty</th><th>Saturday</th><th>Sunday</th></tr></thead>'
+        + '<tbody>';
+      sorted.forEach(function(r, i){
         var pmams = [r.pmam1, r.pmam2].filter(function(p){ return (p||'').trim(); });
         var pmamCell = pmams.length
           ? pmams.map(function(p){ return '<span style="display:inline-block;background:#dbeafe;color:#1e3a8a;padding:2px 10px;border-radius:50px;font-size:11.5px;font-weight:700;margin:2px 4px 2px 0">'+esc(p)+'</span>'; }).join('')
@@ -2421,45 +2421,51 @@ window.addEventListener('DOMContentLoaded', function() {
               + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.saturday))+'</td>'
               + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td></tr>';
       });
+      html += '</tbody></table></div></div>';
+    } else {
+      html += '<div class="cm-empty">No active weekend roster for this week.</div>';
     }
-    html += '</tbody></table></div></div>';
+
+    // History Section
+    if (history.length) {
+      // Deduplicate history
+      var map = {};
+      var all = history.concat(rows); // Also show rows in history
+      all.forEach(function(r){ map[r.saturday] = r; });
+      var combined = Object.keys(map).map(function(k){return map[k];});
+      combined.sort(function(a,b){ return b.saturday.localeCompare(a.saturday); });
+
+      // Button to toggle history
+      html += '<div style="margin-top:20px;text-align:center;">'
+           +  '<button onclick="var wrap = document.getElementById(\'weekendHistoryWrap\'); wrap.style.display = wrap.style.display === \'none\' ? \'block\' : \'none\';"'
+           +  ' style="background:#1e293b;color:#fff;border:none;border-radius:50px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">'
+           +  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>'
+           +  ' View History</button>'
+           +  '</div>';
+
+      // History Table (hidden by default)
+      html += '<div id="weekendHistoryWrap" style="display:none;margin-top:20px;">'
+           +  '<h3 style="font-size:15px;font-weight:800;color:#334155;margin-bottom:12px;border-bottom:2px solid #e2e8f0;padding-bottom:6px;">Past Weekend Rosters</h3>';
+      
+      html += '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
+        + '<thead><tr><th style="width:42px">#</th><th>PMAMs on Duty</th><th>Saturday</th><th>Sunday</th></tr></thead>'
+        + '<tbody>';
+      combined.forEach(function(r, i){
+        var pmams = [r.pmam1, r.pmam2].filter(function(p){ return (p||'').trim(); });
+        var pmamCell = pmams.length
+          ? pmams.map(function(p){ return '<span style="display:inline-block;background:#f3f4f6;color:#4b5563;padding:2px 10px;border-radius:50px;font-size:11.5px;font-weight:700;margin:2px 4px 2px 0">'+esc(p)+'</span>'; }).join('')
+          : '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
+        html += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
+              + '<td>'+pmamCell+'</td>'
+              + '<td style="font-weight:700;color:#64748b;white-space:nowrap">'+esc(fmtDate(r.saturday))+'</td>'
+              + '<td style="font-weight:700;color:#64748b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td></tr>';
+      });
+      html += '</tbody></table></div></div>'
+           +  '</div>';
+    }
+
     return html;
   }
-  
-  // Make renderWeekendRosterHistory globally accessible so the button onclick can find it
-  window.renderWeekendRosterHistory = renderWeekendRosterHistory;
-
-  function renderWeekendRoster(){
-    var data = LIVE.weekendRoster || {};
-    var rows = Array.isArray(data.rows) ? data.rows : [];
-    if (!rows.length) {
-      return '<div class="cm-empty">No weekend roster published yet. Admin can add rows from <strong>Data Management → Weekend Roster</strong>.</div>';
-    }
-    // Sort by saturday date ascending
-    var sorted = rows.slice().sort(function(a,b){ return (a.saturday||'').localeCompare(b.saturday||''); });
-    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
-      + '<thead><tr><th style="width:42px">#</th><th>PMAMs on Duty</th><th>Saturday</th><th>Sunday</th></tr></thead>'
-      + '<tbody>';
-    sorted.forEach(function(r, i){
-      // Combine both PMAM names into one cell, dropping the "1 / 2" labels.
-      var pmams = [r.pmam1, r.pmam2].filter(function(p){ return (p||'').trim(); });
-      var pmamCell = pmams.length
-        ? pmams.map(function(p){ return '<span style="display:inline-block;background:#dbeafe;color:#1e3a8a;padding:2px 10px;border-radius:50px;font-size:11.5px;font-weight:700;margin:2px 4px 2px 0">'+esc(p)+'</span>'; }).join('')
-        : '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
-      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
-            + '<td>'+pmamCell+'</td>'
-            + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.saturday))+'</td>'
-            + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td></tr>';
-    });
-    html += '</tbody></table></div></div>'
-          + '<div style="margin-top:14px; text-align:center;">'
-          + '<button onclick="document.getElementById(\'modalBody\').innerHTML = renderWeekendRosterHistory();" style="padding:8px 24px; background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; border-radius:8px; font-weight:700; cursor:pointer; font-size:12px;">🕰️ View History of All Rosters</button>'
-          + '</div>';
-    return html;
-  }
-
-  // Make renderWeekendRoster globally accessible as well, so back button works
-  window.renderWeekendRoster = renderWeekendRoster;
 
   // ── About Us modal: the AB-PMJAY / SEHAT scheme writeup ──
   // Render one styled content section (shared by About Us & About Developer).
@@ -2805,7 +2811,6 @@ window.addEventListener('DOMContentLoaded', function() {
     return '<div style="display:flex;flex-direction:column;gap:14px">' + profileCard + sectionsCard + expertiseCard + '</div>';
   }
 
-
   function renderOrders(){
     var data = LIVE.orders || {};
     var rows = Array.isArray(data.rows) ? data.rows : [];
@@ -2847,6 +2852,7 @@ window.addEventListener('DOMContentLoaded', function() {
     }
     return html;
   }
+
 
   // ─── Renderer registry (exposed globally so click handler can check) ─
   var ICON = {
