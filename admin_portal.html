@@ -2598,15 +2598,18 @@ function showWrHistoryModal() {
     var map = {};
     all.forEach(function(r){ map[r.saturday] = r; });
     var combined = Object.keys(map).map(function(k){return map[k];});
-    combined.sort(function(a,b){ return b.saturday.localeCompare(a.saturday); }); // desc
+    
+    var today = new Date().toISOString().slice(0,10);
+    var pastOnly = combined.filter(function(r){ return (r.saturday || '') < today; });
+    pastOnly.sort(function(a,b){ return b.saturday.localeCompare(a.saturday); }); // desc
     
     var html = '<table style="width:100%; border-collapse:collapse; font-size:12px;">'
       + '<thead><tr><th>#</th><th>PMAM 1</th><th>PMAM 2</th><th>SATURDAY</th><th>SUNDAY</th></tr></thead><tbody>';
     
-    if(!combined.length) {
+    if(!pastOnly.length) {
       html += '<tr><td colspan="5" style="text-align:center;padding:20px;color:#9ca3af;font-style:italic">No history found.</td></tr>';
     } else {
-      combined.forEach(function(r, i){
+      pastOnly.forEach(function(r, i){
         html += '<tr>'
           + '<td style="color:#6b7280;font-weight:600;padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+(i+1)+'</td>'
           + '<td style="padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+(r.pmam1||'-')+'</td>'
