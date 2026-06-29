@@ -853,13 +853,24 @@
 
         <!-- STEP 1: SELECT PERIOD -->
         <div style="background:#f0f9ff;border:2px solid #bae6fd;border-radius:10px;padding:16px;margin-bottom:18px;">
-          <div style="font-size:12px;font-weight:800;color:#0369a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📅 STEP 1 — Select Financial Year and Months</div>
+          <div style="font-size:12px;font-weight:800;color:#0369a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📅 STEP 1 — Select Period & Grouping</div>
+          
+          <div style="margin-bottom: 16px; padding: 10px; background: #e0f2fe; border-radius: 8px; border: 1.5px solid #bae6fd;">
+            <label style="font-size:11px;font-weight:700;color:#0369a1;text-transform:uppercase;margin-right:16px;">Report Grouping:</label>
+            <label style="margin-right: 16px; font-size: 13px; font-weight: 600; color: #0c4a6e; cursor: pointer;">
+              <input type="radio" name="crGrouping" value="month" checked onchange="crToggleGrouping()"> Month-wise Data
+            </label>
+            <label style="font-size: 13px; font-weight: 600; color: #0c4a6e; cursor: pointer;">
+              <input type="radio" name="crGrouping" value="fy" onchange="crToggleGrouping()"> Financial Year-wise Data
+            </label>
+          </div>
+
           <div style="display:grid;grid-template-columns:240px 1fr;gap:16px;align-items:start;">
             <div>
               <label style="display:block;color:#0369a1;font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:5px;">Financial Year</label>
               <select id="crFy" style="width:100%;padding:9px;border:2px solid #bae6fd;border-radius:8px;background:#fff;color:#0c4a6e;font-weight:600;font-size:13px;"><option value="">All FY</option></select>
             </div>
-            <div>
+            <div id="crMonthSelectionWrapper">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
                 <label style="color:#0369a1;font-size:11px;font-weight:700;text-transform:uppercase;">Months (tick one or more — leave all unchecked = all months)</label>
                 <span>
@@ -3325,6 +3336,15 @@
       crRebuildMonthList();
     }
 
+    function crToggleGrouping() {
+      var grouping = document.querySelector('input[name="crGrouping"]:checked').value;
+      if (grouping === 'fy') {
+        $('crMonthSelectionWrapper').style.display = 'none';
+      } else {
+        $('crMonthSelectionWrapper').style.display = 'block';
+      }
+    }
+
     function crRebuildMonthList(){
       var listDiv = $('crMonthList'); if(!listDiv) return;
       listDiv.innerHTML = '';
@@ -3400,6 +3420,7 @@
     function buildCustomReport(){
       // Step 1: period
       var fy = $('crFy').value;
+      var grouping = document.querySelector('input[name="crGrouping"]:checked').value;
       var selectedMonths = crGetSelectedMonths(); // empty array = all months in selected FY (or all FYs)
 
       // Step 2: which columns
@@ -3494,15 +3515,46 @@
         });
       }
 
-      // Compute data for each month in the list
-      var perMonth = monthList.map(function(m){
-        return { fy:m.fy, key:m.key, label:m.label, data:dataForMonth(m.key) };
-      });
+      // Compute data per group
+      var reportRows = [];
+      if (grouping === 'fy') {
+        var targetFys = fy ? [fy] : load(LS.FYS, []).map(function(f){ return f.name; });
+        reportRows = targetFys.map(function(f) {
+           var inc  = income.filter(function(i){ return i.fy === f; });
+           var exp  = expense.filter(function(e){ return e.fy === f && expMatchesKw(e); });
+           var statList = stats.filter(function(s){ return s.fy === f; });
+           var totalClaim    = inc.reduce(function(s,i){ return s + Number(i.claim||0); }, 0);
+           var totalInterest = inc.reduce(function(s,i){ return s + Number(i.interest||0); }, 0);
+           var totalExp      = exp.reduce(function(s,e){ return s + Number(e.amount||0); }, 0);
+           var catTotals = {};
+           CR_EXP_CATS.forEach(function(c){ catTotals[c.key] = 0; });
+           exp.forEach(function(e){
+             var k = normCat(e.category);
+             if(catTotals.hasOwnProperty(k)) catTotals[k] += Number(e.amount||0);
+           });
+           var incentive = catTotals['Incentives Disbursed'] || 0;
+           var shaShare5pct = (totalClaim + totalInterest) * 0.05;
+           var patients = statList.reduce(function(s,st){ return s + Number(st.patients||0); }, 0);
+           var cards    = statList.reduce(function(s,st){ return s + Number(st.cards||0); }, 0);
+           return {
+             fy: f, key: f, label: f,
+             data: {
+               claim: totalClaim, interest: totalInterest, expTotal: totalExp,
+               shaShare: shaShare5pct, incentive: incentive,
+               patients: patients, cards: cards, catTotals: catTotals
+             }
+           };
+        });
+      } else {
+        reportRows = monthList.map(function(m){
+          return { fy:m.fy, key:m.key, label:m.label, data:dataForMonth(m.key) };
+        });
+      }
 
       // Compute column totals
       var totals = {};
       colDefs.forEach(function(c){ totals[c.numKey] = 0; });
-      perMonth.forEach(function(row){
+      reportRows.forEach(function(row){
         colDefs.forEach(function(c){
           var v;
           if(c.numKey.indexOf('cat:') === 0) {
@@ -3519,17 +3571,21 @@
       var combinedHTML = '';
 
       if(layout === 'rowMonth'){
-        // Rows = months; columns = data items
-        var th = '<tr><th>#</th><th>FY</th><th>Month</th>';
+        // Rows = items; columns = data items
+        var th = grouping === 'fy' ? '<tr><th>#</th><th>Financial Year</th>' : '<tr><th>#</th><th>FY</th><th>Month</th>';
         colDefs.forEach(function(c){ th += '<th>'+c.header+'</th>'; });
         th += '</tr>';
         var bodyRows = '';
-        perMonth.forEach(function(row, i){
-          bodyRows += '<tr><td>'+(i+1)+'</td><td>'+row.fy+'</td><td>'+row.label+'</td>';
+        reportRows.forEach(function(row, i){
+          if (grouping === 'fy') {
+            bodyRows += '<tr><td>'+(i+1)+'</td><td style="font-weight:700;">'+row.fy+'</td>';
+          } else {
+            bodyRows += '<tr><td>'+(i+1)+'</td><td>'+row.fy+'</td><td>'+row.label+'</td>';
+          }
           colDefs.forEach(function(c){ bodyRows += '<td style="text-align:right;">'+c.get(row.data)+'</td>'; });
           bodyRows += '</tr>';
         });
-        var tfRow = '<tr><td colspan="3" style="text-align:right;font-weight:700;">TOTAL</td>';
+        var tfRow = grouping === 'fy' ? '<tr><td colspan="2" style="text-align:right;font-weight:700;">TOTAL</td>' : '<tr><td colspan="3" style="text-align:right;font-weight:700;">TOTAL</td>';
         colDefs.forEach(function(c){
           tfRow += '<td style="text-align:right;font-weight:700;">'+(c.fmt==='count' ? totals[c.numKey] : fmt(totals[c.numKey]))+'</td>';
         });
@@ -3538,12 +3594,18 @@
       } else {
         // rowItem: rows = data items; columns = months (+ Total)
         var th = '<tr><th>Data Item</th>';
-        perMonth.forEach(function(row){ th += '<th>'+row.label+'<br><span style="font-weight:400;font-size:10px;">'+row.fy+'</span></th>'; });
+        reportRows.forEach(function(row){ 
+          if(grouping === 'fy'){
+             th += '<th>'+row.fy+'</th>';
+          } else {
+             th += '<th>'+row.label+'<br><span style="font-weight:400;font-size:10px;">'+row.fy+'</span></th>'; 
+          }
+        });
         th += '<th>TOTAL</th></tr>';
         var bodyRows = '';
         colDefs.forEach(function(c){
           bodyRows += '<tr><td style="font-weight:700;">'+c.header+'</td>';
-          perMonth.forEach(function(row){ bodyRows += '<td style="text-align:right;">'+c.get(row.data)+'</td>'; });
+          reportRows.forEach(function(row){ bodyRows += '<td style="text-align:right;">'+c.get(row.data)+'</td>'; });
           bodyRows += '<td style="text-align:right;font-weight:700;">'+(c.fmt==='count' ? totals[c.numKey] : fmt(totals[c.numKey]))+'</td></tr>';
         });
         combinedHTML = '<table id="crCombinedTable"><thead>'+th+'</thead><tbody>'+bodyRows+'</tbody></table>';
@@ -3552,11 +3614,13 @@
       // Period label
       var prdParts = [];
       if(fy) prdParts.push('FY: '+fy); else prdParts.push('All FY');
-      if(selectedMonths.length > 0) {
-        var labels = monthList.map(function(m){return m.label;}).join(', ');
-        prdParts.push('Months: '+labels);
-      } else {
-        prdParts.push('All Months');
+      if(grouping === 'month') {
+        if(selectedMonths.length > 0) {
+          var labels = monthList.map(function(m){return m.label;}).join(', ');
+          prdParts.push('Months: '+labels);
+        } else {
+          prdParts.push('All Months');
+        }
       }
       if(subKw)  prdParts.push('Sub-Cat KW: '+subKw);
       if(firmKw) prdParts.push('Firm KW: '+firmKw);
