@@ -42,6 +42,7 @@
     .sidebar a:hover{background:rgba(255,255,255,0.8);color:var(--blue);}
     .sidebar a.active-nav{background:var(--blue);color:#fff;font-weight:700;}
     
+    .sidebar-heading { font-size: 11px; color: #6b7280; font-weight: 800; text-transform: uppercase; padding: 12px 16px 4px 16px; margin-top: 8px; letter-spacing: 0.5px; }
     main{margin-left:180px;margin-top:80px;padding:32px;flex:1}
     .panel{background:var(--panel);backdrop-filter:blur(24px);padding:32px;border-radius:12px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(31, 38, 135, 0.05);margin-bottom:24px}
     
@@ -169,12 +170,17 @@
     <div class="brand">FINANCE</div>
     <ul>
       <li><a class="nav" data-tab="dashboard"><span class="icon">⊞</span>Dashboard</a></li>
+      <div class="sidebar-heading">Data Entry</div>
       <li><a class="nav" data-tab="claims"><span class="icon">📥</span>Claims</a></li>
       <li><a class="nav" data-tab="expenditure"><span class="icon">💸</span>Expense</a></li>
+      <li><a class="nav" data-tab="stats-entry"><span class="icon">🏥</span>Monthly Stats</a></li>
+      <li><a class="nav" data-tab="stats-dhs"><span class="icon">📋</span>DHS Entry</a></li>
+      <div class="sidebar-heading">Reporting</div>
+      <li><a class="nav" data-tab="stats-report"><span class="icon">📈</span>Stats Report</a></li>
       <li><a class="nav" data-tab="reports"><span class="icon">📊</span>Reports</a></li>
       <li><a class="nav" data-tab="ledger"><span class="icon">📒</span>Ledger</a></li>
-      <li><a class="nav" data-tab="stats"><span class="icon">🏥</span>Stats</a></li>
       <li><a class="nav" data-tab="customreport"><span class="icon">🗂</span>Custom Report</a></li>
+      <div class="sidebar-heading">System</div>
       <li><a class="nav" data-tab="settings"><span class="icon">⚙</span>Settings</a></li>
     </ul>
   </aside>
@@ -693,13 +699,8 @@
       </section>
 
       <!-- STATS -->
-      <section id="stats" class="panel tab-screen" style="display:none">
-        <div class="report-tabs" id="statsMenu">
-          <div class="report-tab active" id="btnStatsEntry" data-report="stats-entry">Data Entry</div>
-          <div class="report-tab" id="btnStatsReport" data-report="stats-report">Report</div>
-          <div class="report-tab" id="btnStatsDhs" data-report="stats-dhs" style="background:#0369a1;color:#fff;">📋 DHS Report</div>
-        </div>
-
+      <!-- STATS DATA ENTRY -->
+      <section id="stats-entry" class="panel tab-screen" style="display:none">
         <div id="rep-stats-entry">
           <div class="section-title">ADD MONTHLY STATISTICS</div>
           <form id="statsForm">
@@ -736,8 +737,10 @@
             <tbody></tbody>
           </table>
         </div>
+      </section>
 
-        <div id="rep-stats-report" style="display:none;">
+      <section id="stats-report" class="panel tab-screen" style="display:none">
+        <div id="rep-stats-report">
           <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
             <select id="statsRepFy" style="min-width:110px;"><option value="">All FY</option></select>
             <select id="statsRepMonth" style="min-width:130px;"><option value="">All Month</option></select>
@@ -754,9 +757,11 @@
             <tbody></tbody>
           </table>
         </div>
+      </section>
 
-        <!-- DHS REPORT PANE -->
-        <div id="rep-stats-dhs" style="display:none;">
+      <!-- DHS REPORT PANE -->
+      <section id="stats-dhs" class="panel tab-screen" style="display:none">
+        <div id="rep-stats-dhs">
           <div class="section-title" style="background:#0369a1;">📋 DHS REPORT FORMAT</div>
           <div style="font-size:13px;color:#475569;margin-bottom:16px;">Pick FY + Month. Auto-data fills in from Claims/Expenditure/Stats. Fill manual fields below, then click <b>Save & Generate Preview</b>.</div>
 
@@ -801,7 +806,7 @@
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Claim Settled per TMS (₹)</label><input id="dhsTmsSettled" type="number" min="0" step="0.01" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Actual Claim Received (₹)</label><input id="dhsActualRecvd" type="number" min="0" step="0.01" placeholder="auto if blank" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pending at SHA Level</label><input id="dhsPendingSHA" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
-                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pending at NHA Level</label><input id="dhsPendingNHA" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
+                  <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pending at NHA Level</label><input id="dhsPendingNHA" type="number" value="0" readonly style="width:100%;padding:8px;border:1.5px solid #e5e7eb;border-radius:6px;background:#f1f5f9; cursor:not-allowed;"></div>
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Cases Rejected</label><input id="dhsRejected" type="number" min="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
                   <div><label style="font-size:11px;color:#15803d;font-weight:700;display:block;margin-bottom:3px;">Pending Liabilities (₹)</label><input id="dhsPendingLiab" type="number" min="0" step="0.01" placeholder="0" style="width:100%;padding:8px;border:1.5px solid #bbf7d0;border-radius:6px;background:#fff;"></div>
                 </div>
@@ -1348,7 +1353,9 @@
       if(tab==='expenditure') renderExpenditure();
       if(tab==='reports') renderReports();
       if(tab==='ledger') renderLedger();
-      if(tab==='stats') renderStats();
+      if(tab==='stats-entry') renderStatsEntryTable();
+      if(tab==='stats-report') renderStatsReportTable();
+      if(tab==='stats-dhs') { /* DHS has no special render */ }
       if(tab==='settings') renderSettings();
       if(tab==='customreport') renderCustomReport();
     }
@@ -2306,8 +2313,8 @@
     });
 
     function renderStats() {
-      const activeBtn = document.querySelector('#statsMenu .report-tab.active') || $('btnStatsEntry');
-      if(activeBtn) activeBtn.click();
+      renderStatsEntryTable();
+      renderStatsReportTable();
     }
     
     function delStat(id) {
@@ -4131,8 +4138,8 @@ setTimeout(function() {
                     let pre = 0, reg = 0;
                     snap.forEach(doc => { 
                         let d = doc.data();
-                        pre += Number(d.pre||0);
-                        reg += Number(d.reg||0);
+                        pre += Number(d.preauth||0);
+                        reg += Number(d.registrations||0);
                     });
                     document.getElementById('dhsPreAuth').value = pre;
                     document.getElementById('dhsConvertedIPDs').value = reg;
@@ -4154,7 +4161,7 @@ setTimeout(function() {
                     .where('date','>=',startStr)
                     .where('date','<=',endStr).get();
                 let totalReg = 0;
-                snap.forEach(doc => { totalReg += Number(doc.data().reg || 0); });
+                snap.forEach(doc => { totalReg += Number(doc.data().registrations || 0); });
                 document.getElementById('statsPatients').value = totalReg;
             } catch(e) { console.error("Error fetching IC portal stats:", e); }
         }
