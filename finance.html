@@ -2521,21 +2521,6 @@
     }
 
     // ---------- LEDGER ----------
-    function renderLedger(){
-      const tbody = document.querySelector('#ledgerTable tbody'); tbody.innerHTML = '';
-      const incomes = load(LS.INCOME, []);
-      const expenses = load(LS.EXPENSE, []);
-      const combined = [];
-      incomes.forEach(i=> combined.push({date: i.monthKey + '-01', type:'Income', label:i.monthKey, amount: Number(i.claim||0)+Number(i.interest||0)}));
-      expenses.forEach(e=> combined.push({date: e.date, type:'Expense', label:e.category, amount: Number(e.amount||0)}));
-      combined.sort((a,b)=> new Date(b.date) - new Date(a.date));
-      if(combined.length===0){ tbody.innerHTML = '<tr><td colspan="4" class="small">No ledger entries</td></tr>'; return; }
-      combined.forEach(c=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${c.date}</td><td>${c.type}</td><td>${c.label}</td><td>${fmt(c.amount)}</td>`;
-        tbody.appendChild(tr);
-      });
-    }
 
     // ---------- SETTINGS ----------
     function renderSettings(){
