@@ -1035,7 +1035,7 @@
 
             <div style="flex:1;min-width:300px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #cbd5e1;">
               <div style="font-weight:bold;margin-bottom:8px;">2. Expenditure Import</div>
-              <div class="small">Paste columns: <b>Category | Sub Category | Amount | Month</b><br><span style="color:#b91c1c;">(Skip the 'S NO' column)</span><br>(e.g. <i>SHA Share &nbsp; SHA Share 5%... &nbsp; 73695 &nbsp; May-25</i>)</div>
+              <div class="small">Paste columns: <b>FY | Month | Category | Sub Category | Description | Firm / Agency | Amount (₹) | Invoice No | Remarks</b><br><span style="color:#b91c1c;">(Matches Expenditure table format)</span></div>
               <textarea id="importExpArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
               <button class="btn" id="btnImportExp" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Expenditure</button>
             </div>
@@ -2152,20 +2152,31 @@
         const cols = line.split('\t');
         if(cols.length < 4) continue;
         
-        let cat = cols[0].trim();
-        let sub = cols[1].trim();
-        let amt = parseFloat(cols[2].replace(/,/g, '').trim()) || 0;
-        let mStr = cols[3].trim();
+        let cat, sub, amt, mStr, desc='', firm='', invoice='', remarks='';
         
-        let monthKey = parseMonthToKey(mStr, "2020-21");
-        if(!monthKey && cols.length >= 5) {
-          cat = cols[1].trim();
-          sub = cols[2].trim();
-          amt = parseFloat(cols[3].replace(/,/g, '').trim()) || 0;
-          mStr = cols[4].trim();
-          monthKey = parseMonthToKey(mStr, "2020-21");
+        if (cols.length >= 7 && parseMonthToKey(cols[1].trim(), "2020-21")) {
+          mStr = cols[1].trim();
+          cat = cols[2].trim();
+          sub = cols[3].trim();
+          desc = cols[4] ? cols[4].trim() : '';
+          firm = cols[5] ? cols[5].trim() : '';
+          amt = parseFloat(cols[6].replace(/,/g, '').trim()) || 0;
+          invoice = cols[7] ? cols[7].trim() : '';
+          remarks = cols[8] ? cols[8].trim() : '';
+        } else {
+          cat = cols[0].trim();
+          sub = cols[1].trim();
+          amt = parseFloat(cols[2].replace(/,/g, '').trim()) || 0;
+          mStr = cols[3].trim();
+          if(!parseMonthToKey(mStr, "2020-21") && cols.length >= 5) {
+            cat = cols[1].trim();
+            sub = cols[2].trim();
+            amt = parseFloat(cols[3].replace(/,/g, '').trim()) || 0;
+            mStr = cols[4].trim();
+          }
         }
         
+        let monthKey = parseMonthToKey(mStr, "2020-21");
         if(!monthKey) continue;
         if (isLocked(monthKey)) continue;
         
@@ -2181,10 +2192,10 @@
           category: cat,
           sub: sub,
           amount: amt,
-          description: '',
-          firm: '',
-          invoice: '',
-          remarks: 'Imported Bulk'
+          description: desc,
+          firm: firm,
+          invoice: invoice,
+          remarks: remarks || 'Imported Bulk'
         });
         count++;
       }
