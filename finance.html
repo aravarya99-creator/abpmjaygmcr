@@ -1189,15 +1189,25 @@
     }
 
     // Load all finance data from Firestore into _cache, then render
-    function fsLoadAll(callback) {
+    async function fsLoadAll(callback) {
       setLoading(true);
-      db.collection('entries').get().then(function(snap) {
-        snap.forEach(function(doc) {
+      try {
+        var results = await Promise.all([
+          db.collection('entries').get(),
+          db.collection('finance_incomes').get(),
+          db.collection('finance_expenses').get(),
+          db.collection('finance_stats').get()
+        ]);
+        
+        var snapEntries = results[0];
+        var legacyIncome = null, legacyExpense = null, legacyStats = null;
+        
+        snapEntries.forEach(function(doc) {
           try {
             var val = JSON.parse(doc.data().data);
-            if(doc.id === 'fin_income')  _cache.income  = val || [];
-            if(doc.id === 'fin_expense') _cache.expense = val || [];
-            if(doc.id === 'fin_stats')   _cache.stats   = val || [];
+            if(doc.id === 'fin_income') legacyIncome = val || [];
+            if(doc.id === 'fin_expense') legacyExpense = val || [];
+            if(doc.id === 'fin_stats') legacyStats = val || [];
             if(doc.id === 'fin_meta')    _cache.meta    = val || {};
             if(doc.id === 'fin_locked')  _cache.locked  = val || [];
             if(doc.id === 'fin_fys')     _cache.fys     = val || [];
@@ -1206,6 +1216,58 @@
             if(doc.id === 'fin_stats_locked_fys') _cache.statsLockedFys = val || [];
           } catch(e) {}
         });
+
+        // Batch committer helper
+        async function commitBatches(items, collectionName, legacyDocId) {
+            if(!items || !items.length) return false;
+            let batches = [];
+            let currentBatch = db.batch();
+            let count = 0;
+            for (let i = 0; i < items.length; i++) {
+                let item = items[i];
+                let ref = db.collection(collectionName).doc(item.id || Date.now().toString() + Math.random().toString().slice(2,8));
+                item.id = ref.id; 
+                currentBatch.set(ref, item);
+                count++;
+                if (count === 490) { 
+                    batches.push(currentBatch);
+                    currentBatch = db.batch();
+                    count = 0;
+                }
+            }
+            if (legacyDocId) currentBatch.delete(db.collection('entries').doc(legacyDocId));
+            batches.push(currentBatch);
+            for (let b of batches) await b.commit();
+            return true;
+        }
+
+        // Migrate or Load Incomes
+        if (legacyIncome && legacyIncome.length > 0 && results[1].empty) {
+            await commitBatches(legacyIncome, 'finance_incomes', 'fin_income');
+            _cache.income = legacyIncome;
+        } else {
+            _cache.income = [];
+            results[1].forEach(doc => _cache.income.push(doc.data()));
+        }
+
+        // Migrate or Load Expenses
+        if (legacyExpense && legacyExpense.length > 0 && results[2].empty) {
+            await commitBatches(legacyExpense, 'finance_expenses', 'fin_expense');
+            _cache.expense = legacyExpense;
+        } else {
+            _cache.expense = [];
+            results[2].forEach(doc => _cache.expense.push(doc.data()));
+        }
+
+        // Migrate or Load Stats
+        if (legacyStats && legacyStats.length > 0 && results[3].empty) {
+            await commitBatches(legacyStats, 'finance_stats', 'fin_stats');
+            _cache.stats = legacyStats;
+        } else {
+            _cache.stats = [];
+            results[3].forEach(doc => _cache.stats.push(doc.data()));
+        }
+
         // Default FYs if none stored
         if(!_cache.fys || _cache.fys.length === 0) {
           var start = 2018; var now = new Date(); var cy = now.getFullYear(); var arr = [];
@@ -1213,21 +1275,26 @@
           _cache.fys = arr;
           fsSave('fin_fys', arr);
         }
+
         // One-time normalize: fix mixed-case categories in existing expense records
         var _needSave = false;
         (_cache.expense||[]).forEach(function(e){
           var norm = normCat(e.category);
-          if(e.category && norm !== e.category){ e.category = norm; _needSave = true; }
+          if(e.category && norm !== e.category){ 
+              e.category = norm; 
+              _needSave = true;
+              db.collection('finance_expenses').doc(e.id).set(e);
+          }
         });
-        if(_needSave) fsSave('fin_expense', _cache.expense);
+
         _loaded = true;
         setLoading(false);
         if(callback) callback();
-      }).catch(function(e) {
+      } catch(e) {
         setLoading(false);
         console.error('Firestore load error:', e);
         alert('Could not load data from server. Check your connection.');
-      });
+      }
     }
 
     // ── Compatibility shim — load/save now use _cache + Firestore ──
@@ -1246,10 +1313,42 @@
       return fallback;
     }
 
+    // Firestore Sync Wrappers
+    function fsSyncAdd(collection, obj) {
+      if(!obj.id) obj.id = obj.createdAt || Date.now().toString();
+      db.collection(collection).doc(obj.id).set(obj).catch(function(e){ console.error(e); });
+    }
+    function fsSyncDelete(collection, id) {
+      db.collection(collection).doc(id).delete().catch(function(e){ console.error(e); });
+    }
+    async function fsSyncBatchAdd(collection, arr) {
+      var b = db.batch();
+      var c = 0;
+      for(var i=0; i<arr.length; i++) {
+        var obj = arr[i];
+        if(!obj.id) obj.id = obj.createdAt || Date.now().toString();
+        b.set(db.collection(collection).doc(obj.id), obj);
+        c++;
+        if(c === 490) { await b.commit(); b = db.batch(); c = 0; }
+      }
+      await b.commit();
+    }
+    async function fsSyncBatchDelete(collection, arr) {
+      var b = db.batch();
+      var c = 0;
+      for(var i=0; i<arr.length; i++) {
+        var obj = arr[i];
+        b.delete(db.collection(collection).doc(obj.id || obj.createdAt));
+        c++;
+        if(c === 490) { await b.commit(); b = db.batch(); c = 0; }
+      }
+      await b.commit();
+    }
+
     function save(k, v) {
-      if(k === LS.INCOME  || k === 'fp_income')  { _cache.income  = v; fsSave('fin_income',  v); }
-      if(k === LS.EXPENSE || k === 'fp_expense') { _cache.expense = v; fsSave('fin_expense', v); }
-      if(k === LS.STATS   || k === 'fp_stats')   { _cache.stats   = v; fsSave('fin_stats',   v); }
+      if(k === LS.INCOME  || k === 'fp_income')  { _cache.income  = v; }
+      if(k === LS.EXPENSE || k === 'fp_expense') { _cache.expense = v; }
+      if(k === LS.STATS   || k === 'fp_stats')   { _cache.stats   = v; }
       if(k === LS.META    || k === 'fp_meta')    { _cache.meta    = v; fsSave('fin_meta',    v); }
       if(k === LS.LOCKED  || k === 'fp_locked')  { _cache.locked  = v; fsSave('fin_locked',  v); }
       if(k === LS.FYS     || k === 'fp_fys')     { _cache.fys     = v; fsSave('fin_fys',     v); }
@@ -1464,7 +1563,9 @@
       const incomes = load(LS.INCOME, []);
       const existing = incomes.find(x=> x.fy===fy && x.monthKey===monthKey);
       if(existing){ alert('Duplicate entry blocked: Claim for this FY and Month already exists.'); return; }
-      incomes.push({fy, monthKey, claim, interest, remarks: $('claimsRemarks').value||'', createdAt: new Date().toISOString()});
+      var newObj = {fy, monthKey, claim, interest, remarks: $('claimsRemarks').value||'', createdAt: new Date().toISOString()};
+      incomes.push(newObj);
+      fsSyncAdd('finance_incomes', newObj);
       save(LS.INCOME, incomes);
       this.reset();
       renderClaims();
@@ -1535,6 +1636,7 @@
       if(item && isLocked(item.monthKey)) { alert('Cannot delete: ' + item.monthKey + ' is locked.'); return; }
       if(!confirm('Delete this entry?')) return;
       save(LS.INCOME, incomes.filter(x => x.createdAt !== id));
+      fsSyncDelete('finance_incomes', id);
       renderClaims();
     }
     function editClaim(id) {
@@ -1550,6 +1652,7 @@
       $('claimsInterest').value = item.interest;
       $('claimsRemarks').value = item.remarks || '';
       save(LS.INCOME, incomes.filter(x => x.createdAt !== id));
+      fsSyncDelete('finance_incomes', id);
       renderClaims();
       window.scrollTo(0,0);
     }
@@ -1573,7 +1676,9 @@
       const firm = $('expFirm').value || '';
       const remarks = $('expRemarks').value || '';
       const expenses = load(LS.EXPENSE, []);
-      expenses.push({date, fy:fyName, monthKey, category: normCat(category), sub, description: desc, firm, invoice, amount, remarks, createdAt: new Date().toISOString()});
+      var newObj = {date, fy:fyName, monthKey, category: normCat(category), sub, description: desc, firm, invoice, amount, remarks, createdAt: new Date().toISOString()};
+      expenses.push(newObj);
+      fsSyncAdd('finance_expenses', newObj);
       save(LS.EXPENSE, expenses);
       this.reset();
       renderExpenditure();
@@ -1671,6 +1776,7 @@
       if(isLocked(item.monthKey)) { alert('Cannot delete: ' + item.monthKey + ' is locked.'); return; }
       if(!confirm('Delete this entry?')) return;
       save(LS.EXPENSE, expenses.filter(x => x.createdAt !== id));
+      fsSyncDelete('finance_expenses', id);
       renderExpenditure();
     }
     function editExp(id) {
@@ -1689,6 +1795,7 @@
       $('expFirm').value = item.firm || '';
       $('expRemarks').value = item.remarks || '';
       save(LS.EXPENSE, exps.filter(x => x.createdAt !== id));
+      fsSyncDelete('finance_expenses', id);
       renderExpenditure();
       window.scrollTo(0,0);
     }
@@ -2147,6 +2254,7 @@
         count++;
       }
       save(LS.INCOME, incomes);
+      fsSyncBatchAdd('finance_incomes', incomes);
       let msg = 'Imported ' + count + ' income record(s) successfully!';
       if(skipped > 0) msg += '\n(' + skipped + ' row(s) skipped — no valid month found or month locked)';
       alert(msg);
@@ -2213,6 +2321,7 @@
         count++;
       }
       save(LS.EXPENSE, exps);
+      fsSyncBatchAdd('finance_expenses', exps);
       alert(`Imported ${count} expenditure records successfully!`);
       $('importExpArea').value = '';
     });
@@ -2336,11 +2445,13 @@
       
       const statsClaim = Number($('statsClaim').value||0);
       const statsExp = Number($('statsExpenditure').value||0);
-      stats.push({
+      var newObj = {
         fy, monthKey, patients, cards,
         claim: statsClaim, expenditure: statsExp,
         createdAt: new Date().toISOString()
-      });
+      };
+      stats.push(newObj);
+      fsSyncAdd('finance_stats', newObj);
       save(LS.STATS, stats);
       this.reset();
       populateFyAll();
@@ -2362,6 +2473,7 @@
       if(item.monthKey !== 'YEARLY' && isLocked(item.monthKey)) { alert('Cannot delete: ' + item.monthKey + ' is locked.'); return; }
       if(!confirm('Delete this entry?')) return;
       save(LS.STATS, stats.filter(x => x.createdAt !== id));
+      fsSyncDelete('finance_stats', id);
       renderStatsEntryTable();
     }
 
@@ -2461,6 +2573,7 @@
         count++;
       }
       save(LS.STATS, stats);
+      fsSyncBatchAdd('finance_stats', stats);
       alert(`Imported ${count} stats records successfully!`);
       $('importStatsArea').value = '';
     });
@@ -3149,18 +3262,22 @@
         excludedIPDs: Number($('dhsExcludedIPDs').value||0),
         convertedIPDs: Number($('dhsConvertedIPDs').value||0)
       };
+      var savedObj;
       if(idx >= 0){
         // Merge into existing record
         Object.assign(stats[idx], manualData);
+        savedObj = stats[idx];
       } else {
         // Create a minimal stats record (auto fields aren't in stats; they come from income/exp on render)
-        stats.push(Object.assign({
+        savedObj = Object.assign({
           fy: fy, monthKey: monthKey,
           patients: 0, cards: 0,
           claim: 0, expenditure: 0,
           createdAt: new Date().toISOString()
-        }, manualData));
+        }, manualData);
+        stats.push(savedObj);
       }
+      fsSyncAdd('finance_stats', savedObj);
       save(LS.STATS, stats);
       return true;
     }
@@ -3878,6 +3995,7 @@
       if(n === 0) { alert('No income records found for FY '+fy+'.'); return; }
       if(!confirm('⚠ DELETE '+n+' income record(s) for FY '+fy+'?\nThis CANNOT be undone.')) return;
       save(LS.INCOME, inc.filter(function(r){return r.fy!==fy;}));
+      fsSyncBatchDelete('finance_incomes', inc.filter(function(r){return r.fy===fy;}));
       alert('✅ Deleted '+n+' income records for FY '+fy+'.');
       updateBulkDelCounts();
       renderClaims();
@@ -3891,6 +4009,7 @@
       if(n === 0) { alert('No expenditure records found for FY '+fy+'.'); return; }
       if(!confirm('⚠ DELETE '+n+' expenditure record(s) for FY '+fy+'?\nThis CANNOT be undone.')) return;
       save(LS.EXPENSE, exp.filter(function(r){return r.fy!==fy;}));
+      fsSyncBatchDelete('finance_expenses', exp.filter(function(r){return r.fy===fy;}));
       alert('✅ Deleted '+n+' expenditure records for FY '+fy+'.');
       updateBulkDelCounts();
       renderExpenditure();
@@ -3904,6 +4023,7 @@
       if(n === 0) { alert('No statistics records found for FY '+fy+'.'); return; }
       if(!confirm('⚠ DELETE '+n+' statistics record(s) for FY '+fy+'?\nThis CANNOT be undone.')) return;
       save(LS.STATS, stat.filter(function(r){return r.fy!==fy;}));
+      fsSyncBatchDelete('finance_stats', stat.filter(function(r){return r.fy===fy;}));
       alert('✅ Deleted '+n+' statistics records for FY '+fy+'.');
       updateBulkDelCounts();
       renderStatsEntryTable();
@@ -3922,8 +4042,11 @@
       if(total===0){alert('No records found for FY '+fy+'.');return;}
       if(!confirm('⚠ DELETE ALL '+total+' records for FY '+fy+'?\n(Income: '+nI+', Expenditure: '+nE+', Stats: '+nS+')\n\nThis CANNOT be undone.')) return;
       save(LS.INCOME,  inc.filter(function(r){return r.fy!==fy;}));
+      fsSyncBatchDelete('finance_incomes', inc.filter(function(r){return r.fy===fy;}));
       save(LS.EXPENSE, exp.filter(function(r){return r.fy!==fy;}));
+      fsSyncBatchDelete('finance_expenses', exp.filter(function(r){return r.fy===fy;}));
       save(LS.STATS,   stat.filter(function(r){return r.fy!==fy;}));
+      fsSyncBatchDelete('finance_stats', stat.filter(function(r){return r.fy===fy;}));
       alert('✅ Deleted all '+total+' records for FY '+fy+'.');
       updateBulkDelCounts();
       renderClaims();
