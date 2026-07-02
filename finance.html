@@ -959,6 +959,7 @@
           <div class="settings-tab" data-pane="statslock" onclick="showSettingsPane('statslock')">📊 Lock/Unlock Stats</div>
           <div class="settings-tab" data-pane="import" onclick="showSettingsPane('import')">📤 Bulk Import</div>
           <div class="settings-tab" data-pane="delete" onclick="showSettingsPane('delete')">🗑 Bulk Delete</div>
+          <div class="settings-tab" data-pane="backup" onclick="showSettingsPane('backup')">💾 Export & Backup</div>
         </div>
 
         <!-- PANE 1: OPENING BALANCE -->
@@ -1090,6 +1091,18 @@
               <div id="bulkDelAllCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
               <button class="btn" onclick="bulkDeleteAll()" style="width:100%;background:#991b1b;font-weight:700;">🗑 Delete ALL Records for Selected FY</button>
             </div>
+          </div>
+        </div>
+
+        <!-- PANE 6: EXPORT & BACKUP -->
+        <div id="setPane_backup" class="settings-pane">
+          <div class="section-title" style="background:#059669;">💾 EXPORT & BACKUP DATA</div>
+          <div class="small" style="margin-bottom:12px;color:#047857;font-weight:600;">Download a full offline backup of all your financial data in JSON format.</div>
+          
+          <div style="background:#ecfdf5;padding:16px;border-radius:8px;border:2px solid #6ee7b7;max-width:400px;">
+            <div style="font-weight:800;color:#047857;margin-bottom:8px;font-size:13px;">Full Database Backup</div>
+            <div class="small" style="margin-bottom:12px;">This will generate a single JSON file containing all Income, Expenditure, Statistics, and locked configurations. Keep this safe.</div>
+            <button class="btn" onclick="exportFullBackup()" style="width:100%;background:#059669;font-weight:700;">💾 Download Backup</button>
           </div>
         </div>
 
@@ -4062,6 +4075,29 @@
     }
 
     // ── SETTINGS TAB SWITCHER ────────────────────────────────────────
+    function exportFullBackup() {
+      var backupData = {
+        meta: load(LS.META, {}),
+        fys: load(LS.FYS, []),
+        income: load(LS.INCOME, []),
+        expense: load(LS.EXPENSE, []),
+        stats: load(LS.STATS, []),
+        locked: {
+          claim: load('fp_claim_locked_fys', []),
+          exp: load('fp_exp_locked_fys', []),
+          stats: load('fp_stats_locked_fys', [])
+        },
+        exportDate: new Date().toISOString()
+      };
+      var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+      var downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", "Finance_Portal_Backup_" + new Date().toISOString().slice(0,10) + ".json");
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    }
+
     function showSettingsPane(name) {
       // Gate Bulk Import and Bulk Delete behind PIN
       if((name === 'import' || name === 'delete') && !pinUnlockedFor(name)) {
