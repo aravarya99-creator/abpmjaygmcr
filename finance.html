@@ -4361,8 +4361,8 @@ setTimeout(function() {
                     let pre = 0, reg = 0;
                     snap.forEach(doc => { 
                         let d = doc.data();
-                        pre += Number(d.preauth||0);
-                        reg += Number(d.registrations||0);
+                        pre += Number(d.pre||0);
+                        reg += Number(d.reg||0);
                     });
                     document.getElementById('dhsPreAuth').value = pre;
                     document.getElementById('dhsConvertedIPDs').value = reg;
@@ -4384,7 +4384,7 @@ setTimeout(function() {
                     .where('date','>=',startStr)
                     .where('date','<=',endStr).get();
                 let totalReg = 0;
-                snap.forEach(doc => { totalReg += Number(doc.data().registrations || 0); });
+                snap.forEach(doc => { totalReg += Number(doc.data().reg || 0); });
                 document.getElementById('statsPatients').value = totalReg;
             } catch(e) { console.error("Error fetching IC portal stats:", e); }
         }
