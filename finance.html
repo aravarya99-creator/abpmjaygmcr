@@ -1293,7 +1293,7 @@
       } catch(e) {
         setLoading(false);
         console.error('Firestore load error:', e);
-        alert('Could not load data from server. Check your connection.');
+        alert('Could not load data from server. Error: ' + e.message);
       }
     }
 
