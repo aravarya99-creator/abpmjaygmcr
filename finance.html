@@ -19,9 +19,6 @@
     };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
-    db.enablePersistence().catch(function(err) {
-      console.warn("Firebase persistence error: ", err);
-    });
 
     // ── SESSION GUARD ──────────────────────────────────────────
     (function() {
@@ -1032,8 +1029,13 @@
               <div style="font-weight:bold;margin-bottom:8px;">1. Income Import</div>
               <div class="small">Paste columns: <b>Month | Interest | Claim</b> (tab or comma separated)<br>Month can be anywhere in row: <i>Apr-2025, April-25, Apr 25, April 2025</i><br>e.g. <i>Apr-2026 &nbsp;&nbsp; 0 &nbsp;&nbsp; 890344</i><br>or: <i>890344 &nbsp;&nbsp; 0 &nbsp;&nbsp; Apr-2026</i></div>
               <textarea id="importIncomeArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
-              <label class="small" style="display:block;margin-top:4px;">Select Financial Year for this data:</label>
-              <select id="importIncomeFy"></select>
+              <label class="small" style="display:block;margin-top:4px;">Select Financial Year & Month for this data:</label>
+              <div style="display:flex;gap:8px;">
+                <select id="importIncomeFy" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;"></select>
+                <select id="importIncomeMonth" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;">
+                  <option value="">- Auto Detect Month -</option>
+                </select>
+              </div>
               <button class="btn" id="btnImportIncome" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Income</button>
             </div>
 
@@ -1041,6 +1043,15 @@
               <div style="font-weight:bold;margin-bottom:8px;">2. Expenditure Import</div>
               <div class="small">Paste columns: <b>FY | Month | Category | Sub Category | Description | Firm / Agency | Amount (₹) | Invoice No | Remarks</b><br><span style="color:#b91c1c;">(Matches Expenditure table format)</span></div>
               <textarea id="importExpArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
+              <label class="small" style="display:block;margin-top:4px;">Select FY & Month (Overrides inline data):</label>
+              <div style="display:flex;gap:8px;">
+                <select id="importExpFy" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;">
+                  <option value="">- Auto Detect FY -</option>
+                </select>
+                <select id="importExpMonth" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;">
+                  <option value="">- Auto Detect Month -</option>
+                </select>
+              </div>
               <button class="btn" id="btnImportExp" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Expenditure</button>
             </div>
 
@@ -1048,6 +1059,15 @@
               <div style="font-weight:bold;margin-bottom:8px;">3. Hospital Stats Import</div>
               <div class="small">Paste columns: <b>Session (FY) | Patient Treated | Golden Card</b><br>(e.g. <i>2018-19 &nbsp; 500 &nbsp; 1200</i>)</div>
               <textarea id="importStatsArea" rows="6" style="width:100%;margin-top:8px;font-family:monospace;font-size:12px;" placeholder="Paste here..."></textarea>
+              <label class="small" style="display:block;margin-top:4px;">Select FY & Month (Overrides inline Session):</label>
+              <div style="display:flex;gap:8px;">
+                <select id="importStatsFy" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;">
+                  <option value="">- Auto Detect FY -</option>
+                </select>
+                <select id="importStatsMonth" style="flex:1;padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;">
+                  <option value="">- Yearly (or Auto) -</option>
+                </select>
+              </div>
               <button class="btn" id="btnImportStats" style="width:100%;background:#0ea5e9;margin-top:8px;">Import Stats</button>
             </div>
           </div>
@@ -1414,7 +1434,7 @@
     // populate FY selects
     function populateFyAll(){
       const fys = load(LS.FYS, []);
-      ['claimsFy','repFy','setFy','filterFyExp','detFy','importIncomeFy', 'shaFyFilter', 'sshaFyFilter', 'statsFy', 'statsRepFy'].forEach(id=>{
+      ['claimsFy','repFy','setFy','filterFyExp','detFy','importIncomeFy','importExpFy','importStatsFy','shaFyFilter','sshaFyFilter','statsFy','statsRepFy'].forEach(id=>{
         const el = $(id); if(!el) return; el.innerHTML=''; fys.forEach(f=> el.insertAdjacentHTML('beforeend', `<option value="${f.name}">${f.name}</option>`)); el.value = fys[fys.length-1].name;
       });
       populateMonths('claimsFy','claimsMonth');
@@ -1425,6 +1445,15 @@
       }
       populateMonths('setFy','setMonth');
       populateMonths('statsFy','statsMonth');
+      
+      const popImportMonths = (fyId, mId, label) => {
+          const mSel = $(mId); if(!mSel) return; mSel.innerHTML = `<option value="">${label}</option>`;
+          const fyVal = $(fyId) ? $(fyId).value : ''; if(!fyVal) return;
+          monthsForFy(fyVal).forEach(m => mSel.insertAdjacentHTML('beforeend', `<option value="${m.key}">${m.label}</option>`));
+      };
+      popImportMonths('importIncomeFy', 'importIncomeMonth', '- Auto Detect Month -');
+      popImportMonths('importExpFy', 'importExpMonth', '- Auto Detect Month -');
+      popImportMonths('importStatsFy', 'importStatsMonth', '- Yearly (or Auto) -');
       // Trigger Stats auto-fill (Claim Received / Expenditure) since populateMonths doesn't fire 'change'
       if(typeof refreshStatsAutoFields === 'function') refreshStatsAutoFields();
       
@@ -2212,6 +2241,7 @@
       if(!text) { alert('Please paste data first.'); return; }
       const fy = $('importIncomeFy').value;
       if(!fy) { alert('Please select a Financial Year.'); return; }
+      const manualMonth = $('importIncomeMonth') ? $('importIncomeMonth').value : '';
       const lines = text.split('\n');
       let count = 0;
       let skipped = 0;
@@ -2225,9 +2255,16 @@
         // Try to find the month column (first col that looks like a month)
         let monthKey = null;
         let monthColIdx = -1;
-        for(let i = 0; i < Math.min(trimmed.length, 4); i++) {
-          const k = parseMonthToKey(trimmed[i], fy);
-          if(k) { monthKey = k; monthColIdx = i; break; }
+        if(manualMonth) {
+            monthKey = manualMonth;
+            for(let i = 0; i < Math.min(trimmed.length, 4); i++) {
+              if(parseMonthToKey(trimmed[i], fy)) { monthColIdx = i; break; }
+            }
+        } else {
+            for(let i = 0; i < Math.min(trimmed.length, 4); i++) {
+              const k = parseMonthToKey(trimmed[i], fy);
+              if(k) { monthKey = k; monthColIdx = i; break; }
+            }
         }
         if(!monthKey) { skipped++; continue; }
         if(isLocked(monthKey)) { skipped++; continue; }
@@ -2268,6 +2305,8 @@
     $('btnImportExp')?.addEventListener('click', () => {
       const text = $('importExpArea').value.trim();
       if(!text) return;
+      const manualFy = $('importExpFy') ? $('importExpFy').value : '';
+      const manualMonthKey = $('importExpMonth') ? $('importExpMonth').value : '';
       const lines = text.split('\n');
       let count = 0;
       let exps = load(LS.EXPENSE, []);
@@ -2300,13 +2339,13 @@
           }
         }
         
-        let monthKey = parseMonthToKey(mStr, "2020-21");
+        let monthKey = manualMonthKey || parseMonthToKey(mStr, "2020-21");
         if(!monthKey) continue;
         if (isLocked(monthKey)) continue;
         
         let d = new Date(monthKey + '-01'); 
         let fyYear = (d.getMonth() + 1 >= 4) ? d.getFullYear() : d.getFullYear() - 1;
-        let expFy = `${fyYear}-${String(fyYear + 1).slice(-2)}`;
+        let expFy = manualFy || `${fyYear}-${String(fyYear + 1).slice(-2)}`;
         
         exps.push({
           createdAt: Date.now() + Math.random().toString(),
@@ -2360,6 +2399,15 @@
     });
     $('statsFy')?.addEventListener('change', () => { populateMonths('statsFy','statsMonth'); refreshStatsAutoFields(); });
     $('statsMonth')?.addEventListener('change', refreshStatsAutoFields);
+
+    const popImportMonths = (fyId, mId, label) => {
+        const mSel = $(mId); if(!mSel) return; mSel.innerHTML = `<option value="">${label}</option>`;
+        const fyVal = $(fyId) ? $(fyId).value : ''; if(!fyVal) return;
+        monthsForFy(fyVal).forEach(m => mSel.insertAdjacentHTML('beforeend', `<option value="${m.key}">${m.label}</option>`));
+    };
+    $('importIncomeFy')?.addEventListener('change', () => popImportMonths('importIncomeFy', 'importIncomeMonth', '- Auto Detect Month -'));
+    $('importExpFy')?.addEventListener('change', () => popImportMonths('importExpFy', 'importExpMonth', '- Auto Detect Month -'));
+    $('importStatsFy')?.addEventListener('change', () => popImportMonths('importStatsFy', 'importStatsMonth', '- Yearly (or Auto) -'));
 
     // Auto-fill Claim Received & Expenditure from existing modules for selected month
     function refreshStatsAutoFields() {
@@ -2549,6 +2597,8 @@
     $('btnImportStats')?.addEventListener('click', () => {
       const text = $('importStatsArea').value.trim();
       if(!text) return;
+      const manualFy = $('importStatsFy') ? $('importStatsFy').value : '';
+      const manualMonthKey = $('importStatsMonth') ? $('importStatsMonth').value : '';
       const lines = text.split('\n');
       let count = 0;
       let stats = load(LS.STATS, []);
@@ -2558,13 +2608,13 @@
         if(cols.length < 3) continue;
         
         // Expected: FY | PATIENT TREATED | GOLDEN CARD
-        let fy = cols[0].trim();
+        let fy = manualFy || cols[0].trim();
         let pat = parseInt(cols[1].replace(/,/g, '').trim()) || 0;
         let card = parseInt(cols[2].replace(/,/g, '').trim()) || 0;
         
         if(!fy.includes('-')) continue; // skip header or invalid
         
-        let monthKey = fy + '-YEARLY';
+        let monthKey = manualMonthKey || (fy + '-YEARLY');
         
         stats.push({
           createdAt: Date.now() + Math.random().toString(),
