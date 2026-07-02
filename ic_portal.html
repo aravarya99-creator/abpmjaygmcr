@@ -1672,7 +1672,13 @@ function _doPrintReport(areaId, title, format, orientation){
   }
   var contentHTML = sourceEl.innerHTML;
 
-  var periodHtml = sourceEl ? sourceEl.querySelector('.card-hd') : document.querySelector('.card-hd');
+  var periodHtml = null;
+  var titleSelectors = '#dailyTitle, #monthlyTitle, #annualTitle, #wardCardSubhead, #pmamTitle';
+  if (sourceEl) {
+    periodHtml = sourceEl.querySelector(titleSelectors) || sourceEl.querySelector('.card-hd');
+  } else {
+    periodHtml = document.querySelector(titleSelectors) || document.querySelector('.card-hd');
+  }
   var periodText = periodHtml ? (periodHtml.textContent || '') : '';
 
   // Safety check: shared headers must be loaded

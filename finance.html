@@ -1082,8 +1082,11 @@
             <!-- Delete Income by FY -->
             <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #fca5a5;">
               <div style="font-weight:800;color:#dc2626;margin-bottom:8px;font-size:13px;">1. Delete Income Records</div>
-              <div class="small" style="margin-bottom:8px;">Select FY to delete ALL claim/income entries for that year.</div>
-              <select id="bulkDelIncomeFy" style="width:100%;padding:8px;border:1px solid #fca5a5;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
+              <div class="small" style="margin-bottom:8px;">Select FY & Month to delete claim/income entries.</div>
+              <div style="display:flex;gap:8px;margin-bottom:8px;">
+                <select id="bulkDelIncomeFy" style="flex:1;padding:8px;border:1px solid #fca5a5;border-radius:6px;font-weight:600;"></select>
+                <select id="bulkDelIncomeMonth" style="flex:1;padding:8px;border:1px solid #fca5a5;border-radius:6px;font-weight:600;"><option value="">All Months</option></select>
+              </div>
               <div id="bulkDelIncomeCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
               <button class="btn" onclick="bulkDeleteIncome()" style="width:100%;background:#dc2626;font-weight:700;">🗑 Delete Income for Selected FY</button>
             </div>
@@ -1091,8 +1094,11 @@
             <!-- Delete Expenditure by FY -->
             <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #fca5a5;">
               <div style="font-weight:800;color:#dc2626;margin-bottom:8px;font-size:13px;">2. Delete Expenditure Records</div>
-              <div class="small" style="margin-bottom:8px;">Select FY to delete ALL expenditure entries for that year.</div>
-              <select id="bulkDelExpFy" style="width:100%;padding:8px;border:1px solid #fca5a5;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
+              <div class="small" style="margin-bottom:8px;">Select FY & Month to delete expenditure entries.</div>
+              <div style="display:flex;gap:8px;margin-bottom:8px;">
+                <select id="bulkDelExpFy" style="flex:1;padding:8px;border:1px solid #fca5a5;border-radius:6px;font-weight:600;"></select>
+                <select id="bulkDelExpMonth" style="flex:1;padding:8px;border:1px solid #fca5a5;border-radius:6px;font-weight:600;"><option value="">All Months</option></select>
+              </div>
               <div id="bulkDelExpCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
               <button class="btn" onclick="bulkDeleteExp()" style="width:100%;background:#dc2626;font-weight:700;">🗑 Delete Expenditure for Selected FY</button>
             </div>
@@ -1100,8 +1106,11 @@
             <!-- Delete Stats by FY -->
             <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #fca5a5;">
               <div style="font-weight:800;color:#dc2626;margin-bottom:8px;font-size:13px;">3. Delete Statistics Records</div>
-              <div class="small" style="margin-bottom:8px;">Select FY to delete ALL hospital statistics for that year.</div>
-              <select id="bulkDelStatsFy" style="width:100%;padding:8px;border:1px solid #fca5a5;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
+              <div class="small" style="margin-bottom:8px;">Select FY & Month to delete hospital statistics.</div>
+              <div style="display:flex;gap:8px;margin-bottom:8px;">
+                <select id="bulkDelStatsFy" style="flex:1;padding:8px;border:1px solid #fca5a5;border-radius:6px;font-weight:600;"></select>
+                <select id="bulkDelStatsMonth" style="flex:1;padding:8px;border:1px solid #fca5a5;border-radius:6px;font-weight:600;"><option value="">All Months</option></select>
+              </div>
               <div id="bulkDelStatsCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
               <button class="btn" onclick="bulkDeleteStats()" style="width:100%;background:#dc2626;font-weight:700;">🗑 Delete Statistics for Selected FY</button>
             </div>
@@ -1109,8 +1118,11 @@
             <!-- Delete ALL data for FY (nuclear) -->
             <div style="background:#fff5f5;padding:16px;border-radius:8px;border:2px solid #dc2626;">
               <div style="font-weight:800;color:#991b1b;margin-bottom:8px;font-size:13px;">4. Delete ALL Data for FY</div>
-              <div class="small" style="margin-bottom:8px;color:#b91c1c;">Deletes Income + Expenditure + Stats for the selected FY in one go.</div>
-              <select id="bulkDelAllFy" style="width:100%;padding:8px;border:1px solid #dc2626;border-radius:6px;margin-bottom:8px;font-weight:600;"></select>
+              <div class="small" style="margin-bottom:8px;color:#b91c1c;">Deletes Income + Expenditure + Stats for the selected FY & Month in one go.</div>
+              <div style="display:flex;gap:8px;margin-bottom:8px;">
+                <select id="bulkDelAllFy" style="flex:1;padding:8px;border:1px solid #dc2626;border-radius:6px;font-weight:600;"></select>
+                <select id="bulkDelAllMonth" style="flex:1;padding:8px;border:1px solid #dc2626;border-radius:6px;font-weight:600;"><option value="">All Months</option></select>
+              </div>
               <div id="bulkDelAllCount" style="font-size:12px;color:#555;margin-bottom:8px;"></div>
               <button class="btn" onclick="bulkDeleteAll()" style="width:100%;background:#991b1b;font-weight:700;">🗑 Delete ALL Records for Selected FY</button>
             </div>
@@ -2315,27 +2327,38 @@
         const cols = line.split('\t');
         if(cols.length < 4) continue;
         
-        let cat, sub, amt, mStr, desc='', firm='', invoice='', remarks='';
+        let cat='', sub='', amt=0, mStr='', desc='', firm='', invoice='', remarks='';
         
-        if (cols.length >= 7 && parseMonthToKey(cols[1].trim(), "2020-21")) {
+        if (cols.length >= 7 && parseMonthToKey(cols[1]?cols[1].trim():"", "2020-21")) {
+          // Format 9-cols: FY | Month | Category | Sub Category | Description | Firm | Amount | Invoice | Remarks
           mStr = cols[1].trim();
           cat = cols[2].trim();
           sub = cols[3].trim();
           desc = cols[4] ? cols[4].trim() : '';
           firm = cols[5] ? cols[5].trim() : '';
-          amt = parseFloat(cols[6].replace(/,/g, '').trim()) || 0;
+          amt = parseFloat((cols[6]||'').replace(/[,₹\s]/g, '').trim()) || 0;
           invoice = cols[7] ? cols[7].trim() : '';
           remarks = cols[8] ? cols[8].trim() : '';
+        } else if (manualMonthKey && cols.length >= 5 && !parseMonthToKey(cols[1]?cols[1].trim():"", "2020-21")) {
+          // Format 7-cols: Category | Sub Category | Description | Firm | Amount | Invoice | Remarks
+          cat = cols[0] ? cols[0].trim() : '';
+          sub = cols[1] ? cols[1].trim() : '';
+          desc = cols[2] ? cols[2].trim() : '';
+          firm = cols[3] ? cols[3].trim() : '';
+          amt = parseFloat((cols[4]||'').replace(/[,₹\s]/g, '').trim()) || 0;
+          invoice = cols[5] ? cols[5].trim() : '';
+          remarks = cols[6] ? cols[6].trim() : '';
+          mStr = '';
         } else {
-          cat = cols[0].trim();
-          sub = cols[1].trim();
-          amt = parseFloat(cols[2].replace(/,/g, '').trim()) || 0;
-          mStr = cols[3].trim();
+          cat = (cols[0]||'').trim();
+          sub = (cols[1]||'').trim();
+          amt = parseFloat((cols[2]||'').replace(/[,₹\s]/g, '').trim()) || 0;
+          mStr = (cols[3]||'').trim();
           if(!parseMonthToKey(mStr, "2020-21") && cols.length >= 5) {
-            cat = cols[1].trim();
-            sub = cols[2].trim();
-            amt = parseFloat(cols[3].replace(/,/g, '').trim()) || 0;
-            mStr = cols[4].trim();
+            cat = (cols[1]||'').trim();
+            sub = (cols[2]||'').trim();
+            amt = parseFloat((cols[3]||'').replace(/[,₹\s]/g, '').trim()) || 0;
+            mStr = (cols[4]||'').trim();
           }
         }
         
@@ -2605,14 +2628,24 @@
       for(const line of lines) {
         if(!line.trim()) continue;
         const cols = line.split('\t');
-        if(cols.length < 3) continue;
+        if(cols.length < 2) continue;
         
         // Expected: FY | PATIENT TREATED | GOLDEN CARD
-        let fy = manualFy || cols[0].trim();
-        let pat = parseInt(cols[1].replace(/,/g, '').trim()) || 0;
-        let card = parseInt(cols[2].replace(/,/g, '').trim()) || 0;
+        // Or if manual FY provided, maybe just: PATIENT TREATED | GOLDEN CARD
+        let fy, pat, card;
         
-        if(!fy.includes('-')) continue; // skip header or invalid
+        if (manualFy && !cols[0].trim().includes('-') && !isNaN(parseInt(cols[0].replace(/,/g, '').trim()))) {
+          // No FY in first column, likely starts with Patient Treated
+          fy = manualFy;
+          pat = parseInt(cols[0].replace(/,/g, '').trim()) || 0;
+          card = parseInt((cols[1]||'').replace(/,/g, '').trim()) || 0;
+        } else {
+          fy = manualFy || cols[0].trim();
+          pat = parseInt((cols[1]||'').replace(/,/g, '').trim()) || 0;
+          card = parseInt((cols[2]||'').replace(/,/g, '').trim()) || 0;
+        }
+        
+        if(!fy || !fy.includes('-')) continue; // skip header or invalid
         
         let monthKey = manualMonthKey || (fy + '-YEARLY');
         
@@ -3997,11 +4030,23 @@
     function initBulkDelete() {
       var fys = load(LS.FYS, []);
       var selIds = ['bulkDelIncomeFy','bulkDelExpFy','bulkDelStatsFy','bulkDelAllFy'];
-      selIds.forEach(function(id){
+      var mIds = ['bulkDelIncomeMonth','bulkDelExpMonth','bulkDelStatsMonth','bulkDelAllMonth'];
+      selIds.forEach(function(id, i){
         var sel = $(id); if(!sel) return;
-        sel.innerHTML = '<option value="">— Select FY —</option>';
+        var mSel = $(mIds[i]);
+        sel.innerHTML = '<option value="">- Select FY -</option>';
         fys.forEach(function(f){ sel.insertAdjacentHTML('beforeend','<option value="'+f.name+'">'+f.name+'</option>'); });
-        sel.addEventListener('change', updateBulkDelCounts);
+        sel.addEventListener('change', function() {
+          if (mSel) {
+            mSel.innerHTML = '<option value="">All Months</option>';
+            if (sel.value) {
+              var ml = monthsForFy(sel.value);
+              ml.forEach(function(m){ mSel.insertAdjacentHTML('beforeend', '<option value="'+m.key+'">'+m.label+'</option>'); });
+            }
+          }
+          updateBulkDelCounts();
+        });
+        if (mSel) mSel.addEventListener('change', updateBulkDelCounts);
       });
       updateBulkDelCounts();
     }
@@ -4011,59 +4056,78 @@
       var expFy = $('bulkDelExpFy')    ? $('bulkDelExpFy').value    : '';
       var statFy= $('bulkDelStatsFy') ? $('bulkDelStatsFy').value   : '';
       var allFy = $('bulkDelAllFy')   ? $('bulkDelAllFy').value     : '';
+      
+      var incM = $('bulkDelIncomeMonth') ? $('bulkDelIncomeMonth').value : '';
+      var expM = $('bulkDelExpMonth')    ? $('bulkDelExpMonth').value    : '';
+      var statM= $('bulkDelStatsMonth') ? $('bulkDelStatsMonth').value   : '';
+      var allM = $('bulkDelAllMonth')   ? $('bulkDelAllMonth').value     : '';
 
       var inc  = load(LS.INCOME,[]);
       var exp  = load(LS.EXPENSE,[]);
       var stat = load(LS.STATS,[]);
 
       var cInc = $('bulkDelIncomeCount');
-      if(cInc) cInc.textContent = incFy
-        ? (inc.filter(function(r){return r.fy===incFy;}).length + ' income records found for FY '+incFy)
-        : 'Select a FY to see record count';
+      if(cInc) {
+        var fi = inc.filter(function(r){return r.fy===incFy && (!incM || r.monthKey===incM);});
+        cInc.textContent = incFy ? (fi.length + ' income records found') : 'Select a FY to see record count';
+      }
 
       var cExp = $('bulkDelExpCount');
-      if(cExp) cExp.textContent = expFy
-        ? (exp.filter(function(r){return r.fy===expFy;}).length + ' expenditure records found for FY '+expFy)
-        : 'Select a FY to see record count';
+      if(cExp) {
+        var fe = exp.filter(function(r){return r.fy===expFy && (!expM || r.monthKey===expM);});
+        cExp.textContent = expFy ? (fe.length + ' expenditure records found') : 'Select a FY to see record count';
+      }
 
       var cStat = $('bulkDelStatsCount');
-      if(cStat) cStat.textContent = statFy
-        ? (stat.filter(function(r){return r.fy===statFy;}).length + ' statistics records found for FY '+statFy)
-        : 'Select a FY to see record count';
+      if(cStat) {
+        var fs;
+        if (statM && statM.length > 0) {
+            fs = stat.filter(function(r){return r.fy===statFy && r.monthKey===statM;});
+        } else {
+            fs = stat.filter(function(r){return r.fy===statFy;});
+        }
+        cStat.textContent = statFy ? (fs.length + ' statistics records found') : 'Select a FY to see record count';
+      }
 
       var cAll = $('bulkDelAllCount');
       if(cAll && allFy) {
-        var nI=inc.filter(function(r){return r.fy===allFy;}).length;
-        var nE=exp.filter(function(r){return r.fy===allFy;}).length;
-        var nS=stat.filter(function(r){return r.fy===allFy;}).length;
-        cAll.textContent = 'Income: '+nI+' | Expenditure: '+nE+' | Stats: '+nS+' records for FY '+allFy;
+        var nI=inc.filter(function(r){return r.fy===allFy && (!allM || r.monthKey===allM);}).length;
+        var nE=exp.filter(function(r){return r.fy===allFy && (!allM || r.monthKey===allM);}).length;
+        var nS=stat.filter(function(r){return r.fy===allFy && (!allM || r.monthKey===allM || (!allM && r.monthKey && r.monthKey.startsWith(allFy)));}).length;
+        cAll.textContent = (nI+nE+nS) + ' total records found (Inc: '+nI+', Exp: '+nE+', Stat: '+nS+')';
       } else if(cAll) { cAll.textContent = 'Select a FY to see record count'; }
     }
 
     function bulkDeleteIncome() {
       var fy = $('bulkDelIncomeFy') ? $('bulkDelIncomeFy').value : '';
+      var m = $('bulkDelIncomeMonth') ? $('bulkDelIncomeMonth').value : '';
       if(!fy) { alert('Please select a Financial Year.'); return; }
       var inc = load(LS.INCOME,[]);
-      var n = inc.filter(function(r){return r.fy===fy;}).length;
-      if(n === 0) { alert('No income records found for FY '+fy+'.'); return; }
-      if(!confirm('⚠ DELETE '+n+' income record(s) for FY '+fy+'?\nThis CANNOT be undone.')) return;
-      save(LS.INCOME, inc.filter(function(r){return r.fy!==fy;}));
-      fsSyncBatchDelete('finance_incomes', inc.filter(function(r){return r.fy===fy;}));
-      alert('✅ Deleted '+n+' income records for FY '+fy+'.');
+      var toDelete = inc.filter(function(r){return r.fy===fy && (!m || r.monthKey===m);});
+      var toKeep = inc.filter(function(r){return !(r.fy===fy && (!m || r.monthKey===m));});
+      var n = toDelete.length;
+      if(n === 0) { alert('No income records found for FY '+fy+(m?' Month '+m:'')+'.'); return; }
+      if(!confirm('🚨 DELETE '+n+' income record(s) for FY '+fy+(m?' Month '+m:'')+'?\nThis CANNOT be undone.')) return;
+      save(LS.INCOME, toKeep);
+      fsSyncBatchDelete('finance_incomes', toDelete);
+      alert('✅ Deleted '+n+' income records.');
       updateBulkDelCounts();
       renderClaims();
     }
 
     function bulkDeleteExp() {
       var fy = $('bulkDelExpFy') ? $('bulkDelExpFy').value : '';
+      var m = $('bulkDelExpMonth') ? $('bulkDelExpMonth').value : '';
       if(!fy) { alert('Please select a Financial Year.'); return; }
       var exp = load(LS.EXPENSE,[]);
-      var n = exp.filter(function(r){return r.fy===fy;}).length;
-      if(n === 0) { alert('No expenditure records found for FY '+fy+'.'); return; }
-      if(!confirm('⚠ DELETE '+n+' expenditure record(s) for FY '+fy+'?\nThis CANNOT be undone.')) return;
-      save(LS.EXPENSE, exp.filter(function(r){return r.fy!==fy;}));
-      fsSyncBatchDelete('finance_expenses', exp.filter(function(r){return r.fy===fy;}));
-      alert('✅ Deleted '+n+' expenditure records for FY '+fy+'.');
+      var toDelete = exp.filter(function(r){return r.fy===fy && (!m || r.monthKey===m);});
+      var toKeep = exp.filter(function(r){return !(r.fy===fy && (!m || r.monthKey===m));});
+      var n = toDelete.length;
+      if(n === 0) { alert('No expenditure records found for FY '+fy+(m?' Month '+m:'')+'.'); return; }
+      if(!confirm('🚨 DELETE '+n+' expenditure record(s) for FY '+fy+(m?' Month '+m:'')+'?\nThis CANNOT be undone.')) return;
+      save(LS.EXPENSE, toKeep);
+      fsSyncBatchDelete('finance_expenses', toDelete);
+      alert('✅ Deleted '+n+' expenditure records.');
       updateBulkDelCounts();
       renderExpenditure();
     }
