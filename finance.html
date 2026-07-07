@@ -3972,7 +3972,9 @@
           '<td><b>'+fmt(totClaim)+'</b></td>'+
           '<td><b>'+fmt(totActual)+'</b></td>'+
           '<td style="color:'+totBalColor+';"><b>'+fmt(totBalance)+'</b></td></tr>');
-      }\n\n      // Month-wise table (only if no specific month selected and multiple months)
+      }
+
+      // Month-wise table (only if no specific month selected and multiple months)
       var mwWrap = $('faMonthWiseWrap');
       if(!mo && incomes.length > 1) {
         mwWrap.style.display='';
@@ -4545,4 +4547,5 @@ setTimeout(function() {
 </script>
 </body>
 </html>
+
 
