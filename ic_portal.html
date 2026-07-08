@@ -739,7 +739,7 @@ function genAnnual(){
     pmamTotals[nm].ipd+=Number(r.ipd||0); pmamTotals[nm].reg+=Number(r.reg||0);
     pmamTotals[nm].pre+=Number(r.pre||0); pmamTotals[nm].dis+=Number(r.dis||0); pmamTotals[nm].clm+=Number(r.clm||0);
   });
-  const ranked = Object.values(pmamTotals).sort((a,b) => cvN(b.ipd,b.reg) - cvN(a.ipd,a.reg));
+  const ranked = Object.values(pmamTotals).sort((a,b) => b.reg - a.reg);
   document.getElementById('annualPmamTbody').innerHTML = ranked.map((r,i) => `
     <tr><td>${i+1}</td><td><strong>${r.name}</strong></td><td>${r.ipd}</td><td>${r.reg}</td><td>${r.pre}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td>${cv(r.ipd,r.reg)}</td></tr>
   `).join('');
