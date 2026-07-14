@@ -2693,5 +2693,14 @@ window.addEventListener('DOMContentLoaded', function(){
 })();
 
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="digital_signature.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.DSig) {
+      DSig.init({ portal: 'ic' });
+    }
+  });
+</script>
 </body>
 </html>
