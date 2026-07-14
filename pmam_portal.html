@@ -902,6 +902,17 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           </div>
         </div>
 
+        <div style="margin-top:16px;padding:12px;border:1.5px dashed rgba(100,150,255,0.4);border-radius:10px;background:rgba(240,245,255,0.7)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="checkbox" id="lvUseSig" style="width:16px;height:16px;cursor:pointer;accent-color:#0F2B8C" onchange="document.getElementById('lvPinWrap').style.display=this.checked?'block':'none'">
+            <label for="lvUseSig" style="font-size:12px;font-weight:700;color:#0F2B8C;cursor:pointer">Digitally sign this application</label>
+          </div>
+          <div id="lvPinWrap" style="display:none;margin-top:10px">
+            <input type="password" id="lvPin" placeholder="Enter PIN (4-6 digits)" maxlength="6" style="width:200px;padding:8px 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px;outline:none">
+            <div style="font-size:10px;color:#6b7280;margin-top:4px">First time? Enter any PIN to set it permanently.</div>
+          </div>
+        </div>
+
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
           <button class="btn btn-sec" onclick="clearLeaveForm()">Clear</button>
           <button class="btn btn-pri" style="background:linear-gradient(90deg,#166534,#16a34a)" onclick="printLeaveForm()">&#128424; Print Application</button>
