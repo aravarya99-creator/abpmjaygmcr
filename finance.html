@@ -3979,12 +3979,30 @@
     function printFundAllocFyWise(askTitle) {
       var t = 'FY-WISE DETAILED FUND ALLOCATION REPORT';
       if(askTitle) { t = prompt('Enter Report Title:', t); if(t===null) return; }
-      var table = document.getElementById('repFundAllocFyWiseTable').outerHTML;
-      var html = '<div style="text-align:center;margin-bottom:20px;"><h2>'+(t||'')+'</h2></div>'+table;
-      _printHtml(html);
+      var t1 = '<table>'+(document.getElementById('repFundAllocFyWiseTable')?document.getElementById('repFundAllocFyWiseTable').innerHTML:'')+'</table>';
+      printReport({
+        title: t,
+        periodInfo: 'All Financial Years',
+        generatedInfo: 'Generated: '+(typeof _fmtNow === "function" ? _fmtNow() : new Date().toLocaleString()),
+        bodyHTML: t1
+      });
     }
-    function exportFaFyWiseExcel() { exportTableToExcel('repFundAllocFyWiseTable', 'FY_Wise_Fund_Allocation'); }
-    function exportFaFyWiseWord() { exportTableToWord('repFundAllocFyWiseTable', 'FY_Wise_Fund_Allocation'); }
+    function exportFaFyWiseExcel() {
+      var t1 = document.getElementById('repFundAllocFyWiseTable');
+      exportToExcel({
+        title: 'FY-WISE DETAILED FUND ALLOCATION REPORT',
+        bodyHTML: t1 ? '<table>'+t1.innerHTML+'</table>' : '',
+        filename: 'fy_wise_fund_allocation'
+      });
+    }
+    function exportFaFyWiseWord() {
+      var t1 = document.getElementById('repFundAllocFyWiseTable');
+      exportToWord({
+        title: 'FY-WISE DETAILED FUND ALLOCATION REPORT',
+        bodyHTML: t1 ? '<table border="1">'+t1.innerHTML+'</table>' : '',
+        filename: 'fy_wise_fund_allocation'
+      });
+    }
 
     // ── FUND ALLOCATION REPORT ───────────────────────────────────────
     function renderFundAllocReport() {
