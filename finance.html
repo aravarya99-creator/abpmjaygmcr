@@ -465,6 +465,7 @@
           <div class="report-tab active" id="btnSha" data-report="sha">SHA Report</div>
           <div class="report-tab" id="btnShaShare" data-report="shashare">SHA Share</div>
           <div class="report-tab" id="btnFundAlloc" data-report="fundalloc">Fund Allocation</div>
+          <div class="report-tab" id="btnFundAllocFyWise" data-report="fundallocfywise">FY-Wise Fund Allocation</div>
         </div>
 
         <div id="rep-sha" style="overflow-x:auto;">
@@ -605,6 +606,32 @@
               <thead>
                 <tr style="background:#8b5cf6;color:#fff;">
                   <th>#</th><th>Month</th><th>Medicines &amp; Consumables (50%)</th><th>Human Resources (15%)</th><th>Hospital Upgradation (15%)</th><th>Admin Expenses (10%)</th><th>SHA Share (5%)</th><th>Unallocated (5%)</th><th>Claim Total</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- FY-WISE FUND ALLOCATION SECTION -->
+        <div id="rep-fundallocfywise" style="display:none;">
+          <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
+            <button class="btn" onclick="printFundAllocFyWise()" style="background:#4b5563;">🖨 Print / PDF</button>
+            <button class="btn" onclick="printFundAllocFyWise(true)" style="background:#0891b2;">✏️ Custom Title</button>
+            <button class="btn" onclick="exportFaFyWiseExcel()" style="background:#16a34a;">📊 Excel</button>
+            <button class="btn" onclick="exportFaFyWiseWord()" style="background:#2563eb;">📝 Word</button>
+          </div>
+          <div style="margin-bottom:8px;font-size:13px;font-weight:700;color:#7c3aed;">FY-WISE DETAILED BREAKDOWN</div>
+          <div style="overflow-x:auto;">
+            <table id="repFundAllocFyWiseTable" style="border:1px solid #e9d5ff; border-radius:8px; overflow:hidden; width:100%; border-collapse:collapse; text-align:left; font-size:14px; color:#4c1d95;">
+              <thead>
+                <tr style="background:#7c3aed;color:#fff;">
+                  <th style="padding:12px 16px; border-right:1px solid rgba(255,255,255,0.35); border-bottom:1px solid #e9d5ff;">Financial Year</th>
+                  <th style="padding:12px 16px; border-right:1px solid rgba(255,255,255,0.35); border-bottom:1px solid #e9d5ff;">Expenditure Category</th>
+                  <th style="padding:12px 16px; border-right:1px solid rgba(255,255,255,0.35); border-bottom:1px solid #e9d5ff; text-align:center;">Allocation %</th>
+                  <th style="padding:12px 16px; border-right:1px solid rgba(255,255,255,0.35); border-bottom:1px solid #e9d5ff;">Amount (₹)</th>
+                  <th style="padding:12px 16px; border-right:1px solid rgba(255,255,255,0.35); border-bottom:1px solid #e9d5ff;">Actual Utilization (₹)</th>
+                  <th style="padding:12px 16px; border-bottom:1px solid #e9d5ff;">Balance (₹)</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -1557,7 +1584,8 @@
       const mapRep = {
         btnSha: 'sha',
         btnShaShare: 'shashare',
-        btnFundAlloc: 'fundalloc'
+        btnFundAlloc: 'fundalloc',
+        btnFundAllocFyWise: 'fundallocfywise'
       };
       Object.keys(mapRep).forEach(id=>{
         const btn = $(id); if(!btn) return;
@@ -1570,6 +1598,7 @@
           if(mapRep[id] === 'sha') renderShaReport();
           if(mapRep[id] === 'shashare') renderShaShareReport();
           if(mapRep[id] === 'fundalloc') renderFundAllocReport();
+          if(mapRep[id] === 'fundallocfywise') renderFundAllocFyWiseReport();
         });
       });
     }
@@ -3880,6 +3909,82 @@
       initCustomReport();
     }
 
+
+    // ── FY-WISE DETAILED FUND ALLOCATION REPORT ───────────────────────
+    function renderFundAllocFyWiseReport() {
+      var fys = load(LS.FYS,[]);
+      var incomes = load(LS.INCOME,[]);
+      var expenses = load(LS.EXPENSE,[]);
+      var tbody = document.querySelector('#repFundAllocFyWiseTable tbody');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+
+      var ALLOC_CATS = [
+        {n:'Medicines, Consumables & Diagnostics', pct:50, heads:['Drugs', 'Consumables']},
+        {n:'Human Resources', pct:15, heads:['Salary to Arogya Mitras', 'Incentives Disbursed']},
+        {n:'Hospital Upgradation & Quality Improvement', pct:15, heads:['Machinery & Equipment', 'Hospital Development', 'Laboratory Development']},
+        {n:'Administrative Expenses', pct:10, heads:['Misc. Expenses']},
+        {n:'SHA Share', pct:5, heads:['SHA Share Deposited']},
+        {n:'Unallocated Balance (Post-SHA)', pct:5, heads:[]}
+      ];
+
+      fys.forEach(function(f, index) {
+        var fy = f.name;
+        var fyIncomes = incomes.filter(function(i){return i.fy===fy;});
+        var totClaim = fyIncomes.reduce(function(s,i){return s+Number(i.claim||0);},0);
+        
+        var fyExpenses = expenses.filter(function(e){return e.fy===fy;});
+        var totActual = 0;
+
+        // The header column spans 7 rows (6 categories + 1 total) for each FY
+        var rowHtml = '<tr style="background:#f5f3ff;">';
+        rowHtml += '<td rowspan="7" style="font-weight:bold; vertical-align:middle; text-align:center; border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; font-size:16px;">'+fy+'</td>';
+
+        ALLOC_CATS.forEach(function(c, i) {
+          var allocAmt = totClaim * c.pct / 100;
+          var actualAmt = 0;
+          fyExpenses.forEach(function(e) {
+            var nCat = normCat(e.category);
+            if (c.heads.indexOf(nCat) !== -1) {
+              actualAmt += Number(e.amount || 0);
+            }
+          });
+          totActual += actualAmt;
+          var balance = allocAmt - actualAmt;
+          var balColor = balance < 0 ? '#ef4444' : '#000';
+
+          if (i > 0) {
+            rowHtml += '<tr'+(i%2?' style="background:#f5f3ff;"':'')+'>';
+          }
+          rowHtml += '<td style="border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; padding:6px 12px;">'+(i+1)+'. '+c.n+'</td>';
+          rowHtml += '<td style="text-align:center; border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; padding:6px 12px;">'+c.pct+'%</td>';
+          rowHtml += '<td style="border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; padding:6px 12px;"><b>'+fmt(allocAmt)+'</b></td>';
+          rowHtml += '<td style="border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; padding:6px 12px;"><b>'+fmt(actualAmt)+'</b></td>';
+          rowHtml += '<td style="color:'+balColor+'; border-bottom:1px solid #e9d5ff; padding:6px 12px;"><b>'+fmt(balance)+'</b></td></tr>';
+        });
+
+        var totBalance = totClaim - totActual;
+        var totBalColor = totBalance < 0 ? '#ef4444' : '#000';
+        rowHtml += '<tr style="font-weight:bold;background:#ede9fe;color:#000;">';
+        rowHtml += '<td style="border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; padding:6px 12px;"><b>TOTAL</b></td>';
+        rowHtml += '<td style="text-align:center; border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; padding:6px 12px;"><b>100%</b></td>';
+        rowHtml += '<td style="border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; padding:6px 12px;"><b>'+fmt(totClaim)+'</b></td>';
+        rowHtml += '<td style="border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; padding:6px 12px;"><b>'+fmt(totActual)+'</b></td>';
+        rowHtml += '<td style="color:'+totBalColor+'; border-bottom:1px solid #e9d5ff; padding:6px 12px;"><b>'+fmt(totBalance)+'</b></td></tr>';
+
+        tbody.insertAdjacentHTML('beforeend', rowHtml);
+      });
+    }
+
+    function printFundAllocFyWise(askTitle) {
+      var t = 'FY-WISE DETAILED FUND ALLOCATION REPORT';
+      if(askTitle) { t = prompt('Enter Report Title:', t); if(t===null) return; }
+      var table = document.getElementById('repFundAllocFyWiseTable').outerHTML;
+      var html = '<div style="text-align:center;margin-bottom:20px;"><h2>'+(t||'')+'</h2></div>'+table;
+      _printHtml(html);
+    }
+    function exportFaFyWiseExcel() { exportTableToExcel('repFundAllocFyWiseTable', 'FY_Wise_Fund_Allocation'); }
+    function exportFaFyWiseWord() { exportTableToWord('repFundAllocFyWiseTable', 'FY_Wise_Fund_Allocation'); }
 
     // ── FUND ALLOCATION REPORT ───────────────────────────────────────
     function renderFundAllocReport() {
