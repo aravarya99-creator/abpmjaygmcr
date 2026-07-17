@@ -688,6 +688,7 @@ DSig.buildLetterheadHTML = function(d, forPdfId){
     +   '<tr><td class="lbl">Return Date</td><td>'+fmtD(d.ret)+'</td></tr>'
     +   '<tr><td class="lbl">Duty Assigned To</td><td>'+esc(d.duty||'')+'</td></tr>'
     + '</tbody></table>'
+    + '<div style="page-break-inside: avoid; break-inside: avoid;">'
     + '<div class="undertaking">'
     +   '<div style="text-align:center;font-weight:700;margin-bottom:4px;font-size:10pt;text-decoration:underline">UNDERTAKING FOR HANDOVER OF PMAM WORK DURING LEAVE</div>'
     +   'I, Mr./Ms. <strong>' + esc(d.duty||'________________') + '</strong>, PMAM, hereby undertake that during the leave period of Mr./Ms. <strong>' + esc(d.name||'________________') + '</strong> from <strong>' + fmtD(d.fromDt) + '</strong> to <strong>' + fmtD(d.toDt) + '</strong>, I shall assume full responsibility for all assigned AB PM-JAY work, including pre-authorizations, pre-authorization queries, enhancement requests, patient discharges, claim submissions, claim queries, all pending work/files, and any other assigned duties. I further undertake to ensure timely completion of all work and acknowledge that all new patient registrations from the assigned ward(s) during the leave period shall be counted under my IPD workload and shall remain my responsibility.'
@@ -699,6 +700,7 @@ DSig.buildLetterheadHTML = function(d, forPdfId){
     + '<div class="sig-row" style="margin-top:8mm">'
     +   sigBoxByRole('I/C AB-PMJAY', 'I/C AB-PMJAY', 'I/C AB-PMJAY')
     +   sigBoxByRole('Medical Superintendent', 'Medical Superintendent', 'Medical Superintendent')
+    + '</div>'
     + '</div>'
     + '<div class="print-footer">'
     +   '<span class="footer-brand">Computer generated leave application. | Ref: '+esc(d.refNo)+' | Digitally signed via MIS AB-PMJAY GMCR</span>'
