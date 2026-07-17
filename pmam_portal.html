@@ -904,12 +904,8 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
         <div style="margin-top:16px;padding:12px;border:1.5px dashed rgba(100,150,255,0.4);border-radius:10px;background:rgba(240,245,255,0.7)">
           <div style="display:flex;align-items:center;gap:10px">
-            <input type="checkbox" id="lvUseSig" style="width:16px;height:16px;cursor:pointer;accent-color:#0F2B8C" onchange="document.getElementById('lvPinWrap').style.display=this.checked?'block':'none'">
+            <input type="checkbox" id="lvUseSig" style="width:16px;height:16px;cursor:pointer;accent-color:#0F2B8C">
             <label for="lvUseSig" style="font-size:12px;font-weight:700;color:#0F2B8C;cursor:pointer">Digitally sign this application</label>
-          </div>
-          <div id="lvPinWrap" style="display:none;margin-top:10px">
-            <input type="password" id="lvPin" placeholder="Enter PIN (4-6 digits)" maxlength="6" style="width:200px;padding:8px 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px;outline:none">
-            <div style="font-size:10px;color:#6b7280;margin-top:4px">First time? Enter any PIN to set it permanently.</div>
           </div>
         </div>
 
@@ -1016,6 +1012,25 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
     <div class="modal-foot">
       <button class="mbtn mbtn-sec" onclick="closeModal()">Cancel</button>
       <button class="mbtn mbtn-pri" onclick="saveProfile()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIGITAL SIGNATURE MODAL -->
+<div class="modal-bg" id="signPinModal">
+  <div class="modal-box">
+    <div class="modal-title" style="color:#0F2B8C">Digital Signature</div>
+    <div style="font-size:12px;margin-bottom:12px;color:#374151">
+      Please enter your PIN to digitally sign and submit this leave application.<br>
+      <span style="font-size:10px;color:#6b7280">(First time? Enter any PIN to set it permanently.)</span>
+    </div>
+    <div class="mfld">
+      <input type="password" id="modalLvPin" placeholder="Enter PIN (4-6 digits)" maxlength="6" style="text-align:center;font-size:16px;letter-spacing:4px">
+    </div>
+    <div id="modalLvMsg" style="font-size:11px;color:#dc2626;text-align:center;margin-bottom:10px"></div>
+    <div class="modal-foot">
+      <button class="mbtn mbtn-sec" onclick="document.getElementById('signPinModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn mbtn-pri" onclick="confirmLeaveSignature()">Sign & Submit</button>
     </div>
   </div>
 </div>
