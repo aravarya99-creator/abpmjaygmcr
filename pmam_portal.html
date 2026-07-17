@@ -957,8 +957,9 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             <tr><td style="border:1px solid #000;padding:5px 8px;font-weight:700">Duty Assigned To</td><td style="border:1px solid #000;padding:5px 8px" id="lp_duty"></td></tr>
           </table>
 
-          <div style="font-size:9.5pt;line-height:1.7;margin:6mm 0">
-            I hereby undertake that during his/her leave period, I shall assume full responsibility for all duties, work, and responsibilities assigned to him/her.
+          <div style="font-size:9.5pt;text-align:justify;border:1px solid #1a3db5;border-left:4px solid #1a3db5;padding:8px 12px;background:#f7f8fc;margin:2mm 0;line-height:1.4">
+            <div style="text-align:center;font-weight:700;margin-bottom:4px;font-size:10pt;text-decoration:underline">UNDERTAKING FOR HANDOVER OF PMAM WORK DURING LEAVE</div>
+            I, Mr./Ms. <strong id="lp_duty_name">________________</strong>, PMAM, hereby undertake that during the leave period of Mr./Ms. <strong id="lp_app_name">________________</strong> from <strong id="lp_from_dt">___</strong> to <strong id="lp_to_dt">___</strong>, I shall assume full responsibility for all assigned AB PM-JAY work, including pre-authorizations, pre-authorization queries, enhancement requests, patient discharges, claim submissions, claim queries, all pending work/files, and any other assigned duties. I further undertake to ensure timely completion of all work and acknowledge that all new patient registrations from the assigned ward(s) during the leave period shall be counted under my IPD workload and shall remain my responsibility.
           </div>
 
           <div style="display:flex;justify-content:space-between;margin-top:14mm">
@@ -1826,13 +1827,21 @@ function fetchPmamLeaves() {
 function submitLeave() {
   var msg  = document.getElementById('leaveMsg');
   var name = document.getElementById('lvName').value;
-  var duty = document.getElementById('lvDays').value;
   if (!name) { msg.style.color='#dc2626'; msg.textContent='Please select your name.'; return; }
+  if (!getLvWard()) { msg.style.color='#dc2626'; msg.textContent='Please select your ward.'; return; }
   if (!document.getElementById('lvDuty').value) { msg.style.color='#dc2626'; msg.textContent='Please assign duty to a substitute PMAM.'; return; }
   if (!document.getElementById('lvFrom').value) { msg.style.color='#dc2626'; msg.textContent='Please select From date.'; return; }
+  if (!document.getElementById('lvTo').value) { msg.style.color='#dc2626'; msg.textContent='Please select To date.'; return; }
+  if (!document.getElementById('lvReturn').value) { msg.style.color='#dc2626'; msg.textContent='Please select Return date.'; return; }
+  
   var rEl  = document.querySelector('input[name=lvReason]:checked');
+  if (!rEl) { msg.style.color='#dc2626'; msg.textContent='Please select a Reason for Leave.'; return; }
+  if (rEl.value === 'other' && !document.getElementById('lvOther').value.trim()) { msg.style.color='#dc2626'; msg.textContent='Please specify the reason.'; return; }
+  
   var tEl  = document.querySelector('input[name=lvType]:checked');
-  var reason = rEl ? (rEl.value==='other' ? document.getElementById('lvOther').value : rEl.value) : '—';
+  if (!tEl) { msg.style.color='#dc2626'; msg.textContent='Please select a Type of Leave.'; return; }
+  
+  var reason = (rEl.value === 'other') ? document.getElementById('lvOther').value.trim() : rEl.value;
   var u = getPmjayUser();
   var req = {
     name:  name,
@@ -2122,7 +2131,10 @@ function printLeaveForm() {
     + compSection
 
     /* ── UNDERTAKING (from substitute PMAM's perspective) ── */
-    + '<p class="undertaking">I hereby undertake that during his/her leave period, I shall assume full responsibility for all duties, work, and responsibilities assigned to him/her.</p>'
+    + '<div class="undertaking">'
+    +   '<div style="text-align:center;font-weight:700;margin-bottom:4px;font-size:10pt;text-decoration:underline">UNDERTAKING FOR HANDOVER OF PMAM WORK DURING LEAVE</div>'
+    +   'I, Mr./Ms. <strong>' + (duty||'________________') + '</strong>, PMAM, hereby undertake that during the leave period of Mr./Ms. <strong>' + (name||'________________') + '</strong> from <strong>' + (fmtDate(fromDt)||'___') + '</strong> to <strong>' + (fmtDate(toDt)||'___') + '</strong>, I shall assume full responsibility for all assigned AB PM-JAY work, including pre-authorizations, pre-authorization queries, enhancement requests, patient discharges, claim submissions, claim queries, all pending work/files, and any other assigned duties. I further undertake to ensure timely completion of all work and acknowledge that all new patient registrations from the assigned ward(s) during the leave period shall be counted under my IPD workload and shall remain my responsibility.'
+    + '</div>'
 
     /* ── SIGNATURES (clean 2-row layout, no line) ── */
     + '<div class="sig-row">'
@@ -2186,8 +2198,8 @@ function printLeaveForm() {
     + '.lbl{font-weight:700;width:70mm;color:#1a2340;border-right:2px solid #dde2ee}'
     + '.tc{text-align:center}'
     + '.section-title{font-weight:700;font-size:11pt;margin:3mm 0 1mm;color:#1a2340;text-transform:uppercase;letter-spacing:0.5px}'
-    + '.undertaking{font-size:11pt;line-height:1.45;margin:3mm 0;font-style:italic;color:#333;border-left:3px solid #1a2340;padding-left:8px}'
-    + '.sig-row{display:flex;justify-content:space-between;margin-top:8mm;gap:8mm}'
+    + '.undertaking{font-size:9.5pt;text-align:justify;border:1px solid #1a3db5;border-left:4px solid #1a3db5;padding:8px 12px;background:#f7f8fc;margin:2mm 0;line-height:1.4}'
+    + '.sig-row{display:flex;justify-content:space-between;margin-top:4mm;gap:8mm}'
     + '.sig-box{flex:1;text-align:center}'
     + '.sig-label{font-weight:700;font-size:11pt;color:#1a2340;line-height:1.25;height:9mm;display:flex;align-items:center;justify-content:center;padding:0 2mm}'
     + '.sig-desig{font-size:10pt;font-weight:normal;color:#555;margin-top:1mm;line-height:1.3;min-height:6mm}'
