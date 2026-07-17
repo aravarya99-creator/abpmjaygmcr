@@ -902,12 +902,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           </div>
         </div>
 
-        <div style="margin-top:16px;padding:12px;border:1.5px dashed rgba(100,150,255,0.4);border-radius:10px;background:rgba(240,245,255,0.7)">
-          <div style="display:flex;align-items:center;gap:10px">
-            <input type="checkbox" id="lvUseSig" style="width:16px;height:16px;cursor:pointer;accent-color:#0F2B8C">
-            <label for="lvUseSig" style="font-size:12px;font-weight:700;color:#0F2B8C;cursor:pointer">Digitally sign this application</label>
-          </div>
-        </div>
+
 
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
           <button class="btn btn-sec" onclick="clearLeaveForm()">Clear</button>
@@ -1857,8 +1852,7 @@ function submitLeave() {
   msg.style.color = '#1A3DB5';
   msg.textContent = 'Submitting leave request…';
 
-  var useSig = document.getElementById('lvUseSig') && document.getElementById('lvUseSig').checked;
-  if (useSig && window.DSig) {
+  if (window.DSig) {
     window._pendingLeaveReq = req;
     document.getElementById('modalLvPin').value = '';
     document.getElementById('modalLvMsg').textContent = '';
@@ -1902,7 +1896,6 @@ function confirmLeaveSignature() {
     var card = document.getElementById('leaveHistCard');
     if (card) card.style.display = 'block';
     clearLeaveForm();
-    if(document.getElementById('lvUseSig')) document.getElementById('lvUseSig').checked = false;
   }).catch(function(e) {
     msgEl.style.color = '#dc2626';
     msgEl.textContent = 'Signature Error: ' + e.message;
