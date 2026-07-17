@@ -1856,6 +1856,16 @@ function submitLeave() {
   };
   msg.style.color = '#1A3DB5';
   msg.textContent = 'Submitting leave request…';
+
+  var useSig = document.getElementById('lvUseSig') && document.getElementById('lvUseSig').checked;
+  if (useSig && window.DSig) {
+    window._pendingLeaveReq = req;
+    document.getElementById('modalLvPin').value = '';
+    document.getElementById('modalLvMsg').textContent = '';
+    document.getElementById('signPinModal').classList.add('open');
+    return;
+  }
+
   // Note: fetchPmamLeaves() onSnapshot will refresh leaveRequests[] + re-render
   // automatically once Firestore acknowledges this write. Do NOT push locally
   // or the entry will appear twice on the next snapshot.
@@ -1871,6 +1881,32 @@ function submitLeave() {
       msg.style.color = '#dc2626';
       msg.textContent = 'Error submitting: ' + e.message;
     });
+}
+
+function confirmLeaveSignature() {
+  var pin = document.getElementById('modalLvPin').value;
+  var msgEl = document.getElementById('modalLvMsg');
+  if (!pin) {
+    msgEl.textContent = 'Please enter your PIN.';
+    return;
+  }
+  msgEl.style.color = '#1A3DB5';
+  msgEl.textContent = 'Signing...';
+  
+  DSig.initiateSignedLeave(window._pendingLeaveReq, pin).then(function() {
+    document.getElementById('signPinModal').classList.remove('open');
+    var msg = document.getElementById('leaveMsg');
+    msg.style.color = '#166534';
+    msg.textContent = '✅ Leave request digitally signed and submitted!';
+    setTimeout(function(){ msg.textContent=''; }, 4000);
+    var card = document.getElementById('leaveHistCard');
+    if (card) card.style.display = 'block';
+    clearLeaveForm();
+    if(document.getElementById('lvUseSig')) document.getElementById('lvUseSig').checked = false;
+  }).catch(function(e) {
+    msgEl.style.color = '#dc2626';
+    msgEl.textContent = 'Signature Error: ' + e.message;
+  });
 }
 // ═══════════════════════════════════════════════════════════════
 // HOLIDAY CALENDAR — fetched from Firestore (same source as admin portal)
