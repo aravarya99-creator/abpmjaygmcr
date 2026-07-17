@@ -1538,6 +1538,12 @@ function loadLeaveReq(){
 }
 
 function approveLeaveFb(id) {
+  var l = leaveRequests.find(function(x){return x.id === id;});
+  if (l && l.signEnabled && window.DSig) {
+    DSig.openSignModal(id);
+    return;
+  }
+  
   var remark = document.getElementById('lremark_'+id).value || '';
   var btnGroup = document.getElementById('lactions_'+id);
   if (btnGroup) btnGroup.style.opacity = '0.5';
@@ -1548,6 +1554,12 @@ function approveLeaveFb(id) {
     });
 }
 function rejectLeaveFb(id) {
+  var l = leaveRequests.find(function(x){return x.id === id;});
+  if (l && l.signEnabled && window.DSig) {
+    DSig.openSignModal(id);
+    return;
+  }
+  
   var remark = document.getElementById('lremark_'+id).value;
   if(!remark) return alert('Remarks required for rejection');
   var btnGroup = document.getElementById('lactions_'+id);

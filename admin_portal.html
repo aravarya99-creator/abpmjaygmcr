@@ -1942,7 +1942,16 @@ tr:hover td{background:#EEF3FF}
   <div class="modal-box">
     <div class="modal-title">Edit User</div>
     <div class="mfld"><label>Full Name</label><input type="text" id="editName"></div>
-    <div class="mfld"><label>Email Address</label><input type="email" id="editEmail"></div>
+    <div class="mfld"><label>Email Address</label><input type="email" id="editEmail" disabled></div>
+    <div class="mfld">
+      <label>PNG Signature Image (Transparent background)</label>
+      <input type="file" id="editSigImage" accept="image/png" style="font-size:12px;width:100%;padding:4px" onchange="handleSigUpload(event)">
+      <div id="sigPreviewWrap" style="display:none;margin-top:8px;border:1px solid #e5e7eb;padding:4px;border-radius:4px;background:#f9fafb">
+         <img id="sigPreviewImg" src="" style="max-height:40px;max-width:100px;display:block">
+         <button class="mbtn mbtn-sec" style="font-size:10px;padding:2px 6px;margin-top:4px" onclick="clearEditSig()">Remove Image</button>
+      </div>
+      <input type="hidden" id="editSigBase64">
+    </div>
     <input type="hidden" id="editIndex">
     <div class="modal-footer">
       <button class="mbtn mbtn-sec" onclick="document.getElementById('editModal').classList.remove('open')">Cancel</button>
@@ -2195,15 +2204,51 @@ function openEdit(i,type){
   const u=type==='pmam'?pmams[i]:others[i];
   document.getElementById('editName').value=u.name;
   document.getElementById('editEmail').value=u.email;
+  
+  document.getElementById('editSigImage').value = '';
+  if (u.signatureImage) {
+    document.getElementById('editSigBase64').value = u.signatureImage;
+    document.getElementById('sigPreviewImg').src = u.signatureImage;
+    document.getElementById('sigPreviewWrap').style.display = 'block';
+  } else {
+    document.getElementById('editSigBase64').value = '';
+    document.getElementById('sigPreviewImg').src = '';
+    document.getElementById('sigPreviewWrap').style.display = 'none';
+  }
+
   document.getElementById('editIndex').value=i+'|'+type;
   document.getElementById('editModal').classList.add('open');
 }
+
+function handleSigUpload(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(evt) {
+    var b64 = evt.target.result;
+    document.getElementById('editSigBase64').value = b64;
+    document.getElementById('sigPreviewImg').src = b64;
+    document.getElementById('sigPreviewWrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearEditSig() {
+  document.getElementById('editSigBase64').value = '';
+  document.getElementById('sigPreviewImg').src = '';
+  document.getElementById('sigPreviewWrap').style.display = 'none';
+  document.getElementById('editSigImage').value = '';
+}
+
 function saveEdit(){
   const[i,type]=document.getElementById('editIndex').value.split('|');
   const u=type==='pmam'?pmams[parseInt(i)]:others[parseInt(i)];
   const newName=document.getElementById('editName').value;
-  db.collection('users').doc(u.email).update({ name: newName }).then(function() {
+  const newSig=document.getElementById('editSigBase64').value;
+  
+  db.collection('users').doc(u.email).update({ name: newName, signatureImage: newSig }).then(function() {
     u.name=newName;
+    u.signatureImage=newSig;
     document.getElementById('editModal').classList.remove('open');
     renderPmams();renderOthers();
     showToast('User updated', 'success');
