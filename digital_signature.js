@@ -688,7 +688,10 @@ DSig.buildLetterheadHTML = function(d, forPdfId){
     +   '<tr><td class="lbl">Return Date</td><td>'+fmtD(d.ret)+'</td></tr>'
     +   '<tr><td class="lbl">Duty Assigned To</td><td>'+esc(d.duty||'')+'</td></tr>'
     + '</tbody></table>'
-    + '<p class="undertaking">I hereby undertake that during his/her leave period, I shall assume full responsibility for all duties, work, and responsibilities assigned to him/her.</p>'
+    + '<div class="undertaking">'
+    +   '<div style="text-align:center;font-weight:700;margin-bottom:4px;font-size:10pt;text-decoration:underline">UNDERTAKING FOR HANDOVER OF PMAM WORK DURING LEAVE</div>'
+    +   'I, Mr./Ms. <strong>' + esc(d.duty||'________________') + '</strong>, PMAM, hereby undertake that during the leave period of Mr./Ms. <strong>' + esc(d.name||'________________') + '</strong> from <strong>' + fmtD(d.fromDt) + '</strong> to <strong>' + fmtD(d.toDt) + '</strong>, I shall assume full responsibility for all assigned AB PM-JAY work, including pre-authorizations, pre-authorization queries, enhancement requests, patient discharges, claim submissions, claim queries, all pending work/files, and any other assigned duties. I further undertake to ensure timely completion of all work and acknowledge that all new patient registrations from the assigned ward(s) during the leave period shall be counted under my IPD workload and shall remain my responsibility.'
+    + '</div>'
     + '<div class="sig-row">'
     +   sigBoxByRole('PMAM', 'Applicant PMAM', 'Signature of Applicant - PMAM')
     +   sigBoxByRole('PMAM', 'Substitute PMAM', 'Signature of Substitute PMAM')
@@ -724,8 +727,8 @@ DSig.buildLetterheadHTML = function(d, forPdfId){
     +   'td{padding:4px 10px;border-bottom:1px solid #dde2ee;vertical-align:middle}'
     +   'tbody tr:last-child td{border-bottom:none}'
     +   '.lbl{font-weight:700;width:60mm;background:#eaf0ff;color:#1a3db5}'
-    +   '.undertaking{font-size:11pt;font-style:italic;border-left:3px solid #1a3db5;padding:6px 12px;background:#f7f8fc;margin:3mm 0}'
-    +   '.sig-row{display:flex;justify-content:space-between;gap:20mm;margin-top:6mm}'
+    +   '.undertaking{font-size:9.5pt;text-align:justify;border-left:4px solid #1a3db5;padding:8px 12px;background:#f7f8fc;margin:2mm 0;line-height:1.4}'
+    +   '.sig-row{display:flex;justify-content:space-between;gap:20mm;margin-top:4mm}'
     +   '.sig-box{flex:1;text-align:center}'
     +   '.sig-label{font-size:11pt;font-weight:700;margin-top:2mm;color:#000;padding-top:1.5mm;position:relative}'
     +   '.sig-label::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:60mm;max-width:75%;border-top:1px solid #888}'
