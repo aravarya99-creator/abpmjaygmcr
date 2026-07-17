@@ -690,8 +690,8 @@ DSig.buildLetterheadHTML = function(d, forPdfId){
     + '</tbody></table>'
     + '<div style="page-break-inside: avoid; break-inside: avoid;">'
     + '<div class="undertaking">'
-    +   '<div style="text-align:center;font-weight:700;margin-bottom:4px;font-size:10pt;text-decoration:underline">UNDERTAKING FOR HANDOVER OF PMAM WORK DURING LEAVE</div>'
-    +   'I, Mr./Ms. <strong>' + esc(d.duty||'________________') + '</strong>, PMAM, hereby undertake that during the leave period of Mr./Ms. <strong>' + esc(d.name||'________________') + '</strong> from <strong>' + fmtD(d.fromDt) + '</strong> to <strong>' + fmtD(d.toDt) + '</strong>, I shall assume full responsibility for all assigned AB PM-JAY work, including pre-authorizations, pre-authorization queries, enhancement requests, patient discharges, claim submissions, claim queries, all pending work/files, and any other assigned duties. I further undertake to ensure timely completion of all work and acknowledge that all new patient registrations from the assigned ward(s) during the leave period shall be counted under my IPD workload and shall remain my responsibility.'
+    +   '<div style="text-align:center;font-weight:700;margin-bottom:4px;font-size:10pt;text-decoration:underline">UNDERTAKING FOR PMAM DUTY COVERAGE DURING LEAVE</div>'
+    +   'I, Mr./Ms. <strong>' + esc(d.duty||'________________') + '</strong>, PMAM, hereby undertake that during the leave period of Mr./Ms. <strong>' + esc(d.name||'________________') + '</strong>, from <strong>' + fmtD(d.fromDt) + '</strong> to <strong>' + fmtD(d.toDt) + '</strong>, I shall assume full responsibility for all assigned AB PM-JAY work, including pre-auths, pre-auth queries, claim queries, enhancements, discharges, claim submissions, and all pending work. All IPDs from the assigned ward(s) during the leave period shall be counted under my IPD workload and shall be my responsibility.'
     + '</div>'
     + '<div class="sig-row">'
     +   sigBoxByRole('PMAM', 'Applicant PMAM', 'Signature of Applicant - PMAM')
