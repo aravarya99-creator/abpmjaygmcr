@@ -2344,6 +2344,10 @@ document.addEventListener('click', function(e) {
 // ══════════════════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', function(){
   try {
+    
+    db.collection('settings').doc('leave_rules').onSnapshot(doc => { if(doc.exists) _icLeaveLimits = doc.data(); });
+    db.collection('settings').doc('comp_balances').onSnapshot(doc => { if(doc.exists) _icCompBalances = doc.data().balances || {}; });
+
     db.collection('settings').doc('tickers').onSnapshot(function(doc){
       var bar = document.getElementById('adminTicker');
       if (!bar) return;

@@ -1341,6 +1341,7 @@ tr:hover td{background:#EEF3FF}
         <button class="dmt-tab active" id="stab-branding" onclick="showSettingsTab('branding',this)">🖼️ Branding</button>
         <button class="dmt-tab" id="stab-tickers" onclick="showSettingsTab('tickers',this)">📣 Tickers</button>
         <button class="dmt-tab" id="stab-sysinfo" onclick="showSettingsTab('sysinfo',this)">⚙️ System</button>
+        <button class="dmt-tab" id="stab-leaves" onclick="showSettingsTab(\'leaves\',this)">📅 Leaves &amp; Balances</button>
       </div>
 
       <div class="settings-layout">
@@ -1591,6 +1592,51 @@ tr:hover td{background:#EEF3FF}
             </div>
           </div>
 
+
+          <div class="settings-panel" id="panel-leave_limits">
+            <div class="panel-hd">Global Leave Rules</div>
+            <div class="panel-body">
+              <div style="font-size:12px;color:#4b5563;margin-bottom:16px">
+                Set the annual eligible limits for PMAM leaves.
+              </div>
+              <table style="width:100%;border-collapse:collapse;font-size:13px;max-width:500px">
+                <tr style="background:#f3f4f6">
+                  <th style="padding:8px;border-bottom:1px solid #d1d5db;text-align:left">Leave Type</th>
+                  <th style="padding:8px;border-bottom:1px solid #d1d5db;text-align:left">Annual Quota (Days)</th>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border-bottom:1px solid #e5e7eb">Casual Leave (Paid)</td>
+                  <td style="padding:8px;border-bottom:1px solid #e5e7eb"><input type="number" id="ll_casual" class="frm-inp" style="width:80px" value="15"></td>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border-bottom:1px solid #e5e7eb">Medical Leave (Unpaid)</td>
+                  <td style="padding:8px;border-bottom:1px solid #e5e7eb"><input type="number" id="ll_medical" class="frm-inp" style="width:80px" value="30"></td>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border-bottom:1px solid #e5e7eb">Leave Without Pay (Unpaid)</td>
+                  <td style="padding:8px;border-bottom:1px solid #e5e7eb"><input type="number" id="ll_lwp" class="frm-inp" style="width:80px" value="30"></td>
+                </tr>
+              </table>
+              <div style="margin-top:16px">
+                <button class="btn btn-pri" onclick="saveLeaveLimits()">Save Limits</button>
+                <span id="ll_msg" style="margin-left:12px;font-size:12px"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="panel-comp_balances">
+            <div class="panel-hd">Compensatory Balances</div>
+            <div class="panel-body">
+              <div style="font-size:12px;color:#4b5563;margin-bottom:16px">
+                Manage Earned Compensatory Days for each PMAM. (When they work a holiday/Sunday, increment their Earned Balance).
+              </div>
+              <div id="comp_balances_table_wrap">Loading...</div>
+              <div style="margin-top:16px">
+                <button class="btn btn-pri" onclick="saveCompBalances()">Save Balances</button>
+                <span id="cb_msg" style="margin-left:12px;font-size:12px"></span>
+              </div>
+            </div>
+          </div>
           <div class="settings-panel" id="panel-sysinfo">
             <div class="s-card">
               <div class="s-card-title"><svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z"/></svg>System Information</div>
@@ -5228,7 +5274,16 @@ var _settingsTabSubSidebars = {
       { id:'tickers', label:'📣 Ticker Messages', icon:'M3 11l18-5v12L3 14v-3z' }
     ]
   },
+
+  leaves: {
+    title: 'Leaves & Balances',
+    items: [
+      { id:'leave_limits', label:'Global Leave Rules', icon:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+      { id:'comp_balances', label:'Compensatory Balances', icon:'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' }
+    ]
+  },
   sysinfo: {
+
     title: 'System',
     items: [
       { id:'sysinfo', label:'🛡️ System Info & Backup', icon:'M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4z' }
