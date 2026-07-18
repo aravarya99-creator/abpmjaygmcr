@@ -8448,7 +8448,7 @@ function loadCompBalances() {
   var wrap = document.getElementById('comp_balances_table_wrap');
   if(!wrap) return;
   wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#6b7280;font-style:italic">Loading PMAMs...</div>';
-  db.collection('users').where('role','==','pmam').get().then(function(snap){
+  db.collection('users').where('role','==','PMAM').get().then(function(snap){
     var arr = [];
     snap.forEach(function(doc){
       var d = doc.data();
@@ -8483,7 +8483,7 @@ function saveCompBalances() {
   var msg = document.getElementById('cb_msg');
   if(msg) msg.textContent = '';
   
-  db.collection('users').where('role','==','pmam').get().then(function(snap){
+  db.collection('users').where('role','==','PMAM').get().then(function(snap){
     var batch = db.batch();
     var count = 0;
     snap.forEach(function(doc){
