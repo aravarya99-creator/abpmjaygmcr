@@ -294,6 +294,20 @@ tr:hover td{background:#EEF3FF}
     var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
     if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
   </script>
+
+<style>
+/* Toggle Switch */
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; margin:0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+input:checked + .slider { background-color: #1A3DB5; }
+input:focus + .slider { box-shadow: 0 0 1px #1A3DB5; }
+input:checked + .slider:before { transform: translateX(20px); }
+.slider.round { border-radius: 34px; }
+.slider.round:before { border-radius: 50%; }
+</style>
+
 </head>
 <body>
 
@@ -395,6 +409,13 @@ tr:hover td{background:#EEF3FF}
       <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1.41-9.58L7 16l5.58-3.59L16 9l-5.41 1.42z"/></svg>
       <div class="sbl">Nav Bar</div>
     </div>
+    
+    <div class="sb-div"></div>
+    <div class="sbi" onclick="goSec('leaves',this)" title="Leaves & Balances">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/></svg>
+      <div class="sbl">Leaves</div>
+    </div>
+
     <div class="sb-div"></div>
     <div class="sbi" onclick="goSec('settings',this)" title="Settings">
       <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg>
@@ -727,33 +748,7 @@ tr:hover td{background:#EEF3FF}
       </div>
 
       <!-- ── TAB: Leave Requests ── -->
-      <div class="dmt-pane" id="dmpane-leaves">
-        <div class="card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;margin-bottom:12px">
-          <div class="card-hd" style="color:#14532d">📋 Leave Requests — View / Edit / Approve / Reject</div>
-          <div style="font-size:12px;color:#14532d">Filter by PMAM, status, or type.</div>
-        </div>
-        <div class="card">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
-            <div class="fld"><label>PMAM</label><select id="dmLvPmam" style="height:34px;padding:0 10px;border:1.5px solid #bbf7d0;border-radius:8px;font-size:12px"><option value="">All PMAMs</option></select></div>
-            <div class="fld"><label>Status</label><select id="dmLvStatus" style="height:34px;padding:0 10px;border:1.5px solid #bbf7d0;border-radius:8px;font-size:12px"><option value="">All</option><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
-            <div class="fld"><label>Type</label><select id="dmLvType" style="height:34px;padding:0 10px;border:1.5px solid #bbf7d0;border-radius:8px;font-size:12px"><option value="">All</option><option>Casual</option><option>Earned</option><option>Medical</option><option>Compensatory</option></select></div>
-            <button class="btn btn-pri" onclick="dmLoadLeaves()">🔍 Load</button>
-          </div>
-          <div id="dmLvStatusTxt" style="font-size:11px;color:#6b7280;margin-top:8px"></div>
-        </div>
-        <div class="card" style="padding:0">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:8px">
-            <span style="font-weight:700;color:#1e293b;font-size:13px">Leave Requests <span id="dmLvCount" style="font-weight:400;color:#6b7280;font-size:11px"></span></span>
-            <button class="btn btn-pri" onclick="openAddLeave()" style="padding:6px 12px;font-size:11px">➕ Add Leave</button>
-          </div>
-          <div class="tbl-wrap" style="max-height:520px;overflow:auto">
-            <table>
-              <thead><tr><th>Type</th><th>PMAM</th><th>Ward</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th style="width:110px">Actions</th></tr></thead>
-              <tbody id="dmLvTbody"><tr><td colspan="9" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">Click Load to fetch leave requests…</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      
 
       <!-- ── TAB: Data Cleanup ── -->
       <div class="dmt-pane" id="dmpane-cleanup">
@@ -1333,7 +1328,205 @@ tr:hover td{background:#EEF3FF}
     </div>
 
     <!-- ===== SETTINGS ===== -->
-    <div class="sec" id="sec-settings">
+    
+  <div class="sec" id="sec-leaves">
+    <div class="sec-hd">Leaves & Balances</div>
+    <div class="sec-body" style="padding:0; display:flex; height:calc(100vh - 60px);">
+      <!-- Sub Sidebar -->
+      <div style="width:250px; background:#fff; border-right:1px solid #e2e8f0; display:flex; flex-direction:column;">
+        <div style="padding:16px; font-weight:700; color:#1e293b; border-bottom:1px solid #e2e8f0;">Leave Management</div>
+        <div style="padding:10px;">
+          <div class="sbs-item active" onclick="showLeavesTab('leave_requests', this)">Leave Requests</div>
+          <div class="sbs-item" onclick="showLeavesTab('leave_limits', this)">Global Leave Rules</div>
+          <div class="sbs-item" onclick="showLeavesTab('comp_balances', this)">Compensatory Balances</div>
+          <div class="sbs-item" onclick="showLeavesTab('add_leaves', this)">Add Historical Leaves</div>
+        </div>
+      </div>
+      <!-- Content Area -->
+      <div style="flex:1; padding:24px; overflow-y:auto; background:#f8fafc;" id="leaves-content-area">
+        
+        <div class="leaves-panel active" id="lpanel-leave_requests" style="display:block;">
+          <div class="" >
+        <div class="card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;margin-bottom:12px">
+          <div class="card-hd" style="color:#14532d">📋 Leave Requests — View / Edit / Approve / Reject</div>
+          <div style="font-size:12px;color:#14532d">Filter by PMAM, status, or type.</div>
+        </div>
+        <div class="card">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
+            <div class="fld"><label>PMAM</label><select id="dmLvPmam" style="height:34px;padding:0 10px;border:1.5px solid #bbf7d0;border-radius:8px;font-size:12px"><option value="">All PMAMs</option></select></div>
+            <div class="fld"><label>Status</label><select id="dmLvStatus" style="height:34px;padding:0 10px;border:1.5px solid #bbf7d0;border-radius:8px;font-size:12px"><option value="">All</option><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+            <div class="fld"><label>Type</label><select id="dmLvType" style="height:34px;padding:0 10px;border:1.5px solid #bbf7d0;border-radius:8px;font-size:12px"><option value="">All</option><option>Casual</option><option>Earned</option><option>Medical</option><option>Compensatory</option></select></div>
+            <button class="btn btn-pri" onclick="dmLoadLeaves()">🔍 Load</button>
+          </div>
+          <div id="dmLvStatusTxt" style="font-size:11px;color:#6b7280;margin-top:8px"></div>
+        </div>
+        <div class="card" style="padding:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:8px">
+            <span style="font-weight:700;color:#1e293b;font-size:13px">Leave Requests <span id="dmLvCount" style="font-weight:400;color:#6b7280;font-size:11px"></span></span>
+            <button class="btn btn-pri" onclick="openAddLeave()" style="padding:6px 12px;font-size:11px">➕ Add Leave</button>
+          </div>
+          <div class="tbl-wrap" style="max-height:520px;overflow:auto">
+            <table>
+              <thead><tr><th>Type</th><th>PMAM</th><th>Ward</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th style="width:110px">Actions</th></tr></thead>
+              <tbody id="dmLvTbody"><tr><td colspan="9" style="text-align:center;padding:30px;color:#9ca3af;font-style:italic">Click Load to fetch leave requests…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+        </div>
+        
+        
+        <div class="leaves-panel" id="lpanel-leave_limits" style="display:none;">
+            <div class="panel-hd" style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:16px;">Global Leave Rules</div>
+            <div style="font-size:13px;color:#4b5563;margin-bottom:16px">
+              Configure which leave types are available in the PMAM Portal and set their annual quotas.
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; max-width:800px;">
+              
+              <!-- Casual Leave -->
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="font-weight:600;display:flex;align-items:center;gap:8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A3DB5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Casual Leave (Paid)
+                  </div>
+                  <label class="switch"><input type="checkbox" id="ll_en_casual" checked><span class="slider round"></span></label>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                  <span>Annual Quota (Days):</span>
+                  <input type="number" id="ll_casual" class="frm-inp" style="width:70px;padding:4px;" value="15">
+                </div>
+              </div>
+
+              <!-- Compensatory -->
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="font-weight:600;display:flex;align-items:center;gap:8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4-9 4-9-4 9-4z"/><path d="M3 7v6c0 2 4 4 9 4s9-2 9-4V7"/></svg>
+                    Compensatory (Paid)
+                  </div>
+                  <label class="switch"><input type="checkbox" id="ll_en_comp" checked><span class="slider round"></span></label>
+                </div>
+                <div style="font-size:12px;color:#64748b;">Earned by working holidays/Sundays. Limit depends on earned balance.</div>
+              </div>
+
+              <!-- Medical Leave -->
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="font-weight:600;display:flex;align-items:center;gap:8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg>
+                    Medical Leave (Unpaid)
+                  </div>
+                  <label class="switch"><input type="checkbox" id="ll_en_medical" checked><span class="slider round"></span></label>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                  <span>Annual Quota (Days):</span>
+                  <input type="number" id="ll_medical" class="frm-inp" style="width:70px;padding:4px;" value="30">
+                </div>
+              </div>
+
+              <!-- Maternity Leave -->
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="font-weight:600;display:flex;align-items:center;gap:8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#BE185D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="3"/><path d="M12 9c-3 0-6 2-6 5v8h12v-8c0-3-3-5-6-5z"/></svg>
+                    Maternity Leave (Unpaid)
+                  </div>
+                  <label class="switch"><input type="checkbox" id="ll_en_mat" checked><span class="slider round"></span></label>
+                </div>
+                <div style="font-size:12px;color:#64748b;">Quota: 26 weeks (1st/2nd child), 12 weeks (3rd+). Checked manually.</div>
+              </div>
+
+              <!-- Paternity Leave -->
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="font-weight:600;display:flex;align-items:center;gap:8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>
+                    Paternity Leave (Unpaid)
+                  </div>
+                  <label class="switch"><input type="checkbox" id="ll_en_pat" checked><span class="slider round"></span></label>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                  <span>Quota (Days/Child):</span>
+                  <input type="number" id="ll_pat" class="frm-inp" style="width:70px;padding:4px;" value="15">
+                </div>
+              </div>
+
+              <!-- Leave Without Pay -->
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="font-weight:600;display:flex;align-items:center;gap:8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4338CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    Leave Without Pay (Unpaid)
+                  </div>
+                  <label class="switch"><input type="checkbox" id="ll_en_lwp" checked><span class="slider round"></span></label>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                  <span>Annual Quota (Days):</span>
+                  <input type="number" id="ll_lwp" class="frm-inp" style="width:70px;padding:4px;" value="30">
+                </div>
+              </div>
+
+            </div>
+            
+            <div style="margin-top:20px;border-top:1px solid #e2e8f0;padding-top:20px;">
+              <button class="btn btn-pri" onclick="saveLeaveLimits()">Save Configuration</button>
+              <span id="ll_msg" style="margin-left:12px;font-size:13px;font-weight:600;"></span>
+            </div>
+        </div>
+
+        <div class="leaves-panel" id="lpanel-comp_balances" style="display:none;">
+          <div class="" >
+            <div class="panel-hd">Compensatory Balances</div>
+            <div class="panel-body">
+              <div style="font-size:12px;color:#4b5563;margin-bottom:16px">
+                Manage Earned Compensatory Days for each PMAM. (When they work a holiday/Sunday, increment their Earned Balance).
+              </div>
+              <div id="comp_balances_table_wrap">Loading...</div>
+              <div style="margin-top:16px">
+                <button class="btn btn-pri" onclick="saveCompBalances()">Save Balances</button>
+                <span id="cb_msg" style="margin-left:12px;font-size:12px"></span>
+              </div>
+            </div>
+        </div>
+        
+        <div class="leaves-panel" id="lpanel-add_leaves" style="display:none;">
+          <div class="panel-hd" style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:16px;">Add Historical Leaves</div>
+          <div style="background:#fff;padding:20px;border-radius:8px;border:1px solid #e2e8f0;max-width:500px;">
+            <div style="margin-bottom:12px;">
+              <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;">PMAM</label>
+              <select id="al_pmam" class="frm-inp" style="width:100%;"></select>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;">Leave Type</label>
+              <select id="al_type" class="frm-inp" style="width:100%;">
+                <option value="Casual">Casual Leave (Paid)</option>
+                <option value="Compensatory">Compensatory (Paid)</option>
+                <option value="Medical Leave">Medical Leave (Unpaid)</option>
+                <option value="Maternity Leave">Maternity Leave (Unpaid)</option>
+                <option value="Paternity Leave">Paternity Leave (Unpaid)</option>
+                <option value="Leave Without Pay">Leave Without Pay (Unpaid)</option>
+              </select>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;">Days Taken</label>
+              <input type="number" id="al_days" class="frm-inp" style="width:100%;" min="1" value="1">
+            </div>
+            <div style="margin-bottom:16px;">
+              <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;">Remarks (Optional)</label>
+              <input type="text" id="al_remarks" class="frm-inp" style="width:100%;" placeholder="e.g. Manual balance seeding">
+            </div>
+            <button class="btn btn-pri" onclick="submitHistoricalLeave()" style="width:100%;">Add Leave Record</button>
+            <div id="al_msg" style="margin-top:12px;font-size:13px;text-align:center;"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="sec" id="sec-settings">
       <div class="page-hd">Settings</div>
 
       <!-- Settings Tabs -->
@@ -1593,49 +1786,10 @@ tr:hover td{background:#EEF3FF}
           </div>
 
 
-          <div class="settings-panel" id="panel-leave_limits">
-            <div class="panel-hd">Global Leave Rules</div>
-            <div class="panel-body">
-              <div style="font-size:12px;color:#4b5563;margin-bottom:16px">
-                Set the annual eligible limits for PMAM leaves.
-              </div>
-              <table style="width:100%;border-collapse:collapse;font-size:13px;max-width:500px">
-                <tr style="background:#f3f4f6">
-                  <th style="padding:8px;border-bottom:1px solid #d1d5db;text-align:left">Leave Type</th>
-                  <th style="padding:8px;border-bottom:1px solid #d1d5db;text-align:left">Annual Quota (Days)</th>
-                </tr>
-                <tr>
-                  <td style="padding:8px;border-bottom:1px solid #e5e7eb">Casual Leave (Paid)</td>
-                  <td style="padding:8px;border-bottom:1px solid #e5e7eb"><input type="number" id="ll_casual" class="frm-inp" style="width:80px" value="15"></td>
-                </tr>
-                <tr>
-                  <td style="padding:8px;border-bottom:1px solid #e5e7eb">Medical Leave (Unpaid)</td>
-                  <td style="padding:8px;border-bottom:1px solid #e5e7eb"><input type="number" id="ll_medical" class="frm-inp" style="width:80px" value="30"></td>
-                </tr>
-                <tr>
-                  <td style="padding:8px;border-bottom:1px solid #e5e7eb">Leave Without Pay (Unpaid)</td>
-                  <td style="padding:8px;border-bottom:1px solid #e5e7eb"><input type="number" id="ll_lwp" class="frm-inp" style="width:80px" value="30"></td>
-                </tr>
-              </table>
-              <div style="margin-top:16px">
-                <button class="btn btn-pri" onclick="saveLeaveLimits()">Save Limits</button>
-                <span id="ll_msg" style="margin-left:12px;font-size:12px"></span>
-              </div>
-            </div>
+          
           </div>
 
-          <div class="settings-panel" id="panel-comp_balances">
-            <div class="panel-hd">Compensatory Balances</div>
-            <div class="panel-body">
-              <div style="font-size:12px;color:#4b5563;margin-bottom:16px">
-                Manage Earned Compensatory Days for each PMAM. (When they work a holiday/Sunday, increment their Earned Balance).
-              </div>
-              <div id="comp_balances_table_wrap">Loading...</div>
-              <div style="margin-top:16px">
-                <button class="btn btn-pri" onclick="saveCompBalances()">Save Balances</button>
-                <span id="cb_msg" style="margin-left:12px;font-size:12px"></span>
-              </div>
-            </div>
+          
           </div>
           <div class="settings-panel" id="panel-sysinfo">
             <div class="s-card">
@@ -5275,13 +5429,7 @@ var _settingsTabSubSidebars = {
     ]
   },
 
-  leaves: {
-    title: 'Leaves & Balances',
-    items: [
-      { id:'leave_limits', label:'Global Leave Rules', icon:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
-      { id:'comp_balances', label:'Compensatory Balances', icon:'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' }
-    ]
-  },
+  
   sysinfo: {
 
     title: 'System',
@@ -5290,6 +5438,17 @@ var _settingsTabSubSidebars = {
     ]
   }
 };
+
+
+function showLeavesTab(id, el) {
+  document.querySelectorAll('#sec-leaves .sbs-item').forEach(e => e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.querySelectorAll('#sec-leaves .leaves-panel').forEach(p => p.style.display = 'none');
+  var panel = document.getElementById('lpanel-' + id);
+  if(panel) panel.style.display = 'block';
+  if(id === 'leave_requests') { dmLoadFilters(); }
+  if(id === 'add_leaves') { populateALPMAMs(); }
+}
 
 function showSettingsTab(tab, el) {
   // Update top tab buttons

@@ -1846,7 +1846,18 @@ function fetchMyLeaveBalances() {
   if (typeof db === 'undefined') return;
   
   db.collection('settings').doc('leave_rules').get().then(doc => {
-    if(doc.exists) _globalLeaveLimits = doc.data();
+    if(doc.exists) {
+      _globalLeaveLimits = doc.data();
+      var safeHide = function(lblFor) { var e = document.querySelector('label[for="'+lblFor+'"]'); if(e) e.style.display = 'none'; else console.warn('Not found', lblFor); };
+      var safeShow = function(lblFor) { var e = document.querySelector('label[for="'+lblFor+'"]'); if(e) e.style.display = 'inline-flex'; };
+      
+      if(_globalLeaveLimits.en_casual === false) safeHide("lt1"); else safeShow("lt1");
+      if(_globalLeaveLimits.en_comp === false) safeHide("lt2"); else safeShow("lt2");
+      if(_globalLeaveLimits.en_medical === false) safeHide("lt3"); else safeShow("lt3");
+      if(_globalLeaveLimits.en_mat === false) safeHide("lt4"); else safeShow("lt4");
+      if(_globalLeaveLimits.en_pat === false) safeHide("lt5"); else safeShow("lt5");
+      if(_globalLeaveLimits.en_lwp === false) safeHide("lt6"); else safeShow("lt6");
+    }
     return db.collection('settings').doc('comp_balances').get();
   }).then(doc => {
     if(doc.exists && doc.data().balances) {
