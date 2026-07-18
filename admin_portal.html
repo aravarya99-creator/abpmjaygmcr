@@ -6006,7 +6006,6 @@ function dmLoadFilters(){
       sel.innerHTML = '<option value="">All PMAMs</option>' + _dmPmamList.map(function(u){ return '<option value="'+u.email+'">'+u.name+'</option>'; }).join('');
     });
   });
-});
   _dmWardList = ['Orthopaedics','Male Surgery Ward','Female Surgery Ward','Male Medicine Ward A','Male Medicine Ward B','Female Medicine Ward A','Female Medicine Ward B','MICU','SICU','Optha','Onco','Gynae','ENT','Dental','Disaster','Dialysis'];
   var wsel = document.getElementById('dmRepWard');
   if (wsel) wsel.innerHTML = '<option value="">All Wards</option>' + _dmWardList.map(function(w){ return '<option>'+w+'</option>'; }).join('');
