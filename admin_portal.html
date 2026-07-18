@@ -5992,15 +5992,21 @@ function dmShowTab(tab, el){
 var _dmPmamList = [];
 var _dmWardList = [];
 function dmLoadFilters(){
-  db.collection('users').where('role','==','PMAM').get().then(function(s){
+  db.collection('users').get().then(function(s){
     _dmPmamList = [];
-    s.forEach(function(d){ var u = d.data(); if (u.email) _dmPmamList.push({ email: u.email, name: u.name || u.email }); });
+    s.forEach(function(d){
+      var u = d.data();
+      if ((u.role || '').trim().toLowerCase() === 'pmam' && u.email) {
+        _dmPmamList.push({ email: u.email, name: u.name || u.email });
+      }
+    });
     _dmPmamList.sort(function(a,b){ return a.name.localeCompare(b.name); });
     ['dmRepPmam','dmLvPmam'].forEach(function(id){
       var sel = document.getElementById(id); if (!sel) return;
       sel.innerHTML = '<option value="">All PMAMs</option>' + _dmPmamList.map(function(u){ return '<option value="'+u.email+'">'+u.name+'</option>'; }).join('');
     });
   });
+});
   _dmWardList = ['Orthopaedics','Male Surgery Ward','Female Surgery Ward','Male Medicine Ward A','Male Medicine Ward B','Female Medicine Ward A','Female Medicine Ward B','MICU','SICU','Optha','Onco','Gynae','ENT','Dental','Disaster','Dialysis'];
   var wsel = document.getElementById('dmRepWard');
   if (wsel) wsel.innerHTML = '<option value="">All Wards</option>' + _dmWardList.map(function(w){ return '<option>'+w+'</option>'; }).join('');
@@ -8447,68 +8453,65 @@ function submitHistoricalLeave() {
 function loadCompBalances() {
   var wrap = document.getElementById('comp_balances_table_wrap');
   if(!wrap) return;
-  wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#6b7280;font-style:italic">Loading PMAMs...</div>';
-  db.collection('users').where('role','==','PMAM').get().then(function(snap){
+  wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#6b7280;font-style:italic">Loading PMAMs... (v1.3)</div>';
+  db.collection('users').get().then(function(snap){
     var arr = [];
     snap.forEach(function(doc){
       var d = doc.data();
-      arr.push({id: doc.id, name: d.name||'Unknown', bal: d.earnedCompLeave||0});
+      if ((d.role || '').trim().toLowerCase() === 'pmam') {
+        arr.push({id: doc.id, name: d.name||'Unknown', bal: d.earnedCompLeave||0});
+      }
     });
     arr.sort(function(a,b){ return a.name.localeCompare(b.name); });
     
     var html = '<table style="width:100%;border-collapse:collapse;margin-top:10px;">';
-    html += '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;"><th style="padding:10px;text-align:left;font-size:12px;color:#475569">PMAM</th><th style="padding:10px;text-align:center;font-size:12px;color:#475569">Earned Balance (Days)</th></tr></thead><tbody>';
+    html += '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;"><th style="padding:10px;text-align:left;font-size:12px;color:#475569">PMAM</th><th style="padding:10px;text-align:center;font-size:12px;color:#475569">EARNED BALANCE (DAYS)</th></tr></thead><tbody>';
     
     if(arr.length === 0){
-      html += '<tr><td colspan="2" style="text-align:center;padding:20px;color:#9ca3af;font-style:italic">No PMAMs found.</td></tr>';
+      html += '<tr><td colspan="2" style="padding:20px;text-align:center;color:#94a3b8;font-style:italic">No PMAMs found. (v1.3)</td></tr>';
     } else {
       arr.forEach(function(p){
-        html += '<tr style="border-bottom:1px solid #f1f5f9;">';
-        html += '<td style="padding:10px;font-size:13px;color:#1e293b;font-weight:500;">'+p.name+'</td>';
-        html += '<td style="padding:10px;text-align:center;"><input type="number" id="cb_inp_'+p.id+'" value="'+p.bal+'" style="width:70px;padding:4px;text-align:center;border:1px solid #cbd5e1;border-radius:4px;" step="0.5" min="0"></td>';
-        html += '</tr>';
+        html += '<tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px;font-weight:500;color:#1e293b">'+p.name+'</td>';
+        html += '<td style="padding:10px;text-align:center;"><input type="number" id="cb_inp_'+p.id+'" value="'+p.bal+'" style="width:80px;text-align:center;padding:5px;border:1px solid #cbd5e1;border-radius:4px;" step="0.5" min="0"></td></tr>';
       });
     }
     html += '</tbody></table>';
     wrap.innerHTML = html;
-  }).catch(function(e){
-    wrap.innerHTML = '<div style="padding:20px;color:#dc2626;">Error: '+e.message+'</div>';
+  }).catch(function(err){
+    wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#dc2626">Error loading PMAMs: '+err.message+'</div>';
   });
 }
 
 function saveCompBalances() {
-  if(!isAdminUnlocked()){ alert('Unlock Admin first.'); return; }
-  var btn = document.querySelector('#lpanel-comp_balances .btn-pri');
-  if(btn) btn.textContent = 'Saving...';
-  var msg = document.getElementById('cb_msg');
-  if(msg) msg.textContent = '';
-  
-  db.collection('users').where('role','==','PMAM').get().then(function(snap){
+  var btn = event.target;
+  btn.textContent = 'Saving...';
+  db.collection('users').get().then(function(snap){
     var batch = db.batch();
     var count = 0;
     snap.forEach(function(doc){
-      var inp = document.getElementById('cb_inp_' + doc.id);
-      if(inp){
-        var val = parseFloat(inp.value)||0;
-        batch.update(doc.ref, { earnedCompLeave: val });
-        count++;
+      var d = doc.data();
+      if ((d.role || '').trim().toLowerCase() === 'pmam') {
+        var inp = document.getElementById('cb_inp_' + doc.id);
+        if(inp){
+          var val = parseFloat(inp.value) || 0;
+          batch.update(db.collection('users').doc(doc.id), { earnedCompLeave: val });
+          count++;
+        }
       }
     });
-    return batch.commit().then(function(){ return count; });
-  }).then(function(count){
-    if(msg){ msg.textContent = 'Saved successfully ('+count+' PMAMs)'; msg.style.color='#166534'; setTimeout(function(){msg.textContent='';},3000); }
-    if(btn) btn.textContent = 'Save Balances';
-    logAdminAction('Updated compensatory leave balances');
-  }).catch(function(e){
-    console.error(e);
-    if(btn) btn.textContent = 'Save Balances';
-    if(msg){ msg.textContent = 'Error saving'; msg.style.color='#dc2626'; }
-    alert('Error saving balances: '+e.message);
+    if(count > 0){
+      batch.commit().then(function(){
+        btn.textContent = 'Save Balances';
+        showToast('Compensatory balances updated for '+count+' PMAM(s).', 'success');
+      }).catch(function(err){
+        btn.textContent = 'Save Balances';
+        showToast('Error saving: '+err.message, 'error');
+      });
+    } else {
+      btn.textContent = 'Save Balances';
+    }
   });
 }
-
-// --- END ADVANCED LEAVE MANAGEMENT LOGIC ---
-
 </script>
 </body>
 </html>
