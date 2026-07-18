@@ -1957,8 +1957,13 @@ function _formatHolidayLabel(h) {
 // Build <option> list for all 4 holiday dropdowns from _pmamHolidays.
 // Sundays excluded (not normally compensable). Sorted by date ascending.
 function populateHolidayDropdowns() {
+  var now = new Date();
+  var currentMonthPrefix = now.getFullYear() + '-' + (now.getMonth() + 1).toString().padStart(2, '0');
+
   var sorted = _pmamHolidays.slice()
-    .filter(function(h){ return h.type !== 'Sunday'; })
+    .filter(function(h){ 
+      return h.type !== 'Sunday' && h.date && h.date.substring(0, 7) === currentMonthPrefix; 
+    })
     .sort(function(a,b){
       if (!a.date) return 1;
       if (!b.date) return -1;
@@ -1969,14 +1974,20 @@ function populateHolidayDropdowns() {
     var sel = document.getElementById('cd'+i+'_hol');
     if (!sel) continue;
     var prev = sel.value; // preserve current selection if possible
-    var html = '<option value="">-- Select Holiday --</option>';
-    sorted.forEach(function(h){
-      // Encode date+name as JSON in value so the change handler can recover both
-      var v = JSON.stringify({date: h.date, name: h.name, type: h.type||''});
-      html += '<option value="'+v.replace(/"/g,'&quot;')+'">'+_formatHolidayLabel(h)+'</option>';
-    });
+    
+    var html = '';
+    if (sorted.length === 0) {
+      html = '<option value="" disabled selected>No holidays are available in this month</option>';
+    } else {
+      html = '<option value="">-- Select Holiday --</option>';
+      sorted.forEach(function(h){
+        // Encode date+name as JSON in value so the change handler can recover both
+        var v = JSON.stringify({date: h.date, name: h.name, type: h.type||''});
+        html += '<option value="'+v.replace(/"/g,'&quot;')+'">'+_formatHolidayLabel(h)+'</option>';
+      });
+    }
     sel.innerHTML = html;
-    if (prev) { try { sel.value = prev; } catch(e){} }
+    if (sorted.length > 0 && prev) { try { sel.value = prev; } catch(e){} }
   }
 }
 
