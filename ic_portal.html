@@ -578,6 +578,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="tab active" onclick="switchLvTab('pending',this)">Pending (<span id="pendingCnt">0</span>)</div>
         <div class="tab" onclick="switchLvTab('history',this)">All History</div>
         <div class="tab" onclick="switchLvTab('onleave',this)">On Leave Today</div>
+        <div class="tab" onclick="switchLvTab('profiles',this); renderPmamProfiles();">PMAM Profiles</div>
       </div>
 
       <!-- PENDING -->
@@ -2717,6 +2718,98 @@ window.addEventListener('DOMContentLoaded', function(){
       DSig.init({ portal: 'ic' });
     }
   });
+
+function renderPmamProfiles() {
+  fetchPmamList(function(pmams){
+    var grid = document.getElementById('pmamProfilesGrid');
+    if(!grid) return;
+    
+    var search = (document.getElementById('pmamProfileSearch') ? document.getElementById('pmamProfileSearch').value.toLowerCase().trim() : '');
+    
+    var rules = window._icLeaveLimits || { casual:15, medical:10, maternity:180, paternity:15, lwp:0 };
+    var compBals = window._icCompBalances || {};
+    
+    var html = '';
+    
+    // Sort pmams alphabetically
+    var sortedPmams = pmams.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
+    
+    sortedPmams.forEach(function(p){
+      if(search && p.name.toLowerCase().indexOf(search) === -1 && p.email.toLowerCase().indexOf(search) === -1) return;
+      
+      // Calculate taken leaves
+      var casualTaken=0, medicalTaken=0, compTaken=0, otherTaken=0;
+      
+      leaveRequests.forEach(function(l){
+        if (l.status === 'Approved' && (l.email === p.email || l.name === p.name)) {
+          var d = parseFloat(l.days) || 0;
+          var t = (l.ltype || '').toLowerCase();
+          if(t === 'casual') casualTaken += d;
+          else if(t === 'medical') medicalTaken += d;
+          else if(t === 'compensatory') compTaken += d;
+          else otherTaken += d;
+        }
+      });
+      
+      var compEarned = parseFloat(compBals[p.email] || compBals[p.id] || 0); // If id exists
+      if(isNaN(compEarned)) compEarned = 0;
+      
+      var casualBal = Math.max(0, rules.casual - casualTaken);
+      var medicalBal = Math.max(0, rules.medical - medicalTaken);
+      var compBal = Math.max(0, compEarned - compTaken);
+      
+      html += `
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; box-shadow:0 4px 12px rgba(0,0,0,0.03); display:flex; flex-direction:column; gap:12px;">
+           <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+              <div>
+                 <div style="font-weight:700; color:#1e293b; font-size:15px; margin-bottom:2px;">${p.name}</div>
+                 <div style="font-size:11px; color:#64748b;">${p.email || 'No email provided'}</div>
+              </div>
+              <div style="background:#eff6ff; color:#1d4ed8; font-size:10px; font-weight:700; padding:4px 8px; border-radius:4px; text-transform:uppercase;">PMAM</div>
+           </div>
+           
+           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div style="background:#f8fafc; padding:8px 12px; border-radius:8px; border:1px solid #f1f5f9;">
+                 <div style="font-size:10px; color:#64748b; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Casual (CL)</div>
+                 <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                    <span style="font-size:15px; font-weight:700; color:#0f172a;">${casualBal} <span style="font-size:10px; font-weight:500; color:#64748b;">left</span></span>
+                    <span style="font-size:11px; color:#94a3b8;">${casualTaken}/${rules.casual} used</span>
+                 </div>
+                 <div style="width:100%; background:#e2e8f0; height:4px; border-radius:4px; margin-top:6px; overflow:hidden;">
+                    <div style="height:100%; background:${casualBal > 0 ? '#3b82f6' : '#ef4444'}; width:${Math.min(100, (casualTaken/rules.casual)*100)}%;"></div>
+                 </div>
+              </div>
+              
+              <div style="background:#f8fafc; padding:8px 12px; border-radius:8px; border:1px solid #f1f5f9;">
+                 <div style="font-size:10px; color:#64748b; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Medical (ML)</div>
+                 <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                    <span style="font-size:15px; font-weight:700; color:#0f172a;">${medicalBal} <span style="font-size:10px; font-weight:500; color:#64748b;">left</span></span>
+                    <span style="font-size:11px; color:#94a3b8;">${medicalTaken}/${rules.medical} used</span>
+                 </div>
+                 <div style="width:100%; background:#e2e8f0; height:4px; border-radius:4px; margin-top:6px; overflow:hidden;">
+                    <div style="height:100%; background:${medicalBal > 0 ? '#f59e0b' : '#ef4444'}; width:${Math.min(100, (medicalTaken/rules.medical)*100)}%;"></div>
+                 </div>
+              </div>
+           </div>
+           
+           <div style="display:flex; justify-content:space-between; align-items:center; background:#f0fdf4; border:1px solid #dcfce7; padding:8px 12px; border-radius:8px;">
+              <div>
+                 <div style="font-size:11px; color:#166534; font-weight:700;">Compensatory Balance</div>
+                 <div style="font-size:10px; color:#15803d;">Earned: ${compEarned} &bull; Taken: ${compTaken}</div>
+              </div>
+              <div style="font-size:16px; font-weight:800; color:#14532d;">${compBal}</div>
+           </div>
+           
+           ${otherTaken > 0 ? `<div style="font-size:11px; color:#6b7280; text-align:center;">Taken ${otherTaken} day(s) of Maternity/Paternity/LWP</div>` : ''}
+        </div>
+      `;
+    });
+    
+    if(html === '') html = '<div style="color:#6b7280; font-size:13px; padding:20px;">No PMAM profiles found.</div>';
+    grid.innerHTML = html;
+  });
+}
+
 </script>
 </body>
 </html>
