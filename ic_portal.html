@@ -2749,69 +2749,85 @@ function renderPmamProfiles() {
       if(search && p.name.toLowerCase().indexOf(search) === -1 && p.email.toLowerCase().indexOf(search) === -1) return;
       
       // Calculate taken leaves
-      var casualTaken=0, medicalTaken=0, compTaken=0, otherTaken=0;
+      var casualTaken=0, medicalTaken=0, compTaken=0, patTaken=0, matTaken=0, lwpTaken=0, otherTaken=0;
       
       leaveRequests.forEach(function(l){
         if (l.status === 'Approved' && (l.email === p.email || l.name === p.name)) {
           var d = parseFloat(l.days) || 0;
           var t = (l.ltype || '').toLowerCase();
-          if(t === 'casual') casualTaken += d;
-          else if(t === 'medical') medicalTaken += d;
-          else if(t === 'compensatory') compTaken += d;
+          if(t.indexOf('casual') !== -1) casualTaken += d;
+          else if(t.indexOf('medical') !== -1) medicalTaken += d;
+          else if(t.indexOf('compensatory') !== -1) compTaken += d;
+          else if(t.indexOf('paternity') !== -1) patTaken += d;
+          else if(t.indexOf('maternity') !== -1) matTaken += d;
+          else if(t.indexOf('lwp') !== -1 || t.indexOf('pay') !== -1) lwpTaken += d;
           else otherTaken += d;
         }
       });
       
-      var compEarned = parseFloat(compBals[p.email] || compBals[p.id] || 0); // If id exists
+      var compEarned = parseFloat(compBals[p.email] || compBals[p.id] || 0);
       if(isNaN(compEarned)) compEarned = 0;
       
       var casualBal = Math.max(0, rules.casual - casualTaken);
       var medicalBal = Math.max(0, rules.medical - medicalTaken);
       var compBal = Math.max(0, compEarned - compTaken);
+      var patBal = Math.max(0, rules.paternity - patTaken);
+      var matBal = Math.max(0, rules.maternity - matTaken);
       
       html += `
-        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; box-shadow:0 4px 12px rgba(0,0,0,0.03); display:flex; flex-direction:column; gap:12px;">
-           <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-              <div>
-                 <div style="font-weight:700; color:#1e293b; font-size:15px; margin-bottom:2px;">${p.name}</div>
-                 <div style="font-size:11px; color:#64748b;">${p.email || 'No email provided'}</div>
-              </div>
-              <div style="background:#eff6ff; color:#1d4ed8; font-size:10px; font-weight:700; padding:4px 8px; border-radius:4px; text-transform:uppercase;">PMAM</div>
-           </div>
-           
-           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-              <div style="background:#f8fafc; padding:8px 12px; border-radius:8px; border:1px solid #f1f5f9;">
-                 <div style="font-size:10px; color:#64748b; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Casual (CL)</div>
-                 <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                    <span style="font-size:15px; font-weight:700; color:#0f172a;">${casualBal} <span style="font-size:10px; font-weight:500; color:#64748b;">left</span></span>
-                    <span style="font-size:11px; color:#94a3b8;">${casualTaken}/${rules.casual} used</span>
-                 </div>
-                 <div style="width:100%; background:#e2e8f0; height:4px; border-radius:4px; margin-top:6px; overflow:hidden;">
-                    <div style="height:100%; background:${casualBal > 0 ? '#3b82f6' : '#ef4444'}; width:${Math.min(100, (casualTaken/rules.casual)*100)}%;"></div>
-                 </div>
-              </div>
-              
-              <div style="background:#f8fafc; padding:8px 12px; border-radius:8px; border:1px solid #f1f5f9;">
-                 <div style="font-size:10px; color:#64748b; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Medical (ML)</div>
-                 <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                    <span style="font-size:15px; font-weight:700; color:#0f172a;">${medicalBal} <span style="font-size:10px; font-weight:500; color:#64748b;">left</span></span>
-                    <span style="font-size:11px; color:#94a3b8;">${medicalTaken}/${rules.medical} used</span>
-                 </div>
-                 <div style="width:100%; background:#e2e8f0; height:4px; border-radius:4px; margin-top:6px; overflow:hidden;">
-                    <div style="height:100%; background:${medicalBal > 0 ? '#f59e0b' : '#ef4444'}; width:${Math.min(100, (medicalTaken/rules.medical)*100)}%;"></div>
-                 </div>
-              </div>
-           </div>
-           
-           <div style="display:flex; justify-content:space-between; align-items:center; background:#f0fdf4; border:1px solid #dcfce7; padding:8px 12px; border-radius:8px;">
-              <div>
-                 <div style="font-size:11px; color:#166534; font-weight:700;">Compensatory Balance</div>
-                 <div style="font-size:10px; color:#15803d;">Earned: ${compEarned} &bull; Taken: ${compTaken}</div>
-              </div>
-              <div style="font-size:16px; font-weight:800; color:#14532d;">${compBal}</div>
-           </div>
-           
-           ${otherTaken > 0 ? `<div style="font-size:11px; color:#6b7280; text-align:center;">Taken ${otherTaken} day(s) of Maternity/Paternity/LWP</div>` : ''}
+        <div style="background:#1e1e24; border:1px solid #333; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); overflow:hidden; color:#e5e7eb; font-family:monospace;">
+          <div style="background:#2d2d35; padding:12px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid #3f3f46;">
+             <span style="font-size:16px;">👤</span>
+             <span style="font-weight:700; font-size:14px; font-family:sans-serif;">${p.name}</span>
+          </div>
+          <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+            <thead>
+              <tr style="border-bottom:1px solid #3f3f46; color:#9ca3af; font-size:11px;">
+                <th style="padding:10px 16px; font-weight:normal;">Leave Type</th>
+                <th style="padding:10px 16px; font-weight:normal; text-align:center;">Elg</th>
+                <th style="padding:10px 16px; font-weight:normal; text-align:center;">Tkn</th>
+                <th style="padding:10px 16px; font-weight:normal; text-align:center;">Bal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #333;">
+                <td style="padding:10px 16px; color:#bfdbfe;">CL</td>
+                <td style="padding:10px 16px; text-align:center;">${rules.casual}</td>
+                <td style="padding:10px 16px; text-align:center;">${casualTaken}</td>
+                <td style="padding:10px 16px; text-align:center; font-weight:bold; color:#fff;">${casualBal}</td>
+              </tr>
+              <tr style="border-bottom:1px solid #333;">
+                <td style="padding:10px 16px; color:#bbf7d0;">COL</td>
+                <td style="padding:10px 16px; text-align:center;">${compEarned}</td>
+                <td style="padding:10px 16px; text-align:center;">${compTaken}</td>
+                <td style="padding:10px 16px; text-align:center; font-weight:bold; color:#fff;">${compBal}</td>
+              </tr>
+              <tr style="border-bottom:1px solid #333;">
+                <td style="padding:10px 16px; color:#fde047;">ML</td>
+                <td style="padding:10px 16px; text-align:center;">${rules.medical}</td>
+                <td style="padding:10px 16px; text-align:center;">${medicalTaken}</td>
+                <td style="padding:10px 16px; text-align:center; font-weight:bold; color:#fff;">${medicalBal}</td>
+              </tr>
+              <tr style="border-bottom:1px solid #333;">
+                <td style="padding:10px 16px; color:#e9d5ff;">PTL</td>
+                <td style="padding:10px 16px; text-align:center;">${rules.paternity}</td>
+                <td style="padding:10px 16px; text-align:center;">${patTaken}</td>
+                <td style="padding:10px 16px; text-align:center; font-weight:bold; color:#fff;">${patBal}</td>
+              </tr>
+              <tr style="border-bottom:1px solid #333;">
+                <td style="padding:10px 16px; color:#fbcfe8;">MTL</td>
+                <td style="padding:10px 16px; text-align:center;">${rules.maternity}</td>
+                <td style="padding:10px 16px; text-align:center;">${matTaken}</td>
+                <td style="padding:10px 16px; text-align:center; font-weight:bold; color:#fff;">${matBal}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 16px; color:#fca5a5;">LWP</td>
+                <td style="padding:10px 16px; text-align:center; color:#6b7280;">NA</td>
+                <td style="padding:10px 16px; text-align:center;">${lwpTaken}</td>
+                <td style="padding:10px 16px; text-align:center; color:#6b7280;">NA</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       `;
     });
