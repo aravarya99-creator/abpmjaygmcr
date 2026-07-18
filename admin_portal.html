@@ -5426,7 +5426,7 @@ function showLeavesTab(id, el) {
   if(panel) panel.style.display = 'block';
   if(id === 'leave_requests') { dmLoadFilters(); }
   if(id === 'comp_balances') { loadCompBalances(); }
-  if(id === 'add_leaves') { populateALPMAMs(); }
+  // if(id === 'add_leaves') { populateALPMAMs(); } // removed, modal handles it
 }
 
 function showSettingsTab(tab, el) {
@@ -5995,8 +5995,9 @@ function dmLoadFilters(){
     _dmPmamList = [];
     s.forEach(function(d){
       var u = d.data();
-      if ((u.role || '').trim().toLowerCase() === 'pmam' && u.email) {
-        _dmPmamList.push({ email: u.email, name: u.name || u.email });
+      if ((u.role || '').trim().toLowerCase() === 'pmam') {
+        var email = u.email || d.id;
+        _dmPmamList.push({ email: email, name: u.name || email });
       }
     });
     _dmPmamList.sort(function(a,b){ return a.name.localeCompare(b.name); });
