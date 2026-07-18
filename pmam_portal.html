@@ -2161,6 +2161,27 @@ window.addEventListener('DOMContentLoaded', function(){
   }
 });
 
+
+// Restrict compensatory date pickers to current month
+(function(){
+  window.addEventListener('DOMContentLoaded', function(){
+    var now = new Date();
+    var y = now.getFullYear();
+    var m = String(now.getMonth() + 1).padStart(2, '0');
+    var lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
+    var minDate = y + '-' + m + '-01';
+    var maxDate = y + '-' + m + '-' + String(lastDay).padStart(2, '0');
+    
+    for (var i = 1; i <= 4; i++) {
+      var reqEl = document.getElementById('cd' + i + '_req');
+      if (reqEl) {
+        reqEl.setAttribute('min', minDate);
+        reqEl.setAttribute('max', maxDate);
+      }
+    }
+  });
+})();
+
 function clearLeaveForm() {
   ['lvDesig','lvFrom','lvTo','lvDays','lvReturn','lvOther'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.value='';
