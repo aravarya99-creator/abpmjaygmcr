@@ -1969,8 +1969,8 @@ function submitLeave() {
   var reason = (rEl.value === 'other') ? document.getElementById('lvOther').value.trim() : rEl.value;
   var u = getPmjayUser();
 
-  var dLabelStr = document.getElementById('lDays').textContent || "0";
-  var reqDays = parseInt(dLabelStr.split(' ')[0]) || 0;
+  var dLabelStr = document.getElementById('lvDays').value || "0";
+  var reqDays = parseInt(dLabelStr) || 0;
   
   var chk = canTakeLeave(tEl.value, reqDays);
   if(!chk.ok) {
