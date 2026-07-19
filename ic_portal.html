@@ -68,16 +68,28 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 
 /* SIDEBAR */
 .sidebar{
+  width:260px;background:#0a1945;border-right:none;
+  display:flex;flex-direction:column;
+  padding:20px 0;gap:4px;flex-shrink:0;
+  box-shadow:2px 0 10px rgba(0,0,0,0.1);
+  color:#9ca3af; overflow-y:auto;
+}
   width:76px;background:#fff;border-right:1.5px solid #E0E8FF;
   display:flex;flex-direction:column;align-items:center;
   padding:10px 0;gap:2px;flex-shrink:0;
   box-shadow:2px 0 8px rgba(26,61,181,0.06);
 }
 .sbi{
+  width:100%; display:flex; flex-direction:row; align-items:center;
+  gap:12px; padding:12px 24px; cursor:pointer; transition:all 0.2s;
+  color:#d1d5db; box-sizing:border-box;
+}
   width:66px;display:flex;flex-direction:column;align-items:center;
   gap:3px;padding:9px 4px;border-radius:10px;cursor:pointer;transition:all 0.15s;
 }
-.sbi:hover{background:#F0F5FF}
+.sbi:hover{background:rgba(255,255,255,0.05); color:#fff;}
+.sbi svg { fill:currentColor; width:20px; height:20px; opacity:0.8; }
+.sbi:hover svg { opacity:1; }
 .sbi.active{background:linear-gradient(135deg,#0F2B8C,#1A3DB5);box-shadow:0 3px 10px rgba(15,43,140,0.25)}
 .sbi svg{width:22px;height:22px}
 .sbi.active svg{fill:#fff}
@@ -276,40 +288,148 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 <div class="layout">
 
   <!-- SIDEBAR -->
-  <div class="sidebar">
+  <div class="sidebar" id="app-sidebar">
+    <!-- Logo area -->
+    <div style="padding:0 24px 20px 24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:12px;">
+      <div style="background:#2563eb; width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+         <svg viewBox="0 0 24 24" style="fill:#fff; width:22px; height:22px;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      </div>
+      <div>
+        <div style="color:#fff; font-size:14px; font-weight:700; line-height:1.2;">PMAM LEAVE</div>
+        <div style="color:#9ca3af; font-size:12px; font-weight:500;">MANAGEMENT</div>
+      </div>
+    </div>
+
+    <div class="sidebar-category">REPORTS</div>
+    
     <div class="sbi active" onclick="goSec('daily',this)" title="Daily Report">
       <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
-      <div class="sbl">Daily</div>
+      <div class="sbl">Daily Report</div>
     </div>
+    
     <div class="sbi" onclick="goSec('monthly',this)" title="Monthly Report">
       <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-      <div class="sbl">Monthly</div>
+      <div class="sbl">Monthly Report</div>
     </div>
+    
     <div class="sbi" onclick="goSec('annual',this)" title="Annual Report">
       <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-      <div class="sbl">Annual</div>
+      <div class="sbl">Annual Report</div>
     </div>
-    <div class="sbi" onclick="goSec('ward',this)" title="Ward Wise Report">
-      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
-      <div class="sbl">Ward Wise</div>
-    </div>
+    
     <div class="sbi" onclick="goSec('pmamwise',this)" title="PMAM Wise Report">
       <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-      <div class="sbl">PMAM Wise</div>
+      <div class="sbl">PMAM Wise Report</div>
     </div>
-    <div class="sb-div"></div>
+    
+    <div class="sbi" onclick="goSec('ward',this)" title="Ward Wise Report">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+      <div class="sbl">Ward Wise Report</div>
+    </div>
+
+    <div class="sidebar-category">LEAVE MANAGEMENT</div>
+    
+    <!-- We'll repurpose 'leavereq' for Leave Requests and 'pmamwise' logic for Dashboard/Balances later if needed -->
+    <!-- For now, we will map Leave Dashboard to pmam profiles, Leave Requests to Leave Req -->
+    <div class="sbi" onclick="goSec('profiles',this)" title="Leave Dashboard">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      <div class="sbl">Leave Dashboard</div>
+    </div>
+
+    <div class="sbi" onclick="goSec('leavereq',this)" title="Leave Requests">
+      <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+      <div class="sbl">Leave Requests</div>
+      <div id="navLeaveBadge" style="margin-left:auto; background:#ef4444; color:#fff; font-size:11px; font-weight:bold; padding:2px 6px; border-radius:10px; display:none;">0</div>
+    </div>
+
+    <div class="sidebar-category">AUDIT & MONITORING</div>
+    
     <div class="sbi" onclick="goSec('allrecords',this)" title="Audit Log">
       <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
       <div class="sbl">Audit Log</div>
     </div>
-    <div class="sbi" onclick="goSec('leavereq',this)" title="Leave Requests">
-      <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
-      <div class="sbl">Leave Req</div>
+    
+    <div style="margin-top:auto; padding:20px; border-top:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; gap:12px;">
+       <div style="background:#1e3a8a; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+          <span style="font-size:18px;">👨‍💼</span>
+       </div>
+       <div>
+          <div style="color:#fff; font-size:13px; font-weight:600;">Incharge</div>
+          <div style="color:#9ca3af; font-size:11px;">Leave Section</div>
+       </div>
+       <div style="margin-left:auto; cursor:pointer;" onclick="location.reload()">
+          <svg viewBox="0 0 24 24" style="fill:#9ca3af; width:18px; height:18px;"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+       </div>
     </div>
   </div>
 
   <!-- CONTENT -->
   <div class="content">
+    <!-- TOP SUMMARY WIDGETS -->
+    <div style="display:flex; gap:16px; padding:20px 24px 0 24px; flex-wrap:wrap;">
+      
+      <!-- Total PMAM -->
+      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+        <div style="width:48px; height:48px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center;">
+           <span style="font-size:24px;">👨‍👩‍👧‍👦</span>
+        </div>
+        <div>
+          <div style="color:#1e293b; font-size:13px; font-weight:600;">Total PMAM</div>
+          <div style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">10</div>
+          <div style="color:#64748b; font-size:11px;">Employees</div>
+        </div>
+      </div>
+
+      <!-- Present Today -->
+      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+        <div style="width:48px; height:48px; border-radius:50%; background:#f0fdf4; display:flex; align-items:center; justify-content:center;">
+           <span style="font-size:24px;">✅</span>
+        </div>
+        <div>
+          <div style="color:#1e293b; font-size:13px; font-weight:600;">Present Today</div>
+          <div id="top-present" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
+          <div style="color:#64748b; font-size:11px;">Employees</div>
+        </div>
+      </div>
+
+      <!-- On Leave Today -->
+      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+        <div style="width:48px; height:48px; border-radius:50%; background:#fff7ed; display:flex; align-items:center; justify-content:center;">
+           <span style="font-size:24px;">🕒</span>
+        </div>
+        <div>
+          <div style="color:#1e293b; font-size:13px; font-weight:600;">On Leave Today</div>
+          <div id="top-onleave" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
+          <div style="color:#64748b; font-size:11px;">Employees</div>
+        </div>
+      </div>
+
+      <!-- Pending Requests -->
+      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+        <div style="width:48px; height:48px; border-radius:50%; background:#fdf4ff; display:flex; align-items:center; justify-content:center;">
+           <span style="font-size:24px;">⏳</span>
+        </div>
+        <div>
+          <div style="color:#1e293b; font-size:13px; font-weight:600;">Pending Requests</div>
+          <div id="top-pending" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
+          <div style="color:#64748b; font-size:11px;">Requests</div>
+        </div>
+      </div>
+
+      <!-- Total Leaves Taken -->
+      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+        <div style="width:48px; height:48px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center;">
+           <span style="font-size:24px;">📄</span>
+        </div>
+        <div>
+          <div style="color:#1e293b; font-size:13px; font-weight:600;">Total Leaves Taken</div>
+          <div id="top-total" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
+          <div style="color:#64748b; font-size:11px;">Days</div>
+        </div>
+      </div>
+
+    </div>
+
 
     <!-- ===== DAILY REPORT ===== -->
     <div class="sec active" id="sec-daily">
@@ -345,6 +465,44 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           </table>
         </div>
       </div>
+
+      <!-- PMAM Leave Overview -->
+      <div class="card" style="margin-top:20px;">
+        <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center;">
+           <span style="color:#0F2B8C; font-size:16px;">PMAM Leave Overview</span>
+           <div style="display:flex; gap:12px; font-weight:normal;">
+              <input type="text" id="overviewSearch" placeholder="Search PMAM..." onkeyup="renderOverview()" style="padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px; width:150px;">
+              <select id="overviewStatus" onchange="renderOverview()" style="padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px;">
+                 <option value="All">All Status</option>
+                 <option value="Present">Present</option>
+                 <option value="On Leave">On Leave</option>
+              </select>
+              <button class="btn btn-pri" onclick="exportExcel('overviewTbl','PMAM_Leave_Overview')">Export Excel</button>
+           </div>
+        </div>
+        <div class="tbl-wrap">
+          <table id="overviewTbl">
+            <thead>
+              <tr>
+                <th style="background:#0F2B8C;color:#fff;">S.No</th>
+                <th style="background:#0F2B8C;color:#fff;">PMAM Name</th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">Status</th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">CL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">COL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">ML<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">PTL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">MTL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">LWP<br><span style="font-size:9px;font-weight:normal;">(Taken)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">Pending Requests</th>
+              </tr>
+            </thead>
+            <tbody id="overviewTbody">
+              <tr><td colspan="10" class="empty-td">Loading data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
     <!-- ===== MONTHLY REPORT ===== -->
@@ -2197,6 +2355,82 @@ function fetchFirebaseData() {
 }
 
 // Keep the counter badges in sync across all sections.
+
+// --- PMAM Leave Overview Logic ---
+function renderOverview() {
+  var tbody = document.getElementById('overviewTbody');
+  if(!tbody) return;
+  var search = (document.getElementById('overviewSearch') ? document.getElementById('overviewSearch').value.toLowerCase() : '');
+  var statusFilter = (document.getElementById('overviewStatus') ? document.getElementById('overviewStatus').value : 'All');
+  
+  var html = '';
+  var sortedPmams = pmams.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
+  var sno = 1;
+  var today = new Date().toISOString().split('T')[0];
+
+  sortedPmams.forEach(function(p){
+    if(search && p.name.toLowerCase().indexOf(search) === -1 && p.email.toLowerCase().indexOf(search) === -1) return;
+    
+    // Status Logic
+    var isLeave = false;
+    leaveRequests.forEach(function(l){
+      if (l.status === 'Approved' && (l.email === p.email || l.name === p.name) && l.from <= today && l.to >= today) {
+         isLeave = true;
+      }
+    });
+    var statusText = isLeave ? 'On Leave' : 'Present';
+    if(statusFilter !== 'All' && statusText !== statusFilter) return;
+
+    var statusBadge = isLeave ? '<span style="background:#ffedd5;color:#c2410c;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">On Leave</span>' : '<span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">Present</span>';
+
+    // Pending Logic
+    var pendingCount = leaveRequests.filter(function(l){
+      return l.status === 'Pending' && (l.email === p.email || l.name === p.name);
+    }).length;
+
+    // Leave Types Logic
+    var casualTaken=0, medicalTaken=0, compTaken=0, patTaken=0, matTaken=0, lwpTaken=0;
+    leaveRequests.forEach(function(l){
+      if (l.status === 'Approved' && (l.email === p.email || l.name === p.name)) {
+        var d = parseFloat(l.days) || 0;
+        var t = (l.ltype || '').toLowerCase();
+        if(t.indexOf('casual') !== -1) casualTaken += d;
+        else if(t.indexOf('medical') !== -1) medicalTaken += d;
+        else if(t.indexOf('compensatory') !== -1) compTaken += d;
+        else if(t.indexOf('paternity') !== -1) patTaken += d;
+        else if(t.indexOf('maternity') !== -1) matTaken += d;
+        else if(t.indexOf('lwp') !== -1 || t.indexOf('pay') !== -1) lwpTaken += d;
+      }
+    });
+
+    var compBals = window._icCompBalances || {};
+    var compEarned = parseFloat(compBals[p.email] || compBals[p.id] || 0);
+    if(isNaN(compEarned)) compEarned = 0;
+
+    var casualBal = Math.max(0, rules.casual - casualTaken);
+    var medicalBal = Math.max(0, rules.medical - medicalTaken);
+    var compBal = Math.max(0, compEarned - compTaken);
+    var patBal = Math.max(0, rules.paternity - patTaken);
+    var matBal = Math.max(0, rules.maternity - matTaken);
+
+    html += `<tr>
+      <td>${sno++}</td>
+      <td style="font-weight:500; color:#1e293b;">${p.name}</td>
+      <td style="text-align:center;">${statusBadge}</td>
+      <td style="text-align:center;font-size:11px;">${rules.casual}/${casualTaken}/${casualBal}</td>
+      <td style="text-align:center;font-size:11px;">${compEarned}/${compTaken}/${compBal}</td>
+      <td style="text-align:center;font-size:11px;">${rules.medical}/${medicalTaken}/${medicalBal}</td>
+      <td style="text-align:center;font-size:11px;">${p.gender === 'Female' ? 'NA' : rules.paternity+'/'+patTaken+'/'+patBal}</td>
+      <td style="text-align:center;font-size:11px;">${p.gender === 'Male' ? 'NA' : rules.maternity+'/'+matTaken+'/'+matBal}</td>
+      <td style="text-align:center;font-size:11px;">${lwpTaken}</td>
+      <td style="text-align:center;font-weight:bold;color:${pendingCount>0?'#ef4444':'#64748b'};">${pendingCount}</td>
+    </tr>`;
+  });
+
+  if(html === '') html = '<tr><td colspan="10" class="empty-td">No PMAMs found</td></tr>';
+  tbody.innerHTML = html;
+}
+
 function updateLeaveBadges() {
   var pending  = leaveRequests.filter(l => l.status === 'Pending').length;
   var approved = leaveRequests.filter(l => l.status === 'Approved').length;
@@ -2211,6 +2445,19 @@ function updateLeaveBadges() {
   set('lv-pending',  pending);
   set('lv-approved', approved);
   set('lv-rejected', rejected);
+  
+  // Update Top Widgets
+  var topPresent = pmams.length - onLeaveToday;
+  if (document.getElementById('top-present')) document.getElementById('top-present').textContent = topPresent;
+  if (document.getElementById('top-onleave')) document.getElementById('top-onleave').textContent = onLeaveToday;
+  if (document.getElementById('top-pending')) document.getElementById('top-pending').textContent = pending;
+  
+  var totalDaysTaken = 0;
+  leaveRequests.forEach(l => { if(l.status === 'Approved') totalDaysTaken += (parseFloat(l.days)||0); });
+  if (document.getElementById('top-total')) document.getElementById('top-total').textContent = totalDaysTaken;
+  
+  if (typeof renderOverview === 'function') renderOverview();
+
   set('lv-onleave',  onLeaveToday);
 
   // Tab counter (previously hardcoded to 3 — now live)
