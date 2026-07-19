@@ -134,8 +134,8 @@
             if (!doc.exists) throw new Error("User profile not found.");
             var udata = doc.data();
             if (udata.signPinHash) {
-              if (typeof sha256 === 'undefined') throw new Error("Encryption module missing.");
-              if (sha256(pin) !== udata.signPinHash) throw new Error("Incorrect PIN.");
+              if (typeof CryptoJS === 'undefined') throw new Error("Encryption module missing.");
+              if (CryptoJS.SHA256(pin).toString() !== udata.signPinHash) throw new Error("Incorrect PIN.");
             } else {
               throw new Error("You have not set up a Digital Signature PIN yet.");
             }
@@ -159,8 +159,8 @@
           if (!doc.exists) throw new Error("User profile not found.");
           var udata = doc.data();
           if (udata.signPinHash) {
-            if (typeof sha256 === 'undefined') throw new Error("Encryption module missing.");
-            if (sha256(pin) !== udata.signPinHash) throw new Error("Incorrect PIN.");
+            if (typeof CryptoJS === 'undefined') throw new Error("Encryption module missing.");
+            if (CryptoJS.SHA256(pin).toString() !== udata.signPinHash) throw new Error("Incorrect PIN.");
           } else {
             throw new Error("You have not set up a Digital Signature PIN yet.");
           }
