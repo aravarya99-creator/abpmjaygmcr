@@ -316,21 +316,20 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
     </div>
 
     <div class="sidebar-category">LEAVE MANAGEMENT</div>
-    
-    <!-- We'll repurpose 'leavereq' for Leave Requests and 'pmamwise' logic for Dashboard/Balances later if needed -->
-    <!-- For now, we will map Leave Dashboard to pmam profiles, Leave Requests to Leave Req -->
-    <div class="sbi" onclick="goSec('profiles',this)" title="Leave Dashboard">
-      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-      <div class="sbl">Leave Dashboard</div>
-    </div>
-
-    <div class="sbi" onclick="goSec('leavereq',this)" title="Leave Requests">
-      <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
-      <div class="sbl">Leave Requests</div>
-      <div id="navLeaveBadge" style="margin-left:auto; background:#ef4444; color:#fff; font-size:11px; font-weight:bold; padding:2px 6px; border-radius:10px; display:none;">0</div>
-    </div>
-
-    <div class="sidebar-category">AUDIT & MONITORING</div>
+      <div class="sbi" onclick="goSec('leavedash',this)">
+        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        <span class="sbl">Leave Dashboard</span>
+      </div>
+      <div class="sbi" onclick="goSec('leavereq',this)">
+        <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+        <span class="sbl">Leave Requests</span>
+        <span class="bdg" id="sb-pend-req" style="margin-left:auto;background:#ef4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;">0</span>
+      </div>
+      <div class="sbi" onclick="goSec('leavebal',this)">
+        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-2.99 1.34-2.99 3S17.66 11 16 11zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5.01 6.34 5.01 8S6.34 11 8 11zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        <span class="sbl">Leave Balance</span>
+      </div>
+      <div class="sidebar-category">AUDIT & MONITORING</div>
     
     <div class="sbi" onclick="goSec('allrecords',this)" title="Audit Log">
       <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
@@ -534,6 +533,205 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             <thead id="pmamThead"><tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
             <tbody id="pmamTbody"><tr><td colspan="10" class="empty-td">Select PMAM and click Generate</td></tr></tbody>
             <tfoot id="pmamFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ALL RECORDS ===== -->
+    <div class="sec" id="sec-allrecords">
+      <div class="page-hd">Audit Log <span style="font-size:11px;color:#6b7280;font-weight:500;margin-left:8px">— Individual entry verification</span></div>
+      <div class="card">
+        <div class="card-hd">Filter Records — Day-wise View</div>
+        <div class="frow" style="align-items:flex-start">
+          <div class="fld"><label>Mode</label>
+            <select id="arMode" style="width:160px" onchange="arToggleMode()">
+              <option value="month" selected>Month + Year</option>
+              <option value="range">Date Range</option>
+            </select>
+          </div>
+          <div class="fld"><label>PMAM</label>
+            <select id="arPmam" style="width:180px">
+              <option value="">All PMAMs</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label>Ward(s) <span style="font-size:10px;color:#6b7280;font-weight:400">— Ctrl/Cmd-click for multiple</span></label>
+            <select id="arWardMulti" multiple size="5" style="width:230px;height:auto;padding:6px"></select>
+          </div>
+          <!-- Month + Year fields -->
+          <div class="fld arModeMonth"><label>Month</label>
+            <select id="arMonth" style="width:140px">
+              <option value="">All Months</option>
+            </select>
+          </div>
+          <div class="fld arModeMonth"><label>Year</label>
+            <select id="arYear" style="width:110px"></select>
+          </div>
+          <!-- Date Range fields (hidden by default) -->
+          <div class="fld arModeRange" style="display:none"><label>From Date</label><input type="date" id="arFrom" style="width:150px"></div>
+          <div class="fld arModeRange" style="display:none"><label>To Date</label><input type="date" id="arTo" style="width:150px"></div>
+          <div class="fld" style="align-self:flex-end">
+            <button class="btn btn-pri" onclick="genAllRecords()">Filter</button>
+            <button class="btn btn-sec" onclick="clearAllRecordsFilter()">Clear</button>
+            <button class="btn" id="arAnomalyBtn" onclick="arToggleAnomalyMode()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">🔍 Show Missing Reports</button>
+            <button class="btn btn-grn" onclick="exportExcel('allTbl','Audit_Log')">Export Excel</button>
+            <button class="btn btn-word" onclick="printReport('Audit Log')">Print / PDF</button>
+          </div>
+        </div>
+      </div>
+      <div class="metrics-grid" id="arMetrics"></div>
+      <div class="card">
+        <div class="card-hd">All Entries — Day-wise <span id="arCount" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
+        <div class="tbl-wrap">
+          <table id="allTbl">
+            <thead><tr><th>S.No</th><th>Date</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th title="When the report was actually saved (vs report date)">Submitted</th><th title="Same-day / Late / Backdated">Lag</th><th title="Firestore document ID">Entry ID</th><th>Flag</th><th>Action</th></tr></thead>
+            <tbody id="allTbody"><tr><td colspan="18" class="empty-td">Click Filter to load records</td></tr></tbody>
+            <tfoot id="allFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    
+    
+    <!-- ===== LEAVE DASHBOARD (sec-leavedash) ===== -->
+    <div class="sec" id="sec-leavedash">
+      <div class="page-hd">Leave Dashboard</div>
+      
+      <!-- KPI Cards -->
+      <div style="display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap;" id="ld-kpis">
+        <!-- Rendered via JS -->
+      </div>
+
+      <div class="frow" style="align-items:stretch;">
+        <!-- Left Column: Leave Category Summary & Recent Activity -->
+        <div style="flex:2; display:flex; flex-direction:column; gap:20px;">
+          
+          <div class="card" style="margin:0;">
+            <div class="card-hd">Leave Category Summary</div>
+            <div id="ld-cat-summary" style="padding:16px; display:flex; flex-wrap:wrap; gap:16px;">
+               <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <div class="card" style="margin:0; flex:1;">
+            <div class="card-hd">Recent Activity</div>
+            <div id="ld-recent-activity" style="padding:16px;">
+               <!-- Rendered via JS -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Employees On Leave & Quick Actions -->
+        <div style="flex:1; display:flex; flex-direction:column; gap:20px;">
+          
+          <div class="card" style="margin:0;">
+            <div class="card-hd">Quick Actions</div>
+            <div style="padding:16px; display:flex; flex-direction:column; gap:12px;">
+               <button class="btn btn-pri" style="width:100%; justify-content:center; padding:12px;" onclick="document.querySelector('.sbi[onclick=\'goSec("leavereq",this)\']').click()">View Pending Requests</button>
+               <button class="btn" style="width:100%; justify-content:center; padding:12px; border:1px solid #0F2B8C; color:#0F2B8C;" onclick="document.querySelector('.sbi[onclick=\'goSec("leavebal",this)\']').click()">View Leave Balance</button>
+            </div>
+          </div>
+
+          <div class="card" style="margin:0; flex:1;">
+            <div class="card-hd">Employees Currently On Leave</div>
+            <div class="tbl-wrap">
+              <table id="ld-onleave-tbl">
+                <thead><tr><th style="background:#0F2B8C;color:#fff;">Employee</th><th style="background:#0F2B8C;color:#fff;">Leave</th><th style="background:#0F2B8C;color:#fff;">From</th><th style="background:#0F2B8C;color:#fff;">To</th><th style="background:#0F2B8C;color:#fff;">Days</th></tr></thead>
+                <tbody id="ld-onleave-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LEAVE REQUESTS (sec-leavereq) ===== -->
+    <div class="sec" id="sec-leavereq">
+      <div class="page-hd">Leave Requests</div>
+      <div class="card">
+        
+        <!-- Tabs -->
+        <div style="display:flex; border-bottom:1px solid #e2e8f0; margin-bottom:16px;">
+           <div class="lr-tab active" data-tab="pending" onclick="switchLrTab(this)" style="padding:12px 24px; cursor:pointer; border-bottom:3px solid #2563eb; color:#2563eb; font-weight:600;">Pending</div>
+           <div class="lr-tab" data-tab="approved" onclick="switchLrTab(this)" style="padding:12px 24px; cursor:pointer; color:#64748b; font-weight:500;">Approved</div>
+           <div class="lr-tab" data-tab="rejected" onclick="switchLrTab(this)" style="padding:12px 24px; cursor:pointer; color:#64748b; font-weight:500;">Rejected</div>
+           <div class="lr-tab" data-tab="history" onclick="switchLrTab(this)" style="padding:12px 24px; cursor:pointer; color:#64748b; font-weight:500;">History</div>
+        </div>
+
+        <!-- History Filters (Hidden by default) -->
+        <div id="lr-filters" style="display:none; gap:12px; margin-bottom:16px; padding:0 16px;">
+           <input type="text" id="lrFilterEmp" placeholder="Employee Name..." class="form-control" style="width:150px;" onkeyup="renderLeaveReqs()">
+           <select id="lrFilterStatus" class="form-control" style="width:130px;" onchange="renderLeaveReqs()">
+              <option value="All">All Status</option><option>Pending</option><option>Approved</option><option>Rejected</option>
+           </select>
+           <select id="lrFilterType" class="form-control" style="width:130px;" onchange="renderLeaveReqs()">
+              <option value="All">All Types</option><option>Casual</option><option>Medical</option><option>Compensatory</option><option>Paternity</option><option>Maternity</option><option>LWP</option>
+           </select>
+           <input type="date" id="lrFilterDate" class="form-control" onchange="renderLeaveReqs()">
+           <button class="btn btn-grn" onclick="exportExcel('lr-history-tbl','Leave_History')">Export Excel</button>
+        </div>
+
+        <!-- Tab Panels -->
+        <div class="tbl-wrap" id="lr-panel-pending">
+          <table id="lr-pending-tbl">
+            <thead><tr><th style="background:#0F2B8C;color:#fff;">Employee</th><th style="background:#0F2B8C;color:#fff;">Leave</th><th style="background:#0F2B8C;color:#fff;">From</th><th style="background:#0F2B8C;color:#fff;">To</th><th style="background:#0F2B8C;color:#fff;">Days</th><th style="background:#0F2B8C;color:#fff;">Reason</th><th style="background:#0F2B8C;color:#fff;text-align:right;">Action</th></tr></thead>
+            <tbody id="lr-pending-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="tbl-wrap" id="lr-panel-approved" style="display:none;">
+          <table id="lr-approved-tbl">
+            <thead><tr><th style="background:#0F2B8C;color:#fff;">Employee</th><th style="background:#0F2B8C;color:#fff;">Leave</th><th style="background:#0F2B8C;color:#fff;">Days</th><th style="background:#0F2B8C;color:#fff;">Approved By</th><th style="background:#0F2B8C;color:#fff;">Date</th></tr></thead>
+            <tbody id="lr-approved-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="tbl-wrap" id="lr-panel-rejected" style="display:none;">
+          <table id="lr-rejected-tbl">
+            <thead><tr><th style="background:#0F2B8C;color:#fff;">Employee</th><th style="background:#0F2B8C;color:#fff;">Leave</th><th style="background:#0F2B8C;color:#fff;">Rejected By</th><th style="background:#0F2B8C;color:#fff;">Reason</th><th style="background:#0F2B8C;color:#fff;">Date</th></tr></thead>
+            <tbody id="lr-rejected-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="tbl-wrap" id="lr-panel-history" style="display:none;">
+          <table id="lr-history-tbl">
+            <thead><tr><th style="background:#0F2B8C;color:#fff;">Employee</th><th style="background:#0F2B8C;color:#fff;">Leave</th><th style="background:#0F2B8C;color:#fff;">From</th><th style="background:#0F2B8C;color:#fff;">To</th><th style="background:#0F2B8C;color:#fff;">Days</th><th style="background:#0F2B8C;color:#fff;">Status</th><th style="background:#0F2B8C;color:#fff;">Action Date</th></tr></thead>
+            <tbody id="lr-history-tbody"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== LEAVE BALANCE (sec-leavebal) ===== -->
+    <div class="sec" id="sec-leavebal">
+      <div class="page-hd">Leave Balance</div>
+      <div class="card">
+        <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center;">
+           <span style="color:#0F2B8C; font-size:16px;">Employee Balance</span>
+           <div style="display:flex; gap:12px;">
+              <input type="text" id="lbSearch" placeholder="Search PMAM..." onkeyup="renderLeaveBal()" class="form-control" style="width:150px;">
+              <button class="btn btn-grn" onclick="exportExcel('lb-tbl','Leave_Balances')">Export Excel</button>
+           </div>
+        </div>
+        <div class="tbl-wrap">
+          <table id="lb-tbl">
+            <thead>
+              <tr>
+                <th style="background:#0F2B8C;color:#fff;">Employee</th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">CL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">COL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">ML<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">PTL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">MTL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">LWP<br><span style="font-size:9px;font-weight:normal;">(Taken)</span></th>
+              </tr>
+            </thead>
+            <tbody id="lb-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -2411,6 +2609,349 @@ function renderOverview() {
   tbody.innerHTML = html;
 }
 
+
+// ==========================================
+// LEAVE DASHBOARD LOGIC (sec-leavedash)
+// ==========================================
+function renderLeaveDash() {
+  var today = new Date().toISOString().split('T')[0];
+  var currentMonth = today.substring(0, 7); // YYYY-MM
+  
+  // 1. Calculate KPIs
+  var totalPMAM = pmams.length;
+  var onLeaveToday = 0;
+  var pendingReqs = 0;
+  var approvedThisMonth = 0;
+  var totalLeavesTaken = 0;
+
+  var onLeaveList = [];
+  var recentActivity = []; // We will build this by scanning leaveRequests
+
+  leaveRequests.forEach(function(l) {
+    var d = parseFloat(l.days) || 0;
+    if (l.status === 'Pending') pendingReqs++;
+    if (l.status === 'Approved') {
+      totalLeavesTaken += d;
+      // Approved this month? Check actionDate or appliedDate if actionDate is missing
+      var aDate = l.actionDate || l.appliedDate || '';
+      if (aDate.startsWith(currentMonth)) approvedThisMonth++;
+      
+      if (l.from <= today && l.to >= today) {
+        onLeaveToday++;
+        onLeaveList.push(l);
+      }
+    }
+    
+    // Build activity feed
+    var actDate = l.actionDate || l.appliedDate || '';
+    var actStr = '';
+    if (l.status === 'Pending') actStr = `${l.name} submitted ${l.ltype || 'Leave'} request`;
+    else if (l.status === 'Approved') actStr = `${l.name}'s leave was approved`;
+    else if (l.status === 'Rejected') actStr = `${l.name}'s leave was rejected`;
+    
+    recentActivity.push({ text: actStr, date: actDate, ts: new Date(actDate).getTime() });
+  });
+
+  var presentToday = totalPMAM - onLeaveToday;
+
+  // Render KPIs
+  var kpiHtml = `
+    <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+       <div style="width:48px;height:48px;border-radius:12px;background:#EBF5FF;display:flex;align-items:center;justify-content:center;font-size:24px;">👨‍👩‍👦</div>
+       <div><div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;">Total PMAM</div><div style="font-size:20px;font-weight:800;color:#0f172a;">${totalPMAM}</div></div>
+    </div>
+    <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+       <div style="width:48px;height:48px;border-radius:12px;background:#dcfce7;display:flex;align-items:center;justify-content:center;font-size:24px;">✅</div>
+       <div><div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;">Present Today</div><div style="font-size:20px;font-weight:800;color:#15803d;">${presentToday}</div></div>
+    </div>
+    <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+       <div style="width:48px;height:48px;border-radius:12px;background:#ffedd5;display:flex;align-items:center;justify-content:center;font-size:24px;">🕒</div>
+       <div><div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;">On Leave Today</div><div style="font-size:20px;font-weight:800;color:#c2410c;">${onLeaveToday}</div></div>
+    </div>
+    <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+       <div style="width:48px;height:48px;border-radius:12px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:24px;">⏳</div>
+       <div><div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;">Pending Requests</div><div style="font-size:20px;font-weight:800;color:#b45309;">${pendingReqs}</div></div>
+    </div>
+    <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+       <div style="width:48px;height:48px;border-radius:12px;background:#f3e8ff;display:flex;align-items:center;justify-content:center;font-size:24px;">📈</div>
+       <div><div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;">Approved This Month</div><div style="font-size:20px;font-weight:800;color:#7e22ce;">${approvedThisMonth}</div></div>
+    </div>
+  `;
+  document.getElementById('ld-kpis').innerHTML = kpiHtml;
+
+  // 2. Leave Category Summary (Aggregated across all PMAMs)
+  var totalCL_E=0, totalCL_T=0;
+  var totalCOL_E=0, totalCOL_T=0;
+  var totalML_E=0, totalML_T=0;
+  var totalPTL_E=0, totalPTL_T=0;
+  var totalMTL_E=0, totalMTL_T=0;
+  var totalLWP_T=0;
+
+  var compBals = window._icCompBalances || {};
+  
+  pmams.forEach(function(p){
+    totalCL_E += rules.casual;
+    totalML_E += rules.medical;
+    var cB = parseFloat(compBals[p.email] || compBals[p.id] || 0);
+    totalCOL_E += (isNaN(cB) ? 0 : cB);
+    if (p.gender !== 'Female') totalPTL_E += rules.paternity;
+    if (p.gender !== 'Male') totalMTL_E += rules.maternity;
+  });
+
+  leaveRequests.forEach(function(l){
+    if (l.status === 'Approved') {
+      var d = parseFloat(l.days) || 0;
+      var t = (l.ltype || '').toLowerCase();
+      if(t.indexOf('casual') !== -1) totalCL_T += d;
+      else if(t.indexOf('medical') !== -1) totalML_T += d;
+      else if(t.indexOf('compensatory') !== -1) totalCOL_T += d;
+      else if(t.indexOf('paternity') !== -1) totalPTL_T += d;
+      else if(t.indexOf('maternity') !== -1) totalMTL_T += d;
+      else if(t.indexOf('lwp') !== -1 || t.indexOf('pay') !== -1) totalLWP_T += d;
+    }
+  });
+
+  var genCatCard = function(title, e, t) {
+    var b = Math.max(0, e - t);
+    var pct = e > 0 ? (t / e) * 100 : 0;
+    return `
+    <div style="flex:1; min-width:120px; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+       <div style="font-weight:700; color:#0F2B8C; margin-bottom:8px;">${title}</div>
+       <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;"><span>Eligible:</span> <b>${e}</b></div>
+       <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;"><span>Taken:</span> <b>${t}</b></div>
+       <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px;"><span>Balance:</span> <b style="color:#15803d;">${b}</b></div>
+       <div style="height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden;"><div style="height:100%; width:${pct}%; background:#2563eb;"></div></div>
+    </div>`;
+  };
+  var lwpCard = `
+    <div style="flex:1; min-width:120px; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+       <div style="font-weight:700; color:#0F2B8C; margin-bottom:8px;">LWP</div>
+       <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;"><span>Taken:</span> <b style="color:#ef4444;">${totalLWP_T}</b></div>
+    </div>`;
+
+  document.getElementById('ld-cat-summary').innerHTML = 
+    genCatCard('CL', totalCL_E, totalCL_T) +
+    genCatCard('COL', totalCOL_E, totalCOL_T) +
+    genCatCard('ML', totalML_E, totalML_T) +
+    genCatCard('PTL', totalPTL_E, totalPTL_T) +
+    genCatCard('MTL', totalMTL_E, totalMTL_T) +
+    lwpCard;
+
+  // 3. Employees On Leave Table
+  var onlHtml = '';
+  onLeaveList.forEach(function(l){
+    onlHtml += `<tr><td>${l.name}</td><td>${l.ltype}</td><td>${l.from}</td><td>${l.to}</td><td>${l.days}</td></tr>`;
+  });
+  if (onlHtml === '') onlHtml = '<tr><td colspan="5" style="text-align:center; padding:16px;">No employees on leave today.</td></tr>';
+  document.getElementById('ld-onleave-tbody').innerHTML = onlHtml;
+
+  // 4. Recent Activity
+  recentActivity.sort((a,b) => b.ts - a.ts); // Descending
+  var actHtml = '';
+  recentActivity.slice(0, 5).forEach(function(a){
+    var dStr = a.date ? new Date(a.date).toLocaleDateString('en-GB') : 'Just now';
+    actHtml += `
+      <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
+         <div style="width:32px; height:32px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center; color:#2563eb; font-size:14px; flex-shrink:0;">📌</div>
+         <div>
+            <div style="font-size:13px; font-weight:500; color:#1e293b;">${a.text}</div>
+            <div style="font-size:11px; color:#64748b; margin-top:4px;">${dStr}</div>
+         </div>
+      </div>`;
+  });
+  if (actHtml === '') actHtml = '<div style="color:#64748b; font-size:13px;">No recent activity.</div>';
+  document.getElementById('ld-recent-activity').innerHTML = actHtml;
+
+  // Update Sidebar Badge
+  var sbPend = document.getElementById('sb-pend-req');
+  if (sbPend) { sbPend.textContent = pendingReqs; sbPend.style.display = pendingReqs > 0 ? 'inline-block' : 'none'; }
+}
+
+
+// ==========================================
+// LEAVE REQUESTS LOGIC (sec-leavereq)
+// ==========================================
+function switchLrTab(el) {
+  document.querySelectorAll('.lr-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.lr-tab').forEach(t => { t.style.borderBottom = 'none'; t.style.color = '#64748b'; });
+  
+  el.classList.add('active');
+  el.style.borderBottom = '3px solid #2563eb';
+  el.style.color = '#2563eb';
+
+  var tabId = el.getAttribute('data-tab');
+  document.getElementById('lr-panel-pending').style.display = 'none';
+  document.getElementById('lr-panel-approved').style.display = 'none';
+  document.getElementById('lr-panel-rejected').style.display = 'none';
+  document.getElementById('lr-panel-history').style.display = 'none';
+  document.getElementById('lr-filters').style.display = 'none';
+
+  document.getElementById('lr-panel-' + tabId).style.display = 'block';
+  if (tabId === 'history') document.getElementById('lr-filters').style.display = 'flex';
+
+  renderLeaveReqs();
+}
+
+function renderLeaveReqs() {
+  var activeTab = document.querySelector('.lr-tab.active');
+  if (!activeTab) return;
+  var tabId = activeTab.getAttribute('data-tab');
+
+  var fEmp = document.getElementById('lrFilterEmp').value.toLowerCase();
+  var fStatus = document.getElementById('lrFilterStatus').value;
+  var fType = document.getElementById('lrFilterType').value;
+  var fDate = document.getElementById('lrFilterDate').value;
+
+  var phtml='', ahtml='', rhtml='', hhtml='';
+  
+  // Sort descending by appliedDate
+  var sortedReqs = leaveRequests.slice().sort((a,b) => new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime());
+
+  sortedReqs.forEach(function(l){
+    var emp = l.name || l.email;
+    var rowStyle = "border-bottom:1px solid #f1f5f9;";
+
+    // History Filters Check
+    if (tabId === 'history') {
+      if (fEmp && emp.toLowerCase().indexOf(fEmp) === -1) return;
+      if (fStatus !== 'All' && l.status !== fStatus) return;
+      if (fType !== 'All' && (l.ltype||'').indexOf(fType) === -1) return;
+      if (fDate && l.from > fDate && l.to < fDate) return;
+      
+      hhtml += `<tr style="${rowStyle}">
+        <td>${emp}</td>
+        <td>${l.ltype}</td>
+        <td>${l.from}</td>
+        <td>${l.to}</td>
+        <td>${l.days}</td>
+        <td style="font-weight:bold; color:${l.status==='Approved'?'#16a34a':(l.status==='Rejected'?'#dc2626':'#ca8a04')}">${l.status}</td>
+        <td>${l.actionDate || l.appliedDate || '-'}</td>
+      </tr>`;
+    }
+
+    if (l.status === 'Pending' && tabId === 'pending') {
+      phtml += `<tr style="${rowStyle}">
+        <td>${emp}</td>
+        <td>${l.ltype}</td>
+        <td>${l.from}</td>
+        <td>${l.to}</td>
+        <td>${l.days}</td>
+        <td>${l.reason || '-'}</td>
+        <td style="text-align:right;">
+           <button class="btn btn-grn" style="padding:4px 8px; font-size:11px;" onclick="icActionLeave('${l.id}','Approved')">Approve</button>
+           <button class="btn btn-pri" style="padding:4px 8px; font-size:11px; background:#dc2626; border-color:#dc2626;" onclick="icActionLeave('${l.id}','Rejected')">Reject</button>
+        </td>
+      </tr>`;
+    }
+
+    if (l.status === 'Approved' && tabId === 'approved') {
+      ahtml += `<tr style="${rowStyle}">
+        <td>${emp}</td>
+        <td>${l.ltype}</td>
+        <td>${l.days}</td>
+        <td>${l.actionBy || 'Admin'}</td>
+        <td>${l.actionDate || '-'}</td>
+      </tr>`;
+    }
+
+    if (l.status === 'Rejected' && tabId === 'rejected') {
+      rhtml += `<tr style="${rowStyle}">
+        <td>${emp}</td>
+        <td>${l.ltype}</td>
+        <td>${l.actionBy || 'Admin'}</td>
+        <td>${l.rejectReason || '-'}</td>
+        <td>${l.actionDate || '-'}</td>
+      </tr>`;
+    }
+  });
+
+  if(phtml === '') phtml = '<tr><td colspan="7" style="text-align:center;">No pending requests.</td></tr>';
+  if(ahtml === '') ahtml = '<tr><td colspan="5" style="text-align:center;">No approved requests.</td></tr>';
+  if(rhtml === '') rhtml = '<tr><td colspan="5" style="text-align:center;">No rejected requests.</td></tr>';
+  if(hhtml === '') hhtml = '<tr><td colspan="7" style="text-align:center;">No history found.</td></tr>';
+
+  document.getElementById('lr-pending-tbody').innerHTML = phtml;
+  document.getElementById('lr-approved-tbody').innerHTML = ahtml;
+  document.getElementById('lr-rejected-tbody').innerHTML = rhtml;
+  document.getElementById('lr-history-tbody').innerHTML = hhtml;
+}
+
+// Action Leave directly from Pending Tab
+function icActionLeave(id, status) {
+  var reason = '';
+  if(status === 'Rejected') {
+    reason = prompt("Enter rejection reason:");
+    if(reason === null) return;
+  }
+  if(!confirm("Are you sure you want to " + status + " this leave?")) return;
+  
+  var updates = { status: status, actionDate: new Date().toISOString().split('T')[0], actionBy: document.querySelector('.uname').textContent || 'I/C Admin' };
+  if(status === 'Rejected') updates.rejectReason = reason;
+
+  db.collection('leave_requests').doc(id).update(updates).then(() => {
+    alert("Leave " + status);
+  }).catch(err => {
+    console.error(err);
+    alert("Error updating leave.");
+  });
+}
+
+
+// ==========================================
+// LEAVE BALANCE LOGIC (sec-leavebal)
+// ==========================================
+function renderLeaveBal() {
+  var tbody = document.getElementById('lb-tbody');
+  if(!tbody) return;
+  var search = (document.getElementById('lbSearch') ? document.getElementById('lbSearch').value.toLowerCase() : '');
+  
+  var html = '';
+  var sortedPmams = pmams.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
+  
+  var compBals = window._icCompBalances || {};
+
+  sortedPmams.forEach(function(p){
+    if(search && p.name.toLowerCase().indexOf(search) === -1) return;
+    
+    var casualTaken=0, medicalTaken=0, compTaken=0, patTaken=0, matTaken=0, lwpTaken=0;
+    leaveRequests.forEach(function(l){
+      if (l.status === 'Approved' && (l.email === p.email || l.name === p.name)) {
+        var d = parseFloat(l.days) || 0;
+        var t = (l.ltype || '').toLowerCase();
+        if(t.indexOf('casual') !== -1) casualTaken += d;
+        else if(t.indexOf('medical') !== -1) medicalTaken += d;
+        else if(t.indexOf('compensatory') !== -1) compTaken += d;
+        else if(t.indexOf('paternity') !== -1) patTaken += d;
+        else if(t.indexOf('maternity') !== -1) matTaken += d;
+        else if(t.indexOf('lwp') !== -1 || t.indexOf('pay') !== -1) lwpTaken += d;
+      }
+    });
+
+    var compEarned = parseFloat(compBals[p.email] || compBals[p.id] || 0);
+    if(isNaN(compEarned)) compEarned = 0;
+
+    var casualBal = Math.max(0, rules.casual - casualTaken);
+    var medicalBal = Math.max(0, rules.medical - medicalTaken);
+    var compBal = Math.max(0, compEarned - compTaken);
+    var patBal = Math.max(0, rules.paternity - patTaken);
+    var matBal = Math.max(0, rules.maternity - matTaken);
+
+    // Make row clickable (Cursor pointer)
+    html += `<tr style="cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'" onclick="alert('Employee Leave Card detail view coming soon!')">
+      <td style="font-weight:500; color:#1e293b;">${p.name}</td>
+      <td style="text-align:center;font-size:12px;">${rules.casual} / ${casualTaken} / <b>${casualBal}</b></td>
+      <td style="text-align:center;font-size:12px;">${compEarned} / ${compTaken} / <b>${compBal}</b></td>
+      <td style="text-align:center;font-size:12px;">${rules.medical} / ${medicalTaken} / <b>${medicalBal}</b></td>
+      <td style="text-align:center;font-size:12px;">${p.gender === 'Female' ? 'NA' : rules.paternity+' / '+patTaken+' / <b>'+patBal+'</b>'}</td>
+      <td style="text-align:center;font-size:12px;">${p.gender === 'Male' ? 'NA' : rules.maternity+' / '+matTaken+' / <b>'+matBal+'</b>'}</td>
+      <td style="text-align:center;font-size:12px;color:#ef4444;font-weight:bold;">${lwpTaken}</td>
+    </tr>`;
+  });
+
+  if(html === '') html = '<tr><td colspan="7" class="empty-td">No PMAMs found</td></tr>';
+  tbody.innerHTML = html;
+}
+
 function updateLeaveBadges() {
   var pending  = leaveRequests.filter(l => l.status === 'Pending').length;
   var approved = leaveRequests.filter(l => l.status === 'Approved').length;
@@ -2419,7 +2960,15 @@ function updateLeaveBadges() {
   var today = new Date().toISOString().split('T')[0];
   var onLeaveToday = leaveRequests.filter(function(l){
     return l.status === 'Approved' && l.from && l.to && l.from <= today && l.to >= today;
-  }).length;
+  
+  if(document.getElementById('sec-leavedash') && document.getElementById('sec-leavedash').classList.contains('active')) renderLeaveDash();
+  if(document.getElementById('sec-leavereq') && document.getElementById('sec-leavereq').classList.contains('active')) renderLeaveReqs();
+  if(document.getElementById('sec-leavebal') && document.getElementById('sec-leavebal').classList.contains('active')) renderLeaveBal();
+  
+  // Refresh regardless if we need to update the sidebar badge (done via renderLeaveDash)
+  if (typeof renderLeaveDash === 'function') renderLeaveDash();
+
+}).length;
 
   var set = (id, v) => { var el = document.getElementById(id); if (el) el.textContent = v; };
   set('lv-pending',  pending);
