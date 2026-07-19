@@ -1972,7 +1972,7 @@ function submitLeave() {
   var dLabelStr = document.getElementById('lDays').textContent || "0";
   var reqDays = parseInt(dLabelStr.split(' ')[0]) || 0;
   
-  var chk = canTakeLeave(ltype, reqDays);
+  var chk = canTakeLeave(tEl.value, reqDays);
   if(!chk.ok) {
     alert("LIMIT EXCEEDED: " + chk.msg);
     hideLoader();
