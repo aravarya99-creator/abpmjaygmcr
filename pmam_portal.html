@@ -433,11 +433,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
     <div class="banner-overlay">
       <!-- User pill with dropdown -->
       
-      <div style="margin-right:20px; display:flex; align-items:center; gap:8px; cursor:pointer; background:rgba(255,255,255,0.15); padding:6px 16px; border-radius:50px; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'" onclick="alert('Sign Inbox clicked')">
-         <svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:#fff;"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-         <span style="color:#fff; font-size:12px; font-weight:600; font-family:'Inter', sans-serif;">Sign Inbox</span>
-         <span style="background:#ef4444; color:#fff; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; margin-left:4px;">1</span>
-      </div>
+      
 <div class="user-pill" onclick="toggleDD()">
         <div class="uphoto">
           <span class="ini" id="hInitials">TM</span>
@@ -925,6 +921,40 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
       </div>
 
       <!-- LEAVE HISTORY CARD -->
+      
+      <!-- SUBSTITUTE DUTY REQUESTS -->
+      <div class="card" id="substituteReqCard" style="margin-bottom:20px; display:none;">
+        <div class="card-header" style="background:#f0fdf4; border-bottom:1px solid #bbf7d0;">
+          <h2 style="color:#166534; font-size:16px;">Substitute Duty Requests</h2>
+        </div>
+        <div class="card-body">
+          <table class="data-table" id="subReqTable">
+            <thead>
+              <tr>
+                <th>APPLICANT</th>
+                <th>TYPE</th>
+                <th>FROM</th>
+                <th>TO</th>
+                <th>DAYS</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="subReqTbody"></tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- VIEW DUTY MODAL -->
+      <div id="viewDutyModal" class="modal-overlay">
+        <div class="modal-content" style="max-width:500px">
+          <h3>Leave Request Details</h3>
+          <div id="viewDutyDetails" style="margin:15px 0; font-size:14px; line-height:1.6;"></div>
+          <div style="text-align:right">
+            <button class="btn btn-sec" onclick="document.getElementById('viewDutyModal').classList.remove('open')">Close</button>
+          </div>
+        </div>
+      </div>
+
       <div class="card" id="leaveHistCard" style="display:none">
         <div class="card-hd">My Leave History</div>
         <div class="tbl-wrap">
@@ -1825,6 +1855,137 @@ function fetchPmamLeaves() {
         var card = document.getElementById('leaveHistCard');
         if (card) card.style.display = 'block';
       }
+
+
+// ═══════════════════════════════════════════════════════════════
+// SUBSTITUTE PMAM LOGIC
+// ═══════════════════════════════════════════════════════════════
+var _subRequests = [];
+
+function fetchSubstituteRequests() {
+  if (typeof db === 'undefined' || !getPmjayUser() || !getPmjayUser().name) return;
+  var myName = getPmjayUser().name;
+  db.collection('leave_requests')
+    .where('duty', '==', myName)
+    .where('status', '==', 'Pending Substitute')
+    .onSnapshot(function(snap) {
+      _subRequests = [];
+      snap.forEach(function(doc) {
+        _subRequests.push(Object.assign({id: doc.id}, doc.data()));
+      });
+      renderSubstituteRequests();
+    });
+}
+
+function renderSubstituteRequests() {
+  var card = document.getElementById('substituteReqCard');
+  var tbody = document.getElementById('subReqTbody');
+  if (!card || !tbody) return;
+  
+  if (_subRequests.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+  
+  var html = '';
+  _subRequests.forEach(function(req) {
+    html += '<tr>';
+    html += '<td><strong>' + (req.name || 'Unknown') + '</strong></td>';
+    html += '<td>' + (req.ltype || 'Unknown') + '</td>';
+    html += '<td>' + fmtDt(req.fromDt) + '</td>';
+    html += '<td>' + fmtDt(req.toDt) + '</td>';
+    html += '<td>' + (req.days || '-') + '</td>';
+    html += '<td>';
+    html += '<button class="btn btn-pri" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="viewDutyRequest(\'' + req.id + '\')">View</button>';
+    html += '<button class="btn btn-pri" style="background:#166534; padding:4px 8px; font-size:11px; margin-right:4px;" onclick="initiateApproveDuty(\'' + req.id + '\')">Approve</button>';
+    html += '<button class="btn btn-sec" style="color:#dc2626; padding:4px 8px; font-size:11px;" onclick="rejectDutyRequest(\'' + req.id + '\')">Reject</button>';
+    html += '</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function viewDutyRequest(id) {
+  var req = _subRequests.find(r => r.id === id);
+  if (!req) return;
+  var d = document.getElementById('viewDutyDetails');
+  d.innerHTML = '<strong>Applicant:</strong> ' + req.name + '<br>' +
+                '<strong>Ward:</strong> ' + req.ward + '<br>' +
+                '<strong>Leave Type:</strong> ' + req.ltype + '<br>' +
+                '<strong>Dates:</strong> ' + fmtDt(req.fromDt) + ' to ' + fmtDt(req.toDt) + ' (' + req.days + ' days)<br>' +
+                '<strong>Reason:</strong> ' + req.reason;
+  document.getElementById('viewDutyModal').classList.add('open');
+}
+
+function rejectDutyRequest(id) {
+  if(confirm("Are you sure you want to REJECT this leave request?")) {
+    db.collection('leave_requests').doc(id).update({
+      status: 'Rejected',
+      remark: 'Rejected by Substitute PMAM'
+    });
+  }
+}
+
+var _pendingApproveDutyId = null;
+function initiateApproveDuty(id) {
+  _pendingApproveDutyId = id;
+  document.getElementById('modalLvPin').value = '';
+  document.getElementById('modalLvMsg').textContent = '';
+  // Reuse the signature PIN modal, but override its behavior
+  var btn = document.querySelector('#signPinModal .btn-pri');
+  btn.onclick = executeApproveDuty;
+  document.getElementById('signPinModal').classList.add('open');
+}
+
+function executeApproveDuty() {
+  var pin = document.getElementById('modalLvPin').value;
+  var msgEl = document.getElementById('modalLvMsg');
+  if (!pin || pin.length < 4) {
+    msgEl.style.color = '#dc2626';
+    msgEl.textContent = 'Please enter your 4-digit PIN.';
+    return;
+  }
+  
+  var myEmail = getPmjayUser().email;
+  msgEl.style.color = '#1A3DB5';
+  msgEl.textContent = 'Verifying and Signing...';
+  
+  // Hash the PIN and check user's signatureImage
+  db.collection('users').doc(myEmail).get().then(function(doc) {
+    if (!doc.exists) throw new Error("User profile not found.");
+    var udata = doc.data();
+    if (udata.signPinHash) {
+      if (typeof sha256 === 'undefined') throw new Error("Encryption module missing.");
+      if (sha256(pin) !== udata.signPinHash) {
+        throw new Error("Incorrect PIN.");
+      }
+    } else {
+      throw new Error("You have not set up a Digital Signature PIN yet.");
+    }
+    
+    // Attach the substitute's signature URL to the leave request
+    var sigUrl = udata.signatureImage || '';
+    
+    return db.collection('leave_requests').doc(_pendingApproveDutyId).update({
+      status: 'Pending',
+      substituteSignatureUrl: sigUrl,
+      substituteSignedAt: Date.now()
+    });
+  }).then(function() {
+    msgEl.style.color = '#166534';
+    msgEl.textContent = 'Successfully Approved & Signed!';
+    setTimeout(function() {
+      document.getElementById('signPinModal').classList.remove('open');
+      // Reset the button onclick back to normal submission for safety
+      document.querySelector('#signPinModal .btn-pri').onclick = confirmLeaveSignature;
+    }, 1500);
+  }).catch(function(e) {
+    msgEl.style.color = '#dc2626';
+    msgEl.textContent = e.message;
+  });
+}
+
     }, function(err) {
       // Surface any Firestore error visibly instead of failing silently.
       console.error('Leave history load error:', err);
@@ -1990,7 +2151,7 @@ function submitLeave() {
       ret: document.getElementById('lvReturn').value,
       duty:  document.getElementById('lvDuty').value,
       reason: reason,
-      status: 'Pending',
+      status: 'Pending Substitute',
       desig: 'PMAM',
       timestamp: Date.now()
     };
@@ -2036,7 +2197,14 @@ function confirmLeaveSignature() {
   msgEl.style.color = '#1A3DB5';
   msgEl.textContent = 'Signing...';
   
-  DSig.initiateSignedLeave(window._pendingLeaveReq, pin).then(function() {
+  
+  var myEmail = getPmjayUser().email;
+  db.collection('users').doc(myEmail).get().then(function(doc) {
+    var udata = doc.exists ? doc.data() : {};
+    window._pendingLeaveReq.applicantSignatureUrl = udata.signatureImage || '';
+    return DSig.initiateSignedLeave(window._pendingLeaveReq, pin);
+  }).then(function() {
+
     document.getElementById('signPinModal').classList.remove('open');
     var msg = document.getElementById('leaveMsg');
     msg.style.color = '#166534';
@@ -2254,7 +2422,8 @@ function renderLeaveHistory() {
       + '<td>' + (r.retDate?fmtDate(r.retDate):'—') + '</td>'
       + '<td>' + (r.duty||'—') + '</td>'
       + '<td>' + (r.reason||'—') + '</td>'
-      + '<td>' + statusHtml + '</td>'
+            + '<td>' + statusHtml + '</td>'
+      + '<td><button class="btn btn-sec" style="padding:4px 8px; font-size:11px;" onclick="printHistoryLeave(\'' + r.id + '\')">Print</button></td>'
       + '</tr>';
   }).join('');
 }
@@ -2585,7 +2754,9 @@ function fetchPmamReports() {
 // INIT SESSION USER
 // ══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', function() {
-  fetchPmamLeaves(); fetchMyLeaveBalances();
+  fetchPmamLeaves();
+    fetchSubstituteRequests(); fetchMyLeaveBalances();
+    fetchSubstituteRequests();
   fetchPmamReports();
   _loadFieldLimits();
   var ustr = sessionStorage.getItem('pmjay_user');
