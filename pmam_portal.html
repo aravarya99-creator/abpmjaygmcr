@@ -1950,75 +1950,80 @@ function canTakeLeave(ltype, reqDays) {
 }
 
 function submitLeave() {
-  var msg  = document.getElementById('leaveMsg');
-  var name = document.getElementById('lvName').value;
-  if (!name) { msg.style.color='#dc2626'; msg.textContent='Please select your name.'; return; }
-  if (!getLvWard()) { msg.style.color='#dc2626'; msg.textContent='Please select your ward.'; return; }
-  if (!document.getElementById('lvDuty').value) { msg.style.color='#dc2626'; msg.textContent='Please assign duty to a substitute PMAM.'; return; }
-  if (!document.getElementById('lvFrom').value) { msg.style.color='#dc2626'; msg.textContent='Please select From date.'; return; }
-  if (!document.getElementById('lvTo').value) { msg.style.color='#dc2626'; msg.textContent='Please select To date.'; return; }
-  if (!document.getElementById('lvReturn').value) { msg.style.color='#dc2626'; msg.textContent='Please select Return date.'; return; }
-  
-  var rEl  = document.querySelector('input[name=lvReason]:checked');
-  if (!rEl) { msg.style.color='#dc2626'; msg.textContent='Please select a Reason for Leave.'; return; }
-  if (rEl.value === 'other' && !document.getElementById('lvOther').value.trim()) { msg.style.color='#dc2626'; msg.textContent='Please specify the reason.'; return; }
-  
-  var tEl  = document.querySelector('input[name=lvType]:checked');
-  if (!tEl) { msg.style.color='#dc2626'; msg.textContent='Please select a Type of Leave.'; return; }
-  
-  var reason = (rEl.value === 'other') ? document.getElementById('lvOther').value.trim() : rEl.value;
-  var u = getPmjayUser();
+  try {
+    var msg  = document.getElementById('leaveMsg');
+    var name = document.getElementById('lvName').value;
+    if (!name) { msg.style.color='#dc2626'; msg.textContent='Please select your name.'; return; }
+    if (!getLvWard()) { msg.style.color='#dc2626'; msg.textContent='Please select your ward.'; return; }
+    if (!document.getElementById('lvDuty').value) { msg.style.color='#dc2626'; msg.textContent='Please assign duty to a substitute PMAM.'; return; }
+    if (!document.getElementById('lvFrom').value) { msg.style.color='#dc2626'; msg.textContent='Please select From date.'; return; }
+    if (!document.getElementById('lvTo').value) { msg.style.color='#dc2626'; msg.textContent='Please select To date.'; return; }
+    if (!document.getElementById('lvReturn').value) { msg.style.color='#dc2626'; msg.textContent='Please select Return date.'; return; }
+    
+    var rEl  = document.querySelector('input[name=lvReason]:checked');
+    if (!rEl) { msg.style.color='#dc2626'; msg.textContent='Please select a Reason for Leave.'; return; }
+    if (rEl.value === 'other' && !document.getElementById('lvOther').value.trim()) { msg.style.color='#dc2626'; msg.textContent='Please specify the reason.'; return; }
+    
+    var tEl  = document.querySelector('input[name=lvType]:checked');
+    if (!tEl) { msg.style.color='#dc2626'; msg.textContent='Please select a Type of Leave.'; return; }
+    
+    var reason = (rEl.value === 'other') ? document.getElementById('lvOther').value.trim() : rEl.value;
+    var u = getPmjayUser();
 
-  var dLabelStr = document.getElementById('lvDays').value || "0";
-  var reqDays = parseInt(dLabelStr) || 0;
-  
-  var chk = canTakeLeave(tEl.value, reqDays);
-  if(!chk.ok) {
-    alert("LIMIT EXCEEDED: " + chk.msg);
-    return;
+    var dLabelStr = document.getElementById('lvDays').value || "0";
+    var reqDays = parseInt(dLabelStr) || 0;
+    
+    var chk = canTakeLeave(tEl.value, reqDays);
+    if(!chk.ok) {
+      alert("LIMIT EXCEEDED: " + chk.msg);
+      return;
+    }
+
+    var req = {
+      name:  name,
+      email: u.email || 'unknown',
+      ward:  getLvWard() || '-',
+      ltype:  tEl ? tEl.value : '-',
+      fromDt:  document.getElementById('lvFrom').value,
+      toDt:    document.getElementById('lvTo').value,
+      days:  document.getElementById('lvDays').value || '-',
+      ret: document.getElementById('lvReturn').value,
+      duty:  document.getElementById('lvDuty').value,
+      reason: reason,
+      status: 'Pending',
+      desig: 'PMAM',
+      timestamp: Date.now()
+    };
+    msg.style.color = '#1A3DB5';
+    msg.textContent = 'Submitting leave request...';
+
+    if (window.DSig) {
+      window._pendingLeaveReq = req;
+      document.getElementById('modalLvPin').value = '';
+      document.getElementById('modalLvMsg').textContent = '';
+      document.getElementById('signPinModal').classList.add('open');
+      return;
+    }
+
+    db.collection('leave_requests').add(req)
+      .then(function() {
+        msg.style.color = '#166534';
+        msg.textContent = '✅ Leave request submitted! I/C AB-PMJAY has been notified.';
+        setTimeout(function(){ msg.textContent=''; }, 4000);
+        document.getElementById('leaveHistCard').style.display = 'block';
+        clearLeaveForm();
+      })
+      .catch(function(e) {
+        msg.style.color = '#dc2626';
+        msg.textContent = 'Error submitting: ' + e.message;
+      });
+  } catch (err) {
+    if (document.getElementById('leaveMsg')) {
+      document.getElementById('leaveMsg').style.color='#dc2626';
+      document.getElementById('leaveMsg').textContent = 'Error: ' + err.message;
+    }
+    alert("CRITICAL JAVASCRIPT ERROR: " + err.message);
   }
-
-  var req = {
-    name:  name,
-    email: u.email || 'unknown',
-    ward:  getLvWard() || '—',
-    ltype:  tEl ? tEl.value : '—',
-    fromDt:  document.getElementById('lvFrom').value,
-    toDt:    document.getElementById('lvTo').value,
-    days:  document.getElementById('lvDays').value || '—',
-    ret: document.getElementById('lvReturn').value,
-    duty:  document.getElementById('lvDuty').value,
-    reason: reason,
-    status: 'Pending',
-    desig: 'PMAM',
-    timestamp: Date.now()
-  };
-  msg.style.color = '#1A3DB5';
-  msg.textContent = 'Submitting leave request…';
-
-  if (window.DSig) {
-    window._pendingLeaveReq = req;
-    document.getElementById('modalLvPin').value = '';
-    document.getElementById('modalLvMsg').textContent = '';
-    document.getElementById('signPinModal').classList.add('open');
-    return;
-  }
-
-  // Note: fetchPmamLeaves() onSnapshot will refresh leaveRequests[] + re-render
-  // automatically once Firestore acknowledges this write. Do NOT push locally
-  // or the entry will appear twice on the next snapshot.
-  db.collection('leave_requests').add(req)
-    .then(function() {
-      msg.style.color = '#166534';
-      msg.textContent = '✅ Leave request submitted! I/C AB-PMJAY has been notified.';
-      setTimeout(function(){ msg.textContent=''; }, 4000);
-      document.getElementById('leaveHistCard').style.display = 'block';
-      clearLeaveForm();
-    })
-    .catch(function(e) {
-      msg.style.color = '#dc2626';
-      msg.textContent = 'Error submitting: ' + e.message;
-    });
 }
 
 function confirmLeaveSignature() {
