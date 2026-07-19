@@ -67,6 +67,7 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .layout{display:flex;min-height:calc(100vh - 110px)}
 
 /* SIDEBAR */
+
 .sidebar{
   width:260px;background:#0a1945;border-right:none;
   display:flex;flex-direction:column;
@@ -74,31 +75,23 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
   box-shadow:2px 0 10px rgba(0,0,0,0.1);
   color:#9ca3af; overflow-y:auto;
 }
-  width:76px;background:#fff;border-right:1.5px solid #E0E8FF;
-  display:flex;flex-direction:column;align-items:center;
-  padding:10px 0;gap:2px;flex-shrink:0;
-  box-shadow:2px 0 8px rgba(26,61,181,0.06);
-}
 .sbi{
   width:100%; display:flex; flex-direction:row; align-items:center;
   gap:12px; padding:12px 24px; cursor:pointer; transition:all 0.2s;
   color:#d1d5db; box-sizing:border-box;
 }
-  width:66px;display:flex;flex-direction:column;align-items:center;
-  gap:3px;padding:9px 4px;border-radius:10px;cursor:pointer;transition:all 0.15s;
-}
 .sbi:hover{background:rgba(255,255,255,0.05); color:#fff;}
 .sbi svg { fill:currentColor; width:20px; height:20px; opacity:0.8; }
 .sbi:hover svg { opacity:1; }
-.sbi.active{background:linear-gradient(135deg,#0F2B8C,#1A3DB5);box-shadow:0 3px 10px rgba(15,43,140,0.25)}
-.sbi svg{width:22px;height:22px}
-.sbi.active svg{fill:#fff}
-.sbi:not(.active) svg{fill:#1A3DB5}
-.sbl{font-size:8px;font-weight:700;text-align:center;line-height:1.3;color:#666;text-transform:uppercase;letter-spacing:0.3px}
-.sbi.active .sbl{color:#fff}
-.sb-div{width:44px;height:1px;background:#E0E8FF;margin:4px 0}
-
-/* CONTENT */
+.sbi.active{
+  background:#2563eb; color:#ffffff; font-weight:600;
+  border-radius:0 24px 24px 0;
+  margin-right:16px; width:calc(100% - 16px);
+  box-shadow: none;
+}
+.sbi.active svg { opacity:1; fill:#ffffff; }
+.sidebar-category { font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:1px; padding:16px 24px 8px 24px; margin-top:8px; }
+.sbl{font-size:13px;font-weight:500;text-align:left;line-height:1.2;color:inherit;text-transform:none;letter-spacing:normal;}
 .content{flex:1;padding:18px;overflow-y:auto}
 .sec{display:none}.sec.active{display:block}
 .page-hd{font-size:20px;font-weight:800;color:#0F2B8C;margin-bottom:16px;display:flex;align-items:center;gap:10px}
@@ -365,72 +358,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 
   <!-- CONTENT -->
   <div class="content">
-    <!-- TOP SUMMARY WIDGETS -->
-    <div style="display:flex; gap:16px; padding:20px 24px 0 24px; flex-wrap:wrap;">
-      
-      <!-- Total PMAM -->
-      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-        <div style="width:48px; height:48px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">👨‍👩‍👧‍👦</span>
-        </div>
-        <div>
-          <div style="color:#1e293b; font-size:13px; font-weight:600;">Total PMAM</div>
-          <div style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">10</div>
-          <div style="color:#64748b; font-size:11px;">Employees</div>
-        </div>
-      </div>
-
-      <!-- Present Today -->
-      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-        <div style="width:48px; height:48px; border-radius:50%; background:#f0fdf4; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">✅</span>
-        </div>
-        <div>
-          <div style="color:#1e293b; font-size:13px; font-weight:600;">Present Today</div>
-          <div id="top-present" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
-          <div style="color:#64748b; font-size:11px;">Employees</div>
-        </div>
-      </div>
-
-      <!-- On Leave Today -->
-      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-        <div style="width:48px; height:48px; border-radius:50%; background:#fff7ed; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">🕒</span>
-        </div>
-        <div>
-          <div style="color:#1e293b; font-size:13px; font-weight:600;">On Leave Today</div>
-          <div id="top-onleave" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
-          <div style="color:#64748b; font-size:11px;">Employees</div>
-        </div>
-      </div>
-
-      <!-- Pending Requests -->
-      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-        <div style="width:48px; height:48px; border-radius:50%; background:#fdf4ff; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">⏳</span>
-        </div>
-        <div>
-          <div style="color:#1e293b; font-size:13px; font-weight:600;">Pending Requests</div>
-          <div id="top-pending" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
-          <div style="color:#64748b; font-size:11px;">Requests</div>
-        </div>
-      </div>
-
-      <!-- Total Leaves Taken -->
-      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-        <div style="width:48px; height:48px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">📄</span>
-        </div>
-        <div>
-          <div style="color:#1e293b; font-size:13px; font-weight:600;">Total Leaves Taken</div>
-          <div id="top-total" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
-          <div style="color:#64748b; font-size:11px;">Days</div>
-        </div>
-      </div>
-
-    </div>
-
-
+    
     <!-- ===== DAILY REPORT ===== -->
     <div class="sec active" id="sec-daily">
       <div class="page-hd">Daily Report</div>
@@ -466,44 +394,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         </div>
       </div>
 
-      <!-- PMAM Leave Overview -->
-      <div class="card" style="margin-top:20px;">
-        <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center;">
-           <span style="color:#0F2B8C; font-size:16px;">PMAM Leave Overview</span>
-           <div style="display:flex; gap:12px; font-weight:normal;">
-              <input type="text" id="overviewSearch" placeholder="Search PMAM..." onkeyup="renderOverview()" style="padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px; width:150px;">
-              <select id="overviewStatus" onchange="renderOverview()" style="padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px;">
-                 <option value="All">All Status</option>
-                 <option value="Present">Present</option>
-                 <option value="On Leave">On Leave</option>
-              </select>
-              <button class="btn btn-pri" onclick="exportExcel('overviewTbl','PMAM_Leave_Overview')">Export Excel</button>
-           </div>
-        </div>
-        <div class="tbl-wrap">
-          <table id="overviewTbl">
-            <thead>
-              <tr>
-                <th style="background:#0F2B8C;color:#fff;">S.No</th>
-                <th style="background:#0F2B8C;color:#fff;">PMAM Name</th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">Status</th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">CL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">COL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">ML<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">PTL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">MTL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">LWP<br><span style="font-size:9px;font-weight:normal;">(Taken)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">Pending Requests</th>
-              </tr>
-            </thead>
-            <tbody id="overviewTbody">
-              <tr><td colspan="10" class="empty-td">Loading data...</td></tr>
-            </tbody>
-          </table>
-        </div>
       </div>
-
-    </div>
 
     <!-- ===== MONTHLY REPORT ===== -->
     <div class="sec" id="sec-monthly">
@@ -714,6 +605,111 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             <thead><tr><th>S.No</th><th>Date</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th title="When the report was actually saved (vs report date)">Submitted</th><th title="Same-day / Late / Backdated">Lag</th><th title="Firestore document ID">Entry ID</th><th>Flag</th><th>Action</th></tr></thead>
             <tbody id="allTbody"><tr><td colspan="18" class="empty-td">Click Filter to load records</td></tr></tbody>
             <tfoot id="allFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    
+    <!-- ===== LEAVE DASHBOARD ===== -->
+    <div class="sec" id="sec-profiles">
+      <!-- TOP SUMMARY WIDGETS -->
+    <div style="display:flex; gap:16px; padding:20px 24px 0 24px; flex-wrap:wrap;">
+      
+      <!-- Total PMAM -->
+      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+        <div style="width:48px; height:48px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center;">
+           <span style="font-size:24px;">👨‍👩‍👧‍👦</span>
+        </div>
+        <div>
+          <div style="color:#1e293b; font-size:13px; font-weight:600;">Total PMAM</div>
+          <div style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">10</div>
+          <div style="color:#64748b; font-size:11px;">Employees</div>
+        </div>
+      </div>
+
+      <!-- Present Today -->
+      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+        <div style="width:48px; height:48px; border-radius:50%; background:#f0fdf4; display:flex; align-items:center; justify-content:center;">
+           <span style="font-size:24px;">✅</span>
+        </div>
+        <div>
+          <div style="color:#1e293b; font-size:13px; font-weight:600;">Present Today</div>
+          <div id="top-present" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
+          <div style="color:#64748b; font-size:11px;">Employees</div>
+        </div>
+      </div>
+
+      <!-- On Leave Today -->
+      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+        <div style="width:48px; height:48px; border-radius:50%; background:#fff7ed; display:flex; align-items:center; justify-content:center;">
+           <span style="font-size:24px;">🕒</span>
+        </div>
+        <div>
+          <div style="color:#1e293b; font-size:13px; font-weight:600;">On Leave Today</div>
+          <div id="top-onleave" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
+          <div style="color:#64748b; font-size:11px;">Employees</div>
+        </div>
+      </div>
+
+      <!-- Pending Requests -->
+      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+        <div style="width:48px; height:48px; border-radius:50%; background:#fdf4ff; display:flex; align-items:center; justify-content:center;">
+           <span style="font-size:24px;">⏳</span>
+        </div>
+        <div>
+          <div style="color:#1e293b; font-size:13px; font-weight:600;">Pending Requests</div>
+          <div id="top-pending" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
+          <div style="color:#64748b; font-size:11px;">Requests</div>
+        </div>
+      </div>
+
+      <!-- Total Leaves Taken -->
+      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+        <div style="width:48px; height:48px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center;">
+           <span style="font-size:24px;">📄</span>
+        </div>
+        <div>
+          <div style="color:#1e293b; font-size:13px; font-weight:600;">Total Leaves Taken</div>
+          <div id="top-total" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
+          <div style="color:#64748b; font-size:11px;">Days</div>
+        </div>
+      </div>
+
+    </div>
+      <!-- PMAM Leave Overview -->
+      <div class="card" style="margin-top:20px;">
+        <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center;">
+           <span style="color:#0F2B8C; font-size:16px;">PMAM Leave Overview</span>
+           <div style="display:flex; gap:12px; font-weight:normal;">
+              <input type="text" id="overviewSearch" placeholder="Search PMAM..." onkeyup="renderOverview()" style="padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px; width:150px;">
+              <select id="overviewStatus" onchange="renderOverview()" style="padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px;">
+                 <option value="All">All Status</option>
+                 <option value="Present">Present</option>
+                 <option value="On Leave">On Leave</option>
+              </select>
+              <button class="btn btn-pri" onclick="exportExcel('overviewTbl','PMAM_Leave_Overview')">Export Excel</button>
+           </div>
+        </div>
+        <div class="tbl-wrap">
+          <table id="overviewTbl">
+            <thead>
+              <tr>
+                <th style="background:#0F2B8C;color:#fff;">S.No</th>
+                <th style="background:#0F2B8C;color:#fff;">PMAM Name</th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">Status</th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">CL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">COL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">ML<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">PTL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">MTL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">LWP<br><span style="font-size:9px;font-weight:normal;">(Taken)</span></th>
+                <th style="background:#0F2B8C;color:#fff;text-align:center;">Pending Requests</th>
+              </tr>
+            </thead>
+            <tbody id="overviewTbody">
+              <tr><td colspan="10" class="empty-td">Loading data...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
