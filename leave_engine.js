@@ -49,21 +49,24 @@
         if (!this.userEmail) return;
         query = query.where('email', '==', this.userEmail);
         
-        if (this.userName) {
+                if (this.userName) {
           this._unsubSub = db.collection('leave_requests')
-            .where('duty', '==', this.userName)
             .where('status', '==', 'Pending Substitute')
             .onSnapshot(function(snap) {
               self.subRequests = [];
               snap.forEach(function(doc) {
                 var d = doc.data();
-                self.subRequests.push(Object.assign({
+                var dutyName = (d.duty || '').toLowerCase();
+                var myName = (self.userName || '').toLowerCase();
+                if (dutyName === myName) {
+                  self.subRequests.push(Object.assign({
                   id: doc.id, type: d.ltype, name: d.name, ward: d.ward, from: d.fromDt,
                   to: d.toDt, days: d.days, retDate: d.ret, duty: d.duty,
                   reason: d.reason, status: d.status, remark: d.remark || '', timestamp: d.timestamp || 0
                 }, d));
+                }
               });
-              self.onUpdate();
+              if (self.onUpdate) self.onUpdate();
             });
         }
       }
