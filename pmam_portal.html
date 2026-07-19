@@ -1857,6 +1857,69 @@ function fetchPmamLeaves() {
       }
 
 
+    }, function(err) {
+      // Surface any Firestore error visibly instead of failing silently.
+      console.error('Leave history load error:', err);
+      var msg = document.getElementById('leaveMsg');
+      if (msg) {
+        msg.style.color = '#dc2626';
+        msg.textContent = 'Could not load leave history: ' + err.message;
+      }
+    });
+}
+// Call this when page loads or navigation reaches Leave section
+
+// ===== LEAVE BALANCE TRACKER =====
+var _myLeaveStats = {}; // { 'Casual': 4, 'Medical Leave': 2, ... }
+var _globalLeaveLimits = { casual: 15, medical: 30, lwp: 30 };
+var _myCompEarned = 0;
+
+function fetchMyLeaveBalances() {
+  var u = getPmjayUser();
+  if(!u || !u.name) return;
+  var year = new Date().getFullYear();
+  var ls_year = document.getElementById('ls_year');
+  if (ls_year) ls_year.textContent = year;
+  
+  if (typeof db === 'undefined') return;
+  
+  db.collection('settings').doc('leave_rules').get().then(doc => {
+    if(doc.exists) {
+      _globalLeaveLimits = doc.data();
+      var safeHide = function(lblFor) { var e = document.querySelector('label[for="'+lblFor+'"]'); if(e) e.style.display = 'none'; else console.warn('Not found', lblFor); };
+      var safeShow = function(lblFor) { var e = document.querySelector('label[for="'+lblFor+'"]'); if(e) e.style.display = 'inline-flex'; };
+      
+      if(_globalLeaveLimits.en_casual === false) safeHide("lt1"); else safeShow("lt1");
+      if(_globalLeaveLimits.en_comp === false) safeHide("lt2"); else safeShow("lt2");
+      if(_globalLeaveLimits.en_medical === false) safeHide("lt3"); else safeShow("lt3");
+      if(_globalLeaveLimits.en_mat === false) safeHide("lt4"); else safeShow("lt4");
+      if(_globalLeaveLimits.en_pat === false) safeHide("lt5"); else safeShow("lt5");
+      if(_globalLeaveLimits.en_lwp === false) safeHide("lt6"); else safeShow("lt6");
+    }
+    return db.collection('settings').doc('comp_balances').get();
+  }).then(doc => {
+    if(doc.exists && doc.data().balances) {
+      _myCompEarned = doc.data().balances[u.name] || 0;
+    }
+    
+    var startOfYear = new Date(year, 0, 1).toISOString();
+    return db.collection('leave_requests')
+      .where('name', '==', u.name)
+      .where('status', '==', 'Approved')
+      .get().then(snap => {
+        _myLeaveStats = {};
+        snap.forEach(lDoc => {
+          var data = lDoc.data();
+          if(data.timestamp >= startOfYear) {
+            _myLeaveStats[data.ltype] = (_myLeaveStats[data.ltype] || 0) + parseInt(data.days || 0);
+          }
+        });
+        renderLeaveSummary();
+      });
+  }).catch(function(e){ console.error(e); });
+}
+
+
 // ═══════════════════════════════════════════════════════════════
 // SUBSTITUTE PMAM LOGIC
 // ═══════════════════════════════════════════════════════════════
@@ -1984,68 +2047,6 @@ function executeApproveDuty() {
     msgEl.style.color = '#dc2626';
     msgEl.textContent = e.message;
   });
-}
-
-    }, function(err) {
-      // Surface any Firestore error visibly instead of failing silently.
-      console.error('Leave history load error:', err);
-      var msg = document.getElementById('leaveMsg');
-      if (msg) {
-        msg.style.color = '#dc2626';
-        msg.textContent = 'Could not load leave history: ' + err.message;
-      }
-    });
-}
-// Call this when page loads or navigation reaches Leave section
-
-// ===== LEAVE BALANCE TRACKER =====
-var _myLeaveStats = {}; // { 'Casual': 4, 'Medical Leave': 2, ... }
-var _globalLeaveLimits = { casual: 15, medical: 30, lwp: 30 };
-var _myCompEarned = 0;
-
-function fetchMyLeaveBalances() {
-  var u = getPmjayUser();
-  if(!u || !u.name) return;
-  var year = new Date().getFullYear();
-  var ls_year = document.getElementById('ls_year');
-  if (ls_year) ls_year.textContent = year;
-  
-  if (typeof db === 'undefined') return;
-  
-  db.collection('settings').doc('leave_rules').get().then(doc => {
-    if(doc.exists) {
-      _globalLeaveLimits = doc.data();
-      var safeHide = function(lblFor) { var e = document.querySelector('label[for="'+lblFor+'"]'); if(e) e.style.display = 'none'; else console.warn('Not found', lblFor); };
-      var safeShow = function(lblFor) { var e = document.querySelector('label[for="'+lblFor+'"]'); if(e) e.style.display = 'inline-flex'; };
-      
-      if(_globalLeaveLimits.en_casual === false) safeHide("lt1"); else safeShow("lt1");
-      if(_globalLeaveLimits.en_comp === false) safeHide("lt2"); else safeShow("lt2");
-      if(_globalLeaveLimits.en_medical === false) safeHide("lt3"); else safeShow("lt3");
-      if(_globalLeaveLimits.en_mat === false) safeHide("lt4"); else safeShow("lt4");
-      if(_globalLeaveLimits.en_pat === false) safeHide("lt5"); else safeShow("lt5");
-      if(_globalLeaveLimits.en_lwp === false) safeHide("lt6"); else safeShow("lt6");
-    }
-    return db.collection('settings').doc('comp_balances').get();
-  }).then(doc => {
-    if(doc.exists && doc.data().balances) {
-      _myCompEarned = doc.data().balances[u.name] || 0;
-    }
-    
-    var startOfYear = new Date(year, 0, 1).toISOString();
-    return db.collection('leave_requests')
-      .where('name', '==', u.name)
-      .where('status', '==', 'Approved')
-      .get().then(snap => {
-        _myLeaveStats = {};
-        snap.forEach(lDoc => {
-          var data = lDoc.data();
-          if(data.timestamp >= startOfYear) {
-            _myLeaveStats[data.ltype] = (_myLeaveStats[data.ltype] || 0) + parseInt(data.days || 0);
-          }
-        });
-        renderLeaveSummary();
-      });
-  }).catch(function(e){ console.error(e); });
 }
 
 function renderLeaveSummary() {
@@ -2755,8 +2756,8 @@ function fetchPmamReports() {
 // ══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', function() {
   fetchPmamLeaves();
-    fetchSubstituteRequests(); fetchMyLeaveBalances();
-    fetchSubstituteRequests();
+  fetchMyLeaveBalances();
+  fetchSubstituteRequests();
   fetchPmamReports();
   _loadFieldLimits();
   var ustr = sessionStorage.getItem('pmjay_user');
