@@ -182,8 +182,8 @@ DSig.init = function(opts){
   }
   console.log('[DSig] Init for portal:', DSig.portal, '· user:', DSig.user.email);
 
-  DSig.mountSidebarItem();
-  DSig.mountInboxSection();
+  // DSig.mountSidebarItem(); // Disabled by user
+  // DSig.mountInboxSection(); // Disabled by user
   DSig.subscribeUsers();
   DSig.subscribeDocs();
 };

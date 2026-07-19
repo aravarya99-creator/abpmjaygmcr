@@ -124,12 +124,22 @@
     // ==========================================
     submitLeave: function(reqObj, pin, requireDigitalSign) {
       return new Promise(function(resolve, reject) {
-        if (requireDigitalSign && window.DSig) {
+        if (requireDigitalSign) {
+          if (!pin || pin.length < 4) return reject(new Error('Please enter your 4-digit PIN.'));
           var myEmail = getPmjayUser().email;
           db.collection('users').doc(myEmail).get().then(function(doc) {
-            var udata = doc.exists ? doc.data() : {};
+            if (!doc.exists) throw new Error("User profile not found.");
+            var udata = doc.data();
+            if (udata.signPinHash) {
+              if (typeof sha256 === 'undefined') throw new Error("Encryption module missing.");
+              if (sha256(pin) !== udata.signPinHash) throw new Error("Incorrect PIN.");
+            } else {
+              throw new Error("You have not set up a Digital Signature PIN yet.");
+            }
             reqObj.applicantSignatureUrl = udata.signatureImage || '';
-            return DSig.initiateSignedLeave(reqObj, pin);
+            reqObj.status = 'Pending Substitute';
+            reqObj.timestamp = Date.now();
+            return db.collection('leave_requests').add(reqObj);
           }).then(resolve).catch(reject);
         } else {
           db.collection('leave_requests').add(reqObj).then(resolve).catch(reject);

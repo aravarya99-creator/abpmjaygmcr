@@ -2882,12 +2882,27 @@ function renderLeaveReqs() {
 
 // Action Leave directly from Pending Tab
 function icActionLeave(id, status) {
-  if(!confirm("Are you sure you want to " + status + " this leave?")) return;
-  LeaveEngine.icActionLeave(id, status).then(() => {
-    alert("Leave " + status);
-  }).catch((err) => {
-    alert("Error updating leave: " + err.message);
-  });
+  if (status === 'Approved') {
+    var pin = prompt("Please enter your 4-digit PIN to digitally sign and approve this leave:");
+    if (pin === null) return; // user cancelled
+    if (pin.length < 4) {
+      alert("PIN must be at least 4 digits.");
+      return;
+    }
+    LeaveEngine.icActionLeave(id, status, pin).then(() => {
+      alert("Leave Approved and Signed Successfully!");
+    }).catch((err) => {
+      alert("Error: " + err.message);
+    });
+  } else {
+    var reason = prompt("Optional: Enter reason for rejection:");
+    if (reason === null) return; // user cancelled
+    LeaveEngine.icActionLeave(id, status, null, reason).then(() => {
+      alert("Leave Rejected.");
+    }).catch((err) => {
+      alert("Error: " + err.message);
+    });
+  }
 }
 
 
