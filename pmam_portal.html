@@ -1824,49 +1824,7 @@ function fmtDate(d) {
 // ══════════════════════════════════════
 // LEAVE — SUBMIT & CLEAR
 // ══════════════════════════════════════
-var leaveRequests = [];
 
-function fetchPmamLeaves() {
-  var u = getPmjayUser();
-  if (!u.email) return;
-  // NOTE: We deliberately DO NOT use .orderBy('timestamp','desc') here,
-  // because combining .where('email','==',...) with .orderBy() requires
-  // a Firestore composite index. Without that index, the query fails
-  // silently in the background and the leave history never appears.
-  // Instead we sort client-side after receiving the snapshot.
-  db.collection('leave_requests')
-    .where('email', '==', u.email)
-    .onSnapshot(function(snap) {
-      leaveRequests = [];
-      snap.forEach(function(doc) {
-        var d = doc.data();
-        leaveRequests.push({
-          id: doc.id,
-          type: d.ltype, name: d.name, ward: d.ward, from: d.fromDt,
-          to: d.toDt, days: d.days, retDate: d.ret, duty: d.duty,
-          reason: d.reason, status: d.status, remark: d.remark || '',
-          timestamp: d.timestamp || 0
-        });
-      });
-      // Sort newest first, client-side
-      leaveRequests.sort(function(a,b){ return (b.timestamp||0) - (a.timestamp||0); });
-      renderLeaveHistory();
-      if (leaveRequests.length > 0) {
-        var card = document.getElementById('leaveHistCard');
-        if (card) card.style.display = 'block';
-      }
-
-
-    }, function(err) {
-      // Surface any Firestore error visibly instead of failing silently.
-      console.error('Leave history load error:', err);
-      var msg = document.getElementById('leaveMsg');
-      if (msg) {
-        msg.style.color = '#dc2626';
-        msg.textContent = 'Could not load leave history: ' + err.message;
-      }
-    });
-}
 // Call this when page loads or navigation reaches Leave section
 
 // ===== LEAVE BALANCE TRACKER =====
@@ -1874,85 +1832,26 @@ var _myLeaveStats = {}; // { 'Casual': 4, 'Medical Leave': 2, ... }
 var _globalLeaveLimits = { casual: 15, medical: 30, lwp: 30 };
 var _myCompEarned = 0;
 
-function fetchMyLeaveBalances() {
-  var u = getPmjayUser();
-  if(!u || !u.name) return;
-  var year = new Date().getFullYear();
-  var ls_year = document.getElementById('ls_year');
-  if (ls_year) ls_year.textContent = year;
-  
-  if (typeof db === 'undefined') return;
-  
-  db.collection('settings').doc('leave_rules').get().then(doc => {
-    if(doc.exists) {
-      _globalLeaveLimits = doc.data();
-      var safeHide = function(lblFor) { var e = document.querySelector('label[for="'+lblFor+'"]'); if(e) e.style.display = 'none'; else console.warn('Not found', lblFor); };
-      var safeShow = function(lblFor) { var e = document.querySelector('label[for="'+lblFor+'"]'); if(e) e.style.display = 'inline-flex'; };
-      
-      if(_globalLeaveLimits.en_casual === false) safeHide("lt1"); else safeShow("lt1");
-      if(_globalLeaveLimits.en_comp === false) safeHide("lt2"); else safeShow("lt2");
-      if(_globalLeaveLimits.en_medical === false) safeHide("lt3"); else safeShow("lt3");
-      if(_globalLeaveLimits.en_mat === false) safeHide("lt4"); else safeShow("lt4");
-      if(_globalLeaveLimits.en_pat === false) safeHide("lt5"); else safeShow("lt5");
-      if(_globalLeaveLimits.en_lwp === false) safeHide("lt6"); else safeShow("lt6");
-    }
-    return db.collection('settings').doc('comp_balances').get();
-  }).then(doc => {
-    if(doc.exists && doc.data().balances) {
-      _myCompEarned = doc.data().balances[u.name] || 0;
-    }
-    
-    var startOfYear = new Date(year, 0, 1).toISOString();
-    return db.collection('leave_requests')
-      .where('name', '==', u.name)
-      .where('status', '==', 'Approved')
-      .get().then(snap => {
-        _myLeaveStats = {};
-        snap.forEach(lDoc => {
-          var data = lDoc.data();
-          if(data.timestamp >= startOfYear) {
-            _myLeaveStats[data.ltype] = (_myLeaveStats[data.ltype] || 0) + parseInt(data.days || 0);
-          }
-        });
-        renderLeaveSummary();
-      });
-  }).catch(function(e){ console.error(e); });
-}
 
 
 // ═══════════════════════════════════════════════════════════════
 // SUBSTITUTE PMAM LOGIC
 // ═══════════════════════════════════════════════════════════════
-var _subRequests = [];
 
-function fetchSubstituteRequests() {
-  if (typeof db === 'undefined' || !getPmjayUser() || !getPmjayUser().name) return;
-  var myName = getPmjayUser().name;
-  db.collection('leave_requests')
-    .where('duty', '==', myName)
-    .where('status', '==', 'Pending Substitute')
-    .onSnapshot(function(snap) {
-      _subRequests = [];
-      snap.forEach(function(doc) {
-        _subRequests.push(Object.assign({id: doc.id}, doc.data()));
-      });
-      renderSubstituteRequests();
-    });
-}
 
 function renderSubstituteRequests() {
   var card = document.getElementById('substituteReqCard');
   var tbody = document.getElementById('subReqTbody');
   if (!card || !tbody) return;
   
-  if (_subRequests.length === 0) {
+  if (LeaveEngine.subRequests.length === 0) {
     card.style.display = 'none';
     return;
   }
   card.style.display = 'block';
   
   var html = '';
-  _subRequests.forEach(function(req) {
+  LeaveEngine.subRequests.forEach(function(req) {
     html += '<tr>';
     html += '<td><strong>' + (req.name || 'Unknown') + '</strong></td>';
     html += '<td>' + (req.ltype || 'Unknown') + '</td>';
@@ -1982,12 +1881,10 @@ function viewDutyRequest(id) {
 }
 
 function rejectDutyRequest(id) {
-  if(confirm("Are you sure you want to REJECT this leave request?")) {
-    db.collection('leave_requests').doc(id).update({
-      status: 'Rejected',
-      remark: 'Rejected by Substitute PMAM'
-    });
-  }
+  if(!confirm("Are you sure you want to reject taking this duty?")) return;
+  LeaveEngine.rejectSubstituteDuty(id).then(function(){
+    alert("Duty request rejected.");
+  });
 }
 
 var _pendingApproveDutyId = null;
@@ -2002,50 +1899,21 @@ function initiateApproveDuty(id) {
 }
 
 function executeApproveDuty() {
-  var pin = document.getElementById('modalLvPin').value;
-  var msgEl = document.getElementById('modalLvMsg');
-  if (!pin || pin.length < 4) {
-    msgEl.style.color = '#dc2626';
-    msgEl.textContent = 'Please enter your 4-digit PIN.';
-    return;
-  }
+  var pin = document.getElementById('dutyPinInput').value;
+  var btn = document.getElementById('dutyConfirmBtn');
+  var msg = document.getElementById('dutyConfirmMsg');
+  if(!pin){ msg.style.color='red'; msg.textContent='Enter PIN.'; return; }
   
-  var myEmail = getPmjayUser().email;
-  msgEl.style.color = '#1A3DB5';
-  msgEl.textContent = 'Verifying and Signing...';
+  btn.disabled = true; msg.style.color='blue'; msg.textContent='Approving...';
   
-  // Hash the PIN and check user's signatureImage
-  db.collection('users').doc(myEmail).get().then(function(doc) {
-    if (!doc.exists) throw new Error("User profile not found.");
-    var udata = doc.data();
-    if (udata.signPinHash) {
-      if (typeof sha256 === 'undefined') throw new Error("Encryption module missing.");
-      if (sha256(pin) !== udata.signPinHash) {
-        throw new Error("Incorrect PIN.");
-      }
-    } else {
-      throw new Error("You have not set up a Digital Signature PIN yet.");
-    }
-    
-    // Attach the substitute's signature URL to the leave request
-    var sigUrl = udata.signatureImage || '';
-    
-    return db.collection('leave_requests').doc(_pendingApproveDutyId).update({
-      status: 'Pending',
-      substituteSignatureUrl: sigUrl,
-      substituteSignedAt: Date.now()
-    });
-  }).then(function() {
-    msgEl.style.color = '#166534';
-    msgEl.textContent = 'Successfully Approved & Signed!';
-    setTimeout(function() {
-      document.getElementById('signPinModal').classList.remove('open');
-      // Reset the button onclick back to normal submission for safety
-      document.querySelector('#signPinModal .btn-pri').onclick = confirmLeaveSignature;
-    }, 1500);
-  }).catch(function(e) {
-    msgEl.style.color = '#dc2626';
-    msgEl.textContent = e.message;
+  LeaveEngine.approveSubstituteDuty(_activeDutyReqId, pin).then(function() {
+    msg.style.color = 'green';
+    msg.textContent = 'Duty Accepted Successfully!';
+    setTimeout(closeModal, 1500);
+  }).catch(function(err) {
+    msg.style.color = 'red';
+    msg.textContent = err.message;
+    btn.disabled = false;
   });
 }
 
@@ -2091,24 +1959,22 @@ function renderLeaveSummary() {
   if(c) c.innerHTML = html;
 }
 function canTakeLeave(ltype, reqDays) {
-  var used = _myLeaveStats[ltype] || 0;
-  reqDays = parseInt(reqDays) || 0;
-  if(ltype === 'Casual') {
-    var limit = _globalLeaveLimits.casual || 15;
-    if(used + reqDays > limit) return { ok: false, msg: 'You only have ' + (limit-used) + ' Casual leaves remaining.' };
+  var b = LeaveEngine.calculateBalances(getPmjayUser().email);
+  var t = (ltype || '').toLowerCase();
+  
+  if (t.indexOf('pay') !== -1 || t.indexOf('lwp') !== -1) return {ok: true};
+  
+  var max = 0;
+  if (t.indexOf('casual') !== -1) max = b.balance.casual;
+  else if (t.indexOf('medical') !== -1) max = b.balance.medical;
+  else if (t.indexOf('maternity') !== -1) max = b.balance.maternity;
+  else if (t.indexOf('paternity') !== -1) max = b.balance.paternity;
+  else if (t.indexOf('compensatory') !== -1) max = 999; 
+  
+  if (reqDays > max) {
+    return {ok: false, msg: 'You only have ' + max + ' days of ' + ltype + ' left.'};
   }
-  if(ltype === 'Medical Leave') {
-    var limit = _globalLeaveLimits.medical || 30;
-    if(used + reqDays > limit) return { ok: false, msg: 'You only have ' + (limit-used) + ' Medical leaves remaining.' };
-  }
-  if(ltype === 'Leave Without Pay') {
-    var limit = _globalLeaveLimits.lwp || 30;
-    if(used + reqDays > limit) return { ok: false, msg: 'You only have ' + (limit-used) + ' LWP remaining.' };
-  }
-  if(ltype === 'Compensatory') {
-    if(used + reqDays > _myCompEarned) return { ok: false, msg: 'You only have ' + (_myCompEarned-used) + ' earned Compensatory leaves remaining. Please contact admin if incorrect.' };
-  }
-  return { ok: true };
+  return {ok: true};
 }
 
 function submitLeave() {
@@ -2403,7 +2269,7 @@ function clearLeaveForm() {
   document.getElementById('leaveMsg').textContent = '';
 }
 function renderLeaveHistory() {
-  document.getElementById('leaveTbody').innerHTML = leaveRequests.map(function(r) {
+  document.getElementById('leaveTbody').innerHTML = LeaveEngine.requests.map(function(r) {
     var statusBg, statusFg;
     if (r.status === 'Pending')       { statusBg = '#FEF3C7'; statusFg = '#92400e'; }
     else if (r.status === 'Approved') { statusBg = '#DCFCE7'; statusFg = '#166534'; }
@@ -2755,9 +2621,19 @@ function fetchPmamReports() {
 // INIT SESSION USER
 // ══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', function() {
-  fetchPmamLeaves();
-  fetchMyLeaveBalances();
-  fetchSubstituteRequests();
+  
+    LeaveEngine.init({
+      role: 'pmam',
+      email: getPmjayUser() ? getPmjayUser().email : null,
+      name: getPmjayUser() ? getPmjayUser().name : null,
+      onUpdate: function() {
+        if(typeof renderLeaveSummary === 'function') renderLeaveSummary();
+        if(typeof renderLeaveHistory === 'function') renderLeaveHistory();
+        if(typeof renderSubstituteRequests === 'function') renderSubstituteRequests();
+      }
+    });
+    // fetchSubstituteRequests(); fetchMyLeaveBalances(); // Removed
+
   fetchPmamReports();
   _loadFieldLimits();
   var ustr = sessionStorage.getItem('pmjay_user');
@@ -3483,6 +3359,7 @@ function updateWardStatus(){
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="leave_engine.js"></script>
 <script src="digital_signature.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {

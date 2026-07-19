@@ -1833,8 +1833,8 @@ function populateFilters() {
 
 // ===== LEAVE =====
 function loadLeaveReq(){
-  const pending = leaveRequests.filter(l => l.status === 'Pending');
-  const history = leaveRequests.filter(l => l.status !== 'Pending');
+  const pending = LeaveEngine.requests.filter(l => l.status === 'Pending');
+  const history = LeaveEngine.requests.filter(l => l.status !== 'Pending');
   
   document.getElementById('lv-pending').textContent = pending.length;
   document.getElementById('lv-approved').textContent = history.filter(l=>l.status==='Approved').length;
@@ -2436,7 +2436,6 @@ function printReport_DEPRECATED(title){
 
 // INIT — load monthly on start
 let allReports = [];
-let leaveRequests = [];
 
 window.addEventListener('load',()=>{
   // Production session guard — only authenticated I/C AB-PMJAY or Admin
@@ -2456,6 +2455,22 @@ window.addEventListener('load',()=>{
   const today=new Date().toISOString().split('T')[0];
   document.querySelectorAll('input[type=date]').forEach(el=>{if(!el.value)el.value=today;});
   fetchPmamList(function(){}); // warm up cache for Daily report
+
+  var u;
+  try { u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); } catch(e) { u = {}; }
+  LeaveEngine.init({
+    role: 'ic',
+    email: u.email || null,
+    name: u.name || null,
+    onUpdate: function() {
+      updateLeaveBadges();
+      if(document.getElementById('sec-leavereq') && document.getElementById('sec-leavereq').classList.contains('active')) {
+        if(typeof loadLeaveReq === 'function') loadLeaveReq();
+        if(typeof renderLeaveReqs === 'function') renderLeaveReqs();
+      }
+    }
+  });
+
   fetchFirebaseData();
 
   // Also seed Monthly dropdowns (kept for users who switch to Monthly section)
@@ -2519,18 +2534,7 @@ function fetchFirebaseData() {
   }, err => {
     console.error('daily_reports listener error:', err);
   });
-  db.collection('leave_requests').orderBy('timestamp', 'desc').onSnapshot(snap => {
-    leaveRequests = [];
-    snap.forEach(doc => leaveRequests.push({ id: doc.id, ...doc.data() }));
-    // Always refresh the badge counts + sidebar pill so the I/C sees
-    // new pending requests even while viewing other sections.
-    updateLeaveBadges();
-    // If viewing the Leave Requests section, also re-render the lists.
-    if(document.getElementById('sec-leavereq') && document.getElementById('sec-leavereq').classList.contains('active')) loadLeaveReq();
-  }, err => {
-    console.error('leave_requests listener error:', err);
-  });
-}
+  }
 
 // Keep the counter badges in sync across all sections.
 
@@ -2551,7 +2555,7 @@ function renderOverview() {
     
     // Status Logic
     var isLeave = false;
-    leaveRequests.forEach(function(l){
+    LeaveEngine.requests.forEach(function(l){
       if (l.status === 'Approved' && (l.email === p.email || l.name === p.name) && l.from <= today && l.to >= today) {
          isLeave = true;
       }
@@ -2562,13 +2566,13 @@ function renderOverview() {
     var statusBadge = isLeave ? '<span style="background:#ffedd5;color:#c2410c;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">On Leave</span>' : '<span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">Present</span>';
 
     // Pending Logic
-    var pendingCount = leaveRequests.filter(function(l){
+    var pendingCount = LeaveEngine.requests.filter(function(l){
       return l.status === 'Pending' && (l.email === p.email || l.name === p.name);
     }).length;
 
     // Leave Types Logic
     var casualTaken=0, medicalTaken=0, compTaken=0, patTaken=0, matTaken=0, lwpTaken=0;
-    leaveRequests.forEach(function(l){
+    LeaveEngine.requests.forEach(function(l){
       if (l.status === 'Approved' && (l.email === p.email || l.name === p.name)) {
         var d = parseFloat(l.days) || 0;
         var t = (l.ltype || '').toLowerCase();
@@ -2627,7 +2631,7 @@ function renderLeaveDash() {
   var onLeaveList = [];
   var recentActivity = []; // We will build this by scanning leaveRequests
 
-  leaveRequests.forEach(function(l) {
+  LeaveEngine.requests.forEach(function(l) {
     var d = parseFloat(l.days) || 0;
     if (l.status === 'Pending') pendingReqs++;
     if (l.status === 'Approved') {
@@ -2698,7 +2702,7 @@ function renderLeaveDash() {
     if (p.gender !== 'Male') totalMTL_E += rules.maternity;
   });
 
-  leaveRequests.forEach(function(l){
+  LeaveEngine.requests.forEach(function(l){
     if (l.status === 'Approved') {
       var d = parseFloat(l.days) || 0;
       var t = (l.ltype || '').toLowerCase();
@@ -2805,7 +2809,7 @@ function renderLeaveReqs() {
   var phtml='', ahtml='', rhtml='', hhtml='';
   
   // Sort descending by appliedDate
-  var sortedReqs = leaveRequests.slice().sort((a,b) => new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime());
+  var sortedReqs = LeaveEngine.requests.slice().sort((a,b) => new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime());
 
   sortedReqs.forEach(function(l){
     var emp = l.name || l.email;
@@ -2878,21 +2882,11 @@ function renderLeaveReqs() {
 
 // Action Leave directly from Pending Tab
 function icActionLeave(id, status) {
-  var reason = '';
-  if(status === 'Rejected') {
-    reason = prompt("Enter rejection reason:");
-    if(reason === null) return;
-  }
   if(!confirm("Are you sure you want to " + status + " this leave?")) return;
-  
-  var updates = { status: status, actionDate: new Date().toISOString().split('T')[0], actionBy: document.querySelector('.uname').textContent || 'I/C Admin' };
-  if(status === 'Rejected') updates.rejectReason = reason;
-
-  db.collection('leave_requests').doc(id).update(updates).then(() => {
+  LeaveEngine.icActionLeave(id, status).then(() => {
     alert("Leave " + status);
-  }).catch(err => {
-    console.error(err);
-    alert("Error updating leave.");
+  }).catch((err) => {
+    alert("Error updating leave: " + err.message);
   });
 }
 
@@ -2914,7 +2908,7 @@ function renderLeaveBal() {
     if(search && p.name.toLowerCase().indexOf(search) === -1) return;
     
     var casualTaken=0, medicalTaken=0, compTaken=0, patTaken=0, matTaken=0, lwpTaken=0;
-    leaveRequests.forEach(function(l){
+    LeaveEngine.requests.forEach(function(l){
       if (l.status === 'Approved' && (l.email === p.email || l.name === p.name)) {
         var d = parseFloat(l.days) || 0;
         var t = (l.ltype || '').toLowerCase();
@@ -2953,12 +2947,12 @@ function renderLeaveBal() {
 }
 
 function updateLeaveBadges() {
-  var pending  = leaveRequests.filter(l => l.status === 'Pending').length;
-  var approved = leaveRequests.filter(l => l.status === 'Approved').length;
-  var rejected = leaveRequests.filter(l => l.status === 'Rejected').length;
+  var pending  = LeaveEngine.requests.filter(l => l.status === 'Pending').length;
+  var approved = LeaveEngine.requests.filter(l => l.status === 'Approved').length;
+  var rejected = LeaveEngine.requests.filter(l => l.status === 'Rejected').length;
   // "On Leave Today" — Approved requests whose date range includes today
   var today = new Date().toISOString().split('T')[0];
-  var onLeaveToday = leaveRequests.filter(function(l){
+  var onLeaveToday = LeaveEngine.requests.filter(function(l){
     return l.status === 'Approved' && l.from && l.to && l.from <= today && l.to >= today;
   
   if(document.getElementById('sec-leavedash') && document.getElementById('sec-leavedash').classList.contains('active')) renderLeaveDash();
@@ -2982,7 +2976,7 @@ function updateLeaveBadges() {
   if (document.getElementById('top-pending')) document.getElementById('top-pending').textContent = pending;
   
   var totalDaysTaken = 0;
-  leaveRequests.forEach(l => { if(l.status === 'Approved') totalDaysTaken += (parseFloat(l.days)||0); });
+  LeaveEngine.requests.forEach(l => { if(l.status === 'Approved') totalDaysTaken += (parseFloat(l.days)||0); });
   if (document.getElementById('top-total')) document.getElementById('top-total').textContent = totalDaysTaken;
   
   if (typeof renderOverview === 'function') renderOverview();
@@ -3498,6 +3492,7 @@ window.addEventListener('DOMContentLoaded', function(){
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="leave_engine.js"></script>
 <script src="digital_signature.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -3527,7 +3522,7 @@ function renderPmamProfiles() {
       // Calculate taken leaves
       var casualTaken=0, medicalTaken=0, compTaken=0, patTaken=0, matTaken=0, lwpTaken=0, otherTaken=0;
       
-      leaveRequests.forEach(function(l){
+      LeaveEngine.requests.forEach(function(l){
         if (l.status === 'Approved' && (l.email === p.email || l.name === p.name)) {
           var d = parseFloat(l.days) || 0;
           var t = (l.ltype || '').toLowerCase();
