@@ -1855,8 +1855,8 @@ function renderSubstituteRequests() {
     html += '<tr>';
     html += '<td><strong>' + (req.name || 'Unknown') + '</strong></td>';
     html += '<td>' + (req.ltype || 'Unknown') + '</td>';
-    html += '<td>' + fmtDt(req.fromDt) + '</td>';
-    html += '<td>' + fmtDt(req.toDt) + '</td>';
+    html += '<td>' + fmtDate(req.from) + '</td>';
+    html += '<td>' + fmtDate(req.to) + '</td>';
     html += '<td>' + (req.days || '-') + '</td>';
     html += '<td>';
     html += '<button class="btn btn-pri" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="viewDutyRequest(\'' + req.id + '\')">View</button>';
@@ -1875,7 +1875,7 @@ function viewDutyRequest(id) {
   d.innerHTML = '<strong>Applicant:</strong> ' + req.name + '<br>' +
                 '<strong>Ward:</strong> ' + req.ward + '<br>' +
                 '<strong>Leave Type:</strong> ' + req.ltype + '<br>' +
-                '<strong>Dates:</strong> ' + fmtDt(req.fromDt) + ' to ' + fmtDt(req.toDt) + ' (' + req.days + ' days)<br>' +
+                '<strong>Dates:</strong> ' + fmtDate(req.from) + ' to ' + fmtDate(req.to) + ' (' + req.days + ' days)<br>' +
                 '<strong>Reason:</strong> ' + req.reason;
   document.getElementById('viewDutyModal').classList.add('open');
 }
