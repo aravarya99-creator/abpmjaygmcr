@@ -1975,8 +1975,6 @@ function submitLeave() {
   var chk = canTakeLeave(tEl.value, reqDays);
   if(!chk.ok) {
     alert("LIMIT EXCEEDED: " + chk.msg);
-    hideLoader();
-    btn.disabled = false;
     return;
   }
 
