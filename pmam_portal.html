@@ -1869,7 +1869,7 @@ function renderSubstituteRequests() {
 }
 
 function viewDutyRequest(id) {
-  var req = _subRequests.find(r => r.id === id);
+  var req = LeaveEngine.subRequests.find(r => r.id === id);
   if (!req) return;
   var d = document.getElementById('viewDutyDetails');
   d.innerHTML = '<strong>Applicant:</strong> ' + req.name + '<br>' +
@@ -1893,23 +1893,27 @@ function initiateApproveDuty(id) {
   document.getElementById('modalLvPin').value = '';
   document.getElementById('modalLvMsg').textContent = '';
   // Reuse the signature PIN modal, but override its behavior
-  var btn = document.querySelector('#signPinModal .btn-pri');
+  var btn = document.querySelector('#signPinModal .mbtn-pri');
   btn.onclick = executeApproveDuty;
   document.getElementById('signPinModal').classList.add('open');
 }
 
 function executeApproveDuty() {
-  var pin = document.getElementById('dutyPinInput').value;
-  var btn = document.getElementById('dutyConfirmBtn');
-  var msg = document.getElementById('dutyConfirmMsg');
+  var pin = document.getElementById('modalLvPin').value;
+  var btn = document.querySelector('#signPinModal .mbtn-pri');
+  var msg = document.getElementById('modalLvMsg');
   if(!pin){ msg.style.color='red'; msg.textContent='Enter PIN.'; return; }
   
   btn.disabled = true; msg.style.color='blue'; msg.textContent='Approving...';
   
-  LeaveEngine.approveSubstituteDuty(_activeDutyReqId, pin).then(function() {
+  LeaveEngine.approveSubstituteDuty(_pendingApproveDutyId, pin).then(function() {
     msg.style.color = 'green';
     msg.textContent = 'Duty Accepted Successfully!';
-    setTimeout(closeModal, 1500);
+    setTimeout(function() {
+      document.getElementById('signPinModal').classList.remove('open');
+      btn.disabled = false;
+      btn.onclick = confirmLeaveSignature; // restore original handler
+    }, 1500);
   }).catch(function(err) {
     msg.style.color = 'red';
     msg.textContent = err.message;
