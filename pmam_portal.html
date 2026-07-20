@@ -705,6 +705,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
       </style>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
         <button class="lv-tab active" onclick="showLvTab('dash', this)">📊 Leave Dashboard</button>
+        <button class="lv-tab" onclick="showLvTab('apply', this)">📝 Apply Leave</button>
         <button class="lv-tab" onclick="showLvTab('myreq', this)">📋 My Leave Requests</button>
         <button class="lv-tab" onclick="showLvTab('subreq', this)">👥 Substitute Duty Requests</button>
       </div>
@@ -726,7 +727,10 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div style="font-size:13px;font-weight:700;color:#1e3a8a;margin-bottom:10px">Your Leave Balance (<span id="ls_year">...</span>)</div>
         <div id="ls_content" style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px">Loading balances...</div>
       </div>
+      </div> <!-- End lvpane-dash -->
 
+      <!-- APPLY LEAVE PANE -->
+      <div class="lv-pane" id="lvpane-apply">
       <!-- FORM CARD -->
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:13px;font-weight:700;color:#0F2B8C;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(26,61,181,0.1)">Fill Leave Application</div>
@@ -945,7 +949,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         </div>
         <div id="leaveMsg" style="font-size:12px;text-align:right;margin-top:8px;min-height:18px;color:#166534"></div>
       </div>
-      </div> <!-- End lvpane-dash -->
+      </div> <!-- End lvpane-apply -->
 
       <!-- SUBSTITUTE DUTY REQUESTS PANE -->
       <div class="lv-pane" id="lvpane-subreq">
