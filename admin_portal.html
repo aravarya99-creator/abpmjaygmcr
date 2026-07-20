@@ -274,6 +274,7 @@ tr:hover td{background:#EEF3FF}
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  <script src="leave_engine.js"></script>
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
@@ -579,7 +580,6 @@ input:checked + .slider:before { transform: translateX(20px); }
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
         <button class="dmt-tab active" id="dmt-wardmgmt" onclick="showDmTab('wardmgmt',this)">🏨 Ward Management</button>
         <button class="dmt-tab"        id="dmt-reports"  onclick="showDmTab('reports',this)">📊 Monthly Reports</button>
-        <button class="dmt-tab"        id="dmt-leaves"   onclick="showDmTab('leaves',this)">📋 Leave Requests</button>
         <button class="dmt-tab"        id="dmt-cleanup"  onclick="showDmTab('cleanup',this)">🧹 Data Cleanup</button>
       </div>
 
@@ -7795,6 +7795,18 @@ window.addEventListener('DOMContentLoaded', function() {
   loadSessionUser();
   setTimeout(loadAllUsers, 500);
   setTimeout(function(){ setAdminUnlocked(isAdminUnlocked()); }, 800);
+  LeaveEngine.init({
+    role: 'admin',
+    email: u.email,
+    name: 'Admin',
+    onUpdate: function() {
+      if (document.getElementById('sec-leaves') && document.getElementById('sec-leaves').classList.contains('active')) {
+        var statusEl = document.getElementById('dmLvStatusTxt');
+        if (statusEl) statusEl.textContent = 'Loaded ' + LeaveEngine.requests.length + ' leave requests';
+        dmRenderLeaves();
+      }
+    }
+  });
   // Init settings to Branding tab by default
   setTimeout(function(){
     var firstStab = document.getElementById('stab-branding');
