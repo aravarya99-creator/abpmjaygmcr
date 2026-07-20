@@ -974,8 +974,17 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         </div>
       </div>
       </div> <!-- End lvpane-subreq -->
-      
 
+      <!-- VIEW DUTY MODAL -->
+      <div id="viewDutyModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+        <div class="modal-content" style="background:#fff;padding:20px;border-radius:12px;width:90%;max-width:500px;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+          <h3 style="margin-bottom:15px;color:#0f2b8c;">Leave Request Details</h3>
+          <div id="viewDutyDetails" style="margin:15px 0; font-size:14px; line-height:1.6;"></div>
+          <div style="text-align:right">
+            <button class="btn btn-sec" onclick="document.getElementById('viewDutyModal').style.display='none'">Close</button>
+          </div>
+        </div>
+      </div>
 
       <div class="lv-pane" id="lvpane-myreq">
       <div class="card" id="leaveHistCard" style="display:none">
@@ -1884,8 +1893,12 @@ function renderSubstituteRequests() {
     html += '<td>' + (req.days || '-') + '</td>';
     html += '<td>';
     html += '<button class="btn btn-pri" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="viewDutyRequest(\'' + req.id + '\')">View</button>';
-    html += '<button class="btn btn-pri" style="background:#166534; padding:4px 8px; font-size:11px; margin-right:4px;" onclick="initiateApproveDuty(\'' + req.id + '\')">Approve</button>';
-    html += '<button class="btn btn-sec" style="color:#dc2626; padding:4px 8px; font-size:11px;" onclick="rejectDutyRequest(\'' + req.id + '\')">Reject</button>';
+    if (req.status === 'Pending Substitute') {
+      html += '<button class="btn btn-pri" style="background:#166534; padding:4px 8px; font-size:11px; margin-right:4px;" onclick="initiateApproveDuty(\'' + req.id + '\')">Approve</button>';
+      html += '<button class="btn btn-sec" style="color:#dc2626; padding:4px 8px; font-size:11px;" onclick="rejectDutyRequest(\'' + req.id + '\')">Reject</button>';
+    } else {
+      html += '<span style="font-size:11px; font-weight:600; color:#1e3a8a; margin-left:4px;">' + req.status + '</span>';
+    }
     html += '</td>';
     html += '</tr>';
   });
@@ -1901,7 +1914,7 @@ function viewDutyRequest(id) {
                 '<strong>Leave Type:</strong> ' + req.ltype + '<br>' +
                 '<strong>Dates:</strong> ' + fmtDate(req.from) + ' to ' + fmtDate(req.to) + ' (' + req.days + ' days)<br>' +
                 '<strong>Reason:</strong> ' + req.reason;
-  document.getElementById('viewDutyModal').classList.add('open');
+  document.getElementById('viewDutyModal').style.display = 'flex';
 }
 
 function rejectDutyRequest(id) {
@@ -2257,6 +2270,58 @@ window.addEventListener('DOMContentLoaded', function(){
   }
 });
 
+// ---
+// LEAVE - PRINT HISTORY (opens new window)
+// ---
+function printHistoryLeave(id) {
+  var r = LeaveEngine.requests.find(function(req) { return req.id === id; });
+  if (!r) return;
+  var dLabel = '';
+  if (r.days) dLabel += r.days + ' day(s)';
+  if (r.fromDt && r.toDt) dLabel += ' (' + fmtDate(r.fromDt) + ' to ' + fmtDate(r.toDt) + ')';
+  if (!dLabel) dLabel = '-';
+  
+  var reasonStr = r.reason || '-';
+  var todayStr = new Date(r.timestamp || Date.now()).toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+
+  var FORM_TITLE = 'LEAVE APPLICATION FORM';
+  var bodyHTML = ''
+    + '<div class="date-row"><strong>Date:</strong> ' + todayStr + '</div>'
+    + '<table>'
+    + '<tbody>'
+    + '<tr><td class="lbl">Name of the Official</td><td>' + (r.name || '-')   + '</td></tr>'
+    + '<tr><td class="lbl">Designation</td><td>'          + (r.desig || 'PMAM')  + '</td></tr>'
+    + '<tr><td class="lbl">Ward / Unit</td><td>'          + (r.ward || '-')   + '</td></tr>'
+    + '<tr><td class="lbl">Reason for Leave</td><td>'     + reasonStr + '</td></tr>'
+    + '<tr><td class="lbl">Type of Leave</td><td>'        + (r.ltype || '-')  + '</td></tr>'
+    + '<tr><td class="lbl">Total No. of Days</td><td>'    + dLabel + '</td></tr>'
+    + '<tr><td class="lbl">Return Date</td><td>'          + (r.retDate ? fmtDate(r.retDate) : '-') + '</td></tr>'
+    + '<tr><td class="lbl">Duty Assigned To</td><td>'     + (r.duty || '-') + '</td></tr>'
+    + '</tbody></table>';
+
+  if (typeof GMCHeaders !== 'undefined') {
+    bodyHTML = GMCHeaders.abpmjayReport(FORM_TITLE, bodyHTML);
+  }
+
+  var printWin = window.open('','_blank');
+  printWin.document.write('<html><head><title>Print Leave Application</title>');
+  printWin.document.write('<link rel="stylesheet" href="shared/headers.css?v=6">');
+  printWin.document.write('<style>');
+  printWin.document.write('@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");');
+  printWin.document.write('body{font-family:"Inter",sans-serif;padding:20px;color:#1e293b} ');
+  printWin.document.write('.date-row{text-align:right;font-size:13px;margin:20px 0;font-weight:500;} ');
+  printWin.document.write('table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px;} ');
+  printWin.document.write('td{padding:12px;border:1px solid #cbd5e1;vertical-align:middle;} ');
+  printWin.document.write('.lbl{font-weight:600;background:#f8fafc;width:40%;color:#0f172a;} ');
+  printWin.document.write('.section-title{font-size:14px;font-weight:700;color:#0F2B8C;margin-top:25px;margin-bottom:10px;border-bottom:2px solid #e2e8f0;padding-bottom:5px} ');
+  printWin.document.write('.tc{text-align:center} ');
+  printWin.document.write('</style></head><body>');
+  printWin.document.write(bodyHTML);
+  printWin.document.write('</body></html>');
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(function(){ printWin.print(); }, 800);
+}
 
 // Restrict compensatory date pickers to current month
 (function(){
