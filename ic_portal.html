@@ -2468,6 +2468,9 @@ window.addEventListener('load',()=>{
         if(typeof loadLeaveReq === 'function') loadLeaveReq();
         if(typeof renderLeaveReqs === 'function') renderLeaveReqs();
       }
+      if(document.getElementById('sec-leavebal') && document.getElementById('sec-leavebal').classList.contains('active')) {
+        if(typeof renderLeaveBal === 'function') renderLeaveBal();
+      }
     }
   });
 

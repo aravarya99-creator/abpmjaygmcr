@@ -1950,14 +1950,16 @@ function renderLeaveSummary() {
   var isFemale = u.gender === 'Female';
   var isMale = u.gender === 'Male';
   
-  html += genCatCard('Casual (CL)', _globalLeaveLimits.casual || 0, _myLeaveStats['Casual'] || 0, false);
-  html += genCatCard('Compensatory', _myCompEarned || 0, _myLeaveStats['Compensatory'] || 0, false);
-  html += genCatCard('Medical (ML)', _globalLeaveLimits.medical || 0, _myLeaveStats['Medical Leave'] || 0, false);
+  var b = LeaveEngine.calculateBalances(u.email || u.name);
+
+  html += genCatCard('Casual (CL)', b.eligible.casual || 0, b.taken.casual || 0, false);
+  html += genCatCard('Compensatory', _myCompEarned || 0, b.taken.comp || 0, false);
+  html += genCatCard('Medical (ML)', b.eligible.medical || 0, b.taken.medical || 0, false);
   
-  if (!isFemale) html += genCatCard('Paternity (PTL)', _globalLeaveLimits.paternity || 15, _myLeaveStats['Paternity Leave'] || 0, false);
-  if (!isMale) html += genCatCard('Maternity (MTL)', _globalLeaveLimits.maternity || 180, _myLeaveStats['Maternity Leave'] || 0, false);
+  if (!isFemale) html += genCatCard('Paternity (PTL)', b.eligible.paternity || 15, b.taken.paternity || 0, false);
+  if (!isMale) html += genCatCard('Maternity (MTL)', b.eligible.maternity || 180, b.taken.maternity || 0, false);
   
-  html += genCatCard('LWP', 0, _myLeaveStats['Leave Without Pay'] || 0, true);
+  html += genCatCard('LWP', 0, b.taken.lwp || 0, true);
 
   var c = document.getElementById('ls_content');
   if(c) c.innerHTML = html;
