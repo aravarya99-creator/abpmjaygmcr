@@ -695,6 +695,32 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div style="flex:1;height:2px;background:linear-gradient(90deg,#1A3DB5,transparent)"></div>
       </div>
 
+      <!-- Tabs -->
+      <style>
+        .lv-tab { padding:8px 16px;font-size:12px;border-radius:10px;border:1.5px solid #e0e8ff;cursor:pointer;font-weight:600;color:#374151;background:#f8faff;transition:all 0.18s;white-space:nowrap; }
+        .lv-tab:hover { background:#dbeafe;color:#1e3a8a;border-color:#93c5fd; }
+        .lv-tab.active { background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border-color:#1d4ed8;box-shadow:0 2px 8px rgba(29,78,216,0.25); }
+        .lv-pane { display:none; }
+        .lv-pane.active { display:block; }
+      </style>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
+        <button class="lv-tab active" onclick="showLvTab('dash', this)">📊 Leave Dashboard</button>
+        <button class="lv-tab" onclick="showLvTab('myreq', this)">📋 My Leave Requests</button>
+        <button class="lv-tab" onclick="showLvTab('subreq', this)">👥 Substitute Duty Requests</button>
+      </div>
+      <script>
+        function showLvTab(tab, el) {
+          document.querySelectorAll('#sec-leave .lv-tab').forEach(function(b){ b.classList.remove('active'); });
+          document.querySelectorAll('#sec-leave .lv-pane').forEach(function(p){ p.classList.remove('active'); });
+          el.classList.add('active');
+          document.getElementById('lvpane-' + tab).classList.add('active');
+          if(tab==='myreq' && document.getElementById('leaveHistCard')) document.getElementById('leaveHistCard').style.display='block';
+          if(tab==='subreq' && document.getElementById('substituteReqCard')) document.getElementById('substituteReqCard').style.display='block';
+        }
+      </script>
+
+      <!-- LEAVE DASHBOARD PANE -->
+      <div class="lv-pane active" id="lvpane-dash">
       <!-- LEAVE SUMMARY DASHBOARD -->
       <div id="leave_summary_dash" style="background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:14px;">
         <div style="font-size:13px;font-weight:700;color:#1e3a8a;margin-bottom:10px">Your Leave Balance (<span id="ls_year">...</span>)</div>
@@ -919,10 +945,10 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         </div>
         <div id="leaveMsg" style="font-size:12px;text-align:right;margin-top:8px;min-height:18px;color:#166534"></div>
       </div>
+      </div> <!-- End lvpane-dash -->
 
-      <!-- LEAVE HISTORY CARD -->
-      
-      <!-- SUBSTITUTE DUTY REQUESTS -->
+      <!-- SUBSTITUTE DUTY REQUESTS PANE -->
+      <div class="lv-pane" id="lvpane-subreq">
       <div class="card" id="substituteReqCard" style="margin-bottom:20px; display:none;">
         <div class="card-header" style="background:#f0fdf4; border-bottom:1px solid #bbf7d0;">
           <h2 style="color:#166534; font-size:16px;">Substitute Duty Requests</h2>
@@ -943,6 +969,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           </table>
         </div>
       </div>
+      </div> <!-- End lvpane-subreq -->
       
       <!-- VIEW DUTY MODAL -->
       <div id="viewDutyModal" class="modal-overlay">
@@ -955,6 +982,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         </div>
       </div>
 
+      <div class="lv-pane" id="lvpane-myreq">
       <div class="card" id="leaveHistCard" style="display:none">
         <div class="card-hd">My Leave History</div>
         <div class="tbl-wrap">
@@ -962,6 +990,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           <tbody id="leaveTbody"></tbody></table>
         </div>
       </div>
+      </div> <!-- End lvpane-myreq -->
 
       <!-- PRINT AREA — exact letterhead layout, hidden on screen -->
       <div id="leavePrintArea" style="display:none">
