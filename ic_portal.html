@@ -630,8 +630,8 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           <div class="card" style="margin:0;">
             <div class="card-hd">Quick Actions</div>
             <div style="padding:16px; display:flex; flex-direction:column; gap:12px;">
-               <button class="btn btn-pri" style="width:100%; justify-content:center; padding:12px;" onclick="document.querySelector('.sbi[onclick=\'goSec("leavereq",this)\']').click()">View Pending Requests</button>
-               <button class="btn" style="width:100%; justify-content:center; padding:12px; border:1px solid #0F2B8C; color:#0F2B8C;" onclick="document.querySelector('.sbi[onclick=\'goSec("leavebal",this)\']').click()">View Leave Balance</button>
+               <button class="btn btn-pri" style="width:100%; justify-content:center; padding:12px;" onclick="goSec('leavereq', document.querySelector('.sbi[onclick*=\'leavereq\']'))">View Pending Requests</button>
+               <button class="btn" style="width:100%; justify-content:center; padding:12px; border:1px solid #0F2B8C; color:#0F2B8C;" onclick="goSec('leavebal', document.querySelector('.sbi[onclick*=\'leavebal\']'))">View Leave Balance</button>
             </div>
           </div>
 
@@ -2549,6 +2549,7 @@ function renderOverview() {
   var statusFilter = (document.getElementById('overviewStatus') ? document.getElementById('overviewStatus').value : 'All');
   
   var html = '';
+  var pmams = window._allPmams || window.pmams || [];
   var sortedPmams = pmams.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
   var sno = 1;
   var today = new Date().toISOString().split('T')[0];
@@ -2695,7 +2696,7 @@ function renderLeaveDash() {
   var totalLWP_T=0;
 
   var compBals = window._icCompBalances || {};
-  
+  var pmams = window._allPmams || window.pmams || [];
   pmams.forEach(function(p){
     totalCL_E += rules.casual;
     totalML_E += rules.medical;
@@ -2918,6 +2919,7 @@ function renderLeaveBal() {
   var search = (document.getElementById('lbSearch') ? document.getElementById('lbSearch').value.toLowerCase() : '');
   
   var html = '';
+  var pmams = window._allPmams || window.pmams || [];
   var sortedPmams = pmams.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
   
   var compBals = window._icCompBalances || {};
@@ -2968,10 +2970,11 @@ function updateLeaveBadges() {
   var pending  = LeaveEngine.requests.filter(l => l.status === 'Pending').length;
   var approved = LeaveEngine.requests.filter(l => l.status === 'Approved').length;
   var rejected = LeaveEngine.requests.filter(l => l.status === 'Rejected').length;
-  // "On Leave Today" — Approved requests whose date range includes today
+  // "On Leave Today" - Approved requests whose date range includes today
   var today = new Date().toISOString().split('T')[0];
   var onLeaveToday = LeaveEngine.requests.filter(function(l){
     return l.status === 'Approved' && l.from && l.to && l.from <= today && l.to >= today;
+  }).length;
   
   if(document.getElementById('sec-leavedash') && document.getElementById('sec-leavedash').classList.contains('active')) renderLeaveDash();
   if(document.getElementById('sec-leavereq') && document.getElementById('sec-leavereq').classList.contains('active')) renderLeaveReqs();
@@ -2980,14 +2983,13 @@ function updateLeaveBadges() {
   // Refresh regardless if we need to update the sidebar badge (done via renderLeaveDash)
   if (typeof renderLeaveDash === 'function') renderLeaveDash();
 
-}).length;
-
   var set = (id, v) => { var el = document.getElementById(id); if (el) el.textContent = v; };
   set('lv-pending',  pending);
   set('lv-approved', approved);
   set('lv-rejected', rejected);
   
   // Update Top Widgets
+  var pmams = window._allPmams || window.pmams || [];
   var topPresent = pmams.length - onLeaveToday;
   if (document.getElementById('top-present')) document.getElementById('top-present').textContent = topPresent;
   if (document.getElementById('top-onleave')) document.getElementById('top-onleave').textContent = onLeaveToday;
