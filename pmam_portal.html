@@ -2419,7 +2419,7 @@ function printHistoryLeave(id) {
     + '@media print{body{margin:0}@page{size:A4 portrait;margin:6mm 10mm}}'
     + '</style></head><body>'
     + pageContent
-    + '<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\\/script>'
+    + '<' + 'script>window.onload=function(){setTimeout(function(){window.print();},300);};</' + 'script>'
     + '</body></html>';
 
   var printWin = window.open('','_blank');
@@ -2616,7 +2616,7 @@ function printLeaveForm() {
   var page = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Leave Application</title>'
     + '<base href="' + baseHref + '">'
     + '<link rel="stylesheet" href="shared/headers.css?v=6">'
-    + '<script src="shared/logos.js?v=6"><\/script>'
+    + '<' + 'script src="shared/logos.js?v=6"></' + 'script>'
     + '<style>'
     + '*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}'
     + 'img{image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges}'
@@ -2645,7 +2645,7 @@ function printLeaveForm() {
     + '@media print{body{margin:0}@page{size:A4 portrait;margin:6mm 10mm}}'
     + '</style></head><body>'
     + pageContent
-    + '<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script>'
+    + '<' + 'script>window.onload=function(){setTimeout(function(){window.print();},300);};</' + 'script>'
     + '</body></html>';
 
   var pw = window.open('','_blank','width=900,height=700');
