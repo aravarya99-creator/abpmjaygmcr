@@ -252,6 +252,46 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .content{flex:1;padding:16px;overflow-y:auto}
 .sec{display:none}.sec.active{display:block}
 
+/* TOP MODULE NAVIGATION TABS */
+.top-module-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(26,61,181,0.07);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.top-nav-tab {
+  padding: 9px 18px;
+  font-size: 12px;
+  border-radius: 10px;
+  border: 1.5px solid #e0e8ff;
+  cursor: pointer;
+  font-weight: 700;
+  color: #374151;
+  background: #f8faff;
+  transition: all 0.18s;
+  white-space: nowrap;
+  font-family: "Inter", sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.top-nav-tab:hover {
+  background: #dbeafe;
+  color: #1e3a8a;
+  border-color: #93c5fd;
+}
+.top-nav-tab.active {
+  background: linear-gradient(135deg, #0F2B8C, #1A3DB5);
+  color: #fff;
+  border-color: #0F2B8C;
+  box-shadow: 0 3px 10px rgba(15, 43, 140, 0.25);
+}
+
 /* CARDS */
 .card{
   background:rgba(255,255,255,0.65);
@@ -468,19 +508,12 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="sbi" onclick="goSec('dashboard',this)" title="Dashboard">
-      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-      <div class="sbl">Dashboard</div>
-    </div>
-    <div class="sbi active" onclick="goSec('fillReport',this)" title="Fill Report">
+    <div class="sbi active" id="sbi-reports" onclick="selectModule('reports',this)" title="Reports Module">
       <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-      <div class="sbl">Fill Report</div>
+      <div class="sbl">Reports</div>
     </div>
-    <div class="sbi" onclick="goSec('myRecords',this)" title="My Records">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-      <div class="sbl">My Records</div>
-    </div>
-    <div class="sbi" onclick="goSec('leave',this)" title="Leave">
+    <div class="sb-div"></div>
+    <div class="sbi" id="sbi-leave" onclick="selectModule('leave',this)" title="Leave Module">
       <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
       <div class="sbl">Leave</div>
     </div>
@@ -488,6 +521,21 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
   <!-- CONTENT -->
   <div class="content">
+
+    <!-- TOP NAVIGATION FOR REPORTS MODULE -->
+    <div class="top-module-bar" id="reportsTopNav" style="display:flex;">
+      <button class="top-nav-tab active" id="tab-btn-fillReport" onclick="switchReportsTab('fillReport', this)">📝 Fill Report</button>
+      <button class="top-nav-tab" id="tab-btn-myRecords" onclick="switchReportsTab('myRecords', this)">📁 My Records</button>
+      <button class="top-nav-tab" id="tab-btn-dashboard" onclick="switchReportsTab('dashboard', this)">📊 Dashboard</button>
+    </div>
+
+    <!-- TOP NAVIGATION FOR LEAVE MODULE -->
+    <div class="top-module-bar" id="leaveTopNav" style="display:none;">
+      <button class="top-nav-tab active" id="tab-btn-apply" onclick="switchLeaveTab('apply', this)">➕ Apply Leave</button>
+      <button class="top-nav-tab" id="tab-btn-myreq" onclick="switchLeaveTab('myreq', this)">📋 My Requests</button>
+      <button class="top-nav-tab" id="tab-btn-subreq" onclick="switchLeaveTab('subreq', this)">🔄 Substitute Duty</button>
+      <button class="top-nav-tab" id="tab-btn-dash" onclick="switchLeaveTab('dash', this)">📊 Dashboard</button>
+    </div>
 
     <!-- DASHBOARD -->
     <div class="sec" id="sec-dashboard">
@@ -695,26 +743,15 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div style="flex:1;height:2px;background:linear-gradient(90deg,#1A3DB5,transparent)"></div>
       </div>
 
-      <!-- Tabs -->
       <style>
-        .lv-tab { padding:8px 16px;font-size:12px;border-radius:10px;border:1.5px solid #e0e8ff;cursor:pointer;font-weight:600;color:#374151;background:#f8faff;transition:all 0.18s;white-space:nowrap; }
-        .lv-tab:hover { background:#dbeafe;color:#1e3a8a;border-color:#93c5fd; }
-        .lv-tab.active { background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border-color:#1d4ed8;box-shadow:0 2px 8px rgba(29,78,216,0.25); }
         .lv-pane { display:none; }
         .lv-pane.active { display:block; }
       </style>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
-        <button class="lv-tab active" onclick="showLvTab('dash', this)">📊 Leave Dashboard</button>
-        <button class="lv-tab" onclick="showLvTab('apply', this)">📝 Apply Leave</button>
-        <button class="lv-tab" onclick="showLvTab('myreq', this)">📋 My Leave Requests</button>
-        <button class="lv-tab" onclick="showLvTab('subreq', this)">👥 Substitute Duty Requests</button>
-      </div>
       <script>
         function showLvTab(tab, el) {
-          document.querySelectorAll('#sec-leave .lv-tab').forEach(function(b){ b.classList.remove('active'); });
           document.querySelectorAll('#sec-leave .lv-pane').forEach(function(p){ p.classList.remove('active'); });
-          el.classList.add('active');
-          document.getElementById('lvpane-' + tab).classList.add('active');
+          var pane = document.getElementById('lvpane-' + tab);
+          if(pane) pane.classList.add('active');
           if(tab==='myreq' && document.getElementById('leaveHistCard')) document.getElementById('leaveHistCard').style.display='block';
           if(tab==='subreq' && document.getElementById('substituteReqCard')) document.getElementById('substituteReqCard').style.display='block';
         }
@@ -2777,6 +2814,87 @@ function fetchPmamReports() {
     }, function(err) {
       console.error('Error loading daily reports:', err);
     });
+// ══════════════════════════════════════
+// MODULE & TAB NAVIGATION SYSTEM
+// ══════════════════════════════════════
+var currentModule = 'reports';
+var currentReportsTab = 'fillReport';
+var currentLeaveTab = 'apply';
+
+function selectModule(mod, el) {
+  currentModule = mod;
+  document.querySelectorAll('.sidebar .sbi').forEach(function(item){ item.classList.remove('active'); });
+  if (el) {
+    el.classList.add('active');
+  } else {
+    var sbi = document.getElementById('sbi-' + mod);
+    if (sbi) sbi.classList.add('active');
+  }
+
+  var rNav = document.getElementById('reportsTopNav');
+  var lNav = document.getElementById('leaveTopNav');
+  if (mod === 'reports') {
+    if (rNav) rNav.style.display = 'flex';
+    if (lNav) lNav.style.display = 'none';
+    switchReportsTab(currentReportsTab);
+  } else if (mod === 'leave') {
+    if (rNav) rNav.style.display = 'none';
+    if (lNav) lNav.style.display = 'flex';
+    switchLeaveTab(currentLeaveTab);
+  }
+}
+
+function switchReportsTab(tab, el) {
+  currentReportsTab = tab;
+  document.querySelectorAll('#reportsTopNav .top-nav-tab').forEach(function(b){ b.classList.remove('active'); });
+  if (el) {
+    el.classList.add('active');
+  } else {
+    var b = document.getElementById('tab-btn-' + tab);
+    if (b) b.classList.add('active');
+  }
+
+  document.querySelectorAll('.content > .sec').forEach(function(s){ s.classList.remove('active'); });
+  var secMap = {
+    'fillReport': 'sec-fillReport',
+    'myRecords': 'sec-myRecords',
+    'dashboard': 'sec-dashboard'
+  };
+  var targetId = secMap[tab] || 'sec-fillReport';
+  var targetSec = document.getElementById(targetId);
+  if (targetSec) targetSec.classList.add('active');
+
+  if (tab === 'myRecords') filterRecords();
+  if (tab === 'dashboard') updateDashboard();
+}
+
+function switchLeaveTab(tab, el) {
+  currentLeaveTab = tab;
+  document.querySelectorAll('#leaveTopNav .top-nav-tab').forEach(function(b){ b.classList.remove('active'); });
+  if (el) {
+    el.classList.add('active');
+  } else {
+    var b = document.getElementById('tab-btn-' + tab);
+    if (b) b.classList.add('active');
+  }
+
+  document.querySelectorAll('.content > .sec').forEach(function(s){ s.classList.remove('active'); });
+  var secLeave = document.getElementById('sec-leave');
+  if (secLeave) secLeave.classList.add('active');
+
+  if (typeof showLvTab === 'function') {
+    showLvTab(tab);
+  }
+}
+
+function goSec(secName, el) {
+  if (secName === 'fillReport' || secName === 'myRecords' || secName === 'dashboard') {
+    selectModule('reports');
+    switchReportsTab(secName);
+  } else if (secName === 'leave') {
+    selectModule('leave');
+    switchLeaveTab('apply');
+  }
 }
 
 // ══════════════════════════════════════
