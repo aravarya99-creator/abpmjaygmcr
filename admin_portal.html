@@ -390,14 +390,9 @@ input:checked + .slider:before { transform: translateX(20px); }
       <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
       <div class="sbl">Dashboard</div>
     </div>
-    <div class="sbi" onclick="goSec('users',this)" title="User Management">
+    <div class="sbi" onclick="goSec('directory',this)" title="User Directory">
       <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-      <div class="sbl">Users</div>
-    </div>
-    <div class="sb-div"></div>
-    <div class="sbi" onclick="goSec('staff',this)" title="Staff Management">
-      <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 110 10A5 5 0 0112 2zm0 12c5.33 0 8 2.67 8 4v2H4v-2c0-1.33 2.67-4 8-4z"/><path d="M18 8.5A2.5 2.5 0 1118 3a2.5 2.5 0 010 5zm0 2c2.67 0 4 1.33 4 2v1h-3v-1c0-.67-.22-1.3-.6-1.82.2-.1.4-.18.6-.18zm-12 0c-.2 0-.4.08-.6.18A4.4 4.4 0 005 14.5v1H2v-1c0-.67 1.33-2 4-2z"/></svg>
-      <div class="sbl">Staff</div>
+      <div class="sbl">Directory</div>
     </div>
     <div class="sb-div"></div>
     <div class="sbi" data-goto="datamgmt" onclick="goSec('datamgmt',this)" title="Data Management">
@@ -447,13 +442,14 @@ input:checked + .slider:before { transform: translateX(20px); }
     </div>
 
     <!-- ===== USER MANAGEMENT ===== -->
-    <div class="sec" id="sec-users">
+    <!-- ===== UNIFIED DIRECTORY ===== -->
+    <div class="sec" id="sec-directory">
       <div class="page-hd" style="justify-content:space-between">
-        User Management
-        <button class="btn btn-pri" onclick="loadAllUsers()">🔄 Refresh</button>
+        User Directory
+        <button class="btn btn-pri" onclick="loadDirectory()">🔄 Refresh</button>
       </div>
 
-      <!-- USER REQUESTS SECTION -->
+      <!-- USER REQUESTS SECTION (Pending / Rejected) -->
       <div class="section-wrap" style="background: rgba(255, 255, 255, 0.4); border-color: rgba(15, 43, 140, 0.1);">
         <div class="section-hd"><div class="section-title">User Access Requests</div></div>
         
@@ -473,106 +469,87 @@ input:checked + .slider:before { transform: translateX(20px); }
         </div>
       </div>
 
+      <!-- ACTIVE USERS (Unified Grid) -->
       <div class="section-wrap">
-        <div class="section-hd"><div class="section-title">Admin Users</div></div>
-        <div class="users-grid" id="adminGrid"></div>
-      </div>
+        <!-- Filter bar -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
+          <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px">Filter:</div>
+          <button class="dmt-tab active" id="dir-tab-all" onclick="filterDirectory('all',this)">All Users</button>
+          <button class="dmt-tab" id="dir-tab-pmam" onclick="filterDirectory('PMAM',this)">PMAMs</button>
+          <button class="dmt-tab" id="dir-tab-ic" onclick="filterDirectory('I/C AB-PMJAY',this)">I/C</button>
+          <button class="dmt-tab" id="dir-tab-deo" onclick="filterDirectory('DEO',this)">DEO</button>
+          <button class="dmt-tab" id="dir-tab-admin" onclick="filterDirectory('Admin',this)">Admin</button>
+          <button class="dmt-tab" id="dir-tab-accountant" onclick="filterDirectory('Accountant',this)">Accountant</button>
+          <div style="margin-left:auto;font-size:11px;color:#6b7280" id="dirCountBadge"></div>
+        </div>
 
-      <div class="section-wrap">
-        <div class="section-hd"><div class="section-title">I/C AB-PMJAY Users</div></div>
-        <div class="users-grid" id="icGrid"></div>
-      </div>
-
-      <div class="section-wrap">
-        <div class="section-hd"><div class="section-title">DEO Users (Patient Services)</div></div>
-        <div class="users-grid" id="deoGrid"></div>
-      </div>
-
-      <div class="section-wrap">
-        <div class="section-hd"><div class="section-title">Accountant Users (Finance)</div></div>
-        <div class="users-grid" id="accountantGrid"></div>
-      </div>
-
-      <div class="section-wrap">
-        <div class="section-hd"><div class="section-title">PMAM Users</div></div>
-        <div class="users-grid" id="pmamGrid"></div>
+        <div class="users-grid" id="directoryGrid">
+          <div style="color:#9ca3af;font-style:italic;padding:20px;grid-column:1/-1">Loading directory...</div>
+        </div>
       </div>
     </div>
 
-    <!-- ===== STAFF MANAGEMENT ===== -->
-    <div class="sec" id="sec-staff">
-      <div class="page-hd" style="justify-content:space-between">
-        Staff Management
-        <button class="btn btn-pri" onclick="loadStaffFromUsers()">🔄 Refresh</button>
-      </div>
-
-      <!-- Filter bar -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
-        <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px">Filter:</div>
-        <button class="dmt-tab active" id="sf-tab-all" onclick="filterStaff('all',this)">All Staff</button>
-        <button class="dmt-tab" id="sf-tab-pmam" onclick="filterStaff('PMAM',this)">PMAMs</button>
-        <button class="dmt-tab" id="sf-tab-ic" onclick="filterStaff('I/C AB-PMJAY',this)">I/C</button>
-        <button class="dmt-tab" id="sf-tab-deo" onclick="filterStaff('DEO',this)">DEO</button>
-        <button class="dmt-tab" id="sf-tab-admin" onclick="filterStaff('Admin',this)">Admin</button>
-        <div style="margin-left:auto;font-size:11px;color:#6b7280" id="staffCountBadge"></div>
-      </div>
-
-      <div id="staffGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px">
-        <div style="color:#9ca3af;font-style:italic;padding:20px;grid-column:1/-1">Loading staff...</div>
-      </div>
-    </div>
-
-    <!-- STAFF EDIT MODAL -->
-    <div class="modal-bg" id="staffEditModal">
-      <div class="modal-box" style="max-width:520px">
-        <div class="modal-title">✏️ Edit Staff Profile</div>
-        <input type="hidden" id="seEmail">
-        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
-          <div id="sePhotoPreview" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#1A3DB5,#2952D9);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;border:3px solid #e0e8ff"></div>
-          <div style="flex:1">
+    <!-- UNIFIED EDIT MODAL -->
+    <div class="modal-bg" id="unifiedEditModal">
+      <div class="modal-box" style="max-width:520px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-title">✏️ Edit User Profile</div>
+        <input type="hidden" id="ueDocId">
+        <input type="hidden" id="ueEmail">
+        
+        <!-- Images Section -->
+        <div style="display:flex; gap:16px; margin-bottom:16px; align-items: flex-start;">
+          <!-- Profile Photo -->
+          <div>
             <label style="font-size:10px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:4px">Profile Photo</label>
-            <input type="file" id="sePhotoFile" accept="image/*" onchange="sePreviewPhoto(this)" style="font-size:11px;padding:6px;border:1px solid #d1d5db;border-radius:6px;width:100%;background:#fff">
-            <div style="font-size:10px;color:#9ca3af;margin-top:2px">Max ~300KB · will be stored as Base64</div>
+            <div id="uePhotoPreview" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#1A3DB5,#2952D9);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;overflow:hidden;border:3px solid #e0e8ff;margin-bottom:8px"></div>
+            <input type="file" id="uePhotoFile" accept="image/*" onchange="uePreviewPhoto(this)" style="font-size:11px;padding:4px;border:1px solid #d1d5db;border-radius:6px;width:150px;background:#fff">
+          </div>
+          <!-- Signature Image -->
+          <div style="flex:1">
+            <label style="font-size:10px;font-weight:700;color:#1A3DB5;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:4px">PNG Signature Image (Transparent)</label>
+            <div id="ueSignPreview" style="width:120px;height:40px;background:#f9fafb;border:1px dashed #d1d5db;border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+              <span style="font-size:10px;color:#9ca3af">No Signature</span>
+            </div>
+            <input type="file" id="ueSignFile" accept="image/png" onchange="uePreviewSign(this)" style="font-size:11px;padding:4px;border:1px solid #d1d5db;border-radius:6px;width:100%;background:#fff">
           </div>
         </div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="mfld"><label>Full Name</label><input type="text" id="seName" placeholder="Full name"></div>
-          <div class="mfld"><label>Role</label><input type="text" id="seRole" readonly style="background:#f9fafb;color:#6b7280"></div>
-          <div class="mfld"><label>Email</label><input type="text" id="seEmailDisplay" readonly style="background:#f9fafb;color:#6b7280"></div>
+          <div class="mfld"><label>Full Name</label><input type="text" id="ueName" placeholder="Full name"></div>
+          <div class="mfld"><label>Email</label><input type="text" id="ueEmailDisplay" readonly style="background:#f9fafb;color:#6b7280;cursor:not-allowed"></div>
+          <div class="mfld"><label>Role</label><input type="text" id="ueRole" readonly style="background:#f9fafb;color:#6b7280;cursor:not-allowed"></div>
           <div class="mfld"><label>Status</label>
-            <select id="seStatus">
-              <option value="approved">✅ Approved</option>
+            <select id="ueStatus">
+              <option value="active">✅ Active / Approved</option>
               <option value="inactive">⛔ Inactive</option>
               <option value="pending">⏳ Pending</option>
             </select>
           </div>
-          <div class="mfld" style="grid-column:1/-1"><label>Ward / Department</label>
-            <select id="seWard" data-ward-select="1" data-ward-extras="Admin,Finance,OPD">
-              <option value="">-- Select Ward --</option>
-              <option>Orthopaedics</option><option>Male Surgery Ward</option><option>Female Surgery Ward</option>
-              <option>Male Medicine Ward A</option><option>Male Medicine Ward B</option>
-              <option>Female Medicine Ward A</option><option>Female Medicine Ward B</option>
-              <option>MICU</option><option>SICU</option><option>Optha</option><option>Onco</option>
-              <option>Gynae</option><option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
-              <option>Admin</option><option>Finance</option><option>OPD</option>
-            </select>
+          
+          <!-- Multiple Ward Selection -->
+          <div class="mfld" style="grid-column:1/-1">
+            <label>Wards / Departments Assigned</label>
+            <div style="font-size:10px;color:#6b7280;margin-bottom:6px">Select all that apply for this user.</div>
+            <div id="ueWardsContainer" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:1.5px solid #e0e8ff;border-radius:10px;max-height:120px;overflow-y:auto;background:#fafbfc;">
+              <!-- Checkboxes will be populated here via JS -->
+            </div>
           </div>
+
           <div class="mfld" style="grid-column:1/-1; margin-top:2px;">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:12px;color:#1e293b;text-transform:none">
-              <input type="checkbox" id="seHideOnIndex" style="width:16px;height:16px;cursor:pointer">
-              Hide this staff member from the public Landing Page (Index)
+              <input type="checkbox" id="ueHideOnIndex" style="width:16px;height:16px;cursor:pointer">
+              Hide this user from the public Landing Page (Index)
             </label>
           </div>
         </div>
-        <div id="seErr" style="font-size:11px;color:#dc2626;min-height:14px;margin-top:6px"></div>
+        <div id="ueErr" style="font-size:11px;color:#dc2626;min-height:14px;margin-top:6px"></div>
         <div class="modal-footer">
-          <button class="mbtn mbtn-sec" onclick="document.getElementById('staffEditModal').classList.remove('open')">Cancel</button>
-          <button class="mbtn mbtn-pri" onclick="saveStaffEdit()">💾 Save Changes</button>
+          <button class="mbtn mbtn-sec" onclick="document.getElementById('unifiedEditModal').classList.remove('open')">Cancel</button>
+          <button class="mbtn mbtn-pri" onclick="saveUnifiedEdit()">💾 Save Changes</button>
         </div>
       </div>
     </div>
 
-    <!-- ===== DATA MANAGEMENT (unified) ===== -->
     <div class="sec" id="sec-datamgmt">
       <div class="page-hd">Data Management</div>
 
@@ -8522,5 +8499,319 @@ function saveCompBalances() {
   });
 }
 </script>
+
+<!-- UNIFIED DIRECTORY LOGIC -->
+<script>
+window._allDirectoryUsers = [];
+
+function loadDirectory() {
+  var grid = document.getElementById('directoryGrid');
+  if (grid) grid.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:20px;grid-column:1/-1">Loading directory...</div>';
+  
+  db.collection('users').get().then(function(snap) {
+    window._allDirectoryUsers = [];
+    var pending=[], rejected=[];
+    
+    snap.forEach(function(doc) {
+      var u = doc.data();
+      if (u.email === ADMIN_EMAIL && u.role === 'Admin') return; // Skip main admin if handled separately, or maybe don't skip. Actually old code skipped ADMIN_EMAIL in loadAllUsers but not loadStaffFromUsers. Let's keep them if they exist in DB.
+      
+      u._docId = doc.id;
+      if (u.status === 'pending') {
+        pending.push(u);
+      } else if (u.status === 'rejected') {
+        rejected.push(u);
+      } else {
+        window._allDirectoryUsers.push(u);
+      }
+    });
+
+    // Update pending badges
+    var badge = document.getElementById('pendingCntBadge');
+    if (badge) badge.textContent = pending.length || '0';
+    var bell = document.querySelector('.bell-badge');
+    if (bell) bell.textContent = pending.length || '0';
+
+    renderPendingGrid(pending);
+    renderRejectedGrid(rejected);
+    
+    // Check which filter is active
+    var activeTab = document.querySelector('.dmt-tab.active[id^="dir-tab-"]');
+    var filterRole = activeTab ? activeTab.innerText : 'All Users';
+    if(filterRole === 'PMAMs') filterRole = 'PMAM';
+    else if(filterRole === 'I/C') filterRole = 'I/C AB-PMJAY';
+    
+    filterDirectory(filterRole === 'All Users' ? 'all' : filterRole, activeTab);
+
+  }).catch(function(e){ console.error('loadDirectory:', e); });
+}
+
+function filterDirectory(role, el) {
+  if (el) {
+    document.querySelectorAll('[id^="dir-tab-"]').forEach(btn => btn.classList.remove('active'));
+    el.classList.add('active');
+  }
+  
+  var filtered = window._allDirectoryUsers;
+  if (role !== 'all') {
+    filtered = window._allDirectoryUsers.filter(u => u.role === role);
+  }
+  
+  renderDirectoryGrid(filtered);
+}
+
+function renderDirectoryGrid(list) {
+  var grid = document.getElementById('directoryGrid');
+  var badge = document.getElementById('dirCountBadge');
+  if (badge) badge.textContent = list.length + ' user(s)';
+  
+  if (!list.length) {
+    grid.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:20px;grid-column:1/-1">No users found for this filter.</div>';
+    return;
+  }
+  
+  var html = '';
+  list.forEach(function(u) {
+    var ini = (u.name || 'U').substring(0,2).toUpperCase();
+    var wardsText = '';
+    if (Array.isArray(u.wards) && u.wards.length) {
+      wardsText = u.wards.join(', ');
+    } else if (u.ward) {
+      wardsText = u.ward;
+    }
+    
+    var roleClass = 'role-pmam';
+    if(u.role === 'I/C AB-PMJAY') roleClass = 'role-ic';
+    else if(u.role === 'Admin') roleClass = 'role-admin';
+    else if(u.role === 'DEO') roleClass = 'role-deo';
+    else if(u.role === 'Accountant') roleClass = 'role-accountant';
+
+    var statusColor = (u.status === 'active' || u.status === 'approved') ? '#16a34a' : '#dc2626';
+    
+    var photoHtml = `<div class="user-av av-pmam">${ini}</div>`;
+    if (u.photoBase64) {
+      photoHtml = `<img src="${u.photoBase64}" style="width:46px;height:46px;border-radius:50%;object-fit:cover;flex-shrink:0;">`;
+    }
+
+    html += `
+      <div class="user-card" style="position:relative;">
+        ${photoHtml}
+        <div class="user-info">
+          <div class="user-name">${u.name || 'Unnamed'}</div>
+          <div class="user-email">${u.email}</div>
+          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:4px;">
+             <span class="user-role ${roleClass}">${u.role || 'User'}</span>
+             <span style="font-size:9px; font-weight:700; color:${statusColor}; text-transform:uppercase;">• ${(u.status||'').toUpperCase()}</span>
+          </div>
+          <div style="font-size:10px; color:#6b7280; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            ${wardsText ? '🏥 ' + wardsText : ''}
+          </div>
+        </div>
+        <div class="user-actions">
+          <button class="act-btn act-edit" onclick="openUnifiedEdit('${u._docId}')">✏️ Edit</button>
+          <button class="act-btn act-reset" onclick="resetPin('${u.email}')">Reset PIN</button>
+          <button class="act-btn act-disable" onclick="toggleStatus('${u._docId}', '${u.status}')">
+            ${(u.status==='active'||u.status==='approved')?'Disable':'Enable'}
+          </button>
+          <button class="act-btn act-disable" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca" onclick="deleteUser('${u._docId}', '${u.email}')">🗑 Delete</button>
+        </div>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+// Override pending and rejected renderers to use the new unified grid style if desired, or keep them similar
+function renderPendingGrid(list) {
+  var grid = document.getElementById('pendingUsersGrid');
+  if(!grid) return;
+  if(!list.length) { grid.innerHTML = '<div style="color:#9ca3af;font-style:italic;font-size:12px">No pending approvals</div>'; return; }
+  
+  var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">';
+  list.forEach(u => {
+    html += `
+      <div style="background:#fff;padding:12px;border-radius:10px;border:1px solid #fcd34d;display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;color:#92400e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.name}</div>
+          <div style="font-size:10px;color:#6b7280">${u.email}</div>
+          <div style="font-size:10px;font-weight:600;color:#1e3a8a;margin-top:2px">${u.role} ${u.ward ? '- '+u.ward : ''}</div>
+        </div>
+        <button class="act-btn act-enable" onclick="approveUser('${u.email}')">Approve</button>
+        <button class="act-btn act-disable" onclick="rejectUser('${u.email}')">Reject</button>
+      </div>`;
+  });
+  html += '</div>';
+  grid.innerHTML = html;
+}
+
+function renderRejectedGrid(list) {
+  var grid = document.getElementById('rejectedUsersGrid');
+  if(!grid) return;
+  if(!list.length) { grid.innerHTML = '<div style="color:#9ca3af;font-style:italic;font-size:12px">No rejected users</div>'; return; }
+  
+  var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">';
+  list.forEach(u => {
+    html += `
+      <div style="background:#fff;padding:12px;border-radius:10px;border:1px solid #fecaca;display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;color:#991b1b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.name}</div>
+          <div style="font-size:10px;color:#6b7280">${u.email}</div>
+        </div>
+        <button class="act-btn act-reset" onclick="db.collection('users').doc('${u.email}').update({status:'pending'}).then(()=>loadDirectory())">Move to Pending</button>
+        <button class="act-btn act-disable" onclick="deleteUser('${u.email}', '${u.email}')">Delete</button>
+      </div>`;
+  });
+  html += '</div>';
+  grid.innerHTML = html;
+}
+
+// Unified Edit Modal Logic
+function openUnifiedEdit(docId) {
+  var user = window._allDirectoryUsers.find(u => u._docId === docId);
+  if (!user) return;
+  
+  document.getElementById('ueDocId').value = docId;
+  document.getElementById('ueEmail').value = user.email || '';
+  document.getElementById('ueName').value = user.name || '';
+  document.getElementById('ueEmailDisplay').value = user.email || '';
+  document.getElementById('ueRole').value = user.role || '';
+  document.getElementById('ueStatus').value = user.status || 'active';
+  document.getElementById('ueHideOnIndex').checked = !!user.hideOnIndex;
+  
+  // Profile Photo
+  document.getElementById('uePhotoFile').value = '';
+  document.getElementById('uePhotoFile').dataset.b64 = user.photoBase64 || '';
+  var pPreview = document.getElementById('uePhotoPreview');
+  if (user.photoBase64) {
+    pPreview.innerHTML = `<img src="${user.photoBase64}" style="width:100%;height:100%;object-fit:cover;">`;
+  } else {
+    pPreview.innerHTML = (user.name||'U').substring(0,2).toUpperCase();
+  }
+
+  // Signature Image
+  document.getElementById('ueSignFile').value = '';
+  document.getElementById('ueSignFile').dataset.b64 = user.signatureImage || '';
+  var sPreview = document.getElementById('ueSignPreview');
+  if (user.signatureImage) {
+    sPreview.innerHTML = `<img src="${user.signatureImage}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+  } else {
+    sPreview.innerHTML = '<span style="font-size:10px;color:#9ca3af">No Signature</span>';
+  }
+
+  // Populate Wards Checkboxes
+  var wContainer = document.getElementById('ueWardsContainer');
+  var allWards = window.WARD_REGISTRY ? window.WARD_REGISTRY.all().map(w => w.label) : [];
+  
+  // Also add any legacy wards that user has but aren't in registry
+  var userWards = Array.isArray(user.wards) ? user.wards : (user.ward ? [user.ward] : []);
+  userWards.forEach(w => {
+    if (w && !allWards.includes(w)) allWards.push(w);
+  });
+  // Extras
+  ['Admin', 'Finance', 'OPD'].forEach(w => {
+     if(!allWards.includes(w)) allWards.push(w);
+  });
+  
+  var wHtml = '';
+  allWards.forEach(wLabel => {
+    var isChecked = userWards.includes(wLabel) ? 'checked' : '';
+    wHtml += `
+      <label style="display:flex;align-items:center;gap:4px;background:#fff;border:1px solid #cbd5e1;padding:4px 8px;border-radius:20px;font-size:11px;cursor:pointer;white-space:nowrap;font-weight:600;color:#334155;">
+        <input type="checkbox" value="${wLabel}" class="ue-ward-cb" ${isChecked} style="cursor:pointer">
+        ${wLabel}
+      </label>
+    `;
+  });
+  wContainer.innerHTML = wHtml;
+  
+  document.getElementById('ueErr').textContent = '';
+  document.getElementById('unifiedEditModal').classList.add('open');
+}
+
+function saveUnifiedEdit() {
+  var docId = document.getElementById('ueDocId').value;
+  var email = document.getElementById('ueEmail').value;
+  var name = document.getElementById('ueName').value.trim();
+  var status = document.getElementById('ueStatus').value;
+  var hideOnIndex = document.getElementById('ueHideOnIndex').checked;
+  var pB64 = document.getElementById('uePhotoFile').dataset.b64 || '';
+  var sB64 = document.getElementById('ueSignFile').dataset.b64 || '';
+  
+  if (!name) { document.getElementById('ueErr').textContent = 'Name is required.'; return; }
+
+  // Get selected wards
+  var selectedWards = [];
+  document.querySelectorAll('.ue-ward-cb:checked').forEach(cb => selectedWards.push(cb.value));
+
+  var btn = document.querySelector('#unifiedEditModal .mbtn-pri');
+  var origText = btn.textContent;
+  btn.textContent = 'Saving...'; btn.disabled = true;
+
+  var updates = {
+    name: name,
+    status: status,
+    wards: selectedWards,
+    hideOnIndex: hideOnIndex
+  };
+  
+  // Only update ward (singular) for backward compatibility
+  if (selectedWards.length > 0) updates.ward = selectedWards[0];
+  else updates.ward = '';
+
+  if (pB64) updates.photoBase64 = pB64;
+  if (sB64) updates.signatureImage = sB64;
+
+  db.collection('users').doc(docId).update(updates).then(function() {
+    document.getElementById('unifiedEditModal').classList.remove('open');
+    showToast('User profile updated successfully', 'success');
+    loadDirectory();
+  }).catch(function(e) {
+    console.error(e);
+    document.getElementById('ueErr').textContent = 'Error: ' + e.message;
+  }).finally(function() {
+    btn.textContent = origText; btn.disabled = false;
+  });
+}
+
+function uePreviewPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 400000) { alert('File is too large. Please select an image under 300KB.'); input.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    input.dataset.b64 = e.target.result;
+    document.getElementById('uePhotoPreview').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function uePreviewSign(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 200000) { alert('File is too large. Please select a PNG under 200KB.'); input.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    input.dataset.b64 = e.target.result;
+    document.getElementById('ueSignPreview').innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Redirect old router to new loadDirectory
+var _goSecDirOrig = goSec;
+goSec = function(id, el) {
+  _goSecDirOrig(id, el);
+  if (id === 'directory' || id === 'users' || id === 'staff') {
+     document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+     var dSec = document.getElementById('sec-directory');
+     if(dSec) dSec.classList.add('active');
+     loadDirectory();
+  }
+};
+// Overwrite old loadAllUsers to avoid errors if called directly
+window.loadAllUsers = loadDirectory;
+window.loadStaffFromUsers = loadDirectory;
+</script>
+
 </body>
 </html>
