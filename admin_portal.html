@@ -8882,6 +8882,8 @@ function uePreviewSign(input) {
 }
 </script>
 
+
+
 <!-- ROLE SWITCHER UI LOGIC -->
 <script>
 window.addEventListener('DOMContentLoaded', function() {
@@ -8891,7 +8893,7 @@ window.addEventListener('DOMContentLoaded', function() {
     try {
       var u = JSON.parse(uStr);
       var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-      if (u.email === ADMIN_EMAIL && !uRoles.includes('Admin')) uRoles.push('Admin');
+      if (u.email === 'gmcrajouriofficial@gmail.com' && !uRoles.includes('Admin')) uRoles.push('Admin');
       
       if (uRoles.length > 1) {
         var dd = document.getElementById('userDD');
