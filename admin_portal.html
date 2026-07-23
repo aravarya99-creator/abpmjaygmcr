@@ -2239,7 +2239,7 @@ function loadDashboard(){
 }
 
 // ===== USERS =====
-function renderPmams(){
+function renderPmams(){ return; 
   document.getElementById('pmamGrid').innerHTML=pmams.map((u,i)=>`
     <div class="user-card">
       <div class="user-av av-pmam">${ini(u.name)}</div>
@@ -2260,7 +2260,7 @@ function renderPmams(){
       </div>
     </div>`).join('');
 }
-function renderOthers(){
+function renderOthers(){ return; 
   const adminUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'Admin');
   const icUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'I/C AB-PMJAY');
   const deoUsers = others.map((u,i) => ({u,i})).filter(x => x.u.role === 'DEO' || x.u.role === 'MTS(patient services )' || x.u.role === 'MTS(patient services)' || x.u.role === 'MTS');
@@ -5446,7 +5446,7 @@ function showSettingsTab(tab, el) {
 var _allStaff = [];
 var _staffPhotoBase64 = '';
 
-function loadStaffFromUsers() {
+function loadStaffFromUsers() { return; 
   var grid = document.getElementById('staffGrid');
   if (grid) grid.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:20px;grid-column:1/-1">Loading staff from Firebase...</div>';
   db.collection('users').get().then(function(snap) {
@@ -5617,12 +5617,12 @@ function saveStaffEdit() {
 
 // ===== INIT =====
 loadDashboard();
-renderPmams();
-renderOthers();
+// renderPmams();
+// renderOthers();
 renderRoster();
 renderHoliday();
 renderWards();
-renderStaff();
+// renderStaff();
 renderOrders();
 
 // ══════════════════════════════════════
@@ -5711,7 +5711,7 @@ function showToast(msg, type) {
 // ══════════════════════════════════════
 // FIREBASE USER MANAGEMENT
 // ══════════════════════════════════════
-function loadAllUsers() {
+function loadAllUsers() { return; 
   db.collection('users').get().then(function(snap) {
     pmams = []; others = [];
     var pending=[], rejected=[];
@@ -8508,8 +8508,8 @@ window._allDirectoryUsers = [];
 // Override old render functions to prevent errors if old code calls them
 function renderPmams() {}
 function renderOthers() {}
-function loadAllUsers() { loadDirectory(); }
-function loadStaffFromUsers() { loadDirectory(); }
+function loadAllUsers() { return;  loadDirectory(); }
+function loadStaffFromUsers() { return;  loadDirectory(); }
 
 function loadDirectory() {
   var grid = document.getElementById('directoryGrid');
