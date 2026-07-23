@@ -517,7 +517,12 @@ input:checked + .slider:before { transform: translateX(20px); }
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div class="mfld"><label>Full Name</label><input type="text" id="ueName" placeholder="Full name"></div>
           <div class="mfld"><label>Email</label><input type="text" id="ueEmailDisplay" readonly style="background:#f9fafb;color:#6b7280;cursor:not-allowed"></div>
-          <div class="mfld"><label>Role</label><input type="text" id="ueRole" readonly style="background:#f9fafb;color:#6b7280;cursor:not-allowed"></div>
+          <div class="mfld">
+            <label>Roles</label>
+            <div id="ueRolesContainer" style="display:flex;flex-wrap:wrap;gap:6px;padding:6px;border:1.5px solid #e0e8ff;border-radius:6px;background:#fafbfc;">
+              <!-- Roles checkboxes populated via JS -->
+            </div>
+          </div>
           <div class="mfld"><label>Status</label>
             <select id="ueStatus">
               <option value="active">✅ Active / Approved</option>
@@ -7762,11 +7767,20 @@ window.addEventListener('DOMContentLoaded', function() {
   var u;
   try { u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); } catch(e) { u = {}; }
   if (!u || !u.email) { window.location.replace('index.html'); return; }
+  var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+  if (u.email !== ADMIN_EMAIL && !uRoles.includes('Admin')) {
+    if (uRoles.includes('PMAM')) window.location.replace('pmam_portal.html');
+    else if (uRoles.includes('I/C AB-PMJAY')) window.location.replace('ic_portal.html');
+    else if (uRoles.includes('DEO')) window.location.replace('patient_service_portal.html');
+    else if (uRoles.includes('Accountant')) window.location.replace('finance.html');
+    else { sessionStorage.clear(); window.location.replace('index.html'); }
+    return;
+  }
   if (u.email !== ADMIN_EMAIL) {
-    if (u.role === 'I/C AB-PMJAY') window.location.replace('ic_portal.html');
-    else if (u.role === 'DEO')         window.location.replace('patient_service_portal.html');
-      else if (u.role === 'Accountant') window.location.replace('finance.html');
-    else                           window.location.replace('pmam_portal.html');
+    if (false) window.location.replace('ic_portal.html');
+    if (false)         window.location.replace('patient_service_portal.html');
+      if (false) window.location.replace('finance.html');
+    
     return;
   }
   loadSessionUser();
@@ -8561,7 +8575,10 @@ function filterDirectory(role, el) {
   
   var filtered = window._allDirectoryUsers;
   if (role !== 'all') {
-    filtered = window._allDirectoryUsers.filter(u => u.role === role);
+    filtered = window._allDirectoryUsers.filter(u => {
+      var uR = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+      return uR.includes(role);
+    });
   }
   
   renderDirectoryGrid(filtered);
@@ -8587,11 +8604,15 @@ function renderDirectoryGrid(list) {
       wardsText = u.ward;
     }
     
-    var roleClass = 'role-pmam';
-    if(u.role === 'I/C AB-PMJAY') roleClass = 'role-ic';
-    else if(u.role === 'Admin') roleClass = 'role-admin';
-    else if(u.role === 'DEO') roleClass = 'role-deo';
-    else if(u.role === 'Accountant') roleClass = 'role-accountant';
+    var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+    var rolesHtml = uRoles.map(r => {
+      var c = 'role-pmam';
+      if(r === 'I/C AB-PMJAY') c = 'role-ic';
+      else if(r === 'Admin') c = 'role-admin';
+      else if(r === 'DEO') c = 'role-deo';
+      else if(r === 'Accountant') c = 'role-accountant';
+      return `<span class="user-role ${c}" style="margin-right:4px">${r}</span>`;
+    }).join('');
 
     var statusColor = (u.status === 'active' || u.status === 'approved') ? '#16a34a' : '#dc2626';
     var isEnabled = (u.status === 'active' || u.status === 'approved');
@@ -8608,7 +8629,7 @@ function renderDirectoryGrid(list) {
           <div class="user-name">${u.name || 'Unnamed'}</div>
           <div class="user-email">${u.email}</div>
           <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:4px;">
-             <span class="user-role ${roleClass}">${u.role || 'User'}</span>
+             ${rolesHtml || '<span class="user-role role-pmam">User</span>'}
              <span style="font-size:9px; font-weight:700; color:${statusColor}; text-transform:uppercase;">• ${(u.status||'').toUpperCase()}</span>
           </div>
           <div style="font-size:10px; color:#6b7280; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
@@ -8717,7 +8738,20 @@ function openUnifiedEdit(docId) {
   document.getElementById('ueEmail').value = user.email || '';
   document.getElementById('ueName').value = user.name || '';
   document.getElementById('ueEmailDisplay').value = user.email || '';
-  document.getElementById('ueRole').value = user.role || '';
+  // Populate Roles Checkboxes
+  var rContainer = document.getElementById('ueRolesContainer');
+  var allRoles = ['PMAM', 'I/C AB-PMJAY', 'DEO', 'Admin', 'Accountant'];
+  var userRoles = Array.isArray(user.roles) ? user.roles : (user.role ? [user.role] : []);
+  var rHtml = '';
+  allRoles.forEach(r => {
+    var isChecked = userRoles.includes(r) ? 'checked' : '';
+    rHtml += `
+      <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;cursor:pointer;">
+        <input type="checkbox" value="${r}" class="ue-role-cb" ${isChecked}> ${r}
+      </label>
+    `;
+  });
+  rContainer.innerHTML = rHtml;
   document.getElementById('ueStatus').value = user.status || 'active';
   document.getElementById('ueHideOnIndex').checked = !!user.hideOnIndex;
   
@@ -8780,6 +8814,8 @@ function saveUnifiedEdit() {
   var name = document.getElementById('ueName').value.trim();
   var status = document.getElementById('ueStatus').value;
   var hideOnIndex = document.getElementById('ueHideOnIndex').checked;
+  var selectedRoles = [];
+  document.querySelectorAll('.ue-role-cb:checked').forEach(cb => selectedRoles.push(cb.value));
   var pB64 = document.getElementById('uePhotoFile').dataset.b64 || '';
   var sB64 = document.getElementById('ueSignFile').dataset.b64 || '';
   
@@ -8797,7 +8833,9 @@ function saveUnifiedEdit() {
     name: name,
     status: status,
     wards: selectedWards,
-    hideOnIndex: hideOnIndex
+    hideOnIndex: hideOnIndex,
+    roles: selectedRoles,
+    role: selectedRoles.length > 0 ? selectedRoles[0] : ''
   };
   
   // Only update ward (singular) for backward compatibility
@@ -8843,4 +8881,60 @@ function uePreviewSign(input) {
   reader.readAsDataURL(file);
 }
 </script>
+
+<!-- ROLE SWITCHER UI LOGIC -->
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var uStr = sessionStorage.getItem('pmjay_user');
+    if (!uStr) return;
+    try {
+      var u = JSON.parse(uStr);
+      var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+      if (u.email === ADMIN_EMAIL && !uRoles.includes('Admin')) uRoles.push('Admin');
+      
+      if (uRoles.length > 1) {
+        var dd = document.getElementById('userDD');
+        if (!dd) return;
+        
+        var portals = [
+          { role: 'Admin', name: 'Admin Portal', url: 'admin_portal.html' },
+          { role: 'PMAM', name: 'PMAM Portal', url: 'pmam_portal.html' },
+          { role: 'I/C AB-PMJAY', name: 'I/C Portal', url: 'ic_portal.html' },
+          { role: 'DEO', name: 'DEO Portal', url: 'patient_service_portal.html' },
+          { role: 'Accountant', name: 'Finance Portal', url: 'finance.html' }
+        ];
+        
+        var switcherHtml = '<div style="font-size:10px; font-weight:bold; color:#9ca3af; padding:8px 16px 4px 16px; text-transform:uppercase;">Switch Workspace</div>';
+        
+        var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
+        var inserted = false;
+        
+        portals.forEach(function(p) {
+          if (uRoles.includes(p.role) && !currentPath.includes(p.url)) {
+            switcherHtml += `
+              <div class="dd-item" style="color:#1d4ed8;" onclick="window.location.href='${p.url}'">
+                <svg viewBox="0 0 24 24" fill="#3b82f6"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
+                Switch to ${p.name}
+              </div>
+            `;
+            inserted = true;
+          }
+        });
+        
+        if (inserted) {
+          switcherHtml += '<div style="height:1px; background:#e5e7eb; margin:4px 0;"></div>';
+          var logoutBtn = Array.from(dd.querySelectorAll('.dd-item')).find(el => el.textContent.includes('Logout'));
+          if (logoutBtn) {
+             logoutBtn.insertAdjacentHTML('beforebegin', switcherHtml);
+          } else {
+             dd.insertAdjacentHTML('beforeend', switcherHtml);
+          }
+        }
+      }
+    } catch(e) { console.error('Role Switcher Error', e); }
+  }, 1000);
+});
+</script>
+
 </body>

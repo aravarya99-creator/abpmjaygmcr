@@ -746,10 +746,10 @@ function doLogin() {
     setMsg('loginMsg','Login successful! Redirecting...','#16a34a');
     setTimeout(function(){
       if (email===ADMIN_EMAIL)           window.location.href='admin_portal.html';
-      else if (u.role==='I/C AB-PMJAY')  window.location.href='ic_portal.html';
-      else if (u.role==='DEO')           window.location.href='patient_service_portal.html';
-      else if (u.role==='Accountant')    window.location.href='finance.html';
-      else                               window.location.href='pmam_portal.html';
+      
+      
+      
+      
     }, 800);
   }).catch(function(e){ setMsg('loginMsg','Connection error: '+e.message,'#dc2626'); });
 }

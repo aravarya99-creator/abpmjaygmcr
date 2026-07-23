@@ -252,46 +252,6 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 .content{flex:1;padding:16px;overflow-y:auto}
 .sec{display:none}.sec.active{display:block}
 
-/* TOP MODULE NAVIGATION TABS */
-.top-module-bar {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-  background: #fff;
-  border-radius: 14px;
-  padding: 8px 12px;
-  box-shadow: 0 2px 8px rgba(26,61,181,0.07);
-  align-items: center;
-  flex-wrap: wrap;
-}
-.top-nav-tab {
-  padding: 9px 18px;
-  font-size: 12px;
-  border-radius: 10px;
-  border: 1.5px solid #e0e8ff;
-  cursor: pointer;
-  font-weight: 700;
-  color: #374151;
-  background: #f8faff;
-  transition: all 0.18s;
-  white-space: nowrap;
-  font-family: "Inter", sans-serif;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.top-nav-tab:hover {
-  background: #dbeafe;
-  color: #1e3a8a;
-  border-color: #93c5fd;
-}
-.top-nav-tab.active {
-  background: linear-gradient(135deg, #0F2B8C, #1A3DB5);
-  color: #fff;
-  border-color: #0F2B8C;
-  box-shadow: 0 3px 10px rgba(15, 43, 140, 0.25);
-}
-
 /* CARDS */
 .card{
   background:rgba(255,255,255,0.65);
@@ -508,12 +468,19 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="sbi active" id="sbi-reports" onclick="selectModule('reports',this)" title="Reports Module">
-      <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-      <div class="sbl">Reports</div>
+    <div class="sbi" onclick="goSec('dashboard',this)" title="Dashboard">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      <div class="sbl">Dashboard</div>
     </div>
-    <div class="sb-div"></div>
-    <div class="sbi" id="sbi-leave" onclick="selectModule('leave',this)" title="Leave Module">
+    <div class="sbi active" onclick="goSec('fillReport',this)" title="Fill Report">
+      <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+      <div class="sbl">Fill Report</div>
+    </div>
+    <div class="sbi" onclick="goSec('myRecords',this)" title="My Records">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+      <div class="sbl">My Records</div>
+    </div>
+    <div class="sbi" onclick="goSec('leave',this)" title="Leave">
       <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
       <div class="sbl">Leave</div>
     </div>
@@ -521,21 +488,6 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
   <!-- CONTENT -->
   <div class="content">
-
-    <!-- TOP NAVIGATION FOR REPORTS MODULE -->
-    <div class="top-module-bar" id="reportsTopNav" style="display:flex;">
-      <button class="top-nav-tab active" id="tab-btn-fillReport" onclick="switchReportsTab('fillReport', this)">📝 Fill Report</button>
-      <button class="top-nav-tab" id="tab-btn-myRecords" onclick="switchReportsTab('myRecords', this)">📁 My Records</button>
-      <button class="top-nav-tab" id="tab-btn-dashboard" onclick="switchReportsTab('dashboard', this)">📊 Dashboard</button>
-    </div>
-
-    <!-- TOP NAVIGATION FOR LEAVE MODULE -->
-    <div class="top-module-bar" id="leaveTopNav" style="display:none;">
-      <button class="top-nav-tab active" id="tab-btn-apply" onclick="switchLeaveTab('apply', this)">➕ Apply Leave</button>
-      <button class="top-nav-tab" id="tab-btn-myreq" onclick="switchLeaveTab('myreq', this)">📋 My Requests</button>
-      <button class="top-nav-tab" id="tab-btn-subreq" onclick="switchLeaveTab('subreq', this)">🔄 Substitute Duty</button>
-      <button class="top-nav-tab" id="tab-btn-dash" onclick="switchLeaveTab('dash', this)">📊 Dashboard</button>
-    </div>
 
     <!-- DASHBOARD -->
     <div class="sec" id="sec-dashboard">
@@ -743,15 +695,26 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div style="flex:1;height:2px;background:linear-gradient(90deg,#1A3DB5,transparent)"></div>
       </div>
 
+      <!-- Tabs -->
       <style>
+        .lv-tab { padding:8px 16px;font-size:12px;border-radius:10px;border:1.5px solid #e0e8ff;cursor:pointer;font-weight:600;color:#374151;background:#f8faff;transition:all 0.18s;white-space:nowrap; }
+        .lv-tab:hover { background:#dbeafe;color:#1e3a8a;border-color:#93c5fd; }
+        .lv-tab.active { background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border-color:#1d4ed8;box-shadow:0 2px 8px rgba(29,78,216,0.25); }
         .lv-pane { display:none; }
         .lv-pane.active { display:block; }
       </style>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
+        <button class="lv-tab active" onclick="showLvTab('dash', this)">📊 Leave Dashboard</button>
+        <button class="lv-tab" onclick="showLvTab('apply', this)">📝 Apply Leave</button>
+        <button class="lv-tab" onclick="showLvTab('myreq', this)">📋 My Leave Requests</button>
+        <button class="lv-tab" onclick="showLvTab('subreq', this)">👥 Substitute Duty Requests</button>
+      </div>
       <script>
         function showLvTab(tab, el) {
+          document.querySelectorAll('#sec-leave .lv-tab').forEach(function(b){ b.classList.remove('active'); });
           document.querySelectorAll('#sec-leave .lv-pane').forEach(function(p){ p.classList.remove('active'); });
-          var pane = document.getElementById('lvpane-' + tab);
-          if(pane) pane.classList.add('active');
+          el.classList.add('active');
+          document.getElementById('lvpane-' + tab).classList.add('active');
           if(tab==='myreq' && document.getElementById('leaveHistCard')) document.getElementById('leaveHistCard').style.display='block';
           if(tab==='subreq' && document.getElementById('substituteReqCard')) document.getElementById('substituteReqCard').style.display='block';
         }
@@ -759,105 +722,11 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
       <!-- LEAVE DASHBOARD PANE -->
       <div class="lv-pane active" id="lvpane-dash">
-
-        <!-- HEADER -->
-        <div style="margin-bottom:20px;">
-          <div style="font-size:22px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:8px;">
-            Leave Dashboard <span style="display:inline-block; width:24px; height:3px; background:#2563EB; border-radius:2px;"></span>
-          </div>
-          <div style="font-size:13px; color:#64748B; margin-top:2px;">Overview of your leave balance, usage and schedule</div>
-        </div>
-
-        <!-- TOP 6 LEAVE CARDS CONTAINER -->
-        <div id="ls_top_cards" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px; margin-bottom:20px;">
-          <!-- Rendered dynamically -->
-        </div>
-
-        <!-- LEAVE UTILIZATION OVERVIEW CARD -->
-        <div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:24px; box-shadow:0 2px 10px rgba(0,0,0,0.03); margin-bottom:20px;">
-          
-          <div style="font-size:15px; font-weight:700; color:#0F172A; display:flex; align-items:center; gap:6px; margin-bottom:20px;">
-            Leave Utilization Overview <span style="font-size:14px; color:#94A3B8; font-weight:400; cursor:pointer;" title="Visual summary of all leave types and utilization percentage">ⓘ</span>
-          </div>
-
-          <!-- MAIN GRID: DONUT + TABLE -->
-          <div style="display:grid; grid-template-columns: 240px 1fr; gap:30px; align-items:center;">
-            
-            <!-- LEFT: DONUT CHART -->
-            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
-              <div style="position:relative; width:180px; height:180px;">
-                <svg id="leaveDonutSvg" viewBox="0 0 160 160" width="180" height="180" style="transform: rotate(-90deg);">
-                  <!-- Dynamic SVG Donut paths -->
-                </svg>
-                <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
-                  <div style="font-size:11px; font-weight:600; color:#64748B; text-transform:uppercase; letter-spacing:0.5px;">Total</div>
-                  <div style="font-size:26px; font-weight:900; color:#0F172A; line-height:1.1;" id="dashTotalDays">220</div>
-                  <div style="font-size:12px; font-weight:600; color:#64748B;">Days</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- RIGHT: TABLE -->
-            <div style="overflow-x:auto;">
-              <table style="width:100%; border-collapse:collapse; font-size:13px;">
-                <thead>
-                  <tr style="border-bottom:1px solid #E2E8F0; text-align:left; color:#64748B; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">
-                    <th style="padding:8px 12px; font-weight:700;">Leave Type</th>
-                    <th style="padding:8px 12px; text-align:center;">Eligible</th>
-                    <th style="padding:8px 12px; text-align:center;">Taken</th>
-                    <th style="padding:8px 12px; text-align:center;">Balance</th>
-                    <th style="padding:8px 12px; text-align:center;">Utilization</th>
-                    <th style="padding:8px 12px; min-width:100px;"></th>
-                  </tr>
-                </thead>
-                <tbody id="leaveUtilTbody">
-                  <!-- Dynamic rows -->
-                </tbody>
-              </table>
-            </div>
-
-          </div>
-
-          <!-- BOTTOM STRIP: 3 SUMMARY CARDS -->
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-top:24px; padding-top:20px; border-top:1px solid #F1F5F9;">
-            
-            <!-- Total Eligible -->
-            <div style="background:#F8FAFC; border-radius:14px; padding:14px 18px; display:flex; align-items:center; gap:14px; border:1px solid #E2E8F0;">
-              <div style="width:44px; height:44px; border-radius:50%; background:#DBEAFE; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="#2563EB"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5l-4 4 1.41 1.41L12 15.83l4.59-4.58L18 12.66z"/></svg>
-              </div>
-              <div>
-                <div style="font-size:11px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.4px;">Total Eligible</div>
-                <div style="font-size:20px; font-weight:900; color:#0F172A;" id="sumTotalEligible">220 <span style="font-size:13px; font-weight:600; color:#64748B;">Days</span></div>
-              </div>
-            </div>
-
-            <!-- Total Taken -->
-            <div style="background:#F8FAFC; border-radius:14px; padding:14px 18px; display:flex; align-items:center; gap:14px; border:1px solid #E2E8F0;">
-              <div style="width:44px; height:44px; border-radius:50%; background:#DCFCE7; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="#16A34A"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-              </div>
-              <div>
-                <div style="font-size:11px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.4px;">Total Taken</div>
-                <div style="font-size:20px; font-weight:900; color:#0F172A;" id="sumTotalTaken">0 <span style="font-size:13px; font-weight:600; color:#64748B;">Days</span></div>
-              </div>
-            </div>
-
-            <!-- Total Remaining -->
-            <div style="background:#F8FAFC; border-radius:14px; padding:14px 18px; display:flex; align-items:center; gap:14px; border:1px solid #E2E8F0;">
-              <div style="width:44px; height:44px; border-radius:50%; background:#F3E8FF; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="#9333EA"><path d="M6 2v6l4 4-4 4v6h12v-6l-4-4 4-4V2H6zm10 14.5V18H8v-1.5l4-4 4 4zM12 11.5L8 7.5V4h8v3.5l-4 4z"/></svg>
-              </div>
-              <div>
-                <div style="font-size:11px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.4px;">Total Remaining</div>
-                <div style="font-size:20px; font-weight:900; color:#0F172A;" id="sumTotalRemaining">220 <span style="font-size:13px; font-weight:600; color:#64748B;">Days</span></div>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
+      <!-- LEAVE SUMMARY DASHBOARD -->
+      <div id="leave_summary_dash" style="background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;color:#1e3a8a;margin-bottom:10px">Your Leave Balance (<span id="ls_year">...</span>)</div>
+        <div id="ls_content" style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px">Loading balances...</div>
+      </div>
       </div> <!-- End lvpane-dash -->
 
       <!-- APPLY LEAVE PANE -->
@@ -2112,187 +1981,47 @@ function executeApproveDuty() {
 }
 
 function renderLeaveSummary() {
+  var html = '';
+  
+  var genCatCard = function(title, e, t, isLwp) {
+    var b = Math.max(0, e - t);
+    var pct = e > 0 ? (t / e) * 100 : 0;
+    
+    if (isLwp) {
+      return `
+      <div style="flex:1; min-width:130px; border:1px solid #e2e8f0; border-radius:8px; padding:12px; background:#fff;">
+         <div style="font-weight:800; color:#0F2B8C; margin-bottom:8px; font-size:13px;">${title}</div>
+         <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;"><span>Taken:</span> <b style="color:#ef4444;">${t}</b></div>
+      </div>`;
+    }
+    
+    return `
+    <div style="flex:1; min-width:130px; border:1px solid #e2e8f0; border-radius:8px; padding:12px; background:#fff;">
+       <div style="font-weight:800; color:#0F2B8C; margin-bottom:8px; font-size:13px;">${title}</div>
+       <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; color:#475569;"><span>Eligible:</span> <b>${e}</b></div>
+       <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; color:#475569;"><span>Taken:</span> <b>${t}</b></div>
+       <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px;"><span>Balance:</span> <b style="color:#15803d; font-size:14px;">${b}</b></div>
+       <div style="height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden;"><div style="height:100%; width:${pct}%; background:#2563eb;"></div></div>
+    </div>`;
+  };
+  
   var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+  var isFemale = u.gender === 'Female';
+  var isMale = u.gender === 'Male';
+  
   var b = LeaveEngine.calculateBalances(u.email || u.name);
 
-  var cats = [
-    {
-      id: 'casual',
-      title: 'Casual Leave (CL)',
-      color: '#2563EB',
-      bg: '#DBEAFE',
-      icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="#2563EB"><path d="M13.13 22.19L11.5 18.36L9.87 22.19L8.03 21.41L10 16.78V13H14V16.78L15.97 21.41L13.13 22.19M12 2C6.48 2 2 6.48 2 12C2 12.34 2.03 12.67 2.08 13H21.92C21.97 12.67 22 12.34 22 12C22 6.48 17.52 2 12 2Z"/></svg>',
-      eligible: b.eligible ? (b.eligible.casual || 15) : 15,
-      taken: b.taken ? (b.taken.casual || 0) : 0
-    },
-    {
-      id: 'comp',
-      title: 'Compensatory',
-      color: '#16A34A',
-      bg: '#DCFCE7',
-      icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="#16A34A"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>',
-      eligible: typeof _myCompEarned !== 'undefined' ? (_myCompEarned || 0) : 0,
-      taken: b.taken ? (b.taken.comp || 0) : 0
-    },
-    {
-      id: 'medical',
-      title: 'Medical Leave (ML)',
-      color: '#9333EA',
-      bg: '#F3E8FF',
-      icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="#9333EA"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm1 11h-2v3h-2v-3H9v-2h3V7h2v3h3v2z"/></svg>',
-      eligible: b.eligible ? (b.eligible.medical || 10) : 10,
-      taken: b.taken ? (b.taken.medical || 0) : 0
-    },
-    {
-      id: 'paternity',
-      title: 'Paternity Leave (PTL)',
-      color: '#F97316',
-      bg: '#FFEDD5',
-      icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="#F97316"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>',
-      eligible: b.eligible ? (b.eligible.paternity || 15) : 15,
-      taken: b.taken ? (b.taken.paternity || 0) : 0
-    },
-    {
-      id: 'maternity',
-      title: 'Maternity Leave (MTL)',
-      color: '#EC4899',
-      bg: '#FCE7F3',
-      icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="#EC4899"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>',
-      eligible: b.eligible ? (b.eligible.maternity || 180) : 180,
-      taken: b.taken ? (b.taken.maternity || 0) : 0
-    },
-    {
-      id: 'lwp',
-      title: 'LWP',
-      color: '#64748B',
-      bg: '#F1F5F9',
-      icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="#64748B"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm.75 14h-1.5v-1.25H10.5V12.5h2.25v-1.5H10v-1.5h1.25V8.25h1.5v1.25h1.5v1.25h-2.25v1.5h2.75V15h-1.5v1.25z"/></svg>',
-      eligible: 0,
-      taken: b.taken ? (b.taken.lwp || 0) : 0
-    }
-  ];
+  html += genCatCard('Casual (CL)', b.eligible.casual || 0, b.taken.casual || 0, false);
+  html += genCatCard('Compensatory', _myCompEarned || 0, b.taken.comp || 0, false);
+  html += genCatCard('Medical (ML)', b.eligible.medical || 0, b.taken.medical || 0, false);
+  
+  if (!isFemale) html += genCatCard('Paternity (PTL)', b.eligible.paternity || 15, b.taken.paternity || 0, false);
+  if (!isMale) html += genCatCard('Maternity (MTL)', b.eligible.maternity || 180, b.taken.maternity || 0, false);
+  
+  html += genCatCard('LWP', 0, b.taken.lwp || 0, true);
 
-  // 1. Render Top 6 Cards
-  var topCardsHtml = cats.map(function(c) {
-    var bal = Math.max(0, c.eligible - c.taken);
-    var availPct = c.eligible > 0 ? Math.round((bal / c.eligible) * 100) : 0;
-
-    return '<div style="background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.03); display:flex; flex-direction:column; justify-content:space-between;">'
-      + '<div>'
-      + '<div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">'
-      + '<div style="width:36px; height:36px; border-radius:50%; background:' + c.bg + '; display:flex; align-items:center; justify-content:center; flex-shrink:0;">'
-      + c.icon
-      + '</div>'
-      + '<div style="font-size:13px; font-weight:700; color:#0F172A; line-height:1.2;">' + c.title + '</div>'
-      + '</div>'
-      + '<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px; text-align:center; margin-bottom:12px;">'
-      + '<div>'
-      + '<div style="font-size:10px; font-weight:600; color:#64748B; margin-bottom:2px;">Eligible</div>'
-      + '<div style="font-size:16px; font-weight:800; color:#0F172A;">' + c.eligible + '</div>'
-      + '</div>'
-      + '<div>'
-      + '<div style="font-size:10px; font-weight:600; color:#64748B; margin-bottom:2px;">Taken</div>'
-      + '<div style="font-size:16px; font-weight:800; color:#0F172A;">' + c.taken + '</div>'
-      + '</div>'
-      + '<div>'
-      + '<div style="font-size:10px; font-weight:600; color:#64748B; margin-bottom:2px;">Balance</div>'
-      + '<div style="font-size:16px; font-weight:800; color:#16A34A;">' + bal + '</div>'
-      + '</div>'
-      + '</div>'
-      + '</div>'
-      + '<div>'
-      + '<div style="height:5px; background:#E2E8F0; border-radius:3px; overflow:hidden; margin-bottom:6px;">'
-      + '<div style="height:100%; width:' + availPct + '%; background:' + c.color + '; border-radius:3px; transition:width 0.3s;"></div>'
-      + '</div>'
-      + '<div style="font-size:10px; font-weight:600; color:#64748B;">' + availPct + '% Available</div>'
-      + '</div>'
-      + '</div>';
-  }).join('');
-
-  var topContainer = document.getElementById('ls_top_cards');
-  if (topContainer) topContainer.innerHTML = topCardsHtml;
-
-  // 2. Render Table Rows & Calculate Totals
-  var totalEligible = 0;
-  var totalTaken = 0;
-
-  var tbodyHtml = cats.map(function(c) {
-    totalEligible += c.eligible;
-    totalTaken += c.taken;
-
-    var bal = Math.max(0, c.eligible - c.taken);
-    var utilPct = c.eligible > 0 ? Math.round((c.taken / c.eligible) * 100) : 0;
-
-    return '<tr style="border-bottom:1px solid #F1F5F9;">'
-      + '<td style="padding:10px 12px; font-weight:700; color:#0F172A; display:flex; align-items:center; gap:8px;">'
-      + '<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:' + c.color + ';"></span>'
-      + c.title
-      + '</td>'
-      + '<td style="padding:10px 12px; text-align:center; font-weight:800; color:#0F172A;">' + c.eligible + '</td>'
-      + '<td style="padding:10px 12px; text-align:center; font-weight:800; color:#0F172A;">' + c.taken + '</td>'
-      + '<td style="padding:10px 12px; text-align:center; font-weight:800; color:#16A34A;">' + bal + '</td>'
-      + '<td style="padding:10px 12px; text-align:center; font-weight:800; color:#0F172A;">' + utilPct + '%</td>'
-      + '<td style="padding:10px 12px;">'
-      + '<div style="height:6px; background:#F1F5F9; border-radius:3px; overflow:hidden; width:100px;">'
-      + '<div style="height:100%; width:' + utilPct + '%; background:' + c.color + '; border-radius:3px;"></div>'
-      + '</div>'
-      + '</td>'
-      + '</tr>';
-  }).join('');
-
-  var tbody = document.getElementById('leaveUtilTbody');
-  if (tbody) tbody.innerHTML = tbodyHtml;
-
-  // 3. Render Totals Strip
-  var totalRemaining = Math.max(0, totalEligible - totalTaken);
-
-  var totalDaysEl = document.getElementById('dashTotalDays');
-  if (totalDaysEl) totalDaysEl.textContent = totalEligible;
-
-  var sumEligibleEl = document.getElementById('sumTotalEligible');
-  if (sumEligibleEl) sumEligibleEl.innerHTML = totalEligible + ' <span style="font-size:13px; font-weight:600; color:#64748B;">Days</span>';
-
-  var sumTakenEl = document.getElementById('sumTotalTaken');
-  if (sumTakenEl) sumTakenEl.innerHTML = totalTaken + ' <span style="font-size:13px; font-weight:600; color:#64748B;">Days</span>';
-
-  var sumRemEl = document.getElementById('sumTotalRemaining');
-  if (sumRemEl) sumRemEl.innerHTML = totalRemaining + ' <span style="font-size:13px; font-weight:600; color:#64748B;">Days</span>';
-
-  // 4. Render Donut Chart
-  renderDonutChart(cats, totalEligible);
-}
-
-function renderDonutChart(cats, totalEligible) {
-  var svg = document.getElementById('leaveDonutSvg');
-  if (!svg) return;
-
-  var r = 60;
-  var cx = 80;
-  var cy = 80;
-  var C = 2 * Math.PI * r;
-
-  if (totalEligible === 0) {
-    svg.innerHTML = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#E2E8F0" stroke-width="16" />';
-    return;
-  }
-
-  var currentOffset = 0;
-  var pathsHtml = '';
-
-  cats.forEach(function(c) {
-    if (c.eligible <= 0) return;
-    var pct = c.eligible / totalEligible;
-    var dashLen = pct * C;
-    var gapLen = C - dashLen;
-
-    pathsHtml += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + c.color + '" stroke-width="16" '
-      + 'stroke-dasharray="' + dashLen.toFixed(2) + ' ' + gapLen.toFixed(2) + '" '
-      + 'stroke-dashoffset="' + (-currentOffset).toFixed(2) + '" />';
-
-    currentOffset += dashLen;
-  });
-
-  svg.innerHTML = pathsHtml;
+  var c = document.getElementById('ls_content');
+  if(c) c.innerHTML = html;
 }
 function canTakeLeave(ltype, reqDays) {
   var b = LeaveEngine.calculateBalances(getPmjayUser().email);
@@ -2653,8 +2382,64 @@ function printHistoryLeave(id) {
     + '@media print{body{margin:0}@page{size:A4 portrait;margin:6mm 10mm}}'
     + '</style></head><body>'
     + pageContent
-    + '<' + 'script>window.onload=function(){setTimeout(function(){window.print();},300);};</' + 'script>'
-    + '</body></html>';
+    + '<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\\/script>'
+    + '
+<!-- ROLE SWITCHER UI LOGIC -->
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var uStr = sessionStorage.getItem('pmjay_user');
+    if (!uStr) return;
+    try {
+      var u = JSON.parse(uStr);
+      var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+      if (u.email === ADMIN_EMAIL && !uRoles.includes('Admin')) uRoles.push('Admin');
+      
+      if (uRoles.length > 1) {
+        var dd = document.getElementById('userDD');
+        if (!dd) return;
+        
+        var portals = [
+          { role: 'Admin', name: 'Admin Portal', url: 'admin_portal.html' },
+          { role: 'PMAM', name: 'PMAM Portal', url: 'pmam_portal.html' },
+          { role: 'I/C AB-PMJAY', name: 'I/C Portal', url: 'ic_portal.html' },
+          { role: 'DEO', name: 'DEO Portal', url: 'patient_service_portal.html' },
+          { role: 'Accountant', name: 'Finance Portal', url: 'finance.html' }
+        ];
+        
+        var switcherHtml = '<div style="font-size:10px; font-weight:bold; color:#9ca3af; padding:8px 16px 4px 16px; text-transform:uppercase;">Switch Workspace</div>';
+        
+        var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
+        var inserted = false;
+        
+        portals.forEach(function(p) {
+          if (uRoles.includes(p.role) && !currentPath.includes(p.url)) {
+            switcherHtml += `
+              <div class="dd-item" style="color:#1d4ed8;" onclick="window.location.href='${p.url}'">
+                <svg viewBox="0 0 24 24" fill="#3b82f6"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
+                Switch to ${p.name}
+              </div>
+            `;
+            inserted = true;
+          }
+        });
+        
+        if (inserted) {
+          switcherHtml += '<div style="height:1px; background:#e5e7eb; margin:4px 0;"></div>';
+          var logoutBtn = Array.from(dd.querySelectorAll('.dd-item')).find(el => el.textContent.includes('Logout'));
+          if (logoutBtn) {
+             logoutBtn.insertAdjacentHTML('beforebegin', switcherHtml);
+          } else {
+             dd.insertAdjacentHTML('beforeend', switcherHtml);
+          }
+        }
+      }
+    } catch(e) { console.error('Role Switcher Error', e); }
+  }, 1000);
+});
+</script>
+
+</body></html>';
 
   var printWin = window.open('','_blank');
   printWin.document.write(page);
@@ -2850,7 +2635,7 @@ function printLeaveForm() {
   var page = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Leave Application</title>'
     + '<base href="' + baseHref + '">'
     + '<link rel="stylesheet" href="shared/headers.css?v=6">'
-    + '<' + 'script src="shared/logos.js?v=6"></' + 'script>'
+    + '<script src="shared/logos.js?v=6"><\/script>'
     + '<style>'
     + '*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}'
     + 'img{image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges}'
@@ -2879,8 +2664,64 @@ function printLeaveForm() {
     + '@media print{body{margin:0}@page{size:A4 portrait;margin:6mm 10mm}}'
     + '</style></head><body>'
     + pageContent
-    + '<' + 'script>window.onload=function(){setTimeout(function(){window.print();},300);};</' + 'script>'
-    + '</body></html>';
+    + '<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script>'
+    + '
+<!-- ROLE SWITCHER UI LOGIC -->
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var uStr = sessionStorage.getItem('pmjay_user');
+    if (!uStr) return;
+    try {
+      var u = JSON.parse(uStr);
+      var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+      if (u.email === ADMIN_EMAIL && !uRoles.includes('Admin')) uRoles.push('Admin');
+      
+      if (uRoles.length > 1) {
+        var dd = document.getElementById('userDD');
+        if (!dd) return;
+        
+        var portals = [
+          { role: 'Admin', name: 'Admin Portal', url: 'admin_portal.html' },
+          { role: 'PMAM', name: 'PMAM Portal', url: 'pmam_portal.html' },
+          { role: 'I/C AB-PMJAY', name: 'I/C Portal', url: 'ic_portal.html' },
+          { role: 'DEO', name: 'DEO Portal', url: 'patient_service_portal.html' },
+          { role: 'Accountant', name: 'Finance Portal', url: 'finance.html' }
+        ];
+        
+        var switcherHtml = '<div style="font-size:10px; font-weight:bold; color:#9ca3af; padding:8px 16px 4px 16px; text-transform:uppercase;">Switch Workspace</div>';
+        
+        var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
+        var inserted = false;
+        
+        portals.forEach(function(p) {
+          if (uRoles.includes(p.role) && !currentPath.includes(p.url)) {
+            switcherHtml += `
+              <div class="dd-item" style="color:#1d4ed8;" onclick="window.location.href='${p.url}'">
+                <svg viewBox="0 0 24 24" fill="#3b82f6"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
+                Switch to ${p.name}
+              </div>
+            `;
+            inserted = true;
+          }
+        });
+        
+        if (inserted) {
+          switcherHtml += '<div style="height:1px; background:#e5e7eb; margin:4px 0;"></div>';
+          var logoutBtn = Array.from(dd.querySelectorAll('.dd-item')).find(el => el.textContent.includes('Logout'));
+          if (logoutBtn) {
+             logoutBtn.insertAdjacentHTML('beforebegin', switcherHtml);
+          } else {
+             dd.insertAdjacentHTML('beforeend', switcherHtml);
+          }
+        }
+      }
+    } catch(e) { console.error('Role Switcher Error', e); }
+  }, 1000);
+});
+</script>
+
+</body></html>';
 
   var pw = window.open('','_blank','width=900,height=700');
   if (!pw) {
@@ -2981,17 +2822,30 @@ function getPmjayUser() {
     window.location.replace('index.html');
     return;
   }
+  var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+  if (!uRoles.includes('PMAM')) {
+    if (uRoles.includes('Admin')) window.location.replace('admin_portal.html');
+    else if (uRoles.includes('I/C AB-PMJAY')) window.location.replace('ic_portal.html');
+    else if (uRoles.includes('DEO')) window.location.replace('patient_service_portal.html');
+    else if (uRoles.includes('Accountant')) window.location.replace('finance.html');
+    else window.location.replace('index.html');
+    return;
+  }
+  if (false) {
+    window.location.replace('index.html');
+    return;
+  }
   // Route guard: only PMAM should be here. Admin → admin_portal,
   // I/C → ic_portal, DEO → patient_services_portal. Otherwise stay.
   if (u.email === ADMIN_EMAIL) {
     window.location.replace('admin_portal.html');
     return;
   }
-  if (u.role === 'I/C AB-PMJAY') {
+  if (false) {
     window.location.replace('ic_portal.html');
     return;
   }
-  if (u.role === 'DEO') {
+  if (false) {
     window.location.replace('patient_services_portal.html');
     return;
   }
@@ -3048,89 +2902,6 @@ function fetchPmamReports() {
     }, function(err) {
       console.error('Error loading daily reports:', err);
     });
-}
-
-// ══════════════════════════════════════
-// MODULE & TAB NAVIGATION SYSTEM
-// ══════════════════════════════════════
-var currentModule = 'reports';
-var currentReportsTab = 'fillReport';
-var currentLeaveTab = 'apply';
-
-function selectModule(mod, el) {
-  currentModule = mod;
-  document.querySelectorAll('.sidebar .sbi').forEach(function(item){ item.classList.remove('active'); });
-  if (el) {
-    el.classList.add('active');
-  } else {
-    var sbi = document.getElementById('sbi-' + mod);
-    if (sbi) sbi.classList.add('active');
-  }
-
-  var rNav = document.getElementById('reportsTopNav');
-  var lNav = document.getElementById('leaveTopNav');
-  if (mod === 'reports') {
-    if (rNav) rNav.style.display = 'flex';
-    if (lNav) lNav.style.display = 'none';
-    switchReportsTab(currentReportsTab);
-  } else if (mod === 'leave') {
-    if (rNav) rNav.style.display = 'none';
-    if (lNav) lNav.style.display = 'flex';
-    switchLeaveTab(currentLeaveTab);
-  }
-}
-
-function switchReportsTab(tab, el) {
-  currentReportsTab = tab;
-  document.querySelectorAll('#reportsTopNav .top-nav-tab').forEach(function(b){ b.classList.remove('active'); });
-  if (el) {
-    el.classList.add('active');
-  } else {
-    var b = document.getElementById('tab-btn-' + tab);
-    if (b) b.classList.add('active');
-  }
-
-  document.querySelectorAll('.content > .sec').forEach(function(s){ s.classList.remove('active'); });
-  var secMap = {
-    'fillReport': 'sec-fillReport',
-    'myRecords': 'sec-myRecords',
-    'dashboard': 'sec-dashboard'
-  };
-  var targetId = secMap[tab] || 'sec-fillReport';
-  var targetSec = document.getElementById(targetId);
-  if (targetSec) targetSec.classList.add('active');
-
-  if (tab === 'myRecords') filterRecords();
-  if (tab === 'dashboard') updateDashboard();
-}
-
-function switchLeaveTab(tab, el) {
-  currentLeaveTab = tab;
-  document.querySelectorAll('#leaveTopNav .top-nav-tab').forEach(function(b){ b.classList.remove('active'); });
-  if (el) {
-    el.classList.add('active');
-  } else {
-    var b = document.getElementById('tab-btn-' + tab);
-    if (b) b.classList.add('active');
-  }
-
-  document.querySelectorAll('.content > .sec').forEach(function(s){ s.classList.remove('active'); });
-  var secLeave = document.getElementById('sec-leave');
-  if (secLeave) secLeave.classList.add('active');
-
-  if (typeof showLvTab === 'function') {
-    showLvTab(tab);
-  }
-}
-
-function goSec(secName, el) {
-  if (secName === 'fillReport' || secName === 'myRecords' || secName === 'dashboard') {
-    selectModule('reports');
-    switchReportsTab(secName);
-  } else if (secName === 'leave') {
-    selectModule('leave');
-    switchLeaveTab('apply');
-  }
 }
 
 // ══════════════════════════════════════
@@ -3884,5 +3655,61 @@ function updateWardStatus(){
     }
   });
 </script>
+
+<!-- ROLE SWITCHER UI LOGIC -->
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var uStr = sessionStorage.getItem('pmjay_user');
+    if (!uStr) return;
+    try {
+      var u = JSON.parse(uStr);
+      var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+      if (u.email === ADMIN_EMAIL && !uRoles.includes('Admin')) uRoles.push('Admin');
+      
+      if (uRoles.length > 1) {
+        var dd = document.getElementById('userDD');
+        if (!dd) return;
+        
+        var portals = [
+          { role: 'Admin', name: 'Admin Portal', url: 'admin_portal.html' },
+          { role: 'PMAM', name: 'PMAM Portal', url: 'pmam_portal.html' },
+          { role: 'I/C AB-PMJAY', name: 'I/C Portal', url: 'ic_portal.html' },
+          { role: 'DEO', name: 'DEO Portal', url: 'patient_service_portal.html' },
+          { role: 'Accountant', name: 'Finance Portal', url: 'finance.html' }
+        ];
+        
+        var switcherHtml = '<div style="font-size:10px; font-weight:bold; color:#9ca3af; padding:8px 16px 4px 16px; text-transform:uppercase;">Switch Workspace</div>';
+        
+        var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
+        var inserted = false;
+        
+        portals.forEach(function(p) {
+          if (uRoles.includes(p.role) && !currentPath.includes(p.url)) {
+            switcherHtml += `
+              <div class="dd-item" style="color:#1d4ed8;" onclick="window.location.href='${p.url}'">
+                <svg viewBox="0 0 24 24" fill="#3b82f6"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
+                Switch to ${p.name}
+              </div>
+            `;
+            inserted = true;
+          }
+        });
+        
+        if (inserted) {
+          switcherHtml += '<div style="height:1px; background:#e5e7eb; margin:4px 0;"></div>';
+          var logoutBtn = Array.from(dd.querySelectorAll('.dd-item')).find(el => el.textContent.includes('Logout'));
+          if (logoutBtn) {
+             logoutBtn.insertAdjacentHTML('beforebegin', switcherHtml);
+          } else {
+             dd.insertAdjacentHTML('beforeend', switcherHtml);
+          }
+        }
+      }
+    } catch(e) { console.error('Role Switcher Error', e); }
+  }, 1000);
+});
+</script>
+
 </body>
 </html>
