@@ -8500,9 +8500,16 @@ function saveCompBalances() {
 }
 </script>
 
+
 <!-- UNIFIED DIRECTORY LOGIC -->
 <script>
 window._allDirectoryUsers = [];
+
+// Override old render functions to prevent errors if old code calls them
+function renderPmams() {}
+function renderOthers() {}
+function loadAllUsers() { loadDirectory(); }
+function loadStaffFromUsers() { loadDirectory(); }
 
 function loadDirectory() {
   var grid = document.getElementById('directoryGrid');
@@ -8514,7 +8521,7 @@ function loadDirectory() {
     
     snap.forEach(function(doc) {
       var u = doc.data();
-      if (u.email === ADMIN_EMAIL && u.role === 'Admin') return; // Skip main admin if handled separately, or maybe don't skip. Actually old code skipped ADMIN_EMAIL in loadAllUsers but not loadStaffFromUsers. Let's keep them if they exist in DB.
+      if (u.email === ADMIN_EMAIL && u.role === 'Admin') return; // Skip main admin 
       
       u._docId = doc.id;
       if (u.status === 'pending') {
@@ -8587,6 +8594,7 @@ function renderDirectoryGrid(list) {
     else if(u.role === 'Accountant') roleClass = 'role-accountant';
 
     var statusColor = (u.status === 'active' || u.status === 'approved') ? '#16a34a' : '#dc2626';
+    var isEnabled = (u.status === 'active' || u.status === 'approved');
     
     var photoHtml = `<div class="user-av av-pmam">${ini}</div>`;
     if (u.photoBase64) {
@@ -8609,11 +8617,11 @@ function renderDirectoryGrid(list) {
         </div>
         <div class="user-actions">
           <button class="act-btn act-edit" onclick="openUnifiedEdit('${u._docId}')">✏️ Edit</button>
-          <button class="act-btn act-reset" onclick="resetPin('${u.email}')">Reset PIN</button>
-          <button class="act-btn act-disable" onclick="toggleStatus('${u._docId}', '${u.status}')">
-            ${(u.status==='active'||u.status==='approved')?'Disable':'Enable'}
+          <button class="act-btn act-reset" onclick="dirResetPin('${u._docId}', '${u.email}')">Reset PIN</button>
+          <button class="act-btn act-disable" onclick="dirToggleStatus('${u._docId}', ${isEnabled})">
+            ${isEnabled?'Disable':'Enable'}
           </button>
-          <button class="act-btn act-disable" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca" onclick="deleteUser('${u._docId}', '${u.email}')">🗑 Delete</button>
+          <button class="act-btn act-disable" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca" onclick="dirDeleteUser('${u._docId}', '${u.email}')">🗑 Delete</button>
         </div>
       </div>
     `;
@@ -8621,7 +8629,7 @@ function renderDirectoryGrid(list) {
   grid.innerHTML = html;
 }
 
-// Override pending and rejected renderers to use the new unified grid style if desired, or keep them similar
+// Override pending and rejected renderers to use the new unified grid style
 function renderPendingGrid(list) {
   var grid = document.getElementById('pendingUsersGrid');
   if(!grid) return;
@@ -8658,11 +8666,46 @@ function renderRejectedGrid(list) {
           <div style="font-size:10px;color:#6b7280">${u.email}</div>
         </div>
         <button class="act-btn act-reset" onclick="db.collection('users').doc('${u.email}').update({status:'pending'}).then(()=>loadDirectory())">Move to Pending</button>
-        <button class="act-btn act-disable" onclick="deleteUser('${u.email}', '${u.email}')">Delete</button>
+        <button class="act-btn act-disable" onclick="dirDeleteUser('${u.email}', '${u.email}')">Delete</button>
       </div>`;
   });
   html += '</div>';
   grid.innerHTML = html;
+}
+
+// Directory Action Functions
+function dirResetPin(docId, email) {
+  if (confirm('Are you sure you want to reset the PIN for ' + email + ' to 1234?')) {
+    db.collection('users').doc(docId).update({ pin: '1234' }).then(() => {
+      showToast('PIN reset to 1234 successfully', 'success');
+    }).catch(e => {
+      showToast('Error resetting PIN: ' + e.message, 'error');
+    });
+  }
+}
+
+function dirToggleStatus(docId, isEnabled) {
+  var newStatus = isEnabled ? 'inactive' : 'active';
+  var action = isEnabled ? 'Disable' : 'Enable';
+  if (confirm('Are you sure you want to ' + action + ' this user?')) {
+    db.collection('users').doc(docId).update({ status: newStatus }).then(() => {
+      showToast('User ' + action + 'd successfully', 'success');
+      loadDirectory();
+    }).catch(e => {
+      showToast('Error toggling status: ' + e.message, 'error');
+    });
+  }
+}
+
+function dirDeleteUser(docId, email) {
+  if (confirm('Do you really want to permanently delete ' + email + '? Cannot be undone.')) {
+    db.collection('users').doc(docId).delete().then(() => {
+      showToast('User deleted successfully', 'success');
+      loadDirectory();
+    }).catch(e => {
+      showToast('Error deleting user: ' + e.message, 'error');
+    });
+  }
 }
 
 // Unified Edit Modal Logic
@@ -8700,7 +8743,10 @@ function openUnifiedEdit(docId) {
 
   // Populate Wards Checkboxes
   var wContainer = document.getElementById('ueWardsContainer');
-  var allWards = window.WARD_REGISTRY ? window.WARD_REGISTRY.all().map(w => w.label) : [];
+  var allWards = [];
+  if (window.WARD_REGISTRY && typeof window.WARD_REGISTRY.list === 'function') {
+    allWards = window.WARD_REGISTRY.list().map(w => w.label);
+  }
   
   // Also add any legacy wards that user has but aren't in registry
   var userWards = Array.isArray(user.wards) ? user.wards : (user.ward ? [user.ward] : []);
@@ -8796,22 +8842,5 @@ function uePreviewSign(input) {
   };
   reader.readAsDataURL(file);
 }
-
-// Redirect old router to new loadDirectory
-var _goSecDirOrig = goSec;
-goSec = function(id, el) {
-  _goSecDirOrig(id, el);
-  if (id === 'directory' || id === 'users' || id === 'staff') {
-     document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-     var dSec = document.getElementById('sec-directory');
-     if(dSec) dSec.classList.add('active');
-     loadDirectory();
-  }
-};
-// Overwrite old loadAllUsers to avoid errors if called directly
-window.loadAllUsers = loadDirectory;
-window.loadStaffFromUsers = loadDirectory;
 </script>
-
 </body>
-</html>
