@@ -525,7 +525,7 @@ input:checked + .slider:before { transform: translateX(20px); }
           </div>
           <div class="mfld"><label>Status</label>
             <select id="ueStatus">
-              <option value="active">✅ Active / Approved</option>
+              <option value="approved">✅ Active / Approved</option>
               <option value="inactive">⛔ Inactive</option>
               <option value="pending">⏳ Pending</option>
             </select>
@@ -8752,7 +8752,7 @@ function openUnifiedEdit(docId) {
     `;
   });
   rContainer.innerHTML = rHtml;
-  document.getElementById('ueStatus').value = user.status || 'active';
+  document.getElementById('ueStatus').value = (user.status === 'active' ? 'approved' : (user.status || 'approved'));
   document.getElementById('ueHideOnIndex').checked = !!user.hideOnIndex;
   
   // Profile Photo

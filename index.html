@@ -730,7 +730,7 @@ function doLogin() {
       }
       return;
     }
-    if (email !== ADMIN_EMAIL && u.status !== 'approved') {
+    if (email !== ADMIN_EMAIL && u.status !== 'approved' && u.status !== 'active') {
       setMsg('loginMsg', u.status==='rejected' ? 'Account rejected. Contact Admin.' : 'Account pending Admin approval.', '#dc2626');
       return;
     }
