@@ -8508,8 +8508,8 @@ window._allDirectoryUsers = [];
 // Override old render functions to prevent errors if old code calls them
 function renderPmams() {}
 function renderOthers() {}
-function loadAllUsers() { return;  loadDirectory(); }
-function loadStaffFromUsers() { return;  loadDirectory(); }
+function loadAllUsers() { loadDirectory(); }
+function loadStaffFromUsers() { loadDirectory(); }
 
 function loadDirectory() {
   var grid = document.getElementById('directoryGrid');
