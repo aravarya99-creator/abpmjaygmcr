@@ -375,7 +375,7 @@
               <div class="ph-bell-badge" id="topBellBadge" style="display:none;">0</div>
             </div>
 
-            <div class="ph-user-pill" onclick="document.getElementById('userDD') && document.getElementById('userDD').classList.toggle('open')">
+            <div class="ph-user-pill user-pill" onclick="event.stopPropagation(); document.getElementById('userDD') && document.getElementById('userDD').classList.toggle('open')">
               <div class="ph-u-av" id="hAvatarContainer">
                 <span id="hInitials">U</span>
               </div>
