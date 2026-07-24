@@ -2725,7 +2725,7 @@ function getPmjayUser() {
   }
   // Route guard: only PMAM should be here. Admin → admin_portal,
   // I/C → ic_portal, DEO → patient_services_portal. Otherwise stay.
-  if (u.email === ADMIN_EMAIL) {
+  if (u.email === 'aravarya99@gmail.com') {
     window.location.replace('admin_portal.html');
     return;
   }

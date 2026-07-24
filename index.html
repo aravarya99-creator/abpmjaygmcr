@@ -739,17 +739,19 @@ function doLogin() {
     localStorage.removeItem(lockKey);
     // Save login PIN for in-app PIN re-verification on protected sections (e.g. Bulk Import / Bulk Delete)
     localStorage.setItem('userPin', pin);
-    sessionStorage.setItem('pmjay_user', JSON.stringify({ email:email, name:u.name||'', role:u.role||'', desig:u.role||'', ward:u.ward||'' }));
+    sessionStorage.setItem('pmjay_user', JSON.stringify({ email:email, name:u.name||'', role:u.role||'', roles:u.roles||[u.role||''], desig:u.role||'', ward:u.ward||'' }));
     var remChk = document.getElementById('rememberMe');
     if (remChk && remChk.checked) localStorage.setItem('pmjay_remember', email);
     else localStorage.removeItem('pmjay_remember');
     setMsg('loginMsg','Login successful! Redirecting...','#16a34a');
     setTimeout(function(){
-      if (email===ADMIN_EMAIL)           window.location.href='admin_portal.html';
-      
-      
-      
-      
+      var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+      if (email === ADMIN_EMAIL || uRoles.includes('Admin')) window.location.href='admin_portal.html';
+      else if (uRoles.includes('PMAM')) window.location.href='pmam_portal.html';
+      else if (uRoles.includes('I/C AB-PMJAY')) window.location.href='ic_portal.html';
+      else if (uRoles.includes('DEO') || uRoles.some(r=>(typeof r==='string' && r.includes('MTS')))) window.location.href='patient_service_portal.html';
+      else if (uRoles.includes('Accountant')) window.location.href='finance.html';
+      else window.location.href='pmam_portal.html';
     }, 800);
   }).catch(function(e){ setMsg('loginMsg','Connection error: '+e.message,'#dc2626'); });
 }
@@ -869,11 +871,13 @@ window.addEventListener('DOMContentLoaded', function() {
   try {
     var sess = JSON.parse(sessionStorage.getItem('pmjay_user')||'{}');
     if (sess.email) {
-      if (sess.email===ADMIN_EMAIL)          window.location.href='admin_portal.html';
-      else if (sess.role==='I/C AB-PMJAY')   window.location.href='ic_portal.html';
-      else if (sess.role==='DEO')            window.location.href='patient_service_portal.html';
-      else if (sess.role==='Accountant')     window.location.href='finance.html';
-      else                                   window.location.href='pmam_portal.html';
+      var sRoles = Array.isArray(sess.roles) ? sess.roles : (sess.role ? [sess.role] : []);
+      if (sess.email === ADMIN_EMAIL || sRoles.includes('Admin')) window.location.href='admin_portal.html';
+      else if (sRoles.includes('PMAM')) window.location.href='pmam_portal.html';
+      else if (sRoles.includes('I/C AB-PMJAY')) window.location.href='ic_portal.html';
+      else if (sRoles.includes('DEO') || sRoles.some(r=>(typeof r==='string' && r.includes('MTS')))) window.location.href='patient_service_portal.html';
+      else if (sRoles.includes('Accountant')) window.location.href='finance.html';
+      else window.location.href='pmam_portal.html';
     }
   } catch(e){}
 
