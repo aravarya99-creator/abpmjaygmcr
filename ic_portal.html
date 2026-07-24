@@ -181,6 +181,10 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 .pmam-empty-day td.miss-flag{color:#dc2626!important;font-weight:700;font-style:normal}
 /* Ward pills in day-wise list */
 .ward-mini{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin:1px 2px;border:1px solid;white-space:nowrap}
+
+.bell-wrap{position:relative;cursor:pointer;margin-right:16px;}
+.bell-wrap svg{width:22px;height:22px;fill:#fff;opacity:0.85}
+.bell-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:800;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center}
 </style>
   <!-- Firebase v10 -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -403,6 +407,11 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
        <span style="color:#fff; font-size:12px; font-weight:600; font-family:'Inter', sans-serif;">Sign Inbox</span>
        <span style="background:#ef4444; color:#fff; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; margin-left:4px;">3</span>
     </div>
+
+    <div class="bell-wrap" onclick="showContent('leave-module')">
+      <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+      <div class="bell-badge" id="topBellBadge" style="display:none">0</div>
+    </div>
 <div class="user-pill" onclick="toggleDD()">
       <div class="uphoto"><span class="ini" id="ini">IC</span></div>
       <div>
@@ -411,14 +420,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       </div>
       <span class="dd-arrow">▾</span>
       <div class="user-dropdown premium-dd" id="userDD">
-  <div class="dd-premium-header">
-    <div class="dd-avatar-large">VK</div>
-    <div class="dd-user-details">
-      <div class="dd-user-name" id="ddUserName">Vinod Kumar</div>
-      <div class="dd-user-role" id="ddUserRole">System Administrator</div>
-      <div class="dd-user-status"><span class="status-dot"></span> Online</div>
-    </div>
-  </div>
+  <div id="ddWorkspaceInjection"></div>
   
   <div class="premium-actions">
     <div class="premium-btn" onclick="if(typeof openProfile === 'function'){openProfile();}else if(typeof openModal === 'function'){openModal('profileModal');}">
@@ -430,8 +432,6 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       Change Password
     </div>
   </div>
-
-  <div id="ddWorkspaceInjection"></div>
 
   <div class="logout-btn-container">
     <div class="premium-btn logout-btn" onclick="if(typeof confirmLogout === 'function'){confirmLogout();}else if(typeof doLogout === 'function'){doLogout();}">
@@ -3817,30 +3817,19 @@ window.addEventListener('DOMContentLoaded', function() {
       var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
       if (u.email === 'gmcrajouriofficial@gmail.com' && !uRoles.includes('Admin')) uRoles.push('Admin');
       
-      // Update Name and Avatar dynamically
-      var nameEl = document.getElementById('ddUserName');
-      var avEl = document.querySelector('.dd-avatar-large');
-      var roleEl = document.getElementById('ddUserRole');
+      // Forcefully update the navbar designation to match the portal!
+      var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
+      var portalRole = '';
+      if (currentPath.includes('admin')) portalRole = 'Admin';
+      else if (currentPath.includes('pmam')) portalRole = 'PMAM';
+      else if (currentPath.includes('ic_')) portalRole = 'Incharge AB-PMJAY';
+      else if (currentPath.includes('finance')) portalRole = 'Accountant';
+      else if (currentPath.includes('patient')) portalRole = 'DEO';
       
-      if (nameEl && u.name) nameEl.textContent = u.name;
-      if (avEl && u.name) {
-          if (u.photoBase64) {
-              avEl.innerHTML = '<img src="' + u.photoBase64 + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-          } else {
-              var initials = u.name.trim().split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-              if (initials) avEl.textContent = initials;
-          }
-      }
-      
-      // Update Role dynamically based on current portal
-      if (roleEl) {
-         var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
-         if (currentPath.includes('admin')) roleEl.textContent = 'Admin';
-         else if (currentPath.includes('pmam')) roleEl.textContent = 'PMAM';
-         else if (currentPath.includes('ic_')) roleEl.textContent = 'Incharge AB-PMJAY';
-         else if (currentPath.includes('finance')) roleEl.textContent = 'Accountant';
-         else if (currentPath.includes('patient')) roleEl.textContent = 'DEO';
-      }
+      ['udesig', 'userDesig', 'hRole', 'userRole', 'ddUserRole'].forEach(function(id) {
+          var els = document.querySelectorAll('#'+id+', .'+id);
+          els.forEach(el => el.textContent = portalRole);
+      });
       
       if (uRoles.length > 1) {
         var dd = document.getElementById('ddWorkspaceInjection');
@@ -3855,7 +3844,6 @@ window.addEventListener('DOMContentLoaded', function() {
         ];
         
         var switcherHtml = '<div class="dd-ws-label">Switch Workspace</div>';
-        var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
         var inserted = false;
         
         portals.forEach(function(p) {

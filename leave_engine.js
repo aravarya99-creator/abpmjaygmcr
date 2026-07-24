@@ -21,7 +21,25 @@
       this.role = config.role || 'pmam';
       this.userEmail = config.email || null;
       this.userName = config.name || null;
-      this.onUpdate = config.onUpdate || function(){};
+      var origUpdate = config.onUpdate || function(){};
+      this.onUpdate = function() {
+          origUpdate();
+          var actionable = 0;
+          if (self.role === 'pmam') {
+              actionable = self.subRequests.filter(function(r) { return r.status === 'Needs Substitute' || r.status === 'Pending Substitute'; }).length;
+          } else if (self.role === 'ic' || self.role === 'admin') {
+              actionable = self.requests.filter(function(r) { return r.status === 'Pending'; }).length;
+          }
+          var bellBadge = document.getElementById('topBellBadge');
+          if (bellBadge) {
+              if (actionable > 0) {
+                  bellBadge.style.display = 'flex';
+                  bellBadge.textContent = actionable;
+              } else {
+                  bellBadge.style.display = 'none';
+              }
+          }
+      };
       
       this._fetchRules();
       this._fetchRequests();
@@ -51,7 +69,6 @@
         
                 if (this.userName) {
           this._unsubSub = db.collection('leave_requests')
-            .where('status', '==', 'Pending Substitute')
             .onSnapshot(function(snap) {
               self.subRequests = [];
               snap.forEach(function(doc) {
