@@ -309,153 +309,6 @@ input:checked + .slider:before { transform: translateX(20px); }
 .slider.round:before { border-radius: 50%; }
 </style>
 
-
-<style>
-/* PREMIUM DROPDOWN CSS */
-.premium-dd {
-  width: 280px !important;
-  padding: 0 !important;
-  border-radius: 16px !important;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
-  overflow: hidden;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-}
-.dd-premium-header {
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #f9fafb;
-  border-bottom: 1px solid #f3f4f6;
-}
-.dd-avatar-large {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-.dd-user-details {
-  flex-grow: 1;
-  overflow: hidden;
-}
-.dd-user-name {
-  font-weight: 700;
-  color: #111827;
-  font-size: 15px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.dd-user-role {
-  font-size: 12px;
-  color: #4b5563;
-  margin-top: 2px;
-}
-.dd-user-status {
-  font-size: 11px;
-  color: #16a34a;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-}
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: #16a34a;
-}
-.premium-actions {
-  padding: 12px 16px;
-}
-.premium-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  background: #f9fafb;
-  color: #374151;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid transparent;
-}
-.premium-btn:hover {
-  background: #f3f4f6;
-  border-color: #e5e7eb;
-}
-.premium-btn svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.dd-ws-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: #6b7280;
-  padding: 8px 16px 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.ws-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  margin: 0 16px 8px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-.ws-card:hover {
-  opacity: 0.85;
-}
-.ws-icon-box {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
-}
-.ws-icon-box svg {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-}
-.logout-btn-container {
-  padding: 12px 16px 16px;
-}
-.logout-btn {
-  background: #fef2f2;
-  color: #dc2626;
-  margin-bottom: 0;
-}
-.logout-btn:hover {
-  background: #fee2e2;
-  border-color: #fca5a5;
-}
-</style>
 </head>
 <body>
 
@@ -556,18 +409,6 @@ input:checked + .slider:before { transform: translateX(20px); }
   margin-right: -20px;
 }
 
-.ph-center-logo {
-  width: 55px;
-  height: 55px;
-  border-radius: 50%;
-  border: 3px solid #2563eb;
-  padding: 3px;
-  background: #fff;
-  object-fit: contain;
-  z-index: 2;
-  position: relative;
-  margin-bottom: 5px;
-}
 .ph-portal-name {
   color: #ea580c;
   font-weight: 900;
@@ -753,12 +594,11 @@ input:checked + .slider:before { transform: translateX(20px); }
 
   <!-- CENTER -->
   <div class="ph-center">
-    <div class="ph-ribbon-bg"></div>
-    <img src="shared/pmjay_logo.png" class="ph-center-logo" alt="PMJAY Logo" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
-    <div class="ph-portal-name udesig-portal-name">ADMIN PORTAL</div>
-  </div>
-
-  <div class="ph-divider"></div>
+      <div class="ph-portal-name" style="font-size: 24px; font-weight: 900; color: #fff; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">ADMIN PORTAL</div>
+      <div class="ph-portal-sub" style="font-size: 13px; font-weight: 700; color: #FFD700; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px;">GMC &amp; AH RAJOURI</div>
+    </div>
+    
+    <div class="ph-divider"></div>
 
   <!-- RIGHT -->
   <div class="ph-right">
@@ -783,69 +623,11 @@ input:checked + .slider:before { transform: translateX(20px); }
         <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </div>
       
-      <div class="user-dropdown premium-dd" id="userDD">
-  <div id="ddWorkspaceInjection"></div>
-  
-  <div class="premium-actions">
-    <div class="premium-btn" onclick="if(typeof openProfile === 'function'){openProfile();}else if(typeof openModal === 'function'){openModal('profileModal');}">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-      My Profile
-    </div>
-    <div class="premium-btn" onclick="alert('Change Password clicked')">
-      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-      Change Password
-    </div>
-  </div>
-
-  <div class="logout-btn-container">
-    <div class="premium-btn logout-btn" onclick="if(typeof confirmLogout === 'function'){confirmLogout();}else if(typeof doLogout === 'function'){doLogout();}">
-      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-      Sign Out
-    </div>
-  </div>
-</div>
+      
     </div>
   </div>
 </header>
-
-  <div class="banner-overlay">
-    <div class="bell-wrap">
-      <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-      <div class="bell-badge">3</div>
-    </div>
-    <div class="user-pill" onclick="toggleDD()">
-      <div class="uphoto"><span class="ini">VK</span></div>
-      <div>
-        <div class="uname">Vinod Kumar</div>
-        <div class="udesig">Admin</div>
-      </div>
-      <span class="dd-arrow">▾</span>
-      <div class="user-dropdown premium-dd" id="userDD">
-  <div id="ddWorkspaceInjection"></div>
-  
-  <div class="premium-actions">
-    <div class="premium-btn" onclick="if(typeof openProfile === 'function'){openProfile();}else if(typeof openModal === 'function'){openModal('profileModal');}">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-      My Profile
-    </div>
-    <div class="premium-btn" onclick="alert('Change Password clicked')">
-      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-      Change Password
-    </div>
-  </div>
-
-  <div class="logout-btn-container">
-    <div class="premium-btn logout-btn" onclick="if(typeof confirmLogout === 'function'){confirmLogout();}else if(typeof doLogout === 'function'){doLogout();}">
-      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-      Sign Out
-    </div>
-  </div>
-</div>
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN-CONTROLLED TICKER — rendered from settings/tickers.admin -->
+\n<!-- ADMIN-CONTROLLED TICKER — rendered from settings/tickers.admin -->
 <div id="adminTicker" style="display:none;position:relative;width:100%;padding:8px 18px;font-size:13px;font-weight:600;text-align:center;line-height:1.4;border-bottom:1px solid transparent;z-index:100"></div>
 <style>
   #adminTicker.tk-info    { background:#dbeafe; color:#1e3a8a; border-bottom-color:#93c5fd; }
@@ -992,15 +774,10 @@ input:checked + .slider:before { transform: translateX(20px); }
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div class="mfld"><label>Full Name</label><input type="text" id="ueName" placeholder="Full name"></div>
           <div class="mfld"><label>Email</label><input type="text" id="ueEmailDisplay" readonly style="background:#f9fafb;color:#6b7280;cursor:not-allowed"></div>
-          <div class="mfld">
-            <label>Roles</label>
-            <div id="ueRolesContainer" style="display:flex;flex-wrap:wrap;gap:6px;padding:6px;border:1.5px solid #e0e8ff;border-radius:6px;background:#fafbfc;">
-              <!-- Roles checkboxes populated via JS -->
-            </div>
-          </div>
+          <div class="mfld"><label>Role</label><input type="text" id="ueRole" readonly style="background:#f9fafb;color:#6b7280;cursor:not-allowed"></div>
           <div class="mfld"><label>Status</label>
             <select id="ueStatus">
-              <option value="approved">✅ Active / Approved</option>
+              <option value="active">✅ Active / Approved</option>
               <option value="inactive">⛔ Inactive</option>
               <option value="pending">⏳ Pending</option>
             </select>
@@ -8242,20 +8019,11 @@ window.addEventListener('DOMContentLoaded', function() {
   var u;
   try { u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); } catch(e) { u = {}; }
   if (!u || !u.email) { window.location.replace('index.html'); return; }
-  var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-  if (u.email !== ADMIN_EMAIL && !uRoles.includes('Admin')) {
-    if (uRoles.includes('PMAM')) window.location.replace('pmam_portal.html');
-    else if (uRoles.includes('I/C AB-PMJAY')) window.location.replace('ic_portal.html');
-    else if (uRoles.includes('DEO')) window.location.replace('patient_service_portal.html');
-    else if (uRoles.includes('Accountant')) window.location.replace('finance.html');
-    else { sessionStorage.clear(); window.location.replace('index.html'); }
-    return;
-  }
   if (u.email !== ADMIN_EMAIL) {
-    if (false) window.location.replace('ic_portal.html');
-    if (false)         window.location.replace('patient_service_portal.html');
-      if (false) window.location.replace('finance.html');
-    
+    if (u.role === 'I/C AB-PMJAY') window.location.replace('ic_portal.html');
+    else if (u.role === 'DEO')         window.location.replace('patient_service_portal.html');
+      else if (u.role === 'Accountant') window.location.replace('finance.html');
+    else                           window.location.replace('pmam_portal.html');
     return;
   }
   loadSessionUser();
@@ -9050,10 +8818,7 @@ function filterDirectory(role, el) {
   
   var filtered = window._allDirectoryUsers;
   if (role !== 'all') {
-    filtered = window._allDirectoryUsers.filter(u => {
-      var uR = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-      return uR.includes(role);
-    });
+    filtered = window._allDirectoryUsers.filter(u => u.role === role);
   }
   
   renderDirectoryGrid(filtered);
@@ -9079,15 +8844,11 @@ function renderDirectoryGrid(list) {
       wardsText = u.ward;
     }
     
-    var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-    var rolesHtml = uRoles.map(r => {
-      var c = 'role-pmam';
-      if(r === 'I/C AB-PMJAY') c = 'role-ic';
-      else if(r === 'Admin') c = 'role-admin';
-      else if(r === 'DEO') c = 'role-deo';
-      else if(r === 'Accountant') c = 'role-accountant';
-      return `<span class="user-role ${c}" style="margin-right:4px">${r}</span>`;
-    }).join('');
+    var roleClass = 'role-pmam';
+    if(u.role === 'I/C AB-PMJAY') roleClass = 'role-ic';
+    else if(u.role === 'Admin') roleClass = 'role-admin';
+    else if(u.role === 'DEO') roleClass = 'role-deo';
+    else if(u.role === 'Accountant') roleClass = 'role-accountant';
 
     var statusColor = (u.status === 'active' || u.status === 'approved') ? '#16a34a' : '#dc2626';
     var isEnabled = (u.status === 'active' || u.status === 'approved');
@@ -9104,7 +8865,7 @@ function renderDirectoryGrid(list) {
           <div class="user-name">${u.name || 'Unnamed'}</div>
           <div class="user-email">${u.email}</div>
           <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:4px;">
-             ${rolesHtml || '<span class="user-role role-pmam">User</span>'}
+             <span class="user-role ${roleClass}">${u.role || 'User'}</span>
              <span style="font-size:9px; font-weight:700; color:${statusColor}; text-transform:uppercase;">• ${(u.status||'').toUpperCase()}</span>
           </div>
           <div style="font-size:10px; color:#6b7280; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
@@ -9213,21 +8974,8 @@ function openUnifiedEdit(docId) {
   document.getElementById('ueEmail').value = user.email || '';
   document.getElementById('ueName').value = user.name || '';
   document.getElementById('ueEmailDisplay').value = user.email || '';
-  // Populate Roles Checkboxes
-  var rContainer = document.getElementById('ueRolesContainer');
-  var allRoles = ['PMAM', 'I/C AB-PMJAY', 'DEO', 'Admin', 'Accountant'];
-  var userRoles = Array.isArray(user.roles) ? user.roles : (user.role ? [user.role] : []);
-  var rHtml = '';
-  allRoles.forEach(r => {
-    var isChecked = userRoles.includes(r) ? 'checked' : '';
-    rHtml += `
-      <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;cursor:pointer;">
-        <input type="checkbox" value="${r}" class="ue-role-cb" ${isChecked}> ${r}
-      </label>
-    `;
-  });
-  rContainer.innerHTML = rHtml;
-  document.getElementById('ueStatus').value = (user.status === 'active' ? 'approved' : (user.status || 'approved'));
+  document.getElementById('ueRole').value = user.role || '';
+  document.getElementById('ueStatus').value = user.status || 'active';
   document.getElementById('ueHideOnIndex').checked = !!user.hideOnIndex;
   
   // Profile Photo
@@ -9289,8 +9037,6 @@ function saveUnifiedEdit() {
   var name = document.getElementById('ueName').value.trim();
   var status = document.getElementById('ueStatus').value;
   var hideOnIndex = document.getElementById('ueHideOnIndex').checked;
-  var selectedRoles = [];
-  document.querySelectorAll('.ue-role-cb:checked').forEach(cb => selectedRoles.push(cb.value));
   var pB64 = document.getElementById('uePhotoFile').dataset.b64 || '';
   var sB64 = document.getElementById('ueSignFile').dataset.b64 || '';
   
@@ -9308,9 +9054,7 @@ function saveUnifiedEdit() {
     name: name,
     status: status,
     wards: selectedWards,
-    hideOnIndex: hideOnIndex,
-    roles: selectedRoles,
-    role: selectedRoles.length > 0 ? selectedRoles[0] : ''
+    hideOnIndex: hideOnIndex
   };
   
   // Only update ward (singular) for backward compatibility
@@ -9356,77 +9100,4 @@ function uePreviewSign(input) {
   reader.readAsDataURL(file);
 }
 </script>
-
-
-
-<!-- ROLE SWITCHER UI LOGIC -->
-<script>
-window.addEventListener('DOMContentLoaded', function() {
-  setTimeout(function() {
-    try {
-      var uStr = sessionStorage.getItem('pmjay_user');
-      if (!uStr) return;
-      var u = JSON.parse(uStr);
-      var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-      if (u.email === 'gmcrajouriofficial@gmail.com' && !uRoles.includes('Admin')) uRoles.push('Admin');
-      
-      // Forcefully update the navbar designation to match the portal!
-      var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
-      var portalRole = '';
-      if (currentPath.includes('admin')) portalRole = 'Admin';
-      else if (currentPath.includes('pmam')) portalRole = 'PMAM';
-      else if (currentPath.includes('ic_')) portalRole = 'Incharge AB-PMJAY';
-      else if (currentPath.includes('finance')) portalRole = 'Accountant';
-      else if (currentPath.includes('patient')) portalRole = 'DEO';
-      
-      ['udesig', 'userDesig', 'hRole', 'userRole', 'ddUserRole', 'fin-role'].forEach(function(id) {
-          var els = document.querySelectorAll('#'+id+', .'+id);
-          els.forEach(el => el.textContent = portalRole);
-      });
-      // Also update fin-name and fin-avatar for finance portal
-      if (document.getElementById('fin-name')) document.getElementById('fin-name').textContent = u.name;
-      if (document.getElementById('fin-avatar')) {
-          if (u.photoBase64) document.getElementById('fin-avatar').innerHTML = '<img src="' + u.photoBase64 + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-          else document.getElementById('fin-avatar').textContent = (u.name||'').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-      }
-
-      
-      if (uRoles.length > 1) {
-        var dd = document.getElementById('ddWorkspaceInjection');
-        if (!dd) return;
-        
-        var portals = [
-          { role: 'Admin', url: 'admin_portal.html', name: 'Admin Portal', bg: '#f3e8ff', color: '#7e22ce', iconBg: '#a855f7' },
-          { role: 'PMAM', url: 'pmam_portal.html', name: 'PMAM Portal', bg: '#dcfce7', color: '#15803d', iconBg: '#22c55e' },
-          { role: 'I/C AB-PMJAY', url: 'ic_portal.html', name: 'I/C Portal', bg: '#dbeafe', color: '#1d4ed8', iconBg: '#3b82f6' },
-          { role: 'DEO', url: 'patient_service_portal.html', name: 'DEO Portal', bg: '#fee2e2', color: '#b91c1c', iconBg: '#ef4444' },
-          { role: 'Accountant', url: 'finance.html', name: 'Finance Portal', bg: '#ffedd5', color: '#c2410c', iconBg: '#f97316' }
-        ];
-        
-        var switcherHtml = '<div class="dd-ws-label">Switch Workspace</div>';
-        var inserted = false;
-        
-        portals.forEach(function(p) {
-          if (uRoles.includes(p.role) && !currentPath.includes(p.url)) {
-             switcherHtml += `
-              <div class="ws-card" style="background:${p.bg}; color:${p.color};" onclick="window.location.href='${p.url}'">
-                <div class="ws-icon-box" style="background:${p.iconBg};">
-                  <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                </div>
-                ${p.name}
-              </div>
-            `;
-            inserted = true;
-          }
-        });
-        
-        if (inserted) {
-           dd.innerHTML = switcherHtml;
-        }
-      }
-    } catch(e) { console.error('Role Switcher Error', e); }
-  }, 1000);
-});
-</script>
-
 </body>
