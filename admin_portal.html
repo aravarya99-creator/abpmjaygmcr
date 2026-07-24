@@ -309,6 +309,153 @@ input:checked + .slider:before { transform: translateX(20px); }
 .slider.round:before { border-radius: 50%; }
 </style>
 
+
+<style>
+/* PREMIUM DROPDOWN CSS */
+.premium-dd {
+  width: 280px !important;
+  padding: 0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+}
+.dd-premium-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
+}
+.dd-avatar-large {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.dd-user-details {
+  flex-grow: 1;
+  overflow: hidden;
+}
+.dd-user-name {
+  font-weight: 700;
+  color: #111827;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dd-user-role {
+  font-size: 12px;
+  color: #4b5563;
+  margin-top: 2px;
+}
+.dd-user-status {
+  font-size: 11px;
+  color: #16a34a;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #16a34a;
+}
+.premium-actions {
+  padding: 12px 16px;
+}
+.premium-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.premium-btn:hover {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+}
+.premium-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dd-ws-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  padding: 8px 16px 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ws-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin: 0 16px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.ws-card:hover {
+  opacity: 0.85;
+}
+.ws-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+.ws-icon-box svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.logout-btn-container {
+  padding: 12px 16px 16px;
+}
+.logout-btn {
+  background: #fef2f2;
+  color: #dc2626;
+  margin-bottom: 0;
+}
+.logout-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+</style>
 </head>
 <body>
 
@@ -352,20 +499,36 @@ input:checked + .slider:before { transform: translateX(20px); }
         <div class="udesig">Admin</div>
       </div>
       <span class="dd-arrow">▾</span>
-      <div class="user-dropdown" id="userDD">
-        <div class="dd-header">
-          <div class="dd-av">VK</div>
-          <div><div class="dd-hname">Vinod Kumar</div><div class="dd-hrole">Admin — GMC Rajouri</div></div>
-        </div>
-        <div class="dd-item" onclick="closeDD(); alert('Admin profile settings can be configured via Firebase. Please see Portal Settings for other updates.');">
-          <svg viewBox="0 0 24 24" fill="#1A3DB5"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-          Update Profile
-        </div>
-        <div class="dd-item danger" onclick="confirmLogout()">
-          <svg viewBox="0 0 24 24" fill="#dc2626"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-          Logout
-        </div>
-      </div>
+      <div class="user-dropdown premium-dd" id="userDD">
+  <div class="dd-premium-header">
+    <div class="dd-avatar-large">VK</div>
+    <div class="dd-user-details">
+      <div class="dd-user-name" id="ddUserName">Vinod Kumar</div>
+      <div class="dd-user-role" id="ddUserRole">System Administrator</div>
+      <div class="dd-user-status"><span class="status-dot"></span> Online</div>
+    </div>
+  </div>
+  
+  <div class="premium-actions">
+    <div class="premium-btn" onclick="if(typeof openProfile === 'function'){openProfile();}else if(typeof openModal === 'function'){openModal('profileModal');}">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      My Profile
+    </div>
+    <div class="premium-btn" onclick="alert('Change Password clicked')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      Change Password
+    </div>
+  </div>
+
+  <div id="ddWorkspaceInjection"></div>
+
+  <div class="logout-btn-container">
+    <div class="premium-btn logout-btn" onclick="if(typeof confirmLogout === 'function'){confirmLogout();}else if(typeof doLogout === 'function'){doLogout();}">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      Sign Out
+    </div>
+  </div>
+</div>
     </div>
   </div>
 </div>
@@ -8888,36 +9051,62 @@ function uePreviewSign(input) {
 <script>
 window.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() {
-    var uStr = sessionStorage.getItem('pmjay_user');
-    if (!uStr) return;
     try {
+      var uStr = sessionStorage.getItem('pmjay_user');
+      if (!uStr) return;
       var u = JSON.parse(uStr);
       var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
       if (u.email === 'gmcrajouriofficial@gmail.com' && !uRoles.includes('Admin')) uRoles.push('Admin');
       
+      // Update Name and Avatar dynamically
+      var nameEl = document.getElementById('ddUserName');
+      var avEl = document.querySelector('.dd-avatar-large');
+      var roleEl = document.getElementById('ddUserRole');
+      
+      if (nameEl && u.name) nameEl.textContent = u.name;
+      if (avEl && u.name) {
+          if (u.photoBase64) {
+              avEl.innerHTML = '<img src="' + u.photoBase64 + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+          } else {
+              var initials = u.name.trim().split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+              if (initials) avEl.textContent = initials;
+          }
+      }
+      
+      // Update Role dynamically based on current portal
+      if (roleEl) {
+         var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
+         if (currentPath.includes('admin')) roleEl.textContent = 'Admin';
+         else if (currentPath.includes('pmam')) roleEl.textContent = 'PMAM';
+         else if (currentPath.includes('ic_')) roleEl.textContent = 'Incharge AB-PMJAY';
+         else if (currentPath.includes('finance')) roleEl.textContent = 'Accountant';
+         else if (currentPath.includes('patient')) roleEl.textContent = 'DEO';
+      }
+      
       if (uRoles.length > 1) {
-        var dd = document.getElementById('userDD');
+        var dd = document.getElementById('ddWorkspaceInjection');
         if (!dd) return;
         
         var portals = [
-          { role: 'Admin', name: 'Admin Portal', url: 'admin_portal.html' },
-          { role: 'PMAM', name: 'PMAM Portal', url: 'pmam_portal.html' },
-          { role: 'I/C AB-PMJAY', name: 'I/C Portal', url: 'ic_portal.html' },
-          { role: 'DEO', name: 'DEO Portal', url: 'patient_service_portal.html' },
-          { role: 'Accountant', name: 'Finance Portal', url: 'finance.html' }
+          { role: 'Admin', url: 'admin_portal.html', name: 'Admin Portal', bg: '#f3e8ff', color: '#7e22ce', iconBg: '#a855f7' },
+          { role: 'PMAM', url: 'pmam_portal.html', name: 'PMAM Portal', bg: '#dcfce7', color: '#15803d', iconBg: '#22c55e' },
+          { role: 'I/C AB-PMJAY', url: 'ic_portal.html', name: 'I/C Portal', bg: '#dbeafe', color: '#1d4ed8', iconBg: '#3b82f6' },
+          { role: 'DEO', url: 'patient_service_portal.html', name: 'DEO Portal', bg: '#fee2e2', color: '#b91c1c', iconBg: '#ef4444' },
+          { role: 'Accountant', url: 'finance.html', name: 'Finance Portal', bg: '#ffedd5', color: '#c2410c', iconBg: '#f97316' }
         ];
         
-        var switcherHtml = '<div style="font-size:10px; font-weight:bold; color:#9ca3af; padding:8px 16px 4px 16px; text-transform:uppercase;">Switch Workspace</div>';
-        
+        var switcherHtml = '<div class="dd-ws-label">Switch Workspace</div>';
         var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
         var inserted = false;
         
         portals.forEach(function(p) {
           if (uRoles.includes(p.role) && !currentPath.includes(p.url)) {
-            switcherHtml += `
-              <div class="dd-item" style="color:#1d4ed8;" onclick="window.location.href='${p.url}'">
-                <svg viewBox="0 0 24 24" fill="#3b82f6"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
-                Switch to ${p.name}
+             switcherHtml += `
+              <div class="ws-card" style="background:${p.bg}; color:${p.color};" onclick="window.location.href='${p.url}'">
+                <div class="ws-icon-box" style="background:${p.iconBg};">
+                  <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                </div>
+                ${p.name}
               </div>
             `;
             inserted = true;
@@ -8925,13 +9114,7 @@ window.addEventListener('DOMContentLoaded', function() {
         });
         
         if (inserted) {
-          switcherHtml += '<div style="height:1px; background:#e5e7eb; margin:4px 0;"></div>';
-          var logoutBtn = Array.from(dd.querySelectorAll('.dd-item')).find(el => el.textContent.includes('Logout'));
-          if (logoutBtn) {
-             logoutBtn.insertAdjacentHTML('beforebegin', switcherHtml);
-          } else {
-             dd.insertAdjacentHTML('beforeend', switcherHtml);
-          }
+           dd.innerHTML = switcherHtml;
         }
       }
     } catch(e) { console.error('Role Switcher Error', e); }
