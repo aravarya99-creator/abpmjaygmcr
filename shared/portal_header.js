@@ -344,7 +344,7 @@
           
           <!-- LEFT: Branding -->
           <div class="ph-left-brand">
-            <img src="\${fallbackLogo}" class="ph-gmc-logo" id="headerGmcLogo" alt="GMC Rajouri" onerror="this.src='https://via.placeholder.com/58?text=GMC'">
+            <img src="${fallbackLogo}" class="ph-gmc-logo" id="headerGmcLogo" alt="GMC Rajouri" onerror="this.src='https://via.placeholder.com/58?text=GMC'">
             <div class="ph-text-stack">
               <div class="ph-t1">AYUSHMAN BHARAT — PM-JAY</div>
               <div class="ph-t2">MANAGEMENT INFORMATION SYSTEM</div>
@@ -358,12 +358,12 @@
               <div class="ph-ribbon-dots"></div>
               <div class="ph-ribbon-line"></div>
               <div class="ph-pmjay-logo" id="centerLogoContainer">
-                \${pmjaySVG}
+                ${pmjaySVG}
               </div>
             </div>
             <div class="ph-portal-title">
               <div class="ph-pt-line"></div>
-              <div class="ph-pt-text">\${title}</div>
+              <div class="ph-pt-text">${title}</div>
               <div class="ph-pt-line right"></div>
             </div>
           </div>
