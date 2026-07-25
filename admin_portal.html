@@ -5773,7 +5773,7 @@ function loadSessionUser() {
   try {
     var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
     if (!u.email) return;
-    var name = u.name || 'Vinod Kumar';
+    var name = u.name || 'Admin User';
     var initials = name.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
     var uname = document.querySelector('.uname');
     if (uname) uname.textContent = name;
@@ -9048,5 +9048,5 @@ window.addEventListener('DOMContentLoaded', function() {
 
 
 <script src="shared/logos.js"></script>
-<script src="shared/portal_header.js?v=20260725_12"></script>
+<script src="shared/portal_header.js?v=20260725_13"></script>
 </body>

@@ -739,7 +739,14 @@ function doLogin() {
     localStorage.removeItem(lockKey);
     // Save login PIN for in-app PIN re-verification on protected sections (e.g. Bulk Import / Bulk Delete)
     localStorage.setItem('userPin', pin);
-    sessionStorage.setItem('pmjay_user', JSON.stringify({ email:email, name:u.name||'', role:u.role||'', roles:u.roles||[u.role||''], desig:u.role||'', ward:u.ward||'' }));
+    var userData = { email:email, name:u.name||'', role:u.role||'', roles:u.roles||[u.role||''], desig:u.role||'', ward:u.ward||'' };
+    var uStr = JSON.stringify(userData);
+    sessionStorage.setItem('pmjay_user', uStr);
+    sessionStorage.setItem('pmam_user', uStr);
+    sessionStorage.setItem('currentUser', uStr);
+    localStorage.setItem('pmjay_user', uStr);
+    localStorage.setItem('pmam_user', uStr);
+    localStorage.setItem('currentUser', uStr);
     var remChk = document.getElementById('rememberMe');
     if (remChk && remChk.checked) localStorage.setItem('pmjay_remember', email);
     else localStorage.removeItem('pmjay_remember');
@@ -3241,6 +3248,6 @@ window.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script src="shared/logos.js"></script>
-<script src="shared/portal_header.js?v=20260725_12"></script>
+<script src="shared/portal_header.js?v=20260725_13"></script>
 </body>
 </html>
