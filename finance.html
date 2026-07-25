@@ -315,6 +315,7 @@
 </style>
 </head>
 <body>
+<div id="portal-header-mount" data-title="FINANCE PORTAL"></div>
   <aside class="sidebar">
     <div class="brand">FINANCE</div>
     <ul>
@@ -3034,7 +3035,8 @@
         +   infoRow
         +   bodyHTML
         +   universalFooter
-    + '</body></html>';
+    + '<script src="shared/portal_header.js?v=20260725_11"></script>
+</body></html>';
 
       var uri = 'data:application/vnd.ms-word;base64,';
       var a = document.createElement('a');
@@ -3099,7 +3101,8 @@
         +     tableRows
         +     footerRows
         +   '</table>'
-    + '</body></html>';
+    + '<script src="shared/portal_header.js?v=20260725_11"></script>
+</body></html>';
 
       var uri = 'data:application/vnd.ms-excel;base64,';
       var a = document.createElement('a');
@@ -3280,7 +3283,8 @@
         +"<style>"+pageCSS+"</style></head><body>"
         +pageContent
         +_rptPrintScript()
-        +"</body></html>";
+        +"<script src="shared/portal_header.js?v=20260725_11"></script>
+</body></html>";
       w.document.write(h);
       w.document.close();
     }
@@ -4882,6 +4886,7 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<script src="shared/portal_header.js?v=20260725_11"></script>
 </body>
 </html>
 

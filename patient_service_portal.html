@@ -705,39 +705,7 @@ table tr {
 }
 </style>
 </head>
-<body>
-<header>
-  <!-- LEFT: Logo + 3-line title block -->
-  <div class="h-l" style="gap:14px; align-items:center; flex:1 1 0; min-width:0; max-width:50%;">
-    <img id="header-logo" src="" alt="AB-PMJAY" style="width:60px; height:60px; border-radius:50%; flex-shrink:0; background:#fff; padding:2px;">
-    <div style="line-height: 1.2; min-width:0; flex:1; overflow:hidden;">
-      <div style="font-weight: 900; font-size: 1.2rem; color: #fff; letter-spacing: 0.3px; font-family: 'Eras Bold ITC', 'Arial Black', Arial, sans-serif; text-transform: uppercase; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,0.25);">Management Information System</div>
-      <div style="font-weight: 800; font-size: 0.85rem; color: #fff; letter-spacing: 1px; margin-top: 2px; text-transform: uppercase; text-shadow: 0 1px 3px rgba(0,0,0,0.25);">Ayushman Bharat &mdash; PM-JAY</div>
-      <div style="font-weight: 600; font-size: 0.74rem; color: #fff; letter-spacing: 0.3px; margin-top: 2px; font-style: italic; text-shadow: 0 1px 3px rgba(0,0,0,0.25);">Government Medical College &amp; Associated Hospital, Rajouri</div>
-    </div>
-  </div>
-
-  <!-- CENTER: PATIENT SERVICE PORTAL — guaranteed centered -->
-  <div style="display: flex; align-items: center; gap: 14px; flex: 0 0 auto; justify-content:center; padding: 0 20px;">
-    <div style="width: 3px; height: 50px; background: rgba(255,255,255,0.9); border-radius: 2px; flex-shrink:0;"></div>
-    <div style="text-align: center; line-height: 1.15; white-space: nowrap;">
-      <div style="font-weight: 900; font-size: 1.15rem; color: #fff; letter-spacing: 1.2px; font-family: 'Arial Black', Arial, sans-serif; text-transform: uppercase; text-shadow: 0 1px 3px rgba(0,0,0,0.25);">Patient Service Portal</div>
-    </div>
-    <div style="width: 3px; height: 50px; background: rgba(255,255,255,0.9); border-radius: 2px; flex-shrink:0;"></div>
-  </div>
-
-  <!-- RIGHT: User pill + logout -->
-  <div class="h-r" style="gap:12px; flex:1; justify-content:flex-end;">
-    <div style="display:flex; align-items:center; gap:10px; padding: 5px 14px 5px 5px; border:1px solid rgba(255,255,255,0.4); border-radius: 30px; background: rgba(255,255,255,0.08);">
-      <div id="psp-avatar" style="width:36px; height:36px; background:rgba(255,255,255,0.25); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.85rem; border:2px solid rgba(255,255,255,0.4);">AU</div>
-      <div style="line-height: 1.2;">
-        <div id="psp-name" style="font-size: 0.8rem; font-weight: 700; color: #fff;">Active User <i class="fas fa-chevron-down" style="font-size:0.6rem; margin-left:4px; opacity:0.7;"></i></div>
-        <div id="psp-role" style="font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 0.5px;">DEO</div>
-      </div>
-    </div>
-    <button class="btn-l" style="border: 1px solid rgba(255,255,255,0.5); border-radius: 8px; padding: 7px 16px; font-size: 0.78rem; display: flex; align-items: center; gap: 8px; background: transparent; color: #fff; cursor: pointer; font-weight: 600;" onclick="pspLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-  </div>
-</header>
+<div id="portal-header-mount" data-title="PATIENT SERVICES PORTAL"></div>
 
 <script>
 // ── SESSION GUARD ──────────────────────────────────────────────
@@ -1911,6 +1879,7 @@ new QRCode(document.getElementById("qrcode"), {
 
 
 
+<script src="shared/portal_header.js?v=20260725_11"></script>
 </body>
 </html>`);
   w.document.close();
@@ -2028,6 +1997,7 @@ function diaPrintRecords() {
     +"<div style=\"text-align:center;font-size:0.75rem;color:#666;\">This is a computer-generated report<br><b>Patient Services Portal MIS - ABPMJAY GMC Rajouri</b></div>"
     +"<script>(function(){var closed=false;var printCalled=false;function returnAndClose(){if(closed)return;closed=true;if(window.opener&&!window.opener.closed){try{window.opener.focus();}catch(e){}}setTimeout(function(){try{window.close();}catch(e){}},150);}window.addEventListener('afterprint',returnAndClose);window.addEventListener('focus',function(){if(!printCalled)return;setTimeout(returnAndClose,300);});function doPrint(){if(printCalled)return;printCalled=true;try{window.print();}catch(e){}}function whenImagesReady(){var imgs=document.images;var pending=0;function done(){pending--;if(pending<=0){doPrint();}}for(var i=0;i<imgs.length;i++){var img=imgs[i];if(img.complete&&img.naturalWidth>0){continue;}pending++;img.addEventListener('load',done);img.addEventListener('error',done);}if(pending===0){doPrint();}}if(document.readyState==='complete'){whenImagesReady();}else{document.addEventListener('DOMContentLoaded',whenImagesReady);window.addEventListener('load',whenImagesReady);}setTimeout(doPrint,800);})();\x3C/script>
 
+<script src="shared/portal_header.js?v=20260725_11"></script>
 </body></html>");
 }
 
@@ -2612,6 +2582,7 @@ new QRCode(document.getElementById("qrcode"), {
 
 
 
+<script src="shared/portal_header.js?v=20260725_11"></script>
 </body>
 </html>`);
   w.document.close();
@@ -2683,6 +2654,7 @@ function ctPrintRecords(){
     +"<div style=\"text-align:center;font-size:0.75rem;color:#666;\">This is a computer-generated report<br><b>Patient Services Portal MIS - ABPMJAY GMC Rajouri</b></div>"
     +"<script>(function(){var closed=false;var printCalled=false;function returnAndClose(){if(closed)return;closed=true;if(window.opener&&!window.opener.closed){try{window.opener.focus();}catch(e){}}setTimeout(function(){try{window.close();}catch(e){}},150);}window.addEventListener('afterprint',returnAndClose);window.addEventListener('focus',function(){if(!printCalled)return;setTimeout(returnAndClose,300);});function doPrint(){if(printCalled)return;printCalled=true;try{window.print();}catch(e){}}function whenImagesReady(){var imgs=document.images;var pending=0;function done(){pending--;if(pending<=0){doPrint();}}for(var i=0;i<imgs.length;i++){var img=imgs[i];if(img.complete&&img.naturalWidth>0){continue;}pending++;img.addEventListener('load',done);img.addEventListener('error',done);}if(pending===0){doPrint();}}if(document.readyState==='complete'){whenImagesReady();}else{document.addEventListener('DOMContentLoaded',whenImagesReady);window.addEventListener('load',whenImagesReady);}setTimeout(doPrint,800);})();\x3C/script>
 
+<script src="shared/portal_header.js?v=20260725_11"></script>
 </body></html>");
 }
 
@@ -3111,6 +3083,7 @@ new QRCode(document.getElementById("qrcode"), {
 
 
 
+<script src="shared/portal_header.js?v=20260725_11"></script>
 </body>
 </html>`);
   w.document.close();
@@ -3177,6 +3150,7 @@ function outPrintRecords(){
     +"<div style=\"text-align:center;font-size:0.75rem;color:#666;\">This is a computer-generated report<br><b>Patient Services Portal MIS - ABPMJAY GMC Rajouri</b></div>"
     +"<script>(function(){var closed=false;var printCalled=false;function returnAndClose(){if(closed)return;closed=true;if(window.opener&&!window.opener.closed){try{window.opener.focus();}catch(e){}}setTimeout(function(){try{window.close();}catch(e){}},150);}window.addEventListener('afterprint',returnAndClose);window.addEventListener('focus',function(){if(!printCalled)return;setTimeout(returnAndClose,300);});function doPrint(){if(printCalled)return;printCalled=true;try{window.print();}catch(e){}}function whenImagesReady(){var imgs=document.images;var pending=0;function done(){pending--;if(pending<=0){doPrint();}}for(var i=0;i<imgs.length;i++){var img=imgs[i];if(img.complete&&img.naturalWidth>0){continue;}pending++;img.addEventListener('load',done);img.addEventListener('error',done);}if(pending===0){doPrint();}}if(document.readyState==='complete'){whenImagesReady();}else{document.addEventListener('DOMContentLoaded',whenImagesReady);window.addEventListener('load',whenImagesReady);}setTimeout(doPrint,800);})();\x3C/script>
 
+<script src="shared/portal_header.js?v=20260725_11"></script>
 </body></html>");
 }
 
@@ -3605,6 +3579,7 @@ new QRCode(document.getElementById("qrcode"), {
 
 
 
+<script src="shared/portal_header.js?v=20260725_11"></script>
 </body>
 </html>`);
   w.document.close();
@@ -3671,6 +3646,7 @@ function inPrintRecords(){
     +"<div style=\"text-align:center;font-size:0.75rem;color:#666;\">This is a computer-generated report<br><b>Patient Services Portal MIS - ABPMJAY GMC Rajouri</b></div>"
     +"<script>(function(){var closed=false;var printCalled=false;function returnAndClose(){if(closed)return;closed=true;if(window.opener&&!window.opener.closed){try{window.opener.focus();}catch(e){}}setTimeout(function(){try{window.close();}catch(e){}},150);}window.addEventListener('afterprint',returnAndClose);window.addEventListener('focus',function(){if(!printCalled)return;setTimeout(returnAndClose,300);});function doPrint(){if(printCalled)return;printCalled=true;try{window.print();}catch(e){}}function whenImagesReady(){var imgs=document.images;var pending=0;function done(){pending--;if(pending<=0){doPrint();}}for(var i=0;i<imgs.length;i++){var img=imgs[i];if(img.complete&&img.naturalWidth>0){continue;}pending++;img.addEventListener('load',done);img.addEventListener('error',done);}if(pending===0){doPrint();}}if(document.readyState==='complete'){whenImagesReady();}else{document.addEventListener('DOMContentLoaded',whenImagesReady);window.addEventListener('load',whenImagesReady);}setTimeout(doPrint,800);})();\x3C/script>
 
+<script src="shared/portal_header.js?v=20260725_11"></script>
 </body></html>");
 }
 </script>
@@ -3801,6 +3777,7 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<script src="shared/portal_header.js?v=20260725_11"></script>
 </body></html>
 
 
