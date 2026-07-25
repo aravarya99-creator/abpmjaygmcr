@@ -108,7 +108,7 @@
   text-transform: uppercase;
 }
 .ph-portal-name::before, .ph-portal-name::after {
-  content: "\2022 \2014";
+  content: '— •';
 color: #3b82f6;
   font-weight: 900;
   letter-spacing: -1px;
