@@ -25,8 +25,8 @@
 .ph-left {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex: 1;
+  gap: 14px;
+  flex: 0 0 auto;
 }
 .ph-logo {
   width: 65px;
@@ -36,11 +36,13 @@
   padding: 2px;
   background: #fff;
   object-fit: contain;
+  flex-shrink: 0;
 }
 .ph-title-block {
   display: flex;
   flex-direction: column;
-  line-height: 1.25;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 .ph-title-top {
   color: #ea580c;
@@ -48,18 +50,21 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 .ph-title-mid {
   color: #1e3a8a;
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
 }
 .ph-title-bot {
   color: #1e3a8a;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* Vertical Divider */
@@ -86,7 +91,8 @@
   transform: translateX(-50%);
   width: 320px;
   height: 20px;
-  background: linear-gradient(90deg, rgba(37,99,235,0) 0%, rgba(37,99,235,1) 25%, rgba(37,99,235,1) 75%, rgba(37,99,235,0) 100%);
+  background: linear-gradient(90deg, rgba(37,99,235,0) 0%, rgba(37,99,235,0.85) 20%, rgba(37,99,235,1) 50%, rgba(37,99,235,0.85) 80%, rgba(37,99,235,0) 100%);
+  border-radius: 4px;
   z-index: 1;
 }
 .ph-center-emblem {
@@ -104,7 +110,7 @@
   margin-bottom: 2px;
 }
 .ph-portal-name {
-  color: #1e3a8a;
+  color: #ea580c;
   font-weight: 900;
   font-size: 13px;
   letter-spacing: 1px;
@@ -417,20 +423,13 @@
                 </div>
               </div>
 
-              <!-- BUILT-IN PROFILE DROPDOWN MENU -->
+              <!-- BUILT-IN PROFILE DROPDOWN MENU (Clean: Update Profile, Switch Portal, Logout) -->
               <div class="user-dropdown" id="userDD" onclick="event.stopPropagation();">
                 <div class="dd-item" onclick="document.getElementById('userDD').classList.remove('open'); if(document.getElementById('profileModal')) document.getElementById('profileModal').classList.add('open'); else alert('User Profile: ' + (document.getElementById('hName')?document.getElementById('hName').textContent:'User'));">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                   <span>Update Profile</span>
                 </div>
-                <div class="dd-item" onclick="document.getElementById('userDD').classList.remove('open'); if(document.getElementById('signPinModal')) document.getElementById('signPinModal').classList.add('open'); else alert('Digital Signature PIN Settings');">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                  <span>Digital Signature PIN</span>
-                </div>
-                <div class="dd-item" onclick="document.getElementById('userDD').classList.remove('open'); if(window.LeaveEngine && window.LeaveEngine.role && document.getElementById('leaveModal')) document.getElementById('leaveModal').style.display='flex'; else if(document.getElementById('sec-leave')) { if(window.goSec) window.goSec('leave'); }">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                  <span>Leave Application</span>
-                </div>
+
                 <div class="dd-item" onclick="var sub=document.getElementById('phPortalSwitchMenu'); if(sub) sub.style.display = (sub.style.display==='block'?'none':'block');">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3L4 7l4 4"></path><path d="M4 7h16"></path><path d="M16 21l4-4-4-4"></path><path d="M20 17H4"></path></svg>
                   <span>Switch Portal ▾</span>
