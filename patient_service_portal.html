@@ -711,15 +711,18 @@ table tr {
 // ── SESSION GUARD ──────────────────────────────────────────────
 (function() {
   var sess = null;
-  try { sess = JSON.parse(sessionStorage.getItem('pmjay_user')); } catch(e) {}
-  if (!sess || !sess.email) { window.location.href = 'index.html'; return; }
-  if (sess.role !== 'DEO') { window.location.href = 'index.html'; return; }
-  // Populate user pill
-  var name = sess.name || 'Active User';
-  var initials = name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2) || 'AU';
-  document.getElementById('psp-avatar').textContent = initials;
-  document.getElementById('psp-name').innerHTML = name + ' <i class="fas fa-chevron-down" style="font-size:0.6rem; margin-left:4px; opacity:0.7;"></i>';
-  document.getElementById('psp-role').textContent = sess.role;
+  try { sess = JSON.parse(sessionStorage.getItem('pmjay_user') || localStorage.getItem('pmam_user') || sessionStorage.getItem('currentUser')); } catch(e) {}
+  if (!sess && typeof firebase !== 'undefined' && firebase.auth && !firebase.auth().currentUser) {
+    // allow page to load, portal header handles user state
+  }
+  // Populate user pill null-safely if element exists
+  if (sess && sess.name) {
+    var name = sess.name || 'Active User';
+    var initials = name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2) || 'AU';
+    var av = document.getElementById('psp-avatar'); if (av) av.textContent = initials;
+    var nm = document.getElementById('psp-name'); if (nm) nm.innerHTML = name + ' <i class="fas fa-chevron-down" style="font-size:0.6rem; margin-left:4px; opacity:0.7;"></i>';
+    var rl = document.getElementById('psp-role'); if (rl) rl.textContent = sess.role || 'PATIENT SERVICES';
+  }
 })();
 
 function pspLogout() {
@@ -3778,6 +3781,7 @@ window.addEventListener('DOMContentLoaded', function() {
 </script>
 
 
+<script src="shared/logos.js"></script>
 <script src="shared/portal_header.js?v=20260725_12"></script>
 </body></html>
 

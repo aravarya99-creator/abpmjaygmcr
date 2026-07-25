@@ -344,9 +344,9 @@
       if (!sess) return;
       var name = sess.name || 'Accountant';
       var initials = name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2) || 'AC';
-      document.getElementById('fin-avatar').textContent = initials;
-      document.getElementById('fin-name').textContent = name;
-      document.getElementById('fin-role').textContent = sess.role || 'ACCOUNTANT';
+      var elAv = document.getElementById('fin-avatar'); if (elAv) elAv.textContent = initials;
+      var elNm = document.getElementById('fin-name'); if (elNm) elNm.textContent = name;
+      var elRl = document.getElementById('fin-role'); if (elRl) elRl.textContent = sess.role || 'ACCOUNTANT';
     })();
     function finLogout() {
       sessionStorage.removeItem('pmjay_user');
