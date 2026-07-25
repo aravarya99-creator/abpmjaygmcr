@@ -848,15 +848,9 @@
     if (window.LeaveEngine && window.LeaveEngine.userName) {
       name = window.LeaveEngine.userName;
     }
-    if (window.LeaveEngine && window.LeaveEngine.role) {
-      var r = window.LeaveEngine.role;
-      if (r === 'pmam') role = 'PMAM';
-      else if (r === 'ic') role = 'INCHARGE AB-PMJAY';
-      else if (r === 'admin') role = 'ADMIN';
-      else if (r === 'finance') role = 'FINANCE';
-    }
 
-    // Filter workspace switcher items based on assigned user roles
+    // Enforce strict portal access control and workspace switcher filtering
+    checkPortalAccess(userObj, title);
     updateWorkspaceSwitcher(userObj, title);
 
     if (typeof firebase !== 'undefined' && firebase.auth) {
@@ -877,6 +871,7 @@
                   else if (rStr.indexOf('admin') !== -1) role = 'ADMIN';
                   else role = d.role;
                 }
+                checkPortalAccess(d, title);
                 updateWorkspaceSwitcher(d, title);
                 applyHeaderData(name, role, d.photo || d.photoUrl);
               }
@@ -890,6 +885,53 @@
       });
     } else {
       applyHeaderData(name, role, photoUrl);
+    }
+  }
+
+  function checkPortalAccess(userObj, currentTitle) {
+    if (!userObj) return;
+    var curTitle = currentTitle || title || '';
+    var path = window.location.pathname.toLowerCase();
+    var email = String(userObj.email || '').toLowerCase();
+    var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL.toLowerCase() : 'aravarya99@gmail.com';
+
+    var userRoles = [];
+    if (Array.isArray(userObj.roles) && userObj.roles.length) userRoles = userObj.roles;
+    else if (userObj.role) userRoles = [userObj.role];
+
+    var isUserAdmin = (email === adminEmail) || userRoles.some(function(r) {
+      var str = String(r).toLowerCase();
+      return str === 'admin' || str === 'administrator';
+    });
+
+    if (isUserAdmin) return; // Admin has unrestricted access
+
+    var isUserPmam = userRoles.some(function(r){ return String(r).toLowerCase() === 'pmam'; });
+    var isUserIc = userRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('ic')!==-1 || s.indexOf('incharge')!==-1; });
+    var isUserFinance = userRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('finance')!==-1 || s.indexOf('accountant')!==-1; });
+    var isUserPatient = userRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('deo')!==-1 || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
+
+    var isPageAdmin = path.indexOf('admin') !== -1 || curTitle.indexOf('ADMIN') !== -1;
+    var isPagePmam = path.indexOf('pmam') !== -1 || curTitle.indexOf('PMAM') !== -1;
+    var isPageIc = path.indexOf('ic_') !== -1 || path.indexOf('incharge') !== -1 || curTitle.indexOf('I/C') !== -1;
+    var isPageFinance = path.indexOf('finance') !== -1 || curTitle.indexOf('FINANCE') !== -1;
+    var isPagePatient = path.indexOf('patient') !== -1 || curTitle.indexOf('PATIENT') !== -1;
+
+    var allowed = true;
+    if (isPageAdmin && !isUserAdmin) allowed = false;
+    if (isPageIc && !isUserIc) allowed = false;
+    if (isPageFinance && !isUserFinance) allowed = false;
+    if (isPagePatient && !isUserPatient) allowed = false;
+    if (isPagePmam && !isUserPmam && !isUserAdmin) allowed = false;
+
+    if (!allowed) {
+      console.warn("[SECURITY] Access denied for this portal. Redirecting to authorized portal...");
+      alert("Access Denied: You do not have permission to access this portal.");
+      if (isUserPmam) window.location.href = 'pmam_portal.html';
+      else if (isUserIc) window.location.href = 'ic_portal.html';
+      else if (isUserFinance) window.location.href = 'finance.html';
+      else if (isUserPatient) window.location.href = 'patient_service_portal.html';
+      else window.location.href = 'index.html';
     }
   }
 
