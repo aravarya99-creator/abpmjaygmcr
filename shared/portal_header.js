@@ -280,19 +280,19 @@
   stroke-linejoin: round;
 }
 
-/* USER DROPDOWN MENU - CLEAN NON-DUPLICATE DESIGN */
+/* USER DROPDOWN MENU - COMPACT & CLEAN DESIGN */
 .user-dropdown {
   position: absolute !important;
-  top: calc(100% + 10px) !important;
+  top: calc(100% + 8px) !important;
   right: 0 !important;
   left: auto !important;
   background: #ffffff !important;
-  border-radius: 20px !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16), 0 2px 10px rgba(0, 0, 0, 0.06) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
   border: 1.5px solid #e2e8f0 !important;
-  width: 280px !important;
-  min-width: 280px !important;
-  padding: 16px 14px !important;
+  width: 240px !important;
+  min-width: 240px !important;
+  padding: 10px !important;
   box-sizing: border-box !important;
   display: none;
   z-index: 100000 !important;
@@ -300,10 +300,10 @@
 }
 .user-dropdown.open {
   display: block !important;
-  animation: phDdFade 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation: phDdFade 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 @keyframes phDdFade {
-  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
@@ -311,16 +311,16 @@
 .ph-dd-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: #ffffff;
-  border: 1.5px solid #f1f5f9;
-  border-radius: 12px;
-  padding: 11px 14px;
-  margin-bottom: 8px;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 5px;
   cursor: pointer;
   transition: all 0.15s ease;
   color: #334155;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   text-decoration: none;
   box-sizing: border-box;
@@ -328,11 +328,10 @@
 .ph-dd-btn:hover {
   background: #f8fafc;
   border-color: #cbd5e1;
-  transform: translateY(-1px);
 }
 .ph-dd-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke: #475569;
   stroke-width: 2;
   fill: none;
@@ -341,12 +340,12 @@
 
 /* Switch Workspace Section Title */
 .ph-dd-section-title {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   color: #94a3b8;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  margin: 14px 0 10px 0;
+  margin: 10px 0 6px 0;
   padding: 0 4px;
 }
 
@@ -354,15 +353,15 @@
 .ph-workspace-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
 }
 .ph-ws-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 12px;
-  border-radius: 12px;
-  border: 1.5px solid #f1f5f9;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid #f1f5f9;
   background: #ffffff;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -372,91 +371,61 @@
 .ph-ws-item:hover {
   background: #f8fafc;
   border-color: #cbd5e1;
-  transform: translateY(-1px);
 }
 .ph-ws-icon-box {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 .ph-ws-icon-box svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 .ph-ws-label {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   color: #1e293b;
   flex: 1;
 }
 
-/* Green CURRENT badge for active portal */
-.ph-ws-current-badge {
-  background: #dcfce7;
-  color: #15803d;
-  font-size: 9.5px;
-  font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 10px;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  border: 1px solid #bbf7d0;
-  white-space: nowrap;
-}
-
-/* Active State Styles per Portal */
-/* Admin Portal (Purple Theme) */
+/* Portal Themes */
 .ph-ws-admin .ph-ws-icon-box { background: #ede9fe; }
 .ph-ws-admin .ph-ws-icon-box svg { stroke: #7c3aed; }
-.ph-ws-admin.active { background: #f3e8ff; border-color: #e9d5ff; }
-.ph-ws-admin.active .ph-ws-label { color: #6d28d9; }
 
-/* PMAM Portal (Green Theme) */
 .ph-ws-pmam .ph-ws-icon-box { background: #dcfce7; }
 .ph-ws-pmam .ph-ws-icon-box svg { stroke: #16a34a; }
-.ph-ws-pmam.active { background: #dcfce7; border-color: #bbf7d0; }
-.ph-ws-pmam.active .ph-ws-label { color: #15803d; }
 
-/* I/C Portal (Blue Theme) */
 .ph-ws-ic .ph-ws-icon-box { background: #e0f2fe; }
 .ph-ws-ic .ph-ws-icon-box svg { stroke: #2563eb; }
-.ph-ws-ic.active { background: #dbeafe; border-color: #bfdbfe; }
-.ph-ws-ic.active .ph-ws-label { color: #1d4ed8; }
 
-/* Finance Portal (Orange Theme) */
 .ph-ws-finance .ph-ws-icon-box { background: #ffedd5; }
 .ph-ws-finance .ph-ws-icon-box svg { stroke: #ea580c; }
-.ph-ws-finance.active { background: #ffedd5; border-color: #fed7aa; }
-.ph-ws-finance.active .ph-ws-label { color: #c2410c; }
 
-/* Patient Services (Cyan Theme) */
 .ph-ws-patient .ph-ws-icon-box { background: #e0f2fe; }
 .ph-ws-patient .ph-ws-icon-box svg { stroke: #0284c7; }
-.ph-ws-patient.active { background: #e0f2fe; border-color: #bae6fd; }
-.ph-ws-patient.active .ph-ws-label { color: #0369a1; }
 
 /* Sign Out Button (Bottom Red Card) */
 .ph-dd-signout-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: #fef2f2;
-  border: 1.5px solid #fee2e2;
-  border-radius: 12px;
-  padding: 11px 16px;
-  margin-top: 14px;
+  border: 1px solid #fee2e2;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-top: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
   color: #ef4444;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 700;
   width: 100%;
   box-sizing: border-box;
@@ -464,11 +433,10 @@
 .ph-dd-signout-btn:hover {
   background: #fee2e2;
   border-color: #fca5a5;
-  transform: translateY(-1px);
 }
 .ph-dd-signout-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke: #ef4444;
   stroke-width: 2.2;
   fill: none;
@@ -655,7 +623,7 @@
       else if (title.indexOf('ADMIN') !== -1) defaultRole = 'ADMIN';
       else if (title.indexOf('PATIENT') !== -1) defaultRole = 'PATIENT SERVICES';
 
-      // Current page path detection for active state in workspace switcher
+      // Current page path detection
       var path = window.location.pathname.toLowerCase();
       var isAdmin = path.indexOf('admin') !== -1 || title.indexOf('ADMIN') !== -1;
       var isPmam = path.indexOf('pmam') !== -1 || title.indexOf('PMAM') !== -1;
@@ -663,12 +631,70 @@
       var isFinance = path.indexOf('finance') !== -1 || title.indexOf('FINANCE') !== -1;
       var isPatient = path.indexOf('patient') !== -1 || title.indexOf('PATIENT') !== -1;
 
+      // Build workspace list excluding the current portal
+      var workspaceItemsHTML = '';
+
+      if (!isAdmin) {
+        workspaceItemsHTML += `
+          <div class="ph-ws-item ph-ws-admin" onclick="event.stopPropagation(); window.location.href='admin_portal.html';">
+            <div class="ph-ws-icon-box">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <span class="ph-ws-label">Admin Portal</span>
+          </div>
+        `;
+      }
+
+      if (!isPmam) {
+        workspaceItemsHTML += `
+          <div class="ph-ws-item ph-ws-pmam" onclick="event.stopPropagation(); window.location.href='pmam_portal.html';">
+            <div class="ph-ws-icon-box">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <span class="ph-ws-label">PMAM Portal</span>
+          </div>
+        `;
+      }
+
+      if (!isIc) {
+        workspaceItemsHTML += `
+          <div class="ph-ws-item ph-ws-ic" onclick="event.stopPropagation(); window.location.href='ic_portal.html';">
+            <div class="ph-ws-icon-box">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <span class="ph-ws-label">I/C Portal</span>
+          </div>
+        `;
+      }
+
+      if (!isFinance) {
+        workspaceItemsHTML += `
+          <div class="ph-ws-item ph-ws-finance" onclick="event.stopPropagation(); window.location.href='finance.html';">
+            <div class="ph-ws-icon-box">
+              <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
+            </div>
+            <span class="ph-ws-label">Finance Portal</span>
+          </div>
+        `;
+      }
+
+      if (!isPatient) {
+        workspaceItemsHTML += `
+          <div class="ph-ws-item ph-ws-patient" onclick="event.stopPropagation(); window.location.href='patient_service_portal.html';">
+            <div class="ph-ws-icon-box">
+              <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 18h6M12 11v4M10 13h4"></path></svg>
+            </div>
+            <span class="ph-ws-label">Patient Services Portal</span>
+          </div>
+        `;
+      }
+
       var html = `
         <div class="premium-header-bar">
           
           <!-- LEFT: Branding -->
           <div class="ph-left">
-            <img src="${initialGmcLogo}" class="ph-logo" id="headerGmcLogo" alt="GMC Rajouri" onerror="if(this.src!=='${defaultGmcLogo}') this.src='${defaultGmcLogo}';">
+            <img src="${initialGmcLogo}" class="ph-logo" id="headerGmcLogo" alt="GMC Rajouri">
             <div class="ph-title-block">
               <div class="ph-title-top">AYUSHMAN BHARAT - PM-JAY</div>
               <div class="ph-title-mid">MANAGEMENT INFORMATION SYSTEM</div>
@@ -714,7 +740,7 @@
                 </div>
               </div>
 
-              <!-- BUILT-IN PROFILE DROPDOWN MENU - NON-DUPLICATE CLEAN DESIGN -->
+              <!-- BUILT-IN PROFILE DROPDOWN MENU - CLEAN COMPACT DESIGN -->
               <div class="user-dropdown" id="userDD" onclick="event.stopPropagation();">
                 
                 <!-- My Profile & Change Password Buttons -->
@@ -731,49 +757,9 @@
                 <!-- Switch Workspace Section -->
                 <div class="ph-dd-section-title">SWITCH WORKSPACE</div>
 
-                <!-- Workspace List -->
+                <!-- Workspace List (Excludes current logged-in portal) -->
                 <div class="ph-workspace-list">
-                  
-                  <div class="ph-ws-item ph-ws-admin ${isAdmin ? 'active' : ''}" onclick="event.stopPropagation(); window.location.href='admin_portal.html';">
-                    <div class="ph-ws-icon-box">
-                      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                    </div>
-                    <span class="ph-ws-label">Admin Portal</span>
-                    ${isAdmin ? '<span class="ph-ws-current-badge">CURRENT</span>' : ''}
-                  </div>
-
-                  <div class="ph-ws-item ph-ws-pmam ${isPmam ? 'active' : ''}" onclick="event.stopPropagation(); window.location.href='pmam_portal.html';">
-                    <div class="ph-ws-icon-box">
-                      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                    </div>
-                    <span class="ph-ws-label">PMAM Portal</span>
-                    ${isPmam ? '<span class="ph-ws-current-badge">CURRENT</span>' : ''}
-                  </div>
-
-                  <div class="ph-ws-item ph-ws-ic ${isIc ? 'active' : ''}" onclick="event.stopPropagation(); window.location.href='ic_portal.html';">
-                    <div class="ph-ws-icon-box">
-                      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    </div>
-                    <span class="ph-ws-label">I/C Portal</span>
-                    ${isIc ? '<span class="ph-ws-current-badge">CURRENT</span>' : ''}
-                  </div>
-
-                  <div class="ph-ws-item ph-ws-finance ${isFinance ? 'active' : ''}" onclick="event.stopPropagation(); window.location.href='finance.html';">
-                    <div class="ph-ws-icon-box">
-                      <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
-                    </div>
-                    <span class="ph-ws-label">Finance Portal</span>
-                    ${isFinance ? '<span class="ph-ws-current-badge">CURRENT</span>' : ''}
-                  </div>
-
-                  <div class="ph-ws-item ph-ws-patient ${isPatient ? 'active' : ''}" onclick="event.stopPropagation(); window.location.href='patient_service_portal.html';">
-                    <div class="ph-ws-icon-box">
-                      <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 18h6M12 11v4M10 13h4"></path></svg>
-                    </div>
-                    <span class="ph-ws-label">Patient Services Portal</span>
-                    ${isPatient ? '<span class="ph-ws-current-badge">CURRENT</span>' : ''}
-                  </div>
-
+                  ${workspaceItemsHTML}
                 </div>
 
                 <!-- Sign Out Button -->
@@ -790,6 +776,14 @@
       `;
 
       mount.outerHTML = html; // replace mount point completely
+
+      // Clean image fallback handler
+      var img1 = document.getElementById('headerGmcLogo');
+      if (img1) {
+        img1.onerror = function() {
+          if (this.src !== defaultGmcLogo) this.src = defaultGmcLogo;
+        };
+      }
       
       // Async fetch logo from firebase if db is available and cache locally
       if (typeof db !== 'undefined') {
@@ -798,8 +792,8 @@
             // Apply Logo 1 (Left side GMC logo)
             if (doc.data().logo1) {
               try { localStorage.setItem('gmc_logo1', doc.data().logo1); } catch(e){}
-              var img1 = document.getElementById('headerGmcLogo');
-              if (img1 && img1.src !== doc.data().logo1) img1.src = doc.data().logo1;
+              var hImg1 = document.getElementById('headerGmcLogo');
+              if (hImg1 && hImg1.src !== doc.data().logo1) hImg1.src = doc.data().logo1;
             }
             // Apply Logo 2 (Center side PM-JAY logo)
             if (doc.data().logo2) {
