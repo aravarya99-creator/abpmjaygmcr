@@ -755,10 +755,10 @@
                 </div>
 
                 <!-- Switch Workspace Section -->
-                <div class="ph-dd-section-title">SWITCH WORKSPACE</div>
+                <div class="ph-dd-section-title" id="phWsTitle">SWITCH WORKSPACE</div>
 
-                <!-- Workspace List (Excludes current logged-in portal) -->
-                <div class="ph-workspace-list">
+                <!-- Workspace List (Filtered dynamically by assigned user roles) -->
+                <div class="ph-workspace-list" id="phWsList">
                   ${workspaceItemsHTML}
                 </div>
 
@@ -827,6 +827,7 @@
     var name = '';
     var role = '';
     var photoUrl = '';
+    var userObj = null;
 
     var userJson = sessionStorage.getItem('pmjay_user') ||
                    sessionStorage.getItem('pmam_user') ||
@@ -837,10 +838,10 @@
 
     if (userJson) {
       try {
-        var u = typeof userJson === 'string' ? JSON.parse(userJson) : userJson;
-        if (u.name || u.displayName) name = u.name || u.displayName;
-        if (u.role || u.desig) role = u.role || u.desig;
-        if (u.photo || u.photoUrl) photoUrl = u.photo || u.photoUrl;
+        userObj = typeof userJson === 'string' ? JSON.parse(userJson) : userJson;
+        if (userObj.name || userObj.displayName) name = userObj.name || userObj.displayName;
+        if (userObj.role || userObj.desig) role = userObj.role || userObj.desig;
+        if (userObj.photo || userObj.photoUrl) photoUrl = userObj.photo || userObj.photoUrl;
       } catch(e){}
     }
 
@@ -854,6 +855,9 @@
       else if (r === 'admin') role = 'ADMIN';
       else if (r === 'finance') role = 'FINANCE';
     }
+
+    // Filter workspace switcher items based on assigned user roles
+    updateWorkspaceSwitcher(userObj, title);
 
     if (typeof firebase !== 'undefined' && firebase.auth) {
       firebase.auth().onAuthStateChanged(function(user) {
@@ -873,6 +877,7 @@
                   else if (rStr.indexOf('admin') !== -1) role = 'ADMIN';
                   else role = d.role;
                 }
+                updateWorkspaceSwitcher(d, title);
                 applyHeaderData(name, role, d.photo || d.photoUrl);
               }
             }).catch(function(){ applyHeaderData(name, role, photoUrl); });
@@ -885,6 +890,124 @@
       });
     } else {
       applyHeaderData(name, role, photoUrl);
+    }
+  }
+
+  function updateWorkspaceSwitcher(userObj, currentTitle) {
+    var titleEl = document.getElementById('phWsTitle');
+    var listEl = document.getElementById('phWsList');
+    if (!listEl) return;
+
+    var curTitle = currentTitle || title || '';
+    var path = window.location.pathname.toLowerCase();
+    var isCurrentAdmin = path.indexOf('admin') !== -1 || curTitle.indexOf('ADMIN') !== -1;
+    var isCurrentPmam = path.indexOf('pmam') !== -1 || curTitle.indexOf('PMAM') !== -1;
+    var isCurrentIc = path.indexOf('ic_') !== -1 || path.indexOf('incharge') !== -1 || curTitle.indexOf('I/C') !== -1;
+    var isCurrentFinance = path.indexOf('finance') !== -1 || curTitle.indexOf('FINANCE') !== -1;
+    var isCurrentPatient = path.indexOf('patient') !== -1 || curTitle.indexOf('PATIENT') !== -1;
+
+    // Collect assigned user roles
+    var userRoles = [];
+    var email = '';
+    if (userObj) {
+      if (userObj.email) email = String(userObj.email).toLowerCase();
+      if (Array.isArray(userObj.roles) && userObj.roles.length) userRoles = userObj.roles;
+      else if (userObj.role) userRoles = [userObj.role];
+      else if (userObj.roles) userRoles = [userObj.roles];
+    }
+
+    var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL.toLowerCase() : 'aravarya99@gmail.com';
+    var isUserAdmin = (email === adminEmail) || userRoles.some(function(r){
+      var str = String(r).toLowerCase();
+      return str === 'admin' || str === 'administrator';
+    });
+
+    var isUserPmam = isUserAdmin || userRoles.some(function(r){
+      var str = String(r).toLowerCase();
+      return str === 'pmam';
+    });
+
+    var isUserIc = isUserAdmin || userRoles.some(function(r){
+      var str = String(r).toLowerCase();
+      return str.indexOf('ic') !== -1 || str.indexOf('incharge') !== -1;
+    });
+
+    var isUserFinance = isUserAdmin || userRoles.some(function(r){
+      var str = String(r).toLowerCase();
+      return str.indexOf('finance') !== -1 || str.indexOf('accountant') !== -1;
+    });
+
+    var isUserPatient = isUserAdmin || userRoles.some(function(r){
+      var str = String(r).toLowerCase();
+      return str.indexOf('deo') !== -1 || str.indexOf('patient') !== -1 || str.indexOf('mts') !== -1;
+    });
+
+    var itemsHTML = '';
+
+    if (isUserAdmin && !isCurrentAdmin) {
+      itemsHTML += `
+        <div class="ph-ws-item ph-ws-admin" onclick="event.stopPropagation(); window.location.href='admin_portal.html';">
+          <div class="ph-ws-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <span class="ph-ws-label">Admin Portal</span>
+        </div>
+      `;
+    }
+
+    if (isUserPmam && !isCurrentPmam) {
+      itemsHTML += `
+        <div class="ph-ws-item ph-ws-pmam" onclick="event.stopPropagation(); window.location.href='pmam_portal.html';">
+          <div class="ph-ws-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <span class="ph-ws-label">PMAM Portal</span>
+        </div>
+      `;
+    }
+
+    if (isUserIc && !isCurrentIc) {
+      itemsHTML += `
+        <div class="ph-ws-item ph-ws-ic" onclick="event.stopPropagation(); window.location.href='ic_portal.html';">
+          <div class="ph-ws-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <span class="ph-ws-label">I/C Portal</span>
+        </div>
+      `;
+    }
+
+    if (isUserFinance && !isCurrentFinance) {
+      itemsHTML += `
+        <div class="ph-ws-item ph-ws-finance" onclick="event.stopPropagation(); window.location.href='finance.html';">
+          <div class="ph-ws-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
+          </div>
+          <span class="ph-ws-label">Finance Portal</span>
+        </div>
+      `;
+    }
+
+    if (isUserPatient && !isCurrentPatient) {
+      itemsHTML += `
+        <div class="ph-ws-item ph-ws-patient" onclick="event.stopPropagation(); window.location.href='patient_service_portal.html';">
+          <div class="ph-ws-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 18h6M12 11v4M10 13h4"></path></svg>
+          </div>
+          <span class="ph-ws-label">Patient Services Portal</span>
+        </div>
+      `;
+    }
+
+    listEl.innerHTML = itemsHTML;
+    if (titleEl) {
+      if (!itemsHTML.trim()) {
+        titleEl.style.display = 'none';
+        listEl.style.display = 'none';
+      } else {
+        titleEl.style.display = 'block';
+        listEl.style.display = 'block';
+      }
     }
   }
 
