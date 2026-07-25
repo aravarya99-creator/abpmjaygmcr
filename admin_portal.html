@@ -1480,17 +1480,31 @@ input:checked + .slider:before { transform: translateX(20px); }
               </div>
             </div>
 
-            <!-- ── PRIMARY LOGO (PM-JAY) ── -->
+            <!-- ── LOGO 1: GMC RAJOURI (LEFT LOGO) ── -->
             <div class="s-card">
-              <div class="s-card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>Primary Logo (PM-JAY)</div>
-              <div style="font-size:12px;color:#6b7280;margin-bottom:10px">Top-left logo on the landing page header. Recommended: 80×80px, transparent PNG.</div>
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>Logo 1: GMC Rajouri (Left Header Logo)</div>
+              <div style="font-size:12px;color:#6b7280;margin-bottom:10px">Left-side college logo shown in header bar. Recommended: 80×80px, transparent PNG.</div>
               <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
                 <div id="brLogo1Preview" style="width:64px;height:64px;border-radius:8px;border:1.5px dashed #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9ca3af;overflow:hidden">No logo</div>
                 <div style="flex:1;min-width:200px">
                   <input type="file" id="brLogo1File" accept="image/*" onchange="brHandleFile(this,'logo1')" style="font-size:11px;padding:6px;border:1px solid #d1d5db;border-radius:6px;width:100%;background:#fff">
-                  <div style="font-size:11px;color:#6b7280;margin-top:4px">Choose a file (max ~500KB) — image will be embedded in Firebase as base64.</div>
+                  <div style="font-size:11px;color:#6b7280;margin-top:4px">Choose a file (max ~500KB) — image will be saved to Firebase.</div>
                 </div>
                 <button class="btn" onclick="brClear('logo1')" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5">🗑 Remove</button>
+              </div>
+            </div>
+
+            <!-- ── LOGO 2: PM-JAY EMBLEM (CENTER LOGO) ── -->
+            <div class="s-card">
+              <div class="s-card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>Logo 2: PM-JAY Emblem (Center Ribbon Logo)</div>
+              <div style="font-size:12px;color:#6b7280;margin-bottom:10px">Center emblem logo shown in the middle of header ribbon. Recommended: 80×80px, circular PNG.</div>
+              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                <div id="brLogo2Preview" style="width:64px;height:64px;border-radius:8px;border:1.5px dashed #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9ca3af;overflow:hidden">No logo</div>
+                <div style="flex:1;min-width:200px">
+                  <input type="file" id="brLogo2File" accept="image/*" onchange="brHandleFile(this,'logo2')" style="font-size:11px;padding:6px;border:1px solid #d1d5db;border-radius:6px;width:100%;background:#fff">
+                  <div style="font-size:11px;color:#6b7280;margin-top:4px">Choose a file (max ~500KB) — image will be saved to Firebase.</div>
+                </div>
+                <button class="btn" onclick="brClear('logo2')" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5">🗑 Remove</button>
               </div>
             </div>
 
@@ -8791,5 +8805,5 @@ function uePreviewSign(input) {
   reader.readAsDataURL(file);
 }
 </script>
-  <script src="shared/portal_header.js?v=20260725_2"></script>
+  <script src="shared/portal_header.js?v=20260725_7"></script>
 </body>
