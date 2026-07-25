@@ -725,10 +725,10 @@
             <div class="user-pill-container user-pill" style="position: relative; display: flex; align-items: center;">
               <div class="ph-user-pill" id="userPillBtn" onclick="event.stopPropagation(); var dd=document.getElementById('userDD'); if(dd) dd.classList.toggle('open');">
                 <div class="ph-avatar" id="hAvatarContainer">
-                  <span id="hInitials">VK</span>
+                  <span id="hInitials">--</span>
                 </div>
                 <div class="ph-user-info">
-                  <div class="ph-user-name" id="hName">VINOD KUMAR</div>
+                  <div class="ph-user-name" id="hName">User</div>
                   <div class="ph-user-role udesig" id="hRole">${defaultRole}</div>
                   <div class="ph-status">
                     <div class="ph-status-dot"></div>
@@ -763,7 +763,7 @@
                 </div>
 
                 <!-- Sign Out Button -->
-                <button class="ph-dd-signout-btn" type="button" onclick="event.stopPropagation(); document.getElementById('userDD').classList.remove('open'); if(window.logoutUser) window.logoutUser(); else if(typeof firebase !== 'undefined' && firebase.auth) firebase.auth().signOut().then(function(){ sessionStorage.clear(); window.location.href='index.html'; }); else { sessionStorage.clear(); window.location.href='index.html'; }">
+                <button class="ph-dd-signout-btn" type="button" onclick="event.stopPropagation(); document.getElementById('userDD').classList.remove('open'); sessionStorage.clear(); localStorage.removeItem('pmjay_user'); localStorage.removeItem('pmam_user'); localStorage.removeItem('currentUser'); if(window.logoutUser) window.logoutUser(); else if(typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) firebase.auth().signOut().then(function(){ window.location.href='index.html'; }); else { window.location.href='index.html'; }">
                   <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                   <span>Sign Out</span>
                 </button>
@@ -824,15 +824,23 @@
   });
 
   function updateUserHeader() {
-    var name = 'Vinod Kumar';
-    var role = 'System Administrator';
+    var name = '';
+    var role = '';
+    var photoUrl = '';
 
-    var userJson = localStorage.getItem('pmam_user') || localStorage.getItem('currentUser') || sessionStorage.getItem('pmam_user');
+    var userJson = sessionStorage.getItem('pmjay_user') ||
+                   sessionStorage.getItem('pmam_user') ||
+                   sessionStorage.getItem('currentUser') ||
+                   localStorage.getItem('pmjay_user') ||
+                   localStorage.getItem('pmam_user') ||
+                   localStorage.getItem('currentUser');
+
     if (userJson) {
       try {
         var u = typeof userJson === 'string' ? JSON.parse(userJson) : userJson;
         if (u.name || u.displayName) name = u.name || u.displayName;
         if (u.role || u.desig) role = u.role || u.desig;
+        if (u.photo || u.photoUrl) photoUrl = u.photo || u.photoUrl;
       } catch(e){}
     }
 
@@ -867,22 +875,22 @@
                 }
                 applyHeaderData(name, role, d.photo || d.photoUrl);
               }
-            }).catch(function(){ applyHeaderData(name, role); });
+            }).catch(function(){ applyHeaderData(name, role, photoUrl); });
           } else {
-            applyHeaderData(name, role);
+            applyHeaderData(name, role, photoUrl);
           }
         } else {
-          applyHeaderData(name, role);
+          applyHeaderData(name, role, photoUrl);
         }
       });
     } else {
-      applyHeaderData(name, role);
+      applyHeaderData(name, role, photoUrl);
     }
   }
 
   function applyHeaderData(name, role, photoUrl) {
-    var displayName = name || 'Vinod Kumar';
-    var displayRole = role || 'System Administrator';
+    var displayName = name || 'Active User';
+    var displayRole = role || 'USER';
 
     var hName = document.getElementById('hName');
     var hRole = document.getElementById('hRole');
@@ -920,7 +928,7 @@
           </div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:16px;">
             <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:800;position:relative;overflow:hidden;box-shadow:0 4px 14px rgba(124,58,237,0.3);">
-              <span id="phModalAvatarInitials">VK</span>
+              <span id="phModalAvatarInitials">--</span>
               <img id="phModalAvatarImg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
               <input type="file" id="phProfileFileInput" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;" onchange="phHandlePhotoChange(this)">
             </div>
@@ -929,13 +937,13 @@
 
           <div class="ph-input-group">
             <label>Full Name (Read-Only)</label>
-            <input type="text" id="phModalNameInput" class="ph-input-readonly" readonly value="Vinod Kumar">
+            <input type="text" id="phModalNameInput" class="ph-input-readonly" readonly value="">
             <div style="font-size:10px;color:#64748b;margin-top:3px;">Full name is managed by System Administrator and cannot be changed here.</div>
           </div>
 
           <div class="ph-input-group">
             <label>Role / Designation</label>
-            <input type="text" id="phModalRoleInput" class="ph-input-readonly" readonly value="System Administrator">
+            <input type="text" id="phModalRoleInput" class="ph-input-readonly" readonly value="">
           </div>
 
           <div class="ph-modal-btns">
@@ -948,8 +956,8 @@
     }
     
     // Sync current profile values
-    var hName = document.getElementById('hName') ? document.getElementById('hName').textContent : 'Vinod Kumar';
-    var hRole = document.getElementById('hRole') ? document.getElementById('hRole').textContent : 'System Administrator';
+    var hName = document.getElementById('hName') ? document.getElementById('hName').textContent : 'Active User';
+    var hRole = document.getElementById('hRole') ? document.getElementById('hRole').textContent : 'USER';
     var nameInput = document.getElementById('phModalNameInput');
     var roleInput = document.getElementById('phModalRoleInput');
     if (nameInput) nameInput.value = hName;
@@ -994,8 +1002,8 @@
       
       // Update header avatar
       applyHeaderData(
-        document.getElementById('hName') ? document.getElementById('hName').textContent : 'Vinod Kumar',
-        document.getElementById('hRole') ? document.getElementById('hRole').textContent : 'System Administrator',
+        document.getElementById('hName') ? document.getElementById('hName').textContent : 'Active User',
+        document.getElementById('hRole') ? document.getElementById('hRole').textContent : 'USER',
         photoUrl
       );
 
