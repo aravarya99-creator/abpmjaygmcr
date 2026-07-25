@@ -268,21 +268,22 @@ color: #3b82f6;
 }
 /* DROPDOWN MENU */
     .user-dropdown {
-      position: absolute;
-      top: calc(100% + 10px);
-      right: 0;
-      background: #ffffff;
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.05);
-      border: 1px solid #e2e8f0;
-      min-width: 210px;
-      overflow: hidden;
+      position: absolute !important;
+      top: calc(100% + 10px) !important;
+      right: 0 !important;
+      left: auto !important;
+      background: #ffffff !important;
+      border-radius: 14px !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.05) !important;
+      border: 1px solid #e2e8f0 !important;
+      min-width: 215px !important;
+      overflow: hidden !important;
       display: none;
-      z-index: 10000;
+      z-index: 10000 !important;
     }
     .user-dropdown.open {
-      display: block;
-      animation: phDdFade 0.15s ease-out;
+      display: block !important;
+      animation: phDdFade 0.15s ease-out !important;
     }
     @keyframes phDdFade {
       from { opacity: 0; transform: translateY(-6px); }
@@ -389,8 +390,8 @@ color: #3b82f6;
               <div class="ph-bell-badge" id="topBellBadge" style="display:none;">0</div>
             </div>
 
-            <div style="position: relative; display: flex; align-items: center;">
-            <div class="ph-user-pill user-pill" id="userPillBtn" onclick="event.stopPropagation(); var dd=document.getElementById('userDD'); if(dd) dd.classList.toggle('open');">
+            <div class="user-pill-container user-pill" style="position: relative; display: flex; align-items: center;">
+            <div class="ph-user-pill" id="userPillBtn" onclick="event.stopPropagation(); var dd=document.getElementById('userDD'); if(dd) dd.classList.toggle('open');">
               <div class="ph-avatar" id="hAvatarContainer">
                 <span id="hInitials">VK</span>
               </div>
