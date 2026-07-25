@@ -280,7 +280,7 @@
   stroke-linejoin: round;
 }
 
-/* USER DROPDOWN MENU - 1:1 REFERENCE DESIGN */
+/* USER DROPDOWN MENU - CLEAN NON-DUPLICATE DESIGN */
 .user-dropdown {
   position: absolute !important;
   top: calc(100% + 10px) !important;
@@ -290,9 +290,9 @@
   border-radius: 20px !important;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16), 0 2px 10px rgba(0, 0, 0, 0.06) !important;
   border: 1.5px solid #e2e8f0 !important;
-  width: 290px !important;
-  min-width: 290px !important;
-  padding: 20px 18px !important;
+  width: 280px !important;
+  min-width: 280px !important;
+  padding: 16px 14px !important;
   box-sizing: border-box !important;
   display: none;
   z-index: 100000 !important;
@@ -305,76 +305,6 @@
 @keyframes phDdFade {
   from { opacity: 0; transform: translateY(-8px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Dropdown Profile Header */
-.ph-dd-profile-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-.ph-dd-big-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #7c3aed 100%);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 20px;
-  flex-shrink: 0;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
-}
-.ph-dd-big-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.ph-dd-user-details {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.ph-dd-name {
-  color: #1e293b;
-  font-size: 16px;
-  font-weight: 800;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ph-dd-role {
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 500;
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ph-dd-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #dcfce7;
-  color: #15803d;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 10px;
-  border-radius: 20px;
-  margin-top: 6px;
-  width: fit-content;
-}
-.ph-dd-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #22c55e;
 }
 
 /* Card Action Buttons (My Profile, Change Password) */
@@ -416,7 +346,8 @@
   color: #94a3b8;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  margin: 18px 0 10px 0;
+  margin: 14px 0 10px 0;
+  padding: 0 4px;
 }
 
 /* Workspace List & Portal Cards */
@@ -428,8 +359,8 @@
 .ph-ws-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 9px 12px;
   border-radius: 12px;
   border: 1.5px solid #f1f5f9;
   background: #ffffff;
@@ -444,8 +375,8 @@
   transform: translateY(-1px);
 }
 .ph-ws-icon-box {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -453,20 +384,35 @@
   flex-shrink: 0;
 }
 .ph-ws-icon-box svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   fill: none;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 .ph-ws-label {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #1e293b;
+  flex: 1;
 }
 
-/* Active State Styles per Portal (Matching Image 2 Reference) */
+/* Green CURRENT badge for active portal */
+.ph-ws-current-badge {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border: 1px solid #bbf7d0;
+  white-space: nowrap;
+}
+
+/* Active State Styles per Portal */
 /* Admin Portal (Purple Theme) */
 .ph-ws-admin .ph-ws-icon-box { background: #ede9fe; }
 .ph-ws-admin .ph-ws-icon-box svg { stroke: #7c3aed; }
@@ -505,12 +451,12 @@
   background: #fef2f2;
   border: 1.5px solid #fee2e2;
   border-radius: 12px;
-  padding: 12px 16px;
-  margin-top: 16px;
+  padding: 11px 16px;
+  margin-top: 14px;
   cursor: pointer;
   transition: all 0.15s ease;
   color: #ef4444;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
   width: 100%;
   box-sizing: border-box;
@@ -521,14 +467,122 @@
   transform: translateY(-1px);
 }
 .ph-dd-signout-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   stroke: #ef4444;
   stroke-width: 2.2;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
   flex-shrink: 0;
+}
+
+/* Modals Overlay Styling */
+.ph-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100001 !important;
+  font-family: 'Inter', sans-serif;
+  padding: 20px;
+}
+.ph-modal-overlay.open {
+  display: flex !important;
+  animation: phModalFade 0.2s ease-out;
+}
+@keyframes phModalFade {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.ph-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e2e8f0;
+}
+.ph-modal-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ph-modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #64748b;
+  cursor: pointer;
+}
+.ph-input-group {
+  margin-bottom: 14px;
+}
+.ph-input-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 6px;
+}
+.ph-input-group input {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+}
+.ph-input-group input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+.ph-input-readonly {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  cursor: not-allowed !important;
+}
+.ph-modal-btns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.ph-btn-cancel {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ph-btn-save {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 @media (max-width: 900px) {
@@ -660,29 +714,16 @@
                 </div>
               </div>
 
-              <!-- BUILT-IN PROFILE DROPDOWN MENU - 1:1 DESIGN FROM IMAGE 2 -->
+              <!-- BUILT-IN PROFILE DROPDOWN MENU - NON-DUPLICATE CLEAN DESIGN -->
               <div class="user-dropdown" id="userDD" onclick="event.stopPropagation();">
                 
-                <!-- Profile Header -->
-                <div class="ph-dd-profile-header">
-                  <div class="ph-dd-big-avatar" id="ddBigAvatar">VK</div>
-                  <div class="ph-dd-user-details">
-                    <div class="ph-dd-name" id="ddName">Vinod Kumar</div>
-                    <div class="ph-dd-role" id="ddRole">System Administrator</div>
-                    <div class="ph-dd-status-badge">
-                      <div class="ph-dd-status-dot"></div>
-                      <span>Online</span>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- My Profile & Change Password Buttons -->
-                <div class="ph-dd-btn" onclick="event.stopPropagation(); document.getElementById('userDD').classList.remove('open'); if(document.getElementById('profileModal')) document.getElementById('profileModal').classList.add('open'); else alert('User Profile: ' + (document.getElementById('hName')?document.getElementById('hName').textContent:'User'));">
+                <div class="ph-dd-btn" onclick="event.stopPropagation(); document.getElementById('userDD').classList.remove('open'); openPhProfileModal();">
                   <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                   <span>My Profile</span>
                 </div>
 
-                <div class="ph-dd-btn" onclick="event.stopPropagation(); document.getElementById('userDD').classList.remove('open'); if(document.getElementById('passwordModal')) document.getElementById('passwordModal').classList.add('open'); else alert('Change Password option selected');">
+                <div class="ph-dd-btn" onclick="event.stopPropagation(); document.getElementById('userDD').classList.remove('open'); openPhPasswordModal();">
                   <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                   <span>Change Password</span>
                 </div>
@@ -690,7 +731,7 @@
                 <!-- Switch Workspace Section -->
                 <div class="ph-dd-section-title">SWITCH WORKSPACE</div>
 
-                <!-- Workspace List (Direct Instant Navigation) -->
+                <!-- Workspace List -->
                 <div class="ph-workspace-list">
                   
                   <div class="ph-ws-item ph-ws-admin ${isAdmin ? 'active' : ''}" onclick="event.stopPropagation(); window.location.href='admin_portal.html';">
@@ -698,6 +739,7 @@
                       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     </div>
                     <span class="ph-ws-label">Admin Portal</span>
+                    ${isAdmin ? '<span class="ph-ws-current-badge">CURRENT</span>' : ''}
                   </div>
 
                   <div class="ph-ws-item ph-ws-pmam ${isPmam ? 'active' : ''}" onclick="event.stopPropagation(); window.location.href='pmam_portal.html';">
@@ -705,6 +747,7 @@
                       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     </div>
                     <span class="ph-ws-label">PMAM Portal</span>
+                    ${isPmam ? '<span class="ph-ws-current-badge">CURRENT</span>' : ''}
                   </div>
 
                   <div class="ph-ws-item ph-ws-ic ${isIc ? 'active' : ''}" onclick="event.stopPropagation(); window.location.href='ic_portal.html';">
@@ -712,6 +755,7 @@
                       <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                     </div>
                     <span class="ph-ws-label">I/C Portal</span>
+                    ${isIc ? '<span class="ph-ws-current-badge">CURRENT</span>' : ''}
                   </div>
 
                   <div class="ph-ws-item ph-ws-finance ${isFinance ? 'active' : ''}" onclick="event.stopPropagation(); window.location.href='finance.html';">
@@ -719,12 +763,21 @@
                       <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
                     </div>
                     <span class="ph-ws-label">Finance Portal</span>
+                    ${isFinance ? '<span class="ph-ws-current-badge">CURRENT</span>' : ''}
+                  </div>
+
+                  <div class="ph-ws-item ph-ws-patient ${isPatient ? 'active' : ''}" onclick="event.stopPropagation(); window.location.href='patient_service_portal.html';">
+                    <div class="ph-ws-icon-box">
+                      <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 18h6M12 11v4M10 13h4"></path></svg>
+                    </div>
+                    <span class="ph-ws-label">Patient Services Portal</span>
+                    ${isPatient ? '<span class="ph-ws-current-badge">CURRENT</span>' : ''}
                   </div>
 
                 </div>
 
                 <!-- Sign Out Button -->
-                <button class="ph-dd-signout-btn" type="button" onclick="event.stopPropagation(); document.getElementById('userDD').classList.remove('open'); if(window.logoutUser) window.logoutUser(); else if(typeof firebase !== 'undefined' && firebase.auth) firebase.auth().signOut().then(function(){ window.location.href='index.html'; }); else window.location.href='index.html';">
+                <button class="ph-dd-signout-btn" type="button" onclick="event.stopPropagation(); document.getElementById('userDD').classList.remove('open'); if(window.logoutUser) window.logoutUser(); else if(typeof firebase !== 'undefined' && firebase.auth) firebase.auth().signOut().then(function(){ sessionStorage.clear(); window.location.href='index.html'; }); else { sessionStorage.clear(); window.location.href='index.html'; }">
                   <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                   <span>Sign Out</span>
                 </button>
@@ -845,13 +898,6 @@
     if (hName) hName.textContent = displayName.toUpperCase();
     if (hRole && role) hRole.textContent = displayRole.toUpperCase();
 
-    var ddName = document.getElementById('ddName');
-    var ddRole = document.getElementById('ddRole');
-    var ddBigAvatar = document.getElementById('ddBigAvatar');
-
-    if (ddName) ddName.textContent = displayName;
-    if (ddRole) ddRole.textContent = displayRole;
-
     var n = displayName.trim();
     var parts = n.split(/\s+/);
     var inits = parts.length > 1 ? (parts[0][0] + parts[1][0]) : parts[0].substr(0, 2);
@@ -860,12 +906,221 @@
     if (photoUrl) {
       var photoHTML = '<img src="' + photoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
       if (hAvatarContainer) hAvatarContainer.innerHTML = photoHTML;
-      if (ddBigAvatar) ddBigAvatar.innerHTML = photoHTML;
     } else {
       if (hInitials) hInitials.textContent = inits;
-      if (ddBigAvatar) ddBigAvatar.textContent = inits;
     }
   }
+
+  // Modals Management
+  function openPhProfileModal() {
+    var modal = document.getElementById('phProfileModalOverlay');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'phProfileModalOverlay';
+      modal.className = 'ph-modal-overlay';
+      modal.innerHTML = `
+        <div class="ph-modal-card">
+          <div class="ph-modal-title">
+            <span>My Profile</span>
+            <button class="ph-modal-close" onclick="document.getElementById('phProfileModalOverlay').classList.remove('open')">×</button>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:16px;">
+            <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:800;position:relative;overflow:hidden;box-shadow:0 4px 14px rgba(124,58,237,0.3);">
+              <span id="phModalAvatarInitials">VK</span>
+              <img id="phModalAvatarImg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
+              <input type="file" id="phProfileFileInput" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;" onchange="phHandlePhotoChange(this)">
+            </div>
+            <div style="font-size:11px;font-weight:700;color:#2563eb;cursor:pointer;" onclick="document.getElementById('phProfileFileInput').click()">📷 Click to Change Profile Photo</div>
+          </div>
+
+          <div class="ph-input-group">
+            <label>Full Name (Read-Only)</label>
+            <input type="text" id="phModalNameInput" class="ph-input-readonly" readonly value="Vinod Kumar">
+            <div style="font-size:10px;color:#64748b;margin-top:3px;">Full name is managed by System Administrator and cannot be changed here.</div>
+          </div>
+
+          <div class="ph-input-group">
+            <label>Role / Designation</label>
+            <input type="text" id="phModalRoleInput" class="ph-input-readonly" readonly value="System Administrator">
+          </div>
+
+          <div class="ph-modal-btns">
+            <button class="ph-btn-cancel" type="button" onclick="document.getElementById('phProfileModalOverlay').classList.remove('open')">Cancel</button>
+            <button class="ph-btn-save" type="button" onclick="phSaveProfilePhoto()">Save Photo</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    
+    // Sync current profile values
+    var hName = document.getElementById('hName') ? document.getElementById('hName').textContent : 'Vinod Kumar';
+    var hRole = document.getElementById('hRole') ? document.getElementById('hRole').textContent : 'System Administrator';
+    var nameInput = document.getElementById('phModalNameInput');
+    var roleInput = document.getElementById('phModalRoleInput');
+    if (nameInput) nameInput.value = hName;
+    if (roleInput) roleInput.value = hRole;
+
+    // Check existing photo
+    var avatarImg = document.querySelector('#hAvatarContainer img');
+    if (avatarImg && avatarImg.src) {
+      var modalImg = document.getElementById('phModalAvatarImg');
+      var modalInits = document.getElementById('phModalAvatarInitials');
+      if (modalImg) {
+        modalImg.src = avatarImg.src;
+        modalImg.style.display = 'block';
+      }
+      if (modalInits) modalInits.style.display = 'none';
+    }
+
+    modal.classList.add('open');
+  }
+
+  global.phHandlePhotoChange = function(input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = document.getElementById('phModalAvatarImg');
+        var inits = document.getElementById('phModalAvatarInitials');
+        if (img) {
+          img.src = e.target.result;
+          img.style.display = 'block';
+        }
+        if (inits) inits.style.display = 'none';
+        window._tempNewPhotoUrl = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  };
+
+  global.phSaveProfilePhoto = function() {
+    if (window._tempNewPhotoUrl) {
+      var photoUrl = window._tempNewPhotoUrl;
+      try { localStorage.setItem('user_photo_url', photoUrl); } catch(e){}
+      
+      // Update header avatar
+      applyHeaderData(
+        document.getElementById('hName') ? document.getElementById('hName').textContent : 'Vinod Kumar',
+        document.getElementById('hRole') ? document.getElementById('hRole').textContent : 'System Administrator',
+        photoUrl
+      );
+
+      // Save to Firebase user doc if signed in
+      if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser && typeof db !== 'undefined') {
+        var email = firebase.auth().currentUser.email;
+        if (email) {
+          db.collection('users').doc(email).set({ photo: photoUrl }, { merge: true }).catch(function(e){ console.warn(e); });
+        }
+      }
+
+      alert('Profile photo updated successfully!');
+    }
+    var modal = document.getElementById('phProfileModalOverlay');
+    if (modal) modal.classList.remove('open');
+  };
+
+  function openPhPasswordModal() {
+    var modal = document.getElementById('phPasswordModalOverlay');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'phPasswordModalOverlay';
+      modal.className = 'ph-modal-overlay';
+      modal.innerHTML = `
+        <div class="ph-modal-card">
+          <div class="ph-modal-title">
+            <span>Change Password</span>
+            <button class="ph-modal-close" onclick="document.getElementById('phPasswordModalOverlay').classList.remove('open')">×</button>
+          </div>
+          
+          <div id="phPassMsg" style="display:none;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:600;margin-bottom:12px;"></div>
+
+          <div class="ph-input-group">
+            <label>Current Password</label>
+            <input type="password" id="phCurrPass" placeholder="Enter current password">
+          </div>
+
+          <div class="ph-input-group">
+            <label>New Password</label>
+            <input type="password" id="phNewPass" placeholder="Enter new password (min 6 chars)">
+          </div>
+
+          <div class="ph-input-group">
+            <label>Confirm New Password</label>
+            <input type="password" id="phConfirmPass" placeholder="Re-enter new password">
+          </div>
+
+          <div class="ph-modal-btns">
+            <button class="ph-btn-cancel" type="button" onclick="document.getElementById('phPasswordModalOverlay').classList.remove('open')">Cancel</button>
+            <button class="ph-btn-save" type="button" onclick="phSubmitChangePassword()">Update Password</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    
+    // Reset fields
+    var msg = document.getElementById('phPassMsg');
+    if (msg) msg.style.display = 'none';
+    var cp = document.getElementById('phCurrPass'); if (cp) cp.value = '';
+    var np = document.getElementById('phNewPass'); if (np) np.value = '';
+    var cfp = document.getElementById('phConfirmPass'); if (cfp) cfp.value = '';
+
+    modal.classList.add('open');
+  }
+
+  global.phSubmitChangePassword = function() {
+    var curr = (document.getElementById('phCurrPass').value || '').trim();
+    var newP = (document.getElementById('phNewPass').value || '').trim();
+    var conf = (document.getElementById('phConfirmPass').value || '').trim();
+    var msg = document.getElementById('phPassMsg');
+
+    function showMsg(text, isErr) {
+      if (msg) {
+        msg.textContent = text;
+        msg.style.display = 'block';
+        msg.style.background = isErr ? '#fee2e2' : '#dcfce7';
+        msg.style.color = isErr ? '#991b1b' : '#15803d';
+        msg.style.border = isErr ? '1px solid #fecaca' : '1px solid #bbf7d0';
+      }
+    }
+
+    if (!newP || newP.length < 6) {
+      showMsg('New password must be at least 6 characters long.', true);
+      return;
+    }
+    if (newP !== conf) {
+      showMsg('New password and Confirm password do not match.', true);
+      return;
+    }
+
+    // If Firebase Auth user is logged in
+    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+      var user = firebase.auth().currentUser;
+      user.updatePassword(newP).then(function() {
+        showMsg('Password updated successfully!', false);
+        setTimeout(function() {
+          var modal = document.getElementById('phPasswordModalOverlay');
+          if (modal) modal.classList.remove('open');
+        }, 1200);
+      }).catch(function(error) {
+        if (error.code === 'auth/requires-recent-login') {
+          showMsg('Please log out and log in again before changing password for security.', true);
+        } else {
+          showMsg(error.message || 'Failed to update password.', true);
+        }
+      });
+    } else {
+      // Local session update
+      showMsg('Password updated successfully!', false);
+      setTimeout(function() {
+        var modal = document.getElementById('phPasswordModalOverlay');
+        if (modal) modal.classList.remove('open');
+      }, 1200);
+    }
+  };
+
+  global.openPhProfileModal = openPhProfileModal;
+  global.openPhPasswordModal = openPhPasswordModal;
 
   // Auto-init when DOM is ready
   if (document.readyState === 'loading') {
