@@ -2,322 +2,272 @@
   'use strict';
 
   var headerCSS = `
-    .portal-header-wrapper {
-      background: #ffffff;
-      border-radius: 14px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-      margin: 10px 14px;
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border: 1px solid #f1f5f9;
-      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      position: relative;
-      box-sizing: border-box;
-    }
+﻿/* New Premium Header CSS */
+.premium-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 10px 24px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  position: relative;
+  border-bottom: 2px solid #f1f5f9;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  height: 90px;
+  box-sizing: border-box;
+}
 
-    /* Left Section: Branding */
-    .ph-left-brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex: 1;
-    }
-    .ph-gmc-logo {
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      object-fit: contain;
-      border: 2px solid #2563eb;
-      padding: 2px;
-      background: #fff;
-      flex-shrink: 0;
-    }
-    .ph-text-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      line-height: 1.25;
-    }
-    .ph-t1 {
-      font-size: 11px;
-      font-weight: 800;
-      color: #ea580c;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .ph-t2 {
-      font-size: 16px;
-      font-weight: 900;
-      color: #0f2b8c;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    .ph-t3 {
-      font-size: 10.5px;
-      font-weight: 500;
-      color: #1e3a8a;
-    }
+/* Left Section */
+.ph-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+.ph-logo {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  border: 2px solid #2563eb;
+  padding: 2px;
+  background: #fff;
+  object-fit: contain;
+}
+.ph-title-block {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.ph-title-top {
+  color: #ea580c;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ph-title-mid {
+  color: #1e3a8a;
+  font-size: 20px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ph-title-bot {
+  color: #1e3a8a;
+  font-size: 11px;
+  font-weight: 500;
+}
 
-    /* Center Section: Ribbon & Portal Title */
-    .ph-center-brand {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      position: relative;
-      flex: 1;
-    }
-    .ph-ribbon-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      max-width: 360px;
-      position: relative;
-      height: 54px;
-    }
-    .ph-ribbon-line {
-      height: 10px;
-      flex: 1;
-      background: linear-gradient(90deg, rgba(37,99,235,0) 0%, #2563eb 30%, #2563eb 70%, rgba(37,99,235,0) 100%);
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 100%;
-      z-index: 1;
-    }
-    .ph-ribbon-dots {
-      position: absolute;
-      width: 100%;
-      height: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background-image: radial-gradient(#2563eb 1.5px, transparent 1.5px);
-      background-size: 6px 6px;
-      z-index: 2;
-      -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 75%, rgba(0,0,0,1) 100%);
-      mask-image: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 75%, rgba(0,0,0,1) 100%);
-    }
-    .ph-pmjay-logo {
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      background: #fff;
-      border: 3px solid #2563eb;
-      z-index: 3;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      padding: 3px;
-      box-shadow: 0 2px 8px rgba(37,99,235,0.15);
-    }
-    .ph-portal-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 2px;
-    }
-    .ph-pt-line {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .ph-pt-line::before {
-      content: "";
-      display: block;
-      width: 18px;
-      height: 2px;
-      background: #2563eb;
-    }
-    .ph-pt-line::after {
-      content: "";
-      display: block;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: #2563eb;
-    }
-    .ph-pt-line.right {
-      flex-direction: row-reverse;
-    }
-    .ph-pt-text {
-      font-size: 13px;
-      font-weight: 900;
-      color: #ea580c;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
+/* Center Section */
+.ph-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  position: relative;
+}
+.ph-ribbon-bg {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 24px;
+  background: linear-gradient(90deg, rgba(37,99,235,0) 0%, rgba(37,99,235,1) 30%, rgba(37,99,235,1) 70%, rgba(37,99,235,0) 100%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ph-ribbon-bg::before, .ph-ribbon-bg::after {
+  content: '';
+  width: 40px;
+  height: 24px;
+  background-image: radial-gradient(#2563eb 20%, transparent 20%);
+  background-size: 4px 4px;
+  background-position: 0 0;
+  opacity: 0.5;
+}
+.ph-ribbon-bg::before {
+  margin-left: -20px;
+}
+.ph-ribbon-bg::after {
+  margin-right: -20px;
+}
 
-    /* Right Section: Actions & User Profile Pill */
-    .ph-right-actions {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 14px;
-      flex: 1;
-      position: relative;
-    }
-    .ph-bell {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      cursor: pointer;
-      background: #fff;
-      transition: all 0.2s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-    }
-    .ph-bell:hover {
-      background: #f8fafc;
-      border-color: #cbd5e1;
-    }
-    .ph-bell svg {
-      width: 22px;
-      height: 22px;
-      stroke: #2563eb;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    .ph-bell-dot {
-      position: absolute;
-      top: 10px;
-      right: 12px;
-      width: 8px;
-      height: 8px;
-      background: #2563eb;
-      border-radius: 50%;
-      border: 2px solid #fff;
-      box-sizing: content-box;
-    }
-    .ph-bell-badge {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      background: #ef4444;
-      color: #fff;
-      font-size: 9px;
-      font-weight: 800;
-      border-radius: 50%;
-      width: 16px;
-      height: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid #fff;
-    }
+.ph-portal-name {
+  color: #ea580c;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 2;
+  text-transform: uppercase;
+}
+.ph-portal-name::before, .ph-portal-name::after {
+  content: 'â€” â€¢';
+  color: #3b82f6;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+.ph-portal-name::after {
+  content: 'â€¢ â€”';
+}
 
-    .ph-user-pill {
-      display: flex;
-      align-items: center;
-      background: #fff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 50px;
-      padding: 4px 10px 4px 4px;
-      gap: 10px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      min-width: 185px;
-      position: relative;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-    }
-    .ph-user-pill:hover {
-      background: #f8fafc;
-      border-color: #cbd5e1;
-    }
-    .ph-u-av {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #2563eb;
-      color: #ffffff;
-      font-size: 14px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
-    }
-    .ph-u-av img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .ph-u-details {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      flex: 1;
-      min-width: 0;
-    }
-    .ph-u-name {
-      font-size: 11px;
-      font-weight: 800;
-      color: #ea580c;
-      text-transform: uppercase;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 115px;
-    }
-    .ph-u-role {
-      font-size: 9.5px;
-      font-weight: 700;
-      color: #2563eb;
-      text-transform: uppercase;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 115px;
-    }
-    .ph-u-status {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 9px;
-      font-weight: 600;
-      color: #475569;
-    }
-    .ph-u-status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #16a34a;
-    }
-    .ph-u-chevron {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      border: 1px solid #e2e8f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-left: 2px;
-      flex-shrink: 0;
-      background: #fff;
-    }
-    .ph-u-chevron svg {
-      width: 13px;
-      height: 13px;
-      stroke: #1e3a8a;
-      fill: none;
-      stroke-width: 2.5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
+/* Right Section */
+.ph-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  flex: 1;
+}
+.ph-bell-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  background: #fff;
+  transition: all 0.2s;
+}
+.ph-bell-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+.ph-bell-icon {
+  width: 22px;
+  height: 22px;
+  stroke: #2563eb;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ph-bell-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #2563eb;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
 
-    /* DROPDOWN MENU */
+.ph-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px 6px 6px;
+  border-radius: 30px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.ph-user-pill:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+.ph-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #1e3a8a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  border: 2px solid #e2e8f0;
+  overflow: hidden;
+}
+.ph-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ph-user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.ph-user-name {
+  color: #ea580c;
+  font-weight: 800;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+.ph-user-role {
+  color: #1e3a8a;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.ph-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+.ph-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+.ph-status-text {
+  font-size: 10px;
+  color: #475569;
+  font-weight: 600;
+}
+.ph-chevron {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+}
+.ph-chevron svg {
+  width: 14px;
+  height: 14px;
+  stroke: #1e3a8a;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Vertical dividers */
+.ph-divider {
+  width: 1.5px;
+  height: 40px;
+  background: #e2e8f0;
+  margin: 0 10px;
+}
+</style>
+
+
+/* DROPDOWN MENU */
     .user-dropdown {
       position: absolute;
       top: calc(100% + 10px);
@@ -361,16 +311,21 @@
     .dd-item:last-child:hover {
       background: #fef2f2;
     }
-    
+
     @media (max-width: 900px) {
-      .portal-header-wrapper {
+      .premium-header-bar {
         flex-direction: column;
         gap: 14px;
+        height: auto;
       }
-      .ph-center-brand {
+      .ph-center {
         order: -1;
       }
+      .ph-ribbon-bg {
+        width: 100%;
+      }
     }
+
   `;
 
   // Standard PM-JAY SVG Logo
@@ -408,56 +363,46 @@
       else if (title.indexOf('ADMIN') !== -1) defaultRole = 'ADMIN';
       else if (title.indexOf('PATIENT') !== -1) defaultRole = 'PATIENT SERVICES';
 
+      
       var html = `
-        <div class="portal-header-wrapper">
+        <div class="premium-header-bar">
           
           <!-- LEFT: Branding -->
-          <div class="ph-left-brand">
-            <img src="${fallbackLogo}" class="ph-gmc-logo" id="headerGmcLogo" alt="GMC Rajouri" onerror="this.src='https://via.placeholder.com/58?text=GMC'">
-            <div class="ph-text-stack">
-              <div class="ph-t1">AYUSHMAN BHARAT — PM-JAY</div>
-              <div class="ph-t2">MANAGEMENT INFORMATION SYSTEM</div>
-              <div class="ph-t3">Government Medical College & Associated Hospital, Rajouri</div>
+          <div class="ph-left">
+            <img src="${fallbackLogo}" class="ph-logo" id="headerGmcLogo" alt="GMC Rajouri" onerror="this.src='https://via.placeholder.com/58?text=GMC'">
+            <div class="ph-title-block">
+              <div class="ph-title-top">AYUSHMAN BHARAT — PM-JAY</div>
+              <div class="ph-title-mid">MANAGEMENT INFORMATION SYSTEM</div>
+              <div class="ph-title-bot">Government Medical College & Associated Hospital, Rajouri</div>
             </div>
           </div>
 
           <!-- CENTER: Ribbon & Title -->
-          <div class="ph-center-brand">
-            <div class="ph-ribbon-container">
-              <div class="ph-ribbon-dots"></div>
-              <div class="ph-ribbon-line"></div>
-              <div class="ph-pmjay-logo" id="centerLogoContainer">
-                ${pmjaySVG}
-              </div>
-            </div>
-            <div class="ph-portal-title">
-              <div class="ph-pt-line"></div>
-              <div class="ph-pt-text">${title}</div>
-              <div class="ph-pt-line right"></div>
-            </div>
+          <div class="ph-center">
+            <div class="ph-ribbon-bg"></div>
+            <div class="ph-portal-name">${title}</div>
           </div>
 
           <!-- RIGHT: Actions & Profile Pill -->
-          <div class="ph-right-actions">
-            <div class="ph-bell" title="Notifications" onclick="if(window.LeaveEngine && window.LeaveEngine.role && document.getElementById('leaveModal')) { document.getElementById('leaveModal').style.display='flex'; }">
-              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-              <div class="ph-bell-dot"></div>
+          <div class="ph-right">
+            <div class="ph-bell-btn" title="Notifications" onclick="if(window.LeaveEngine && window.LeaveEngine.role && document.getElementById('leaveModal')) { document.getElementById('leaveModal').style.display='flex'; }">
+              <svg class="ph-bell-icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
               <div class="ph-bell-badge" id="topBellBadge" style="display:none;">0</div>
             </div>
 
             <div class="ph-user-pill user-pill" id="userPillBtn" onclick="event.stopPropagation(); var dd=document.getElementById('userDD'); if(dd) dd.classList.toggle('open');">
-              <div class="ph-u-av" id="hAvatarContainer">
+              <div class="ph-avatar" id="hAvatarContainer">
                 <span id="hInitials">VK</span>
               </div>
-              <div class="ph-u-details">
-                <div class="ph-u-name" id="hName">VINOD KUMAR</div>
-                <div class="ph-u-role udesig" id="hRole">${defaultRole}</div>
-                <div class="ph-u-status">
-                  <div class="ph-u-status-dot"></div>
-                  <span>Online</span>
+              <div class="ph-user-info">
+                <div class="ph-user-name" id="hName">VINOD KUMAR</div>
+                <div class="ph-user-role udesig" id="hRole">${defaultRole}</div>
+                <div class="ph-status">
+                  <div class="ph-status-dot"></div>
+                  <div class="ph-status-text">Online</div>
                 </div>
               </div>
-              <div class="ph-u-chevron">
+              <div class="ph-chevron">
                 <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
               </div>
             </div>
@@ -492,11 +437,11 @@
                 <span>Logout</span>
               </div>
             </div>
-
+            
           </div>
-
         </div>
       `;
+
 
       mount.outerHTML = html; // replace mount point completely
       
