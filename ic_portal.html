@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>I/C AB-PMJAY Portal — GMC Rajouri</title>
+<title>I/C AB-PMJAY Portal â€” GMC Rajouri</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -207,14 +207,14 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
     if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
   </script>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     SHARED HEADERS — universal letterhead system for all GMC Rajouri
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     SHARED HEADERS â€” universal letterhead system for all GMC Rajouri
      AB PM-JAY MIS portals. Provides GMCHeaders.abpmjayReport(),
      GMCHeaders.msReport(). Used here in printReportOrient() so the
      user can choose format (AB PM-JAY / MS) + orientation (P/L) at
      print time. Any future print feature in this portal should use
      these renderers via showPrintOptionsModal().
-     ═══════════════════════════════════════════════════════════════ -->
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <link rel="stylesheet" href="shared/headers.css?v=6">
 <script src="shared/logos.js?v=6"></script>
 <script src="shared/headers.js?v=6"></script>
@@ -290,7 +290,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
     <div class="sec active" id="sec-daily">
       <div class="page-hd">Daily Report</div>
       <div class="card">
-        <div class="card-hd">PMAM Performance — Daily</div>
+        <div class="card-hd">PMAM Performance â€” Daily</div>
         <div class="frow">
           <div class="fld"><label>Mode</label>
             <select id="dailyMode" style="width:150px" onchange="dailyToggleRange()">
@@ -314,7 +314,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd" id="dailyTitle">Daily Summary</div>
         <div class="tbl-wrap">
           <table id="dailyTbl">
-            <thead><tr><th>S.No</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Register</th><th>Preauth Initiated</th><th>Preauth Amt (₹)</th><th>Discharge</th><th>Claim Amt (₹)</th></tr></thead>
+            <thead><tr><th>S.No</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Register</th><th>Preauth Initiated</th><th>Preauth Amt (â‚¹)</th><th>Discharge</th><th>Claim Amt (â‚¹)</th></tr></thead>
             <tbody id="dailyTbody"><tr><td colspan="9" class="empty-td">Select date and click Generate</td></tr></tbody>
             <tfoot id="dailyFoot"></tfoot>
           </table>
@@ -327,7 +327,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
     <div class="sec" id="sec-monthly">
       <div class="page-hd">Monthly Report</div>
       <div class="card">
-        <div class="card-hd">PMAM Performance — Monthly</div>
+        <div class="card-hd">PMAM Performance â€” Monthly</div>
         <div class="frow">
           <div class="fld"><label>Month</label>
             <select id="rMonth" style="width:140px">
@@ -345,10 +345,10 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       </div>
       <div class="metrics-grid" id="monthlyMetrics"></div>
       <div class="card">
-        <div class="card-hd" id="monthlyTitle">PMAM-wise Summary — April 2026</div>
+        <div class="card-hd" id="monthlyTitle">PMAM-wise Summary â€” April 2026</div>
         <div class="tbl-wrap">
           <table id="monthlyTbl">
-            <thead><tr><th>S.No</th><th>PMAM Name</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <thead><tr><th>S.No</th><th>PMAM Name</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (â‚¹)</th><th>Discharge</th><th>Claim (â‚¹)</th><th>Conv%</th></tr></thead>
             <tbody id="monthlyTbody"><tr><td colspan="12" class="empty-td">Click Generate to load data</td></tr></tbody>
             <tfoot id="monthlyFoot"></tfoot>
           </table>
@@ -370,10 +370,10 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       </div>
       <div class="metrics-grid" id="annualMetrics"></div>
       <div class="card">
-        <div class="card-hd">Month-wise Summary — 2026</div>
+        <div class="card-hd">Month-wise Summary â€” 2026</div>
         <div class="tbl-wrap">
           <table id="annualTbl">
-            <thead><tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <thead><tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (â‚¹)</th><th>Discharge</th><th>Claim (â‚¹)</th><th>Conv%</th></tr></thead>
             <tbody id="annualTbody"><tr><td colspan="10" class="empty-td">Click Generate to load data</td></tr></tbody>
             <tfoot id="annualFoot"></tfoot>
           </table>
@@ -383,8 +383,8 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd">PMAM-wise Annual Ranking</div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Rank</th><th>PMAM</th><th>IPD</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
-            <tbody id="annualPmamTbody"><tr><td colspan="8" class="empty-td">—</td></tr></tbody>
+            <thead><tr><th>Rank</th><th>PMAM</th><th>IPD</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (â‚¹)</th><th>Conv%</th></tr></thead>
+            <tbody id="annualPmamTbody"><tr><td colspan="8" class="empty-td">â€”</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -425,10 +425,10 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       </div>
       <div class="metrics-grid" id="wardMetrics"></div>
       <div class="card">
-        <div class="card-hd">All Wards Comparison — Ranked by Conv% <span id="wardCardSubhead" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
+        <div class="card-hd">All Wards Comparison â€” Ranked by Conv% <span id="wardCardSubhead" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
         <div class="tbl-wrap">
           <table id="wardTbl">
-            <thead id="wardThead"><tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <thead id="wardThead"><tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (â‚¹)</th><th>Conv%</th></tr></thead>
             <tbody id="wardTbody"><tr><td colspan="11" class="empty-td">Click Generate to load data</td></tr></tbody>
             <tfoot id="wardFoot"></tfoot>
           </table>
@@ -474,7 +474,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd" id="pmamTitle">Monthly Trend</div>
         <div class="tbl-wrap">
           <table id="pmamTbl">
-            <thead id="pmamThead"><tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr></thead>
+            <thead id="pmamThead"><tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (â‚¹)</th><th>Discharge</th><th>Claim (â‚¹)</th><th>Conv%</th></tr></thead>
             <tbody id="pmamTbody"><tr><td colspan="10" class="empty-td">Select PMAM and click Generate</td></tr></tbody>
             <tfoot id="pmamFoot"></tfoot>
           </table>
@@ -484,9 +484,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 
     <!-- ===== ALL RECORDS ===== -->
     <div class="sec" id="sec-allrecords">
-      <div class="page-hd">Audit Log <span style="font-size:11px;color:#6b7280;font-weight:500;margin-left:8px">— Individual entry verification</span></div>
+      <div class="page-hd">Audit Log <span style="font-size:11px;color:#6b7280;font-weight:500;margin-left:8px">â€” Individual entry verification</span></div>
       <div class="card">
-        <div class="card-hd">Filter Records — Day-wise View</div>
+        <div class="card-hd">Filter Records â€” Day-wise View</div>
         <div class="frow" style="align-items:flex-start">
           <div class="fld"><label>Mode</label>
             <select id="arMode" style="width:160px" onchange="arToggleMode()">
@@ -500,7 +500,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             </select>
           </div>
           <div class="fld">
-            <label>Ward(s) <span style="font-size:10px;color:#6b7280;font-weight:400">— Ctrl/Cmd-click for multiple</span></label>
+            <label>Ward(s) <span style="font-size:10px;color:#6b7280;font-weight:400">â€” Ctrl/Cmd-click for multiple</span></label>
             <select id="arWardMulti" multiple size="5" style="width:230px;height:auto;padding:6px"></select>
           </div>
           <!-- Month + Year fields -->
@@ -518,7 +518,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           <div class="fld" style="align-self:flex-end">
             <button class="btn btn-pri" onclick="genAllRecords()">Filter</button>
             <button class="btn btn-sec" onclick="clearAllRecordsFilter()">Clear</button>
-            <button class="btn" id="arAnomalyBtn" onclick="arToggleAnomalyMode()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">🔍 Show Missing Reports</button>
+            <button class="btn" id="arAnomalyBtn" onclick="arToggleAnomalyMode()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">ðŸ” Show Missing Reports</button>
             <button class="btn btn-grn" onclick="exportExcel('allTbl','Audit_Log')">Export Excel</button>
             <button class="btn btn-word" onclick="printReport('Audit Log')">Print / PDF</button>
           </div>
@@ -526,7 +526,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       </div>
       <div class="metrics-grid" id="arMetrics"></div>
       <div class="card">
-        <div class="card-hd">All Entries — Day-wise <span id="arCount" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
+        <div class="card-hd">All Entries â€” Day-wise <span id="arCount" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
         <div class="tbl-wrap">
           <table id="allTbl">
             <thead><tr><th>S.No</th><th>Date</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th title="When the report was actually saved (vs report date)">Submitted</th><th title="Same-day / Late / Backdated">Lag</th><th title="Firestore document ID">Entry ID</th><th>Flag</th><th>Action</th></tr></thead>
@@ -683,9 +683,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 
     <!-- ===== ALL RECORDS ===== -->
     <div class="sec" id="sec-allrecords">
-      <div class="page-hd">Audit Log <span style="font-size:11px;color:#6b7280;font-weight:500;margin-left:8px">— Individual entry verification</span></div>
+      <div class="page-hd">Audit Log <span style="font-size:11px;color:#6b7280;font-weight:500;margin-left:8px">â€” Individual entry verification</span></div>
       <div class="card">
-        <div class="card-hd">Filter Records — Day-wise View</div>
+        <div class="card-hd">Filter Records â€” Day-wise View</div>
         <div class="frow" style="align-items:flex-start">
           <div class="fld"><label>Mode</label>
             <select id="arMode" style="width:160px" onchange="arToggleMode()">
@@ -699,7 +699,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             </select>
           </div>
           <div class="fld">
-            <label>Ward(s) <span style="font-size:10px;color:#6b7280;font-weight:400">— Ctrl/Cmd-click for multiple</span></label>
+            <label>Ward(s) <span style="font-size:10px;color:#6b7280;font-weight:400">â€” Ctrl/Cmd-click for multiple</span></label>
             <select id="arWardMulti" multiple size="5" style="width:230px;height:auto;padding:6px"></select>
           </div>
           <!-- Month + Year fields -->
@@ -717,7 +717,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           <div class="fld" style="align-self:flex-end">
             <button class="btn btn-pri" onclick="genAllRecords()">Filter</button>
             <button class="btn btn-sec" onclick="clearAllRecordsFilter()">Clear</button>
-            <button class="btn" id="arAnomalyBtn" onclick="arToggleAnomalyMode()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">🔍 Show Missing Reports</button>
+            <button class="btn" id="arAnomalyBtn" onclick="arToggleAnomalyMode()" style="background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d">ðŸ” Show Missing Reports</button>
             <button class="btn btn-grn" onclick="exportExcel('allTbl','Audit_Log')">Export Excel</button>
             <button class="btn btn-word" onclick="printReport('Audit Log')">Print / PDF</button>
           </div>
@@ -725,7 +725,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       </div>
       <div class="metrics-grid" id="arMetrics"></div>
       <div class="card">
-        <div class="card-hd">All Entries — Day-wise <span id="arCount" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
+        <div class="card-hd">All Entries â€” Day-wise <span id="arCount" style="font-size:11px;color:#6b7280;font-weight:400"></span></div>
         <div class="tbl-wrap">
           <table id="allTbl">
             <thead><tr><th>S.No</th><th>Date</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th title="When the report was actually saved (vs report date)">Submitted</th><th title="Same-day / Late / Backdated">Lag</th><th title="Firestore document ID">Entry ID</th><th>Flag</th><th>Action</th></tr></thead>
@@ -745,7 +745,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <!-- Total PMAM -->
       <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
         <div style="width:48px; height:48px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">👨‍👩‍👧‍👦</span>
+           <span style="font-size:24px;">ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦</span>
         </div>
         <div>
           <div style="color:#1e293b; font-size:13px; font-weight:600;">Total PMAM</div>
@@ -757,7 +757,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <!-- Present Today -->
       <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
         <div style="width:48px; height:48px; border-radius:50%; background:#f0fdf4; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">✅</span>
+           <span style="font-size:24px;">âœ…</span>
         </div>
         <div>
           <div style="color:#1e293b; font-size:13px; font-weight:600;">Present Today</div>
@@ -769,7 +769,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <!-- On Leave Today -->
       <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
         <div style="width:48px; height:48px; border-radius:50%; background:#fff7ed; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">🕒</span>
+           <span style="font-size:24px;">ðŸ•’</span>
         </div>
         <div>
           <div style="color:#1e293b; font-size:13px; font-weight:600;">On Leave Today</div>
@@ -781,7 +781,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <!-- Pending Requests -->
       <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
         <div style="width:48px; height:48px; border-radius:50%; background:#fdf4ff; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">⏳</span>
+           <span style="font-size:24px;">â³</span>
         </div>
         <div>
           <div style="color:#1e293b; font-size:13px; font-weight:600;">Pending Requests</div>
@@ -793,7 +793,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <!-- Total Leaves Taken -->
       <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
         <div style="width:48px; height:48px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">📄</span>
+           <span style="font-size:24px;">ðŸ“„</span>
         </div>
         <div>
           <div style="color:#1e293b; font-size:13px; font-weight:600;">Total Leaves Taken</div>
@@ -907,7 +907,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 // ===== HELPERS =====
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 function fmt(n){return Number(n||0).toLocaleString('en-IN');}
-function cv(ipd,reg){return ipd>0?((reg/ipd)*100).toFixed(1)+'%':'—';}
+function cv(ipd,reg){return ipd>0?((reg/ipd)*100).toFixed(1)+'%':'â€”';}
 function cvN(ipd,reg){return ipd>0?(reg/ipd)*100:0;}
 function cvColor(ipd,reg){return cvN(ipd,reg)>=60?'#166534':'#92400e';}
 
@@ -929,7 +929,7 @@ function genMonthly(){
   const month=monthSel?monthSel.value:MONTHS[new Date().getMonth()];
   const yearSel=document.getElementById('rYearMonth');
   const year=yearSel?parseInt(yearSel.value):new Date().getFullYear();
-  document.getElementById('monthlyTitle').textContent=`PMAM-wise Summary — ${month} ${year}`;
+  document.getElementById('monthlyTitle').textContent=`PMAM-wise Summary â€” ${month} ${year}`;
 
   // Filter allReports by selected month and year
   const filtered=allReports.filter(r=>{
@@ -967,13 +967,13 @@ function genMonthly(){
     {c:'c2',n:totReg,l:'Registered'},
     {c:'c3',n:totPre,l:'Pre-Auth'},
     {c:'c4',n:totDis,l:'Discharged'},
-    {c:'c5',n:'₹'+fmt(totClm),l:'Claim Amt'},
+    {c:'c5',n:'â‚¹'+fmt(totClm),l:'Claim Amt'},
     {c:'c6',n:cv(totIPD,totReg),l:'Conv%'}
-  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('â‚¹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 
   document.getElementById('monthlyTbody').innerHTML=rows.map((r,i)=>{
     const wardsArr=Array.from(r.wardsSet||[]);
-    const wardsDisplay=wardsArr.length?wardsArr.join(', '):'—';
+    const wardsDisplay=wardsArr.length?wardsArr.join(', '):'â€”';
     const wardsTitle=wardsArr.length?wardsArr.join(', '):'No wards recorded';
     return `
     <tr>
@@ -986,7 +986,7 @@ function genMonthly(){
     </tr>
   `;
   }).join('');
-  document.getElementById('monthlyFoot').innerHTML=`<tr class="tot-row"><td colspan="2">TOTAL</td><td>—</td><td>${totIPD}</td><td>${totMed}</td><td>${totSurg}</td><td>${totReg}</td><td>${totPre}</td><td>${fmt(totPreAmt)}</td><td>${totDis}</td><td>${fmt(totClm)}</td><td>${cv(totIPD,totReg)}</td></tr>`;
+  document.getElementById('monthlyFoot').innerHTML=`<tr class="tot-row"><td colspan="2">TOTAL</td><td>â€”</td><td>${totIPD}</td><td>${totMed}</td><td>${totSurg}</td><td>${totReg}</td><td>${totPre}</td><td>${fmt(totPreAmt)}</td><td>${totDis}</td><td>${fmt(totClm)}</td><td>${cv(totIPD,totReg)}</td></tr>`;
 }
 
 // ===== ANNUAL =====
@@ -1037,8 +1037,8 @@ function genAnnual(){
   `).join('');
 
   document.getElementById('annualMetrics').innerHTML = [
-    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
-  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'â‚¹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('â‚¹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 // ===== WARD =====
@@ -1103,7 +1103,7 @@ function genWard(){
 
   if(subhead){
     var modeLabel = isPmamMode ? ' (PMAM breakdown)' : '';
-    subhead.textContent = '— ' + wardLabel + ' / ' + monthName + ' ' + year + modeLabel;
+    subhead.textContent = 'â€” ' + wardLabel + ' / ' + monthName + ' ' + year + modeLabel;
   }
 
   if(!filtered.length){
@@ -1111,7 +1111,7 @@ function genWard(){
     document.getElementById('wardTbody').innerHTML='<tr><td colspan="11" class="empty-td">No data available for selected filters.</td></tr>';
     var wf=document.getElementById('wardFoot'); if(wf) wf.innerHTML='';
     // Restore default header
-    document.getElementById('wardThead').innerHTML = '<tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr>';
+    document.getElementById('wardThead').innerHTML = '<tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (â‚¹)</th><th>Conv%</th></tr>';
     return;
   }
 
@@ -1124,7 +1124,7 @@ function genWard(){
 
 function _genWardAggregated(ward, filtered){
   // Default ward-wise view: one row per ward, PMAMs listed as comma-separated string
-  document.getElementById('wardThead').innerHTML = '<tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr>';
+  document.getElementById('wardThead').innerHTML = '<tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (â‚¹)</th><th>Conv%</th></tr>';
 
   const wardData = {};
   filtered.forEach(r => {
@@ -1152,14 +1152,14 @@ function _genWardAggregated(ward, filtered){
   }
 
   document.getElementById('wardMetrics').innerHTML = [
-    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
-  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'â‚¹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('â‚¹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 function _genWardPmamBreakdown(ward, filtered){
   // PMAM-wise view: one row per PMAM working on this specific ward
   // Header: Rank | Ward | PMAM | numeric columns | Conv%
-  document.getElementById('wardThead').innerHTML = '<tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr>';
+  document.getElementById('wardThead').innerHTML = '<tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (â‚¹)</th><th>Conv%</th></tr>';
 
   // Aggregate by PMAM. Use pmam_email FK as the grouping key for stability;
   // fall back to name when email is missing on legacy records.
@@ -1189,12 +1189,12 @@ function _genWardPmamBreakdown(ward, filtered){
 
   var wardFoot = document.getElementById('wardFoot');
   if(wardFoot){
-    wardFoot.innerHTML = `<tr class="tot-row"><td colspan="3">TOTAL — ${rows.length} PMAM(s)</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
+    wardFoot.innerHTML = `<tr class="tot-row"><td colspan="3">TOTAL â€” ${rows.length} PMAM(s)</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
   }
 
   document.getElementById('wardMetrics').innerHTML = [
-    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:rows.length+' PMAMs',l:'Contributors'}
-  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'â‚¹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:rows.length+' PMAMs',l:'Contributors'}
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('â‚¹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 // ===== PMAM WISE =====
@@ -1233,9 +1233,9 @@ function genPmam(){
 }
 
 function _genPmamYearWise(pmam, year, filtered){
-  document.getElementById('pmamTitle').textContent = pmam + ' — Monthly Trend ' + year;
+  document.getElementById('pmamTitle').textContent = pmam + ' â€” Monthly Trend ' + year;
   // Reset header to monthly columns
-  document.getElementById('pmamThead').innerHTML = '<tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr>';
+  document.getElementById('pmamThead').innerHTML = '<tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (â‚¹)</th><th>Discharge</th><th>Claim (â‚¹)</th><th>Conv%</th></tr>';
 
   if(!filtered.length){
     document.getElementById('pmamTbody').innerHTML='<tr><td colspan="10" class="empty-td">No trend data available for ' + pmam + '</td></tr>';
@@ -1265,8 +1265,8 @@ function _genPmamYearWise(pmam, year, filtered){
   document.getElementById('pmamFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
 
   document.getElementById('pmamMetrics').innerHTML = [
-    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c3',n:tReg,l:'Registered'}, {c:'c2',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
-  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+    {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c3',n:tReg,l:'Registered'}, {c:'c2',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'â‚¹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('â‚¹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 function _genPmamDayWise(pmam, year, filtered){
@@ -1274,7 +1274,7 @@ function _genPmamDayWise(pmam, year, filtered){
   const monthSel = document.getElementById('prMonth');
   const monthStr = monthSel ? monthSel.value : ''; // '' or '01'..'12'
   if(!monthStr){
-    // No month picked → fall back to year-wise to avoid 365-row table
+    // No month picked â†’ fall back to year-wise to avoid 365-row table
     alert('Please select a month for day-wise view.');
     return;
   }
@@ -1284,12 +1284,12 @@ function _genPmamDayWise(pmam, year, filtered){
   // Further filter to just this month
   const inMonth = filtered.filter(r => (new Date(r.date).getMonth()+1) === monthNum);
 
-  document.getElementById('pmamTitle').textContent = pmam + ' — Day-wise ' + monthName + ' ' + year;
+  document.getElementById('pmamTitle').textContent = pmam + ' â€” Day-wise ' + monthName + ' ' + year;
   // Update header for day-wise (replace Month with Date, add Wards column at end before Conv%)
-  document.getElementById('pmamThead').innerHTML = '<tr><th style="width:90px">Date</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th style="min-width:160px">Wards Submitted</th><th>Conv%</th></tr>';
+  document.getElementById('pmamThead').innerHTML = '<tr><th style="width:90px">Date</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (â‚¹)</th><th>Discharge</th><th>Claim (â‚¹)</th><th style="min-width:160px">Wards Submitted</th><th>Conv%</th></tr>';
 
   // Aggregate by date (cumulative across all wards on the same day)
-  const byDate = {}; // 'YYYY-MM-DD' → aggregated record
+  const byDate = {}; // 'YYYY-MM-DD' â†’ aggregated record
   inMonth.forEach(r => {
     const d = r.date;
     if(!byDate[d]){
@@ -1317,13 +1317,13 @@ function _genPmamDayWise(pmam, year, filtered){
       const wardList = Array.from(row.wards).map(w => `<span class="ward-mini" style="background:#dbeafe;color:#1e40af;border-color:#93c5fd">${w}</span>`).join('');
       rowsHtml.push(`<tr><td style="white-space:nowrap"><strong>${dispDate}</strong></td><td>${row.ipd}</td><td>${row.med}</td><td>${row.surg}</td><td><strong>${row.reg}</strong></td><td>${row.pre}</td><td>${fmt(row.preAmt)}</td><td>${row.dis}</td><td>${fmt(row.clm)}</td><td style="font-size:11px;line-height:1.6">${wardList}</td><td style="font-weight:700;color:${cvColor(row.ipd,row.reg)}">${cv(row.ipd,row.reg)}</td></tr>`);
     } else {
-      // Missed day — highlight
-      rowsHtml.push(`<tr class="pmam-empty-day"><td style="white-space:nowrap" class="miss-flag">${dispDate} ⚠</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td style="font-size:10px">— no entry —</td><td>—</td></tr>`);
+      // Missed day â€” highlight
+      rowsHtml.push(`<tr class="pmam-empty-day"><td style="white-space:nowrap" class="miss-flag">${dispDate} âš </td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td style="font-size:10px">â€” no entry â€”</td><td>â€”</td></tr>`);
     }
   }
   document.getElementById('pmamTbody').innerHTML = rowsHtml.join('');
 
-  // TOTAL row — note: 11 columns total now (10 data + Wards), so colspan="1" for Date label
+  // TOTAL row â€” note: 11 columns total now (10 data + Wards), so colspan="1" for Date label
   document.getElementById('pmamFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td style="font-size:11px">${submittedDays} / ${daysInMonth} days</td><td>${cv(tIPD,tReg)}</td></tr>`;
 
   document.getElementById('pmamMetrics').innerHTML = [
@@ -1331,9 +1331,9 @@ function _genPmamDayWise(pmam, year, filtered){
     {c:'c3',n:tReg,l:'Registered'},
     {c:'c2',n:tPre,l:'Pre-Auth'},
     {c:'c4',n:tDis,l:'Discharged'},
-    {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'},
+    {c:'c5',n:'â‚¹'+fmt(tClm),l:'Claim Amt'},
     {c:'c6',n:submittedDays+'/'+daysInMonth,l:'Days Filed'}
-  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('â‚¹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 // ===== ALL RECORDS =====
@@ -1354,25 +1354,25 @@ function arToggleAnomalyMode(){
       btn.style.background = '#dc2626';
       btn.style.color = '#fff';
       btn.style.border = '1.5px solid #dc2626';
-      btn.textContent = '🔍 Showing Missing Reports Only — click to clear';
+      btn.textContent = 'ðŸ” Showing Missing Reports Only â€” click to clear';
     } else {
       btn.style.background = '#fef3c7';
       btn.style.color = '#92400e';
       btn.style.border = '1.5px solid #fcd34d';
-      btn.textContent = '🔍 Show Missing Reports';
+      btn.textContent = 'ðŸ” Show Missing Reports';
     }
   }
   genAllRecords();
 }
 
-// Pre-computed PMAM baselines (median daily values) — populated by _arBuildBaselines
+// Pre-computed PMAM baselines (median daily values) â€” populated by _arBuildBaselines
 var _arBaselines = null;
 
 function _arBuildBaselines(){
   // For each PMAM (keyed by pmam_email or name), compute median IPD/Reg/Claim
   // per single-record entry. Use median so a single outlier doesn't poison
   // the baseline.
-  var grouped = {}; // key → { ipds:[], regs:[], clms:[], pres:[] }
+  var grouped = {}; // key â†’ { ipds:[], regs:[], clms:[], pres:[] }
   (allReports || []).forEach(function(r){
     var key = (r.pmam_email && r.pmam_email.trim()) || r.email || r.name || 'unknown';
     if (!grouped[key]) grouped[key] = { ipds:[], regs:[], clms:[], pres:[] };
@@ -1414,9 +1414,9 @@ function _arDetectAnomalies(r){
   if(pre > ipd * 5 && pre > 50){
     issues.push('Pre-Auth (' + pre + ') is implausibly larger than IPD (' + ipd + ')');
   }
-  // 2) Register > IPD (conv > 100%) — impossible
+  // 2) Register > IPD (conv > 100%) â€” impossible
   if(reg > ipd && ipd > 0){
-    issues.push('Register (' + reg + ') exceeds IPD (' + ipd + ') — Conv% > 100%');
+    issues.push('Register (' + reg + ') exceeds IPD (' + ipd + ') â€” Conv% > 100%');
   }
   // 3) Conserv + Surgery > IPD
   if((med + surg) > ipd && ipd > 0){
@@ -1428,13 +1428,13 @@ function _arDetectAnomalies(r){
   }
   // 5) Claim without any registration
   if(Number(r.clm||0) > 0 && reg === 0){
-    issues.push('Claim (₹' + r.clm + ') but no Register');
+    issues.push('Claim (â‚¹' + r.clm + ') but no Register');
   }
 
-  // 6) STATISTICAL OUTLIER — catches "whole month dumped into one day" pattern
-  // If this PMAM has at least 5 records and the current record's IPD is >= 8×
+  // 6) STATISTICAL OUTLIER â€” catches "whole month dumped into one day" pattern
+  // If this PMAM has at least 5 records and the current record's IPD is >= 8Ã—
   // their median daily IPD, flag it. (Median is robust against the outlier
-  // itself.) Same logic for Register and Claim — any one of the three being
+  // itself.) Same logic for Register and Claim â€” any one of the three being
   // a wild outlier raises the flag.
   if (_arBaselines){
     var key = (r.pmam_email && r.pmam_email.trim()) || r.email || r.name || 'unknown';
@@ -1442,16 +1442,16 @@ function _arDetectAnomalies(r){
     if (base && base.count >= 5){
       var outlierReasons = [];
       if (base.ipdMedian > 0 && ipd >= base.ipdMedian * 8 && ipd >= 20){
-        outlierReasons.push('IPD ' + ipd + ' is ~' + Math.round(ipd/base.ipdMedian) + '× this PMAM\'s typical daily IPD (median ' + base.ipdMedian + ')');
+        outlierReasons.push('IPD ' + ipd + ' is ~' + Math.round(ipd/base.ipdMedian) + 'Ã— this PMAM\'s typical daily IPD (median ' + base.ipdMedian + ')');
       }
       if (base.regMedian > 0 && reg >= base.regMedian * 8 && reg >= 20){
-        outlierReasons.push('Register ' + reg + ' is ~' + Math.round(reg/base.regMedian) + '× this PMAM\'s typical (median ' + base.regMedian + ')');
+        outlierReasons.push('Register ' + reg + ' is ~' + Math.round(reg/base.regMedian) + 'Ã— this PMAM\'s typical (median ' + base.regMedian + ')');
       }
       if (base.clmMedian > 0 && Number(r.clm||0) >= base.clmMedian * 8 && Number(r.clm||0) >= 50000){
-        outlierReasons.push('Claim ₹' + r.clm + ' is ~' + Math.round(Number(r.clm)/base.clmMedian) + '× this PMAM\'s typical claim (median ₹' + base.clmMedian + ')');
+        outlierReasons.push('Claim â‚¹' + r.clm + ' is ~' + Math.round(Number(r.clm)/base.clmMedian) + 'Ã— this PMAM\'s typical claim (median â‚¹' + base.clmMedian + ')');
       }
       if (outlierReasons.length){
-        issues.push('⚠ STATISTICAL OUTLIER (possibly whole-month data on one day): ' + outlierReasons.join('; '));
+        issues.push('âš  STATISTICAL OUTLIER (possibly whole-month data on one day): ' + outlierReasons.join('; '));
       }
     }
   }
@@ -1461,7 +1461,7 @@ function _arDetectAnomalies(r){
 
 // Format submission timestamp + lag
 function _arFmtSubmission(r){
-  if(!r.timestamp || !r.date) return { ts:'—', lag:'—', lagColor:'#9ca3af' };
+  if(!r.timestamp || !r.date) return { ts:'â€”', lag:'â€”', lagColor:'#9ca3af' };
   var sub = new Date(r.timestamp);
   var rep = new Date(r.date + 'T00:00:00');
   // Format submission as "DD-MM HH:mm"
@@ -1558,7 +1558,7 @@ function genAllRecords(){
     document.getElementById('arCount').textContent = totalMissing + ' missing reports';
 
     if (totalMissing === 0) {
-      document.getElementById('allTbody').innerHTML = '<tr><td colspan="18" class="empty-td">✓ No missing reports found in this period.</td></tr>';
+      document.getElementById('allTbody').innerHTML = '<tr><td colspan="18" class="empty-td">âœ“ No missing reports found in this period.</td></tr>';
       document.getElementById('allFoot').innerHTML = '';
       document.getElementById('arMetrics').innerHTML = '';
       return;
@@ -1640,8 +1640,8 @@ function genAllRecords(){
     var sub = _arFmtSubmission(r);
     var entryId = (r.id || '').substring(0, 8); // short hash
     var flag = isAnomaly
-      ? '<span style="color:#dc2626;font-size:14px;cursor:help" title="' + issues.join(' &#10; ').replace(/"/g,'&quot;') + '">⚠</span>'
-      : '<span style="color:#16a34a;font-size:12px">✓</span>';
+      ? '<span style="color:#dc2626;font-size:14px;cursor:help" title="' + issues.join(' &#10; ').replace(/"/g,'&quot;') + '">âš </span>'
+      : '<span style="color:#16a34a;font-size:12px">âœ“</span>';
     return `
     <tr style="${rowBg}">
       <td>${i+1}</td>
@@ -1666,16 +1666,16 @@ function genAllRecords(){
   `}).join('');
 
   // Footer: 4 col headers + numeric totals
-  document.getElementById('allFoot').innerHTML = `<tr class="tot-row"><td colspan="4">TOTAL${anomalyCount?' — ⚠ '+anomalyCount+' anomalies':''}</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td><td colspan="5"></td></tr>`;
+  document.getElementById('allFoot').innerHTML = `<tr class="tot-row"><td colspan="4">TOTAL${anomalyCount?' â€” âš  '+anomalyCount+' anomalies':''}</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td><td colspan="5"></td></tr>`;
 
   document.getElementById('arMetrics').innerHTML = [
     {c:'c1',n:tIPD,l:'Filtered IPD'},
     {c:'c2',n:tReg,l:'Registered'},
     {c:'c3',n:tPre,l:'Pre-Auth'},
     {c:'c4',n:tDis,l:'Discharged'},
-    {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'},
-    {c:'c6',n: (anomalyCount > 0 ? '⚠ '+anomalyCount : '✓ 0'), l:'Anomalies'}
-  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
+    {c:'c5',n:'â‚¹'+fmt(tClm),l:'Claim Amt'},
+    {c:'c6',n: (anomalyCount > 0 ? 'âš  '+anomalyCount : 'âœ“ 0'), l:'Anomalies'}
+  ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('â‚¹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
 
 function clearAllRecordsFilter() {
@@ -1794,16 +1794,16 @@ function loadLeaveReq(){
           <div style="font-size:11px;color:#9ca3af">${new Date(l.timestamp).toLocaleDateString()}</div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin-bottom:12px">
-          <div><span style="color:#6b7280;font-weight:600">Ward:</span> ${l.ward||'—'}</div>
-          <div><span style="color:#6b7280;font-weight:600">Leave Type:</span> ${l.ltype||'—'}</div>
-          <div><span style="color:#6b7280;font-weight:600">Dates:</span> ${l.fromDt||'—'} to ${l.toDt||'—'} (${l.days||0} days)</div>
-          <div><span style="color:#6b7280;font-weight:600">Substitute:</span> ${l.duty||'—'}</div>
-          <div style="grid-column:1/-1"><span style="color:#6b7280;font-weight:600">Reason:</span> ${l.reason||'—'}</div>
+          <div><span style="color:#6b7280;font-weight:600">Ward:</span> ${l.ward||'â€”'}</div>
+          <div><span style="color:#6b7280;font-weight:600">Leave Type:</span> ${l.ltype||'â€”'}</div>
+          <div><span style="color:#6b7280;font-weight:600">Dates:</span> ${l.fromDt||'â€”'} to ${l.toDt||'â€”'} (${l.days||0} days)</div>
+          <div><span style="color:#6b7280;font-weight:600">Substitute:</span> ${l.duty||'â€”'}</div>
+          <div style="grid-column:1/-1"><span style="color:#6b7280;font-weight:600">Reason:</span> ${l.reason||'â€”'}</div>
         </div>
         <div style="display:flex;gap:8px" id="lactions_${l.id}">
           <input type="text" id="lremark_${l.id}" placeholder="Remarks (optional)" style="flex:1;padding:6px 10px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px">
-          <button style="background:#166534;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer" onclick="approveLeaveFb('${l.id}')">✓ Approve</button>
-          <button style="background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer" onclick="rejectLeaveFb('${l.id}')">✗ Reject</button>
+          <button style="background:#166534;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer" onclick="approveLeaveFb('${l.id}')">âœ“ Approve</button>
+          <button style="background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer" onclick="rejectLeaveFb('${l.id}')">âœ— Reject</button>
         </div>
       </div>
     `).join('');
@@ -1823,7 +1823,7 @@ function loadLeaveReq(){
         <td>${l.days}</td>
         <td>${l.duty}</td>
         <td><span class="badge badge-${l.status==='Approved'?'green':'red'}">${l.status}</span></td>
-        <td>${l.remark||'—'}</td>
+        <td>${l.remark||'â€”'}</td>
       </tr>
     `).join('');
   }
@@ -1883,12 +1883,12 @@ function exportExcel(tblId,name){
   a.click();
 }
 
-// ══════════════════════════════════════
-// ENHANCED PRINT — supports orientation + government letterhead
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ENHANCED PRINT â€” supports orientation + government letterhead
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function inrFmt(n){
   n = Math.round(Number(n)||0);
-  if (n === 0) return '₹0';
+  if (n === 0) return 'â‚¹0';
   var s = String(Math.abs(n));
   // Indian formatting: last 3 digits, then groups of 2
   var last3 = s.slice(-3);
@@ -1899,11 +1899,11 @@ function inrFmt(n){
   } else {
     s = last3;
   }
-  return '₹' + (n < 0 ? '-' : '') + s;
+  return 'â‚¹' + (n < 0 ? '-' : '') + s;
 }
 
-// ══════════════════════════════════════════════════════════════════════
-// PRINT REPORT — fancy template with circular logos, dashed header
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PRINT REPORT â€” fancy template with circular logos, dashed header
 // pill, blue banner, and auto-print + auto-close.
 //
 // Public API (unchanged so the existing buttons keep working):
@@ -1911,13 +1911,13 @@ function inrFmt(n){
 //   printReportOrient(areaId, title, orientation)
 //
 // Logos:
-//   - logo1 (left, Ayushman Bharat) — pulled from settings/portal.logo1
+//   - logo1 (left, Ayushman Bharat) â€” pulled from settings/portal.logo1
 //     (admin Branding tab). No hardcoded fallback; if missing, omitted.
-//   - logo2 (right, GMC Rajouri) — pulled from settings/portal.logo2,
+//   - logo2 (right, GMC Rajouri) â€” pulled from settings/portal.logo2,
 //     OR if Firebase doesn't have one, falls back to a hardcoded base64
 //     copy of GMC_LOGO_NEW.jpg embedded right below.
-// ══════════════════════════════════════════════════════════════════════
-// GMC_LOGO_FALLBACK removed — logos now come from shared/logos.js (GMCLogos.gmc)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// GMC_LOGO_FALLBACK removed â€” logos now come from shared/logos.js (GMCLogos.gmc)
 
 function printReport(title){
   printReportOrient(null, title || 'Report', 'portrait');
@@ -1942,7 +1942,7 @@ function _ensurePrintLogos(cb){
   });
 }
 
-// printReportOrient — opens the print options modal with sensible defaults
+// printReportOrient â€” opens the print options modal with sensible defaults
 // for this report. The actual print happens in _doPrintReport after the user
 // chooses format and orientation in the modal.
 function printReportOrient(areaId, title, orientation){
@@ -1960,7 +1960,7 @@ function printReportOrient(areaId, title, orientation){
   });
 }
 
-// Internal print runner — generates the popup window with the chosen
+// Internal print runner â€” generates the popup window with the chosen
 // letterhead format and orientation. Pulls the letterhead from
 // GMCHeaders.abpmjayReport() or GMCHeaders.msReport() in shared/headers.js.
 function _doPrintReport(areaId, title, format, orientation){
@@ -2043,9 +2043,9 @@ function _doPrintReport(areaId, title, format, orientation){
   var baseHref = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
 
   var w = window.open('', '_blank', 'width=1200,height=900');
-  if (!w) { alert('Popup blocked — please allow popups for this site to print.'); return; }
+  if (!w) { alert('Popup blocked â€” please allow popups for this site to print.'); return; }
 
-  // Inner page CSS — body styling + table styles + show/hide rules.
+  // Inner page CSS â€” body styling + table styles + show/hide rules.
   // No more hardcoded letterhead CSS; that comes from shared/headers.css.
   var pageCSS = ''
     + '@page { size: ' + pageSize + ' ' + orient + '; margin: 12mm; }'
@@ -2110,7 +2110,7 @@ function _doPrintReport(areaId, title, format, orientation){
   w.document.close();
 }
 
-// Print options modal — small dropdown to choose format + orientation
+// Print options modal â€” small dropdown to choose format + orientation
 function showPrintOptionsModal(opts){
   opts = opts || {};
   var existing = document.getElementById('printOptsModal');
@@ -2156,9 +2156,9 @@ function showPrintOptionsModal(opts){
   };
 }
 
-// ══════════════════════════════════════
-// PMAM LIST — pulled from users collection, cached for daily report
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PMAM LIST â€” pulled from users collection, cached for daily report
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 var _allPmams = []; // [{name, email}]
 function fetchPmamList(cb){
   if (_allPmams.length > 0 && cb) { cb(_allPmams); return; }
@@ -2189,23 +2189,23 @@ function fetchPmamList(cb){
 }
 
 // Resolve a PMAM record to its canonical display name. Priority order:
-//   1) If email is provided AND matches a user → use that user's CURRENT name
-//      (this is the FK-based lookup — survives any name rename)
+//   1) If email is provided AND matches a user â†’ use that user's CURRENT name
+//      (this is the FK-based lookup â€” survives any name rename)
 //   2) Else fuzzy-match the free-text name against the users collection
 //   3) Else return the input unchanged
-// Safe to call before _allPmams loads — returns input unchanged.
+// Safe to call before _allPmams loads â€” returns input unchanged.
 function canonicalPmamName(name, email){
   if (!_allPmams || !_allPmams.length) {
     return name ? String(name).trim() : name;
   }
-  // ── PRIMARY: email lookup (immutable foreign key) ──
+  // â”€â”€ PRIMARY: email lookup (immutable foreign key) â”€â”€
   if (email){
     var eL = String(email).toLowerCase().trim();
     for (var i=0; i<_allPmams.length; i++){
       if ((_allPmams[i].email || '').toLowerCase() === eL) return _allPmams[i].name;
     }
   }
-  // ── FALLBACK: fuzzy name match (for legacy records with no email) ──
+  // â”€â”€ FALLBACK: fuzzy name match (for legacy records with no email) â”€â”€
   if (!name) return name;
   var n = String(name).trim();
   if (!n) return name;
@@ -2223,7 +2223,7 @@ function canonicalPmamName(name, email){
   for (var i=0; i<_allPmams.length; i++){
     if (_allPmams[i].name.toLowerCase().replace(/\s+/g,' ') === nC) return _allPmams[i].name;
   }
-  // 4) startsWith ("ABRAR CHOUDHARY 700" → "ABRAR CHOUDHARY")
+  // 4) startsWith ("ABRAR CHOUDHARY 700" â†’ "ABRAR CHOUDHARY")
   for (var i=0; i<_allPmams.length; i++){
     var cL = _allPmams[i].name.toLowerCase();
     if (nL.indexOf(cL) === 0 && (nL.length - cL.length) <= 8) return _allPmams[i].name;
@@ -2246,10 +2246,10 @@ function canonicalWardLabel(label, wardId){
   return label;
 }
 
-// ══════════════════════════════════════
-// DAILY REPORT — generate
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// DAILY REPORT â€” generate
 // Merges multiple entries per PMAM on the same date. Includes missing PMAMs with 0 values.
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function dailyToggleRange(){
   var mode = document.getElementById('dailyMode').value;
   document.getElementById('dailyDateWrap').style.display = (mode === 'single') ? 'flex' : 'none';
@@ -2264,16 +2264,16 @@ function genDaily(){
     var d = document.getElementById('dailyDate').value;
     if (!d) { alert('Please select a date.'); return; }
     dateFrom = d; dateTo = d;
-    title = 'Daily Summary — ' + new Date(d).toLocaleDateString('en-IN', { dateStyle:'long' });
+    title = 'Daily Summary â€” ' + new Date(d).toLocaleDateString('en-IN', { dateStyle:'long' });
   } else {
     dateFrom = document.getElementById('dailyFrom').value;
     dateTo   = document.getElementById('dailyTo').value;
     if (!dateFrom || !dateTo) { alert('Please select both From and To dates.'); return; }
     if (dateFrom > dateTo) { alert('From date cannot be after To date.'); return; }
-    title = 'Daily Summary — ' + new Date(dateFrom).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + ' to ' + new Date(dateTo).toLocaleDateString('en-IN',{dateStyle:'long'});
+    title = 'Daily Summary â€” ' + new Date(dateFrom).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + ' to ' + new Date(dateTo).toLocaleDateString('en-IN',{dateStyle:'long'});
   }
   document.getElementById('dailyTitle').textContent = title;
-  document.getElementById('dailyTbody').innerHTML = '<tr><td colspan="9" class="empty-td">Loading…</td></tr>';
+  document.getElementById('dailyTbody').innerHTML = '<tr><td colspan="9" class="empty-td">Loadingâ€¦</td></tr>';
 
   // Filter records for the date(s)
   var filtered = allReports.filter(function(r){
@@ -2321,7 +2321,7 @@ function genDaily(){
     var totals = { ipd:0, reg:0, pre:0, preAmt:0, dis:0, clm:0 };
     var html = rows.map(function(r, i){
       totals.ipd+=r.ipd; totals.reg+=r.reg; totals.pre+=r.pre; totals.preAmt+=r.preAmt; totals.dis+=r.dis; totals.clm+=r.clm;
-      var wardsStr = r.wards.length ? r.wards.join(', ') : '—';
+      var wardsStr = r.wards.length ? r.wards.join(', ') : 'â€”';
       // Check if any report for this PMAM in the date range is flagged
       var flagged = filtered.some(function(rep){
         return (rep.email === r.email || rep.name === r.name)
@@ -2332,11 +2332,11 @@ function genDaily(){
           && rep._flag && rep._flag.disputed;
       });
       var flagIcon = disputed
-        ? ' <span title="PMAM has disputed this flag — awaiting admin review" style="cursor:help">⚠️</span>'
-        : (flagged ? ' <span title="This report has been flagged by admin for review" style="cursor:help">🚩</span>' : '');
+        ? ' <span title="PMAM has disputed this flag â€” awaiting admin review" style="cursor:help">âš ï¸</span>'
+        : (flagged ? ' <span title="This report has been flagged by admin for review" style="cursor:help">ðŸš©</span>' : '');
       return '<tr'+(flagged ? ' style="background:#fff8f8"' : '')+'>'
         + '<td>'+(i+1)+'</td>'
-        + '<td class="txt">'+(r.name||'—')+flagIcon+'</td>'
+        + '<td class="txt">'+(r.name||'â€”')+flagIcon+'</td>'
         + '<td class="txt">'+wardsStr+'</td>'
         + '<td>'+r.ipd+'</td>'
         + '<td>'+r.reg+'</td>'
@@ -2367,7 +2367,7 @@ function genDaily(){
       { c:'c5', n:totals.dis, l:'Discharged' },
       { c:'c6', n:inrFmt(totals.clm), l:'Claim Amt' }
     ].map(function(m){
-      var isCurr = String(m.n).indexOf('₹') >= 0 ? ' has-currency' : '';
+      var isCurr = String(m.n).indexOf('â‚¹') >= 0 ? ' has-currency' : '';
       return '<div class="mcard '+m.c+isCurr+'"><div class="mcard-num">'+m.n+'</div><div class="mcard-label">'+m.l+'</div></div>';
     }).join('');
   });
@@ -2378,18 +2378,18 @@ function printReport_DEPRECATED(title){
   window.print();
 }
 
-// INIT — load monthly on start
+// INIT â€” load monthly on start
 let allReports = [];
 
 window.addEventListener('load',()=>{
-  // Production session guard — only authenticated I/C AB-PMJAY or Admin
+  // Production session guard â€” only authenticated I/C AB-PMJAY or Admin
   // may view this portal. Unauthenticated users are sent to login.
   var ADMIN_EMAIL = 'aravarya99@gmail.com';
   var u;
   try { u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); } catch(e) { u = {}; }
   if (!u || !u.email) { window.location.replace('index.html'); return; }
   if (u.email !== ADMIN_EMAIL && u.role !== 'I/C AB-PMJAY') {
-    // Wrong role for this portal → send to the correct one.
+    // Wrong role for this portal â†’ send to the correct one.
     if (u.role === 'DEO') window.location.replace('patient_services_portal.html');
     else                  window.location.replace('pmam_portal.html');
     return;
@@ -2430,7 +2430,7 @@ function fetchFirebaseData() {
     snap.forEach(doc => {
       var data = doc.data();
 
-      // ── Step 1: Derive FK fields (pmam_email, ward_ids[]) if missing on legacy records ──
+      // â”€â”€ Step 1: Derive FK fields (pmam_email, ward_ids[]) if missing on legacy records â”€â”€
       if (!data.pmam_email && data.email) {
         data.pmam_email = String(data.email).toLowerCase().trim();
       } else if (data.pmam_email) {
@@ -2449,7 +2449,7 @@ function fetchFirebaseData() {
           .filter(Boolean);
       }
 
-      // ── Step 2: Refresh display names from CURRENT registries (handles renames) ──
+      // â”€â”€ Step 2: Refresh display names from CURRENT registries (handles renames) â”€â”€
       // PMAM name: lookup by email FK first, then fuzzy-match name as fallback
       if (typeof canonicalPmamName === 'function') {
         data.name = canonicalPmamName(data.name, data.pmam_email);
@@ -2570,7 +2570,7 @@ function renderLeaveDash() {
   var currentMonth = today.substring(0, 7); // YYYY-MM
   
   // 1. Calculate KPIs
-  var totalPMAM = pmams.length;
+  var pmams = window._allPmams || [];`r`n  var totalPMAM = pmams.length;
   var onLeaveToday = 0;
   var pendingReqs = 0;
   var approvedThisMonth = 0;
@@ -2609,23 +2609,23 @@ function renderLeaveDash() {
   // Render KPIs
   var kpiHtml = `
     <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-       <div style="width:48px;height:48px;border-radius:12px;background:#EBF5FF;display:flex;align-items:center;justify-content:center;font-size:24px;">👨‍👩‍👦</div>
+       <div style="width:48px;height:48px;border-radius:12px;background:#EBF5FF;display:flex;align-items:center;justify-content:center;font-size:24px;">ðŸ‘¨â€ðŸ‘©â€ðŸ‘¦</div>
        <div><div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;">Total PMAM</div><div style="font-size:20px;font-weight:800;color:#0f172a;">${totalPMAM}</div></div>
     </div>
     <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-       <div style="width:48px;height:48px;border-radius:12px;background:#dcfce7;display:flex;align-items:center;justify-content:center;font-size:24px;">✅</div>
+       <div style="width:48px;height:48px;border-radius:12px;background:#dcfce7;display:flex;align-items:center;justify-content:center;font-size:24px;">âœ…</div>
        <div><div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;">Present Today</div><div style="font-size:20px;font-weight:800;color:#15803d;">${presentToday}</div></div>
     </div>
     <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-       <div style="width:48px;height:48px;border-radius:12px;background:#ffedd5;display:flex;align-items:center;justify-content:center;font-size:24px;">🕒</div>
+       <div style="width:48px;height:48px;border-radius:12px;background:#ffedd5;display:flex;align-items:center;justify-content:center;font-size:24px;">ðŸ•’</div>
        <div><div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;">On Leave Today</div><div style="font-size:20px;font-weight:800;color:#c2410c;">${onLeaveToday}</div></div>
     </div>
     <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-       <div style="width:48px;height:48px;border-radius:12px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:24px;">⏳</div>
+       <div style="width:48px;height:48px;border-radius:12px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:24px;">â³</div>
        <div><div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;">Pending Requests</div><div style="font-size:20px;font-weight:800;color:#b45309;">${pendingReqs}</div></div>
     </div>
     <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-       <div style="width:48px;height:48px;border-radius:12px;background:#f3e8ff;display:flex;align-items:center;justify-content:center;font-size:24px;">📈</div>
+       <div style="width:48px;height:48px;border-radius:12px;background:#f3e8ff;display:flex;align-items:center;justify-content:center;font-size:24px;">ðŸ“ˆ</div>
        <div><div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;">Approved This Month</div><div style="font-size:20px;font-weight:800;color:#7e22ce;">${approvedThisMonth}</div></div>
     </div>
   `;
@@ -2704,7 +2704,7 @@ function renderLeaveDash() {
     var dStr = a.date ? new Date(a.date).toLocaleDateString('en-GB') : 'Just now';
     actHtml += `
       <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
-         <div style="width:32px; height:32px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center; color:#2563eb; font-size:14px; flex-shrink:0;">📌</div>
+         <div style="width:32px; height:32px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center; color:#2563eb; font-size:14px; flex-shrink:0;">ðŸ“Œ</div>
          <div>
             <div style="font-size:13px; font-weight:500; color:#1e293b;">${a.text}</div>
             <div style="font-size:11px; color:#64748b; margin-top:4px;">${dStr}</div>
@@ -2947,7 +2947,7 @@ function updateLeaveBadges() {
 
   set('lv-onleave',  onLeaveToday);
 
-  // Tab counter (previously hardcoded to 3 — now live)
+  // Tab counter (previously hardcoded to 3 â€” now live)
   set('pendingCnt', pending);
 
   // Optional sidebar badge on the Leave Requests nav item (if one exists).
@@ -2958,9 +2958,9 @@ function updateLeaveBadges() {
   }
 }
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // FIREBASE HELPERS
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function fbSendOTP(email, onSuccess, onError) {
   var otp = Math.floor(100000 + Math.random() * 900000).toString();
   var expires = Date.now() + 10 * 60 * 1000;
@@ -2986,9 +2986,9 @@ function fbVerifyOTP(email, otp, onSuccess, onError) {
 }
 
 
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SESSION + LOGOUT
-// ══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function loadSessionUser() {
   try {
     var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
@@ -3012,7 +3012,7 @@ function loadSessionUser() {
     var iniEl=document.querySelector('.ini'); if(iniEl) iniEl.textContent=ini;
     var ddAv=document.querySelector('.dd-av'); if(ddAv) ddAv.textContent=ini;
     var ddName=document.querySelector('.dd-hname'); if(ddName) ddName.textContent=name;
-    var ddRole=document.querySelector('.dd-hrole'); if(ddRole) ddRole.textContent=role+' — GMC Rajouri';
+    var ddRole=document.querySelector('.dd-hrole'); if(ddRole) ddRole.textContent=role+' â€” GMC Rajouri';
   } catch(e) { console.error('loadSessionUser:',e); }
 }
 
@@ -3071,7 +3071,7 @@ function saveProfile() {
     { merge: true }
   ).then(function() {
     closeModal();
-    alert('✅ Profile updated successfully.');
+    alert('âœ… Profile updated successfully.');
   }).catch(function(err) {
     alert('Error saving profile: ' + err.message);
   });
@@ -3083,11 +3083,11 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// ══════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ADMIN-CONTROLLED TICKER LOADER
 // Reads settings/tickers.ic from Firestore and renders the ticker bar.
-// Uses onSnapshot for live updates — admin's saves appear instantly.
-// ══════════════════════════════════════════════════════════════════════
+// Uses onSnapshot for live updates â€” admin's saves appear instantly.
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 window.addEventListener('DOMContentLoaded', function(){
   try {
     
@@ -3109,11 +3109,11 @@ window.addEventListener('DOMContentLoaded', function(){
       var sev = t.severity || 'info';
       bar.className = 'tk-' + (['info','success','warning','danger'].indexOf(sev) >= 0 ? sev : 'info');
       var msg = String(t.message).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      var html = '📣 ' + msg;
+      var html = 'ðŸ“£ ' + msg;
       if (t.link) {
         var safeLink = String(t.link).replace(/"/g,'&quot;');
         var label = t.linkLabel ? String(t.linkLabel).replace(/&/g,'&amp;').replace(/</g,'&lt;') : 'Read more';
-        html += '<a href="' + safeLink + '" target="_blank" rel="noopener">' + label + ' →</a>';
+        html += '<a href="' + safeLink + '" target="_blank" rel="noopener">' + label + ' â†’</a>';
       }
       bar.innerHTML = html;
       bar.style.display = 'block';
@@ -3146,10 +3146,10 @@ window.addEventListener('DOMContentLoaded', function(){
 .modal-bg.open { display:flex !important; }
 </style>
 
-<!-- ═══ WARD_REGISTRY (auto-injected) ═══ -->
+<!-- â•â•â• WARD_REGISTRY (auto-injected) â•â•â• -->
 <script>
-// ════════════════════════════════════════════════════════════════════════
-// WARD_REGISTRY — single source of truth for ward labels, icons, colors,
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// WARD_REGISTRY â€” single source of truth for ward labels, icons, colors,
 // and case-type classification across ALL portals.
 //
 // Data lives in Firestore at settings/wards.
@@ -3161,26 +3161,26 @@ window.addEventListener('DOMContentLoaded', function(){
 //   1) Subscribes to settings/wards via onSnapshot
 //   2) If doc is missing OR uses legacy array shape, falls back to DEFAULTS
 //      and (admin-portal only) writes DEFAULTS up to Firestore
-//   3) Maintains ALIAS map: old hard-coded names → canonical labels, so
+//   3) Maintains ALIAS map: old hard-coded names â†’ canonical labels, so
 //      pre-existing Firestore data (users, rosters) keeps resolving
 //
 // Public API:
-//   WARD_REGISTRY.list()              → array of canonical ward objects
-//   WARD_REGISTRY.byLabel(name)       → ward object (resolves aliases)
-//   WARD_REGISTRY.canonical(name)     → canonical label string
-//   WARD_REGISTRY.caseType(name)      → 'conservative' | 'surgery' | 'both'
-//   WARD_REGISTRY.icon(name)          → emoji or img-src string
-//   WARD_REGISTRY.color(name)         → CSS color (hex)
-//   WARD_REGISTRY.pill(name, opts?)   → HTML string of a colored pill
-//   WARD_REGISTRY.populateSelect(sel, selected?, opts?) → fills a <select>
-//   WARD_REGISTRY.onReady(cb)         → fires once when data is loaded
-//   WARD_REGISTRY.onChange(cb)        → fires on every Firestore update
-// ════════════════════════════════════════════════════════════════════════
+//   WARD_REGISTRY.list()              â†’ array of canonical ward objects
+//   WARD_REGISTRY.byLabel(name)       â†’ ward object (resolves aliases)
+//   WARD_REGISTRY.canonical(name)     â†’ canonical label string
+//   WARD_REGISTRY.caseType(name)      â†’ 'conservative' | 'surgery' | 'both'
+//   WARD_REGISTRY.icon(name)          â†’ emoji or img-src string
+//   WARD_REGISTRY.color(name)         â†’ CSS color (hex)
+//   WARD_REGISTRY.pill(name, opts?)   â†’ HTML string of a colored pill
+//   WARD_REGISTRY.populateSelect(sel, selected?, opts?) â†’ fills a <select>
+//   WARD_REGISTRY.onReady(cb)         â†’ fires once when data is loaded
+//   WARD_REGISTRY.onChange(cb)        â†’ fires on every Firestore update
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 (function(){
   'use strict';
 
-  // ── Color tokens (consistent across portals) ──────────────────────────
+  // â”€â”€ Color tokens (consistent across portals) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   var C = {
     red:         { bg:'#fee2e2', text:'#dc2626', border:'#fecaca' },
     darkRed:     { bg:'#fecaca', text:'#991b1b', border:'#f87171' },
@@ -3198,29 +3198,29 @@ window.addEventListener('DOMContentLoaded', function(){
     violet:      { bg:'#f3e8ff', text:'#7c3aed', border:'#d8b4fe' }
   };
 
-  // ── DEFAULT WARDS (from spec — admin can override via Firestore) ──────
+  // â”€â”€ DEFAULT WARDS (from spec â€” admin can override via Firestore) â”€â”€â”€â”€â”€â”€
   var DEFAULTS = [
-    { id:'pm_rahat',         label:'PM RAHAT',          icon:'🚑',        colorKey:'red',         caseType:'both',         order:0  },
-    { id:'orthopaedics',     label:'Orthopaedics',      icon:'🦴',        colorKey:'orange',      caseType:'both',         order:1  },
-    { id:'male_surgical',    label:'Male Surgical',     icon:'👨🔪',       colorKey:'indigo',      caseType:'both',         order:2  },
-    { id:'female_surgical',  label:'Female Surgical',   icon:'👩🔪',       colorKey:'pinkIndigo',  caseType:'both',         order:3  },
-    { id:'male_medical_a',   label:'Male Medical A',    icon:'👨\u200d⚕️🩺🅰️', colorKey:'blue',  caseType:'conservative', order:4  },
-    { id:'male_medical_b',   label:'Male Medical B',    icon:'👨\u200d⚕️🩺🅱️', colorKey:'blue',  caseType:'conservative', order:5  },
-    { id:'female_medical_a', label:'Female Medical A',  icon:'👩\u200d⚕️🩺🅰️', colorKey:'rose',  caseType:'conservative', order:6  },
-    { id:'female_medical_b', label:'Female Medical B',  icon:'👩\u200d⚕️🩺🅱️', colorKey:'rose',  caseType:'conservative', order:7  },
-    { id:'micu',             label:'MICU',              icon:'❤️\u200d🩹📈',   colorKey:'red',     caseType:'conservative', order:8  },
-    { id:'sicu',             label:'SICU',              icon:'🛏️📈',      colorKey:'darkRed',     caseType:'both',         order:9  },
-    { id:'picu',             label:'PICU',              icon:'👶',        colorKey:'skyBlue',     caseType:'both',         order:10 },
-    { id:'dialysis',         label:'Dialysis',          icon:'💧🩸',      colorKey:'blue',        caseType:'conservative', order:11 },
-    { id:'gynecology',       label:'Gynecology',        icon:'♀️',        colorKey:'pink',        caseType:'both',         order:12 },
-    { id:'ophthalmology',    label:'Ophthalmology',     icon:'👁️',        colorKey:'teal',        caseType:'surgery',      order:13 },
-    { id:'ent',              label:'ENT',               icon:'👂',        colorKey:'purple',      caseType:'both',         order:14 },
-    { id:'dental',           label:'Dental',            icon:'🦷',        colorKey:'cyan',        caseType:'both',         order:15 },
-    { id:'oncology',         label:'Oncology',          icon:'🎗️',        colorKey:'violet',      caseType:'conservative', order:16 },
-    { id:'disaster',         label:'Disaster',          icon:'🚨',        colorKey:'brightRed',   caseType:'both',         order:17 }
+    { id:'pm_rahat',         label:'PM RAHAT',          icon:'ðŸš‘',        colorKey:'red',         caseType:'both',         order:0  },
+    { id:'orthopaedics',     label:'Orthopaedics',      icon:'ðŸ¦´',        colorKey:'orange',      caseType:'both',         order:1  },
+    { id:'male_surgical',    label:'Male Surgical',     icon:'ðŸ‘¨ðŸ”ª',       colorKey:'indigo',      caseType:'both',         order:2  },
+    { id:'female_surgical',  label:'Female Surgical',   icon:'ðŸ‘©ðŸ”ª',       colorKey:'pinkIndigo',  caseType:'both',         order:3  },
+    { id:'male_medical_a',   label:'Male Medical A',    icon:'ðŸ‘¨\u200dâš•ï¸ðŸ©ºðŸ…°ï¸', colorKey:'blue',  caseType:'conservative', order:4  },
+    { id:'male_medical_b',   label:'Male Medical B',    icon:'ðŸ‘¨\u200dâš•ï¸ðŸ©ºðŸ…±ï¸', colorKey:'blue',  caseType:'conservative', order:5  },
+    { id:'female_medical_a', label:'Female Medical A',  icon:'ðŸ‘©\u200dâš•ï¸ðŸ©ºðŸ…°ï¸', colorKey:'rose',  caseType:'conservative', order:6  },
+    { id:'female_medical_b', label:'Female Medical B',  icon:'ðŸ‘©\u200dâš•ï¸ðŸ©ºðŸ…±ï¸', colorKey:'rose',  caseType:'conservative', order:7  },
+    { id:'micu',             label:'MICU',              icon:'â¤ï¸\u200dðŸ©¹ðŸ“ˆ',   colorKey:'red',     caseType:'conservative', order:8  },
+    { id:'sicu',             label:'SICU',              icon:'ðŸ›ï¸ðŸ“ˆ',      colorKey:'darkRed',     caseType:'both',         order:9  },
+    { id:'picu',             label:'PICU',              icon:'ðŸ‘¶',        colorKey:'skyBlue',     caseType:'both',         order:10 },
+    { id:'dialysis',         label:'Dialysis',          icon:'ðŸ’§ðŸ©¸',      colorKey:'blue',        caseType:'conservative', order:11 },
+    { id:'gynecology',       label:'Gynecology',        icon:'â™€ï¸',        colorKey:'pink',        caseType:'both',         order:12 },
+    { id:'ophthalmology',    label:'Ophthalmology',     icon:'ðŸ‘ï¸',        colorKey:'teal',        caseType:'surgery',      order:13 },
+    { id:'ent',              label:'ENT',               icon:'ðŸ‘‚',        colorKey:'purple',      caseType:'both',         order:14 },
+    { id:'dental',           label:'Dental',            icon:'ðŸ¦·',        colorKey:'cyan',        caseType:'both',         order:15 },
+    { id:'oncology',         label:'Oncology',          icon:'ðŸŽ—ï¸',        colorKey:'violet',      caseType:'conservative', order:16 },
+    { id:'disaster',         label:'Disaster',          icon:'ðŸš¨',        colorKey:'brightRed',   caseType:'both',         order:17 }
   ];
 
-  // ── ALIAS map: legacy names → canonical labels ────────────────────────
+  // â”€â”€ ALIAS map: legacy names â†’ canonical labels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Keys are matched case-insensitively (see canonicalLabel below).
   var ALIASES = {
     'Male Surgery Ward':      'Male Surgical',
@@ -3282,7 +3282,7 @@ window.addEventListener('DOMContentLoaded', function(){
     _onChange.forEach(function(cb){ try { cb(); } catch(e){ console.warn(e); } });
   }
 
-  // Map an arbitrary input name → canonical label (returns null if no match)
+  // Map an arbitrary input name â†’ canonical label (returns null if no match)
   function canonicalLabel(name) {
     if (!name) return null;
     var s = String(name).trim();
@@ -3299,7 +3299,7 @@ window.addEventListener('DOMContentLoaded', function(){
       var hit = _wards.find(function(w){ return w.label.toLowerCase() === sLower; });
       if (hit) return hit.label;
     }
-    return s; // unknown → return as-is so existing free-text wards still display
+    return s; // unknown â†’ return as-is so existing free-text wards still display
   }
 
   function byLabel(name) {
@@ -3310,7 +3310,7 @@ window.addEventListener('DOMContentLoaded', function(){
 
   function escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-  // ── Public API ────────────────────────────────────────────────────────
+  // â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   window.WARD_REGISTRY = {
     DEFAULTS: DEFAULTS,
     ALIASES:  ALIASES,
@@ -3329,8 +3329,8 @@ window.addEventListener('DOMContentLoaded', function(){
       opts = opts || {};
       var w = byLabel(name);
       if (!w) {
-        // Unknown ward — neutral grey pill (preserves the text)
-        return '<span class="ward-pill ward-pill-unknown" style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:50px;font-size:11px;font-weight:600;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb">'+escHtml(name||'—')+'</span>';
+        // Unknown ward â€” neutral grey pill (preserves the text)
+        return '<span class="ward-pill ward-pill-unknown" style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:50px;font-size:11px;font-weight:600;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb">'+escHtml(name||'â€”')+'</span>';
       }
       var c = w.color;
       var iconHtml = '';
@@ -3358,7 +3358,7 @@ window.addEventListener('DOMContentLoaded', function(){
       var caseTypeFilter = opts.caseType || null;  // 'conservative' | 'surgery' | 'both' | null
       var html = '';
       if (opts.placeholder !== false) {
-        html += '<option value="">'+(opts.placeholderText || '— Select Ward —')+'</option>';
+        html += '<option value="">'+(opts.placeholderText || 'â€” Select Ward â€”')+'</option>';
       }
       var list = _wards || DEFAULTS.map(hydrate);
       list.forEach(function(w){
@@ -3375,7 +3375,7 @@ window.addEventListener('DOMContentLoaded', function(){
     }
   };
 
-  // ── Initialise: subscribe to Firestore once `db` is available ─────────
+  // â”€â”€ Initialise: subscribe to Firestore once `db` is available â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function tryInit() {
     if (typeof db === 'undefined' || !db || !db.collection) {
       // Fall back to defaults immediately, then keep retrying for Firestore
@@ -3417,7 +3417,7 @@ window.addEventListener('DOMContentLoaded', function(){
     tryInit();
   }
 
-  // ─── Auto-populate any <select data-ward-select="1"> on the page ──────
+  // â”€â”€â”€ Auto-populate any <select data-ward-select="1"> on the page â”€â”€â”€â”€â”€â”€
   function _wardSelectsBootstrap(){
     if (!window.WARD_REGISTRY) { setTimeout(_wardSelectsBootstrap, 250); return; }
     function populate(){
@@ -3427,12 +3427,12 @@ window.addEventListener('DOMContentLoaded', function(){
         var current = sel.value || sel.getAttribute('data-pending-value') || '';
         var canon = WARD_REGISTRY.canonical(current);
         WARD_REGISTRY.populateSelect(sel, canon, {
-          placeholderText: sel.getAttribute('data-placeholder') || '— Select Ward —'
+          placeholderText: sel.getAttribute('data-placeholder') || 'â€” Select Ward â€”'
         });
         if (extras.length) {
           var sep = document.createElement('option');
           sep.disabled = true;
-          sep.textContent = '──────────';
+          sep.textContent = 'â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€';
           sel.appendChild(sep);
           extras.forEach(function(ex){
             var o = document.createElement('option');
@@ -3512,7 +3512,7 @@ function renderPmamProfiles() {
       html += `
         <div style="background:#1e1e24; border:1px solid #333; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); overflow:hidden; color:#e5e7eb; font-family:monospace;">
           <div style="background:#2d2d35; padding:12px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid #3f3f46;">
-             <span style="font-size:16px;">👤</span>
+             <span style="font-size:16px;">ðŸ‘¤</span>
              <span style="font-weight:700; font-size:14px; font-family:sans-serif;">${p.name}</span>
           </div>
           <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
@@ -3576,3 +3576,4 @@ function renderPmamProfiles() {
   <script src="shared/portal_header.js"></script>
 </body>
 </html>
+
