@@ -32,10 +32,10 @@
   width: 65px;
   height: 65px;
   border-radius: 50%;
-  border: 2px solid #2563eb;
-  padding: 2px;
+  border: 2.5px solid #2563eb;
+  padding: 0;
   background: #fff;
-  object-fit: contain;
+  object-fit: cover;
   flex-shrink: 0;
 }
 .ph-title-block {
@@ -96,10 +96,11 @@
   z-index: 1;
 }
 .ph-center-emblem {
-  width: 58px;
-  height: 58px;
+  width: 65px;
+  height: 65px;
   border-radius: 50%;
   border: 2.5px solid #2563eb;
+  padding: 0;
   background: #ffffff;
   box-shadow: 0 4px 12px rgba(37,99,235,0.15);
   z-index: 10;
@@ -108,6 +109,13 @@
   justify-content: center;
   overflow: hidden;
   margin-bottom: 2px;
+}
+.ph-center-emblem img, .ph-center-emblem svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
 }
 .ph-portal-name {
   color: #ea580c;
@@ -377,7 +385,7 @@
           
           <!-- LEFT: Branding -->
           <div class="ph-left">
-            <img src="${fallbackLogo}" class="ph-logo" id="headerGmcLogo" alt="GMC Rajouri" onerror="this.src='https://via.placeholder.com/58?text=GMC'">
+            <img src="${fallbackLogo}" class="ph-logo" id="headerGmcLogo" alt="GMC Rajouri" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 65 65'><circle cx='32.5' cy='32.5' r='32.5' fill='%231e3a8a'/><text x='50%' y='55%' text-anchor='middle' fill='white' font-weight='bold' font-size='14' font-family='sans-serif'>GMC</text></svg>'">
             <div class="ph-title-block">
               <div class="ph-title-top">AYUSHMAN BHARAT - PM-JAY</div>
               <div class="ph-title-mid">MANAGEMENT INFORMATION SYSTEM</div>
@@ -467,7 +475,7 @@
             if (doc.data().logo2) {
               var centerContainer = document.getElementById('centerLogoContainer');
               if (centerContainer) {
-                centerContainer.innerHTML = '<img src="' + doc.data().logo2 + '" style="width:100%;height:100%;object-fit:contain;border-radius:50%;">';
+                centerContainer.innerHTML = '<img src="' + doc.data().logo2 + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">';
               }
             }
           }
