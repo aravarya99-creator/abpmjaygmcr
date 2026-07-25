@@ -10,7 +10,9 @@
   background: #ffffff;
   padding: 10px 24px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
   border-bottom: 2px solid #f1f5f9;
   font-family: 'Inter', 'Segoe UI', sans-serif;
   height: 90px;
@@ -371,7 +373,7 @@ color: #3b82f6;
           <div class="ph-left">
             <img src="${fallbackLogo}" class="ph-logo" id="headerGmcLogo" alt="GMC Rajouri" onerror="this.src='https://via.placeholder.com/58?text=GMC'">
             <div class="ph-title-block">
-              <div class="ph-title-top">AYUSHMAN BHARAT — PM-JAY</div>
+              <div class="ph-title-top">AYUSHMAN BHARAT â€” PM-JAY</div>
               <div class="ph-title-mid">MANAGEMENT INFORMATION SYSTEM</div>
               <div class="ph-title-bot">Government Medical College & Associated Hospital, Rajouri</div>
             </div>
@@ -390,6 +392,7 @@ color: #3b82f6;
               <div class="ph-bell-badge" id="topBellBadge" style="display:none;">0</div>
             </div>
 
+            <div style="position: relative; display: flex; align-items: center;">
             <div class="ph-user-pill user-pill" id="userPillBtn" onclick="event.stopPropagation(); var dd=document.getElementById('userDD'); if(dd) dd.classList.toggle('open');">
               <div class="ph-avatar" id="hAvatarContainer">
                 <span id="hInitials">VK</span>
@@ -405,9 +408,10 @@ color: #3b82f6;
               <div class="ph-chevron">
                 <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
               </div>
+            </div>
 
-              <!-- BUILT-IN PROFILE DROPDOWN MENU -->
-              <div class="user-dropdown" id="userDD" onclick="event.stopPropagation();">
+            <!-- BUILT-IN PROFILE DROPDOWN MENU -->
+            <div class="user-dropdown" id="userDD" onclick="event.stopPropagation();">
               <div class="dd-item" onclick="document.getElementById('userDD').classList.remove('open'); if(document.getElementById('profileModal')) document.getElementById('profileModal').classList.add('open'); else alert('User Profile: ' + (document.getElementById('hName')?document.getElementById('hName').textContent:'User'));">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 <span>Update Profile</span>
@@ -422,14 +426,14 @@ color: #3b82f6;
               </div>
               <div class="dd-item" onclick="var sub=document.getElementById('phPortalSwitchMenu'); if(sub) sub.style.display = (sub.style.display==='block'?'none':'block');">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3L4 7l4 4"></path><path d="M4 7h16"></path><path d="M16 21l4-4-4-4"></path><path d="M20 17H4"></path></svg>
-                <span>Switch Portal ▾</span>
+                <span>Switch Portal â–¾</span>
               </div>
               <div id="phPortalSwitchMenu" style="display:none; background:#f8fafc; border-top:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0; padding:4px 0;">
-                <a href="pmam_portal.html" style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 28px;font-size:11px;font-weight:700;color:#1e3a8a;text-decoration:none;">📋 PMAM Reporting</a>
-                <a href="ic_portal.html" style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 28px;font-size:11px;font-weight:700;color:#1e3a8a;text-decoration:none;">👨‍⚕️ I/C AB-PMJAY</a>
-                <a href="finance.html" style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 28px;font-size:11px;font-weight:700;color:#1e3a8a;text-decoration:none;">💰 Finance Portal</a>
-                <a href="admin_portal.html" style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 28px;font-size:11px;font-weight:700;color:#1e3a8a;text-decoration:none;">⚙️ Admin Portal</a>
-                <a href="patient_service_portal.html" style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 28px;font-size:11px;font-weight:700;color:#1e3a8a;text-decoration:none;">🏥 Patient Services</a>
+                <a href="pmam_portal.html" style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 28px;font-size:11px;font-weight:700;color:#1e3a8a;text-decoration:none;">ðŸ“‹ PMAM Reporting</a>
+                <a href="ic_portal.html" style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 28px;font-size:11px;font-weight:700;color:#1e3a8a;text-decoration:none;">ðŸ‘¨â€âš•ï¸ I/C AB-PMJAY</a>
+                <a href="finance.html" style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 28px;font-size:11px;font-weight:700;color:#1e3a8a;text-decoration:none;">ðŸ’° Finance Portal</a>
+                <a href="admin_portal.html" style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 28px;font-size:11px;font-weight:700;color:#1e3a8a;text-decoration:none;">âš™ï¸ Admin Portal</a>
+                <a href="patient_service_portal.html" style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 28px;font-size:11px;font-weight:700;color:#1e3a8a;text-decoration:none;">ðŸ¥ Patient Services</a>
               </div>
               <div class="dd-item" onclick="document.getElementById('userDD').classList.remove('open'); if(window.logoutUser) window.logoutUser(); else if(typeof firebase !== 'undefined' && firebase.auth) firebase.auth().signOut().then(function(){ window.location.href='index.html'; }); else window.location.href='index.html';">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
