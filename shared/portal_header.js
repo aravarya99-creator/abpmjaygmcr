@@ -17,6 +17,7 @@
   z-index: 99999 !important;
   font-family: 'Inter', 'Segoe UI', sans-serif;
   height: 94px;
+  width: 100%;
   box-sizing: border-box;
   margin: 0;
 }
