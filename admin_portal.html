@@ -5778,7 +5778,7 @@ function loadSessionUser() {
     var uname = document.querySelector('.uname');
     if (uname) uname.textContent = name;
     var udesig = document.querySelector('.udesig');
-    if (udesig) udesig.textContent = u.role || 'Admin';
+    if (udesig) udesig.textContent = 'ADMIN';
     var iniEl = document.querySelector('.ini');
     if (iniEl) iniEl.textContent = initials;
     var ddAv = document.querySelector('.dd-av');
@@ -5786,7 +5786,7 @@ function loadSessionUser() {
     var ddName = document.querySelector('.dd-hname');
     if (ddName) ddName.textContent = name;
     var ddRole = document.querySelector('.dd-hrole');
-    if (ddRole) ddRole.textContent = (u.role||'Admin') + ' — GMC Rajouri';
+    if (ddRole) ddRole.textContent = 'ADMIN — GMC Rajouri';
   } catch(e) {}
 }
 

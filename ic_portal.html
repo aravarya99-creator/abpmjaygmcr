@@ -3153,7 +3153,7 @@ function loadSessionUser() {
     var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
     if (!u.email) return;
     var name = u.name || '';
-    var role = u.desig || u.role || '';
+    var role = 'INCHARGE AB-PMJAY';
     var ini  = name.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
     // Update all name/role/initials elements
     ['hName','userName','userNameDisp'].forEach(function(id){
