@@ -770,10 +770,24 @@
 
   function updateUserHeader(mountTitle) {
     var title = mountTitle || (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') || 'PORTAL';
+    var path = window.location.pathname.toLowerCase();
     var name = '';
     var role = '';
     var photoUrl = '';
     var userObj = null;
+
+    var isPageAdmin   = path.indexOf('admin') !== -1 || title.indexOf('ADMIN') !== -1;
+    var isPageIc      = path.indexOf('ic_') !== -1 || path.indexOf('incharge') !== -1 || title.indexOf('I/C') !== -1;
+    var isPagePmam    = path.indexOf('pmam') !== -1 || title.indexOf('PMAM') !== -1;
+    var isPageFinance = path.indexOf('finance') !== -1 || title.indexOf('FINANCE') !== -1;
+    var isPagePatient = path.indexOf('patient') !== -1 || title.indexOf('PATIENT') !== -1;
+
+    var activePortalRole = 'USER';
+    if (isPageAdmin) activePortalRole = 'ADMIN';
+    else if (isPageIc) activePortalRole = 'INCHARGE AB-PMJAY';
+    else if (isPagePmam) activePortalRole = 'PMAM';
+    else if (isPageFinance) activePortalRole = 'FINANCE';
+    else if (isPagePatient) activePortalRole = 'PATIENT SERVICES';
 
     var userJson = sessionStorage.getItem('pmjay_user') ||
                    sessionStorage.getItem('pmam_user') ||
@@ -795,8 +809,11 @@
       name = window.LeaveEngine.userName;
     }
 
+    // Always prefer active portal role for header display
+    var displayRole = activePortalRole || role || 'USER';
+
     // Apply stored profile details immediately
-    applyHeaderData(name, role, photoUrl);
+    applyHeaderData(name, displayRole, photoUrl);
 
     // Enforce strict portal access control and workspace switcher filtering
     checkPortalAccess(userObj, title);
@@ -813,19 +830,11 @@
               if (doc.exists && doc.data()) {
                 var d = doc.data();
                 if (d.name) name = d.name;
-                if (d.role || d.roles) {
-                  var rStr = String(d.role || (Array.isArray(d.roles) ? d.roles[0] : '')).toLowerCase();
-                  if (rStr.indexOf('ic') !== -1 || rStr.indexOf('incharge') !== -1) role = 'INCHARGE AB-PMJAY';
-                  else if (rStr.indexOf('pmam') !== -1) role = 'PMAM';
-                  else if (rStr.indexOf('finance') !== -1 || rStr.indexOf('accountant') !== -1) role = 'FINANCE';
-                  else if (rStr.indexOf('claims') !== -1) role = 'CLAIMS';
-                  else if (rStr.indexOf('admin') !== -1) role = 'ADMIN';
-                  else if (rStr.indexOf('deo') !== -1 || rStr.indexOf('patient') !== -1) role = 'PATIENT SERVICES';
-                  else role = d.role || d.roles[0];
-                }
-                var updatedUserObj = Object.assign({}, userObj || {}, d, { name: name, role: role });
+                var updatedUserObj = Object.assign({}, userObj || {}, d);
+                var finalDisplayRole = activePortalRole || d.role || d.desig || displayRole;
+
                 try {
-                  var uStr = JSON.stringify(updatedUserObj);
+                  var uStr = JSON.stringify(Object.assign({}, updatedUserObj, { name: name }));
                   sessionStorage.setItem('pmjay_user', uStr);
                   sessionStorage.setItem('currentUser', uStr);
                   localStorage.setItem('pmjay_user', uStr);
@@ -834,9 +843,9 @@
 
                 checkPortalAccess(updatedUserObj, title);
                 updateWorkspaceSwitcher(updatedUserObj, title);
-                applyHeaderData(name, role, d.photo || d.photoUrl || photoUrl);
+                applyHeaderData(name, finalDisplayRole, d.photo || d.photoUrl || photoUrl);
               }
-            }).catch(function(){ applyHeaderData(name, role, photoUrl); });
+            }).catch(function(){ applyHeaderData(name, displayRole, photoUrl); });
           }
         }
       });
