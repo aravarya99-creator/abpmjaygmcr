@@ -3005,7 +3005,7 @@
         +   letterhead
         +   infoRow
         +   bodyHTML
-        +   universalFooter</body></html>';
+        +   universalFooter + '</body></html>';
 
       var uri = 'data:application/vnd.ms-word;base64,';
       var a = document.createElement('a');
@@ -3069,7 +3069,7 @@
         +     headerRows
         +     tableRows
         +     footerRows
-        +   '</table>'</body></html>';
+        +   '</table></body></html>';
 
       var uri = 'data:application/vnd.ms-excel;base64,';
       var a = document.createElement('a');
@@ -3249,7 +3249,7 @@
         +"<' + 'script src=\'shared/logos.js?v=6\'></" + "script>"
         +"<style>"+pageCSS+"</style></head><body>"
         +pageContent
-        +_rptPrintScript()</body></html>";
+        +_rptPrintScript()+"</body></html>";
       w.document.write(h);
       w.document.close();
     }
