@@ -631,63 +631,8 @@
       var isFinance = path.indexOf('finance') !== -1 || title.indexOf('FINANCE') !== -1;
       var isPatient = path.indexOf('patient') !== -1 || title.indexOf('PATIENT') !== -1;
 
-      // Build workspace list excluding the current portal
+      // Build workspace list excluding the current portal (initially empty until user permissions resolve)
       var workspaceItemsHTML = '';
-
-      if (!isAdmin) {
-        workspaceItemsHTML += `
-          <div class="ph-ws-item ph-ws-admin" onclick="event.stopPropagation(); window.location.href='admin_portal.html';">
-            <div class="ph-ws-icon-box">
-              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            </div>
-            <span class="ph-ws-label">Admin Portal</span>
-          </div>
-        `;
-      }
-
-      if (!isPmam) {
-        workspaceItemsHTML += `
-          <div class="ph-ws-item ph-ws-pmam" onclick="event.stopPropagation(); window.location.href='pmam_portal.html';">
-            <div class="ph-ws-icon-box">
-              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            </div>
-            <span class="ph-ws-label">PMAM Portal</span>
-          </div>
-        `;
-      }
-
-      if (!isIc) {
-        workspaceItemsHTML += `
-          <div class="ph-ws-item ph-ws-ic" onclick="event.stopPropagation(); window.location.href='ic_portal.html';">
-            <div class="ph-ws-icon-box">
-              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            </div>
-            <span class="ph-ws-label">I/C Portal</span>
-          </div>
-        `;
-      }
-
-      if (!isFinance) {
-        workspaceItemsHTML += `
-          <div class="ph-ws-item ph-ws-finance" onclick="event.stopPropagation(); window.location.href='finance.html';">
-            <div class="ph-ws-icon-box">
-              <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
-            </div>
-            <span class="ph-ws-label">Finance Portal</span>
-          </div>
-        `;
-      }
-
-      if (!isPatient) {
-        workspaceItemsHTML += `
-          <div class="ph-ws-item ph-ws-patient" onclick="event.stopPropagation(); window.location.href='patient_service_portal.html';">
-            <div class="ph-ws-icon-box">
-              <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 18h6M12 11v4M10 13h4"></path></svg>
-            </div>
-            <span class="ph-ws-label">Patient Services Portal</span>
-          </div>
-        `;
-      }
 
       var html = `
         <div class="premium-header-bar">
@@ -755,10 +700,10 @@
                 </div>
 
                 <!-- Switch Workspace Section -->
-                <div class="ph-dd-section-title" id="phWsTitle">SWITCH WORKSPACE</div>
+                <div class="ph-dd-section-title" id="phWsTitle" style="display:none;">SWITCH WORKSPACE</div>
 
                 <!-- Workspace List (Filtered dynamically by assigned user roles) -->
-                <div class="ph-workspace-list" id="phWsList">
+                <div class="ph-workspace-list" id="phWsList" style="display:none;">
                   ${workspaceItemsHTML}
                 </div>
 
@@ -823,7 +768,8 @@
     }
   });
 
-  function updateUserHeader() {
+  function updateUserHeader(mountTitle) {
+    var title = mountTitle || (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') || 'PORTAL';
     var name = '';
     var role = '';
     var photoUrl = '';
@@ -845,9 +791,12 @@
       } catch(e){}
     }
 
-    if (window.LeaveEngine && window.LeaveEngine.userName) {
+    if (window.LeaveEngine && window.LeaveEngine.userName && String(window.LeaveEngine.userName).trim()) {
       name = window.LeaveEngine.userName;
     }
+
+    // Apply stored profile details immediately
+    applyHeaderData(name, role, photoUrl);
 
     // Enforce strict portal access control and workspace switcher filtering
     checkPortalAccess(userObj, title);
@@ -856,41 +805,47 @@
     if (typeof firebase !== 'undefined' && firebase.auth) {
       firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
-          if (user.displayName) name = user.displayName;
-          if (typeof db !== 'undefined' && user.email) {
-            db.collection('users').doc(user.email).get().then(function(doc) {
+          if (user.displayName && !name) name = user.displayName;
+          var lookupEmail = user.email || (userObj ? userObj.email : '');
+          if (typeof db !== 'undefined' && lookupEmail) {
+            lookupEmail = String(lookupEmail).trim().toLowerCase();
+            db.collection('users').doc(lookupEmail).get().then(function(doc) {
               if (doc.exists && doc.data()) {
                 var d = doc.data();
                 if (d.name) name = d.name;
-                if (d.role) {
-                  var rStr = d.role.toLowerCase();
+                if (d.role || d.roles) {
+                  var rStr = String(d.role || (Array.isArray(d.roles) ? d.roles[0] : '')).toLowerCase();
                   if (rStr.indexOf('ic') !== -1 || rStr.indexOf('incharge') !== -1) role = 'INCHARGE AB-PMJAY';
                   else if (rStr.indexOf('pmam') !== -1) role = 'PMAM';
-                  else if (rStr.indexOf('finance') !== -1) role = 'FINANCE';
+                  else if (rStr.indexOf('finance') !== -1 || rStr.indexOf('accountant') !== -1) role = 'FINANCE';
                   else if (rStr.indexOf('claims') !== -1) role = 'CLAIMS';
                   else if (rStr.indexOf('admin') !== -1) role = 'ADMIN';
-                  else role = d.role;
+                  else if (rStr.indexOf('deo') !== -1 || rStr.indexOf('patient') !== -1) role = 'PATIENT SERVICES';
+                  else role = d.role || d.roles[0];
                 }
-                checkPortalAccess(d, title);
-                updateWorkspaceSwitcher(d, title);
-                applyHeaderData(name, role, d.photo || d.photoUrl);
+                var updatedUserObj = Object.assign({}, userObj || {}, d, { name: name, role: role });
+                try {
+                  var uStr = JSON.stringify(updatedUserObj);
+                  sessionStorage.setItem('pmjay_user', uStr);
+                  sessionStorage.setItem('currentUser', uStr);
+                  localStorage.setItem('pmjay_user', uStr);
+                  localStorage.setItem('currentUser', uStr);
+                } catch(e){}
+
+                checkPortalAccess(updatedUserObj, title);
+                updateWorkspaceSwitcher(updatedUserObj, title);
+                applyHeaderData(name, role, d.photo || d.photoUrl || photoUrl);
               }
             }).catch(function(){ applyHeaderData(name, role, photoUrl); });
-          } else {
-            applyHeaderData(name, role, photoUrl);
           }
-        } else {
-          applyHeaderData(name, role, photoUrl);
         }
       });
-    } else {
-      applyHeaderData(name, role, photoUrl);
     }
   }
 
   function checkPortalAccess(userObj, currentTitle) {
     if (!userObj) return;
-    var curTitle = currentTitle || title || '';
+    var curTitle = currentTitle || '';
     var path = window.location.pathname.toLowerCase();
     var email = String(userObj.email || '').toLowerCase();
     var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL.toLowerCase() : 'aravarya99@gmail.com';
@@ -898,6 +853,7 @@
     var userRoles = [];
     if (Array.isArray(userObj.roles) && userObj.roles.length) userRoles = userObj.roles;
     else if (userObj.role) userRoles = [userObj.role];
+    else if (userObj.desig) userRoles = [userObj.desig];
 
     var isUserAdmin = (email === adminEmail) || userRoles.some(function(r) {
       var str = String(r).toLowerCase();
@@ -940,13 +896,26 @@
     var listEl = document.getElementById('phWsList');
     if (!listEl) return;
 
-    var curTitle = currentTitle || title || '';
+    var curTitle = currentTitle || (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') || '';
     var path = window.location.pathname.toLowerCase();
     var isCurrentAdmin = path.indexOf('admin') !== -1 || curTitle.indexOf('ADMIN') !== -1;
     var isCurrentPmam = path.indexOf('pmam') !== -1 || curTitle.indexOf('PMAM') !== -1;
     var isCurrentIc = path.indexOf('ic_') !== -1 || path.indexOf('incharge') !== -1 || curTitle.indexOf('I/C') !== -1;
     var isCurrentFinance = path.indexOf('finance') !== -1 || curTitle.indexOf('FINANCE') !== -1;
     var isCurrentPatient = path.indexOf('patient') !== -1 || curTitle.indexOf('PATIENT') !== -1;
+
+    // Fallback: If userObj not provided, try reading from storage
+    if (!userObj) {
+      var uStr = sessionStorage.getItem('pmjay_user') ||
+                 sessionStorage.getItem('pmam_user') ||
+                 sessionStorage.getItem('currentUser') ||
+                 localStorage.getItem('pmjay_user') ||
+                 localStorage.getItem('pmam_user') ||
+                 localStorage.getItem('currentUser');
+      if (uStr) {
+        try { userObj = typeof uStr === 'string' ? JSON.parse(uStr) : uStr; } catch(e){}
+      }
+    }
 
     // Collect assigned user roles
     var userRoles = [];
@@ -955,7 +924,7 @@
       if (userObj.email) email = String(userObj.email).toLowerCase();
       if (Array.isArray(userObj.roles) && userObj.roles.length) userRoles = userObj.roles;
       else if (userObj.role) userRoles = [userObj.role];
-      else if (userObj.roles) userRoles = [userObj.roles];
+      else if (userObj.desig) userRoles = [userObj.desig];
     }
 
     var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL.toLowerCase() : 'aravarya99@gmail.com';
@@ -1054,7 +1023,7 @@
   }
 
   function applyHeaderData(name, role, photoUrl) {
-    var displayName = name || 'Active User';
+    var displayName = (name && name.trim()) ? name.trim() : 'Active User';
     var displayRole = role || 'USER';
 
     var hName = document.getElementById('hName');
@@ -1065,16 +1034,24 @@
     if (hName) hName.textContent = displayName.toUpperCase();
     if (hRole && role) hRole.textContent = displayRole.toUpperCase();
 
-    var n = displayName.trim();
-    var parts = n.split(/\s+/);
-    var inits = parts.length > 1 ? (parts[0][0] + parts[1][0]) : parts[0].substr(0, 2);
+    var parts = displayName.split(/\s+/).filter(Boolean);
+    var inits = '--';
+    if (parts.length >= 2) {
+      inits = parts[0][0] + parts[1][0];
+    } else if (parts.length === 1 && parts[0].length >= 2) {
+      inits = parts[0].substring(0, 2);
+    } else if (parts.length === 1 && parts[0].length === 1) {
+      inits = parts[0];
+    }
     inits = inits.toUpperCase();
 
     if (photoUrl) {
       var photoHTML = '<img src="' + photoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
       if (hAvatarContainer) hAvatarContainer.innerHTML = photoHTML;
     } else {
-      if (hInitials) hInitials.textContent = inits;
+      if (hAvatarContainer) {
+        hAvatarContainer.innerHTML = '<span id="hInitials">' + inits + '</span>';
+      }
     }
   }
 
