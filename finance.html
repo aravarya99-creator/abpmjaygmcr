@@ -3142,7 +3142,7 @@
         +"if(document.readyState==='complete')whenReady();"
         +"else{document.addEventListener('DOMContentLoaded',whenReady);window.addEventListener('load',whenReady);}"
         +"setTimeout(doPrint,900);"
-        +"})();<' + '/script>";
+        +"})();</" + "script>";
     }
 
     // printReport — shows modal first, then runs _doPrintReport with chosen options.
@@ -3246,7 +3246,7 @@
       var h = "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>"+title+"</title>"
         +"<base href='"+baseHref+"'>"
         +"<link rel='stylesheet' href='shared/headers.css?v=6'>"
-        +"<script src='shared/logos.js?v=6'><' + '/script>"
+        +"<' + 'script src=\'shared/logos.js?v=6\'></" + "script>"
         +"<style>"+pageCSS+"</style></head><body>"
         +pageContent
         +_rptPrintScript()</body></html>";
