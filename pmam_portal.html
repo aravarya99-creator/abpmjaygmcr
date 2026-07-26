@@ -2472,7 +2472,7 @@ function printHistoryLeave(id) {
     + '@media print{body{margin:0}@page{size:A4 portrait;margin:6mm 10mm}}'
     + '</style></head><body>'
     + pageContent
-    + '<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\' + \'/script></body></html>\';
+    + '<script>window.onload=function(){setTimeout(function(){window.print();},300);};<' + '/script></body></html>';
 
   var printWin = window.open('','_blank');
   printWin.document.write(page);
