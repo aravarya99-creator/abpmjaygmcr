@@ -861,21 +861,21 @@
     var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL.toLowerCase() : 'aravarya99@gmail.com';
 
     var userRoles = [];
-    if (Array.isArray(userObj.roles) && userObj.roles.length) userRoles = userObj.roles;
-    else if (userObj.role) userRoles = [userObj.role];
-    else if (userObj.desig) userRoles = [userObj.desig];
+    if (Array.isArray(userObj.roles) && userObj.roles.length) userRoles = userObj.roles.slice();
+    if (userObj.role && !userRoles.includes(userObj.role)) userRoles.push(userObj.role);
+    if (userObj.desig && !userRoles.includes(userObj.desig)) userRoles.push(userObj.desig);
 
     var isUserAdmin = (email === adminEmail) || userRoles.some(function(r) {
-      var str = String(r).toLowerCase();
+      var str = String(r).toLowerCase().trim();
       return str === 'admin' || str === 'administrator';
     });
 
     if (isUserAdmin) return; // Admin has unrestricted access
 
-    var isUserPmam = userRoles.some(function(r){ return String(r).toLowerCase() === 'pmam'; });
-    var isUserIc = userRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('ic')!==-1 || s.indexOf('incharge')!==-1; });
-    var isUserFinance = userRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('finance')!==-1 || s.indexOf('accountant')!==-1; });
-    var isUserPatient = userRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('deo')!==-1 || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
+    var isUserPmam = userRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
+    var isUserIc = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('ic')!==-1 || s.indexOf('incharge')!==-1; });
+    var isUserFinance = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('finance')!==-1 || s.indexOf('accountant')!==-1; });
+    var isUserPatient = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('deo')!==-1 || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
 
     var isPageAdmin = path.indexOf('admin') !== -1 || curTitle.indexOf('ADMIN') !== -1;
     var isPagePmam = path.indexOf('pmam') !== -1 || curTitle.indexOf('PMAM') !== -1;
@@ -893,9 +893,9 @@
     if (!allowed) {
       console.warn("[SECURITY] Access denied for this portal. Redirecting to authorized portal...");
       alert("Access Denied: You do not have permission to access this portal.");
-      if (isUserPmam) window.location.href = 'pmam_portal.html';
-      else if (isUserIc) window.location.href = 'ic_portal.html';
+      if (isUserIc) window.location.href = 'ic_portal.html';
       else if (isUserFinance) window.location.href = 'finance.html';
+      else if (isUserPmam) window.location.href = 'pmam_portal.html';
       else if (isUserPatient) window.location.href = 'patient_service_portal.html';
       else window.location.href = 'index.html';
     }
@@ -932,34 +932,34 @@
     var email = '';
     if (userObj) {
       if (userObj.email) email = String(userObj.email).toLowerCase();
-      if (Array.isArray(userObj.roles) && userObj.roles.length) userRoles = userObj.roles;
-      else if (userObj.role) userRoles = [userObj.role];
-      else if (userObj.desig) userRoles = [userObj.desig];
+      if (Array.isArray(userObj.roles) && userObj.roles.length) userRoles = userObj.roles.slice();
+      if (userObj.role && !userRoles.includes(userObj.role)) userRoles.push(userObj.role);
+      if (userObj.desig && !userRoles.includes(userObj.desig)) userRoles.push(userObj.desig);
     }
 
     var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL.toLowerCase() : 'aravarya99@gmail.com';
     var isUserAdmin = (email === adminEmail) || userRoles.some(function(r){
-      var str = String(r).toLowerCase();
+      var str = String(r).toLowerCase().trim();
       return str === 'admin' || str === 'administrator';
     });
 
     var isUserPmam = isUserAdmin || userRoles.some(function(r){
-      var str = String(r).toLowerCase();
+      var str = String(r).toLowerCase().trim();
       return str === 'pmam';
     });
 
     var isUserIc = isUserAdmin || userRoles.some(function(r){
-      var str = String(r).toLowerCase();
+      var str = String(r).toLowerCase().trim();
       return str.indexOf('ic') !== -1 || str.indexOf('incharge') !== -1;
     });
 
     var isUserFinance = isUserAdmin || userRoles.some(function(r){
-      var str = String(r).toLowerCase();
+      var str = String(r).toLowerCase().trim();
       return str.indexOf('finance') !== -1 || str.indexOf('accountant') !== -1;
     });
 
     var isUserPatient = isUserAdmin || userRoles.some(function(r){
-      var str = String(r).toLowerCase();
+      var str = String(r).toLowerCase().trim();
       return str.indexOf('deo') !== -1 || str.indexOf('patient') !== -1 || str.indexOf('mts') !== -1;
     });
 
