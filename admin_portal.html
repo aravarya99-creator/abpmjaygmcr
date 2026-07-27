@@ -8834,10 +8834,24 @@ function openUnifiedEdit(docId) {
   // Populate Roles Checkboxes
   var rContainer = document.getElementById('ueRolesContainer');
   var allRoles = ['PMAM', 'I/C AB-PMJAY', 'DEO', 'Admin', 'Accountant'];
-  var userRoles = Array.isArray(user.roles) ? user.roles : (user.role ? [user.role] : []);
+  var userRoles = Array.isArray(user.roles) ? user.roles.slice() : (user.role ? [user.role] : []);
+  if (user.desig && !userRoles.includes(user.desig)) userRoles.push(user.desig);
+
+  function matchesRole(targetRole, roleList) {
+    return roleList.some(function(r) {
+      var str = String(r).toLowerCase().trim();
+      if (targetRole === 'Admin') return str === 'admin' || str === 'administrator';
+      if (targetRole === 'PMAM') return str === 'pmam';
+      if (targetRole === 'I/C AB-PMJAY') return str.indexOf('ic') !== -1 || str.indexOf('incharge') !== -1;
+      if (targetRole === 'Accountant') return str.indexOf('accountant') !== -1 || str.indexOf('finance') !== -1;
+      if (targetRole === 'DEO') return str === 'deo' || str.indexOf('patient') !== -1 || str.indexOf('mts') !== -1;
+      return str === String(targetRole).toLowerCase().trim();
+    });
+  }
+
   var rHtml = '';
   allRoles.forEach(r => {
-    var isChecked = userRoles.includes(r) ? 'checked' : '';
+    var isChecked = matchesRole(r, userRoles) ? 'checked' : '';
     rHtml += `
       <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;cursor:pointer;">
         <input type="checkbox" value="${r}" class="ue-role-cb" ${isChecked}> ${r}
