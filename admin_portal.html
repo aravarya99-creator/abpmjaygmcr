@@ -7855,24 +7855,25 @@ goSec = function(id, el) {
 
 // ── Init ──
 window.addEventListener('DOMContentLoaded', function() {
-  // Production session guard — only the admin email may access this portal.
+  // Production session guard — only admin accounts may access this portal.
   var u;
   try { u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); } catch(e) { u = {}; }
   if (!u || !u.email) { window.location.replace('index.html'); return; }
-  var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-  if (u.email !== ADMIN_EMAIL && !uRoles.includes('Admin')) {
-    if (uRoles.includes('PMAM')) window.location.replace('pmam_portal.html');
-    else if (uRoles.includes('I/C AB-PMJAY')) window.location.replace('ic_portal.html');
-    else if (uRoles.includes('DEO')) window.location.replace('patient_service_portal.html');
-    else if (uRoles.includes('Accountant')) window.location.replace('finance.html');
+  var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
+  if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
+
+  var isAdmin = u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() || uRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='admin'||s==='administrator'; });
+  if (!isAdmin) {
+    var isIc = uRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('ic')!==-1 || s.indexOf('incharge')!==-1; });
+    var isAccountant = uRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('accountant')!==-1 || s.indexOf('finance')!==-1; });
+    var isPmam = uRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
+    var isDeo = uRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='deo' || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
+
+    if (isIc) window.location.replace('ic_portal.html');
+    else if (isAccountant) window.location.replace('finance.html');
+    else if (isPmam) window.location.replace('pmam_portal.html');
+    else if (isDeo) window.location.replace('patient_service_portal.html');
     else { sessionStorage.clear(); window.location.replace('index.html'); }
-    return;
-  }
-  if (u.email !== ADMIN_EMAIL) {
-    if (false) window.location.replace('ic_portal.html');
-    if (false)         window.location.replace('patient_service_portal.html');
-      if (false) window.location.replace('finance.html');
-    
     return;
   }
   loadSessionUser();

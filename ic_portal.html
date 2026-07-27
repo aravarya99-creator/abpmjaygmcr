@@ -2546,11 +2546,23 @@ window.addEventListener('load',()=>{
   var u;
   try { u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); } catch(e) { u = {}; }
   if (!u || !u.email) { window.location.replace('index.html'); return; }
-  var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-  if (u.email !== ADMIN_EMAIL && !uRoles.includes('I/C AB-PMJAY')) {
-    // Wrong role for this portal → send to the correct one.
-    if (u.role === 'DEO') window.location.replace('patient_services_portal.html');
-    else                  window.location.replace('pmam_portal.html');
+  var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
+  if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
+
+  var isIc = u.email === ADMIN_EMAIL || uRoles.some(function(r){
+    var s = String(r).toLowerCase().trim();
+    return s === 'admin' || s === 'administrator' || s.indexOf('ic') !== -1 || s.indexOf('incharge') !== -1;
+  });
+
+  if (!isIc) {
+    var isAccountant = uRoles.some(function(r){ var s = String(r).toLowerCase(); return s.indexOf('accountant') !== -1 || s.indexOf('finance') !== -1; });
+    var isDeo = uRoles.some(function(r){ var s = String(r).toLowerCase(); return s === 'deo' || s.indexOf('patient') !== -1 || s.indexOf('mts') !== -1; });
+    var isPmam = uRoles.some(function(r){ return String(r).toLowerCase() === 'pmam'; });
+
+    if (isAccountant) window.location.replace('finance.html');
+    else if (isDeo) window.location.replace('patient_service_portal.html');
+    else if (isPmam) window.location.replace('pmam_portal.html');
+    else window.location.replace('index.html');
     return;
   }
 
@@ -3740,18 +3752,19 @@ function renderPmamProfiles() {
 window.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() {
     try {
-      var uStr = sessionStorage.getItem('pmjay_user');
+      var uStr = sessionStorage.getItem('pmjay_user') || sessionStorage.getItem('currentUser');
       if (!uStr) return;
       var u = JSON.parse(uStr);
-      var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-      if (u.email === 'gmcrajouriofficial@gmail.com' && !uRoles.includes('Admin')) uRoles.push('Admin');
+      var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
+      if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
+      if ((u.email === 'gmcrajouriofficial@gmail.com' || u.email === 'aravarya99@gmail.com') && !uRoles.includes('Admin')) uRoles.push('Admin');
       
       // Forcefully update the navbar designation to match the portal!
       var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
       var portalRole = '';
       if (currentPath.includes('admin')) portalRole = 'Admin';
       else if (currentPath.includes('pmam')) portalRole = 'PMAM';
-      else if (currentPath.includes('ic_')) portalRole = 'Incharge AB-PMJAY';
+      else if (currentPath.includes('ic_') || currentPath.includes('incharge')) portalRole = 'Incharge AB-PMJAY';
       else if (currentPath.includes('finance')) portalRole = 'Accountant';
       else if (currentPath.includes('patient')) portalRole = 'DEO';
       
@@ -3766,8 +3779,19 @@ window.addEventListener('DOMContentLoaded', function() {
           else document.getElementById('fin-avatar').textContent = (u.name||'').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
       }
 
+      function hasRole(pRole) {
+        return uRoles.some(function(r) {
+          var str = String(r).toLowerCase().trim();
+          if (pRole === 'Admin') return str === 'admin' || str === 'administrator';
+          if (pRole === 'PMAM') return str === 'pmam';
+          if (pRole === 'I/C AB-PMJAY') return str.indexOf('ic') !== -1 || str.indexOf('incharge') !== -1;
+          if (pRole === 'Accountant') return str.indexOf('accountant') !== -1 || str.indexOf('finance') !== -1;
+          if (pRole === 'DEO') return str === 'deo' || str.indexOf('patient') !== -1 || str.indexOf('mts') !== -1;
+          return false;
+        });
+      }
       
-      if (uRoles.length > 1) {
+      if (uRoles.length > 1 || uRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='admin'||s==='administrator'; })) {
         var dd = document.getElementById('ddWorkspaceInjection');
         if (!dd) return;
         
@@ -3783,7 +3807,7 @@ window.addEventListener('DOMContentLoaded', function() {
         var inserted = false;
         
         portals.forEach(function(p) {
-          if (uRoles.includes(p.role) && !currentPath.includes(p.url)) {
+          if (hasRole(p.role) && !currentPath.includes(p.url)) {
              switcherHtml += `
               <div class="ws-card" style="background:${p.bg}; color:${p.color};" onclick="window.location.href='${p.url}'">
                 <div class="ws-icon-box" style="background:${p.iconBg};">

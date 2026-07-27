@@ -23,10 +23,13 @@
     // ── SESSION GUARD ──────────────────────────────────────────
     (function() {
       var sess = null;
-      try { sess = JSON.parse(sessionStorage.getItem('pmjay_user')); } catch(e) {}
+      try { sess = JSON.parse(sessionStorage.getItem('pmjay_user') || sessionStorage.getItem('currentUser') || '{}'); } catch(e) {}
       if (!sess || !sess.email) { window.location.href = 'index.html'; return; }
-      var sessRoles = Array.isArray(sess.roles) ? sess.roles : (sess.role ? [sess.role] : []);
-      if (!sessRoles.includes('Accountant')) { window.location.href = 'index.html'; return; }
+      var sessRoles = Array.isArray(sess.roles) ? sess.roles.slice() : (sess.role ? [sess.role] : []);
+      if (sess.desig && !sessRoles.includes(sess.desig)) sessRoles.push(sess.desig);
+      var isAdmin = sess.email.toLowerCase() === 'aravarya99@gmail.com' || sessRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='admin'||s==='administrator'; });
+      var isAccountant = isAdmin || sessRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('accountant')!==-1 || s.indexOf('finance')!==-1; });
+      if (!isAccountant) { window.location.href = 'index.html'; return; }
     })();
   </script>
   <style>
@@ -4793,18 +4796,19 @@ setTimeout(function() {
 window.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() {
     try {
-      var uStr = sessionStorage.getItem('pmjay_user');
+      var uStr = sessionStorage.getItem('pmjay_user') || sessionStorage.getItem('currentUser');
       if (!uStr) return;
       var u = JSON.parse(uStr);
-      var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-      if (u.email === 'gmcrajouriofficial@gmail.com' && !uRoles.includes('Admin')) uRoles.push('Admin');
+      var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
+      if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
+      if ((u.email === 'gmcrajouriofficial@gmail.com' || u.email === 'aravarya99@gmail.com') && !uRoles.includes('Admin')) uRoles.push('Admin');
       
       // Forcefully update the navbar designation to match the portal!
       var currentPath = window.location.pathname.split('/').pop() || window.location.pathname;
       var portalRole = '';
       if (currentPath.includes('admin')) portalRole = 'Admin';
       else if (currentPath.includes('pmam')) portalRole = 'PMAM';
-      else if (currentPath.includes('ic_')) portalRole = 'Incharge AB-PMJAY';
+      else if (currentPath.includes('ic_') || currentPath.includes('incharge')) portalRole = 'Incharge AB-PMJAY';
       else if (currentPath.includes('finance')) portalRole = 'Accountant';
       else if (currentPath.includes('patient')) portalRole = 'DEO';
       
@@ -4812,8 +4816,20 @@ window.addEventListener('DOMContentLoaded', function() {
           var els = document.querySelectorAll('#'+id+', .'+id);
           els.forEach(el => el.textContent = portalRole);
       });
+
+      function hasRole(pRole) {
+        return uRoles.some(function(r) {
+          var str = String(r).toLowerCase().trim();
+          if (pRole === 'Admin') return str === 'admin' || str === 'administrator';
+          if (pRole === 'PMAM') return str === 'pmam';
+          if (pRole === 'I/C AB-PMJAY') return str.indexOf('ic') !== -1 || str.indexOf('incharge') !== -1;
+          if (pRole === 'Accountant') return str.indexOf('accountant') !== -1 || str.indexOf('finance') !== -1;
+          if (pRole === 'DEO') return str === 'deo' || str.indexOf('patient') !== -1 || str.indexOf('mts') !== -1;
+          return false;
+        });
+      }
       
-      if (uRoles.length > 1) {
+      if (uRoles.length > 1 || uRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='admin'||s==='administrator'; })) {
         var dd = document.getElementById('ddWorkspaceInjection');
         if (!dd) return;
         
@@ -4829,7 +4845,7 @@ window.addEventListener('DOMContentLoaded', function() {
         var inserted = false;
         
         portals.forEach(function(p) {
-          if (uRoles.includes(p.role) && !currentPath.includes(p.url)) {
+          if (hasRole(p.role) && !currentPath.includes(p.url)) {
              switcherHtml += `
               <div class="ws-card" style="background:${p.bg}; color:${p.color};" onclick="window.location.href='${p.url}'">
                 <div class="ws-icon-box" style="background:${p.iconBg};">

@@ -2798,31 +2798,26 @@ function getPmjayUser() {
     window.location.replace('index.html');
     return;
   }
-  var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-  if (!uRoles.includes('PMAM')) {
-    if (uRoles.includes('Admin')) window.location.replace('admin_portal.html');
-    else if (uRoles.includes('I/C AB-PMJAY')) window.location.replace('ic_portal.html');
-    else if (uRoles.includes('DEO')) window.location.replace('patient_service_portal.html');
-    else if (uRoles.includes('Accountant')) window.location.replace('finance.html');
-    else window.location.replace('index.html');
-    return;
-  }
-  if (false) {
-    window.location.replace('index.html');
-    return;
-  }
-  // Route guard: only PMAM should be here. Admin → admin_portal,
-  // I/C → ic_portal, DEO → patient_services_portal. Otherwise stay.
-  if (u.email === 'aravarya99@gmail.com') {
+  var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
+  if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
+
+  var isAdmin = u.email.toLowerCase() === ADMIN_EMAIL || uRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='admin'||s==='administrator'; });
+  var isPmam = isAdmin || uRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
+
+  if (isAdmin) {
     window.location.replace('admin_portal.html');
     return;
   }
-  if (false) {
-    window.location.replace('ic_portal.html');
-    return;
-  }
-  if (false) {
-    window.location.replace('patient_services_portal.html');
+
+  if (!isPmam) {
+    var isIc = uRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('ic')!==-1 || s.indexOf('incharge')!==-1; });
+    var isAccountant = uRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('accountant')!==-1 || s.indexOf('finance')!==-1; });
+    var isDeo = uRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='deo' || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
+
+    if (isIc) window.location.replace('ic_portal.html');
+    else if (isAccountant) window.location.replace('finance.html');
+    else if (isDeo) window.location.replace('patient_service_portal.html');
+    else window.location.replace('index.html');
     return;
   }
 })();

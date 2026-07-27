@@ -752,12 +752,20 @@ function doLogin() {
     else localStorage.removeItem('pmjay_remember');
     setMsg('loginMsg','Login successful! Redirecting...','#16a34a');
     setTimeout(function(){
-      var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-      if (email === ADMIN_EMAIL || uRoles.includes('Admin')) window.location.href='admin_portal.html';
-      else if (uRoles.includes('PMAM')) window.location.href='pmam_portal.html';
-      else if (uRoles.includes('I/C AB-PMJAY')) window.location.href='ic_portal.html';
-      else if (uRoles.includes('DEO') || uRoles.some(r=>(typeof r==='string' && r.includes('MTS')))) window.location.href='patient_service_portal.html';
-      else if (uRoles.includes('Accountant')) window.location.href='finance.html';
+      var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
+      if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
+
+      var isAdmin = email === ADMIN_EMAIL || uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s==='admin'||s==='administrator'; });
+      var isIc = uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('ic')!==-1 || s.indexOf('incharge')!==-1; });
+      var isAccountant = uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('accountant')!==-1 || s.indexOf('finance')!==-1; });
+      var isPmam = uRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
+      var isDeo = uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s==='deo' || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
+
+      if (isAdmin) window.location.href='admin_portal.html';
+      else if (isIc) window.location.href='ic_portal.html';
+      else if (isAccountant) window.location.href='finance.html';
+      else if (isPmam) window.location.href='pmam_portal.html';
+      else if (isDeo) window.location.href='patient_service_portal.html';
       else window.location.href='pmam_portal.html';
     }, 800);
   }).catch(function(e){ setMsg('loginMsg','Connection error: '+e.message,'#dc2626'); });
@@ -878,12 +886,20 @@ window.addEventListener('DOMContentLoaded', function() {
   try {
     var sess = JSON.parse(sessionStorage.getItem('pmjay_user')||'{}');
     if (sess.email) {
-      var sRoles = Array.isArray(sess.roles) ? sess.roles : (sess.role ? [sess.role] : []);
-      if (sess.email === ADMIN_EMAIL || sRoles.includes('Admin')) window.location.href='admin_portal.html';
-      else if (sRoles.includes('PMAM')) window.location.href='pmam_portal.html';
-      else if (sRoles.includes('I/C AB-PMJAY')) window.location.href='ic_portal.html';
-      else if (sRoles.includes('DEO') || sRoles.some(r=>(typeof r==='string' && r.includes('MTS')))) window.location.href='patient_service_portal.html';
-      else if (sRoles.includes('Accountant')) window.location.href='finance.html';
+      var sRoles = Array.isArray(sess.roles) ? sess.roles.slice() : (sess.role ? [sess.role] : []);
+      if (sess.desig && !sRoles.includes(sess.desig)) sRoles.push(sess.desig);
+
+      var isAdmin = sess.email === ADMIN_EMAIL || sRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s==='admin'||s==='administrator'; });
+      var isIc = sRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('ic')!==-1 || s.indexOf('incharge')!==-1; });
+      var isAccountant = sRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('accountant')!==-1 || s.indexOf('finance')!==-1; });
+      var isPmam = sRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
+      var isDeo = sRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s==='deo' || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
+
+      if (isAdmin) window.location.href='admin_portal.html';
+      else if (isIc) window.location.href='ic_portal.html';
+      else if (isAccountant) window.location.href='finance.html';
+      else if (isPmam) window.location.href='pmam_portal.html';
+      else if (isDeo) window.location.href='patient_service_portal.html';
       else window.location.href='pmam_portal.html';
     }
   } catch(e){}
@@ -3248,6 +3264,6 @@ window.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script src="shared/logos.js"></script>
-<script src="shared/portal_header.js?v=20260725_15"></script>
+<script src="shared/portal_header.js?v=20260725_16"></script>
 </body>
 </html>
