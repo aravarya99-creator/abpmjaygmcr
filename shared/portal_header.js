@@ -791,11 +791,11 @@
     else if (isPagePatient) activePortalRole = 'PATIENT SERVICES';
 
     var userJson = sessionStorage.getItem('pmjay_user') ||
-                   sessionStorage.getItem('pmam_user') ||
                    sessionStorage.getItem('currentUser') ||
                    localStorage.getItem('pmjay_user') ||
-                   localStorage.getItem('pmam_user') ||
-                   localStorage.getItem('currentUser');
+                   localStorage.getItem('currentUser') ||
+                   sessionStorage.getItem('pmam_user') ||
+                   localStorage.getItem('pmam_user');
 
     if (userJson) {
       try {
@@ -855,7 +855,7 @@
 
   function checkPortalAccess(userObj, currentTitle) {
     if (!userObj) return;
-    var curTitle = currentTitle || '';
+    var curTitle = (currentTitle || '').toUpperCase();
     var path = window.location.pathname.toLowerCase();
     var email = String(userObj.email || '').toLowerCase();
     var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL.toLowerCase() : 'aravarya99@gmail.com';
@@ -873,15 +873,19 @@
     if (isUserAdmin) return; // Admin has unrestricted access
 
     var isUserPmam = userRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
-    var isUserIc = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('ic')!==-1 || s.indexOf('i/c')!==-1 || s.indexOf('incharge')!==-1 || s.replace(/[^a-z0-9]/g,'').indexOf('ic')!==-1; });
+    var isUserIc = userRoles.some(function(r){
+      var s = String(r).toLowerCase().trim();
+      var norm = s.replace(/[^a-z0-9]/g, '');
+      return s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.indexOf('icnarge') !== -1 || s.indexOf('incherage') !== -1 || s.indexOf('inchrage') !== -1 || norm.indexOf('ic') !== -1 || norm.indexOf('inc') !== -1;
+    });
     var isUserFinance = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('finance')!==-1 || s.indexOf('accountant')!==-1; });
     var isUserPatient = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('deo')!==-1 || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
 
     var isPageAdmin = path.indexOf('admin') !== -1 || curTitle.indexOf('ADMIN') !== -1;
     var isPagePmam = path.indexOf('pmam') !== -1 || curTitle.indexOf('PMAM') !== -1;
-    var isPageIc = path.indexOf('ic_') !== -1 || path.indexOf('incharge') !== -1 || curTitle.indexOf('I/C') !== -1;
-    var isPageFinance = path.indexOf('finance') !== -1 || curTitle.indexOf('FINANCE') !== -1;
-    var isPagePatient = path.indexOf('patient') !== -1 || curTitle.indexOf('PATIENT') !== -1;
+    var isPageIc = path.indexOf('ic') !== -1 || path.indexOf('incharge') !== -1 || curTitle.indexOf('I/C') !== -1 || curTitle.indexOf('INCHARGE') !== -1;
+    var isPageFinance = path.indexOf('finance') !== -1 || curTitle.indexOf('FINANCE') !== -1 || curTitle.indexOf('ACCOUNTANT') !== -1;
+    var isPagePatient = path.indexOf('patient') !== -1 || curTitle.indexOf('PATIENT') !== -1 || curTitle.indexOf('DEO') !== -1;
 
     var allowed = true;
     if (isPageAdmin && !isUserAdmin) allowed = false;
@@ -892,12 +896,11 @@
 
     if (!allowed) {
       console.warn("[SECURITY] Access denied for this portal. Redirecting to authorized portal...");
-      alert("Access Denied: You do not have permission to access this portal.");
       if (isUserIc && !isPageIc) window.location.href = 'ic_portal.html';
       else if (isUserFinance && !isPageFinance) window.location.href = 'finance.html';
       else if (isUserPmam && !isPagePmam) window.location.href = 'pmam_portal.html';
       else if (isUserPatient && !isPagePatient) window.location.href = 'patient_service_portal.html';
-      else if (!isPageAdmin) window.location.href = 'index.html';
+      else if (!isPageAdmin && path.indexOf('index') === -1) window.location.href = 'index.html';
     }
   }
 
@@ -906,13 +909,13 @@
     var listEl = document.getElementById('phWsList');
     if (!listEl) return;
 
-    var curTitle = currentTitle || (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') || '';
+    var curTitle = (currentTitle || (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') || '').toUpperCase();
     var path = window.location.pathname.toLowerCase();
     var isCurrentAdmin = path.indexOf('admin') !== -1 || curTitle.indexOf('ADMIN') !== -1;
     var isCurrentPmam = path.indexOf('pmam') !== -1 || curTitle.indexOf('PMAM') !== -1;
-    var isCurrentIc = path.indexOf('ic_') !== -1 || path.indexOf('incharge') !== -1 || curTitle.indexOf('I/C') !== -1;
-    var isCurrentFinance = path.indexOf('finance') !== -1 || curTitle.indexOf('FINANCE') !== -1;
-    var isCurrentPatient = path.indexOf('patient') !== -1 || curTitle.indexOf('PATIENT') !== -1;
+    var isCurrentIc = path.indexOf('ic') !== -1 || path.indexOf('incharge') !== -1 || curTitle.indexOf('I/C') !== -1 || curTitle.indexOf('INCHARGE') !== -1;
+    var isCurrentFinance = path.indexOf('finance') !== -1 || curTitle.indexOf('FINANCE') !== -1 || curTitle.indexOf('ACCOUNTANT') !== -1;
+    var isCurrentPatient = path.indexOf('patient') !== -1 || curTitle.indexOf('PATIENT') !== -1 || curTitle.indexOf('DEO') !== -1;
 
     // Fallback: If userObj not provided, try reading from storage
     if (!userObj) {
