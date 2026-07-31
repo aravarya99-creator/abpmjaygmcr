@@ -756,7 +756,7 @@ function doLogin() {
       if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
 
       var isAdmin = email === ADMIN_EMAIL || uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s==='admin'||s==='administrator'; });
-      var isIc = uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('ic')!==-1 || s.indexOf('incharge')!==-1; });
+      var isIc = uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('ic')!==-1 || s.indexOf('i/c')!==-1 || s.indexOf('incharge')!==-1 || s.replace(/[^a-z0-9]/g,'').indexOf('ic')!==-1; });
       var isAccountant = uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('accountant')!==-1 || s.indexOf('finance')!==-1; });
       var isPmam = uRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
       var isDeo = uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s==='deo' || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
