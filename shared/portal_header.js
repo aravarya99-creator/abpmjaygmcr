@@ -873,7 +873,7 @@
     if (isUserAdmin) return; // Admin has unrestricted access
 
     var isUserPmam = userRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
-    var isUserIc = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('ic')!==-1 || s.indexOf('incharge')!==-1; });
+    var isUserIc = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('ic')!==-1 || s.indexOf('i/c')!==-1 || s.indexOf('incharge')!==-1 || s.replace(/[^a-z0-9]/g,'').indexOf('ic')!==-1; });
     var isUserFinance = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('finance')!==-1 || s.indexOf('accountant')!==-1; });
     var isUserPatient = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('deo')!==-1 || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
 
@@ -893,11 +893,11 @@
     if (!allowed) {
       console.warn("[SECURITY] Access denied for this portal. Redirecting to authorized portal...");
       alert("Access Denied: You do not have permission to access this portal.");
-      if (isUserIc) window.location.href = 'ic_portal.html';
-      else if (isUserFinance) window.location.href = 'finance.html';
-      else if (isUserPmam) window.location.href = 'pmam_portal.html';
-      else if (isUserPatient) window.location.href = 'patient_service_portal.html';
-      else window.location.href = 'index.html';
+      if (isUserIc && !isPageIc) window.location.href = 'ic_portal.html';
+      else if (isUserFinance && !isPageFinance) window.location.href = 'finance.html';
+      else if (isUserPmam && !isPagePmam) window.location.href = 'pmam_portal.html';
+      else if (isUserPatient && !isPagePatient) window.location.href = 'patient_service_portal.html';
+      else if (!isPageAdmin) window.location.href = 'index.html';
     }
   }
 
@@ -949,8 +949,8 @@
     });
 
     var isUserIc = isUserAdmin || userRoles.some(function(r){
-      var str = String(r).toLowerCase().trim();
-      return str.indexOf('ic') !== -1 || str.indexOf('incharge') !== -1;
+      var s = String(r).toLowerCase().trim();
+      return s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.replace(/[^a-z0-9]/g,'').indexOf('ic') !== -1;
     });
 
     var isUserFinance = isUserAdmin || userRoles.some(function(r){
