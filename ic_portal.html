@@ -2739,6 +2739,8 @@ function renderOverview() {
 function renderLeaveDash() {
   var today = new Date().toISOString().split('T')[0];
   var currentMonth = today.substring(0, 7); // YYYY-MM
+  var pmams = window._allPmams || window.pmams || [];
+  var rules = window._icLeaveLimits || { casual:15, medical:10, maternity:180, paternity:15, lwp:0 };
   
   // 1. Calculate KPIs
   var totalPMAM = pmams.length;
@@ -3034,6 +3036,7 @@ function renderLeaveBal() {
   var search = (document.getElementById('lbSearch') ? document.getElementById('lbSearch').value.toLowerCase() : '');
   
   var html = '';
+  var rules = window._icLeaveLimits || { casual:15, medical:10, maternity:180, paternity:15, lwp:0 };
   var pmams = window._allPmams || window.pmams || [];
   var sortedPmams = pmams.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
   

@@ -739,7 +739,10 @@ function doLogin() {
     localStorage.removeItem(lockKey);
     // Save login PIN for in-app PIN re-verification on protected sections (e.g. Bulk Import / Bulk Delete)
     localStorage.setItem('userPin', pin);
-    var userData = { email:email, name:u.name||'', role:u.role||'', roles:u.roles||[u.role||''], desig:u.role||'', ward:u.ward||'' };
+    var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
+    if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
+
+    var userData = { email:email, name:u.name||'', role:u.role||'', roles:uRoles, desig:u.role||'', ward:u.ward||'' };
     var uStr = JSON.stringify(userData);
     sessionStorage.setItem('pmjay_user', uStr);
     sessionStorage.setItem('pmam_user', uStr);
@@ -752,9 +755,6 @@ function doLogin() {
     else localStorage.removeItem('pmjay_remember');
     setMsg('loginMsg','Login successful! Redirecting...','#16a34a');
     setTimeout(function(){
-      var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
-      if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
-
       var isAdmin = email === ADMIN_EMAIL || uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s==='admin'||s==='administrator'; });
       var isIc = uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('ic')!==-1 || s.indexOf('i/c')!==-1 || s.indexOf('incharge')!==-1 || s.replace(/[^a-z0-9]/g,'').indexOf('ic')!==-1; });
       var isAccountant = uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('accountant')!==-1 || s.indexOf('finance')!==-1; });
