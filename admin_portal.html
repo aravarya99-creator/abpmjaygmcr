@@ -7954,7 +7954,11 @@ window.addEventListener('DOMContentLoaded', function() {
 
   var isAdmin = u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() || uRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='admin'||s==='administrator'; });
   if (!isAdmin) {
-    var isIc = uRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('ic')!==-1 || s.indexOf('incharge')!==-1; });
+    var isIc = uRoles.some(function(r){
+      var s = String(r).toLowerCase().trim();
+      var norm = s.replace(/[^a-z0-9]/g, '');
+      return s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.indexOf('icnarge') !== -1 || s.indexOf('incherage') !== -1 || s.indexOf('inchrage') !== -1 || norm.indexOf('ic') !== -1 || norm.indexOf('inc') !== -1;
+    });
     var isAccountant = uRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('accountant')!==-1 || s.indexOf('finance')!==-1; });
     var isPmam = uRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
     var isDeo = uRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='deo' || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });

@@ -2551,7 +2551,8 @@ window.addEventListener('load',()=>{
 
   var isIc = u.email === ADMIN_EMAIL || uRoles.some(function(r){
     var s = String(r).toLowerCase().trim();
-    return s === 'admin' || s === 'administrator' || s.indexOf('ic') !== -1 || s.indexOf('incharge') !== -1;
+    var norm = s.replace(/[^a-z0-9]/g, '');
+    return s === 'admin' || s === 'administrator' || s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.indexOf('icnarge') !== -1 || s.indexOf('incherage') !== -1 || s.indexOf('inchrage') !== -1 || norm.indexOf('ic') !== -1 || norm.indexOf('inc') !== -1;
   });
 
   if (!isIc) {
