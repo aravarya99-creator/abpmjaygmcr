@@ -3192,7 +3192,10 @@ function loadSessionUser() {
 
 function confirmLogout() {
   if (confirm('Are you sure you want to logout?')) {
-    sessionStorage.removeItem('pmjay_user');
+    ['pmjay_user','pmam_user','currentUser'].forEach(k => {
+      sessionStorage.removeItem(k);
+      localStorage.removeItem(k);
+    });
     window.location.href = 'index.html';
   }
 }
@@ -3785,9 +3788,12 @@ window.addEventListener('DOMContentLoaded', function() {
       function hasRole(pRole) {
         return uRoles.some(function(r) {
           var str = String(r).toLowerCase().trim();
+          var norm = str.replace(/[^a-z0-9]/g, '');
           if (pRole === 'Admin') return str === 'admin' || str === 'administrator';
           if (pRole === 'PMAM') return str === 'pmam';
-          if (pRole === 'I/C AB-PMJAY') return str.indexOf('ic') !== -1 || str.indexOf('i/c') !== -1 || str.indexOf('incharge') !== -1 || str.replace(/[^a-z0-9]/g,'').indexOf('ic') !== -1;
+          if (pRole === 'I/C AB-PMJAY' || pRole === 'I/C') {
+            return str.indexOf('ic') !== -1 || str.indexOf('i/c') !== -1 || str.indexOf('incharge') !== -1 || str.indexOf('icnarge') !== -1 || str.indexOf('incherage') !== -1 || str.indexOf('inchrage') !== -1 || norm.indexOf('ic') !== -1 || norm.indexOf('inc') !== -1;
+          }
           if (pRole === 'Accountant') return str.indexOf('accountant') !== -1 || str.indexOf('finance') !== -1;
           if (pRole === 'DEO') return str === 'deo' || str.indexOf('patient') !== -1 || str.indexOf('mts') !== -1;
           return false;
