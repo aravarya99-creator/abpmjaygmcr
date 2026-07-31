@@ -1872,8 +1872,24 @@ input:checked + .slider:before { transform: translateX(20px); }
               </div>
             </div>
 
+            <!-- ── USER ROLE SANITIZATION (DATA MAINTENANCE) ── -->
+            <div class="s-card" style="border:2px solid #2563eb;background:#eff6ff;margin-top:14px">
+              <div class="s-card-title" style="color:#1e40af">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                🧹 Data Maintenance — Sanitize User Roles & Typos
+              </div>
+              <div style="font-size:12px;color:#374151;line-height:1.7;margin-bottom:12px">
+                <strong style="color:#1e40af">✅ 100% Safe Action:</strong> Standardizes all legacy or misspelled role strings (e.g. <code>icnarge</code>, <code>incherage</code>, <code>I/C</code>) in Firestore to standard <code>I/C AB-PMJAY</code>.<br>
+                <strong>Does NOT delete or alter any user data</strong> (names, emails, PINs, wards, photos, etc. remain completely untouched).
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                <button class="btn btn-pri" onclick="sanitizeAllUserRoles()" style="background:#2563eb;border-color:#1d4ed8">🧹 Sanitize User Roles Now</button>
+                <span id="roleSanitizeStatus" style="font-size:11px;color:#6b7280;font-weight:600">Ready</span>
+              </div>
+            </div>
+
             <!-- ── BULK CLEAR (DANGER ZONE) ── -->
-            <div class="s-card" style="border:2px solid #dc2626;background:#FEF2F2;margin-top:4px">
+            <div class="s-card" style="border:2px solid #dc2626;background:#FEF2F2;margin-top:14px">
               <div class="s-card-title" style="color:#991b1b">
                 <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
                 🚨 Bulk Clear — Danger Zone
@@ -6530,6 +6546,80 @@ function bulkClear(coll, label){
         }).catch(function(e){ showToast('Partial failure: '+e.message, 'error'); });
       }).catch(function(e){ showToast('Error: '+e.message, 'error'); });
     }
+  });
+}
+
+function sanitizeAllUserRoles() {
+  var statusEl = document.getElementById('roleSanitizeStatus');
+  if (statusEl) { statusEl.textContent = 'Scanning users…'; statusEl.style.color = '#2563eb'; }
+
+  if (!confirm("Standardize all user role strings & typos in Firestore?\n\nThis is 100% safe: ONLY role strings (like 'icnarge' → 'I/C AB-PMJAY') are updated. Names, emails, PINs, wards, and photos will NOT be modified.")) {
+    if (statusEl) { statusEl.textContent = 'Cancelled'; statusEl.style.color = '#6b7280'; }
+    return;
+  }
+
+  showToast('Sanitizing user roles in Firestore…', 'info');
+
+  db.collection('users').get().then(function(snapshot) {
+    var count = 0;
+
+    var normalizeRole = function(r) {
+      if (!r) return r;
+      var str = String(r).toLowerCase().trim();
+      var norm = str.replace(/[^a-z0-9]/g, '');
+
+      if (str.indexOf('ic') !== -1 || str.indexOf('i/c') !== -1 || str.indexOf('incharge') !== -1 || 
+          str.indexOf('icnarge') !== -1 || str.indexOf('incherage') !== -1 || str.indexOf('inchrage') !== -1 ||
+          norm.indexOf('ic') !== -1 || norm.indexOf('inc') !== -1) {
+        return 'I/C AB-PMJAY';
+      }
+      if (str === 'admin' || str === 'administrator') return 'Admin';
+      if (str.indexOf('accountant') !== -1 || str.indexOf('finance') !== -1) return 'Accountant';
+      if (str === 'deo' || str.indexOf('patient') !== -1 || str.indexOf('mts') !== -1) return 'DEO';
+      if (str === 'pmam') return 'PMAM';
+      return r;
+    };
+
+    var batch = db.batch();
+    snapshot.forEach(function(doc) {
+      var data = doc.data();
+      var rawRoles = Array.isArray(data.roles) ? data.roles.slice() : (data.role ? [data.role] : []);
+      if (data.desig && !rawRoles.includes(data.desig)) rawRoles.push(data.desig);
+
+      var cleanRoles = Array.from(new Set(rawRoles.map(r => normalizeRole(r))));
+      var primaryRole = cleanRoles.length > 0 ? cleanRoles[0] : (data.role || '');
+
+      var needsUpdate = JSON.stringify(cleanRoles) !== JSON.stringify(data.roles) || primaryRole !== data.role;
+
+      if (needsUpdate) {
+        var ref = db.collection('users').doc(doc.id);
+        // doc.update ONLY updates specified fields, preserving name, email, pin, ward, photo, etc. 100% untouched
+        batch.update(ref, {
+          roles: cleanRoles,
+          role: primaryRole,
+          roleSanitizedAt: new Date().toISOString()
+        });
+        count++;
+      }
+    });
+
+    if (count > 0) {
+      batch.commit().then(function() {
+        if (typeof writeAudit === 'function') writeAudit('SANITIZE_ROLES', 'users', '*', { count: count });
+        if (statusEl) { statusEl.textContent = '✅ Standardized ' + count + ' user(s)'; statusEl.style.color = '#166534'; }
+        showToast('✅ Successfully sanitized ' + count + ' user role(s)!', 'success');
+        if (typeof loadDirectory === 'function') loadDirectory();
+      }).catch(function(e) {
+        if (statusEl) { statusEl.textContent = 'Error: ' + e.message; statusEl.style.color = '#dc2626'; }
+        showToast('Error: ' + e.message, 'error');
+      });
+    } else {
+      if (statusEl) { statusEl.textContent = '✨ All roles already clean'; statusEl.style.color = '#166534'; }
+      showToast('✨ All user roles in Firestore are already clean!', 'info');
+    }
+  }).catch(function(e) {
+    if (statusEl) { statusEl.textContent = 'Error: ' + e.message; statusEl.style.color = '#dc2626'; }
+    showToast('Error reading users: ' + e.message, 'error');
   });
 }
 
