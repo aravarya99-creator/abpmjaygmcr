@@ -852,25 +852,56 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         .ld-summary-val { font-size: 24px; font-weight: 900; color: #0f172a; }
         .ld-summary-val span { font-size: 13px; font-weight: 600; color: #64748b; margin-left: 4px; }
       </style>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
-        <button class="lv-tab active" onclick="showLvTab('dash', this)">📊 Leave Dashboard</button>
-        <button class="lv-tab" onclick="showLvTab('apply', this)">📝 Apply Leave</button>
-        <button class="lv-tab" onclick="showLvTab('myreq', this)">📋 My Leave Requests</button>
-        <button class="lv-tab" onclick="showLvTab('subreq', this)">👥 Substitute Duty Requests</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+        <button class="lv-tab active" onclick="showLvTab('apply', this)" style="display:flex;align-items:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Apply Leave
+        </button>
+        <button class="lv-tab" onclick="showLvTab('myreq', this)" style="display:flex;align-items:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+          My Requests
+        </button>
+        <button class="lv-tab" onclick="showLvTab('subreq', this)" style="display:flex;align-items:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><line x1="3" y1="5" x2="21" y2="5"/><polyline points="7 23 3 19 7 15"/><line x1="21" y1="19" x2="3" y2="19"/></svg>
+          Substitute Duty
+        </button>
+        <button class="lv-tab" onclick="showLvTab('dash', this)" style="display:flex;align-items:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Dashboard
+        </button>
       </div>
       <script>
         function showLvTab(tab, el) {
           document.querySelectorAll('#sec-leave .lv-tab').forEach(function(b){ b.classList.remove('active'); });
           document.querySelectorAll('#sec-leave .lv-pane').forEach(function(p){ p.classList.remove('active'); });
-          el.classList.add('active');
-          document.getElementById('lvpane-' + tab).classList.add('active');
+          if(el) el.classList.add('active');
+          var targetPane = document.getElementById('lvpane-' + tab);
+          if(targetPane) targetPane.classList.add('active');
           if(tab==='myreq' && document.getElementById('leaveHistCard')) document.getElementById('leaveHistCard').style.display='block';
           if(tab==='subreq' && document.getElementById('substituteReqCard')) document.getElementById('substituteReqCard').style.display='block';
+        }
+        function syncLvReason(val) {
+          var radios = document.querySelectorAll('input[name=lvReason]');
+          radios.forEach(function(r) {
+            if (r.value === val) r.checked = true;
+            else if (val === 'other' && r.value === 'other') r.checked = true;
+          });
+          var otherWrap = document.getElementById('lvOtherWrap');
+          if (otherWrap) {
+            otherWrap.style.display = (val === 'other') ? 'block' : 'none';
+          }
+        }
+        function syncLvType(val) {
+          var radios = document.querySelectorAll('input[name=lvType]');
+          radios.forEach(function(r) {
+            if (r.value === val) r.checked = true;
+          });
+          if (typeof toggleComp === 'function') toggleComp();
         }
       </script>
 
       <!-- LEAVE DASHBOARD PANE -->
-      <div class="lv-pane active" id="lvpane-dash">
+      <div class="lv-pane" id="lvpane-dash">
         <!-- LEAVE SUMMARY DASHBOARD -->
         <div id="leave_summary_dash" style="margin-bottom:14px;">
           <!-- Dynamically populated by renderLeaveSummary() -->
@@ -878,225 +909,252 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
       </div> <!-- End lvpane-dash -->
 
       <!-- APPLY LEAVE PANE -->
-      <div class="lv-pane" id="lvpane-apply">
-      <!-- FORM CARD -->
-      <div class="card" style="margin-bottom:14px">
-        <div style="font-size:13px;font-weight:700;color:#0F2B8C;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(26,61,181,0.1)">Fill Leave Application</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">
-
-          <!-- Name -->
-          <div class="fld"><label>Name of the Official</label>
-            <input type="text" id="lvName" value="" readonly style="width:100%;padding:9px 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:#F8FAFF;color:#0F2B8C;cursor:default">
-          </div>
-
-          <!-- Designation -->
-          <div class="fld"><label>Designation</label>
-            <input type="text" id="lvDesig" value="PMAM" style="width:100%;padding:9px 12px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#0F2B8C">
-          </div>
-
-          <!-- Ward — left column, same pattern as Fill Report -->
-          <div class="fld">
-            <label>Ward(s)</label>
-            <div style="display:flex;align-items:center;gap:6px">
-              <select id="lvWardSel" style="flex:1;height:34px;padding:0 8px;border:1.5px solid rgba(100,150,255,0.3);border-radius:50px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.8);color:#0F2B8C" data-ward-select="1">
-                <option value="">-- Select Ward --</option>
-                <option>Orthopaedics</option><option>Male Surgery Ward</option>
-                <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
-                <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
-                <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
-                <option>Optha</option><option>Onco</option><option>Gynae</option>
-                <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
-              </select>
-              <button class="btn btn-pri" onclick="lvAddWard()" style="height:34px;padding:0 12px;font-size:11px;border-radius:50px;white-space:nowrap">+ Add</button>
+      <div class="lv-pane active" id="lvpane-apply">
+        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:24px; box-shadow:0 4px 16px rgba(0,0,0,0.03); margin-bottom:20px;">
+          
+          <!-- Header -->
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:24px;">
+            <div style="width:48px; height:48px; border-radius:12px; background:#f3e8ff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
             </div>
-            <div id="lvWardTags" style="display:flex;flex-wrap:wrap;gap:4px;min-height:22px;margin-top:5px;align-items:center">
-              <span id="lvWardPlaceholder" style="font-size:11px;color:#BDBDBD;font-style:italic">No wards selected</span>
+            <h2 style="font-size:22px; font-weight:800; color:#0f172a; margin:0; font-family:'Inter',sans-serif;">Leave Application Form</h2>
+          </div>
+
+          <!-- 4 Profile Field Cards Grid -->
+          <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:16px; margin-bottom:24px;">
+            
+            <!-- Card 1: Employee Name -->
+            <div style="display:flex; align-items:center; gap:12px; padding:4px;">
+              <div style="width:44px; height:44px; border-radius:12px; background:#eff6ff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <div style="flex:1; overflow:hidden;">
+                <div style="font-size:11px; font-weight:600; color:#64748b; margin-bottom:2px;">Employee Name</div>
+                <input type="text" id="lvName" value="" readonly style="width:100%; border:none; background:transparent; font-size:14px; font-weight:800; color:#0f172a; text-transform:uppercase; outline:none; font-family:'Inter',sans-serif;">
+              </div>
+            </div>
+
+            <!-- Card 2: Designation -->
+            <div style="display:flex; align-items:center; gap:12px; padding:4px; border-left:1px solid #f1f5f9; padding-left:16px;">
+              <div style="width:44px; height:44px; border-radius:12px; background:#f3e8ff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="16" rx="2"/>
+                  <circle cx="9" cy="10" r="2"/>
+                  <line x1="15" y1="8" x2="17" y2="8"/>
+                  <line x1="15" y1="12" x2="17" y2="12"/>
+                  <line x1="7" y1="16" x2="17" y2="16"/>
+                </svg>
+              </div>
+              <div style="flex:1; overflow:hidden;">
+                <div style="font-size:11px; font-weight:600; color:#64748b; margin-bottom:2px;">Designation</div>
+                <input type="text" id="lvDesig" value="PMAM" style="width:100%; border:none; background:transparent; font-size:14px; font-weight:800; color:#0f172a; outline:none; font-family:'Inter',sans-serif;">
+              </div>
+            </div>
+
+            <!-- Card 3: Assigned Ward(s) -->
+            <div style="display:flex; align-items:center; gap:12px; padding:4px; border-left:1px solid #f1f5f9; padding-left:16px;">
+              <div style="width:44px; height:44px; border-radius:12px; background:#f0fdf4; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+                  <path d="M9 22v-4h6v4"/>
+                  <path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/>
+                  <path d="M12 10h.01"/><path d="M12 14h.01"/>
+                  <path d="M16 10h.01"/><path d="M16 14h.01"/>
+                  <path d="M8 10h.01"/><path d="M8 14h.01"/>
+                </svg>
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:11px; font-weight:600; color:#64748b; margin-bottom:2px;">Assigned Ward(s)</div>
+                <div style="display:flex; align-items:center; gap:4px;">
+                  <select id="lvWardSel" data-ward-select="1" style="flex:1; border:none; background:transparent; font-size:13px; font-weight:800; color:#0f172a; outline:none; cursor:pointer; font-family:'Inter',sans-serif; width:100%;">
+                    <option value="">Select Ward</option>
+                    <option>Orthopaedics</option><option>Male Surgery Ward</option>
+                    <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
+                    <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
+                    <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
+                    <option>Optha</option><option>Onco</option><option>Gynae</option>
+                    <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
+                  </select>
+                  <button type="button" onclick="lvAddWard()" style="background:#16a34a; color:#fff; border:none; border-radius:6px; padding:3px 8px; font-size:10px; font-weight:700; cursor:pointer; flex-shrink:0;">+ Add</button>
+                </div>
+                <div id="lvWardTags" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+                  <span id="lvWardPlaceholder" style="font-size:11px; color:#94a3b8; font-style:italic">No wards selected</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4: Duty Assigned To (Substitute) -->
+            <div style="display:flex; align-items:center; gap:12px; padding:4px; border-left:1px solid #f1f5f9; padding-left:16px;">
+              <div style="width:44px; height:44px; border-radius:12px; background:#fff7ed; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:11px; font-weight:600; color:#64748b; margin-bottom:2px;">Duty Assigned To (Substitute)</div>
+                <select id="lvDuty" style="width:100%; border:none; background:transparent; font-size:13px; font-weight:800; color:#0f172a; outline:none; cursor:pointer; font-family:'Inter',sans-serif;">
+                  <option value="">Select Substitute PMAM</option>
+                  <option>Tania Manhas</option><option>Abrar Choudhary</option>
+                  <option>Asia Firdose</option><option>Payal Sharma</option>
+                  <option>Rukhsar Akhter</option><option>Gagandeep Singh</option>
+                  <option>Ambika Thakur</option><option>Safeer Ahmed</option>
+                  <option>Vinod Kumar</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 6 Control Fields Grid -->
+          <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:14px; margin-bottom:24px;">
+            
+            <!-- From Date -->
+            <div>
+              <label style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px; display:block;">From Date</label>
+              <div style="display:flex; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; gap:8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input type="date" id="lvFrom" oninput="calcLvDays()" onchange="calcLvDays()" style="border:none; outline:none; width:100%; font-size:12px; font-weight:600; color:#0f172a; background:transparent; font-family:'Inter',sans-serif;">
+              </div>
+            </div>
+
+            <!-- To Date -->
+            <div>
+              <label style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px; display:block;">To Date</label>
+              <div style="display:flex; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; gap:8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input type="date" id="lvTo" oninput="calcLvDays()" onchange="calcLvDays()" style="border:none; outline:none; width:100%; font-size:12px; font-weight:600; color:#0f172a; background:transparent; font-family:'Inter',sans-serif;">
+              </div>
+            </div>
+
+            <!-- Total No. of Days -->
+            <div>
+              <label style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px; display:block;">Total No. of Days</label>
+              <div style="display:flex; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; gap:8px;">
+                <div style="width:24px; height:24px; border-radius:6px; background:#f3e8ff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><line x1="16" y1="10" x2="16" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="12" y1="18" x2="12" y2="18.01"/><line x1="8" y1="18" x2="8" y2="18.01"/></svg>
+                </div>
+                <input type="text" id="lvDays" placeholder="Auto Calculated" readonly style="border:none; outline:none; width:100%; font-size:12px; font-weight:700; color:#0f172a; background:transparent; font-family:'Inter',sans-serif;">
+              </div>
+            </div>
+
+            <!-- Return Date -->
+            <div>
+              <label style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px; display:block;">Return Date</label>
+              <div style="display:flex; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; gap:8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input type="date" id="lvReturn" readonly style="border:none; outline:none; width:100%; font-size:12px; font-weight:600; color:#0f172a; background:transparent; font-family:'Inter',sans-serif;">
+              </div>
+            </div>
+
+            <!-- Reason for Leave -->
+            <div>
+              <label style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px; display:block;">Reason for Leave</label>
+              <div style="display:flex; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; gap:8px;">
+                <div style="width:24px; height:24px; border-radius:6px; background:#f0fdf4; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <select id="lvReasonSel" onchange="syncLvReason(this.value)" style="border:none; outline:none; width:100%; font-size:12px; font-weight:600; color:#0f172a; background:transparent; font-family:'Inter',sans-serif; cursor:pointer;">
+                  <option value="">-- Select Reason --</option>
+                  <option value="Personal Work (Home)">Personal Work (Home)</option>
+                  <option value="Health Issue (Self/Family)">Health Issue (Self/Family)</option>
+                  <option value="Family Function">Family Function</option>
+                  <option value="other">Any Other</option>
+                </select>
+              </div>
+              <div id="lvOtherWrap" style="display:none; margin-top:6px;">
+                <input type="text" id="lvOther" placeholder="Specify reason..." style="width:100%; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:12px; outline:none; font-family:'Inter',sans-serif;">
+              </div>
+            </div>
+
+            <!-- Type of Leave -->
+            <div>
+              <label style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px; display:block;">Type of Leave</label>
+              <div style="display:flex; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; gap:8px;">
+                <div style="width:24px; height:24px; border-radius:6px; background:#fff7ed; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="m22 12.5-8.58 3.91a2 2 0 0 1-1.66 0L3.18 12.5"/><path d="m22 17.5-8.58 3.91a2 2 0 0 1-1.66 0L3.18 17.5"/></svg>
+                </div>
+                <select id="lvTypeSel" onchange="syncLvType(this.value)" style="border:none; outline:none; width:100%; font-size:12px; font-weight:600; color:#0f172a; background:transparent; font-family:'Inter',sans-serif; cursor:pointer;">
+                  <option value="">-- Select Leave Type --</option>
+                  <option value="Casual">Casual Leave (Paid)</option>
+                  <option value="Compensatory">Compensatory (Paid)</option>
+                  <option value="Medical Leave">Medical Leave (Unpaid)</option>
+                  <option value="Maternity Leave">Maternity Leave (Unpaid)</option>
+                  <option value="Paternity Leave">Paternity Leave (Unpaid)</option>
+                  <option value="Leave Without Pay">Leave Without Pay (Unpaid)</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- HIDDEN RADIO INPUTS FOR 100% BACKWARD COMPATIBILITY -->
+          <div style="display:none;">
+            <input type="radio" name="lvReason" id="r1" value="Personal Work (Home)">
+            <input type="radio" name="lvReason" id="r2" value="Health Issue (Self/Family)">
+            <input type="radio" name="lvReason" id="r4" value="Family Function">
+            <input type="radio" name="lvReason" id="r3" value="other">
+            
+            <input type="radio" name="lvType" id="lt1" value="Casual">
+            <input type="radio" name="lvType" id="lt2" value="Compensatory">
+            <input type="radio" name="lvType" id="lt3" value="Medical Leave">
+            <input type="radio" name="lvType" id="lt4" value="Maternity Leave">
+            <input type="radio" name="lvType" id="lt5" value="Paternity Leave">
+            <input type="radio" name="lvType" id="lt6" value="Leave Without Pay">
+          </div>
+
+          <!-- COMPENSATORY TABLE (shows only when Compensatory selected) -->
+          <div id="compSection" style="display:none; margin-top:16px; margin-bottom:20px;">
+            <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:8px;">Compensatory Leave Details</div>
+            <div style="overflow-x:auto; border-radius:12px; border:1px solid #e2e8f0;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px; min-width:500px;">
+                <thead>
+                  <tr>
+                    <th style="background:#0f172a; color:#fff; padding:10px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; width:50px;">S.No</th>
+                    <th style="background:#0f172a; color:#fff; padding:10px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase;">Holiday Name</th>
+                    <th style="background:#0f172a; color:#fff; padding:10px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase;">Date on Duty Performed</th>
+                    <th style="background:#0f172a; color:#fff; padding:10px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase;">Leave Date Requested</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td style="text-align:center; font-weight:700; padding:8px 10px; border-bottom:1px solid #f1f5f9;">1</td><td style="padding:8px 10px; border-bottom:1px solid #f1f5f9;"><select id="cd1_hol" style="width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif; background:#fff; cursor:pointer;"><option value="">-- Select Holiday --</option></select></td><td style="padding:8px 10px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd1_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif;"></td><td style="padding:8px 10px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd1_req" onclick="if(!document.getElementById('cd1_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd1_hol').value) { this.blur(); }" style="width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif;"></td></tr>
+                  <tr><td style="text-align:center; font-weight:700; padding:8px 10px; border-bottom:1px solid #f1f5f9;">2</td><td style="padding:8px 10px; border-bottom:1px solid #f1f5f9;"><select id="cd2_hol" style="width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif; background:#fff; cursor:pointer;"><option value="">-- Select Holiday --</option></select></td><td style="padding:8px 10px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd2_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif;"></td><td style="padding:8px 10px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd2_req" onclick="if(!document.getElementById('cd2_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd2_hol').value) { this.blur(); }" style="width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif;"></td></tr>
+                  <tr><td style="text-align:center; font-weight:700; padding:8px 10px; border-bottom:1px solid #f1f5f9;">3</td><td style="padding:8px 10px; border-bottom:1px solid #f1f5f9;"><select id="cd3_hol" style="width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif; background:#fff; cursor:pointer;"><option value="">-- Select Holiday --</option></select></td><td style="padding:8px 10px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd3_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif;"></td><td style="padding:8px 10px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd3_req" onclick="if(!document.getElementById('cd3_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd3_hol').value) { this.blur(); }" style="width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif;"></td></tr>
+                  <tr><td style="text-align:center; font-weight:700; padding:8px 10px;">4</td><td style="padding:8px 10px;"><select id="cd4_hol" style="width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif; background:#fff; cursor:pointer;"><option value="">-- Select Holiday --</option></select></td><td style="padding:8px 10px;"><input type="date" id="cd4_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif;"></td><td style="padding:8px 10px;"><input type="date" id="cd4_req" onclick="if(!document.getElementById('cd4_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd4_hol').value) { this.blur(); }" style="width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:12px; outline:none; font-family:'Inter',sans-serif;"></td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
-          <!-- Duty Assigned To — right column, same row as Ward -->
-          <div class="fld"><label>Duty Assigned To</label>
-            <select id="lvDuty" style="width:100%;height:34px;padding:0 10px;border:1.5px solid rgba(100,150,255,0.3);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#0F2B8C">
-              <option value="">-- Select Substitute PMAM --</option>
-              <option>Tania Manhas</option><option>Abrar Choudhary</option>
-              <option>Asia Firdose</option><option>Payal Sharma</option>
-              <option>Rukhsar Akhter</option><option>Gagandeep Singh</option>
-              <option>Ambika Thakur</option><option>Safeer Ahmed</option>
-              <option>Vinod Kumar</option>
-            </select>
+          <!-- Action Buttons Row -->
+          <div style="display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-top:24px;">
+            <button type="button" onclick="clearLeaveForm()" style="background:#ffffff; color:#0052ff; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px 24px; font-size:13px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:all 0.15s ease;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0052ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              Clear Form
+            </button>
+            <button type="button" onclick="printLeaveForm()" style="background:#059669; color:#ffffff; border:none; border-radius:12px; padding:12px 24px; font-size:13px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:all 0.15s ease; box-shadow:0 4px 12px rgba(5, 150, 105, 0.2);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/></svg>
+              Preview Application
+            </button>
+            <button type="button" onclick="submitLeave()" style="background:#0052ff; color:#ffffff; border:none; border-radius:12px; padding:12px 24px; font-size:13px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:all 0.15s ease; box-shadow:0 4px 12px rgba(0, 82, 255, 0.25);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Submit Application
+            </button>
           </div>
+          <div id="leaveMsg" style="font-size:12px; text-align:right; margin-top:10px; min-height:18px; font-weight:600;"></div>
 
         </div>
-
-        <!-- Dates row — 4 compact fields in one row -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 0.7fr 1fr;gap:10px;margin-top:10px">
-
-          <!-- From Date -->
-          <div class="fld">
-            <label style="font-size:10px;font-weight:700;color:#1A3DB5;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">From Date</label>
-            <input type="date" id="lvFrom" oninput="calcLvDays()" onchange="calcLvDays()"
-              style="width:100%;padding:5px 4px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#0F2B8C">
-          </div>
-
-          <!-- To Date -->
-          <div class="fld">
-            <label style="font-size:10px;font-weight:700;color:#1A3DB5;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">To Date</label>
-            <input type="date" id="lvTo" oninput="calcLvDays()" onchange="calcLvDays()"
-              style="width:100%;padding:5px 4px;border:1.5px solid rgba(100,150,255,0.3);border-radius:8px;font-size:11px;font-family:Inter,sans-serif;outline:none;background:rgba(255,255,255,0.9);color:#0F2B8C">
-          </div>
-
-          <!-- Total Days — auto, read-only -->
-          <div class="fld">
-            <label style="font-size:10px;font-weight:700;color:#1A3DB5;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">Total No. of Days</label>
-            <input type="number" id="lvDays" placeholder="Auto" readonly
-              style="width:100%;padding:7px 10px;border:1.5px solid rgba(26,61,181,0.25);border-radius:10px;font-size:14px;font-weight:800;font-family:Inter,sans-serif;outline:none;background:#EEF3FF;color:#0F2B8C;cursor:default;text-align:center">
-          </div>
-
-          <!-- Return Date — auto, read-only -->
-          <div class="fld">
-            <label style="font-size:10px;font-weight:700;color:#1A3DB5;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px">Return Date</label>
-            <input type="date" id="lvReturn" readonly
-              style="width:100%;padding:7px 10px;border:1.5px solid rgba(26,61,181,0.25);border-radius:10px;font-size:12px;font-family:Inter,sans-serif;outline:none;background:#EEF3FF;color:#0F2B8C;cursor:default">
-          </div>
-        </div>
-
-        <!-- Reason + Type of Leave (icon-card design) -->
-        <style>
-          .lvc-section{background:#fff;border:1px solid rgba(26,61,181,0.1);border-radius:14px;padding:14px 16px}
-          .lvc-section h4{display:flex;align-items:center;gap:8px;margin:0 0 12px 0;font-size:12px;font-weight:700;color:#0F2B8C;text-transform:uppercase;letter-spacing:0.4px}
-          .lvc-section h4 .lvc-hdr-ico{width:22px;height:22px;background:#EFF6FF;border-radius:6px;display:inline-flex;align-items:center;justify-content:center}
-          .lvc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-          .lvc-list{display:flex;flex-direction:column;gap:8px}
-          .lvc-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:12px;cursor:pointer;background:#fff;transition:all .15s ease;position:relative}
-          .lvc-card:hover{border-color:#93C5FD;background:#F9FBFF}
-          .lvc-card input[type=radio]{width:16px;height:16px;accent-color:#1A3DB5;cursor:pointer;flex-shrink:0}
-          .lvc-card.lvc-checked{border-color:#1A3DB5;background:#EFF6FF;box-shadow:0 0 0 1px #1A3DB5 inset}
-          .lvc-ico{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-          .lvc-lbl{font-size:12px;font-weight:700;color:#1F2937;line-height:1.25}
-          .lvc-sub{font-size:11px;font-weight:400;color:#6B7280;display:block;margin-top:1px}
-          .lvc-type-card{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid #E5E7EB;border-radius:10px;cursor:pointer;background:#fff;transition:all .15s ease;margin-bottom:0}
-          .lvc-type-card:hover{border-color:#93C5FD;background:#F9FBFF}
-          .lvc-type-card.lvc-checked{border-color:#1A3DB5;background:#EFF6FF;box-shadow:0 0 0 1px #1A3DB5 inset}
-          .lvc-type-card input[type=radio]{width:16px;height:16px;accent-color:#1A3DB5;cursor:pointer;flex-shrink:0}
-          .lvc-type-ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#EFF6FF}
-        </style>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
-
-          <!-- ── REASON FOR LEAVE ── -->
-          <div class="lvc-section">
-            <h4><span class="lvc-hdr-ico">📋</span> Reason for Leave</h4>
-            <div class="lvc-grid">
-              <label class="lvc-card" for="r1">
-                <input type="radio" name="lvReason" id="r1" value="Personal Work (Home)">
-                <div class="lvc-ico" style="background:#EFF6FF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A3DB5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-                <div class="lvc-lbl">Personal Work<span class="lvc-sub">(Home)</span></div>
-              </label>
-              <label class="lvc-card" for="r2">
-                <input type="radio" name="lvReason" id="r2" value="Health Issue (Self/Family)">
-                <div class="lvc-ico" style="background:#ECFDF5"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-                <div class="lvc-lbl">Health Issue<span class="lvc-sub">(Self/Family)</span></div>
-              </label>
-              <label class="lvc-card" for="r4">
-                <input type="radio" name="lvReason" id="r4" value="Family Function">
-                <div class="lvc-ico" style="background:#F5F3FF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-                <div class="lvc-lbl">Family Function</div>
-              </label>
-              <label class="lvc-card" for="r3">
-                <input type="radio" name="lvReason" id="r3" value="other">
-                <div class="lvc-ico" style="background:#FFF7ED"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5" fill="#F97316"/><circle cx="12" cy="12" r="1.5" fill="#F97316"/><circle cx="19" cy="12" r="1.5" fill="#F97316"/></svg></div>
-                <div class="lvc-lbl">Any Other</div>
-              </label>
-            </div>
-            <div style="margin-top:10px">
-              <div style="font-size:11px;color:#6B7280;margin-bottom:4px">Please specify reason</div>
-              <input type="text" id="lvOther" placeholder="Specify reason..." style="width:100%;padding:8px 12px;border:1px solid rgba(100,150,255,0.3);border-radius:8px;font-size:12px;outline:none;font-family:Inter,sans-serif">
-            </div>
-          </div>
-
-          <!-- ── TYPE OF LEAVE ── -->
-          <div class="lvc-section">
-            <h4><span class="lvc-hdr-ico">🗓️</span> Type of Leave</h4>
-            <div class="lvc-list">
-              <label class="lvc-type-card" for="lt1">
-                <input type="radio" name="lvType" id="lt1" value="Casual" onchange="toggleComp()">
-                <div class="lvc-type-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A3DB5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-                <div class="lvc-lbl">Casual Leave (Paid)</div>
-              </label>
-              <label class="lvc-type-card" for="lt2">
-                <input type="radio" name="lvType" id="lt2" value="Compensatory" onchange="toggleComp()">
-                <div class="lvc-type-ico" style="background:#FEF3C7"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4-9 4-9-4 9-4z"/><path d="M3 7v6c0 2 4 4 9 4s9-2 9-4V7"/></svg></div>
-                <div class="lvc-lbl">Compensatory (Paid) <span class="lvc-sub" style="display:inline">(Fill details below)</span></div>
-              </label>
-              <label class="lvc-type-card" for="lt3">
-                <input type="radio" name="lvType" id="lt3" value="Medical Leave" onchange="toggleComp()">
-                <div class="lvc-type-ico" style="background:#FEE2E2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg></div>
-                <div class="lvc-lbl">Medical Leave (Unpaid)</div>
-              </label>
-              <label class="lvc-type-card" for="lt4">
-                <input type="radio" name="lvType" id="lt4" value="Maternity Leave" onchange="toggleComp()">
-                <div class="lvc-type-ico" style="background:#FCE7F3"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#BE185D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="3"/><path d="M12 9c-3 0-6 2-6 5v8h12v-8c0-3-3-5-6-5z"/></svg></div>
-                <div class="lvc-lbl">Maternity Leave (Unpaid)</div>
-              </label>
-              <label class="lvc-type-card" for="lt5">
-                <input type="radio" name="lvType" id="lt5" value="Paternity Leave" onchange="toggleComp()">
-                <div class="lvc-type-ico" style="background:#DBEAFE"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg></div>
-                <div class="lvc-lbl">Paternity Leave (Unpaid)</div>
-              </label>
-              <label class="lvc-type-card" for="lt6">
-                <input type="radio" name="lvType" id="lt6" value="Leave Without Pay" onchange="toggleComp()">
-                <div class="lvc-type-ico" style="background:#E0E7FF"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4338CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-                <div class="lvc-lbl">Leave Without Pay (Unpaid)</div>
-              </label>
-            </div>
-          </div>
-        </div>
-        <script>
-          // Add "lvc-checked" class to the parent card when its radio gets selected
-          (function(){
-            function syncCheckedClass(){
-              document.querySelectorAll('.lvc-card, .lvc-type-card').forEach(function(card){
-                var r = card.querySelector('input[type=radio]');
-                if (r && r.checked) card.classList.add('lvc-checked');
-                else card.classList.remove('lvc-checked');
-              });
-            }
-            document.addEventListener('change', function(e){
-              if (e.target && e.target.matches('input[name=lvReason], input[name=lvType]')) syncCheckedClass();
-            });
-            window.addEventListener('DOMContentLoaded', syncCheckedClass);
-          })();
-        </script>
-
-        <!-- COMPENSATORY TABLE (shows only when Compensatory selected) -->
-        <div id="compSection" style="display:none;margin-top:10px">
-          <div style="font-size:11px;font-weight:700;color:#0F2B8C;margin-bottom:6px">Compensatory Leave Details</div>
-          <div style="overflow-x:auto;border-radius:10px;border:1px solid rgba(100,150,255,0.15)">
-            <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px">
-              <thead><tr>
-                <th style="background:#0F2B8C;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap;width:50px;border-radius:8px 0 0 0">S.No</th>
-                <th style="background:#0F2B8C;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap">Holiday Name</th>
-                <th style="background:#0F2B8C;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap">Date on Duty Performed</th>
-                <th style="background:#0F2B8C;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;white-space:nowrap;border-radius:0 8px 0 0">Leave Date Requested</th>
-              </tr></thead>
-              <tbody>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff">1</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><select id="cd1_hol" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif;appearance:auto;background:#fff;cursor:pointer"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd1_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd1_req" onclick="if(!document.getElementById('cd1_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd1_hol').value) { this.blur(); }" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF">2</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><select id="cd2_hol" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif;appearance:auto;background:#fff;cursor:pointer"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><input type="date" id="cd2_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#F8FAFF"><input type="date" id="cd2_req" onclick="if(!document.getElementById('cd2_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd2_hol').value) { this.blur(); }" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff">3</td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><select id="cd3_hol" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif;appearance:auto;background:#fff;cursor:pointer"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd3_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;border-bottom:1px solid rgba(26,61,181,0.08);background:#fff"><input type="date" id="cd3_req" onclick="if(!document.getElementById('cd3_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd3_hol').value) { this.blur(); }" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
-                <tr><td style="text-align:center;color:#1A3DB5;font-weight:700;padding:6px 8px;background:#F8FAFF">4</td><td style="padding:6px 8px;background:#F8FAFF"><select id="cd4_hol" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif;appearance:auto;background:#fff;cursor:pointer"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px;background:#F8FAFF"><input type="date" id="cd4_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td><td style="padding:6px 8px;background:#F8FAFF"><input type="date" id="cd4_req" onclick="if(!document.getElementById('cd4_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd4_hol').value) { this.blur(); }" style="width:100%;border:1px solid rgba(100,150,255,0.3);border-radius:6px;padding:4px 8px;font-size:11px;outline:none;font-family:Inter,sans-serif"></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-
-
-        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
-          <button class="btn btn-sec" onclick="clearLeaveForm()">Clear</button>
-          <button class="btn btn-pri" style="background:linear-gradient(90deg,#166534,#16a34a)" onclick="printLeaveForm()">&#128424; Print Application</button>
-          <button class="btn btn-pri" onclick="submitLeave()">Submit Request</button>
-        </div>
-        <div id="leaveMsg" style="font-size:12px;text-align:right;margin-top:8px;min-height:18px;color:#166534"></div>
-      </div>
       </div> <!-- End lvpane-apply -->
 
       <!-- SUBSTITUTE DUTY REQUESTS PANE -->
@@ -2802,7 +2860,10 @@ function clearLeaveForm() {
     var el = document.getElementById(id); if(el) el.value='';
   });
   document.getElementById('lvDesig').value = 'PMAM';
-  document.getElementById('lvDuty').selectedIndex  = 0;
+  var dutyEl = document.getElementById('lvDuty'); if(dutyEl) dutyEl.selectedIndex = 0;
+  var rs = document.getElementById('lvReasonSel'); if(rs) rs.selectedIndex = 0;
+  var ts = document.getElementById('lvTypeSel'); if(ts) ts.selectedIndex = 0;
+  var ow = document.getElementById('lvOtherWrap'); if(ow) ow.style.display = 'none';
   document.querySelectorAll('input[name=lvReason],input[name=lvType]').forEach(function(r){ r.checked=false; });
   document.getElementById('compSection').style.display = 'none';
   for (var i=1;i<=4;i++) {
