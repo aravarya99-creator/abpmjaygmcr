@@ -8660,6 +8660,21 @@ function loadDirectory() {
   }).catch(function(e){ console.error('loadDirectory:', e); });
 }
 
+function matchesRole(targetRole, roleList) {
+  if (!Array.isArray(roleList)) return false;
+  return roleList.some(function(r) {
+    var str = String(r).toLowerCase().trim();
+    if (targetRole === 'Admin') return str === 'admin' || str === 'administrator';
+    if (targetRole === 'PMAM') return str === 'pmam';
+    if (targetRole === 'I/C AB-PMJAY' || targetRole === 'I/C') {
+      return str.indexOf('ic') !== -1 || str.indexOf('i/c') !== -1 || str.indexOf('incharge') !== -1 || str.replace(/[^a-z0-9]/g,'').indexOf('ic') !== -1;
+    }
+    if (targetRole === 'Accountant') return str.indexOf('accountant') !== -1 || str.indexOf('finance') !== -1;
+    if (targetRole === 'DEO') return str === 'deo' || str.indexOf('patient') !== -1 || str.indexOf('mts') !== -1;
+    return str === String(targetRole).toLowerCase().trim();
+  });
+}
+
 function filterDirectory(role, el) {
   if (el) {
     document.querySelectorAll('[id^="dir-tab-"]').forEach(btn => btn.classList.remove('active'));
@@ -8670,7 +8685,7 @@ function filterDirectory(role, el) {
   if (role !== 'all') {
     filtered = window._allDirectoryUsers.filter(u => {
       var uR = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-      return uR.includes(role);
+      return matchesRole(role, uR);
     });
   }
   
@@ -8700,10 +8715,11 @@ function renderDirectoryGrid(list) {
     var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
     var rolesHtml = uRoles.map(r => {
       var c = 'role-pmam';
-      if(r === 'I/C AB-PMJAY') c = 'role-ic';
-      else if(r === 'Admin') c = 'role-admin';
-      else if(r === 'DEO') c = 'role-deo';
-      else if(r === 'Accountant') c = 'role-accountant';
+      var s = String(r).toLowerCase().trim();
+      if(s.indexOf('ic')!==-1 || s.indexOf('i/c')!==-1 || s.indexOf('incharge')!==-1) c = 'role-ic';
+      else if(s === 'admin' || s === 'administrator') c = 'role-admin';
+      else if(s === 'deo' || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1) c = 'role-deo';
+      else if(s.indexOf('accountant')!==-1 || s.indexOf('finance')!==-1) c = 'role-accountant';
       return `<span class="user-role ${c}" style="margin-right:4px">${r}</span>`;
     }).join('');
 
@@ -8836,18 +8852,6 @@ function openUnifiedEdit(docId) {
   var allRoles = ['PMAM', 'I/C AB-PMJAY', 'DEO', 'Admin', 'Accountant'];
   var userRoles = Array.isArray(user.roles) ? user.roles.slice() : (user.role ? [user.role] : []);
   if (user.desig && !userRoles.includes(user.desig)) userRoles.push(user.desig);
-
-  function matchesRole(targetRole, roleList) {
-    return roleList.some(function(r) {
-      var str = String(r).toLowerCase().trim();
-      if (targetRole === 'Admin') return str === 'admin' || str === 'administrator';
-      if (targetRole === 'PMAM') return str === 'pmam';
-      if (targetRole === 'I/C AB-PMJAY') return str.indexOf('ic') !== -1 || str.indexOf('incharge') !== -1;
-      if (targetRole === 'Accountant') return str.indexOf('accountant') !== -1 || str.indexOf('finance') !== -1;
-      if (targetRole === 'DEO') return str === 'deo' || str.indexOf('patient') !== -1 || str.indexOf('mts') !== -1;
-      return str === String(targetRole).toLowerCase().trim();
-    });
-  }
 
   var rHtml = '';
   allRoles.forEach(r => {
