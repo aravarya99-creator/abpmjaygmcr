@@ -766,9 +766,9 @@ function doLogin() {
       var isDeo = uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s==='deo' || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
 
       if (isAdmin) window.location.href='admin_portal.html';
+      else if (isPmam) window.location.href='pmam_portal.html';
       else if (isIc) window.location.href='ic_portal.html';
       else if (isAccountant) window.location.href='finance.html';
-      else if (isPmam) window.location.href='pmam_portal.html';
       else if (isDeo) window.location.href='patient_service_portal.html';
       else window.location.href='pmam_portal.html';
     }, 800);
@@ -900,9 +900,9 @@ window.addEventListener('DOMContentLoaded', function() {
       var isDeo = sRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s==='deo' || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
 
       if (isAdmin) window.location.href='admin_portal.html';
+      else if (isPmam) window.location.href='pmam_portal.html';
       else if (isIc) window.location.href='ic_portal.html';
       else if (isAccountant) window.location.href='finance.html';
-      else if (isPmam) window.location.href='pmam_portal.html';
       else if (isDeo) window.location.href='patient_service_portal.html';
       else window.location.href='pmam_portal.html';
     }

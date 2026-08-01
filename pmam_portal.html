@@ -3272,11 +3272,6 @@ function getPmjayUser() {
   var isAdmin = u.email.toLowerCase() === ADMIN_EMAIL || uRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='admin'||s==='administrator'; });
   var isPmam = isAdmin || uRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
 
-  if (isAdmin) {
-    window.location.replace('admin_portal.html');
-    return;
-  }
-
   if (!isPmam) {
     var isIc = uRoles.some(function(r){
       var s = String(r).toLowerCase().trim();
