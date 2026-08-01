@@ -67,20 +67,27 @@
         if (!this.userEmail) return;
         query = query.where('email', '==', this.userEmail);
         
-                if (this.userName) {
+                if (this.userName || this.userEmail) {
           this._unsubSub = db.collection('leave_requests')
             .onSnapshot(function(snap) {
               self.subRequests = [];
               snap.forEach(function(doc) {
                 var d = doc.data();
-                var dutyName = (d.duty || '').toLowerCase();
-                var myName = (self.userName || '').toLowerCase();
-                if (dutyName === myName) {
+                var dutyName = (d.duty || '').toLowerCase().trim();
+                var myName = (self.userName || '').toLowerCase().trim();
+                var myEmail = (self.userEmail || '').toLowerCase().trim();
+                var dutyEmail = (d.dutyEmail || '').toLowerCase().trim();
+                
+                var isMatch = false;
+                if (myName && dutyName && (dutyName === myName || dutyName.indexOf(myName) !== -1 || myName.indexOf(dutyName) !== -1)) isMatch = true;
+                if (myEmail && (dutyName === myEmail || dutyEmail === myEmail)) isMatch = true;
+                
+                if (isMatch) {
                   self.subRequests.push(Object.assign({
-                  id: doc.id, type: d.ltype, name: d.name, ward: d.ward, from: d.fromDt,
-                  to: d.toDt, days: d.days, retDate: d.ret, duty: d.duty,
-                  reason: d.reason, status: d.status, remark: d.remark || '', timestamp: d.timestamp || 0
-                }, d));
+                    id: doc.id, type: d.ltype, name: d.name, ward: d.ward, from: d.fromDt,
+                    to: d.toDt, days: d.days, retDate: d.ret, duty: d.duty,
+                    reason: d.reason, status: d.status, remark: d.remark || '', timestamp: d.timestamp || 0
+                  }, d));
                 }
               });
               if (self.onUpdate) self.onUpdate();

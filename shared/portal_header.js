@@ -830,7 +830,14 @@
             db.collection('users').doc(lookupEmail).get().then(function(doc) {
               if (doc.exists && doc.data()) {
                 var d = doc.data();
-                if (d.name) name = d.name;
+                if (d.name) {
+                  name = d.name;
+                  if (window.LeaveEngine) {
+                    window.LeaveEngine.userName = name;
+                    if (window.LeaveEngine.userEmail === null && lookupEmail) window.LeaveEngine.userEmail = lookupEmail;
+                    if (typeof window.LeaveEngine._fetchRequests === 'function') window.LeaveEngine._fetchRequests();
+                  }
+                }
 
                 var existingRoles = Array.isArray(userObj && userObj.roles) ? userObj.roles.slice() : (userObj && userObj.role ? [userObj.role] : []);
                 var docRoles = Array.isArray(d.roles) ? d.roles.slice() : (d.role ? [d.role] : []);
