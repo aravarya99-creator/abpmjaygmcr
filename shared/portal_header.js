@@ -831,7 +831,13 @@
               if (doc.exists && doc.data()) {
                 var d = doc.data();
                 if (d.name) name = d.name;
-                var updatedUserObj = Object.assign({}, userObj || {}, d);
+
+                var existingRoles = Array.isArray(userObj && userObj.roles) ? userObj.roles.slice() : (userObj && userObj.role ? [userObj.role] : []);
+                var docRoles = Array.isArray(d.roles) ? d.roles.slice() : (d.role ? [d.role] : []);
+                var mergedRoles = Array.from(new Set(existingRoles.concat(docRoles)));
+                if (d.desig && !mergedRoles.includes(d.desig)) mergedRoles.push(d.desig);
+
+                var updatedUserObj = Object.assign({}, userObj || {}, d, { roles: mergedRoles });
                 var finalDisplayRole = activePortalRole || d.role || d.desig || displayRole;
 
                 try {
@@ -896,9 +902,9 @@
 
     if (!allowed) {
       console.warn("[SECURITY] Access denied for this portal. Redirecting to authorized portal...");
-      if (isUserIc && !isPageIc) window.location.href = 'ic_portal.html';
+      if (isUserPmam && !isPagePmam) window.location.href = 'pmam_portal.html';
+      else if (isUserIc && !isPageIc) window.location.href = 'ic_portal.html';
       else if (isUserFinance && !isPageFinance) window.location.href = 'finance.html';
-      else if (isUserPmam && !isPagePmam) window.location.href = 'pmam_portal.html';
       else if (isUserPatient && !isPagePatient) window.location.href = 'patient_service_portal.html';
       else if (!isPageAdmin && path.indexOf('index') === -1) window.location.href = 'index.html';
     }
