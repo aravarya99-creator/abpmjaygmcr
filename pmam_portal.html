@@ -878,7 +878,11 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           var targetPane = document.getElementById('lvpane-' + tab);
           if(targetPane) targetPane.classList.add('active');
           if(tab==='myreq' && document.getElementById('leaveHistCard')) document.getElementById('leaveHistCard').style.display='block';
-          if(tab==='subreq' && document.getElementById('substituteReqCard')) document.getElementById('substituteReqCard').style.display='block';
+          if(tab==='subreq') {
+            if(document.getElementById('substituteReqCardNew')) document.getElementById('substituteReqCardNew').style.display='block';
+            if(document.getElementById('substituteReqCardHist')) document.getElementById('substituteReqCardHist').style.display='block';
+            if(typeof renderSubstituteRequests === 'function') renderSubstituteRequests();
+          }
         }
         function syncLvReason(val) {
           var radios = document.querySelectorAll('input[name=lvReason]');
@@ -2201,36 +2205,74 @@ var _myCompEarned = 0;
 
 
 function renderSubstituteRequests() {
-  var card = document.getElementById('substituteReqCard');
-  var tbody = document.getElementById('subReqTbody');
-  if (!card || !tbody) return;
+  var cardNew = document.getElementById('substituteReqCardNew');
+  var tbodyNew = document.getElementById('subReqTbodyNew');
+  var cardHist = document.getElementById('substituteReqCardHist');
+  var tbodyHist = document.getElementById('subReqTbodyHist');
   
-  if (LeaveEngine.subRequests.length === 0) {
-    card.style.display = 'none';
-    return;
+  var cardLegacy = document.getElementById('substituteReqCard');
+  var tbodyLegacy = document.getElementById('subReqTbody');
+
+  var subReqs = LeaveEngine.subRequests || [];
+  
+  if (cardLegacy && tbodyLegacy) {
+    if (subReqs.length === 0) cardLegacy.style.display = 'none';
+    else cardLegacy.style.display = 'block';
   }
-  card.style.display = 'block';
-  
-  var html = '';
-  LeaveEngine.subRequests.forEach(function(req) {
-    html += '<tr>';
-    html += '<td><strong>' + (req.name || 'Unknown') + '</strong></td>';
-    html += '<td>' + (req.ltype || 'Unknown') + '</td>';
-    html += '<td>' + fmtDate(req.from) + '</td>';
-    html += '<td>' + fmtDate(req.to) + '</td>';
-    html += '<td>' + (req.days || '-') + '</td>';
-    html += '<td>';
-    html += '<button class="btn btn-pri" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="viewDutyRequest(\'' + req.id + '\')">View</button>';
-    if (req.status === 'Pending Substitute') {
-      html += '<button class="btn btn-pri" style="background:#166534; padding:4px 8px; font-size:11px; margin-right:4px;" onclick="initiateApproveDuty(\'' + req.id + '\')">Approve</button>';
-      html += '<button class="btn btn-sec" style="color:#dc2626; padding:4px 8px; font-size:11px;" onclick="rejectDutyRequest(\'' + req.id + '\')">Reject</button>';
+
+  if (!tbodyNew && !tbodyHist) return;
+
+  var newReqs = subReqs.filter(function(r){ return r.status === 'Pending Substitute' || r.status === 'Needs Substitute'; });
+  var histReqs = subReqs.filter(function(r){ return r.status !== 'Pending Substitute' && r.status !== 'Needs Substitute'; });
+
+  // 1. Action Required Requests
+  if (cardNew && tbodyNew) {
+    if (newReqs.length === 0) {
+      cardNew.style.display = 'block';
+      tbodyNew.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:#64748b; font-style:italic;">No pending duty requests assigned to you.</td></tr>';
     } else {
-      html += '<span style="font-size:11px; font-weight:600; color:#1e3a8a; margin-left:4px;">' + req.status + '</span>';
+      cardNew.style.display = 'block';
+      var htmlNew = '';
+      newReqs.forEach(function(req) {
+        htmlNew += '<tr>';
+        htmlNew += '<td><strong>' + (req.name || 'Unknown') + '</strong></td>';
+        htmlNew += '<td>' + (req.ltype || req.type || 'Leave') + '</td>';
+        htmlNew += '<td>' + fmtDate(req.from || req.fromDt) + '</td>';
+        htmlNew += '<td>' + fmtDate(req.to || req.toDt) + '</td>';
+        htmlNew += '<td>' + (req.days || '-') + '</td>';
+        htmlNew += '<td>';
+        htmlNew += '<button class="btn btn-pri" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="viewDutyRequest(\'' + req.id + '\')">View</button>';
+        htmlNew += '<button class="btn btn-pri" style="background:#166534; padding:4px 8px; font-size:11px; margin-right:4px;" onclick="initiateApproveDuty(\'' + req.id + '\')">Approve</button>';
+        htmlNew += '<button class="btn btn-sec" style="color:#dc2626; padding:4px 8px; font-size:11px;" onclick="rejectDutyRequest(\'' + req.id + '\')">Reject</button>';
+        htmlNew += '</td>';
+        htmlNew += '</tr>';
+      });
+      tbodyNew.innerHTML = htmlNew;
     }
-    html += '</td>';
-    html += '</tr>';
-  });
-  tbody.innerHTML = html;
+  }
+
+  // 2. History Requests
+  if (cardHist && tbodyHist) {
+    if (histReqs.length === 0) {
+      cardHist.style.display = 'none';
+    } else {
+      cardHist.style.display = 'block';
+      var htmlHist = '';
+      histReqs.forEach(function(req) {
+        var statusColor = (req.status === 'Approved' || req.status === 'Pending') ? '#166534' : '#dc2626';
+        htmlHist += '<tr>';
+        htmlHist += '<td><strong>' + (req.name || 'Unknown') + '</strong></td>';
+        htmlHist += '<td>' + (req.ltype || req.type || 'Leave') + '</td>';
+        htmlHist += '<td>' + fmtDate(req.from || req.fromDt) + '</td>';
+        htmlHist += '<td>' + fmtDate(req.to || req.toDt) + '</td>';
+        htmlHist += '<td>' + (req.days || '-') + '</td>';
+        htmlHist += '<td><span style="font-size:11px; font-weight:700; color:' + statusColor + ';">' + (req.status || '-') + '</span></td>';
+        htmlHist += '<td><button class="btn btn-sec" style="padding:4px 8px; font-size:11px;" onclick="viewDutyRequest(\'' + req.id + '\')">View</button></td>';
+        htmlHist += '</tr>';
+      });
+      tbodyHist.innerHTML = htmlHist;
+    }
+  }
 }
 
 function viewDutyRequest(id) {
@@ -2686,16 +2728,24 @@ function confirmLeaveSignature() {
     return DSig.initiateSignedLeave(window._pendingLeaveReq, pin);
   }).then(function() {
     setModalLvError('');
-    document.getElementById('signPinModal').classList.remove('open');
-    var msg = document.getElementById('leaveMsg');
-    if (msg) {
-      msg.style.color = '#166534';
-      msg.textContent = '✅ Leave request digitally signed and submitted!';
-      setTimeout(function(){ msg.textContent=''; }, 4000);
-    }
-    var card = document.getElementById('leaveHistCard');
-    if (card) card.style.display = 'block';
-    clearLeaveForm();
+    msgEl.style.display = 'flex';
+    msgEl.style.background = '#dcfce7';
+    msgEl.style.border = '1px solid #86efac';
+    msgEl.style.color = '#166534';
+    msgEl.innerHTML = '<div style="width:22px; height:22px; border-radius:50%; background:#16a34a; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; flex-shrink:0;">✓</div> <div style="font-size:12px; font-weight:700; line-height:1.3;">Leave request submitted successfully!<br><span style="font-size:11px; font-weight:500; color:#15803d;">Request sent to substitute PMAM for duty acceptance.</span></div>';
+    
+    setTimeout(function() {
+      document.getElementById('signPinModal').classList.remove('open');
+      var msg = document.getElementById('leaveMsg');
+      if (msg) {
+        msg.style.color = '#166534';
+        msg.textContent = '✅ Leave request submitted successfully! Sent to substitute PMAM.';
+        setTimeout(function(){ msg.textContent=''; }, 4000);
+      }
+      var card = document.getElementById('leaveHistCard');
+      if (card) card.style.display = 'block';
+      clearLeaveForm();
+    }, 2500);
   }).catch(function(e) {
     var errText = e.message || '';
     if (errText.indexOf('PIN') !== -1 || errText.indexOf('Incorrect') !== -1) {
