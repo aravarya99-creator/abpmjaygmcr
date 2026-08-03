@@ -2903,32 +2903,39 @@ function fmtDate(ymd) {
   return d.getDate() + ' ' + m[d.getMonth()] + ' ' + d.getFullYear();
 }
 
+var _wrHistoryData = [];
+
 function showWrHistoryModal() {
   db.collection('settings').doc('weekend_roster').get().then(function(doc){
     var data = doc.exists ? doc.data() : {rows:[], history:[]};
-    var all = (data.history || []).concat(data.rows || []);
-    // deduplicate
-    var map = {};
-    all.forEach(function(r){ map[r.saturday] = r; });
-    var combined = Object.keys(map).map(function(k){return map[k];});
+    var history = Array.isArray(data.history) ? data.history.slice() : [];
     
-    var today = new Date().toISOString().slice(0,10);
-    var pastOnly = combined.filter(function(r){ return (r.saturday || '') < today; });
-    pastOnly.sort(function(a,b){ return b.saturday.localeCompare(a.saturday); }); // desc
+    // Strict date sequence (descending: newest to oldest)
+    history.sort(function(a,b){ return (b.saturday||'').localeCompare(a.saturday||''); });
+    _wrHistoryData = history;
     
-    var html = '<table style="width:100%; border-collapse:collapse; font-size:12px;">'
-      + '<thead><tr><th>#</th><th>PMAM 1</th><th>PMAM 2</th><th>SATURDAY</th><th>SUNDAY</th></tr></thead><tbody>';
+    var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:4px 2px;">'
+      + '<span style="font-size:12px;font-weight:700;color:#475569;">Total History Records: ' + history.length + '</span>'
+      + '<button class="btn btn-pri" style="height:32px;font-size:11px;padding:0 14px;background:#166534;" onclick="openWrHistoryEditModal(-1)">➕ Add Past Roster Entry</button>'
+      + '</div>';
+
+    html += '<table style="width:100%; border-collapse:collapse; font-size:12px;">'
+      + '<thead><tr style="background:#f1f5f9;border-bottom:1.5px solid #cbd5e1;"><th style="padding:8px;text-align:center">#</th><th style="padding:8px;text-align:left">PMAM 1</th><th style="padding:8px;text-align:left">PMAM 2</th><th style="padding:8px;text-align:left">SATURDAY</th><th style="padding:8px;text-align:left">SUNDAY</th><th style="padding:8px;text-align:center">ACTIONS</th></tr></thead><tbody>';
     
-    if(!pastOnly.length) {
-      html += '<tr><td colspan="5" style="text-align:center;padding:20px;color:#9ca3af;font-style:italic">No history found.</td></tr>';
+    if(!history.length) {
+      html += '<tr><td colspan="6" style="text-align:center;padding:24px;color:#9ca3af;font-style:italic">No history records found. Click "Add Past Roster Entry" to create one.</td></tr>';
     } else {
-      pastOnly.forEach(function(r, i){
-        html += '<tr>'
-          + '<td style="color:#6b7280;font-weight:600;padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+(i+1)+'</td>'
-          + '<td style="padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+(r.pmam1||'-')+'</td>'
-          + '<td style="padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+(r.pmam2||'-')+'</td>'
-          + '<td style="font-weight:600;padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+fmtDate(r.saturday)+'</td>'
-          + '<td style="font-weight:600;padding:8px;border-bottom:1px solid rgba(26,61,181,0.05)">'+fmtDate(r.sunday)+'</td>'
+      history.forEach(function(r, i){
+        html += '<tr style="border-bottom:1px solid #f1f5f9;">'
+          + '<td style="color:#6b7280;font-weight:600;padding:8px;text-align:center">'+(i+1)+'</td>'
+          + '<td style="padding:8px;font-weight:700;color:#1e3a8a">'+(r.pmam1||'-')+'</td>'
+          + '<td style="padding:8px;font-weight:700;color:#1e3a8a">'+(r.pmam2||'-')+'</td>'
+          + '<td style="font-weight:700;padding:8px;color:#334155">'+fmtDate(r.saturday)+'</td>'
+          + '<td style="font-weight:700;padding:8px;color:#334155">'+fmtDate(r.sunday)+'</td>'
+          + '<td style="padding:8px;text-align:center;white-space:nowrap;">'
+          +   '<button class="btn btn-sec" style="padding:3px 8px;font-size:10.5px;margin-right:4px;" onclick="openWrHistoryEditModal('+i+')">✏️ Edit</button>'
+          +   '<button class="btn btn-sec" style="padding:3px 8px;font-size:10.5px;color:#dc2626;border-color:#fecaca;" onclick="deleteWrHistoryEntry('+i+')">🗑️ Delete</button>'
+          + '</td>'
           + '</tr>';
       });
     }
@@ -2937,9 +2944,12 @@ function showWrHistoryModal() {
     // Add modal if it doesn't exist
     if(!document.getElementById('wrHistoryModal')) {
       var modalHtml = '<div class="modal-bg" id="wrHistoryModal">'
-        + '<div class="modal-box" style="max-width:600px; max-height:85vh; display:flex; flex-direction:column;">'
-        + '  <div class="modal-title" style="margin-bottom:12px;">🕰️ Weekend Roster History</div>'
-        + '  <div style="overflow-y:auto; flex:1; border:1px solid rgba(26,61,181,0.1); border-radius:8px;" id="wrHistoryContent"></div>'
+        + '<div class="modal-box" style="max-width:720px; max-height:85vh; display:flex; flex-direction:column;">'
+        + '  <div class="modal-title" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">'
+        + '    <span>🕰️ Manage Weekend Roster History</span>'
+        + '    <button style="background:none;border:none;font-size:18px;cursor:pointer;" onclick="document.getElementById(\'wrHistoryModal\').classList.remove(\'open\')">✕</button>'
+        + '  </div>'
+        + '  <div style="overflow-y:auto; flex:1; border:1px solid #cbd5e1; border-radius:8px; padding:10px; background:#fff;" id="wrHistoryContent"></div>'
         + '  <div class="modal-footer" style="margin-top:16px;">'
         + '    <button class="mbtn mbtn-sec" onclick="document.getElementById(\'wrHistoryModal\').classList.remove(\'open\')">Close</button>'
         + '  </div>'
@@ -2951,6 +2961,92 @@ function showWrHistoryModal() {
     document.getElementById('wrHistoryModal').classList.add('open');
   }).catch(function(err){
     showToast('Failed to load history: ' + err.message, 'danger');
+  });
+}
+
+function openWrHistoryEditModal(index) {
+  var isEdit = index >= 0;
+  var rec = isEdit ? (_wrHistoryData[index] || {}) : { pmam1: '', pmam2: '', saturday: '', sunday: '' };
+  
+  if (!document.getElementById('wrHistoryEditModal')) {
+    var editModalHtml = '<div class="modal-bg" id="wrHistoryEditModal" style="z-index:999999!important;">'
+      + '<div class="modal-box" style="max-width:440px;">'
+      + '  <div class="modal-title" id="wrHistEditTitle" style="margin-bottom:14px;">Edit Past Weekend Roster</div>'
+      + '  <input type="hidden" id="wrHistEditIndex" value="-1">'
+      + '  <div class="mfld"><label>PMAM 1 Name</label><input type="text" id="wrHistPmam1" placeholder="e.g. Payal Sharma"></div>'
+      + '  <div class="mfld"><label>PMAM 2 Name</label><input type="text" id="wrHistPmam2" placeholder="e.g. Tania Manhas"></div>'
+      + '  <div class="mfld"><label>Saturday Date (YYYY-MM-DD)</label><input type="date" id="wrHistSat" onchange="autoFillSunDate(this.value)"></div>'
+      + '  <div class="mfld"><label>Sunday Date (YYYY-MM-DD)</label><input type="date" id="wrHistSun"></div>'
+      + '  <div class="modal-foot" style="margin-top:16px;">'
+      + '    <button class="mbtn mbtn-sec" onclick="document.getElementById(\'wrHistoryEditModal\').classList.remove(\'open\')">Cancel</button>'
+      + '    <button class="mbtn mbtn-pri" onclick="saveWrHistoryEntry()">Save History Entry</button>'
+      + '  </div>'
+      + '</div></div>';
+    document.body.insertAdjacentHTML('beforeend', editModalHtml);
+  }
+
+  document.getElementById('wrHistEditTitle').textContent = isEdit ? '✏️ Edit Past Weekend Roster' : '➕ Add Past Weekend Roster';
+  document.getElementById('wrHistEditIndex').value = index;
+  document.getElementById('wrHistPmam1').value = rec.pmam1 || '';
+  document.getElementById('wrHistPmam2').value = rec.pmam2 || '';
+  document.getElementById('wrHistSat').value = rec.saturday || '';
+  document.getElementById('wrHistSun').value = rec.sunday || '';
+  
+  document.getElementById('wrHistoryEditModal').classList.add('open');
+}
+
+function autoFillSunDate(satStr) {
+  if (!satStr) return;
+  var pts = satStr.split('-');
+  if (pts.length !== 3) return;
+  var d = new Date(Date.UTC(parseInt(pts[0],10), parseInt(pts[1],10)-1, parseInt(pts[2],10)));
+  d.setUTCDate(d.getUTCDate() + 1);
+  document.getElementById('wrHistSun').value = d.toISOString().split('T')[0];
+}
+
+function saveWrHistoryEntry() {
+  var index = parseInt(document.getElementById('wrHistEditIndex').value, 10);
+  var p1  = (document.getElementById('wrHistPmam1').value || '').trim();
+  var p2  = (document.getElementById('wrHistPmam2').value || '').trim();
+  var sat = (document.getElementById('wrHistSat').value || '').trim();
+  var sun = (document.getElementById('wrHistSun').value || '').trim();
+
+  if (!sat) { showToast('Please select Saturday date.', 'warning'); return; }
+  if (!sun) { showToast('Please select Sunday date.', 'warning'); return; }
+  if (!p1 && !p2) { showToast('Please enter at least one PMAM name.', 'warning'); return; }
+
+  var entry = { pmam1: p1, pmam2: p2, saturday: sat, sunday: sun };
+  
+  if (index >= 0 && index < _wrHistoryData.length) {
+    _wrHistoryData[index] = entry;
+  } else {
+    _wrHistoryData.push(entry);
+  }
+
+  // Enforce strict date sequence
+  _wrHistoryData.sort(function(a,b){ return (b.saturday||'').localeCompare(a.saturday||''); });
+
+  // Save updated history array to Firestore
+  db.collection('settings').doc('weekend_roster').set({ history: _wrHistoryData }, { merge: true }).then(function(){
+    showToast('Weekend roster history updated successfully', 'success');
+    document.getElementById('wrHistoryEditModal').classList.remove('open');
+    showWrHistoryModal(); // refresh history table modal
+  }).catch(function(e){
+    showToast('Error saving history: ' + e.message, 'danger');
+  });
+}
+
+function deleteWrHistoryEntry(index) {
+  if (index < 0 || index >= _wrHistoryData.length) return;
+  var rec = _wrHistoryData[index];
+  if (!confirm('Are you sure you want to delete history entry for Saturday ' + (rec.saturday||'') + '?')) return;
+
+  _wrHistoryData.splice(index, 1);
+  db.collection('settings').doc('weekend_roster').set({ history: _wrHistoryData }, { merge: true }).then(function(){
+    showToast('History entry deleted', 'success');
+    showWrHistoryModal();
+  }).catch(function(e){
+    showToast('Error deleting entry: ' + e.message, 'danger');
   });
 }
 

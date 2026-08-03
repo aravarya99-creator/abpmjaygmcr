@@ -2434,71 +2434,75 @@ window.addEventListener('DOMContentLoaded', function() {
       return '<div class="cm-empty">No weekend roster published yet. Admin can add rows from <strong>Data Management &rarr; Weekend Roster</strong>.</div>';
     }
 
-    var html = '';
-
-    // Current Roster Table
+    // Prepare Current Roster rows (sorted chronologically by Saturday date)
+    var activeHtml = '';
     if (rows.length) {
       var sorted = rows.slice().sort(function(a,b){ return (a.saturday||'').localeCompare(b.saturday||''); });
-      html += '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
-        + '<thead><tr><th style="width:42px">#</th><th>PMAMs on Duty</th><th>Saturday</th><th>Sunday</th></tr></thead>'
+      activeHtml += '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
+        + '<thead><tr><th style="width:38px;text-align:center">#</th><th>PMAMs on Duty</th><th style="white-space:nowrap">Saturday</th><th style="white-space:nowrap">Sunday</th></tr></thead>'
         + '<tbody>';
       sorted.forEach(function(r, i){
         var pmams = [r.pmam1, r.pmam2].filter(function(p){ return (p||'').trim(); });
         var pmamCell = pmams.length
-          ? pmams.map(function(p){ return '<span style="display:inline-block;background:#dbeafe;color:#1e3a8a;padding:2px 10px;border-radius:50px;font-size:11.5px;font-weight:700;margin:2px 4px 2px 0">'+esc(p)+'</span>'; }).join('')
+          ? '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' + pmams.map(function(p){ return '<span style="display:inline-flex;align-items:center;background:#dbeafe;color:#1e3a8a;padding:3px 11px;border-radius:50px;font-size:11.5px;font-weight:700;white-space:nowrap;box-shadow:0 1px 2px rgba(30,58,138,0.06)">'+esc(p)+'</span>'; }).join('') + '</div>'
           : '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
-        html += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
+        activeHtml += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
               + '<td>'+pmamCell+'</td>'
               + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.saturday))+'</td>'
               + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td></tr>';
       });
-      html += '</tbody></table></div></div>';
+      activeHtml += '</tbody></table></div></div>';
     } else {
-      html += '<div class="cm-empty">No active weekend roster for this week.</div>';
+      activeHtml = '<div class="cm-empty">No active weekend roster for this week.</div>';
     }
 
-    // History Section
-    if (history.length) {
-      // Deduplicate history
-      var map = {};
-      var all = history.concat(rows); // Also show rows in history
-      all.forEach(function(r){ map[r.saturday] = r; });
-      var combined = Object.keys(map).map(function(k){return map[k];});
-      
-      var today = new Date().toISOString().slice(0,10);
-      var pastOnly = combined.filter(function(r){ return (r.saturday || '') < today; });
-      pastOnly.sort(function(a,b){ return b.saturday.localeCompare(a.saturday); });
+    // Prepare History Roster rows (deduplicated, past dates only, sorted strictly in descending date sequence)
+    var map = {};
+    var all = history.concat(rows);
+    all.forEach(function(r){ if(r.saturday) map[r.saturday] = r; });
+    var combined = Object.keys(map).map(function(k){return map[k];});
+    
+    var today = new Date().toISOString().slice(0,10);
+    var pastOnly = combined.filter(function(r){ return (r.saturday || '') < today; });
+    pastOnly.sort(function(a,b){ return (b.saturday || '').localeCompare(a.saturday || ''); }); // strict descending date sequence
 
-      if (pastOnly.length) {
-        // Button to toggle history
-        html += '<div style="margin-top:20px;text-align:center;">'
-             +  '<button onclick="var wrap = document.getElementById(\'weekendHistoryWrap\'); wrap.style.display = wrap.style.display === \'none\' ? \'block\' : \'none\';"'
-             +  ' style="background:#1e293b;color:#fff;border:none;border-radius:50px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">'
-             +  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>'
-             +  ' View History</button>'
-             +  '</div>';
-
-        // History Table (hidden by default)
-        html += '<div id="weekendHistoryWrap" style="display:none;margin-top:20px;">'
-             +  '<h3 style="font-size:15px;font-weight:800;color:#334155;margin-bottom:12px;border-bottom:2px solid #e2e8f0;padding-bottom:6px;">Past Weekend Rosters</h3>';
-        
-        html += '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
-          + '<thead><tr><th style="width:42px">#</th><th>PMAMs on Duty</th><th>Saturday</th><th>Sunday</th></tr></thead>'
-          + '<tbody>';
-        pastOnly.forEach(function(r, i){
-          var pmams = [r.pmam1, r.pmam2].filter(function(p){ return (p||'').trim(); });
-          var pmamCell = pmams.length
-            ? pmams.map(function(p){ return '<span style="display:inline-block;background:#f3f4f6;color:#4b5563;padding:2px 10px;border-radius:50px;font-size:11.5px;font-weight:700;margin:2px 4px 2px 0">'+esc(p)+'</span>'; }).join('')
-            : '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
-          html += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
-                + '<td>'+pmamCell+'</td>'
-                + '<td style="font-weight:700;color:#64748b;white-space:nowrap">'+esc(fmtDate(r.saturday))+'</td>'
-                + '<td style="font-weight:700;color:#64748b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td></tr>';
-        });
-        html += '</tbody></table></div></div>'
-             +  '</div>';
-      }
+    var historyHtml = '';
+    if (pastOnly.length) {
+      historyHtml += '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
+        + '<thead><tr><th style="width:38px;text-align:center">#</th><th>PMAMs on Duty</th><th style="white-space:nowrap">Saturday</th><th style="white-space:nowrap">Sunday</th></tr></thead>'
+        + '<tbody>';
+      pastOnly.forEach(function(r, i){
+        var pmams = [r.pmam1, r.pmam2].filter(function(p){ return (p||'').trim(); });
+        var pmamCell = pmams.length
+          ? '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' + pmams.map(function(p){ return '<span style="display:inline-flex;align-items:center;background:#f3f4f6;color:#4b5563;border:1px solid #e5e7eb;padding:3px 11px;border-radius:50px;font-size:11.5px;font-weight:700;white-space:nowrap">'+esc(p)+'</span>'; }).join('') + '</div>'
+          : '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
+        historyHtml += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
+              + '<td>'+pmamCell+'</td>'
+              + '<td style="font-weight:700;color:#64748b;white-space:nowrap">'+esc(fmtDate(r.saturday))+'</td>'
+              + '<td style="font-weight:700;color:#64748b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td></tr>';
+      });
+      historyHtml += '</tbody></table></div></div>';
+    } else {
+      historyHtml = '<div class="cm-empty">No past weekend roster records found.</div>';
     }
+
+    // Render Side-by-Side 2-Column Responsive Grid Layout
+    var html = '<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap:20px; align-items:start;">'
+      + '<div>'
+      +   '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;border-bottom:2px solid #2563eb;padding-bottom:6px;">'
+      +     '<h3 style="font-size:15px;font-weight:800;color:#1e3a8a;margin:0;display:flex;align-items:center;gap:6px;"><span>📅</span> Current Weekend Roster</h3>'
+      +     '<span style="font-size:11px;font-weight:700;background:#dcfce7;color:#166534;padding:2px 10px;border-radius:12px;">Active</span>'
+      +   '</div>'
+      +   activeHtml
+      + '</div>'
+      + '<div>'
+      +   '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;border-bottom:2px solid #64748b;padding-bottom:6px;">'
+      +     '<h3 style="font-size:15px;font-weight:800;color:#334155;margin:0;display:flex;align-items:center;gap:6px;"><span>📜</span> Past Weekend Rosters</h3>'
+      +     '<span style="font-size:11px;font-weight:700;background:#f1f5f9;color:#475569;padding:2px 10px;border-radius:12px;">History ('+pastOnly.length+')</span>'
+      +   '</div>'
+      +   historyHtml
+      + '</div>'
+      + '</div>';
 
     return html;
   }
