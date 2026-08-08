@@ -49,8 +49,33 @@
       if (typeof db === 'undefined') return;
       var self = this;
       this._unsubRules = db.collection('settings').doc('leave_rules').onSnapshot(function(doc) {
-        if (doc.exists) self.rules = Object.assign(self.rules, doc.data());
-        self.onUpdate();
+        if (doc.exists) {
+          var d = doc.data() || {};
+          var casual = d.casual_limit !== undefined ? parseInt(d.casual_limit) : (d.casual !== undefined ? parseInt(d.casual) : 15);
+          var medical = d.medical_limit !== undefined ? parseInt(d.medical_limit) : (d.medical !== undefined ? parseInt(d.medical) : 30);
+          var paternity = d.pat_limit !== undefined ? parseInt(d.pat_limit) : (d.paternity !== undefined ? parseInt(d.paternity) : 15);
+          var maternity = d.mat_limit !== undefined ? parseInt(d.mat_limit) : (d.maternity !== undefined ? parseInt(d.maternity) : 180);
+          var lwp = d.lwp_limit !== undefined ? parseInt(d.lwp_limit) : (d.lwp !== undefined ? parseInt(d.lwp) : 30);
+
+          self.rules = Object.assign({}, d, {
+            casual: casual,
+            medical: medical,
+            paternity: paternity,
+            maternity: maternity,
+            lwp: lwp,
+            casual_limit: casual,
+            medical_limit: medical,
+            pat_limit: paternity,
+            lwp_limit: lwp,
+            en_casual: d.en_casual !== undefined ? d.en_casual : true,
+            en_comp: d.en_comp !== undefined ? d.en_comp : true,
+            en_medical: d.en_medical !== undefined ? d.en_medical : true,
+            en_mat: d.en_mat !== undefined ? d.en_mat : true,
+            en_pat: d.en_pat !== undefined ? d.en_pat : true,
+            en_lwp: d.en_lwp !== undefined ? d.en_lwp : true
+          });
+        }
+        if (self.onUpdate) self.onUpdate();
       });
     },
     
