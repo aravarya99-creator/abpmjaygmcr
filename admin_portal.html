@@ -6169,6 +6169,10 @@ function writeAudit(action, collection, recordId, details){
   } catch(e) { console.warn('Audit log error:', e); }
 }
 
+function logAdminAction(note) {
+  writeAudit('ACTION', 'system', 'admin', { note: note || '' });
+}
+
 // --- Tab switcher ---
 function dmShowTab(tab, el){
   document.querySelectorAll('.dm-tab').forEach(function(b){
@@ -8655,7 +8659,7 @@ function saveLeaveLimits() {
     var msg = document.getElementById('ll_msg');
     if(msg){ msg.textContent='Saved successfully'; msg.style.color='#166534'; setTimeout(function(){msg.textContent='';},3000); }
     if(btn) btn.textContent = 'Save Configuration';
-    logAdminAction('Updated global leave rules');
+    if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/leave_rules', 'leave_rules', data);
   }).catch(function(e){
     console.error(e);
     if(btn) btn.textContent = 'Save Configuration';
@@ -8739,7 +8743,7 @@ function submitHistoricalLeave() {
     if(btn) btn.textContent = 'Add Leave Record';
     document.getElementById('al_days').value = '1';
     document.getElementById('al_remarks').value = '';
-    logAdminAction('Added manual leave record for ' + pmam + ' (' + days + ' days ' + type + ')');
+    if (typeof writeAudit === 'function') writeAudit('ADD_RECORD', 'leave_requests', record.id, { name: pmam, days: days, type: type });
   }).catch(function(e){
     console.error(e);
     if(btn) btn.textContent = 'Add Leave Record';
