@@ -4,7 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I/C AB-PMJAY Portal — GMC Rajouri</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="js/config/firebase.config.js"></script>
+<script src="js/services/auth.service.js"></script>
+<script src="js/services/ward.service.js"></script>
+<script src="js/services/leave.service.js"></script>
+<script src="js/services/metrics.service.js"></script>
+<script src="shared/digital_signature.js"></script>
+<script>
+  GMCAuth.requireAuth(['ic', 'admin']);
+</script>
 <style>
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F0FF 0%,#C8DCFF 50%,#D6EAFF 100%);min-height:100vh;overflow-x:hidden}

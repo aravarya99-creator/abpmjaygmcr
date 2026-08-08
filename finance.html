@@ -6,32 +6,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="js/config/firebase.config.js"></script>
+  <script src="js/services/auth.service.js"></script>
   <script>
-    // ── FIREBASE INIT ──────────────────────────────────────────
-    var firebaseConfig = {
-      apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
-      authDomain: "gmcrajouri-pmam.firebaseapp.com",
-      projectId: "gmcrajouri-pmam",
-      storageBucket: "gmcrajouri-pmam.firebasestorage.app",
-      messagingSenderId: "115490476421",
-      appId: "1:115490476421:web:871a91987e1a92a45f34ec",
-      measurementId: "G-NK9VL87CJC"
-    };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    var db = firebase.firestore();
-
-    // ── SESSION GUARD ──────────────────────────────────────────
-    (function() {
-      var sess = null;
-      try { sess = JSON.parse(sessionStorage.getItem('pmjay_user') || sessionStorage.getItem('currentUser') || '{}'); } catch(e) {}
-      if (!sess || !sess.email) { window.location.href = 'index.html'; return; }
-      var sessRoles = Array.isArray(sess.roles) ? sess.roles.slice() : (sess.role ? [sess.role] : []);
-      if (sess.desig && !sessRoles.includes(sess.desig)) sessRoles.push(sess.desig);
-      var isAdmin = sess.email.toLowerCase() === 'aravarya99@gmail.com' || sessRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='admin'||s==='administrator'; });
-      var isAccountant = isAdmin || sessRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('accountant')!==-1 || s.indexOf('finance')!==-1; });
-      if (!isAccountant) { window.location.href = 'index.html'; return; }
-    })();
+    GMCAuth.requireAuth(['accountant', 'admin']);
   </script>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700;800&display=swap');
     :root{--blue:#8b5cf6;--red:#dc2626;--green:#16a34a;--bg:linear-gradient(135deg, #c9b1eb 0%, #e8c6f5 50%, #f3dafc 100%);--panel:rgba(255, 255, 255, 0.5);--text:#4c1d95;--border:rgba(255, 255, 255, 0.6);--muted:#7c3aed;}

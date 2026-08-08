@@ -15,31 +15,18 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script>
-  var firebaseConfig = {
-    apiKey: "AIzaSyBXoF7iqCymH6387RH_oHamjzmnx-Jn4DE",
-    authDomain: "gmcrajouri-pmam.firebaseapp.com",
-    projectId: "gmcrajouri-pmam",
-    storageBucket: "gmcrajouri-pmam.firebasestorage.app",
-    messagingSenderId: "115490476421",
-    appId: "1:115490476421:web:871a91987e1a92a45f34ec"
-  };
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  var db   = firebase.firestore();
-  var auth = firebase.auth();
-</script>
+<script src="js/config/firebase.config.js"></script>
+<script src="js/services/auth.service.js"></script>
+<script src="js/services/ward.service.js"></script>
+<script src="js/services/leave.service.js"></script>
+<script src="js/services/metrics.service.js"></script>
+<script src="shared/digital_signature.js"></script>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     SHARED HEADERS — universal letterhead system for all GMC Rajouri
-     AB PM-JAY MIS portals. Provides GMCHeaders.msReport(),
-     GMCHeaders.msLetter(), GMCHeaders.abpmjayReport(). Used here
-     in printLeaveForm() for the leave application letterhead.
-     Any future print/PDF feature in this portal should use these
-     renderers instead of hardcoding letterhead markup.
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- SHARED HEADERS -->
 <link rel="stylesheet" href="shared/headers.css?v=6">
 <script src="shared/logos.js?v=6"></script>
 <script src="shared/headers.js?v=6"></script>
+
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
