@@ -5625,6 +5625,7 @@ function showLeavesTab(id, el) {
   var panel = document.getElementById('lpanel-' + id);
   if(panel) panel.style.display = 'block';
   if(id === 'leave_requests') { dmLoadFilters(); }
+  if(id === 'leave_limits') { if (typeof loadLeaveLimits === 'function') loadLeaveLimits(); }
   if(id === 'comp_balances') { loadCompBalances(); }
   // if(id === 'add_leaves') { populateALPMAMs(); } // removed, modal handles it
 }
@@ -8635,6 +8636,30 @@ window.addEventListener('DOMContentLoaded', function(){
 
 
 // --- ADVANCED LEAVE MANAGEMENT LOGIC ---
+
+function loadLeaveLimits() {
+  if (typeof db === 'undefined') return;
+  db.collection('settings').doc('leave_rules').get().then(function(doc) {
+    if (doc.exists) {
+      var d = doc.data() || {};
+      if (document.getElementById('ll_casual') && d.casual_limit !== undefined) document.getElementById('ll_casual').value = d.casual_limit;
+      if (document.getElementById('ll_medical') && d.medical_limit !== undefined) document.getElementById('ll_medical').value = d.medical_limit;
+      if (document.getElementById('ll_pat') && d.pat_limit !== undefined) document.getElementById('ll_pat').value = d.pat_limit;
+      if (document.getElementById('ll_lwp') && d.lwp_limit !== undefined) document.getElementById('ll_lwp').value = d.lwp_limit;
+      
+      if (document.getElementById('ll_en_casual') && d.en_casual !== undefined) document.getElementById('ll_en_casual').checked = !!d.en_casual;
+      if (document.getElementById('ll_en_comp') && d.en_comp !== undefined) document.getElementById('ll_en_comp').checked = !!d.en_comp;
+      if (document.getElementById('ll_en_medical') && d.en_medical !== undefined) document.getElementById('ll_en_medical').checked = !!d.en_medical;
+      if (document.getElementById('ll_en_mat') && d.en_mat !== undefined) document.getElementById('ll_en_mat').checked = !!d.en_mat;
+      if (document.getElementById('ll_en_pat') && d.en_pat !== undefined) document.getElementById('ll_en_pat').checked = !!d.en_pat;
+      if (document.getElementById('ll_en_lwp') && d.en_lwp !== undefined) document.getElementById('ll_en_lwp').checked = !!d.en_lwp;
+    }
+  }).catch(function(e){ console.warn('Could not load leave rules:', e); });
+}
+
+window.addEventListener('DOMContentLoaded', function(){
+  setTimeout(loadLeaveLimits, 1500);
+});
 
 function saveLeaveLimits() {
   if (!requireAdminUnlock(saveLeaveLimits)) return;
