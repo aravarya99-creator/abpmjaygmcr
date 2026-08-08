@@ -19,7 +19,7 @@
           return reject(new Error('Database connection not available.'));
         }
         
-        var myEmail = email || (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : '');
+        var myEmail = (email || (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : '') || '').toLowerCase().trim();
         if (!myEmail) {
           return reject(new Error('User email not found. Please log in again.'));
         }
