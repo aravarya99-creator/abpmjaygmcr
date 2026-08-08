@@ -1445,7 +1445,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
       <!-- PIN Input Field Box with Eye Toggle -->
       <div style="position:relative; margin-bottom:14px;">
         <div style="border:1.5px solid #a855f7; border-radius:12px; height:46px; padding:0 14px; display:flex; align-items:center; justify-content:space-between; background:#ffffff; transition:all 0.2s ease;" id="pinInputWrapper">
-          <input type="password" id="modalLvPin" placeholder="○  ○  ○  ○  ○  ○" maxlength="6" style="width:100%; border:none; outline:none; background:transparent; font-size:18px; font-weight:800; color:#6b21a8; text-align:center; letter-spacing:10px; font-family:monospace;" onfocus="document.getElementById('pinInputWrapper').style.boxShadow='0 0 0 3px rgba(168, 85, 247, 0.2)'; document.getElementById('pinInputWrapper').style.borderColor='#9333ea';" onblur="document.getElementById('pinInputWrapper').style.boxShadow='none'; document.getElementById('pinInputWrapper').style.borderColor='#a855f7';">
+          <input type="password" id="modalLvPin" placeholder="○  ○  ○  ○  ○  ○" maxlength="6" style="width:100%; border:none; outline:none; background:transparent; font-size:18px; font-weight:800; color:#6b21a8; text-align:center; letter-spacing:10px; font-family:monospace;" onfocus="document.getElementById('pinInputWrapper').style.boxShadow='0 0 0 3px rgba(168, 85, 247, 0.2)'; document.getElementById('pinInputWrapper').style.borderColor='#9333ea';" onblur="document.getElementById('pinInputWrapper').style.boxShadow='none'; document.getElementById('pinInputWrapper').style.borderColor='#a855f7';" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmLeaveSignature();}">
           <button type="button" onclick="togglePinVisibility()" style="background:transparent; border:none; cursor:pointer; color:#7e22ce; padding:2px; display:flex; align-items:center; justify-content:center;" title="Toggle PIN visibility">
             <svg id="pinEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
@@ -2805,31 +2805,44 @@ function submitLeave() {
 }
 
 function confirmLeaveSignature() {
-  var pin = document.getElementById('modalLvPin').value;
+  var pin = document.getElementById('modalLvPin').value.trim();
   if (!pin) {
-    setModalLvError('Please enter your 6-digit Signature PIN.');
+    setModalLvError('Please enter your 4-digit Signature PIN.');
     return;
   }
   setModalLvError('');
   var msgEl = document.getElementById('modalLvMsg');
-  msgEl.style.display = 'flex';
-  msgEl.style.background = '#eff6ff';
-  msgEl.style.border = '1px solid #dbeafe';
-  msgEl.style.color = '#1d4ed8';
-  msgEl.innerHTML = '<div style="width:20px; height:20px; border-radius:50%; background:#2563eb; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; flex-shrink:0;">⏳</div> <span>Digitally signing and submitting application...</span>';
+  if (msgEl) {
+    msgEl.style.display = 'flex';
+    msgEl.style.background = '#eff6ff';
+    msgEl.style.border = '1px solid #dbeafe';
+    msgEl.style.color = '#1d4ed8';
+    msgEl.innerHTML = '<div style="width:20px; height:20px; border-radius:50%; background:#2563eb; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; flex-shrink:0;">⏳</div> <span>Digitally signing and submitting application...</span>';
+  }
   
-  var myEmail = getPmjayUser().email;
+  var u = (typeof getPmjayUser === 'function') ? (getPmjayUser() || {}) : {};
+  var myEmail = u.email || '';
+  if (!myEmail) {
+    setModalLvError('User session expired. Please log in again.');
+    return;
+  }
+
   db.collection('users').doc(myEmail).get().then(function(doc) {
     var udata = doc.exists ? doc.data() : {};
+    if (!window._pendingLeaveReq) {
+      throw new Error("Leave application details missing. Please try submitting again.");
+    }
     window._pendingLeaveReq.applicantSignatureUrl = udata.signatureImage || '';
     return DSig.initiateSignedLeave(window._pendingLeaveReq, pin);
   }).then(function() {
     setModalLvError('');
-    msgEl.style.display = 'flex';
-    msgEl.style.background = '#dcfce7';
-    msgEl.style.border = '1px solid #86efac';
-    msgEl.style.color = '#166534';
-    msgEl.innerHTML = '<div style="width:22px; height:22px; border-radius:50%; background:#16a34a; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; flex-shrink:0;">✓</div> <div style="font-size:12px; font-weight:700; line-height:1.3;">Leave request submitted successfully!<br><span style="font-size:11px; font-weight:500; color:#15803d;">Request sent to substitute PMAM for duty acceptance.</span></div>';
+    if (msgEl) {
+      msgEl.style.display = 'flex';
+      msgEl.style.background = '#dcfce7';
+      msgEl.style.border = '1px solid #86efac';
+      msgEl.style.color = '#166534';
+      msgEl.innerHTML = '<div style="width:22px; height:22px; border-radius:50%; background:#16a34a; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; flex-shrink:0;">✓</div> <div style="font-size:12px; font-weight:700; line-height:1.3;">Leave request submitted successfully!<br><span style="font-size:11px; font-weight:500; color:#15803d;">Request sent to substitute PMAM for duty acceptance.</span></div>';
+    }
     
     setTimeout(function() {
       document.getElementById('signPinModal').classList.remove('open');
@@ -2842,14 +2855,10 @@ function confirmLeaveSignature() {
       var card = document.getElementById('leaveHistCard');
       if (card) card.style.display = 'block';
       clearLeaveForm();
-    }, 2500);
+    }, 2000);
   }).catch(function(e) {
-    var errText = e.message || '';
-    if (errText.indexOf('PIN') !== -1 || errText.indexOf('Incorrect') !== -1) {
-      setModalLvError('Incorrect PIN. Please try again.');
-    } else {
-      setModalLvError(errText || 'Signature verification failed.');
-    }
+    var errText = e.message || 'Signature verification failed.';
+    setModalLvError(errText);
   });
 }
 // ═══════════════════════════════════════════════════════════════
@@ -4244,8 +4253,8 @@ function updateWardStatus(){
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-<script src="leave_engine.js"></script>
-<script src="digital_signature.js"></script>
+<script src="shared/leave_engine.js"></script>
+<script src="shared/digital_signature.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     if (window.DSig) {

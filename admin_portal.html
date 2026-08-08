@@ -8633,7 +8633,7 @@ window.addEventListener('DOMContentLoaded', function(){
 // --- ADVANCED LEAVE MANAGEMENT LOGIC ---
 
 function saveLeaveLimits() {
-  if(!isAdminUnlocked()){ alert('Unlock Admin first.'); return; }
+  if (!requireAdminUnlock(saveLeaveLimits)) return;
   var btn = document.querySelector('#lpanel-leave_limits .btn-pri');
   if(btn) btn.textContent = 'Saving...';
   
@@ -8694,7 +8694,7 @@ function populateALPMAMs() {
 }
 
 function submitHistoricalLeave() {
-  if(!isAdminUnlocked()){ alert('Unlock Admin first.'); return; }
+  if (!requireAdminUnlock(submitHistoricalLeave)) return;
   var pmam = document.getElementById('al_pmam').value;
   var type = document.getElementById('al_type').value;
   var days = parseInt(document.getElementById('al_days').value);
