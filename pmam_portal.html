@@ -21,8 +21,13 @@
 <script src="js/services/leave.service.js"></script>
 <script src="js/services/metrics.service.js"></script>
 <script src="shared/digital_signature.js"></script>
+<script>
+  var db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
+  var auth = window.auth || (window.GMCFirebase ? window.GMCFirebase.auth : null);
+</script>
 
 <!-- SHARED HEADERS -->
+
 <link rel="stylesheet" href="shared/headers.css?v=6">
 <script src="shared/logos.js?v=6"></script>
 <script src="shared/headers.js?v=6"></script>

@@ -8,8 +8,11 @@
 <script src="js/services/auth.service.js"></script>
 <script src="js/services/ward.service.js"></script>
 <script>
+  var db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
+  var auth = window.auth || (window.GMCFirebase ? window.GMCFirebase.auth : null);
   GMCAuth.requireAuth();
 </script>
+
 <style>
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }

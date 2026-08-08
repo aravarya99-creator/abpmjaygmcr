@@ -9,8 +9,11 @@
   <script src="js/config/firebase.config.js"></script>
   <script src="js/services/auth.service.js"></script>
   <script>
+    var db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
+    var auth = window.auth || (window.GMCFirebase ? window.GMCFirebase.auth : null);
     GMCAuth.requireAuth(['accountant', 'admin']);
   </script>
+
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700;800&display=swap');

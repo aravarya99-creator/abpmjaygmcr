@@ -14,8 +14,11 @@
 <script src="js/services/metrics.service.js"></script>
 <script src="shared/digital_signature.js"></script>
 <script>
+  var db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
+  var auth = window.auth || (window.GMCFirebase ? window.GMCFirebase.auth : null);
   GMCAuth.requireAuth(['admin']);
 </script>
+
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
