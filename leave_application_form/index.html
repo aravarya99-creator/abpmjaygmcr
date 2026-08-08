@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave Application Form</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <div class="leave-card">
+      
+      <!-- Card Header -->
+      <div class="card-header">
+        <div class="header-icon-box">
+          <i data-lucide="file-text"></i>
+        </div>
+        <h1 class="card-title">Leave Application Form</h1>
+      </div>
+
+      <!-- Top Section: Employee Profile & Ward Assignment -->
+      <!-- Explicitly outlined box with vertical colored divider bars between sections -->
+      <div class="employee-info-box">
+        
+        <!-- Item 1: Employee Name -->
+        <div class="info-item">
+          <div class="item-icon-wrapper icon-blue">
+            <i data-lucide="user"></i>
+          </div>
+          <div class="item-details">
+            <span class="item-label">Employee Name</span>
+            <span class="item-value font-bold">PAYAL SHARMA</span>
+          </div>
+        </div>
+
+        <!-- Vertical Colored Bar 1 -->
+        <div class="colored-divider bar-purple"></div>
+
+        <!-- Item 2: Designation -->
+        <div class="info-item">
+          <div class="item-icon-wrapper icon-purple">
+            <i data-lucide="award"></i>
+          </div>
+          <div class="item-details">
+            <span class="item-label">Designation</span>
+            <span class="item-value font-bold">PMAM</span>
+          </div>
+        </div>
+
+        <!-- Vertical Colored Bar 2 -->
+        <div class="colored-divider bar-green"></div>
+
+        <!-- Item 3: Assigned Ward(s) -->
+        <div class="info-item ward-item">
+          <div class="item-icon-wrapper icon-green">
+            <i data-lucide="smartphone"></i>
+          </div>
+          <div class="item-details-flex">
+            <span class="item-label">Assigned Ward(s)</span>
+            <div class="ward-input-group">
+              <select id="ward-select" class="custom-select-sm">
+                <option value="" disabled selected>— Select Ward —</option>
+                <option value="Ward A - ICU">Ward A - ICU</option>
+                <option value="Ward B - OPD">Ward B - OPD</option>
+                <option value="Ward C - General">Ward C - General</option>
+                <option value="Ward D - Pediatrics">Ward D - Pediatrics</option>
+                <option value="Ward E - Emergency">Ward E - Emergency</option>
+              </select>
+              <!-- Increased Height Add Button as requested -->
+              <button type="button" id="btn-add-ward" class="btn-add-taller">
+                <i data-lucide="plus" class="btn-icon"></i> Add
+              </button>
+            </div>
+            <div id="selected-wards-tags" class="wards-tag-container">
+              <span class="empty-ward-text">No wards selected</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vertical Colored Bar 3 -->
+        <div class="colored-divider bar-orange"></div>
+
+        <!-- Item 4: Duty Assigned To (Substitute) -->
+        <div class="info-item substitute-item">
+          <div class="item-icon-wrapper icon-orange">
+            <i data-lucide="user-check"></i>
+          </div>
+          <div class="item-details-flex">
+            <span class="item-label">Duty Assigned To (Substitute)</span>
+            <select id="substitute-select" class="custom-select">
+              <option value="" disabled selected>Select Substitute PMAM</option>
+              <option value="RAHUL VERMA (PMAM)">RAHUL VERMA (PMAM)</option>
+              <option value="ANITA SINGH (PMAM)">ANITA SINGH (PMAM)</option>
+              <option value="VIKRAM MEHTA (PMAM)">VIKRAM MEHTA (PMAM)</option>
+              <option value="SNEHA KAPOOR (PMAM)">SNEHA KAPOOR (PMAM)</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Section: Leave Dates & Details Form -->
+      <form id="leave-form" onsubmit="return false;">
+        <div class="form-fields-grid">
+          
+          <!-- Reduced Box 1: From Date -->
+          <div class="form-group box-reduced">
+            <label for="from-date" class="field-label">From Date</label>
+            <div class="input-wrapper border-blue">
+              <input type="date" id="from-date" class="form-input">
+            </div>
+          </div>
+
+          <!-- Reduced Box 2: To Date -->
+          <div class="form-group box-reduced">
+            <label for="to-date" class="field-label">To Date</label>
+            <div class="input-wrapper border-blue">
+              <input type="date" id="to-date" class="form-input">
+            </div>
+          </div>
+
+          <!-- Reduced Box 3: Total No. of Days -->
+          <div class="form-group box-reduced">
+            <label for="total-days" class="field-label">Total No. of Days</label>
+            <div class="input-wrapper border-purple bg-light-purple">
+              <i data-lucide="copy" class="input-inner-icon icon-purple-text"></i>
+              <input type="text" id="total-days" class="form-input input-purple-text" placeholder="Auto Calculated" readonly>
+            </div>
+          </div>
+
+          <!-- Reduced Box 4: Return Date -->
+          <div class="form-group box-reduced">
+            <label for="return-date" class="field-label">Return Date</label>
+            <div class="input-wrapper border-green">
+              <input type="date" id="return-date" class="form-input font-bold">
+            </div>
+          </div>
+
+          <!-- Increased Box 5: Reason for Leave -->
+          <div class="form-group box-increased">
+            <label for="reason-select" class="field-label">Reason for Leave</label>
+            <div class="input-wrapper border-orange">
+              <i data-lucide="message-square" class="input-inner-icon icon-green-text"></i>
+              <select id="reason-select" class="form-input custom-select-inner">
+                <option value="" disabled selected>-- Select Reason --</option>
+                <option value="Casual Leave (Personal Work)">Casual Leave (Personal Work)</option>
+                <option value="Medical Emergency / Sick Leave">Medical Emergency / Sick Leave</option>
+                <option value="Family Function / Event">Family Function / Event</option>
+                <option value="Urgent Domestic Work">Urgent Domestic Work</option>
+                <option value="Outstation Travel">Outstation Travel</option>
+                <option value="Other Official / Special Leave">Other Official / Special Leave</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Increased Box 6: Type of Leave -->
+          <div class="form-group box-increased">
+            <label for="leave-type-select" class="field-label">Type of Leave</label>
+            <div class="input-wrapper border-pink">
+              <i data-lucide="pie-chart" class="input-inner-icon icon-pink-text"></i>
+              <select id="leave-type-select" class="form-input custom-select-inner">
+                <option value="" disabled selected>-- Select Leave Type --</option>
+                <option value="Earned Leave (EL)">Earned Leave (EL)</option>
+                <option value="Casual Leave (CL)">Casual Leave (CL)</option>
+                <option value="Medical Leave (ML)">Medical Leave (ML)</option>
+                <option value="Restricted Holiday (RH)">Restricted Holiday (RH)</option>
+                <option value="Compensatory Off (C-Off)">Compensatory Off (C-Off)</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button type="button" id="btn-clear" class="btn btn-outline">
+            <i data-lucide="rotate-ccw"></i> Clear Form
+          </button>
+          <button type="button" id="btn-preview" class="btn btn-emerald">
+            <i data-lucide="eye"></i> Preview Application
+          </button>
+          <button type="submit" id="btn-submit" class="btn btn-blue">
+            <i data-lucide="send"></i> Submit Application
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Modal for Application Preview -->
+  <div id="preview-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2><i data-lucide="file-check"></i> Application Summary Preview</h2>
+        <button id="modal-close" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body-content">
+        <!-- Dynamic Content injected here -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="modal-close-btn">Close</button>
+        <button class="btn btn-blue" id="modal-confirm-submit"><i data-lucide="send"></i> Confirm & Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIGITAL SIGNATURE VERIFICATION MODAL (COMPACT & HIGH Z-INDEX) -->
+  <div id="sign-modal" class="modal-backdrop hidden" style="backdrop-filter: blur(6px); background: rgba(15, 23, 42, 0.65); z-index: 999999 !important; padding: 20px 10px;">
+    <div style="background:#ffffff; border-radius:20px; width:92%; max-width:480px; box-shadow:0 20px 50px rgba(15, 23, 42, 0.4); overflow:hidden; max-height: 88vh; overflow-y: auto; animation: modalPop 0.25s ease-out; font-family:'Plus Jakarta Sans', 'Inter', sans-serif;">
+      
+      <!-- Modal Header Banner (Compact Gradient) -->
+      <div style="background: linear-gradient(135deg, #1d4ed8 0%, #7e22ce 100%); padding:14px 20px; display:flex; align-items:center; justify-content:space-between; color:#ffffff;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; flex-shrink:0; backdrop-filter:blur(8px);">
+            <!-- Shield Fingerprint Icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M12 8a3 3 0 0 0-3 3c0 2 1 3.5 2 4.5"/>
+              <path d="M12 11.5a1.5 1.5 0 0 1 1.5 1.5"/>
+            </svg>
+          </div>
+          <div>
+            <h2 style="font-size:16px; font-weight:800; color:#ffffff; margin:0 0 2px 0; letter-spacing:-0.2px; line-height:1.2;">Digital Signature Verification</h2>
+            <p style="font-size:11px; font-weight:500; color:rgba(255,255,255,0.85); margin:0; line-height:1.2;">Secure authentication required before submitting.</p>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.35); color:#ffffff; padding:4px 10px; border-radius:16px; font-size:10px; font-weight:700; display:inline-flex; align-items:center; gap:4px; backdrop-filter:blur(6px); white-space:nowrap;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          256-bit Encrypted
+        </div>
+      </div>
+
+      <!-- Modal Body Content (Compact Padding) -->
+      <div style="padding:16px 20px; background:#ffffff;">
+        
+        <!-- Subtitle Instruction -->
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <div style="width:36px; height:36px; border-radius:10px; background:#f3e8ff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size:14px; font-weight:800; color:#6b21a8; line-height:1.2;">Enter your 6-digit Signature PIN</div>
+            <div style="font-size:11px; font-weight:500; color:#64748b;">(First time? Enter any PIN to set it permanently.)</div>
+          </div>
+        </div>
+
+        <!-- PIN Input Field Box with Eye Toggle -->
+        <div style="position:relative; margin-bottom:14px;">
+          <div style="border:1.5px solid #a855f7; border-radius:12px; height:46px; padding:0 14px; display:flex; align-items:center; justify-content:space-between; background:#ffffff; transition:all 0.2s ease;" id="pinInputWrapper">
+            <input type="password" id="modalLvPinStandalone" placeholder="○  ○  ○  ○  ○  ○" maxlength="6" style="width:100%; border:none; outline:none; background:transparent; font-size:18px; font-weight:800; color:#6b21a8; text-align:center; letter-spacing:10px; font-family:monospace;">
+            <button type="button" id="btn-toggle-eye" style="background:transparent; border:none; cursor:pointer; color:#7e22ce; padding:2px; display:flex; align-items:center; justify-content:center;" title="Toggle PIN visibility">
+              <svg id="pinEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons Row -->
+        <div style="display:grid; grid-template-columns:1fr 1.3fr; gap:12px; margin-bottom:12px;">
+          <button type="button" id="btn-sign-cancel" style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; height:42px; color:#e11d48; font-size:13.5px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; transition:all 0.2s ease;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Cancel
+          </button>
+          <button type="button" id="btn-sign-submit" style="background:linear-gradient(135deg, #2563eb 0%, #7e22ce 100%); border:none; border-radius:12px; height:42px; color:#ffffff; font-size:13.5px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; box-shadow:0 3px 10px rgba(126, 34, 206, 0.3); transition:all 0.2s ease;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Digitally Sign & Submit
+          </button>
+        </div>
+
+        <!-- Divider & Links -->
+        <div style="display:flex; align-items:center; margin-bottom:10px;">
+          <div style="flex:1; height:1px; background:#e2e8f0;"></div>
+          <span style="padding:0 10px; font-size:11px; font-weight:600; color:#94a3b8;">or</span>
+          <div style="flex:1; height:1px; background:#e2e8f0;"></div>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; font-size:12px; font-weight:700; margin-bottom:12px;">
+          <a href="javascript:void(0)" onclick="alert('First time users can enter any 4-6 digit PIN to set it permanently.')" style="color:#d97706; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Forgot PIN?
+          </a>
+          <span style="color:#cbd5e1; font-weight:400;">|</span>
+          <a href="javascript:void(0)" onclick="alert('To reset your PIN, please contact administrator.')" style="color:#2563eb; text-decoration:none;">Reset PIN</a>
+        </div>
+
+        <!-- Dynamic Message Error Box -->
+        <div id="modalLvMsgStandalone" style="display:none; font-size:12px; font-weight:700; border-radius:10px; padding:10px 12px; margin-bottom:12px; align-items:center; gap:8px;"></div>
+
+        <!-- Info Footer Banner -->
+        <div style="background:#eff6ff; border:1px solid #dbeafe; border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:10px; color:#1e40af; font-size:11.5px; font-weight:600;">
+          <div style="width:20px; height:20px; border-radius:50%; background:#2563eb; color:#ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
+          <span>This action will digitally sign your application and submit it for approval.</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="../js/config/firebase.config.js"></script>
+  <script src="../js/services/auth.service.js"></script>
+  <script src="../js/services/ward.service.js"></script>
+  <script src="../js/services/leave.service.js"></script>
+  <script src="../shared/digital_signature.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
