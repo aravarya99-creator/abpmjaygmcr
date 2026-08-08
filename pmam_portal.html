@@ -2385,33 +2385,53 @@ var _pendingApproveDutyId = null;
 function initiateApproveDuty(id) {
   _pendingApproveDutyId = id;
   document.getElementById('modalLvPin').value = '';
-  document.getElementById('modalLvMsg').textContent = '';
-  // Reuse the signature PIN modal, but override its behavior
+  setModalLvError('');
   var btn = document.querySelector('#signPinModal .mbtn-pri');
-  btn.onclick = executeApproveDuty;
+  if (btn) {
+    btn.disabled = false;
+    btn.onclick = executeApproveDuty;
+  }
   document.getElementById('signPinModal').classList.add('open');
 }
 
 function executeApproveDuty() {
-  var pin = document.getElementById('modalLvPin').value;
+  var pin = document.getElementById('modalLvPin').value.trim();
   var btn = document.querySelector('#signPinModal .mbtn-pri');
-  var msg = document.getElementById('modalLvMsg');
-  if(!pin){ msg.style.color='red'; msg.textContent='Enter PIN.'; return; }
+  if (!pin) {
+    setModalLvError('Please enter your 4-digit Signature PIN.');
+    return;
+  }
   
-  btn.disabled = true; msg.style.color='blue'; msg.textContent='Approving...';
+  if (btn) btn.disabled = true;
+  setModalLvError('');
+  var msgEl = document.getElementById('modalLvMsg');
+  if (msgEl) {
+    msgEl.style.display = 'flex';
+    msgEl.style.background = '#eff6ff';
+    msgEl.style.border = '1px solid #dbeafe';
+    msgEl.style.color = '#1d4ed8';
+    msgEl.innerHTML = '<div style="width:20px; height:20px; border-radius:50%; background:#2563eb; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; flex-shrink:0;">⏳</div> <span>Accepting substitute duty request...</span>';
+  }
   
   LeaveEngine.approveSubstituteDuty(_pendingApproveDutyId, pin).then(function() {
-    msg.style.color = 'green';
-    msg.textContent = 'Duty Accepted Successfully!';
+    setModalLvError('');
+    if (msgEl) {
+      msgEl.style.display = 'flex';
+      msgEl.style.background = '#dcfce7';
+      msgEl.style.border = '1px solid #86efac';
+      msgEl.style.color = '#166534';
+      msgEl.innerHTML = '<div style="width:22px; height:22px; border-radius:50%; background:#16a34a; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; flex-shrink:0;">✓</div> <div style="font-size:12px; font-weight:700; line-height:1.3;">Duty Accepted Successfully!</div>';
+    }
     setTimeout(function() {
       document.getElementById('signPinModal').classList.remove('open');
-      btn.disabled = false;
-      btn.onclick = confirmLeaveSignature; // restore original handler
+      if (btn) {
+        btn.disabled = false;
+        btn.onclick = confirmLeaveSignature;
+      }
     }, 1500);
   }).catch(function(err) {
-    msg.style.color = 'red';
-    msg.textContent = err.message;
-    btn.disabled = false;
+    if (btn) btn.disabled = false;
+    setModalLvError(err.message || 'Approval failed.');
   });
 }
 
@@ -2778,7 +2798,12 @@ function submitLeave() {
     if (window.DSig) {
       window._pendingLeaveReq = req;
       document.getElementById('modalLvPin').value = '';
-      document.getElementById('modalLvMsg').textContent = '';
+      setModalLvError('');
+      var btn = document.querySelector('#signPinModal .mbtn-pri');
+      if (btn) {
+        btn.disabled = false;
+        btn.onclick = confirmLeaveSignature;
+      }
       document.getElementById('signPinModal').classList.add('open');
       return;
     }
@@ -2806,11 +2831,14 @@ function submitLeave() {
 
 function confirmLeaveSignature() {
   var pin = document.getElementById('modalLvPin').value.trim();
+  var btn = document.querySelector('#signPinModal .mbtn-pri');
   if (!pin) {
     setModalLvError('Please enter your 4-digit Signature PIN.');
     return;
   }
   setModalLvError('');
+  if (btn) btn.disabled = true;
+
   var msgEl = document.getElementById('modalLvMsg');
   if (msgEl) {
     msgEl.style.display = 'flex';
@@ -2821,8 +2849,9 @@ function confirmLeaveSignature() {
   }
   
   var u = (typeof getPmjayUser === 'function') ? (getPmjayUser() || {}) : {};
-  var myEmail = u.email || '';
+  var myEmail = (u.email || '').toLowerCase().trim();
   if (!myEmail) {
+    if (btn) btn.disabled = false;
     setModalLvError('User session expired. Please log in again.');
     return;
   }
@@ -2846,6 +2875,7 @@ function confirmLeaveSignature() {
     
     setTimeout(function() {
       document.getElementById('signPinModal').classList.remove('open');
+      if (btn) btn.disabled = false;
       var msg = document.getElementById('leaveMsg');
       if (msg) {
         msg.style.color = '#166534';
@@ -2857,6 +2887,7 @@ function confirmLeaveSignature() {
       clearLeaveForm();
     }, 2000);
   }).catch(function(e) {
+    if (btn) btn.disabled = false;
     var errText = e.message || 'Signature verification failed.';
     setModalLvError(errText);
   });
