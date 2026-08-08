@@ -615,6 +615,12 @@ input:checked + .slider:before { transform: translateX(20px); }
               <!-- Roles checkboxes populated via JS -->
             </div>
           </div>
+          <div class="mfld"><label>Gender</label>
+            <select id="ueGender">
+              <option value="Male">Male ♂</option>
+              <option value="Female">Female ♀</option>
+            </select>
+          </div>
           <div class="mfld"><label>Status</label>
             <select id="ueStatus">
               <option value="approved">✅ Active / Approved</option>
@@ -2183,6 +2189,12 @@ input:checked + .slider:before { transform: translateX(20px); }
     <div class="modal-title">Add New User</div>
     <div class="mfld"><label>Full Name</label><input type="text" id="newName" placeholder="Enter full name"></div>
     <div class="mfld"><label>Email Address</label><input type="email" id="newEmail" placeholder="Enter email"></div>
+    <div class="mfld"><label>Gender</label>
+      <select id="newGender">
+        <option value="Male">Male ♂</option>
+        <option value="Female">Female ♀</option>
+      </select>
+    </div>
     <div class="mfld"><label>Role</label>
       <select id="newRole" onchange="toggleWardField()">
         <option>PMAM</option><option>I/C AB-PMJAY</option><option>Admin</option><option>DEO</option>
@@ -2545,6 +2557,7 @@ function toggleWardField(){
 function addUser(){
   const name = document.getElementById('newName').value.trim();
   const email = document.getElementById('newEmail').value.trim().toLowerCase();
+  const gender = document.getElementById('newGender') ? document.getElementById('newGender').value : 'Male';
   const role = document.getElementById('newRole').value;
   const ward = document.getElementById('newWardSel').value;
   if(!name || !email) return showToast('Name and email required', 'error');
@@ -2555,6 +2568,7 @@ function addUser(){
       email: email,
       role: role,
       ward: role === 'PMAM' ? ward : '',
+      gender: gender || 'Male',
       status: 'approved'
     }).then(function() {
       showToast('User added & OTP sent to email!', 'success');
@@ -8930,6 +8944,7 @@ function renderDirectoryGrid(list) {
           <div class="user-email">${u.email}</div>
           <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:4px;">
              ${rolesHtml || '<span class="user-role role-pmam">User</span>'}
+             <span style="font-size:9px; font-weight:700; color:#374151; background:#f3f4f6; border:1px solid #d1d5db; border-radius:10px; padding:1px 6px;">${(u.gender || 'Male') === 'Female' ? '♀ Female' : '♂ Male'}</span>
              <span style="font-size:9px; font-weight:700; color:${statusColor}; text-transform:uppercase;">• ${(u.status||'').toUpperCase()}</span>
           </div>
           <div style="font-size:10px; color:#6b7280; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
@@ -9054,6 +9069,7 @@ function openUnifiedEdit(docId) {
     `;
   });
   rContainer.innerHTML = rHtml;
+  if (document.getElementById('ueGender')) document.getElementById('ueGender').value = user.gender || 'Male';
   document.getElementById('ueStatus').value = (user.status === 'active' ? 'approved' : (user.status || 'approved'));
   document.getElementById('ueHideOnIndex').checked = !!user.hideOnIndex;
   
@@ -9131,8 +9147,10 @@ function saveUnifiedEdit() {
   var origText = btn.textContent;
   btn.textContent = 'Saving...'; btn.disabled = true;
 
+  var genderVal = document.getElementById('ueGender') ? document.getElementById('ueGender').value : 'Male';
   var updates = {
     name: name,
+    gender: genderVal,
     status: status,
     wards: selectedWards,
     hideOnIndex: hideOnIndex,
