@@ -38,16 +38,22 @@
             isValid = true;
           } else if (udata.signPinHash && udata.signPinHash === hashedPin) {
             isValid = true;
-          } else if (!udata.pin && !udata.signPinHash) {
-            // First time user setting PIN
+          } else if (!udata.signPinHash && (!udata.pin || String(udata.pin).trim() === '1234')) {
+            // First time user or default admin reset PIN (1234) -> set/update PIN
+            isValid = true;
             db.collection('users').doc(myEmail).update({
               pin: pinStr,
               signPinHash: hashedPin
             }).catch(function(err){ console.warn('Could not save initial PIN:', err); });
-            isValid = true;
           }
 
           if (isValid) {
+            if (!udata.signPinHash) {
+              db.collection('users').doc(myEmail).update({
+                pin: pinStr,
+                signPinHash: hashedPin
+              }).catch(function(e){});
+            }
             resolve(udata);
           } else {
             reject(new Error('Incorrect PIN. Please try again (default PIN is 1234).'));
