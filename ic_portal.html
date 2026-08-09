@@ -1468,73 +1468,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
     </div>
 
 
-    <!-- ===== LEAVE REQUESTS ===== -->
-    <div class="sec" id="sec-leavereq">
-      <!-- LEAVE MANAGEMENT TOP SUB-TAB BAR -->
-      <div style="display:flex; gap:8px; background:#ffffff; padding:6px 12px; border-radius:12px; border:1.5px solid #cbd5e1; margin-bottom:14px; flex-wrap:wrap; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
-        <button class="ic-leave-tab-btn active" id="ictab-leavereq-1" onclick="goSec('leavereq', document.querySelector('.sbi[onclick*=\'leavereq\']'))" style="padding:6px 14px; border:none; background:transparent; font-size:12px; font-weight:800; color:#2563eb; cursor:pointer; border-bottom:3px solid #2563eb; display:flex; align-items:center; gap:6px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          Leave Requests
-        </button>
-        <button class="ic-leave-tab-btn" id="ictab-profiles-1" onclick="goSec('profiles', document.querySelector('.sbi[onclick*=\'profiles\']'))" style="padding:6px 14px; border:none; background:transparent; font-size:12px; font-weight:700; color:#64748b; cursor:pointer; display:flex; align-items:center; gap:6px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Leave Dashboard
-        </button>
-      </div>
 
-      <!-- STATS -->
-      <div class="metrics-grid" style="grid-template-columns:repeat(auto-fill,minmax(110px,1fr))">
-        <div class="mcard c3"><div class="mcard-num" id="lv-pending">0</div><div class="mcard-label">Pending</div></div>
-        <div class="mcard c2"><div class="mcard-num" id="lv-approved">0</div><div class="mcard-label">Approved</div></div>
-        <div class="mcard c1"><div class="mcard-num" id="lv-rejected">0</div><div class="mcard-label">Rejected</div></div>
-        <div class="mcard c6"><div class="mcard-num" id="lv-onleave">0</div><div class="mcard-label">On Leave Today</div></div>
-      </div>
-
-      <!-- TABS -->
-      <div class="tabs">
-        <div class="tab active" onclick="switchLvTab('pending',this)">Pending (<span id="pendingCnt">0</span>)</div>
-        <div class="tab" onclick="switchLvTab('history',this)">All History</div>
-        <div class="tab" onclick="switchLvTab('onleave',this)">On Leave Today</div>
-        <div class="tab" onclick="switchLvTab('profiles',this); renderPmamProfiles();">PMAM Profiles</div>
-      </div>
-
-      <!-- PENDING -->
-      <div class="tab-panel active" id="lv-tab-pending">
-        <div id="pendingList"></div>
-      </div>
-
-      <!-- HISTORY -->
-      <div class="tab-panel" id="lv-tab-history">
-        <div class="card">
-          <div class="card-hd">All Leave History</div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>PMAM</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Return</th><th>Replaced By</th><th>Status</th><th>Remarks</th><th>Action</th></tr></thead>
-              <tbody id="lvHistTbody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- ON LEAVE -->
-      <div class="tab-panel" id="lv-tab-onleave">
-        <div class="card">
-          <div class="card-hd">PMAMs Currently on Leave</div>
-          <div id="onLeaveList"></div>
-        </div>
-      </div>
-
-      <!-- PMAM PROFILES -->
-      <div class="tab-panel" id="lv-tab-profiles">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-           <div style="font-weight:700;color:#0F2B8C;font-size:16px">PMAM Leave Profiles & Balances</div>
-           <input type="text" id="pmamProfileSearch" placeholder="Search PMAM..." oninput="renderPmamProfiles()" style="padding:8px 12px; border:1px solid #c7d2e8; border-radius:8px; font-size:13px; width:250px;">
-        </div>
-        <div id="pmamProfilesGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:16px;">
-           <div style="color:#6b7280; font-size:13px;">Loading PMAM Profiles...</div>
-        </div>
-      </div>
-    </div>
 
     <!-- ===== DATA CLEANUP (ADMIN) ===== -->
   </div><!-- end content -->
@@ -1549,54 +1483,54 @@ function cvN(ipd,reg){return ipd>0?(reg/ipd)*100:0;}
 function cvColor(ipd,reg){return cvN(ipd,reg)>=60?'#166534':'#92400e';}
 
 function goSec(id,el){
-  if(id === 'leavedash' || id === 'leavebal') id = 'profiles';
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-  var secEl = document.getElementById('sec-'+id);
-  if(secEl) secEl.classList.add('active');
+  var targetTab = null;
+  if(id === 'leavedash' || id === 'leavebal' || id === 'profiles'){
+    id = 'leavereq';
+    targetTab = 'dashboard';
+  }
   
-  document.querySelectorAll('.sbi').forEach(s=>s.classList.remove('active'));
-  if(!el && (id==='leavereq'||id==='profiles')){
-    el = document.querySelector(`.sbi[onclick*='leavereq']`) || document.querySelector(`.sbi[onclick*='profiles']`);
+  document.querySelectorAll('.sec').forEach(function(s){
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  
+  var secEl = document.getElementById('sec-' + id);
+  if(secEl) {
+    secEl.classList.add('active');
+    secEl.style.display = 'block';
+  }
+
+  document.querySelectorAll('.sbi').forEach(function(s){ s.classList.remove('active'); });
+  if(!el && id === 'leavereq'){
+    el = document.querySelector(`.sbi[onclick*='leavereq']`);
   }
   if(el) el.classList.add('active');
 
-  // Sync sub-tab buttons inside Leave section
-  document.querySelectorAll('.ic-leave-tab-btn').forEach(btn => {
-    btn.classList.remove('active');
-    btn.style.color = '#64748b';
-    btn.style.fontWeight = '700';
-    btn.style.borderBottom = 'none';
-    var svg = btn.querySelector('svg'); if (svg) svg.setAttribute('stroke', '#64748b');
-  });
-
   if (id === 'leavereq') {
-    ['ictab-leavereq-1', 'ictab-leavereq-2'].forEach(bId => {
-      var b = document.getElementById(bId);
-      if (b) {
-        b.classList.add('active');
-        b.style.color = '#2563eb';
-        b.style.fontWeight = '800';
-        b.style.borderBottom = '3px solid #2563eb';
-        var svg = b.querySelector('svg'); if (svg) svg.setAttribute('stroke', '#2563eb');
+    if (typeof loadLeaveReq === 'function') loadLeaveReq();
+    if (targetTab === 'dashboard') {
+      var dashTabBtn = document.querySelector('.lr-tab[data-tab="dashboard"]');
+      if (dashTabBtn && typeof switchLrTab === 'function') {
+        switchLrTab(dashTabBtn);
       }
-    });
-    loadLeaveReq();
-  } else if (id === 'profiles') {
-    ['ictab-profiles-1', 'ictab-profiles-2'].forEach(bId => {
-      var b = document.getElementById(bId);
-      if (b) {
-        b.classList.add('active');
-        b.style.color = '#2563eb';
-        b.style.fontWeight = '800';
-        b.style.borderBottom = '3px solid #2563eb';
-        var svg = b.querySelector('svg'); if (svg) svg.setAttribute('stroke', '#2563eb');
+    } else {
+      var pendingTabBtn = document.querySelector('.lr-tab[data-tab="pending"]');
+      if (pendingTabBtn && typeof switchLrTab === 'function') {
+        switchLrTab(pendingTabBtn);
       }
-    });
-    if(typeof renderOverview === 'function') renderOverview();
+    }
   } else if (id === 'monthly') {
-    genMonthly();
+    if (typeof genMonthly === 'function') genMonthly();
   } else if (id === 'allrecords') {
-    genAllRecords();
+    if (typeof genAllRecords === 'function') genAllRecords();
+  } else if (id === 'daily') {
+    if (typeof genDaily === 'function') genDaily();
+  } else if (id === 'annual') {
+    if (typeof genAnnual === 'function') genAnnual();
+  } else if (id === 'ward') {
+    if (typeof genWard === 'function') genWard();
+  } else if (id === 'pmamwise') {
+    if (typeof genPmam === 'function') genPmam();
   }
 }
 function toggleDD(){document.getElementById('userDD').classList.toggle('open');}
