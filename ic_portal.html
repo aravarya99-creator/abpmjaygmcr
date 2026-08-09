@@ -468,40 +468,87 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
     
     <!-- ===== DAILY REPORT ===== -->
     <div class="sec active" id="sec-daily">
-      <div class="page-hd">Daily Report</div>
-      <div class="card">
-        <div class="card-hd">PMAM Performance — Daily</div>
-        <div class="frow">
-          <div class="fld"><label>Mode</label>
-            <select id="dailyMode" style="width:150px" onchange="dailyToggleRange()">
-              <option value="single">Single Date</option>
-              <option value="range">Date Range</option>
-            </select>
+      
+      <!-- MAIN DAILY REPORT CONTAINER CARD -->
+      <div class="card" id="dailyReportArea" style="border-radius:14px; border:1px solid #cbd5e1; box-shadow:0 4px 14px rgba(0,0,0,0.03); overflow:hidden; padding:0; background:#fff;">
+        
+        <!-- CONTROL BAR HEADER (Single Date / Range, Calendar, Generate, Excel, Print/PDF) -->
+        <div style="background:linear-gradient(135deg, #0F2B8C 0%, #1e3a8a 100%); padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; color:#fff;">
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <span style="font-size:16px; font-weight:800; letter-spacing:0.3px;">📊 Daily Report</span>
+            
+            <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12); padding:4px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.2);">
+              <select id="dailyMode" style="background:transparent; color:#fff; border:none; outline:none; font-weight:700; font-size:12px; cursor:pointer;" onchange="dailyToggleRange()">
+                <option value="single" style="color:#0f172a;">Single Date</option>
+                <option value="range" style="color:#0f172a;">Date Range</option>
+              </select>
+            </div>
+
+            <div id="dailyDateWrap" style="display:flex; align-items:center; gap:6px;">
+              <input type="date" id="dailyDate" style="padding:5px 10px; border-radius:8px; border:1px solid #93c5fd; font-size:12px; font-weight:700; color:#0f172a; outline:none;">
+            </div>
+
+            <div id="dailyFromWrap" style="display:none; align-items:center; gap:6px;">
+              <span style="font-size:11px; color:#cbd5e1; font-weight:600;">From:</span>
+              <input type="date" id="dailyFrom" style="padding:5px 10px; border-radius:8px; border:1px solid #93c5fd; font-size:12px; font-weight:700; color:#0f172a; outline:none;">
+            </div>
+
+            <div id="dailyToWrap" style="display:none; align-items:center; gap:6px;">
+              <span style="font-size:11px; color:#cbd5e1; font-weight:600;">To:</span>
+              <input type="date" id="dailyTo" style="padding:5px 10px; border-radius:8px; border:1px solid #93c5fd; font-size:12px; font-weight:700; color:#0f172a; outline:none;">
+            </div>
+
+            <button class="btn" onclick="genDaily()" style="background:#2563eb; color:#fff; border:none; padding:6px 14px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:4px; box-shadow:0 2px 6px rgba(37,99,235,0.3);">
+              ⚡ Generate
+            </button>
           </div>
-          <div class="fld" id="dailyDateWrap"><label>Date</label><input type="date" id="dailyDate" style="width:160px"></div>
-          <div class="fld" id="dailyFromWrap" style="display:none"><label>From</label><input type="date" id="dailyFrom" style="width:150px"></div>
-          <div class="fld" id="dailyToWrap" style="display:none"><label>To</label><input type="date" id="dailyTo" style="width:150px"></div>
-          <button class="btn btn-pri" onclick="genDaily()">Generate</button>
-          <button class="btn btn-grn" onclick="exportExcel('dailyTbl','Daily_Report')">Export Excel</button>
-          <button class="btn btn-word" onclick="printReportOrient('dailyReportArea','Daily Report','portrait')">Print / PDF</button>
+
+          <!-- ACTION BUTTONS: EXCEL & PRINT PDF -->
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="btn" onclick="exportExcel('dailyTbl','Daily_Report')" style="background:#166534; color:#fff; border:none; padding:6px 14px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px;">
+              📊 Export Excel
+            </button>
+            <button class="btn" onclick="printReportOrient('dailyReportArea','Daily Report','portrait')" style="background:#ffffff; color:#0F2B8C; border:none; padding:6px 14px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px;">
+              🖨️ Print / PDF
+            </button>
+          </div>
         </div>
-        <div style="font-size:11px;color:#6b7280;margin-top:6px">Multiple ward entries by the same PMAM are merged into one row with wards comma-separated and values summed. PMAMs who didn't submit are included with 0 values.</div>
-      </div>
 
-      <div class="metrics-grid" id="dailyMetrics"></div>
-
-      <div class="card" id="dailyReportArea">
-        <div class="card-hd" id="dailyTitle">Daily Summary</div>
-        <div class="tbl-wrap">
-          <table id="dailyTbl">
-            <thead><tr><th>S.No</th><th>PMAM</th><th>Ward</th><th>IPD</th><th>Register</th><th>Preauth Initiated</th><th>Preauth Amt (₹)</th><th>Discharge</th><th>Claim Amt (₹)</th></tr></thead>
-            <tbody id="dailyTbody"><tr><td colspan="9" class="empty-td">Select date and click Generate</td></tr></tbody>
-            <tfoot id="dailyFoot"></tfoot>
-          </table>
+        <!-- 6 METRICS KPI BAR -->
+        <div style="padding:14px 20px 0 20px;">
+          <div class="metrics-grid" id="dailyMetrics" style="margin-bottom:14px;"></div>
         </div>
-      </div>
+
+        <!-- TABLE SECTION -->
+        <div style="padding:0 20px 20px 20px;">
+          <div style="font-size:14px; font-weight:800; color:#0f172a; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;" id="dailyTitle">
+            Daily Summary — 9 August 2026
+          </div>
+          <div class="tbl-wrap" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
+            <table id="dailyTbl" style="width:100%; border-collapse:collapse;">
+              <thead>
+                <tr style="background:#0F2B8C; color:#ffffff; font-size:12px;">
+                  <th style="padding:10px; text-align:center; width:50px;">S.No</th>
+                  <th style="padding:10px; text-align:left;">PMAM</th>
+                  <th style="padding:10px; text-align:left;">Ward</th>
+                  <th style="padding:10px; text-align:center;">IPD</th>
+                  <th style="padding:10px; text-align:center;">Register</th>
+                  <th style="padding:10px; text-align:center;">Preauth Initiated</th>
+                  <th style="padding:10px; text-align:right;">Preauth Amt (₹)</th>
+                  <th style="padding:10px; text-align:center;">Discharge</th>
+                  <th style="padding:10px; text-align:right;">Claim Amt (₹)</th>
+                </tr>
+              </thead>
+              <tbody id="dailyTbody">
+                <tr><td colspan="9" class="empty-td" style="padding:20px; text-align:center; color:#64748b;">Select date and click Generate</td></tr>
+              </tbody>
+              <tfoot id="dailyFoot"></tfoot>
+            </table>
+          </div>
+        </div>
 
       </div>
+    </div>
 
     <!-- ===== MONTHLY REPORT ===== -->
     <div class="sec" id="sec-monthly">
