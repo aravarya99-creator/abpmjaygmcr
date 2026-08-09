@@ -5,6 +5,7 @@
   <title>Finance Portal — Fixed Reports & Expenditure</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="js/config/firebase.config.js"></script>
   <script src="js/services/auth.service.js"></script>
@@ -13,6 +14,7 @@
     var auth = window.auth || (window.GMCFirebase ? window.GMCFirebase.auth : null);
     GMCAuth.requireAuth(['accountant', 'admin']);
   </script>
+
 
 
   <style>
@@ -1351,21 +1353,36 @@
       if(el) el.style.display = on ? 'flex' : 'none';
     }
 
+    function getDb() {
+      var d = db || window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
+      if (!d && typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) {
+        d = firebase.firestore();
+      }
+      return d;
+    }
+
     // Save a named document to Firestore entries collection
     function fsSave(key, value) {
-      return db.collection('entries').doc(key).set({ data: JSON.stringify(value) });
+      var instance = getDb();
+      if (!instance) return Promise.reject(new Error('Firestore instance not available.'));
+      return instance.collection('entries').doc(key).set({ data: JSON.stringify(value) });
     }
 
     // Load all finance data from Firestore into _cache, then render
     async function fsLoadAll(callback) {
       setLoading(true);
       try {
+        var instance = getDb();
+        if (!instance) {
+          throw new Error('Firestore DB instance not available. Please ensure Firebase SDKs are loaded.');
+        }
         var results = await Promise.all([
-          db.collection('entries').get(),
-          db.collection('finance_incomes').get(),
-          db.collection('finance_expenses').get(),
-          db.collection('finance_stats').get()
+          instance.collection('entries').get(),
+          instance.collection('finance_incomes').get(),
+          instance.collection('finance_expenses').get(),
+          instance.collection('finance_stats').get()
         ]);
+
         
         var snapEntries = results[0];
         var legacyIncome = null, legacyExpense = null, legacyStats = null;
@@ -1451,7 +1468,8 @@
           if(e.category && norm !== e.category){ 
               e.category = norm; 
               _needSave = true;
-              db.collection('finance_expenses').doc(e.id).set(e);
+              var instanceDb = getDb();
+              if (instanceDb) instanceDb.collection('finance_expenses').doc(e.id).set(e);
           }
         });
 
@@ -1483,35 +1501,44 @@
 
     // Firestore Sync Wrappers
     function fsSyncAdd(collection, obj) {
+      var d = getDb();
+      if(!d) return;
       if(!obj.id) obj.id = obj.createdAt || Date.now().toString();
-      db.collection(collection).doc(obj.id).set(obj).catch(function(e){ console.error(e); });
+      d.collection(collection).doc(obj.id).set(obj).catch(function(e){ console.error(e); });
     }
     function fsSyncDelete(collection, id) {
-      db.collection(collection).doc(id).delete().catch(function(e){ console.error(e); });
+      var d = getDb();
+      if(!d) return;
+      d.collection(collection).doc(id).delete().catch(function(e){ console.error(e); });
     }
     async function fsSyncBatchAdd(collection, arr) {
-      var b = db.batch();
+      var d = getDb();
+      if(!d) return;
+      var b = d.batch();
       var c = 0;
       for(var i=0; i<arr.length; i++) {
         var obj = arr[i];
         if(!obj.id) obj.id = obj.createdAt || Date.now().toString();
-        b.set(db.collection(collection).doc(obj.id), obj);
+        b.set(d.collection(collection).doc(obj.id), obj);
         c++;
-        if(c === 490) { await b.commit(); b = db.batch(); c = 0; }
+        if(c === 490) { await b.commit(); b = d.batch(); c = 0; }
       }
       await b.commit();
     }
     async function fsSyncBatchDelete(collection, arr) {
-      var b = db.batch();
+      var d = getDb();
+      if(!d) return;
+      var b = d.batch();
       var c = 0;
       for(var i=0; i<arr.length; i++) {
         var obj = arr[i];
-        b.delete(db.collection(collection).doc(obj.id || obj.createdAt));
+        b.delete(d.collection(collection).doc(obj.id || obj.createdAt));
         c++;
-        if(c === 490) { await b.commit(); b = db.batch(); c = 0; }
+        if(c === 490) { await b.commit(); b = d.batch(); c = 0; }
       }
       await b.commit();
     }
+
 
     function save(k, v) {
       if(k === LS.INCOME  || k === 'fp_income')  { _cache.income  = v; }
