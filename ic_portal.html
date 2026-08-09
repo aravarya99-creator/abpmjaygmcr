@@ -3848,6 +3848,8 @@ function renderOverview() {
 
   if(html === '') html = '<tr><td colspan="11" class="empty-td">No PMAMs found</td></tr>';
   tbody.innerHTML = html;
+}
+
 function showSec(secId) {
   document.querySelectorAll('.sec').forEach(function(s){ s.classList.remove('active'); s.style.display = 'none'; });
   var target = document.getElementById(secId);
