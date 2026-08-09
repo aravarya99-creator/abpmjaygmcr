@@ -2982,6 +2982,499 @@ function genDaily(){
   });
 }
 
+// ══════════════════════════════════════
+// MONTHLY REPORT — generate
+// ══════════════════════════════════════
+function genMonthly(){
+  var mEl = document.getElementById('rMonth');
+  var yEl = document.getElementById('rYearMonth');
+  var month = mEl ? mEl.value : 'April';
+  var year = yEl ? yEl.value : String(new Date().getFullYear());
+
+  var mTitleEl = document.getElementById('monthlyTitle');
+  if (mTitleEl) mTitleEl.textContent = 'PMAM-wise Summary — ' + month + ' ' + year;
+
+  var tbody = document.getElementById('monthlyTbody');
+  var foot = document.getElementById('monthlyFoot');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="12" class="empty-td">Loading…</td></tr>';
+
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var monthIdx = months.indexOf(month);
+
+  var filtered = allReports.filter(function(r){
+    if (!r.date) return false;
+    var d = new Date(r.date);
+    if (isNaN(d.getTime())) return false;
+    if (String(d.getFullYear()) !== String(year)) return false;
+    return monthIdx === -1 || d.getMonth() === monthIdx;
+  });
+
+  fetchPmamList(function(pmamList){
+    var byPmam = {};
+    pmamList.forEach(function(p){
+      byPmam[p.email || p.name] = {
+        name: p.name, email: p.email, wards: [],
+        ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0, hasReport: false
+      };
+    });
+
+    filtered.forEach(function(r){
+      var key = r.email || r.name || 'unknown';
+      if (!byPmam[key]) {
+        byPmam[key] = { name: r.name || r.email || 'Unknown', email: r.email || '', wards:[], ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0, hasReport:false };
+      }
+      var p = byPmam[key];
+      p.hasReport = true;
+      var wards = Array.isArray(r.wards) ? r.wards : (r.ward ? [r.ward] : []);
+      wards.forEach(function(w){ if (w && p.wards.indexOf(w) === -1) p.wards.push(w); });
+      p.ipd   += Number(r.ipd||0);
+      p.med   += Number(r.med||0);
+      p.surg  += Number(r.surg||0);
+      p.reg   += Number(r.reg||0);
+      p.pre   += Number(r.pre||0);
+      p.preAmt+= Number(r.preAmt||0);
+      p.dis   += Number(r.dis||0);
+      p.clm   += Number(r.clm||0);
+    });
+
+    var rows = Object.values(byPmam).sort(function(a,b){
+      if (a.hasReport !== b.hasReport) return a.hasReport ? -1 : 1;
+      return (a.name||'').localeCompare(b.name||'');
+    });
+
+    var totals = { ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0 };
+    var html = rows.map(function(r, i){
+      totals.ipd += r.ipd; totals.med += r.med; totals.surg += r.surg; totals.reg += r.reg;
+      totals.pre += r.pre; totals.preAmt += r.preAmt; totals.dis += r.dis; totals.clm += r.clm;
+      var conv = r.ipd > 0 ? ((r.pre / r.ipd) * 100).toFixed(1) + '%' : '0.0%';
+      var wardsStr = r.wards.length ? r.wards.join(', ') : '—';
+
+      return '<tr>'
+        + '<td style="text-align:center;">' + (i+1) + '</td>'
+        + '<td style="text-align:left; font-weight:700;">' + (r.name||'—') + '</td>'
+        + '<td style="text-align:left;">' + wardsStr + '</td>'
+        + '<td style="text-align:center;">' + r.ipd + '</td>'
+        + '<td style="text-align:center;">' + r.med + '</td>'
+        + '<td style="text-align:center;">' + r.surg + '</td>'
+        + '<td style="text-align:center;">' + r.reg + '</td>'
+        + '<td style="text-align:center;">' + r.pre + '</td>'
+        + '<td style="text-align:right;">' + inrFmt(r.preAmt) + '</td>'
+        + '<td style="text-align:center;">' + r.dis + '</td>'
+        + '<td style="text-align:right;">' + inrFmt(r.clm) + '</td>'
+        + '<td style="text-align:center; font-weight:700;">' + conv + '</td>'
+        + '</tr>';
+    }).join('');
+
+    var totConv = totals.ipd > 0 ? ((totals.pre / totals.ipd) * 100).toFixed(1) + '%' : '0.0%';
+    if (tbody) tbody.innerHTML = html || '<tr><td colspan="12" class="empty-td">No data found for selected month.</td></tr>';
+    if (foot) {
+      foot.innerHTML = '<tr class="tot-row" style="background:#0038a8; color:#fff; font-weight:800;">'
+        + '<td colspan="3" style="text-align:right;">TOTAL</td>'
+        + '<td style="text-align:center;">' + totals.ipd + '</td>'
+        + '<td style="text-align:center;">' + totals.med + '</td>'
+        + '<td style="text-align:center;">' + totals.surg + '</td>'
+        + '<td style="text-align:center;">' + totals.reg + '</td>'
+        + '<td style="text-align:center;">' + totals.pre + '</td>'
+        + '<td style="text-align:right;">' + inrFmt(totals.preAmt) + '</td>'
+        + '<td style="text-align:center;">' + totals.dis + '</td>'
+        + '<td style="text-align:right;">' + inrFmt(totals.clm) + '</td>'
+        + '<td style="text-align:center;">' + totConv + '</td>'
+        + '</tr>';
+    }
+  });
+}
+
+// ══════════════════════════════════════
+// ANNUAL REPORT — generate
+// ══════════════════════════════════════
+function genAnnual(){
+  var yEl = document.getElementById('rYearAnnual');
+  var year = yEl ? yEl.value : String(new Date().getFullYear());
+
+  var aTitleEl = document.getElementById('annualTitle');
+  if (aTitleEl) aTitleEl.textContent = 'Month-wise Summary — ' + year;
+
+  var tbody = document.getElementById('annualTbody');
+  var foot = document.getElementById('annualFoot');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="10" class="empty-td">Loading…</td></tr>';
+
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var monthStats = months.map(function(m){
+    return { month: m, ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0 };
+  });
+
+  var pmamMap = {};
+
+  allReports.forEach(function(r){
+    if (!r.date) return;
+    var d = new Date(r.date);
+    if (isNaN(d.getTime())) return;
+    if (String(d.getFullYear()) !== String(year)) return;
+
+    var mIdx = d.getMonth();
+    if (monthStats[mIdx]) {
+      monthStats[mIdx].ipd   += Number(r.ipd||0);
+      monthStats[mIdx].med   += Number(r.med||0);
+      monthStats[mIdx].surg  += Number(r.surg||0);
+      monthStats[mIdx].reg   += Number(r.reg||0);
+      monthStats[mIdx].pre   += Number(r.pre||0);
+      monthStats[mIdx].preAmt+= Number(r.preAmt||0);
+      monthStats[mIdx].dis   += Number(r.dis||0);
+      monthStats[mIdx].clm   += Number(r.clm||0);
+    }
+
+    var key = r.email || r.name || 'unknown';
+    if (!pmamMap[key]) {
+      pmamMap[key] = { name: r.name || r.email || 'Unknown', ipd:0, reg:0, pre:0, dis:0, clm:0 };
+    }
+    pmamMap[key].ipd += Number(r.ipd||0);
+    pmamMap[key].reg += Number(r.reg||0);
+    pmamMap[key].pre += Number(r.pre||0);
+    pmamMap[key].dis += Number(r.dis||0);
+    pmamMap[key].clm += Number(r.clm||0);
+  });
+
+  var grandTotals = { ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0 };
+  var html = monthStats.map(function(ms){
+    grandTotals.ipd += ms.ipd; grandTotals.med += ms.med; grandTotals.surg += ms.surg;
+    grandTotals.reg += ms.reg; grandTotals.pre += ms.pre; grandTotals.preAmt += ms.preAmt;
+    grandTotals.dis += ms.dis; grandTotals.clm += ms.clm;
+    var conv = ms.ipd > 0 ? ((ms.pre / ms.ipd) * 100).toFixed(1) + '%' : '0.0%';
+
+    return '<tr>'
+      + '<td style="text-align:left; font-weight:700;">' + ms.month + '</td>'
+      + '<td style="text-align:center;">' + ms.ipd + '</td>'
+      + '<td style="text-align:center;">' + ms.med + '</td>'
+      + '<td style="text-align:center;">' + ms.surg + '</td>'
+      + '<td style="text-align:center;">' + ms.reg + '</td>'
+      + '<td style="text-align:center;">' + ms.pre + '</td>'
+      + '<td style="text-align:right;">' + inrFmt(ms.preAmt) + '</td>'
+      + '<td style="text-align:center;">' + ms.dis + '</td>'
+      + '<td style="text-align:right;">' + inrFmt(ms.clm) + '</td>'
+      + '<td style="text-align:center; font-weight:700;">' + conv + '</td>'
+      + '</tr>';
+  }).join('');
+
+  var grandConv = grandTotals.ipd > 0 ? ((grandTotals.pre / grandTotals.ipd) * 100).toFixed(1) + '%' : '0.0%';
+  if (tbody) tbody.innerHTML = html;
+  if (foot) {
+    foot.innerHTML = '<tr class="tot-row" style="background:#0038a8; color:#fff; font-weight:800;">'
+      + '<td style="text-align:left;">TOTAL</td>'
+      + '<td style="text-align:center;">' + grandTotals.ipd + '</td>'
+      + '<td style="text-align:center;">' + grandTotals.med + '</td>'
+      + '<td style="text-align:center;">' + grandTotals.surg + '</td>'
+      + '<td style="text-align:center;">' + grandTotals.reg + '</td>'
+      + '<td style="text-align:center;">' + grandTotals.pre + '</td>'
+      + '<td style="text-align:right;">' + inrFmt(grandTotals.preAmt) + '</td>'
+      + '<td style="text-align:center;">' + grandTotals.dis + '</td>'
+      + '<td style="text-align:right;">' + inrFmt(grandTotals.clm) + '</td>'
+      + '<td style="text-align:center;">' + grandConv + '</td>'
+      + '</tr>';
+  }
+
+  // PMAM Ranking table
+  var pmamRankings = Object.values(pmamMap).sort(function(a,b){
+    var convA = a.ipd > 0 ? (a.pre / a.ipd) : 0;
+    var convB = b.ipd > 0 ? (b.pre / b.ipd) : 0;
+    if (convB !== convA) return convB - convA;
+    return b.clm - a.clm;
+  });
+
+  var pmamRankBody = document.getElementById('annualPmamTbody');
+  if (pmamRankBody) {
+    if (pmamRankings.length === 0) {
+      pmamRankBody.innerHTML = '<tr><td colspan="8" class="empty-td">No data for selected year</td></tr>';
+    } else {
+      pmamRankBody.innerHTML = pmamRankings.map(function(p, i){
+        var conv = p.ipd > 0 ? ((p.pre / p.ipd) * 100).toFixed(1) + '%' : '0.0%';
+        return '<tr>'
+          + '<td style="text-align:center; font-weight:700;">' + (i+1) + '</td>'
+          + '<td style="text-align:left; font-weight:700;">' + p.name + '</td>'
+          + '<td style="text-align:center;">' + p.ipd + '</td>'
+          + '<td style="text-align:center;">' + p.reg + '</td>'
+          + '<td style="text-align:center;">' + p.pre + '</td>'
+          + '<td style="text-align:center;">' + p.dis + '</td>'
+          + '<td style="text-align:right;">' + inrFmt(p.clm) + '</td>'
+          + '<td style="text-align:center; font-weight:700;">' + conv + '</td>'
+          + '</tr>';
+      }).join('');
+    }
+  }
+}
+
+// ══════════════════════════════════════
+// WARD WISE REPORT — generate
+// ══════════════════════════════════════
+function wrUpdateToggleAvailability(){
+  var wEl = document.getElementById('wrWard');
+  var w = wEl ? wEl.value : '';
+  var tog = document.getElementById('wrModeToggle');
+  if (tog) tog.disabled = !w;
+}
+
+function wrToggleMode(){
+  genWard();
+}
+
+function genWard(){
+  var wEl = document.getElementById('wrWard');
+  var mEl = document.getElementById('rMonthWard');
+  var yEl = document.getElementById('rYearWard');
+  var ward = wEl ? wEl.value : '';
+  var month = mEl ? mEl.value : '';
+  var year = yEl ? yEl.value : '';
+  var isPmamMode = document.getElementById('wrModeToggle') && document.getElementById('wrModeToggle').checked;
+
+  var tbody = document.getElementById('wardTbody');
+  var foot = document.getElementById('wardFoot');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="11" class="empty-td">Loading…</td></tr>';
+
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var monthIdx = months.indexOf(month);
+
+  var filtered = allReports.filter(function(r){
+    if (!r.date) return false;
+    var d = new Date(r.date);
+    if (isNaN(d.getTime())) return false;
+    if (year && String(d.getFullYear()) !== String(year)) return false;
+    if (month && monthIdx !== -1 && d.getMonth() !== monthIdx) return false;
+
+    if (ward) {
+      var rWards = Array.isArray(r.wards) ? r.wards : (r.ward ? [r.ward] : []);
+      return rWards.indexOf(ward) !== -1;
+    }
+    return true;
+  });
+
+  var groupMap = {};
+
+  filtered.forEach(function(r){
+    var rWards = Array.isArray(r.wards) ? r.wards : (r.ward ? [r.ward] : ['Unspecified']);
+    if (ward) rWards = [ward];
+
+    rWards.forEach(function(wLabel){
+      var groupKey = isPmamMode ? (r.name || r.email || 'Unknown') : wLabel;
+      if (!groupMap[groupKey]) {
+        groupMap[groupKey] = {
+          label: groupKey,
+          wardName: wLabel,
+          pmamName: r.name || r.email || '—',
+          ipd:0, med:0, surg:0, reg:0, pre:0, dis:0, clm:0
+        };
+      }
+      var g = groupMap[groupKey];
+      g.ipd += Number(r.ipd||0);
+      g.med += Number(r.med||0);
+      g.surg+= Number(r.surg||0);
+      g.reg += Number(r.reg||0);
+      g.pre += Number(r.pre||0);
+      g.dis += Number(r.dis||0);
+      g.clm += Number(r.clm||0);
+    });
+  });
+
+  var list = Object.values(groupMap).sort(function(a,b){
+    var convA = a.ipd > 0 ? (a.pre / a.ipd) : 0;
+    var convB = b.ipd > 0 ? (b.pre / b.ipd) : 0;
+    if (convB !== convA) return convB - convA;
+    return b.clm - a.clm;
+  });
+
+  var totals = { ipd:0, med:0, surg:0, reg:0, pre:0, dis:0, clm:0 };
+  var html = list.map(function(g, i){
+    totals.ipd += g.ipd; totals.med += g.med; totals.surg += g.surg; totals.reg += g.reg;
+    totals.pre += g.pre; totals.dis += g.dis; totals.clm += g.clm;
+    var conv = g.ipd > 0 ? ((g.pre / g.ipd) * 100).toFixed(1) + '%' : '0.0%';
+
+    return '<tr>'
+      + '<td style="text-align:center; font-weight:700;">' + (i+1) + '</td>'
+      + '<td style="text-align:left;">' + g.wardName + '</td>'
+      + '<td style="text-align:left; font-weight:700;">' + g.pmamName + '</td>'
+      + '<td style="text-align:center;">' + g.ipd + '</td>'
+      + '<td style="text-align:center;">' + g.med + '</td>'
+      + '<td style="text-align:center;">' + g.surg + '</td>'
+      + '<td style="text-align:center;">' + g.reg + '</td>'
+      + '<td style="text-align:center;">' + g.pre + '</td>'
+      + '<td style="text-align:center;">' + g.dis + '</td>'
+      + '<td style="text-align:right;">' + inrFmt(g.clm) + '</td>'
+      + '<td style="text-align:center; font-weight:700;">' + conv + '</td>'
+      + '</tr>';
+  }).join('');
+
+  var totConv = totals.ipd > 0 ? ((totals.pre / totals.ipd) * 100).toFixed(1) + '%' : '0.0%';
+  if (tbody) tbody.innerHTML = html || '<tr><td colspan="11" class="empty-td">No data found for selected criteria.</td></tr>';
+  if (foot) {
+    foot.innerHTML = '<tr class="tot-row" style="background:#0038a8; color:#fff; font-weight:800;">'
+      + '<td colspan="3" style="text-align:right;">TOTAL</td>'
+      + '<td style="text-align:center;">' + totals.ipd + '</td>'
+      + '<td style="text-align:center;">' + totals.med + '</td>'
+      + '<td style="text-align:center;">' + totals.surg + '</td>'
+      + '<td style="text-align:center;">' + totals.reg + '</td>'
+      + '<td style="text-align:center;">' + totals.pre + '</td>'
+      + '<td style="text-align:center;">' + totals.dis + '</td>'
+      + '<td style="text-align:right;">' + inrFmt(totals.clm) + '</td>'
+      + '<td style="text-align:center;">' + totConv + '</td>'
+      + '</tr>';
+  }
+}
+
+// ══════════════════════════════════════
+// PMAM WISE REPORT — generate
+// ══════════════════════════════════════
+function prToggleMode(){
+  var isDay = document.getElementById('prModeToggle') && document.getElementById('prModeToggle').checked;
+  var monthWraps = document.querySelectorAll('.prModeMonth');
+  monthWraps.forEach(function(el){ el.style.display = isDay ? 'flex' : 'none'; });
+  genPmam();
+}
+
+function genPmam(){
+  var pEl = document.getElementById('prPmam');
+  var mEl = document.getElementById('prMonth');
+  var yEl = document.getElementById('rYearPmam');
+  var pmam = pEl ? pEl.value : '';
+  var month = mEl ? mEl.value : '';
+  var year = yEl ? yEl.value : '';
+  var isDay = document.getElementById('prModeToggle') && document.getElementById('prModeToggle').checked;
+
+  var titleEl = document.getElementById('pmamTitle');
+  if (titleEl) titleEl.textContent = pmam ? (pmam + ' — ' + (isDay ? 'Day-wise Breakdown' : 'Monthly Trend')) : 'Monthly Trend';
+
+  var tbody = document.getElementById('pmamTbody');
+  var foot = document.getElementById('pmamFoot');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="10" class="empty-td">Loading…</td></tr>';
+
+  if (!pmam) {
+    if (tbody) tbody.innerHTML = '<tr><td colspan="10" class="empty-td">Please select a PMAM and click Generate.</td></tr>';
+    if (foot) foot.innerHTML = '';
+    return;
+  }
+
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var monthIdx = months.indexOf(month);
+
+  var filtered = allReports.filter(function(r){
+    if (!r.date) return false;
+    var d = new Date(r.date);
+    if (isNaN(d.getTime())) return false;
+    if (year && String(d.getFullYear()) !== String(year)) return false;
+    if (isDay && month && monthIdx !== -1 && d.getMonth() !== monthIdx) return false;
+
+    return (r.name === pmam || r.email === pmam || (r.pmam_email && r.pmam_email.toLowerCase() === pmam.toLowerCase()));
+  });
+
+  var groupMap = {};
+
+  if (isDay) {
+    filtered.forEach(function(r){
+      var key = r.date;
+      if (!groupMap[key]) {
+        groupMap[key] = { label: new Date(r.date).toLocaleDateString('en-IN', {dateStyle:'medium'}), ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0 };
+      }
+      var g = groupMap[key];
+      g.ipd += Number(r.ipd||0); g.med += Number(r.med||0); g.surg += Number(r.surg||0);
+      g.reg += Number(r.reg||0); g.pre += Number(r.pre||0); g.preAmt += Number(r.preAmt||0);
+      g.dis += Number(r.dis||0); g.clm += Number(r.clm||0);
+    });
+  } else {
+    months.forEach(function(m, idx){
+      groupMap[m] = { label: m, monthIdx: idx, ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0 };
+    });
+    filtered.forEach(function(r){
+      var d = new Date(r.date);
+      var mName = months[d.getMonth()];
+      if (groupMap[mName]) {
+        var g = groupMap[mName];
+        g.ipd += Number(r.ipd||0); g.med += Number(r.med||0); g.surg += Number(r.surg||0);
+        g.reg += Number(r.reg||0); g.pre += Number(r.pre||0); g.preAmt += Number(r.preAmt||0);
+        g.dis += Number(r.dis||0); g.clm += Number(r.clm||0);
+      }
+    });
+  }
+
+  var list = Object.values(groupMap);
+  var totals = { ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0 };
+
+  var html = list.map(function(g){
+    totals.ipd += g.ipd; totals.med += g.med; totals.surg += g.surg; totals.reg += g.reg;
+    totals.pre += g.pre; totals.preAmt += g.preAmt; totals.dis += g.dis; totals.clm += g.clm;
+    var conv = g.ipd > 0 ? ((g.pre / g.ipd) * 100).toFixed(1) + '%' : '0.0%';
+
+    return '<tr>'
+      + '<td style="text-align:left; font-weight:700;">' + g.label + '</td>'
+      + '<td style="text-align:center;">' + g.ipd + '</td>'
+      + '<td style="text-align:center;">' + g.med + '</td>'
+      + '<td style="text-align:center;">' + g.surg + '</td>'
+      + '<td style="text-align:center;">' + g.reg + '</td>'
+      + '<td style="text-align:center;">' + g.pre + '</td>'
+      + '<td style="text-align:right;">' + inrFmt(g.preAmt) + '</td>'
+      + '<td style="text-align:center;">' + g.dis + '</td>'
+      + '<td style="text-align:right;">' + inrFmt(g.clm) + '</td>'
+      + '<td style="text-align:center; font-weight:700;">' + conv + '</td>'
+      + '</tr>';
+  }).join('');
+
+  var totConv = totals.ipd > 0 ? ((totals.pre / totals.ipd) * 100).toFixed(1) + '%' : '0.0%';
+  if (tbody) tbody.innerHTML = html || '<tr><td colspan="10" class="empty-td">No data found for this PMAM.</td></tr>';
+  if (foot) {
+    foot.innerHTML = '<tr class="tot-row" style="background:#0038a8; color:#fff; font-weight:800;">'
+      + '<td style="text-align:left;">TOTAL</td>'
+      + '<td style="text-align:center;">' + totals.ipd + '</td>'
+      + '<td style="text-align:center;">' + totals.med + '</td>'
+      + '<td style="text-align:center;">' + totals.surg + '</td>'
+      + '<td style="text-align:center;">' + totals.reg + '</td>'
+      + '<td style="text-align:center;">' + totals.pre + '</td>'
+      + '<td style="text-align:right;">' + inrFmt(totals.preAmt) + '</td>'
+      + '<td style="text-align:center;">' + totals.dis + '</td>'
+      + '<td style="text-align:right;">' + inrFmt(totals.clm) + '</td>'
+      + '<td style="text-align:center;">' + totConv + '</td>'
+      + '</tr>';
+  }
+}
+
+// ══════════════════════════════════════
+// POPULATE DROPDOWNS / FILTERS
+// ══════════════════════════════════════
+function populateFilters(){
+  var years = [];
+  var currentYear = new Date().getFullYear();
+  for (var y = currentYear - 2; y <= currentYear + 1; y++) {
+    years.push(y);
+  }
+
+  var yearSelects = ['rYearMonth', 'rYearAnnual', 'rYearWard', 'rYearPmam', 'arYear'];
+  yearSelects.forEach(function(id){
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    var currVal = sel.value || String(currentYear);
+    sel.innerHTML = years.map(function(y){
+      return '<option value="' + y + '"' + (String(y) === String(currVal) ? ' selected' : '') + '>' + y + '</option>';
+    }).join('');
+  });
+
+  fetchPmamList(function(pmamList){
+    var pmamSelects = ['prPmam', 'arPmam'];
+    pmamSelects.forEach(function(id){
+      var sel = document.getElementById(id);
+      if (!sel) return;
+      var currVal = sel.value || '';
+      var opts = '<option value="">' + (id === 'prPmam' ? '-- Select PMAM --' : 'All PMAMs') + '</option>';
+      opts += pmamList.map(function(p){
+        return '<option value="' + escHtml(p.name) + '"' + (p.name === currVal ? ' selected' : '') + '>' + escHtml(p.name) + '</option>';
+      }).join('');
+      sel.innerHTML = opts;
+    });
+  });
+
+  if (window.WARD_REGISTRY) {
+    var wrWardSel = document.getElementById('wrWard');
+    if (wrWardSel) WARD_REGISTRY.populateSelect(wrWardSel, wrWardSel.value, { placeholderText: 'All Wards' });
+
+    var arWardSel = document.getElementById('arWardMulti');
+    if (arWardSel) WARD_REGISTRY.populateSelect(arWardSel, arWardSel.value, { placeholderText: 'All Wards' });
+  }
+}
+
 // PRINT
 function printReport_DEPRECATED(title){
   window.print();
