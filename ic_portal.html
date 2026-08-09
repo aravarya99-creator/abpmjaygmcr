@@ -576,9 +576,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             <!-- Month Select Pill -->
             <div style="display:flex; align-items:center; background:#fff; padding:4px 10px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
               <span style="font-size:13px; margin-right:4px;">🗓️</span>
-              <select id="rMonth" style="border:none; background:transparent; font-size:13px; font-weight:700; color:#1e1b4b; outline:none; font-family:'Tahoma', sans-serif; cursor:pointer;">
+              <select id="rMonth" style="border:none; background:transparent; font-size:13px; font-weight:700; color:#1e1b4b; outline:none; font-family:'Tahoma', sans-serif; cursor:pointer;" onchange="this.dataset.userSelected='1'">
                 <option>January</option><option>February</option><option>March</option>
-                <option selected>April</option><option>May</option><option>June</option>
+                <option>April</option><option>May</option><option>June</option>
                 <option>July</option><option>August</option><option>September</option>
                 <option>October</option><option>November</option><option>December</option>
               </select>
@@ -2986,9 +2986,14 @@ function genDaily(){
 // MONTHLY REPORT — generate
 // ══════════════════════════════════════
 function genMonthly(){
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var currentMonthName = months[new Date().getMonth()];
   var mEl = document.getElementById('rMonth');
   var yEl = document.getElementById('rYearMonth');
-  var month = mEl ? mEl.value : 'April';
+  if (mEl && (!mEl.dataset.userSelected || !mEl.value)) {
+    mEl.value = currentMonthName;
+  }
+  var month = mEl ? (mEl.value || currentMonthName) : currentMonthName;
   var year = yEl ? yEl.value : String(new Date().getFullYear());
 
   var mTitleEl = document.getElementById('monthlyTitle');
@@ -3436,6 +3441,13 @@ function genPmam(){
 // POPULATE DROPDOWNS / FILTERS
 // ══════════════════════════════════════
 function populateFilters(){
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var currentMonthName = months[new Date().getMonth()];
+  var rMonthSel = document.getElementById('rMonth');
+  if (rMonthSel && !rMonthSel.dataset.userSelected) {
+    rMonthSel.value = currentMonthName;
+  }
+
   var years = [];
   var currentYear = new Date().getFullYear();
   for (var y = currentYear - 2; y <= currentYear + 1; y++) {
