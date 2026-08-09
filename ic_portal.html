@@ -2941,6 +2941,8 @@ function showPrintOptionsModal(opts){
       opts.onConfirm({ format: format, orientation: orientation });
     }
   };
+}
+
 function escHtml(str) {
   if (str == null) return '';
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -4534,7 +4536,7 @@ function dmViewLeaveDoc(reqId) {
 function printLeaveCertificate() {
   var content = document.getElementById('leaveDocCertArea').innerHTML;
   var win = window.open('', '_blank', 'width=800,height=900');
-  win.document.write('<html><head><title>Leave Certificate</title><style>body{font-family:sans-serif;padding:20px;} table{width:100%;border-collapse:collapse;} td,th{padding:8px;border:1px solid #ddd;}</style></head><body>' + content + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>');
+  win.document.write('<html><head><title>Leave Certificate</title><style>body{font-family:sans-serif;padding:20px;} table{width:100%;border-collapse:collapse;} td,th{padding:8px;border:1px solid #ddd;}</style></head><body>' + content + '<' + 'script>window.onload=function(){window.print();window.close();}</' + 'script></body></html>');
   win.document.close();
 }
 
