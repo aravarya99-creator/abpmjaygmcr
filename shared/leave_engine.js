@@ -21,12 +21,15 @@
       this.role = config.role || 'pmam';
       this.userEmail = config.email || null;
       this.userName = config.name || null;
+      var self = this;
       var origUpdate = config.onUpdate || function(){};
       this.onUpdate = function() {
           origUpdate();
           var actionable = 0;
           if (self.role === 'pmam') {
-              actionable = self.subRequests.filter(function(r) { return r.status === 'Needs Substitute' || r.status === 'Pending Substitute'; }).length;
+              var subNeed = self.subRequests.filter(function(r) { return r.status === 'Needs Substitute' || r.status === 'Pending Substitute'; }).length;
+              var myPending = self.requests.filter(function(r) { return r.status === 'Pending' || r.status === 'Pending Substitute'; }).length;
+              actionable = subNeed + myPending;
           } else if (self.role === 'ic' || self.role === 'admin') {
               actionable = self.requests.filter(function(r) { return r.status === 'Pending'; }).length;
           }
@@ -35,6 +38,7 @@
               if (actionable > 0) {
                   bellBadge.style.display = 'flex';
                   bellBadge.textContent = actionable;
+                  bellBadge.style.background = '#dc2626';
               } else {
                   bellBadge.style.display = 'none';
               }
