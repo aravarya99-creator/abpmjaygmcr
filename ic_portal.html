@@ -1124,8 +1124,10 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:#fff; border-bottom:1px solid #e2e8f0;">
                <span style="color:#0038a8; font-size:16px; font-weight:800; font-family:'Tahoma', sans-serif;">Employee Leave Overview</span>
                <div style="display:flex; gap:12px; font-weight:normal;">
-                  <input type="text" id="overviewSearchSub" placeholder="Search PMAM..." onkeyup="renderOverviewSub()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; width:180px;">
-                  <select id="overviewStatusSub" onchange="renderOverviewSub()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px;">
+                  <select id="overviewSearchSub" onchange="renderOverviewSub()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; min-width:160px; max-width:220px; font-family:'Tahoma', sans-serif;">
+                     <option value="">All PMAMs</option>
+                  </select>
+                  <select id="overviewStatusSub" onchange="renderOverviewSub()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; font-family:'Tahoma', sans-serif;">
                      <option value="All">All Status</option>
                      <option value="Present">Present</option>
                      <option value="On Leave">On Leave</option>
@@ -1319,7 +1321,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:#fff; border-bottom:1px solid #e2e8f0;">
            <span style="color:#0d5c3a; font-size:16px; font-weight:800;">Employee Leave Overview</span>
            <div style="display:flex; gap:12px; font-weight:normal;">
-              <input type="text" id="overviewSearch" placeholder="Search PMAM..." onkeyup="renderOverview()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; width:180px;">
+              <select id="overviewSearch" onchange="renderOverview()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; min-width:160px; max-width:220px; font-family:'Tahoma', sans-serif;">
+                 <option value="">All PMAMs</option>
+              </select>
               <select id="overviewStatus" onchange="renderOverview()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px;">
                  <option value="All">All Status</option>
                  <option value="Present">Present</option>
@@ -3639,7 +3643,7 @@ function populateFilters(){
   });
 
   fetchPmamList(function(pmamList){
-    var pmamSelects = ['prPmam', 'arPmam'];
+    var pmamSelects = ['prPmam', 'arPmam', 'overviewSearch', 'overviewSearchSub'];
     pmamSelects.forEach(function(id){
       var sel = document.getElementById(id);
       if (!sel) return;
