@@ -470,68 +470,83 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
     <div class="sec active" id="sec-daily">
       
       <!-- MAIN DAILY REPORT CONTAINER CARD -->
-      <div class="card" style="border-radius:14px; border:1px solid #cbd5e1; box-shadow:0 4px 14px rgba(0,0,0,0.03); overflow:hidden; padding:0; background:#fff;">
+      <div class="card" style="border-radius:16px; border:1px solid #cbd5e1; box-shadow:0 6px 20px rgba(0,0,0,0.04); overflow:hidden; padding:0; background:#fff;">
         
-        <!-- CONTROL BAR HEADER — #8b5cf6 Swatch Color Theme (EXCLUDED FROM PRINT) -->
-        <div class="no-print" style="background:linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; color:#fff;">
+        <!-- CONTROL BAR HEADER (Purple Gradient, Date Picker, Generate, Excel, Print) -->
+        <div class="no-print" style="background:linear-gradient(135deg, #6366f1 0%, #4338ca 100%); padding:16px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; color:#fff;">
+          
+          <!-- LEFT SIDE: TITLE + MODE TAB + DATE PICKER + GENERATE -->
           <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <span style="font-size:16px; font-weight:800; letter-spacing:0.3px;">📊 Daily Report</span>
-            
-            <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.18); padding:4px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.3);">
-              <select id="dailyMode" style="background:transparent; color:#fff; border:none; outline:none; font-weight:700; font-size:12px; cursor:pointer;" onchange="dailyToggleRange()">
-                <option value="single" style="color:#0f172a;">Single Date</option>
-                <option value="range" style="color:#0f172a;">Date Range</option>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="background:#fff; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                <span style="font-size:18px;">📊</span>
+              </div>
+              <span style="font-size:18px; font-weight:800; letter-spacing:0.3px; color:#fff;">Daily Report</span>
+            </div>
+
+            <!-- Single Date / Date Range Mode Dropdown Pill -->
+            <div style="display:flex; align-items:center; background:#fff; padding:4px 10px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+              <span style="font-size:13px; margin-right:4px;">🗓️</span>
+              <select id="dailyMode" style="border:none; background:transparent; font-size:13px; font-weight:700; color:#1e1b4b; outline:none; font-family:'Tahoma', sans-serif; cursor:pointer;" onchange="dailyToggleRange()">
+                <option value="single">Single Date</option>
+                <option value="range">Date Range</option>
               </select>
             </div>
 
-            <div id="dailyDateWrap" style="display:flex; align-items:center; gap:6px;">
-              <input type="date" id="dailyDate" style="padding:5px 10px; border-radius:8px; border:1px solid #ddd6fe; font-size:12px; font-weight:700; color:#4c1d95; background:#f5f3ff; outline:none;">
+            <!-- Single Date Input Pill -->
+            <div id="dailyDateWrap" style="display:flex; align-items:center; background:#fff; padding:4px 10px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+              <span style="font-size:14px; margin-right:6px;">📅</span>
+              <input type="date" id="dailyDate" style="padding:4px 6px; border:none; background:transparent; font-size:13px; font-weight:700; color:#1e1b4b; outline:none; font-family:'Tahoma', sans-serif;">
             </div>
 
-            <div id="dailyFromWrap" style="display:none; align-items:center; gap:6px;">
-              <span style="font-size:11px; color:#f3e8ff; font-weight:600;">From:</span>
-              <input type="date" id="dailyFrom" style="padding:5px 10px; border-radius:8px; border:1px solid #ddd6fe; font-size:12px; font-weight:700; color:#4c1d95; background:#f5f3ff; outline:none;">
+            <!-- Date Range From Input Pill -->
+            <div id="dailyFromWrap" style="display:none; align-items:center; background:#fff; padding:4px 10px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+              <span style="font-size:12px; font-weight:700; color:#475569; margin-right:4px;">From:</span>
+              <input type="date" id="dailyFrom" style="padding:4px 6px; border:none; background:transparent; font-size:13px; font-weight:700; color:#1e1b4b; outline:none; font-family:'Tahoma', sans-serif;">
             </div>
 
-            <div id="dailyToWrap" style="display:none; align-items:center; gap:6px;">
-              <span style="font-size:11px; color:#f3e8ff; font-weight:600;">To:</span>
-              <input type="date" id="dailyTo" style="padding:5px 10px; border-radius:8px; border:1px solid #ddd6fe; font-size:12px; font-weight:700; color:#4c1d95; background:#f5f3ff; outline:none;">
+            <!-- Date Range To Input Pill -->
+            <div id="dailyToWrap" style="display:none; align-items:center; background:#fff; padding:4px 10px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+              <span style="font-size:12px; font-weight:700; color:#475569; margin-right:4px;">To:</span>
+              <input type="date" id="dailyTo" style="padding:4px 6px; border:none; background:transparent; font-size:13px; font-weight:700; color:#1e1b4b; outline:none; font-family:'Tahoma', sans-serif;">
             </div>
 
-            <button class="btn" onclick="genDaily()" style="background:#ffffff; color:#6d28d9; border:none; padding:6px 16px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:4px; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-              ⚡ Generate
+            <!-- Generate Button -->
+            <button class="btn" onclick="genDaily()" style="background:#ffffff; color:#4338ca; border:none; padding:8px 18px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(0,0,0,0.15); font-family:'Tahoma', sans-serif;">
+              <span style="color:#6366f1;">⚡</span> Generate
             </button>
           </div>
 
-          <!-- ACTION BUTTONS: EXCEL & PRINT PDF -->
-          <div style="display:flex; align-items:center; gap:8px;">
-            <button class="btn" onclick="exportExcel('dailyTbl','Daily_Report')" style="background:#10b981; color:#fff; border:none; padding:6px 14px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px; box-shadow:0 2px 6px rgba(16,185,129,0.3);">
-              📊 Export Excel
+          <!-- RIGHT SIDE: EXCEL & PRINT ACTION BUTTONS -->
+          <div style="display:flex; align-items:center; gap:10px;">
+            <button class="btn" onclick="exportExcel('dailyTbl','Daily_Report')" style="background:#ffffff; color:#059669; border:none; padding:8px 18px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(0,0,0,0.15); font-family:'Tahoma', sans-serif;">
+              <span>📊</span> Excel
             </button>
-            <button class="btn" onclick="printReportOrient('dailyReportArea','Daily Report','portrait')" style="background:rgba(255,255,255,0.22); color:#ffffff; border:1px solid rgba(255,255,255,0.45); padding:6px 14px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px;">
-              🖨️ Print / PDF
+            <button class="btn" onclick="printReportOrient('dailyReportArea','Daily Report','portrait')" style="background:#ffffff; color:#4338ca; border:none; padding:8px 18px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(0,0,0,0.15); font-family:'Tahoma', sans-serif;">
+              <span>🖨️</span> Print
             </button>
           </div>
+
         </div>
 
-        <!-- PRINTABLE TABLE AREA (Passed to printReportOrient — EXCLUDES CONTROL BAR) -->
-        <div id="dailyReportArea" style="padding:16px 20px 20px 20px; background:#fff;">
-          <div style="font-size:14px; font-weight:800; color:#0f172a; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;" id="dailyTitle">
+        <!-- PRINTABLE TABLE AREA -->
+        <div id="dailyReportArea" style="padding:20px; background:#fff;">
+          <div style="font-size:15px; font-weight:800; color:#0f172a; margin-bottom:14px; font-family:'Tahoma', sans-serif;" id="dailyTitle">
             Daily Summary — 9 August 2026
           </div>
           <div class="tbl-wrap" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
             <table id="dailyTbl" style="width:100%; border-collapse:collapse; font-family:'Tahoma', sans-serif;">
               <thead>
-                <tr style="background:linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color:#ffffff; font-size:12px; font-family:'Tahoma', sans-serif;">
-                  <th style="padding:10px; text-align:center; width:50px;">S.No</th>
-                  <th style="padding:10px; text-align:left;">PMAM</th>
-                  <th style="padding:10px; text-align:left;">Ward</th>
-                  <th style="padding:10px; text-align:center;">IPD</th>
-                  <th style="padding:10px; text-align:center;">Register</th>
-                  <th style="padding:10px; text-align:center;">Preauth Initiated</th>
-                  <th style="padding:10px; text-align:right;">Preauth Amt (₹)</th>
-                  <th style="padding:10px; text-align:center;">Discharge</th>
-                  <th style="padding:10px; text-align:right;">Claim Amt (₹)</th>
+                <tr style="background:#0038a8; color:#ffffff; font-size:12px; font-family:'Tahoma', sans-serif;">
+                  <th style="padding:11px 10px; text-align:center; width:55px; border-right:1px solid rgba(255,255,255,0.2);">S.NO</th>
+                  <th style="padding:11px 10px; text-align:left; border-right:1px solid rgba(255,255,255,0.2);">PMAM</th>
+                  <th style="padding:11px 10px; text-align:left; border-right:1px solid rgba(255,255,255,0.2);">WARD</th>
+                  <th style="padding:11px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.2);">IPD</th>
+                  <th style="padding:11px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.2);">REGISTER</th>
+                  <th style="padding:11px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.2);">PREAUTH INITIATED</th>
+                  <th style="padding:11px 10px; text-align:right; border-right:1px solid rgba(255,255,255,0.2);">PREAUTH AMT (₹)</th>
+                  <th style="padding:11px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.2);">DISCHARGE</th>
+                  <th style="padding:11px 10px; text-align:right;">CLAIM AMT (₹)</th>
                 </tr>
               </thead>
               <tbody id="dailyTbody">
@@ -2656,7 +2671,8 @@ function dailyToggleRange(){
 }
 
 function genDaily(){
-  var mode = document.getElementById('dailyMode').value;
+  var modeEl = document.getElementById('dailyMode');
+  var mode = modeEl ? modeEl.value : 'single';
   var dateFrom, dateTo, title;
   if (mode === 'single') {
     var d = document.getElementById('dailyDate').value;
