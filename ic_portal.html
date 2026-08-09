@@ -520,9 +520,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             Daily Summary — 9 August 2026
           </div>
           <div class="tbl-wrap" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
-            <table id="dailyTbl" style="width:100%; border-collapse:collapse;">
+            <table id="dailyTbl" style="width:100%; border-collapse:collapse; font-family:'Tahoma', sans-serif;">
               <thead>
-                <tr style="background:#0F2B8C; color:#ffffff; font-size:12px;">
+                <tr style="background:linear-gradient(135deg, #4c1d95 0%, #3b0764 100%); color:#ffffff; font-size:12px; font-family:'Tahoma', sans-serif;">
                   <th style="padding:10px; text-align:center; width:50px;">S.No</th>
                   <th style="padding:10px; text-align:left;">PMAM</th>
                   <th style="padding:10px; text-align:left;">Ward</th>
@@ -2435,22 +2435,30 @@ function _doPrintReport(areaId, title, format, orientation){
   if (!w) { alert('Popup blocked — please allow popups for this site to print.'); return; }
 
   // Inner page CSS — body styling + table styles + show/hide rules.
-  // No more hardcoded letterhead CSS; that comes from shared/headers.css.
   var pageCSS = ''
     + '@page { size: ' + pageSize + ' ' + orient + '; margin: 10mm; }'
     + '* { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }'
     + 'img { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }'
-    + 'body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: #0f172a; font-size: 11px; background: #fff; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }'
+    + 'body, table, th, td { font-family: "Tahoma", "Segoe UI", sans-serif !important; }'
+    + 'body { margin: 0; padding: 0; color: #0f172a; font-size: 11px; background: #fff; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }'
     + '.print-wrap { padding: 0 4px; }'
-    + 'table { width: 100%; border-collapse: collapse; margin-top: 6px; page-break-inside: auto; }'
+    + 'table { width: 100%; border-collapse: collapse; margin-top: 6px; page-break-inside: auto; font-family: "Tahoma", sans-serif !important; }'
     + 'tr { page-break-inside: avoid; page-break-after: auto; }'
-    + 'th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: center; vertical-align: middle; font-size: 11px; }'
-    + 'th { background: #0F2B8C !important; color: #ffffff !important; font-weight: 800; font-size: 11px; border: 1px solid #0a1b5c !important; }'
+    + 'th, td { border: 1px solid #cbd5e1; padding: 6px 8px; vertical-align: middle; font-size: 11px; font-family: "Tahoma", sans-serif !important; }'
+    + 'th { background: #4c1d95 !important; color: #ffffff !important; font-weight: 700; font-size: 11px; border: 1px solid #3b0764 !important; }'
     + 'td { color: #0f172a !important; font-size: 11px; }'
-    + 'td.txt, th.txt { text-align: left; }'
-    + 'tfoot tr { background: #f8fafc !important; font-weight: 800; color: #0f172a !important; }'
-    + '.info-row { display: flex; justify-content: space-between; margin: 8px 0 6px 0; font-size: 11px; font-weight: 700; color: #334155; }'
-    + '.footer-note { text-align: center; font-size: 10px; color: #64748b; border-top: 1px dotted #cbd5e1; padding-top: 8px; margin-top: 20px; }'
+    + 'th:nth-child(1), td:nth-child(1) { text-align: center !important; }'
+    + 'th:nth-child(2), td:nth-child(2) { text-align: left !important; }'
+    + 'th:nth-child(3), td:nth-child(3) { text-align: left !important; }'
+    + 'th:nth-child(4), td:nth-child(4) { text-align: center !important; }'
+    + 'th:nth-child(5), td:nth-child(5) { text-align: center !important; }'
+    + 'th:nth-child(6), td:nth-child(6) { text-align: center !important; }'
+    + 'th:nth-child(7), td:nth-child(7) { text-align: right !important; }'
+    + 'th:nth-child(8), td:nth-child(8) { text-align: center !important; }'
+    + 'th:nth-child(9), td:nth-child(9) { text-align: right !important; }'
+    + 'tfoot tr { background: #f5f3ff !important; font-weight: 800; color: #3730a3 !important; }'
+    + '.info-row { display: flex; justify-content: space-between; margin: 8px 0 6px 0; font-size: 11px; font-weight: 700; color: #334155; font-family: "Tahoma", sans-serif !important; }'
+    + '.footer-note { text-align: center; font-size: 10px; color: #64748b; border-top: 1px dotted #cbd5e1; padding-top: 8px; margin-top: 20px; font-family: "Tahoma", sans-serif !important; }'
     + '.noreport { color: #0f172a; font-style: italic; }'
     + '#dailyTitle, #monthlyTitle, #annualTitle, #wardCardSubhead, #pmamTitle, .card-hd, .btn, .frow, .metrics-grid, .empty-td, .no-print { display: none !important; }'
     + '.tbl-wrap { overflow: visible; max-height: none; border: none !important; }'
