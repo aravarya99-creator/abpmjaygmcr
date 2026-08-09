@@ -470,10 +470,10 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
     <div class="sec active" id="sec-daily">
       
       <!-- MAIN DAILY REPORT CONTAINER CARD -->
-      <div class="card" id="dailyReportArea" style="border-radius:14px; border:1px solid #cbd5e1; box-shadow:0 4px 14px rgba(0,0,0,0.03); overflow:hidden; padding:0; background:#fff;">
+      <div class="card" style="border-radius:14px; border:1px solid #cbd5e1; box-shadow:0 4px 14px rgba(0,0,0,0.03); overflow:hidden; padding:0; background:#fff;">
         
-        <!-- CONTROL BAR HEADER — Royal Indigo / Purple Gradient Theme -->
-        <div style="background:linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; color:#fff;">
+        <!-- CONTROL BAR HEADER — Royal Indigo / Purple Gradient Theme (EXCLUDED FROM PRINT) -->
+        <div class="no-print" style="background:linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; color:#fff;">
           <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
             <span style="font-size:16px; font-weight:800; letter-spacing:0.3px;">📊 Daily Report</span>
             
@@ -514,15 +514,15 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
           </div>
         </div>
 
-        <!-- TABLE SECTION -->
-        <div style="padding:16px 20px 20px 20px;">
+        <!-- PRINTABLE TABLE AREA (Passed to printReportOrient — EXCLUDES CONTROL BAR) -->
+        <div id="dailyReportArea" style="padding:16px 20px 20px 20px; background:#fff;">
           <div style="font-size:14px; font-weight:800; color:#0f172a; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;" id="dailyTitle">
             Daily Summary — 9 August 2026
           </div>
           <div class="tbl-wrap" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
             <table id="dailyTbl" style="width:100%; border-collapse:collapse;">
               <thead>
-                <tr style="background:linear-gradient(135deg, #3730a3 0%, #312e81 100%); color:#ffffff; font-size:12px;">
+                <tr style="background:#0F2B8C; color:#ffffff; font-size:12px;">
                   <th style="padding:10px; text-align:center; width:50px;">S.No</th>
                   <th style="padding:10px; text-align:left;">PMAM</th>
                   <th style="padding:10px; text-align:left;">Ward</th>
