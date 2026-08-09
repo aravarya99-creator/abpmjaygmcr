@@ -82,9 +82,9 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
 /* LAYOUT */
 .layout{display:flex;min-height:calc(100vh - 110px)}
 
-/* SIDEBAR — Compact 148px Carbon Obsidian */
+/* SIDEBAR — Compact 165px Carbon Obsidian */
 .sidebar{
-  width:148px;
+  width:165px;
   background:linear-gradient(180deg, #090d16 0%, #0d121f 100%);
   border-right:1px solid rgba(255, 255, 255, 0.07);
   display:flex; flex-direction:column;
@@ -120,7 +120,7 @@ body{font-family:"Inter",Arial,sans-serif;background:linear-gradient(135deg,#E8F
   box-shadow:0 4px 14px rgba(79, 70, 229, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 .sbi.active svg { opacity:1; fill:#ffffff; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3)); }
-.sbl{font-size:11px; font-weight:600; text-align:left; line-height:1.2; color:inherit; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.sbl{font-size:11px; font-weight:600; text-align:left; line-height:1.2; color:inherit; white-space:nowrap;}
 .content{flex:1;padding:18px;overflow-y:auto}
 .sec{display:none}.sec.active{display:block}
 .page-hd{font-size:20px;font-weight:800;color:#0F2B8C;margin-bottom:16px;display:flex;align-items:center;gap:10px}
@@ -823,7 +823,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 
         <div class="tbl-wrap" id="lr-panel-history" style="display:none;">
           <table id="lr-history-tbl">
-            <thead><tr><th style="background:#0F2B8C;color:#fff;">Employee</th><th style="background:#0F2B8C;color:#fff;">Leave</th><th style="background:#0F2B8C;color:#fff;">From</th><th style="background:#0F2B8C;color:#fff;">To</th><th style="background:#0F2B8C;color:#fff;">Days</th><th style="background:#0F2B8C;color:#fff;">Status</th><th style="background:#0F2B8C;color:#fff;">Action Date</th></tr></thead>
+            <thead><tr><th style="background:#0F2B8C;color:#fff;">Employee</th><th style="background:#0F2B8C;color:#fff;">Leave</th><th style="background:#0F2B8C;color:#fff;">From</th><th style="background:#0F2B8C;color:#fff;">To</th><th style="background:#0F2B8C;color:#fff;text-align:center;">Days</th><th style="background:#0F2B8C;color:#fff;">Substitute</th><th style="background:#0F2B8C;color:#fff;">Status</th><th style="background:#0F2B8C;color:#fff;">Action Date</th><th style="background:#0F2B8C;color:#fff;text-align:center;">Action</th></tr></thead>
             <tbody id="lr-history-tbody"></tbody>
           </table>
         </div>
@@ -3180,6 +3180,15 @@ function switchLrTab(el) {
   renderLeaveReqs();
 }
 
+function formatLeaveDate(dt) {
+  if (!dt || dt === '-') return '—';
+  if (typeof dt === 'string' && (dt.indexOf('T') !== -1 || dt.indexOf('-') !== -1)) {
+    var d = new Date(dt);
+    if (!isNaN(d.getTime())) return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  return dt;
+}
+
 function renderLeaveReqs() {
   var activeTab = document.querySelector('.lr-tab.active');
   if (!activeTab) return;
@@ -3193,37 +3202,44 @@ function renderLeaveReqs() {
   var phtml='', ahtml='', rhtml='', hhtml='';
   
   // Sort descending by appliedDate
-  var sortedReqs = LeaveEngine.requests.slice().sort((a,b) => new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime());
+  var sortedReqs = LeaveEngine.requests.slice().sort((a,b) => new Date(b.appliedDate || b.timestamp || 0).getTime() - new Date(a.appliedDate || a.timestamp || 0).getTime());
 
   sortedReqs.forEach(function(l){
     var emp = l.name || l.email;
+    var leaveType = l.ltype || l.type || l.leaveType || l.lType || l.category || 'Casual';
+    var subDuty = l.duty || l.substitute || l.subDuty || '—';
+    var formattedDate = formatLeaveDate(l.actionDate || l.appliedDate || l.timestamp);
     var rowStyle = "border-bottom:1px solid #f1f5f9;";
 
     // History Filters Check
     if (tabId === 'history') {
       if (fEmp && emp.toLowerCase().indexOf(fEmp) === -1) return;
       if (fStatus !== 'All' && l.status !== fStatus) return;
-      if (fType !== 'All' && (l.ltype||'').indexOf(fType) === -1) return;
+      if (fType !== 'All' && leaveType.toLowerCase().indexOf(fType.toLowerCase()) === -1) return;
       if (fDate && l.from > fDate && l.to < fDate) return;
       
       hhtml += `<tr style="${rowStyle}">
-        <td>${emp}</td>
-        <td>${l.ltype}</td>
-        <td>${l.from}</td>
-        <td>${l.to}</td>
-        <td>${l.days}</td>
-        <td style="font-weight:bold; color:${l.status==='Approved'?'#16a34a':(l.status==='Rejected'?'#dc2626':'#ca8a04')}">${l.status}</td>
-        <td>${l.actionDate || l.appliedDate || '-'}</td>
+        <td style="font-weight:700; color:#0f172a;">${emp}</td>
+        <td><span style="background:#eff6ff; color:#1d4ed8; padding:3px 10px; border-radius:12px; font-weight:700; font-size:11px;">${leaveType}</span></td>
+        <td>${l.from || l.fromDt || '-'}</td>
+        <td>${l.to || l.toDt || '-'}</td>
+        <td style="font-weight:800; text-align:center;">${l.days || 1}</td>
+        <td style="font-weight:600; color:#475569;">${subDuty}</td>
+        <td><span style="padding:2px 8px; border-radius:12px; font-size:11px; font-weight:800; background:${l.status==='Approved'?'#dcfce7':(l.status==='Rejected'?'#fee2e2':'#fef3c7')}; color:${l.status==='Approved'?'#15803d':(l.status==='Rejected'?'#b91c1c':'#b45309')}">${l.status}</span></td>
+        <td>${formattedDate}</td>
+        <td style="text-align:center;">
+          <button onclick="dmViewLeaveDoc('${l.id}')" title="View Printable Leave Certificate" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; padding:3px 8px; cursor:pointer; font-weight:600; font-size:11px;">📄 Certificate</button>
+        </td>
       </tr>`;
     }
 
     if (l.status === 'Pending' && tabId === 'pending') {
       phtml += `<tr style="${rowStyle}">
-        <td>${emp}</td>
-        <td>${l.ltype}</td>
-        <td>${l.from}</td>
-        <td>${l.to}</td>
-        <td>${l.days}</td>
+        <td style="font-weight:700; color:#0f172a;">${emp}</td>
+        <td><span style="background:#eff6ff; color:#1d4ed8; padding:3px 10px; border-radius:12px; font-weight:700; font-size:11px;">${leaveType}</span></td>
+        <td>${l.from || l.fromDt || '-'}</td>
+        <td>${l.to || l.toDt || '-'}</td>
+        <td style="font-weight:800; text-align:center;">${l.days || 1}</td>
         <td>${l.reason || '-'}</td>
         <td style="text-align:right;">
            <button class="btn btn-grn" style="padding:4px 8px; font-size:11px;" onclick="icActionLeave('${l.id}','Approved')">Approve</button>
@@ -3234,21 +3250,21 @@ function renderLeaveReqs() {
 
     if (l.status === 'Approved' && tabId === 'approved') {
       ahtml += `<tr style="${rowStyle}">
-        <td>${emp}</td>
-        <td>${l.ltype}</td>
-        <td>${l.days}</td>
+        <td style="font-weight:700; color:#0f172a;">${emp}</td>
+        <td><span style="background:#eff6ff; color:#1d4ed8; padding:3px 10px; border-radius:12px; font-weight:700; font-size:11px;">${leaveType}</span></td>
+        <td style="font-weight:800; text-align:center;">${l.days || 1}</td>
         <td>${l.actionBy || 'Admin'}</td>
-        <td>${l.actionDate || '-'}</td>
+        <td>${formattedDate}</td>
       </tr>`;
     }
 
     if (l.status === 'Rejected' && tabId === 'rejected') {
       rhtml += `<tr style="${rowStyle}">
-        <td>${emp}</td>
-        <td>${l.ltype}</td>
+        <td style="font-weight:700; color:#0f172a;">${emp}</td>
+        <td><span style="background:#fee2e2; color:#b91c1c; padding:3px 10px; border-radius:12px; font-weight:700; font-size:11px;">${leaveType}</span></td>
         <td>${l.actionBy || 'Admin'}</td>
         <td>${l.rejectReason || '-'}</td>
-        <td>${l.actionDate || '-'}</td>
+        <td>${formattedDate}</td>
       </tr>`;
     }
   });
@@ -3256,7 +3272,7 @@ function renderLeaveReqs() {
   if(phtml === '') phtml = '<tr><td colspan="7" style="text-align:center;">No pending requests.</td></tr>';
   if(ahtml === '') ahtml = '<tr><td colspan="5" style="text-align:center;">No approved requests.</td></tr>';
   if(rhtml === '') rhtml = '<tr><td colspan="5" style="text-align:center;">No rejected requests.</td></tr>';
-  if(hhtml === '') hhtml = '<tr><td colspan="7" style="text-align:center;">No history found.</td></tr>';
+  if(hhtml === '') hhtml = '<tr><td colspan="9" style="text-align:center;">No history found.</td></tr>';
 
   document.getElementById('lr-pending-tbody').innerHTML = phtml;
   document.getElementById('lr-approved-tbody').innerHTML = ahtml;
@@ -3517,6 +3533,43 @@ function saveProfile() {
   });
 }
 
+function dmViewLeaveDoc(reqId) {
+  var l = LeaveEngine.requests.find(function(x){ return x.id === reqId; });
+  if (!l) { alert('Leave request not found.'); return; }
+  
+  var setTxt = function(id, val) { var el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+  
+  setTxt('certRefNo', 'REF-' + (l.id || '').toUpperCase().substring(0, 10));
+  setTxt('certApplicantName', l.name || l.applicantName || l.email);
+  setTxt('certApplicantDesig', l.desig || l.designation || 'PMAM Staff');
+  setTxt('certApplicantEmpId', l.empId || l.employeeId || 'EMP001');
+  setTxt('certWard', l.ward || 'General');
+  setTxt('certLeaveType', l.ltype || l.type || l.leaveType || l.lType || l.category || 'Casual Leave');
+  setTxt('certDuration', (l.from || l.fromDt || '—') + ' to ' + (l.to || l.toDt || '—') + ' (' + (l.days || 1) + ' Days)');
+  setTxt('certSubstitute', l.duty || l.substitute || l.subDuty || 'None Assigned');
+  setTxt('certReason', l.reason || 'Personal Work');
+  setTxt('certAppliedDate', formatLeaveDate(l.appliedDate || l.timestamp));
+  setTxt('certActionBy', l.actionBy || 'Medical Superintendent / I/C');
+  setTxt('certActionDate', formatLeaveDate(l.actionDate || l.appliedDate));
+  
+  var badgeEl = document.getElementById('certStatusBadge');
+  if (badgeEl) {
+    var st = l.status || 'Pending';
+    badgeEl.textContent = st.toUpperCase();
+    badgeEl.style.background = (st === 'Approved' ? '#dcfce7' : (st === 'Rejected' ? '#fee2e2' : '#fef3c7'));
+    badgeEl.style.color = (st === 'Approved' ? '#15803d' : (st === 'Rejected' ? '#b91c1c' : '#b45309'));
+  }
+  
+  openModal('leaveDocCertModal');
+}
+
+function printLeaveCertificate() {
+  var content = document.getElementById('leaveDocCertArea').innerHTML;
+  var win = window.open('', '_blank', 'width=800,height=900');
+  win.document.write('<html><head><title>Leave Certificate</title><style>body{font-family:sans-serif;padding:20px;} table{width:100%;border-collapse:collapse;} td,th{padding:8px;border:1px solid #ddd;}</style></head><body>' + content + '<script>window.onload=function(){window.print();window.close();}<\/script></body></html>');
+  win.document.close();
+}
+
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.user-pill')) {
     closeDD();
@@ -3579,6 +3632,78 @@ window.addEventListener('DOMContentLoaded', function(){
         <button style="padding:6px 12px;border-radius:6px;background:#f3f4f6;border:none;cursor:pointer;margin-right:6px" onclick="closeModal()">Cancel</button>
         <button style="padding:6px 12px;border-radius:6px;background:#1A3DB5;color:#fff;border:none;cursor:pointer" onclick="saveProfile()">Save</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- OFFICIAL LEAVE APPLICATION & CERTIFICATE MODAL -->
+<div class="modal-bg" id="leaveDocCertModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:99999;padding:16px;">
+  <div class="modal" style="background:#fff;border-radius:16px;width:100%;max-width:650px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);border:1px solid #e2e8f0;">
+    <div style="background:linear-gradient(135deg,#0F2B8C,#1A3DB5);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;">
+        <span>📋</span> Official Leave Certificate
+      </div>
+      <button onclick="closeModal()" style="background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    
+    <div id="leaveDocCertArea" style="padding:24px;background:#fff;color:#0f172a;font-family:sans-serif;">
+      <!-- Header Seal -->
+      <div style="text-align:center;border-bottom:2px solid #0F2B8C;padding-bottom:14px;margin-bottom:16px;">
+        <div style="font-size:16px;font-weight:900;color:#0F2B8C;letter-spacing:0.5px;">GOVERNMENT MEDICAL COLLEGE & ASSOCIATED HOSPITALS RAJOURI</div>
+        <div style="font-size:12px;font-weight:700;color:#475569;margin-top:2px;">AB PM-JAY & SCHEME IMPLEMENTATION CELL</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11px;color:#64748b;">
+          <div>Ref: <strong id="certRefNo" style="color:#0f172a;">REF-123456</strong></div>
+          <div id="certStatusBadge" style="padding:3px 10px;border-radius:12px;font-weight:800;font-size:11px;background:#dcfce7;color:#15803d;">APPROVED</div>
+        </div>
+      </div>
+
+      <!-- Applicant Details Grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12.5px;background:#f8fafc;padding:14px;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:16px;">
+        <div><span style="color:#64748b;font-weight:600;">Employee Name:</span> <strong id="certApplicantName">—</strong></div>
+        <div><span style="color:#64748b;font-weight:600;">Designation:</span> <strong id="certApplicantDesig">—</strong></div>
+        <div><span style="color:#64748b;font-weight:600;">Employee ID:</span> <strong id="certApplicantEmpId">—</strong></div>
+        <div><span style="color:#64748b;font-weight:600;">Assigned Ward:</span> <strong id="certWard">—</strong></div>
+      </div>
+
+      <!-- Leave Specifics Table -->
+      <table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px;">
+        <tr style="background:#eff6ff;border-bottom:1.5px solid #cbd5e1;">
+          <th style="padding:8px 10px;text-align:left;color:#1e40af;">Leave Category</th>
+          <th style="padding:8px 10px;text-align:left;color:#1e40af;">Duration & Dates</th>
+          <th style="padding:8px 10px;text-align:left;color:#1e40af;">Duty Substitute</th>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:10px;font-weight:700;" id="certLeaveType">—</td>
+          <td style="padding:10px;" id="certDuration">—</td>
+          <td style="padding:10px;font-weight:600;color:#16a34a;" id="certSubstitute">—</td>
+        </tr>
+      </table>
+
+      <!-- Reason & Timeline -->
+      <div style="font-size:12px;margin-bottom:20px;">
+        <div style="margin-bottom:6px;"><span style="color:#64748b;font-weight:600;">Reason stated for leave:</span> <span id="certReason" style="font-style:italic;">—</span></div>
+        <div><span style="color:#64748b;font-weight:600;">Applied On:</span> <span id="certAppliedDate">—</span></div>
+      </div>
+
+      <!-- Verification Stamp Footer -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;border-top:1.5px dashed #cbd5e1;padding-top:16px;margin-top:10px;font-size:11px;color:#64748b;">
+        <div>
+          <div>Digitally Verified & Authorized</div>
+          <div style="color:#0f172a;font-weight:700;margin-top:2px;" id="certActionBy">Competent Authority / I/C</div>
+          <div id="certActionDate">—</div>
+        </div>
+        <div style="text-align:center;border:1.5px solid #15803d;padding:6px 12px;border-radius:8px;color:#15803d;font-weight:800;letter-spacing:0.5px;">
+          ✓ SIGNED & VERIFIED
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div style="background:#f1f5f9;padding:12px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #e2e8f0;">
+      <button onclick="closeModal()" style="padding:7px 16px;border-radius:8px;background:#fff;border:1px solid #cbd5e1;cursor:pointer;font-size:12px;font-weight:700;color:#64748b;">Close</button>
+      <button onclick="printLeaveCertificate()" style="padding:7px 18px;border-radius:8px;background:#0F2B8C;color:#fff;border:none;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;">
+        🖨️ Print Certificate
+      </button>
     </div>
   </div>
 </div>
