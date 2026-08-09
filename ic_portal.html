@@ -2578,11 +2578,15 @@ function switchLrTab(el){
 function renderOverviewSub(){
   var tbody = document.getElementById('overviewTbodySub');
   if(!tbody) return;
+  var pmams = window._allPmams || window.pmams || [];
+  if ((!pmams || !pmams.length) && typeof fetchPmamList === 'function') {
+    fetchPmamList(function(){ renderOverviewSub(); });
+    return;
+  }
   var search = (document.getElementById('overviewSearchSub') ? document.getElementById('overviewSearchSub').value.toLowerCase().trim() : '');
   var statusFilter = (document.getElementById('overviewStatusSub') ? document.getElementById('overviewStatusSub').value : 'All');
   
   var html = '';
-  var pmams = window._allPmams || window.pmams || [];
   var sortedPmams = pmams.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
   var sno = 1;
   var today = new Date().toISOString().split('T')[0];
@@ -2937,6 +2941,9 @@ function showPrintOptionsModal(opts){
       opts.onConfirm({ format: format, orientation: orientation });
     }
   };
+function escHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // ══════════════════════════════════════
@@ -3802,11 +3809,15 @@ function fetchFirebaseData() {
 function renderOverview() {
   var tbody = document.getElementById('overviewTbody');
   if(!tbody) return;
+  var pmams = window._allPmams || window.pmams || [];
+  if ((!pmams || !pmams.length) && typeof fetchPmamList === 'function') {
+    fetchPmamList(function(){ renderOverview(); });
+    return;
+  }
   var search = (document.getElementById('overviewSearch') ? document.getElementById('overviewSearch').value.toLowerCase().trim() : '');
   var statusFilter = (document.getElementById('overviewStatus') ? document.getElementById('overviewStatus').value : 'All');
   
   var html = '';
-  var pmams = window._allPmams || window.pmams || [];
   var sortedPmams = pmams.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
   var sno = 1;
   var today = new Date().toISOString().split('T')[0];
