@@ -1433,6 +1433,7 @@ input:checked + .slider:before { transform: translateX(20px); }
         <div style="padding:16px; font-weight:700; color:#1e293b; border-bottom:1px solid #e2e8f0;">Leave Management</div>
         <div style="padding:10px;">
           <div class="sbs-item active" onclick="showLeavesTab('leave_requests', this)">Leave Requests</div>
+          <div class="sbs-item" onclick="showLeavesTab('employee_overview', this); renderAdminOverview();">Employee Overview</div>
           <div class="sbs-item" onclick="showLeavesTab('leave_limits', this)">Global Leave Rules</div>
           <div class="sbs-item" onclick="showLeavesTab('comp_balances', this)">Compensatory Balances</div>
           <div class="sbs-item" onclick="showLeavesTab('add_leaves', this)">Add Historical Leaves</div>
@@ -1440,6 +1441,139 @@ input:checked + .slider:before { transform: translateX(20px); }
       </div>
       <!-- Content Area -->
       <div style="flex:1; padding:24px; overflow-y:auto; background:#f8fafc;" id="leaves-content-area">
+        
+        <!-- ===== ADMIN EMPLOYEE LEAVE OVERVIEW (IMAGE 1 & IMAGE 2) ===== -->
+        <div class="leaves-panel" id="lpanel-employee_overview" style="display:none;">
+          <div id="admOverviewMain">
+            <div class="card" style="border-radius:12px; overflow:hidden; border:1px solid #e2e8f0; padding:0; margin-bottom:20px;">
+              <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:#fff; border-bottom:1px solid #e2e8f0;">
+                 <span style="color:#0d5c3a; font-size:16px; font-weight:800;">Employee Leave Overview</span>
+                 <div style="display:flex; gap:12px; font-weight:normal;">
+                    <input type="text" id="admOverviewSearch" placeholder="Search PMAM..." onkeyup="renderAdminOverview()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; width:180px;">
+                    <button class="btn btn-grn" onclick="exportExcel('admOverviewTbl','PMAM_Leave_Overview')">Export Excel</button>
+                 </div>
+              </div>
+              <div class="tbl-wrap" style="overflow-x:auto;">
+                <table id="admOverviewTbl" style="width:100%; border-collapse:collapse;">
+                  <thead>
+                    <tr style="background:#0d5c3a; color:#ffffff;">
+                      <th style="padding:10px 12px; font-size:12px; text-align:center; width:45px;">#</th>
+                      <th style="padding:10px 12px; font-size:12px; text-align:left;">Employee Name</th>
+                      <th style="padding:10px 12px; font-size:12px; text-align:center; color:#bfdbfe;">CL<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                      <th style="padding:10px 12px; font-size:12px; text-align:center; color:#bbf7d0;">Comp<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                      <th style="padding:10px 12px; font-size:12px; text-align:center; color:#e9d5ff;">ML<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                      <th style="padding:10px 12px; font-size:12px; text-align:center; color:#fed7aa;">PTL<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                      <th style="padding:10px 12px; font-size:12px; text-align:center; color:#fbcfe8;">MTL<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                      <th style="padding:10px 12px; font-size:12px; text-align:center; color:#e2e8f0;">LWP<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                      <th style="padding:10px 12px; font-size:12px; text-align:center;">Total Taken<br><span style="font-size:9px; opacity:0.85;">(Days)</span></th>
+                      <th style="padding:10px 12px; font-size:12px; text-align:center; color:#4ade80;">Utilization<br><span style="font-size:9px; opacity:0.85;">(%)</span></th>
+                      <th style="padding:10px 12px; font-size:12px; text-align:center; width:65px;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admOverviewTbody">
+                    <tr><td colspan="11" class="empty-td">Loading data...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ADMIN EMPLOYEE DETAIL CARD SUB-VIEW (IMAGE 2) -->
+          <div id="admEmpDetail" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <div style="font-size:12px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;">
+                <span style="color:#2563eb; cursor:pointer;" onclick="closeAdminEmpDetail()">Dashboard</span> &gt;
+                <span style="color:#2563eb; cursor:pointer;" onclick="closeAdminEmpDetail()">Employees</span> &gt;
+                <span id="admEdBreadcrumbName" style="color:#0f172a; font-weight:700;">Employee Detail</span>
+              </div>
+              <button class="btn" onclick="closeAdminEmpDetail()" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                &larr; Back to Overview
+              </button>
+            </div>
+
+            <!-- Employee Banner -->
+            <div style="background:#ffffff; border-radius:14px; padding:18px 24px; border:1px solid #e2e8f0; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div id="admEdAvatar" style="width:52px; height:52px; border-radius:50%; background:#dcfce7; color:#15803d; font-size:20px; font-weight:800; display:flex; align-items:center; justify-content:center;">PS</div>
+                <div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <h2 id="admEdName" style="font-size:20px; font-weight:800; color:#0f172a; margin:0;">Payal Sharma</h2>
+                    <span id="admEdStatusBadge" style="background:#dcfce7; color:#15803d; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;">Active</span>
+                  </div>
+                  <div id="admEdMeta" style="font-size:12px; color:#64748b; margin-top:3px; font-weight:500;">PMAM | Employee ID: EMP001 | Joined on 12 Jan 2023</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4 Top Metric Cards -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:20px;">
+              <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+                <div style="width:44px; height:44px; border-radius:10px; background:#eff6ff; color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:20px;">📅</div>
+                <div>
+                  <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase;">Total Eligible</div>
+                  <div style="display:flex; align-items:baseline; gap:4px;">
+                    <span id="admEdStatEligible" style="font-size:22px; font-weight:900; color:#0f172a;">225</span>
+                    <span style="font-size:12px; font-weight:600; color:#64748b;">Days</span>
+                  </div>
+                </div>
+              </div>
+              <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+                <div style="width:44px; height:44px; border-radius:10px; background:#f0fdf4; color:#16a34a; display:flex; align-items:center; justify-content:center; font-size:20px;">✅</div>
+                <div>
+                  <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase;">Total Taken</div>
+                  <div style="display:flex; align-items:baseline; gap:4px;">
+                    <span id="admEdStatTaken" style="font-size:22px; font-weight:900; color:#0f172a;">3</span>
+                    <span style="font-size:12px; font-weight:600; color:#64748b;">Days</span>
+                  </div>
+                </div>
+              </div>
+              <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+                <div style="width:44px; height:44px; border-radius:10px; background:#faf5ff; color:#9333ea; display:flex; align-items:center; justify-content:center; font-size:20px;">⏳</div>
+                <div>
+                  <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase;">Total Balance</div>
+                  <div style="display:flex; align-items:baseline; gap:4px;">
+                    <span id="admEdStatBalance" style="font-size:22px; font-weight:900; color:#0f172a;">222</span>
+                    <span style="font-size:12px; font-weight:600; color:#64748b;">Days</span>
+                  </div>
+                </div>
+              </div>
+              <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+                <div style="width:44px; height:44px; border-radius:10px; background:#fff7ed; color:#ea580c; display:flex; align-items:center; justify-content:center; font-size:20px;">📈</div>
+                <div>
+                  <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase;">Overall Utilization</div>
+                  <div style="display:flex; align-items:baseline; gap:4px;">
+                    <span id="admEdStatUtil" style="font-size:22px; font-weight:900; color:#0f172a;">1.33%</span>
+                    <span style="font-size:11px; font-weight:600; color:#64748b;">of Eligible</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2-Column Split: Donut Chart & Detailed Table -->
+            <div style="display:grid; grid-template-columns:320px 1fr; gap:20px; align-items:start;">
+              <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+                <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin-bottom:16px;">Leave Utilization Overview</h3>
+                <div id="admEdDonutContainer" style="display:flex; justify-content:center; align-items:center; margin-bottom:20px; min-height:200px;"></div>
+                <div id="admEdDonutLegend" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:11px; font-weight:700; color:#475569;"></div>
+              </div>
+              <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:0; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+                <table style="width:100%; border-collapse:collapse;">
+                  <thead>
+                    <tr style="background:#0d5c3a; color:#ffffff;">
+                      <th style="padding:12px 16px; text-align:left; font-size:12px;">Leave Type</th>
+                      <th style="padding:12px 16px; text-align:center; font-size:12px;">Eligible</th>
+                      <th style="padding:12px 16px; text-align:center; font-size:12px;">Taken</th>
+                      <th style="padding:12px 16px; text-align:center; font-size:12px;">Balance</th>
+                      <th style="padding:12px 16px; text-align:left; font-size:12px; width:180px;">Utilization</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admEdBreakdownTbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
         
         <div class="leaves-panel active" id="lpanel-leave_requests" style="display:block;">
           <div class="" >
@@ -9389,9 +9523,157 @@ function uePreviewSign(input) {
     input.dataset.b64 = e.target.result;
     document.getElementById('ueSignPreview').innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
   };
-  reader.readAsDataURL(file);
+}
+
+// ==========================================
+// ADMIN EMPLOYEE LEAVE OVERVIEW & DETAIL CARD LOGIC
+// ==========================================
+function renderAdminOverview() {
+  var tbody = document.getElementById('admOverviewTbody');
+  if(!tbody) return;
+  var search = (document.getElementById('admOverviewSearch') ? document.getElementById('admOverviewSearch').value.toLowerCase().trim() : '');
+
+  var html = '';
+  var pmams = window._allDirectoryUsers ? window._allDirectoryUsers.filter(u => {
+    var r = Array.isArray(u.roles) ? u.roles : [u.role];
+    return r.some(x => String(x).toUpperCase() === 'PMAM');
+  }) : (window.pmams || []);
+
+  var sortedPmams = pmams.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+  var sno = 1;
+  var approvedRequests = (window.LeaveEngine && LeaveEngine.requests) ? LeaveEngine.requests.filter(r => r.status === 'Approved') : [];
+
+  sortedPmams.forEach(function(p){
+    if(search && (p.name||'').toLowerCase().indexOf(search) === -1 && (p.email||'').toLowerCase().indexOf(search) === -1) return;
+
+    var data = window.GMCLeave ? GMCLeave.calculateEmployeeBalances(p.email || p.name, approvedRequests) : null;
+    if(!data) return;
+
+    var bd = data.breakdown;
+    var utilPct = data.overallUtilization + '%';
+
+    html += `<tr style="border-bottom:1px solid #f1f5f9;">
+      <td style="text-align:center; font-weight:600; color:#64748b; padding:10px;">${sno++}</td>
+      <td style="font-weight:700; color:#0f172a; padding:10px;">${p.name}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#2563eb;">${bd.cl.taken}/${bd.cl.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#16a34a;">${bd.comp.taken}/${bd.comp.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#9333ea;">${bd.ml.taken}/${bd.ml.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#ea580c;">${p.gender === 'Female' ? 'NA' : bd.ptl.taken+'/'+bd.ptl.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#ec4899;">${p.gender === 'Male' ? 'NA' : bd.mtl.taken+'/'+bd.mtl.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#64748b;">${bd.lwp.taken}/${bd.lwp.eligible}</td>
+      <td style="text-align:center; font-weight:800; color:#0f172a;">${data.totalTaken}</td>
+      <td style="text-align:center; font-weight:800; color:#16a34a;">${utilPct}</td>
+      <td style="text-align:center;">
+        <button class="btn" onclick="openAdminEmployeeCard('${p.email || p.name}')" title="View Detailed Card" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; cursor:pointer;">
+          👁
+        </button>
+      </td>
+    </tr>`;
+  });
+
+  if(html === '') html = '<tr><td colspan="11" class="empty-td">No PMAMs found</td></tr>';
+  tbody.innerHTML = html;
+}
+
+function openAdminEmployeeCard(userEmailOrName) {
+  var pmams = window._allDirectoryUsers || window.pmams || [];
+  var target = (userEmailOrName || '').toLowerCase().trim();
+  var p = pmams.find(function(x){ return (x.email||'').toLowerCase().trim() === target || (x.name||'').toLowerCase().trim() === target; }) || { name: userEmailOrName, email: userEmailOrName, empId: 'EMP001' };
+
+  var approvedRequests = (window.LeaveEngine && LeaveEngine.requests) ? LeaveEngine.requests.filter(function(r){ return r.status === 'Approved'; }) : [];
+  var data = window.GMCLeave ? GMCLeave.calculateEmployeeBalances(p.email || p.name, approvedRequests) : null;
+  if (!data) return;
+
+  var initials = (p.name || 'Emp').split(' ').map(function(n){ return n[0]; }).slice(0,2).join('').toUpperCase();
+  var elAvatar = document.getElementById('admEdAvatar'); if(elAvatar) elAvatar.textContent = initials;
+  var elName = document.getElementById('admEdName'); if(elName) elName.textContent = p.name || 'Employee';
+  var elBread = document.getElementById('admEdBreadcrumbName'); if(elBread) elBread.textContent = p.name || 'Employee';
+  var elMeta = document.getElementById('admEdMeta'); if(elMeta) elMeta.textContent = `${p.designation || 'PMAM'} | Employee ID: ${p.empId || p.employeeId || 'EMP001'} | Joined on ${p.joinedDate || '12 Jan 2023'}`;
+
+  var elElig = document.getElementById('admEdStatEligible'); if(elElig) elElig.textContent = data.totalEligible;
+  var elTak = document.getElementById('admEdStatTaken'); if(elTak) elTak.textContent = data.totalTaken;
+  var elBal = document.getElementById('admEdStatBalance'); if(elBal) elBal.textContent = data.totalBalance;
+  var elUtil = document.getElementById('admEdStatUtil'); if(elUtil) elUtil.textContent = data.overallUtilization + '%';
+
+  var bd = data.breakdown;
+  var items = [
+    { key: 'CL', name: 'Casual Leave (CL)', color: bd.cl.color, val: bd.cl.eligible },
+    { key: 'Comp', name: 'Compensatory', color: bd.comp.color, val: bd.comp.eligible },
+    { key: 'ML', name: 'Medical Leave (ML)', color: bd.ml.color, val: bd.ml.eligible },
+    { key: 'PTL', name: 'Paternity Leave (PTL)', color: bd.ptl.color, val: bd.ptl.eligible },
+    { key: 'MTL', name: 'Maternity Leave (MTL)', color: bd.mtl.color, val: bd.mtl.eligible },
+    { key: 'LWP', name: 'Leave Without Pay (LWP)', color: bd.lwp.color, val: bd.lwp.eligible }
+  ];
+
+  var R = 40;
+  var C = 2 * Math.PI * R;
+  var currentOffset = 0;
+  var svgArcs = '';
+  var totalVal = data.totalEligible || 1;
+
+  items.forEach(function(item) {
+    if (item.val > 0) {
+      var strokeDash = (item.val / totalVal) * C;
+      var strokeGap = C - strokeDash;
+      svgArcs += `<circle cx="60" cy="60" r="${R}" fill="none" stroke="${item.color}" stroke-width="14" stroke-dasharray="${strokeDash.toFixed(2)} ${strokeGap.toFixed(2)}" stroke-dashoffset="${(-currentOffset).toFixed(2)}" transform="rotate(-90 60 60)"/>`;
+      currentOffset += strokeDash;
+    }
+  });
+
+  var donutSvg = `
+    <svg width="200" height="200" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="${R}" fill="none" stroke="#f1f5f9" stroke-width="14"/>
+      ${svgArcs}
+      <text x="60" y="52" text-anchor="middle" font-size="8" fill="#64748b" font-weight="700" letter-spacing="0.5">TOTAL</text>
+      <text x="60" y="66" text-anchor="middle" font-size="15" fill="#0f172a" font-weight="900">${data.totalEligible}</text>
+      <text x="60" y="76" text-anchor="middle" font-size="8" fill="#64748b" font-weight="600">Days</text>
+    </svg>
+  `;
+  var elDonut = document.getElementById('admEdDonutContainer'); if(elDonut) elDonut.innerHTML = donutSvg;
+
+  var elLegend = document.getElementById('admEdDonutLegend'); if(elLegend) {
+    elLegend.innerHTML = items.map(function(it){
+      return `<div style="display:flex; align-items:center; gap:6px;">
+        <span style="width:10px; height:10px; border-radius:50%; background:${it.color}; display:inline-block;"></span>
+        <span>${it.key}</span>
+      </div>`;
+    }).join('');
+  }
+
+  var rows = [bd.cl, bd.comp, bd.ml, bd.ptl, bd.mtl, bd.lwp];
+  var elTbody = document.getElementById('admEdBreakdownTbody'); if(elTbody) {
+    elTbody.innerHTML = rows.map(function(r){
+      var pctNum = parseFloat(r.pct) || 0;
+      return `<tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:12px 16px; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:8px;">
+          <span style="width:10px; height:10px; border-radius:50%; background:${r.color}; display:inline-block;"></span>
+          ${r.name}
+        </td>
+        <td style="padding:12px 16px; text-align:center; font-weight:700; color:#0f172a;">${r.eligible}</td>
+        <td style="padding:12px 16px; text-align:center; font-weight:700; color:#0f172a;">${r.taken}</td>
+        <td style="padding:12px 16px; text-align:center; font-weight:700; color:${r.balance > 0 ? '#16a34a' : '#64748b'};">${r.balance}</td>
+        <td style="padding:12px 16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:11px; font-weight:800; color:#334155; width:35px;">${r.pct}</span>
+            <div style="flex:1; height:8px; background:#f1f5f9; border-radius:4px; overflow:hidden;">
+              <div style="width:${Math.min(100, pctNum)}%; height:100%; background:${r.color}; border-radius:4px;"></div>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('admOverviewMain').style.display = 'none';
+  document.getElementById('admEmpDetail').style.display = 'block';
+}
+
+function closeAdminEmpDetail() {
+  document.getElementById('admEmpDetail').style.display = 'none';
+  document.getElementById('admOverviewMain').style.display = 'block';
 }
 </script>
+
 
 
 

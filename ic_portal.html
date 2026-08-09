@@ -912,109 +912,210 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
     </div>
 
     
-    <!-- ===== LEAVE DASHBOARD ===== -->
+    <!-- ===== LEAVE DASHBOARD (EMPLOYEE OVERVIEW TABLE - IMAGE 1) ===== -->
     <div class="sec" id="sec-profiles">
       <!-- TOP SUMMARY WIDGETS -->
-    <div style="display:flex; gap:16px; padding:20px 24px 0 24px; flex-wrap:wrap;">
-      
-      <!-- Total PMAM -->
-      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-        <div style="width:48px; height:48px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">👨‍👩‍👧‍👦</span>
+      <div style="display:flex; gap:16px; padding:10px 0 0 0; flex-wrap:wrap; margin-bottom:16px;">
+        <!-- Total PMAM -->
+        <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+          <div style="width:44px; height:44px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center; font-size:20px;">👥</div>
+          <div>
+            <div style="color:#64748b; font-size:12px; font-weight:600;">Total PMAM</div>
+            <div style="color:#0f172a; font-size:22px; font-weight:800; line-height:1.2;">10</div>
+            <div style="color:#94a3b8; font-size:11px;">Employees</div>
+          </div>
         </div>
-        <div>
-          <div style="color:#1e293b; font-size:13px; font-weight:600;">Total PMAM</div>
-          <div style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">10</div>
-          <div style="color:#64748b; font-size:11px;">Employees</div>
+
+        <!-- Present Today -->
+        <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+          <div style="width:44px; height:44px; border-radius:50%; background:#f0fdf4; display:flex; align-items:center; justify-content:center; font-size:20px;">✅</div>
+          <div>
+            <div style="color:#64748b; font-size:12px; font-weight:600;">Present Today</div>
+            <div id="top-present" style="color:#0f172a; font-size:22px; font-weight:800; line-height:1.2;">-</div>
+            <div style="color:#94a3b8; font-size:11px;">Employees</div>
+          </div>
+        </div>
+
+        <!-- On Leave Today -->
+        <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+          <div style="width:44px; height:44px; border-radius:50%; background:#fff7ed; display:flex; align-items:center; justify-content:center; font-size:20px;">🕒</div>
+          <div>
+            <div style="color:#64748b; font-size:12px; font-weight:600;">On Leave Today</div>
+            <div id="top-onleave" style="color:#0f172a; font-size:22px; font-weight:800; line-height:1.2;">-</div>
+            <div style="color:#94a3b8; font-size:11px;">Employees</div>
+          </div>
+        </div>
+
+        <!-- Pending Requests -->
+        <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+          <div style="width:44px; height:44px; border-radius:50%; background:#fdf4ff; display:flex; align-items:center; justify-content:center; font-size:20px;">⏳</div>
+          <div>
+            <div style="color:#64748b; font-size:12px; font-weight:600;">Pending Requests</div>
+            <div id="top-pending" style="color:#0f172a; font-size:22px; font-weight:800; line-height:1.2;">-</div>
+            <div style="color:#94a3b8; font-size:11px;">Requests</div>
+          </div>
+        </div>
+
+        <!-- Total Leaves Taken -->
+        <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+          <div style="width:44px; height:44px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center; font-size:20px;">📄</div>
+          <div>
+            <div style="color:#64748b; font-size:12px; font-weight:600;">Total Leaves Taken</div>
+            <div id="top-total" style="color:#0f172a; font-size:22px; font-weight:800; line-height:1.2;">-</div>
+            <div style="color:#94a3b8; font-size:11px;">Days</div>
+          </div>
         </div>
       </div>
 
-      <!-- Present Today -->
-      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-        <div style="width:48px; height:48px; border-radius:50%; background:#f0fdf4; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">✅</span>
-        </div>
-        <div>
-          <div style="color:#1e293b; font-size:13px; font-weight:600;">Present Today</div>
-          <div id="top-present" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
-          <div style="color:#64748b; font-size:11px;">Employees</div>
-        </div>
-      </div>
-
-      <!-- On Leave Today -->
-      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-        <div style="width:48px; height:48px; border-radius:50%; background:#fff7ed; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">🕒</span>
-        </div>
-        <div>
-          <div style="color:#1e293b; font-size:13px; font-weight:600;">On Leave Today</div>
-          <div id="top-onleave" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
-          <div style="color:#64748b; font-size:11px;">Employees</div>
-        </div>
-      </div>
-
-      <!-- Pending Requests -->
-      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-        <div style="width:48px; height:48px; border-radius:50%; background:#fdf4ff; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">⏳</span>
-        </div>
-        <div>
-          <div style="color:#1e293b; font-size:13px; font-weight:600;">Pending Requests</div>
-          <div id="top-pending" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
-          <div style="color:#64748b; font-size:11px;">Requests</div>
-        </div>
-      </div>
-
-      <!-- Total Leaves Taken -->
-      <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-        <div style="width:48px; height:48px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center;">
-           <span style="font-size:24px;">📄</span>
-        </div>
-        <div>
-          <div style="color:#1e293b; font-size:13px; font-weight:600;">Total Leaves Taken</div>
-          <div id="top-total" style="color:#0f172a; font-size:24px; font-weight:700; line-height:1.2;">-</div>
-          <div style="color:#64748b; font-size:11px;">Days</div>
-        </div>
-      </div>
-
-    </div>
-      <!-- PMAM Leave Overview -->
-      <div class="card" style="margin-top:20px;">
-        <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center;">
-           <span style="color:#0F2B8C; font-size:16px;">PMAM Leave Overview</span>
+      <!-- Employee Overview Table Card (Image 1) -->
+      <div class="card" style="border-radius:12px; overflow:hidden; border:1px solid #e2e8f0; padding:0;">
+        <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:#fff; border-bottom:1px solid #e2e8f0;">
+           <span style="color:#0d5c3a; font-size:16px; font-weight:800;">Employee Leave Overview</span>
            <div style="display:flex; gap:12px; font-weight:normal;">
-              <input type="text" id="overviewSearch" placeholder="Search PMAM..." onkeyup="renderOverview()" style="padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px; width:150px;">
-              <select id="overviewStatus" onchange="renderOverview()" style="padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px;">
+              <input type="text" id="overviewSearch" placeholder="Search PMAM..." onkeyup="renderOverview()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; width:180px;">
+              <select id="overviewStatus" onchange="renderOverview()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px;">
                  <option value="All">All Status</option>
                  <option value="Present">Present</option>
                  <option value="On Leave">On Leave</option>
               </select>
-              <button class="btn btn-pri" onclick="exportExcel('overviewTbl','PMAM_Leave_Overview')">Export Excel</button>
+              <button class="btn btn-grn" onclick="exportExcel('overviewTbl','PMAM_Leave_Overview')">Export Excel</button>
            </div>
         </div>
-        <div class="tbl-wrap">
-          <table id="overviewTbl">
+        <div class="tbl-wrap" style="overflow-x:auto;">
+          <table id="overviewTbl" style="width:100%; border-collapse:collapse;">
             <thead>
-              <tr>
-                <th style="background:#0F2B8C;color:#fff;">S.No</th>
-                <th style="background:#0F2B8C;color:#fff;">PMAM Name</th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">Status</th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">CL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">COL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">ML<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">PTL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">MTL<br><span style="font-size:9px;font-weight:normal;">(E/T/B)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">LWP<br><span style="font-size:9px;font-weight:normal;">(Taken)</span></th>
-                <th style="background:#0F2B8C;color:#fff;text-align:center;">Pending Requests</th>
+              <tr style="background:#0d5c3a; color:#ffffff;">
+                <th style="padding:10px 12px; font-size:12px; text-align:center; width:45px;">#</th>
+                <th style="padding:10px 12px; font-size:12px; text-align:left;">Employee Name</th>
+                <th style="padding:10px 12px; font-size:12px; text-align:center; color:#bfdbfe;">CL<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                <th style="padding:10px 12px; font-size:12px; text-align:center; color:#bbf7d0;">Comp<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                <th style="padding:10px 12px; font-size:12px; text-align:center; color:#e9d5ff;">ML<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                <th style="padding:10px 12px; font-size:12px; text-align:center; color:#fed7aa;">PTL<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                <th style="padding:10px 12px; font-size:12px; text-align:center; color:#fbcfe8;">MTL<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                <th style="padding:10px 12px; font-size:12px; text-align:center; color:#e2e8f0;">LWP<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                <th style="padding:10px 12px; font-size:12px; text-align:center;">Total Taken<br><span style="font-size:9px; opacity:0.85;">(Days)</span></th>
+                <th style="padding:10px 12px; font-size:12px; text-align:center; color:#4ade80;">Utilization<br><span style="font-size:9px; opacity:0.85;">(%)</span></th>
+                <th style="padding:10px 12px; font-size:12px; text-align:center; width:65px;">Action</th>
               </tr>
             </thead>
             <tbody id="overviewTbody">
-              <tr><td colspan="10" class="empty-td">Loading data...</td></tr>
+              <tr><td colspan="11" class="empty-td">Loading data...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
+
+    <!-- ===== DETAILED EMPLOYEE LEAVE CARD (SUB-VIEW MATCHING IMAGE 2) ===== -->
+    <div class="sec" id="sec-emp-detail" style="display:none; padding:16px;">
+      <!-- Breadcrumb & Header Bar -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="font-size:12px; font-weight:600; color:#64748b; display:flex; align-items:center; gap:6px;">
+          <span style="color:#2563eb; cursor:pointer;" onclick="showSec('sec-profiles')">Dashboard</span> &gt;
+          <span style="color:#2563eb; cursor:pointer;" onclick="showSec('sec-profiles')">Employees</span> &gt;
+          <span id="edBreadcrumbName" style="color:#0f172a; font-weight:700;">Employee Detail</span>
+        </div>
+        <button class="btn" onclick="showSec('sec-profiles')" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+          &larr; Back to Overview
+        </button>
+      </div>
+
+      <!-- Employee Banner -->
+      <div style="background:#ffffff; border-radius:14px; padding:18px 24px; border:1px solid #e2e8f0; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+        <div style="display:flex; align-items:center; gap:16px;">
+          <div id="edAvatar" style="width:52px; height:52px; border-radius:50%; background:#dcfce7; color:#15803d; font-size:20px; font-weight:800; display:flex; align-items:center; justify-content:center;">PS</div>
+          <div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <h2 id="edName" style="font-size:20px; font-weight:800; color:#0f172a; margin:0;">Payal Sharma</h2>
+              <span id="edStatusBadge" style="background:#dcfce7; color:#15803d; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;">Active</span>
+            </div>
+            <div id="edMeta" style="font-size:12px; color:#64748b; margin-top:3px; font-weight:500;">PMAM | Employee ID: EMP001 | Joined on 12 Jan 2023</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 Top Metric Cards -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:20px;">
+        <!-- Eligible -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+          <div style="width:44px; height:44px; border-radius:10px; background:#eff6ff; color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:20px;">📅</div>
+          <div>
+            <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase;">Total Eligible</div>
+            <div style="display:flex; align-items:baseline; gap:4px;">
+              <span id="edStatEligible" style="font-size:22px; font-weight:900; color:#0f172a;">225</span>
+              <span style="font-size:12px; font-weight:600; color:#64748b;">Days</span>
+            </div>
+          </div>
+        </div>
+        <!-- Taken -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+          <div style="width:44px; height:44px; border-radius:10px; background:#f0fdf4; color:#16a34a; display:flex; align-items:center; justify-content:center; font-size:20px;">✅</div>
+          <div>
+            <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase;">Total Taken</div>
+            <div style="display:flex; align-items:baseline; gap:4px;">
+              <span id="edStatTaken" style="font-size:22px; font-weight:900; color:#0f172a;">3</span>
+              <span style="font-size:12px; font-weight:600; color:#64748b;">Days</span>
+            </div>
+          </div>
+        </div>
+        <!-- Balance -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+          <div style="width:44px; height:44px; border-radius:10px; background:#faf5ff; color:#9333ea; display:flex; align-items:center; justify-content:center; font-size:20px;">⏳</div>
+          <div>
+            <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase;">Total Balance</div>
+            <div style="display:flex; align-items:baseline; gap:4px;">
+              <span id="edStatBalance" style="font-size:22px; font-weight:900; color:#0f172a;">222</span>
+              <span style="font-size:12px; font-weight:600; color:#64748b;">Days</span>
+            </div>
+          </div>
+        </div>
+        <!-- Utilization -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+          <div style="width:44px; height:44px; border-radius:10px; background:#fff7ed; color:#ea580c; display:flex; align-items:center; justify-content:center; font-size:20px;">📈</div>
+          <div>
+            <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase;">Overall Utilization</div>
+            <div style="display:flex; align-items:baseline; gap:4px;">
+              <span id="edStatUtil" style="font-size:22px; font-weight:900; color:#0f172a;">1.33%</span>
+              <span style="font-size:11px; font-weight:600; color:#64748b;">of Eligible</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2-Column Split: Donut Chart & Detailed Table -->
+      <div style="display:grid; grid-template-columns:320px 1fr; gap:20px; align-items:start;">
+        <!-- Left: Donut Chart Card -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+          <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin-bottom:16px;">Leave Utilization Overview</h3>
+          <div id="edDonutContainer" style="display:flex; justify-content:center; align-items:center; margin-bottom:20px; min-height:200px;">
+            <!-- SVG Donut Chart injected here -->
+          </div>
+          <!-- Legend -->
+          <div id="edDonutLegend" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:11px; font-weight:700; color:#475569;">
+            <!-- Legend items injected here -->
+          </div>
+        </div>
+
+        <!-- Right: Breakdown Table Card -->
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:0; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+          <table style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="background:#0d5c3a; color:#ffffff;">
+                <th style="padding:12px 16px; text-align:left; font-size:12px;">Leave Type</th>
+                <th style="padding:12px 16px; text-align:center; font-size:12px;">Eligible</th>
+                <th style="padding:12px 16px; text-align:center; font-size:12px;">Taken</th>
+                <th style="padding:12px 16px; text-align:center; font-size:12px;">Balance</th>
+                <th style="padding:12px 16px; text-align:left; font-size:12px; width:180px;">Utilization</th>
+              </tr>
+            </thead>
+            <tbody id="edBreakdownTbody">
+              <!-- Rows injected here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
 
     <!-- ===== LEAVE REQUESTS ===== -->
     <div class="sec" id="sec-leavereq">
@@ -2606,11 +2707,18 @@ window.addEventListener('load',()=>{
     }
   });
 
+  if (window.GMCLeave && typeof window.GMCLeave.onRulesChange === 'function') {
+    window.GMCLeave.onRulesChange(function() {
+      if (typeof renderOverview === 'function') renderOverview();
+    });
+  }
+
   fetchFirebaseData();
 
   // Also seed Monthly dropdowns (kept for users who switch to Monthly section)
   genMonthly();
 });
+
 
 function fetchFirebaseData() {
   db.collection('daily_reports').orderBy('timestamp', 'desc').onSnapshot(snap => {
@@ -2673,81 +2781,150 @@ function fetchFirebaseData() {
 
 // Keep the counter badges in sync across all sections.
 
-// --- PMAM Leave Overview Logic ---
+// --- PMAM Leave Overview Logic (Image 1 & Image 2) ---
 function renderOverview() {
   var tbody = document.getElementById('overviewTbody');
   if(!tbody) return;
-  var search = (document.getElementById('overviewSearch') ? document.getElementById('overviewSearch').value.toLowerCase() : '');
+  var search = (document.getElementById('overviewSearch') ? document.getElementById('overviewSearch').value.toLowerCase().trim() : '');
   var statusFilter = (document.getElementById('overviewStatus') ? document.getElementById('overviewStatus').value : 'All');
   
   var html = '';
   var pmams = window._allPmams || window.pmams || [];
-  var sortedPmams = pmams.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
+  var sortedPmams = pmams.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
   var sno = 1;
   var today = new Date().toISOString().split('T')[0];
+  var approvedRequests = (window.LeaveEngine && LeaveEngine.requests) ? LeaveEngine.requests.filter(function(r){ return r.status === 'Approved'; }) : [];
 
   sortedPmams.forEach(function(p){
-    if(search && p.name.toLowerCase().indexOf(search) === -1 && p.email.toLowerCase().indexOf(search) === -1) return;
+    if(search && (p.name||'').toLowerCase().indexOf(search) === -1 && (p.email||'').toLowerCase().indexOf(search) === -1) return;
     
-    // Status Logic
-    var isLeave = false;
-    LeaveEngine.requests.forEach(function(l){
-      if (l.status === 'Approved' && (l.email === p.email || l.name === p.name) && l.from <= today && l.to >= today) {
-         isLeave = true;
-      }
+    var isLeave = approvedRequests.some(function(l){
+      return (l.applicantEmail === p.email || l.email === p.email || l.name === p.name) && l.fromDate <= today && l.toDate >= today;
     });
     var statusText = isLeave ? 'On Leave' : 'Present';
     if(statusFilter !== 'All' && statusText !== statusFilter) return;
 
-    var statusBadge = isLeave ? '<span style="background:#ffedd5;color:#c2410c;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">On Leave</span>' : '<span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;">Present</span>';
+    var data = window.GMCLeave ? GMCLeave.calculateEmployeeBalances(p.email || p.name, approvedRequests) : null;
+    if(!data) return;
 
-    // Pending Logic
-    var pendingCount = LeaveEngine.requests.filter(function(l){
-      return l.status === 'Pending' && (l.email === p.email || l.name === p.name);
-    }).length;
+    var bd = data.breakdown;
+    var utilPct = data.overallUtilization + '%';
 
-    // Leave Types Logic
-    var casualTaken=0, medicalTaken=0, compTaken=0, patTaken=0, matTaken=0, lwpTaken=0;
-    LeaveEngine.requests.forEach(function(l){
-      if (l.status === 'Approved' && (l.email === p.email || l.name === p.name)) {
-        var d = parseFloat(l.days) || 0;
-        var t = (l.ltype || '').toLowerCase();
-        if(t.indexOf('casual') !== -1) casualTaken += d;
-        else if(t.indexOf('medical') !== -1) medicalTaken += d;
-        else if(t.indexOf('compensatory') !== -1) compTaken += d;
-        else if(t.indexOf('paternity') !== -1) patTaken += d;
-        else if(t.indexOf('maternity') !== -1) matTaken += d;
-        else if(t.indexOf('lwp') !== -1 || t.indexOf('pay') !== -1) lwpTaken += d;
-      }
-    });
-
-    var compBals = window._icCompBalances || {};
-    var compEarned = parseFloat(compBals[p.email] || compBals[p.id] || 0);
-    if(isNaN(compEarned)) compEarned = 0;
-
-    var casualBal = Math.max(0, rules.casual - casualTaken);
-    var medicalBal = Math.max(0, rules.medical - medicalTaken);
-    var compBal = Math.max(0, compEarned - compTaken);
-    var patBal = Math.max(0, rules.paternity - patTaken);
-    var matBal = Math.max(0, rules.maternity - matTaken);
-
-    html += `<tr>
-      <td>${sno++}</td>
-      <td style="font-weight:500; color:#1e293b;">${p.name}</td>
-      <td style="text-align:center;">${statusBadge}</td>
-      <td style="text-align:center;font-size:11px;">${rules.casual}/${casualTaken}/${casualBal}</td>
-      <td style="text-align:center;font-size:11px;">${compEarned}/${compTaken}/${compBal}</td>
-      <td style="text-align:center;font-size:11px;">${rules.medical}/${medicalTaken}/${medicalBal}</td>
-      <td style="text-align:center;font-size:11px;">${p.gender === 'Female' ? 'NA' : rules.paternity+'/'+patTaken+'/'+patBal}</td>
-      <td style="text-align:center;font-size:11px;">${p.gender === 'Male' ? 'NA' : rules.maternity+'/'+matTaken+'/'+matBal}</td>
-      <td style="text-align:center;font-size:11px;">${lwpTaken}</td>
-      <td style="text-align:center;font-weight:bold;color:${pendingCount>0?'#ef4444':'#64748b'};">${pendingCount}</td>
+    html += `<tr style="border-bottom:1px solid #f1f5f9;">
+      <td style="text-align:center; font-weight:600; color:#64748b; padding:10px;">${sno++}</td>
+      <td style="font-weight:700; color:#0f172a; padding:10px;">${p.name}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#2563eb;">${bd.cl.taken}/${bd.cl.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#16a34a;">${bd.comp.taken}/${bd.comp.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#9333ea;">${bd.ml.taken}/${bd.ml.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#ea580c;">${p.gender === 'Female' ? 'NA' : bd.ptl.taken+'/'+bd.ptl.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#ec4899;">${p.gender === 'Male' ? 'NA' : bd.mtl.taken+'/'+bd.mtl.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#64748b;">${bd.lwp.taken}/${bd.lwp.eligible}</td>
+      <td style="text-align:center; font-weight:800; color:#0f172a;">${data.totalTaken}</td>
+      <td style="text-align:center; font-weight:800; color:#16a34a;">${utilPct}</td>
+      <td style="text-align:center;">
+        <button class="btn" onclick="openEmployeeCard('${p.email || p.name}')" title="View Detailed Card" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; cursor:pointer;">
+          👁
+        </button>
+      </td>
     </tr>`;
   });
 
-  if(html === '') html = '<tr><td colspan="10" class="empty-td">No PMAMs found</td></tr>';
+  if(html === '') html = '<tr><td colspan="11" class="empty-td">No PMAMs found</td></tr>';
   tbody.innerHTML = html;
 }
+
+function openEmployeeCard(userEmailOrName) {
+  var pmams = window._allPmams || window.pmams || [];
+  var target = (userEmailOrName || '').toLowerCase().trim();
+  var p = pmams.find(function(x){ return (x.email||'').toLowerCase().trim() === target || (x.name||'').toLowerCase().trim() === target; }) || { name: userEmailOrName, email: userEmailOrName, empId: 'EMP001' };
+
+  var approvedRequests = (window.LeaveEngine && LeaveEngine.requests) ? LeaveEngine.requests.filter(function(r){ return r.status === 'Approved'; }) : [];
+  var data = window.GMCLeave ? GMCLeave.calculateEmployeeBalances(p.email || p.name, approvedRequests) : null;
+  if (!data) return;
+
+  var initials = (p.name || 'Emp').split(' ').map(function(n){ return n[0]; }).slice(0,2).join('').toUpperCase();
+  var elAvatar = document.getElementById('edAvatar'); if(elAvatar) elAvatar.textContent = initials;
+  var elName = document.getElementById('edName'); if(elName) elName.textContent = p.name || 'Employee';
+  var elBread = document.getElementById('edBreadcrumbName'); if(elBread) elBread.textContent = p.name || 'Employee';
+  var elMeta = document.getElementById('edMeta'); if(elMeta) elMeta.textContent = `${p.designation || 'PMAM'} | Employee ID: ${p.empId || p.employeeId || 'EMP001'} | Joined on ${p.joinedDate || '12 Jan 2023'}`;
+
+  var elElig = document.getElementById('edStatEligible'); if(elElig) elElig.textContent = data.totalEligible;
+  var elTak = document.getElementById('edStatTaken'); if(elTak) elTak.textContent = data.totalTaken;
+  var elBal = document.getElementById('edStatBalance'); if(elBal) elBal.textContent = data.totalBalance;
+  var elUtil = document.getElementById('edStatUtil'); if(elUtil) elUtil.textContent = data.overallUtilization + '%';
+
+  var bd = data.breakdown;
+  var items = [
+    { key: 'CL', name: 'Casual Leave (CL)', color: bd.cl.color, val: bd.cl.eligible },
+    { key: 'Comp', name: 'Compensatory', color: bd.comp.color, val: bd.comp.eligible },
+    { key: 'ML', name: 'Medical Leave (ML)', color: bd.ml.color, val: bd.ml.eligible },
+    { key: 'PTL', name: 'Paternity Leave (PTL)', color: bd.ptl.color, val: bd.ptl.eligible },
+    { key: 'MTL', name: 'Maternity Leave (MTL)', color: bd.mtl.color, val: bd.mtl.eligible },
+    { key: 'LWP', name: 'Leave Without Pay (LWP)', color: bd.lwp.color, val: bd.lwp.eligible }
+  ];
+
+  var R = 40;
+  var C = 2 * Math.PI * R;
+  var currentOffset = 0;
+  var svgArcs = '';
+  var totalVal = data.totalEligible || 1;
+
+  items.forEach(function(item) {
+    if (item.val > 0) {
+      var strokeDash = (item.val / totalVal) * C;
+      var strokeGap = C - strokeDash;
+      svgArcs += `<circle cx="60" cy="60" r="${R}" fill="none" stroke="${item.color}" stroke-width="14" stroke-dasharray="${strokeDash.toFixed(2)} ${strokeGap.toFixed(2)}" stroke-dashoffset="${(-currentOffset).toFixed(2)}" transform="rotate(-90 60 60)"/>`;
+      currentOffset += strokeDash;
+    }
+  });
+
+  var donutSvg = `
+    <svg width="200" height="200" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="${R}" fill="none" stroke="#f1f5f9" stroke-width="14"/>
+      ${svgArcs}
+      <text x="60" y="52" text-anchor="middle" font-size="8" fill="#64748b" font-weight="700" letter-spacing="0.5">TOTAL</text>
+      <text x="60" y="66" text-anchor="middle" font-size="15" fill="#0f172a" font-weight="900">${data.totalEligible}</text>
+      <text x="60" y="76" text-anchor="middle" font-size="8" fill="#64748b" font-weight="600">Days</text>
+    </svg>
+  `;
+  var elDonut = document.getElementById('edDonutContainer'); if(elDonut) elDonut.innerHTML = donutSvg;
+
+  var elLegend = document.getElementById('edDonutLegend'); if(elLegend) {
+    elLegend.innerHTML = items.map(function(it){
+      return `<div style="display:flex; align-items:center; gap:6px;">
+        <span style="width:10px; height:10px; border-radius:50%; background:${it.color}; display:inline-block;"></span>
+        <span>${it.key}</span>
+      </div>`;
+    }).join('');
+  }
+
+  var rows = [bd.cl, bd.comp, bd.ml, bd.ptl, bd.mtl, bd.lwp];
+  var elTbody = document.getElementById('edBreakdownTbody'); if(elTbody) {
+    elTbody.innerHTML = rows.map(function(r){
+      var pctNum = parseFloat(r.pct) || 0;
+      return `<tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="padding:12px 16px; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:8px;">
+          <span style="width:10px; height:10px; border-radius:50%; background:${r.color}; display:inline-block;"></span>
+          ${r.name}
+        </td>
+        <td style="padding:12px 16px; text-align:center; font-weight:700; color:#0f172a;">${r.eligible}</td>
+        <td style="padding:12px 16px; text-align:center; font-weight:700; color:#0f172a;">${r.taken}</td>
+        <td style="padding:12px 16px; text-align:center; font-weight:700; color:${r.balance > 0 ? '#16a34a' : '#64748b'};">${r.balance}</td>
+        <td style="padding:12px 16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:11px; font-weight:800; color:#334155; width:35px;">${r.pct}</span>
+            <div style="flex:1; height:8px; background:#f1f5f9; border-radius:4px; overflow:hidden;">
+              <div style="width:${Math.min(100, pctNum)}%; height:100%; background:${r.color}; border-radius:4px;"></div>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  showSec('sec-emp-detail');
+}
+
 
 
 // ==========================================
