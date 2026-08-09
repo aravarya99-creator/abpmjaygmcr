@@ -1124,14 +1124,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:#fff; border-bottom:1px solid #e2e8f0;">
                <span style="color:#0038a8; font-size:16px; font-weight:800; font-family:'Tahoma', sans-serif;">Employee Leave Overview</span>
                <div style="display:flex; gap:12px; font-weight:normal;">
-                  <select id="overviewSearchSub" onchange="renderOverviewSub()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; min-width:160px; max-width:220px; font-family:'Tahoma', sans-serif;">
-                     <option value="">All PMAMs</option>
-                  </select>
-                  <select id="overviewStatusSub" onchange="renderOverviewSub()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; font-family:'Tahoma', sans-serif;">
-                     <option value="All">All Status</option>
-                     <option value="Present">Present</option>
-                     <option value="On Leave">On Leave</option>
-                  </select>
+                  <button class="btn btn-sec" onclick="printReportOrient('overviewTblSub','Employee Leave Overview','landscape')" style="padding:6px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; font-weight:700; background:#ffffff; color:#1e293b; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    🖨️ Print
+                  </button>
                   <button class="btn btn-grn" onclick="exportExcel('overviewTblSub','PMAM_Leave_Overview')">Export Excel</button>
                </div>
             </div>
@@ -1321,14 +1316,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:#fff; border-bottom:1px solid #e2e8f0;">
            <span style="color:#0d5c3a; font-size:16px; font-weight:800;">Employee Leave Overview</span>
            <div style="display:flex; gap:12px; font-weight:normal;">
-              <select id="overviewSearch" onchange="renderOverview()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; min-width:160px; max-width:220px; font-family:'Tahoma', sans-serif;">
-                 <option value="">All PMAMs</option>
-              </select>
-              <select id="overviewStatus" onchange="renderOverview()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px;">
-                 <option value="All">All Status</option>
-                 <option value="Present">Present</option>
-                 <option value="On Leave">On Leave</option>
-              </select>
+              <button class="btn btn-sec" onclick="printReportOrient('overviewTbl','Employee Leave Overview','landscape')" style="padding:6px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; font-weight:700; background:#ffffff; color:#1e293b; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                🖨️ Print
+              </button>
               <button class="btn btn-grn" onclick="exportExcel('overviewTbl','PMAM_Leave_Overview')">Export Excel</button>
            </div>
         </div>
@@ -2517,9 +2507,6 @@ function renderOverviewSub(){
     fetchPmamList(function(){ renderOverviewSub(); });
     return;
   }
-  var search = (document.getElementById('overviewSearchSub') ? document.getElementById('overviewSearchSub').value.toLowerCase().trim() : '');
-  var statusFilter = (document.getElementById('overviewStatusSub') ? document.getElementById('overviewStatusSub').value : 'All');
-  
   var html = '';
   var sortedPmams = pmams.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
   var sno = 1;
@@ -2527,14 +2514,6 @@ function renderOverviewSub(){
   var approvedRequests = (window.LeaveEngine && LeaveEngine.requests) ? LeaveEngine.requests.filter(function(r){ return r.status === 'Approved'; }) : [];
 
   sortedPmams.forEach(function(p){
-    if(search && (p.name||'').toLowerCase().indexOf(search) === -1 && (p.email||'').toLowerCase().indexOf(search) === -1) return;
-    
-    var isLeave = approvedRequests.some(function(l){
-      return (l.applicantEmail === p.email || l.email === p.email || l.name === p.name) && l.fromDate <= today && l.toDate >= today;
-    });
-    var statusText = isLeave ? 'On Leave' : 'Present';
-    if(statusFilter !== 'All' && statusText !== statusFilter) return;
-
     var data = window.GMCLeave ? GMCLeave.calculateEmployeeBalances(p.email || p.name, approvedRequests) : null;
     if(!data) return;
 
@@ -3586,7 +3565,7 @@ function populateFilters(){
   });
 
   fetchPmamList(function(pmamList){
-    var pmamSelects = ['prPmam', 'arPmam', 'overviewSearch', 'overviewSearchSub'];
+    var pmamSelects = ['prPmam', 'arPmam'];
     pmamSelects.forEach(function(id){
       var sel = document.getElementById(id);
       if (!sel) return;
@@ -3750,9 +3729,6 @@ function renderOverview() {
     fetchPmamList(function(){ renderOverview(); });
     return;
   }
-  var search = (document.getElementById('overviewSearch') ? document.getElementById('overviewSearch').value.toLowerCase().trim() : '');
-  var statusFilter = (document.getElementById('overviewStatus') ? document.getElementById('overviewStatus').value : 'All');
-  
   var html = '';
   var sortedPmams = pmams.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
   var sno = 1;
@@ -3760,14 +3736,6 @@ function renderOverview() {
   var approvedRequests = (window.LeaveEngine && LeaveEngine.requests) ? LeaveEngine.requests.filter(function(r){ return r.status === 'Approved'; }) : [];
 
   sortedPmams.forEach(function(p){
-    if(search && (p.name||'').toLowerCase().indexOf(search) === -1 && (p.email||'').toLowerCase().indexOf(search) === -1) return;
-    
-    var isLeave = approvedRequests.some(function(l){
-      return (l.applicantEmail === p.email || l.email === p.email || l.name === p.name) && l.fromDate <= today && l.toDate >= today;
-    });
-    var statusText = isLeave ? 'On Leave' : 'Present';
-    if(statusFilter !== 'All' && statusText !== statusFilter) return;
-
     var data = window.GMCLeave ? GMCLeave.calculateEmployeeBalances(p.email || p.name, approvedRequests) : null;
     if(!data) return;
 
