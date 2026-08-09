@@ -1033,6 +1033,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
            <div class="lr-tab" data-tab="approved" onclick="switchLrTab(this)" style="padding:12px 24px; cursor:pointer; color:#64748b; font-weight:500;">Approved</div>
            <div class="lr-tab" data-tab="rejected" onclick="switchLrTab(this)" style="padding:12px 24px; cursor:pointer; color:#64748b; font-weight:500;">Rejected</div>
            <div class="lr-tab" data-tab="history" onclick="switchLrTab(this)" style="padding:12px 24px; cursor:pointer; color:#64748b; font-weight:500;">History</div>
+           <div class="lr-tab" data-tab="dashboard" onclick="switchLrTab(this)" style="padding:12px 24px; cursor:pointer; color:#64748b; font-weight:500;">Leave Dashboard</div>
         </div>
 
         <!-- History Filters (Hidden by default) -->
@@ -1075,6 +1076,86 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             <thead><tr><th style="background:#0F2B8C;color:#fff;">Employee</th><th style="background:#0F2B8C;color:#fff;">Leave</th><th style="background:#0F2B8C;color:#fff;">From</th><th style="background:#0F2B8C;color:#fff;">To</th><th style="background:#0F2B8C;color:#fff;text-align:center;">Days</th><th style="background:#0F2B8C;color:#fff;">Substitute</th><th style="background:#0F2B8C;color:#fff;">Status</th><th style="background:#0F2B8C;color:#fff;">Action Date</th><th style="background:#0F2B8C;color:#fff;text-align:center;">Action</th></tr></thead>
             <tbody id="lr-history-tbody"></tbody>
           </table>
+        </div>
+
+        <!-- LEAVE DASHBOARD SUB-PANEL -->
+        <div id="lr-panel-dashboard" style="display:none; padding-top:10px;">
+          <!-- Top KPI Cards -->
+          <div style="display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+              <div style="width:44px; height:44px; border-radius:50%; background:#f0fdf4; display:flex; align-items:center; justify-content:center; font-size:20px;">👥</div>
+              <div>
+                <div style="color:#64748b; font-size:12px; font-weight:600;">Present Today</div>
+                <div id="top-present-sub" style="color:#0f172a; font-size:22px; font-weight:800; line-height:1.2;">-</div>
+                <div style="color:#94a3b8; font-size:11px;">Employees</div>
+              </div>
+            </div>
+
+            <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+              <div style="width:44px; height:44px; border-radius:50%; background:#fff7ed; display:flex; align-items:center; justify-content:center; font-size:20px;">🕒</div>
+              <div>
+                <div style="color:#64748b; font-size:12px; font-weight:600;">On Leave Today</div>
+                <div id="top-onleave-sub" style="color:#0f172a; font-size:22px; font-weight:800; line-height:1.2;">-</div>
+                <div style="color:#94a3b8; font-size:11px;">Employees</div>
+              </div>
+            </div>
+
+            <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+              <div style="width:44px; height:44px; border-radius:50%; background:#fdf4ff; display:flex; align-items:center; justify-content:center; font-size:20px;">⏳</div>
+              <div>
+                <div style="color:#64748b; font-size:12px; font-weight:600;">Pending Requests</div>
+                <div id="top-pending-sub" style="color:#0f172a; font-size:22px; font-weight:800; line-height:1.2;">-</div>
+                <div style="color:#94a3b8; font-size:11px;">Requests</div>
+              </div>
+            </div>
+
+            <div style="flex:1; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+              <div style="width:44px; height:44px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center; font-size:20px;">📄</div>
+              <div>
+                <div style="color:#64748b; font-size:12px; font-weight:600;">Total Leaves Taken</div>
+                <div id="top-total-sub" style="color:#0f172a; font-size:22px; font-weight:800; line-height:1.2;">-</div>
+                <div style="color:#94a3b8; font-size:11px;">Days</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Employee Overview Table -->
+          <div style="border-radius:12px; overflow:hidden; border:1px solid #e2e8f0; padding:0; background:#fff;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:#fff; border-bottom:1px solid #e2e8f0;">
+               <span style="color:#0038a8; font-size:16px; font-weight:800; font-family:'Tahoma', sans-serif;">Employee Leave Overview</span>
+               <div style="display:flex; gap:12px; font-weight:normal;">
+                  <input type="text" id="overviewSearchSub" placeholder="Search PMAM..." onkeyup="renderOverviewSub()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; width:180px;">
+                  <select id="overviewStatusSub" onchange="renderOverviewSub()" style="padding:6px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px;">
+                     <option value="All">All Status</option>
+                     <option value="Present">Present</option>
+                     <option value="On Leave">On Leave</option>
+                  </select>
+                  <button class="btn btn-grn" onclick="exportExcel('overviewTblSub','PMAM_Leave_Overview')">Export Excel</button>
+               </div>
+            </div>
+            <div class="tbl-wrap" style="overflow-x:auto;">
+              <table id="overviewTblSub" style="width:100%; border-collapse:collapse; font-family:'Tahoma', sans-serif;">
+                <thead>
+                  <tr style="background:#0038a8; color:#ffffff;">
+                    <th style="padding:10px 12px; font-size:12px; text-align:center; width:45px; border-right:1px solid rgba(255,255,255,0.2);">#</th>
+                    <th style="padding:10px 12px; font-size:12px; text-align:left; border-right:1px solid rgba(255,255,255,0.2);">Employee Name</th>
+                    <th style="padding:10px 12px; font-size:12px; text-align:center; color:#bfdbfe; border-right:1px solid rgba(255,255,255,0.2);">CL<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                    <th style="padding:10px 12px; font-size:12px; text-align:center; color:#bbf7d0; border-right:1px solid rgba(255,255,255,0.2);">Comp<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                    <th style="padding:10px 12px; font-size:12px; text-align:center; color:#e9d5ff; border-right:1px solid rgba(255,255,255,0.2);">ML<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                    <th style="padding:10px 12px; font-size:12px; text-align:center; color:#fed7aa; border-right:1px solid rgba(255,255,255,0.2);">PTL<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                    <th style="padding:10px 12px; font-size:12px; text-align:center; color:#fbcfe8; border-right:1px solid rgba(255,255,255,0.2);">MTL<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                    <th style="padding:10px 12px; font-size:12px; text-align:center; color:#e2e8f0; border-right:1px solid rgba(255,255,255,0.2);">LWP<br><span style="font-size:9px; opacity:0.85;">(Taken/Eligible)</span></th>
+                    <th style="padding:10px 12px; font-size:12px; text-align:center; border-right:1px solid rgba(255,255,255,0.2);">Total Taken<br><span style="font-size:9px; opacity:0.85;">(Days)</span></th>
+                    <th style="padding:10px 12px; font-size:12px; text-align:center; color:#4ade80; border-right:1px solid rgba(255,255,255,0.2);">Utilization<br><span style="font-size:9px; opacity:0.85;">(%)</span></th>
+                    <th style="padding:10px 12px; font-size:12px; text-align:center; width:65px;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="overviewTbodySub">
+                  <tr><td colspan="11" class="empty-td">Loading data...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -2461,6 +2542,99 @@ function switchLvTab(id,el){
   document.getElementById('lv-tab-'+id).classList.add('active');
   document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
+}
+
+function switchLrTab(el){
+  var tabName = el.getAttribute('data-tab');
+  document.querySelectorAll('.lr-tab').forEach(function(t){
+    t.classList.remove('active');
+    t.style.borderBottom = 'none';
+    t.style.color = '#64748b';
+    t.style.fontWeight = '500';
+  });
+  el.classList.add('active');
+  el.style.borderBottom = '3px solid #2563eb';
+  el.style.color = '#2563eb';
+  el.style.fontWeight = '600';
+
+  var filters = document.getElementById('lr-filters');
+  if (filters) filters.style.display = (tabName === 'history') ? 'flex' : 'none';
+
+  ['pending', 'approved', 'rejected', 'history', 'dashboard'].forEach(function(t){
+    var panel = document.getElementById('lr-panel-' + t);
+    if (panel) panel.style.display = (t === tabName) ? 'block' : 'none';
+  });
+
+  if (tabName === 'dashboard') {
+    renderOverviewSub();
+    if (typeof updateLeaveBadges === 'function') updateLeaveBadges();
+  }
+}
+
+function renderOverviewSub(){
+  var tbody = document.getElementById('overviewTbodySub');
+  if(!tbody) return;
+  var search = (document.getElementById('overviewSearchSub') ? document.getElementById('overviewSearchSub').value.toLowerCase().trim() : '');
+  var statusFilter = (document.getElementById('overviewStatusSub') ? document.getElementById('overviewStatusSub').value : 'All');
+  
+  var html = '';
+  var pmams = window._allPmams || window.pmams || [];
+  var sortedPmams = pmams.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+  var sno = 1;
+  var today = new Date().toISOString().split('T')[0];
+  var approvedRequests = (window.LeaveEngine && LeaveEngine.requests) ? LeaveEngine.requests.filter(function(r){ return r.status === 'Approved'; }) : [];
+
+  sortedPmams.forEach(function(p){
+    if(search && (p.name||'').toLowerCase().indexOf(search) === -1 && (p.email||'').toLowerCase().indexOf(search) === -1) return;
+    
+    var isLeave = approvedRequests.some(function(l){
+      return (l.applicantEmail === p.email || l.email === p.email || l.name === p.name) && l.fromDate <= today && l.toDate >= today;
+    });
+    var statusText = isLeave ? 'On Leave' : 'Present';
+    if(statusFilter !== 'All' && statusText !== statusFilter) return;
+
+    var data = window.GMCLeave ? GMCLeave.calculateEmployeeBalances(p.email || p.name, approvedRequests) : null;
+    if(!data) return;
+
+    var bd = data.breakdown;
+    var utilPct = data.overallUtilization + '%';
+
+    html += `<tr style="border-bottom:1px solid #f1f5f9;">
+      <td style="text-align:center; font-weight:600; color:#64748b; padding:10px;">${sno++}</td>
+      <td style="font-weight:700; color:#0f172a; padding:10px;">${p.name}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#2563eb;">${bd.cl.taken}/${bd.cl.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#16a34a;">${bd.comp.taken}/${bd.comp.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#9333ea;">${bd.ml.taken}/${bd.ml.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#ea580c;">${p.gender === 'Female' ? 'NA' : bd.ptl.taken+'/'+bd.ptl.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#ec4899;">${p.gender === 'Male' ? 'NA' : bd.mtl.taken+'/'+bd.mtl.eligible}</td>
+      <td style="text-align:center; font-size:12px; font-weight:700; color:#64748b;">${bd.lwp.taken}/${bd.lwp.eligible}</td>
+      <td style="text-align:center; font-weight:800; color:#0f172a;">${data.totalTaken}</td>
+      <td style="text-align:center; font-weight:800; color:#16a34a;">${utilPct}</td>
+      <td style="text-align:center;">
+        <button class="btn" onclick="openEmployeeCard('${p.email || p.name}')" title="View Detailed Card" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; cursor:pointer;">
+          👁
+        </button>
+      </td>
+    </tr>`;
+  });
+
+  if(html === '') html = '<tr><td colspan="11" class="empty-td">No PMAMs found</td></tr>';
+  tbody.innerHTML = html;
+
+  // Sync sub stats
+  var onLeaveToday = LeaveEngine.requests.filter(function(l){
+    return l.status === 'Approved' && l.from && l.to && l.from <= today && l.to >= today;
+  }).length;
+  var pending = LeaveEngine.requests.filter(l => l.status === 'Pending').length;
+  var topPresent = pmams.length - onLeaveToday;
+  var totalDaysTaken = 0;
+  LeaveEngine.requests.forEach(l => { if(l.status === 'Approved') totalDaysTaken += (parseFloat(l.days)||0); });
+
+  var setS = function(id, v){ var el = document.getElementById(id); if (el) el.textContent = v; };
+  setS('top-present-sub', topPresent);
+  setS('top-onleave-sub', onLeaveToday);
+  setS('top-pending-sub', pending);
+  setS('top-total-sub', totalDaysTaken);
 }
 
 // EXPORT EXCEL
