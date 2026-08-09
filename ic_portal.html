@@ -2370,7 +2370,9 @@ function _doPrintReport(areaId, title, format, orientation){
   } else {
     periodHtml = document.querySelector(titleSelectors) || document.querySelector('.card-hd');
   }
-  var periodText = periodHtml ? (periodHtml.textContent || '') : '';
+  var rawPeriod = periodHtml ? (periodHtml.textContent || '') : '';
+  var cleanPeriodText = rawPeriod.replace(/^Daily Summary\s*—\s*/i, '').replace(/^PMAM-wise Summary\s*—\s*/i, '').replace(/^Month-wise Summary\s*—\s*/i, '').trim();
+  if (!cleanPeriodText) cleanPeriodText = rawPeriod;
 
   // Safety check: shared headers must be loaded
   if (typeof GMCHeaders === 'undefined' || !GMCHeaders) {
@@ -2396,7 +2398,7 @@ function _doPrintReport(areaId, title, format, orientation){
   var commonBody = ''
     + titleBlock
     + '<div class="info-row">'
-    +   '<div>' + (periodText ? 'Period: ' + periodText : '') + '</div>'
+    +   '<div>' + (cleanPeriodText ? 'Period: ' + cleanPeriodText : '') + '</div>'
     +   '<div>Generated: ' + dateStr + '</div>'
     + '</div>'
     + contentHTML
@@ -2435,21 +2437,23 @@ function _doPrintReport(areaId, title, format, orientation){
   // Inner page CSS — body styling + table styles + show/hide rules.
   // No more hardcoded letterhead CSS; that comes from shared/headers.css.
   var pageCSS = ''
-    + '@page { size: ' + pageSize + ' ' + orient + '; margin: 12mm; }'
-    + '* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }'
+    + '@page { size: ' + pageSize + ' ' + orient + '; margin: 10mm; }'
+    + '* { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }'
     + 'img { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }'
-    + 'body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: #000; font-size: 12px; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }'
+    + 'body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: #0f172a; font-size: 11px; background: #fff; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }'
     + '.print-wrap { padding: 0 4px; }'
-    + 'table { width: 100%; border-collapse: collapse; margin-top: 6px; }'
-    + 'th, td { border: 1px solid #999; padding: 4px 6px; text-align: center; vertical-align: middle; font-size: 10px; }'
-    + 'th { background: #E5EAF4; font-weight: 700; font-size: 10px; }'
+    + 'table { width: 100%; border-collapse: collapse; margin-top: 6px; page-break-inside: auto; }'
+    + 'tr { page-break-inside: avoid; page-break-after: auto; }'
+    + 'th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: center; vertical-align: middle; font-size: 11px; }'
+    + 'th { background: #0F2B8C !important; color: #ffffff !important; font-weight: 800; font-size: 11px; border: 1px solid #0a1b5c !important; }'
+    + 'td { color: #0f172a !important; font-size: 11px; }'
     + 'td.txt, th.txt { text-align: left; }'
-    + 'tfoot tr { background: #F0F0F0; font-weight: 800; }'
-    + '.info-row { display: flex; justify-content: space-between; margin: 8px 0 4px 0; font-size: 11px; font-weight: 600; }'
-    + '.footer-note { text-align: center; font-size: 10px; color: #555; border-top: 1px dotted #999; padding-top: 8px; margin-top: 25px; }'
-    + '.noreport { color: #000; font-style: italic; }'
-    + '.card-hd, .btn, .frow, .metrics-grid, .empty-td { display: none !important; }'
-    + '.tbl-wrap { overflow: visible; max-height: none; }'
+    + 'tfoot tr { background: #f8fafc !important; font-weight: 800; color: #0f172a !important; }'
+    + '.info-row { display: flex; justify-content: space-between; margin: 8px 0 6px 0; font-size: 11px; font-weight: 700; color: #334155; }'
+    + '.footer-note { text-align: center; font-size: 10px; color: #64748b; border-top: 1px dotted #cbd5e1; padding-top: 8px; margin-top: 20px; }'
+    + '.noreport { color: #0f172a; font-style: italic; }'
+    + '#dailyTitle, #monthlyTitle, #annualTitle, #wardCardSubhead, #pmamTitle, .card-hd, .btn, .frow, .metrics-grid, .empty-td, .no-print { display: none !important; }'
+    + '.tbl-wrap { overflow: visible; max-height: none; border: none !important; }'
     + '.report-title-bar { display: inline-block; border: 2px solid #1e3a5f; padding: 4px 18px; font-size: 13px; font-weight: bold; background: #d9e2ec; border-radius: 6px; color: #1e3a5f; margin: 6px 0 10px 0; }';
 
   // Remove old duplicate declarations and old html assembly
