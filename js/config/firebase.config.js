@@ -26,29 +26,43 @@
       console.error('[GMCFirebase] Firebase SDKs not loaded. Please include firebase-app, auth, and firestore compat scripts.');
       return null;
     }
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      var app = firebase.app();
+      var db = (typeof firebase.firestore === 'function') ? firebase.firestore() : null;
+      var auth = (typeof firebase.auth === 'function') ? firebase.auth() : null;
+
+      global.db = db;
+      global.auth = auth;
+
+      if (typeof emailjs !== 'undefined' && EMAILJS_CONFIG.publicKey) {
+        try { emailjs.init(EMAILJS_CONFIG.publicKey); } catch(e){}
+      }
+
+      return {
+        app: app,
+        db: db,
+        auth: auth,
+        config: firebaseConfig,
+        emailjs: EMAILJS_CONFIG
+      };
+    } catch(err) {
+      console.error('[GMCFirebase] Firebase initialization error:', err);
+      return null;
     }
-    var app = firebase.app();
-    var db = firebase.firestore();
-    var auth = firebase.auth();
-
-    // Set globally on window for backwards compatibility
-    global.db = db;
-    global.auth = auth;
-
-    if (typeof emailjs !== 'undefined' && EMAILJS_CONFIG.publicKey) {
-      try { emailjs.init(EMAILJS_CONFIG.publicKey); } catch(e){}
-    }
-
-    return {
-      app: app,
-      db: db,
-      auth: auth,
-      config: firebaseConfig,
-      emailjs: EMAILJS_CONFIG
-    };
   }
 
-  global.GMCFirebase = initFirebase();
+  var res = initFirebase();
+  global.GMCFirebase = res;
+  if (res) {
+    if (res.db) global.db = res.db;
+    if (res.auth) global.auth = res.auth;
+  }
 })(typeof window !== 'undefined' ? window : this);
+
+if (typeof window !== 'undefined') {
+  window.db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
+  window.auth = window.auth || (window.GMCFirebase ? window.GMCFirebase.auth : null);
+}
