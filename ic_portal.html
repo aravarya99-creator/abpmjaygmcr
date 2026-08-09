@@ -472,12 +472,12 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <!-- MAIN DAILY REPORT CONTAINER CARD -->
       <div class="card" id="dailyReportArea" style="border-radius:14px; border:1px solid #cbd5e1; box-shadow:0 4px 14px rgba(0,0,0,0.03); overflow:hidden; padding:0; background:#fff;">
         
-        <!-- CONTROL BAR HEADER (Single Date / Range, Calendar, Generate, Excel, Print/PDF) -->
-        <div style="background:linear-gradient(135deg, #0F2B8C 0%, #1e3a8a 100%); padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; color:#fff;">
+        <!-- CONTROL BAR HEADER — Royal Indigo / Purple Gradient Theme -->
+        <div style="background:linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; color:#fff;">
           <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
             <span style="font-size:16px; font-weight:800; letter-spacing:0.3px;">📊 Daily Report</span>
             
-            <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12); padding:4px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.2);">
+            <div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.15); padding:4px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.25);">
               <select id="dailyMode" style="background:transparent; color:#fff; border:none; outline:none; font-weight:700; font-size:12px; cursor:pointer;" onchange="dailyToggleRange()">
                 <option value="single" style="color:#0f172a;">Single Date</option>
                 <option value="range" style="color:#0f172a;">Date Range</option>
@@ -485,49 +485,44 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             </div>
 
             <div id="dailyDateWrap" style="display:flex; align-items:center; gap:6px;">
-              <input type="date" id="dailyDate" style="padding:5px 10px; border-radius:8px; border:1px solid #93c5fd; font-size:12px; font-weight:700; color:#0f172a; outline:none;">
+              <input type="date" id="dailyDate" style="padding:5px 10px; border-radius:8px; border:1px solid #c7d2fe; font-size:12px; font-weight:700; color:#1e1b4b; background:#f5f3ff; outline:none;">
             </div>
 
             <div id="dailyFromWrap" style="display:none; align-items:center; gap:6px;">
-              <span style="font-size:11px; color:#cbd5e1; font-weight:600;">From:</span>
-              <input type="date" id="dailyFrom" style="padding:5px 10px; border-radius:8px; border:1px solid #93c5fd; font-size:12px; font-weight:700; color:#0f172a; outline:none;">
+              <span style="font-size:11px; color:#e0e7ff; font-weight:600;">From:</span>
+              <input type="date" id="dailyFrom" style="padding:5px 10px; border-radius:8px; border:1px solid #c7d2fe; font-size:12px; font-weight:700; color:#1e1b4b; background:#f5f3ff; outline:none;">
             </div>
 
             <div id="dailyToWrap" style="display:none; align-items:center; gap:6px;">
-              <span style="font-size:11px; color:#cbd5e1; font-weight:600;">To:</span>
-              <input type="date" id="dailyTo" style="padding:5px 10px; border-radius:8px; border:1px solid #93c5fd; font-size:12px; font-weight:700; color:#0f172a; outline:none;">
+              <span style="font-size:11px; color:#e0e7ff; font-weight:600;">To:</span>
+              <input type="date" id="dailyTo" style="padding:5px 10px; border-radius:8px; border:1px solid #c7d2fe; font-size:12px; font-weight:700; color:#1e1b4b; background:#f5f3ff; outline:none;">
             </div>
 
-            <button class="btn" onclick="genDaily()" style="background:#2563eb; color:#fff; border:none; padding:6px 14px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:4px; box-shadow:0 2px 6px rgba(37,99,235,0.3);">
+            <button class="btn" onclick="genDaily()" style="background:#ffffff; color:#3730a3; border:none; padding:6px 16px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:4px; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
               ⚡ Generate
             </button>
           </div>
 
           <!-- ACTION BUTTONS: EXCEL & PRINT PDF -->
           <div style="display:flex; align-items:center; gap:8px;">
-            <button class="btn" onclick="exportExcel('dailyTbl','Daily_Report')" style="background:#166534; color:#fff; border:none; padding:6px 14px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px;">
+            <button class="btn" onclick="exportExcel('dailyTbl','Daily_Report')" style="background:#10b981; color:#fff; border:none; padding:6px 14px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px; box-shadow:0 2px 6px rgba(16,185,129,0.3);">
               📊 Export Excel
             </button>
-            <button class="btn" onclick="printReportOrient('dailyReportArea','Daily Report','portrait')" style="background:#ffffff; color:#0F2B8C; border:none; padding:6px 14px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px;">
+            <button class="btn" onclick="printReportOrient('dailyReportArea','Daily Report','portrait')" style="background:rgba(255,255,255,0.2); color:#ffffff; border:1px solid rgba(255,255,255,0.4); padding:6px 14px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px;">
               🖨️ Print / PDF
             </button>
           </div>
         </div>
 
-        <!-- 6 METRICS KPI BAR -->
-        <div style="padding:14px 20px 0 20px;">
-          <div class="metrics-grid" id="dailyMetrics" style="margin-bottom:14px;"></div>
-        </div>
-
         <!-- TABLE SECTION -->
-        <div style="padding:0 20px 20px 20px;">
-          <div style="font-size:14px; font-weight:800; color:#0f172a; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;" id="dailyTitle">
+        <div style="padding:16px 20px 20px 20px;">
+          <div style="font-size:14px; font-weight:800; color:#0f172a; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;" id="dailyTitle">
             Daily Summary — 9 August 2026
           </div>
           <div class="tbl-wrap" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
             <table id="dailyTbl" style="width:100%; border-collapse:collapse;">
               <thead>
-                <tr style="background:#0F2B8C; color:#ffffff; font-size:12px;">
+                <tr style="background:linear-gradient(135deg, #3730a3 0%, #312e81 100%); color:#ffffff; font-size:12px;">
                   <th style="padding:10px; text-align:center; width:50px;">S.No</th>
                   <th style="padding:10px; text-align:left;">PMAM</th>
                   <th style="padding:10px; text-align:left;">Ward</th>
@@ -2747,20 +2742,23 @@ function genDaily(){
       + '<td><strong>'+inrFmt(totals.preAmt)+'</strong></td>'
       + '<td><strong>'+totals.dis+'</strong></td>'
       + '<td><strong>'+inrFmt(totals.clm)+'</strong></td></tr>'
-      + '<tr><td colspan="9" style="text-align:center;font-style:italic;background:#F0F9FF;color:#0F2B8C"><strong>'+reportedCount+' / '+totalCount+' PMAMs reported</strong></td></tr>';
+      + '<tr><td colspan="9" style="text-align:center;font-style:italic;background:#f5f3ff;color:#3730a3"><strong>'+reportedCount+' / '+totalCount+' PMAMs reported</strong></td></tr>';
 
-    // Metrics
-    document.getElementById('dailyMetrics').innerHTML = [
-      { c:'c1', n:totals.ipd, l:'Total IPD' },
-      { c:'c2', n:totals.reg, l:'Registered' },
-      { c:'c3', n:totals.pre, l:'Preauth Init' },
-      { c:'c4', n:inrFmt(totals.preAmt), l:'Preauth Amt' },
-      { c:'c5', n:totals.dis, l:'Discharged' },
-      { c:'c6', n:inrFmt(totals.clm), l:'Claim Amt' }
-    ].map(function(m){
-      var isCurr = String(m.n).indexOf('₹') >= 0 ? ' has-currency' : '';
-      return '<div class="mcard '+m.c+isCurr+'"><div class="mcard-num">'+m.n+'</div><div class="mcard-label">'+m.l+'</div></div>';
-    }).join('');
+    // Metrics (if container exists)
+    var mEl = document.getElementById('dailyMetrics');
+    if (mEl) {
+      mEl.innerHTML = [
+        { c:'c1', n:totals.ipd, l:'Total IPD' },
+        { c:'c2', n:totals.reg, l:'Registered' },
+        { c:'c3', n:totals.pre, l:'Preauth Init' },
+        { c:'c4', n:inrFmt(totals.preAmt), l:'Preauth Amt' },
+        { c:'c5', n:totals.dis, l:'Discharged' },
+        { c:'c6', n:inrFmt(totals.clm), l:'Claim Amt' }
+      ].map(function(m){
+        var isCurr = String(m.n).indexOf('₹') >= 0 ? ' has-currency' : '';
+        return '<div class="mcard '+m.c+isCurr+'"><div class="mcard-num">'+m.n+'</div><div class="mcard-label">'+m.l+'</div></div>';
+      }).join('');
+    }
   });
 }
 
