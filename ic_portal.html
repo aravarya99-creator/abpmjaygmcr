@@ -2515,10 +2515,19 @@ function renderOverviewSub(){
 
   sortedPmams.forEach(function(p){
     var data = window.GMCLeave ? GMCLeave.calculateEmployeeBalances(p.email || p.name, approvedRequests) : null;
-    if(!data) return;
+    if(!data) {
+      data = {
+        totalEligible: 225, totalTaken: 0, overallUtilization: 0,
+        breakdown: {
+          cl: { taken: 0, eligible: 15 }, comp: { taken: 0, eligible: 0 },
+          ml: { taken: 0, eligible: 15 }, ptl: { taken: 0, eligible: 15 },
+          mtl: { taken: 0, eligible: 180 }, lwp: { taken: 0, eligible: 15 }
+        }
+      };
+    }
 
     var bd = data.breakdown;
-    var utilPct = data.overallUtilization + '%';
+    var utilPct = (data.overallUtilization || 0) + '%';
 
     html += `<tr style="border-bottom:1px solid #f1f5f9;">
       <td style="text-align:center; font-weight:600; color:#64748b; padding:10px;">${sno++}</td>
@@ -2529,7 +2538,7 @@ function renderOverviewSub(){
       <td style="text-align:center; font-size:12px; font-weight:700; color:#ea580c;">${p.gender === 'Female' ? 'NA' : bd.ptl.taken+'/'+bd.ptl.eligible}</td>
       <td style="text-align:center; font-size:12px; font-weight:700; color:#ec4899;">${p.gender === 'Male' ? 'NA' : bd.mtl.taken+'/'+bd.mtl.eligible}</td>
       <td style="text-align:center; font-size:12px; font-weight:700; color:#64748b;">${bd.lwp.taken}/${bd.lwp.eligible}</td>
-      <td style="text-align:center; font-weight:800; color:#0f172a;">${data.totalTaken}</td>
+      <td style="text-align:center; font-weight:800; color:#0f172a;">${data.totalTaken || 0}</td>
       <td style="text-align:center; font-weight:800; color:#16a34a;">${utilPct}</td>
       <td style="text-align:center;">
         <button class="btn" onclick="openEmployeeCard('${p.email || p.name}')" title="View Detailed Card" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; cursor:pointer;">
@@ -2543,13 +2552,16 @@ function renderOverviewSub(){
   tbody.innerHTML = html;
 
   // Sync sub stats
-  var onLeaveToday = LeaveEngine.requests.filter(function(l){
-    return l.status === 'Approved' && l.from && l.to && l.from <= today && l.to >= today;
+  var leaveReqs = (window.LeaveEngine && Array.isArray(LeaveEngine.requests)) ? LeaveEngine.requests : [];
+  var onLeaveToday = leaveReqs.filter(function(l){
+    var f = l.from || l.fromDate || l.fromDt;
+    var t = l.to || l.toDate || l.toDt;
+    return l.status === 'Approved' && f && t && f <= today && t >= today;
   }).length;
-  var pending = LeaveEngine.requests.filter(l => l.status === 'Pending').length;
-  var topPresent = pmams.length - onLeaveToday;
+  var pending = leaveReqs.filter(l => l.status === 'Pending').length;
+  var topPresent = Math.max(0, pmams.length - onLeaveToday);
   var totalDaysTaken = 0;
-  LeaveEngine.requests.forEach(l => { if(l.status === 'Approved') totalDaysTaken += (parseFloat(l.days)||0); });
+  leaveReqs.forEach(l => { if(l.status === 'Approved') totalDaysTaken += (parseFloat(l.days || l.totalDays)||0); });
 
   var setS = function(id, v){ var el = document.getElementById(id); if (el) el.textContent = v; };
   setS('top-present-sub', topPresent);
@@ -3639,10 +3651,12 @@ window.addEventListener('load',()=>{
       if(document.getElementById('sec-leavereq') && document.getElementById('sec-leavereq').classList.contains('active')) {
         if(typeof loadLeaveReq === 'function') loadLeaveReq();
         if(typeof renderLeaveReqs === 'function') renderLeaveReqs();
+        if(typeof renderOverviewSub === 'function') renderOverviewSub();
       }
       if(document.getElementById('sec-leavebal') && document.getElementById('sec-leavebal').classList.contains('active')) {
         if(typeof renderLeaveBal === 'function') renderLeaveBal();
       }
+      if(typeof renderOverviewSub === 'function') renderOverviewSub();
     }
   });
 
@@ -4893,8 +4907,8 @@ window.addEventListener('DOMContentLoaded', function(){
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-<script src="leave_engine.js"></script>
-<script src="digital_signature.js"></script>
+<script src="shared/leave_engine.js"></script>
+<script src="shared/digital_signature.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     if (window.DSig) {
