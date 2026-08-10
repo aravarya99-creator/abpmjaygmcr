@@ -110,6 +110,29 @@
     .settings-tab.active { background:#0F2B8C; color:#fff; border-color:#0F2B8C; }
     .settings-pane { display:none; }
     .settings-pane.active { display:block; }
+    /* Dark Liquid Glass Header style */
+    .liquid-glass-hd {
+      background: linear-gradient(135deg, rgba(15, 43, 140, 0.95), rgba(26, 61, 181, 0.88));
+      backdrop-filter: blur(12px);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(15, 43, 140, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 16px;
+    }
+    .liquid-glass-hd-title {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
     /* Custom Report Builder — column picker checkboxes */
     .cr-col-chk { display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:8px; border:2px solid #ddd6fe; background:#fff; cursor:pointer; font-weight:700; font-size:13px; transition:all .2s; color:#4c1d95; }
     .cr-col-chk.checked { background:#ddd6fe; border-color:#7c3aed; }
@@ -432,65 +455,68 @@
       <!-- CLAIMS RECEIVED -->
       <section id="claims" class="tab-screen" style="display:none">
         <div class="panel">
-        <div class="section-title">💰 ENTER CLAIM RECEIVED</div>
-        <form id="claimsForm">
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; align-items:end;">
-            <div>
-              <label style="margin-top:0;">Financial Year <span class="req">*</span></label>
-              <select id="claimsFy" required></select>
-            </div>
-            <div>
-              <label style="margin-top:0;">Month <span class="req">*</span></label>
-              <select id="claimsMonth" required></select>
-            </div>
-            <div>
-              <label style="margin-top:0;">Claim Received (₹) <span class="req">*</span></label>
-              <input id="claimsClaim" type="number" min="0" step="0.01" required placeholder="0.00">
-            </div>
-            <div>
-              <label style="margin-top:0;">Interest Received (₹) <span class="req">*</span></label>
-              <input id="claimsInterest" class="input-green" type="number" min="0" step="0.01" required placeholder="0.00">
-            </div>
-            <div style="grid-column: span 2;">
-              <label style="margin-top:0;">Remarks</label>
-              <input id="claimsRemarks" type="text" placeholder="Optional remarks...">
-            </div>
-            <div>
-              <button class="btn" type="submit" style="width:100%; justify-content:center; padding:10px 20px;">💾 Save Claim Record</button>
-            </div>
+          <div class="liquid-glass-hd">
+            <div class="liquid-glass-hd-title">💰 CLAIM RECEIPT ENTRY</div>
+            <button type="button" class="btn" id="toggleClaimsHistoryBtn" onclick="toggleClaimsHistory()" style="background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3); padding:6px 14px; font-size:12px;">🙈 Hide History</button>
           </div>
-        </form>
+          <form id="claimsForm">
+            <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+              <div style="flex:1; min-width:140px;">
+                <label style="margin-top:0;">Financial Year <span class="req">*</span></label>
+                <select id="claimsFy" required></select>
+              </div>
+              <div style="flex:1; min-width:140px;">
+                <label style="margin-top:0;">Month <span class="req">*</span></label>
+                <select id="claimsMonth" required></select>
+              </div>
+              <div style="flex:1.2; min-width:160px;">
+                <label style="margin-top:0;">Claim Received (₹) <span class="req">*</span></label>
+                <input id="claimsClaim" type="number" min="0" step="0.01" required placeholder="0.00">
+              </div>
+              <div style="flex:1.2; min-width:160px;">
+                <label style="margin-top:0;">Interest Received (₹) <span class="req">*</span></label>
+                <input id="claimsInterest" class="input-green" type="number" min="0" step="0.01" required placeholder="0.00">
+              </div>
+              <div style="flex-shrink:0;">
+                <button class="btn" type="submit" style="padding:10px 24px; font-weight:700;">💾 Save</button>
+              </div>
+            </div>
+          </form>
         </div>
 
-        <div class="panel">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
-          <div class="section-title" style="margin:0;flex-shrink:0;">💰 CLAIM RECEIVED LIST</div>
-          <select id="claimsFyFilter" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-weight:600;background:#fff;color:#0f172a;" onchange="renderClaims()">
-            <option value="">All FY</option>
-          </select>
-          <select id="claimsMonthFilter" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-weight:600;background:#fff;color:#0f172a;" onchange="renderClaims()">
-            <option value="">All Months</option>
-          </select>
-          <div style="margin-left:auto; display:flex; gap:8px;">
-            <button class="btn" onclick="printClaims()" style="background:#475569;">🖨 Print / PDF</button>
-            <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
-            <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
+        <div class="panel" id="claimsLedgerPanel">
+          <div class="liquid-glass-hd">
+            <div class="liquid-glass-hd-title">📒 CLAIM RECEIPT LEDGER</div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn" onclick="printClaims()" style="background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3); padding:6px 12px; font-size:12px;">🖨 Print / PDF</button>
+              <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a; padding:6px 12px; font-size:12px;">📊 Excel</button>
+              <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb; padding:6px 12px; font-size:12px;">📝 Word</button>
+            </div>
           </div>
-        </div>
-        <div style="overflow-x:auto;">
-          <table id="claimsTable">
-            <thead>
-              <tr>
-                <th>FY</th><th>Month</th>
-                <th style="color:#6ee7b7;">Claim (₹)</th>
-                <th style="color:#fcd34d;">Interest (₹)</th>
-                <th style="color:#c4b5fd;">Total (₹)</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+            <label style="margin:0; font-size:12px; font-weight:700; color:#475569;">Filter Financial Year:</label>
+            <select id="claimsFyFilter" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-weight:600;background:#fff;color:#0f172a; min-width:140px;" onchange="renderClaims()">
+              <option value="">All FY</option>
+            </select>
+            <label style="margin:0; font-size:12px; font-weight:700; color:#475569;">Filter Month:</label>
+            <select id="claimsMonthFilter" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-weight:600;background:#fff;color:#0f172a; min-width:140px;" onchange="renderClaims()">
+              <option value="">All Months</option>
+            </select>
+          </div>
+          <div style="overflow-x:auto;">
+            <table id="claimsTable">
+              <thead>
+                <tr>
+                  <th>FY</th><th>Month</th>
+                  <th style="color:#6ee7b7;">Claim (₹)</th>
+                  <th style="color:#fcd34d;">Interest (₹)</th>
+                  <th style="color:#c4b5fd;">Total (₹)</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
         
       </section>
@@ -1777,6 +1803,19 @@
       $('allClosing').innerText = fmtNum(closing);
     }
 
+    function toggleClaimsHistory() {
+      var panel = document.getElementById('claimsLedgerPanel');
+      var btn = document.getElementById('toggleClaimsHistoryBtn');
+      if (!panel || !btn) return;
+      if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        btn.innerHTML = '🙈 Hide History';
+      } else {
+        panel.style.display = 'none';
+        btn.innerHTML = '👁️ Show History';
+      }
+    }
+
     // ---------- CLAIMS RECEIVED ----------
     $('claimsForm').addEventListener('submit', function(e){
       e.preventDefault();
@@ -1789,7 +1828,7 @@
       const incomes = load(LS.INCOME, []);
       const existing = incomes.find(x=> x.fy===fy && x.monthKey===monthKey);
       if(existing){ alert('Duplicate entry blocked: Claim for this FY and Month already exists.'); return; }
-      var newObj = {fy, monthKey, claim, interest, remarks: $('claimsRemarks').value||'', createdAt: new Date().toISOString()};
+      var newObj = {fy, monthKey, claim, interest, remarks: '', createdAt: new Date().toISOString()};
       incomes.push(newObj);
       fsSyncAdd('finance_incomes', newObj);
       save(LS.INCOME, incomes);
@@ -1799,14 +1838,18 @@
 
     function renderClaims(){
       populateMonths('claimsFy','claimsMonth');
-      // Populate FY filter dropdown
+      // Populate FY filter dropdown (defaults to Current FY)
       var cfFy = $('claimsFyFilter');
       if(cfFy) {
         var prevFyFilter = cfFy.value;
         var fys = load(LS.FYS,[]);
         cfFy.innerHTML = '<option value="">All FY</option>';
         fys.forEach(function(f){ cfFy.insertAdjacentHTML('beforeend','<option value="'+f.name+'">'+f.name+'</option>'); });
-        if(prevFyFilter) cfFy.value = prevFyFilter;
+        if(prevFyFilter) {
+          cfFy.value = prevFyFilter;
+        } else if (fys && fys.length > 0) {
+          cfFy.value = fys[fys.length - 1].name;
+        }
       }
       var fyFilter = cfFy ? cfFy.value : '';
       // Populate Month filter dropdown (only months that exist in claims data, optionally narrowed by FY)
@@ -1832,7 +1875,7 @@
       if(monthFilter) incomes = incomes.filter(function(i){return i.monthKey===monthFilter;});
       incomes.sort(function(a,b){return a.monthKey.localeCompare(b.monthKey);});
       if(incomes.length===0){
-        tbody.innerHTML = '<tr><td colspan="6" class="small" style="text-align:center;padding:20px;color:#888;">No claim entries found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="small" style="text-align:center;padding:20px;color:#888;">No claim entries found for selected filters</td></tr>';
         renderDashboard(); return;
       }
       incomes.forEach(function(i){
@@ -1876,7 +1919,6 @@
       $('claimsMonth').value = item.monthKey;
       $('claimsClaim').value = item.claim;
       $('claimsInterest').value = item.interest;
-      $('claimsRemarks').value = item.remarks || '';
       save(LS.INCOME, incomes.filter(x => x.createdAt !== id));
       fsSyncDelete('finance_incomes', id);
       renderClaims();
