@@ -18,25 +18,35 @@
 
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700;800&display=swap');
-    :root{--blue:#8b5cf6;--red:#dc2626;--green:#16a34a;--bg:linear-gradient(135deg, #c9b1eb 0%, #e8c6f5 50%, #f3dafc 100%);--panel:rgba(255, 255, 255, 0.5);--text:#4c1d95;--border:rgba(255, 255, 255, 0.6);--muted:#7c3aed;}
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    :root{
+      --blue:#0F2B8C;
+      --blue-hover:#1A3DB5;
+      --red:#dc2626;
+      --green:#16a34a;
+      --bg:linear-gradient(135deg,#E8F0FF 0%,#C8DCFF 50%,#D6EAFF 100%);
+      --panel:#ffffff;
+      --text:#0f172a;
+      --border:#e2e8f0;
+      --muted:#64748b;
+    }
     *{box-sizing:border-box;margin:0;padding:0} 
-    body{display:block;min-height:100vh;background:var(--bg);background-attachment:fixed;font-family:'Roboto',sans-serif;color:var(--text);overflow-x:hidden;}
+    body{display:block;min-height:100vh;background:var(--bg);background-attachment:fixed;font-family:'Inter',sans-serif;color:var(--text);overflow-x:hidden;}
     
-    .sidebar{width:180px;background:rgba(255, 255, 255, 0.6);backdrop-filter:blur(24px);height:calc(100vh - 94px);padding-top:20px;position:fixed;left:0;top:94px;border-radius:0;text-align:left;z-index:10;border-right:1px solid rgba(255,255,255,0.8);box-shadow:4px 0 24px rgba(0, 0, 0, 0.02);}
+    .sidebar{width:220px;background:#ffffff;height:calc(100vh - 82px);padding-top:16px;position:fixed;left:0;top:82px;border-radius:0;text-align:left;z-index:10;border-right:1px solid #e2e8f0;box-shadow:2px 0 10px rgba(0,0,0,0.03);}
     .brand{display:none;}
     .sidebar ul{list-style:none;padding:0;margin:0}
-    .sidebar li{padding:0 12px;margin-bottom:8px}
-    .sidebar a{color:#4b5563;font-weight:700;text-transform:none;text-decoration:none;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;cursor:pointer;padding:12px 16px;border-radius:12px;transition:all .2s;font-size:14px}
-    .sidebar a .icon{font-size:20px;margin-bottom:0;display:block;}
-    .sidebar a:hover{background:rgba(255,255,255,0.8);color:var(--blue);}
-    .sidebar a.active-nav{background:var(--blue);color:#fff;font-weight:700;}
+    .sidebar li{padding:0 10px;margin-bottom:4px}
+    .sidebar a{color:#475569;font-weight:600;text-transform:none;text-decoration:none;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;cursor:pointer;padding:10px 14px;border-radius:10px;transition:all .15s;font-size:13px}
+    .sidebar a .icon{font-size:16px;margin-bottom:0;display:block;}
+    .sidebar a:hover{background:#f1f5f9;color:#0F2B8C;}
+    .sidebar a.active-nav{background:#0F2B8C;color:#fff;font-weight:700;box-shadow:0 4px 10px rgba(15, 43, 140, 0.2);}
     
-    .sidebar-heading { font-size: 11px; color: #6b7280; font-weight: 800; text-transform: uppercase; padding: 12px 16px 4px 16px; margin-top: 8px; letter-spacing: 0.5px; }
-    main{margin-left:180px;margin-top:0;padding:24px;width:calc(100% - 180px);box-sizing:border-box;}
-    .panel{background:var(--panel);backdrop-filter:blur(24px);padding:32px;border-radius:12px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(31, 38, 135, 0.05);margin-bottom:24px}
+    .sidebar-heading { font-size: 10px; color: #94a3b8; font-weight: 800; text-transform: uppercase; padding: 12px 14px 4px 14px; margin-top: 4px; letter-spacing: 0.5px; }
+    main{margin-left:220px;margin-top:0;padding:24px;width:calc(100% - 220px);box-sizing:border-box;}
+    .panel{background:#ffffff;padding:24px;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,0.03);margin-bottom:24px}
     
-    .top-nav { position: fixed; top: 0; left: 0; width: 100%; height: 80px; z-index: 50; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(24px); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; border-radius: 0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border-bottom: 1px solid rgba(255,255,255,0.8); }
+    .top-nav { position: fixed; top: 0; left: 0; width: 100%; height: 80px; z-index: 50; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(24px); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; border-radius: 0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border-bottom: 1px solid #e2e8f0; }
     .nav-left { display: flex; align-items: center; gap: 16px; }
     .logo-circle { width: 56px; height: 56px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; border: 3px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .logo-circle-inner { width: 44px; height: 44px; border-radius: 50%; background: #25166b; border: 2px solid #eab308; }
@@ -49,55 +59,55 @@
     .nav-divider { width: 2px; height: 36px; background: #e5e7eb; border-radius: 2px; }
     .mid-text { text-align: center; }
     .hosp-name { color: #ea580c; font-weight: 800; font-size: 14px; letter-spacing: 0.5px; }
-    .portal-sub { color: var(--blue); font-weight: 900; font-size: 22px; letter-spacing: 1px; margin-top: 2px; text-transform: uppercase; }
+    .portal-sub { color: #0F2B8C; font-weight: 900; font-size: 22px; letter-spacing: 1px; margin-top: 2px; text-transform: uppercase; }
 
     .nav-right { display: flex; align-items: center; }
     .profile-pill { display: flex; align-items: center; gap: 12px; border: 1px solid rgba(0,0,0,0.1); padding: 6px 16px 6px 6px; border-radius: 40px; background: rgba(255,255,255,0.8); }
-    .prof-icon { width: 36px; height: 36px; border-radius: 50%; background: #eff6ff; border: 1px solid #bfdbfe; display: flex; align-items: center; justify-content: center; color: var(--blue); font-weight: 800; font-size: 14px; }
+    .prof-icon { width: 36px; height: 36px; border-radius: 50%; background: #eff6ff; border: 1px solid #bfdbfe; display: flex; align-items: center; justify-content: center; color: #0F2B8C; font-weight: 800; font-size: 14px; }
     .prof-info { display: flex; flex-direction: column; justify-content: center; margin-right: 8px; }
     .prof-name { color: var(--text); font-weight: 700; font-size: 13px; }
     .prof-role { color: var(--muted); font-size: 10px; font-weight: 600; opacity: 0.8; }
 
-    .section-title { background: #ef4444; color: #fff; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; text-transform: uppercase; display: inline-block; margin-bottom: 24px; margin-top: 8px; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2); }
+    .section-title { background: #0F2B8C; color: #fff; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 700; text-transform: uppercase; display: inline-block; margin-bottom: 20px; margin-top: 0; box-shadow: 0 2px 4px rgba(15, 43, 140, 0.15); }
     .section-title::before { display: none; }
     
-    form label{display:block;margin-top:16px;color:var(--blue);font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:6px;}
+    form label{display:block;margin-top:12px;color:#334155;font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:6px;}
     form label .req { color: var(--red); margin-left: 4px; }
-    form input, form select{width:100%;padding:12px;border:2px solid #d8b4fe;border-radius:8px;background:#faf5ff;color:#4c1d95;font-weight:600;font-family:inherit;font-size:14px;outline:none;transition:all 0.2s;}
-    form input:focus, form select:focus{border-color:#9333ea;box-shadow:0 0 0 4px rgba(147, 51, 234, 0.15);background:#fff;}
+    form input, form select{width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#ffffff;color:#0f172a;font-weight:600;font-family:inherit;font-size:13px;outline:none;transition:all 0.2s;}
+    form input:focus, form select:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37, 99, 235, 0.15);background:#fff;}
     .input-green { border-color: #22c55e !important; }
     
     .row{display:flex;gap:12px;flex-wrap:wrap;}
     .row > div{flex:1;min-width:140px;}
     
-    .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
-    .btn{padding:10px 24px;background:var(--blue);color:#fff;border-radius:24px;border:none;cursor:pointer;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:8px;transition:0.2s;}
-    .btn:hover{background:#152c6e;}
-    .btn.secondary{background:#fff;color:var(--blue);border:1px solid #d1d5db;}
-    .btn.secondary:hover{background:#f9fafb;border-color:var(--blue);}
+    .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+    .btn{padding:8px 20px;background:#0F2B8C;color:#fff;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px;transition:0.2s;}
+    .btn:hover{background:#1A3DB5;}
+    .btn.secondary{background:#fff;color:#0F2B8C;border:1px solid #cbd5e1;}
+    .btn.secondary:hover{background:#f8fafc;border-color:#0F2B8C;}
     
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; border-radius: 8px 8px 0 0; overflow: hidden; border:1px solid var(--border); }
-    th { padding: 12px 16px; background: var(--blue); color: #fff; font-weight: 600; text-align: left; font-size: 13px; border-bottom: none; }
-    td { padding: 12px 16px; text-align: left; font-size: 14px; color: var(--text); border-bottom: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; border-radius: 8px 8px 0 0; overflow: hidden; border:1px solid #e2e8f0; }
+    th { padding: 10px 14px; background: #0F2B8C; color: #fff; font-weight: 700; text-align: left; font-size: 12px; border-bottom: none; }
+    td { padding: 10px 14px; text-align: left; font-size: 13px; color: var(--text); border-bottom: 1px solid #e2e8f0; }
     /* Claims table — full grid (thin column + row lines) */
-    #claimsTable { border:1px solid #e9d5ff; }
-    #claimsTable th { border-right:1px solid rgba(255,255,255,0.35); border-bottom:1px solid #e9d5ff; }
+    #claimsTable { border:1px solid #e2e8f0; }
+    #claimsTable th { border-right:1px solid rgba(255,255,255,0.25); border-bottom:1px solid #e2e8f0; }
     #claimsTable th:last-child { border-right:none; }
-    #claimsTable td { border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; }
+    #claimsTable td { border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0; }
     #claimsTable td:last-child { border-right:none; }
     #claimsTable tbody tr:last-child td { border-bottom:none; }
     /* Expenditure table — full grid (thin column + row lines) */
-    #expTable { border:1px solid #e9d5ff; border-radius:8px; overflow:hidden; }
-    #expTable th { border-right:1px solid rgba(255,255,255,0.35); border-bottom:1px solid #e9d5ff; }
+    #expTable { border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; }
+    #expTable th { border-right:1px solid rgba(255,255,255,0.25); border-bottom:1px solid #e2e8f0; }
     #expTable th:last-child { border-right:none; }
-    #expTable td { border-right:1px solid #e9d5ff; border-bottom:1px solid #e9d5ff; }
+    #expTable td { border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0; }
     #expTable td:last-child { border-right:none; }
     #expTable tbody tr:last-child td { border-bottom:none; }
     /* Settings sub-tab bar */
-    .settings-tabbar { display:flex; flex-wrap:wrap; gap:6px; padding:8px; background:#faf5ff; border:1px solid #ddd6fe; border-radius:10px; margin-bottom:18px; }
-    .settings-tab { padding:8px 16px; background:#fff; border:1.5px solid #ddd6fe; border-radius:8px; cursor:pointer; font-size:13px; font-weight:700; color:#6b21a8; transition:all .15s; user-select:none; }
-    .settings-tab:hover { background:#ede9fe; }
-    .settings-tab.active { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+    .settings-tabbar { display:flex; flex-wrap:wrap; gap:6px; padding:6px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:18px; }
+    .settings-tab { padding:8px 16px; background:#fff; border:1px solid #cbd5e1; border-radius:8px; cursor:pointer; font-size:12px; font-weight:700; color:#475569; transition:all .15s; user-select:none; }
+    .settings-tab:hover { background:#f1f5f9; color:#0F2B8C; }
+    .settings-tab.active { background:#0F2B8C; color:#fff; border-color:#0F2B8C; }
     .settings-pane { display:none; }
     .settings-pane.active { display:block; }
     /* Custom Report Builder — column picker checkboxes */
@@ -307,19 +317,20 @@
   <aside class="sidebar">
     <div class="brand">FINANCE</div>
     <ul>
-      <li><a class="nav" data-tab="dashboard"><span class="icon">⊞</span>Dashboard</a></li>
-      <div class="sidebar-heading">Data Entry</div>
-      <li><a class="nav" data-tab="claims"><span class="icon">📥</span>Claims</a></li>
-      <li><a class="nav" data-tab="expenditure"><span class="icon">💸</span>Expense</a></li>
-      <li><a class="nav" data-tab="stats-entry"><span class="icon">🏥</span>Monthly Stats</a></li>
+      <li><a class="nav active-nav" data-tab="dashboard"><span class="icon">⊞</span>Executive Dashboard</a></li>
+      <div class="sidebar-heading">Transactions</div>
+      <li><a class="nav" data-tab="claims"><span class="icon">💰</span>Claims Received</a></li>
+      <li><a class="nav" data-tab="expenditure"><span class="icon">💸</span>Expenditures</a></li>
+      <div class="sidebar-heading">Hospital Stats</div>
+      <li><a class="nav" data-tab="stats-entry"><span class="icon">🏥</span>Monthly Stats Entry</a></li>
       <li><a class="nav" data-tab="stats-dhs"><span class="icon">📋</span>DHS Entry</a></li>
-      <div class="sidebar-heading">Reporting</div>
-      <li><a class="nav" data-tab="stats-report"><span class="icon">📈</span>Stats Report</a></li>
-      <li><a class="nav" data-tab="reports"><span class="icon">📊</span>Reports</a></li>
-      <li><a class="nav" data-tab="ledger"><span class="icon">📒</span>Ledger</a></li>
-      <li><a class="nav" data-tab="customreport"><span class="icon">🗂</span>Custom Report</a></li>
-      <div class="sidebar-heading">System</div>
-      <li><a class="nav" data-tab="settings"><span class="icon">⚙</span>Settings</a></li>
+      <li><a class="nav" data-tab="stats-report"><span class="icon">📈</span>Stats Performance</a></li>
+      <div class="sidebar-heading">Ledger & Reports</div>
+      <li><a class="nav" data-tab="reports"><span class="icon">📊</span>SHA & Fund Reports</a></li>
+      <li><a class="nav" data-tab="ledger"><span class="icon">📒</span>Financial Ledger</a></li>
+      <li><a class="nav" data-tab="customreport"><span class="icon">🗂</span>Custom Report Builder</a></li>
+      <div class="sidebar-heading">Administration</div>
+      <li><a class="nav" data-tab="settings"><span class="icon">⚙</span>System Settings</a></li>
     </ul>
   </aside>
 
@@ -421,53 +432,55 @@
       <!-- CLAIMS RECEIVED -->
       <section id="claims" class="tab-screen" style="display:none">
         <div class="panel">
-        <div class="section-title" style="background:#7c3aed;">💰 ENTER CLAIM RECEIVED</div>
+        <div class="section-title">💰 ENTER CLAIM RECEIVED</div>
         <form id="claimsForm">
-          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;">
-            <div style="display:flex;flex-direction:column;min-width:0;">
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; align-items:end;">
+            <div>
               <label style="margin-top:0;">Financial Year <span class="req">*</span></label>
-              <select id="claimsFy" required style="width:auto;min-width:110px;padding:10px 10px;"></select>
+              <select id="claimsFy" required></select>
             </div>
-            <div style="display:flex;flex-direction:column;min-width:0;">
+            <div>
               <label style="margin-top:0;">Month <span class="req">*</span></label>
-              <select id="claimsMonth" required style="width:auto;min-width:120px;padding:10px 10px;"></select>
+              <select id="claimsMonth" required></select>
             </div>
-            <div style="display:flex;flex-direction:column;min-width:0;">
+            <div>
               <label style="margin-top:0;">Claim Received (₹) <span class="req">*</span></label>
-              <input id="claimsClaim" type="number" min="0" step="0.01" required style="width:auto;min-width:130px;padding:10px 10px;" placeholder="0.00">
+              <input id="claimsClaim" type="number" min="0" step="0.01" required placeholder="0.00">
             </div>
-            <div style="display:flex;flex-direction:column;min-width:0;">
+            <div>
               <label style="margin-top:0;">Interest Received (₹) <span class="req">*</span></label>
-              <input id="claimsInterest" class="input-green" type="number" min="0" step="0.01" required style="width:auto;min-width:130px;padding:10px 10px;" placeholder="0.00">
+              <input id="claimsInterest" class="input-green" type="number" min="0" step="0.01" required placeholder="0.00">
             </div>
-            <div style="display:flex;flex-direction:column;flex:1;min-width:120px;">
+            <div style="grid-column: span 2;">
               <label style="margin-top:0;">Remarks</label>
-              <input id="claimsRemarks" type="text" placeholder="optional" style="padding:10px 10px;">
+              <input id="claimsRemarks" type="text" placeholder="Optional remarks...">
             </div>
-            <div style="padding-bottom:2px;flex-shrink:0;">
-              <button class="btn" type="submit" style="height:45px;white-space:nowrap;">💾 Save</button>
+            <div>
+              <button class="btn" type="submit" style="width:100%; justify-content:center; padding:10px 20px;">💾 Save Claim Record</button>
             </div>
           </div>
         </form>
         </div>
 
         <div class="panel">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
-          <div class="section-title" style="margin:0;background:#7c3aed;flex-shrink:0;">💰 CLAIM RECEIVED LIST</div>
-          <select id="claimsFyFilter" style="padding:8px 12px;border:2px solid #d8b4fe;border-radius:8px;font-weight:600;background:#faf5ff;color:#4c1d95;" onchange="renderClaims()">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+          <div class="section-title" style="margin:0;flex-shrink:0;">💰 CLAIM RECEIVED LIST</div>
+          <select id="claimsFyFilter" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-weight:600;background:#fff;color:#0f172a;" onchange="renderClaims()">
             <option value="">All FY</option>
           </select>
-          <select id="claimsMonthFilter" style="padding:8px 12px;border:2px solid #d8b4fe;border-radius:8px;font-weight:600;background:#faf5ff;color:#4c1d95;" onchange="renderClaims()">
+          <select id="claimsMonthFilter" style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-weight:600;background:#fff;color:#0f172a;" onchange="renderClaims()">
             <option value="">All Months</option>
           </select>
-          <button class="btn" onclick="printClaims()" style="background:#4b5563;margin-left:auto;">🖨 Print/PDF</button>
-          <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
-          <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
+          <div style="margin-left:auto; display:flex; gap:8px;">
+            <button class="btn" onclick="printClaims()" style="background:#475569;">🖨 Print / PDF</button>
+            <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
+            <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
+          </div>
         </div>
         <div style="overflow-x:auto;">
           <table id="claimsTable">
             <thead>
-              <tr style="background:#7c3aed;color:#fff;">
+              <tr>
                 <th>FY</th><th>Month</th>
                 <th style="color:#6ee7b7;">Claim (₹)</th>
                 <th style="color:#fcd34d;">Interest (₹)</th>
@@ -485,24 +498,24 @@
       <!-- EXPENDITURE -->
       <section id="expenditure" class="tab-screen" style="display:none">
         <div class="panel">
-        <div class="section-title">ADD EXPENDITURE</div>
+        <div class="section-title">💸 ADD EXPENDITURE</div>
         <form id="expForm">
-          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;">
-            <div style="display:flex;flex-direction:column;min-width:0;">
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; align-items:end;">
+            <div>
               <label style="margin-top:0;">Date <span class="req">*</span></label>
-              <input id="expDate" type="date" required style="min-width:140px;padding:10px 10px;">
+              <input id="expDate" type="date" required>
             </div>
-            <div style="display:flex;flex-direction:column;min-width:0;">
+            <div>
               <label style="margin-top:0;">Amount (₹) <span class="req">*</span></label>
-              <input id="expAmount" type="number" min="0" step="0.01" required style="min-width:120px;padding:10px 10px;" placeholder="0.00">
+              <input id="expAmount" type="number" min="0" step="0.01" required placeholder="0.00">
             </div>
-            <div style="display:flex;flex-direction:column;min-width:0;">
+            <div>
               <label style="margin-top:0;">Invoice No</label>
-              <input id="expInvoice" type="text" placeholder="invoice no" style="min-width:120px;padding:10px 10px;">
+              <input id="expInvoice" type="text" placeholder="Invoice No">
             </div>
-            <div style="display:flex;flex-direction:column;min-width:0;">
+            <div>
               <label style="margin-top:0;">Category <span class="req">*</span></label>
-              <select id="expCategory" style="min-width:140px;padding:10px 10px;">
+              <select id="expCategory">
                 <option value="Drugs">Drugs</option>
                 <option value="Consumables">Consumables</option>
                 <option value="Machinery & Equipment">Machinery & Equipment</option>
@@ -514,40 +527,47 @@
                 <option value="Misc. Expenses">Misc. Expenses</option>
               </select>
             </div>
-            <div style="display:flex;flex-direction:column;min-width:0;">
+            <div>
               <label style="margin-top:0;">Sub Category</label>
-              <input id="expSub" type="text" placeholder="sub category" style="min-width:130px;padding:10px 10px;">
+              <input id="expSub" type="text" placeholder="Sub Category">
             </div>
-            <div style="display:flex;flex-direction:column;flex:1;min-width:140px;">
+            <div>
               <label style="margin-top:0;">Firm / Agency</label>
-              <input id="expFirm" type="text" placeholder="firm or agency" style="padding:10px 10px;">
+              <input id="expFirm" type="text" placeholder="Firm or Agency name">
             </div>
             <!-- Hidden fields kept for backward compatibility with save logic -->
             <input id="expDesc" type="hidden" value="">
             <input id="expRemarks" type="hidden" value="">
-            <div style="padding-bottom:2px;flex-shrink:0;">
-              <button class="btn" type="submit" style="height:45px;white-space:nowrap;margin-bottom:0;">💾 Save</button>
+            <div style="grid-column: 1 / -1; text-align:right;">
+              <button class="btn" type="submit" style="padding:10px 24px;">💾 Save Expenditure</button>
             </div>
           </div>
         </form>
         </div>
 
         <div class="panel">
-        <div class="section-title">EXPENDITURE LIST</div>
-        <div class="filter-bar" style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center;">
-          <select id="filterFyExp" style="min-width:110px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"><option value="">All FY</option></select>
-          <select id="filterMonthExp" style="min-width:130px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"><option value="">All Month</option></select>
-          <select id="filterCategoryExp" style="min-width:170px;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-weight:600;background:#faf5ff;color:#4c1d95;"><option value="">All Category</option></select>
-          <input id="filterSubExp" type="text" placeholder="Sub Category..." style="padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-size:13px;min-width:140px;background:#faf5ff;">
-          <input id="filterFirmExp" type="text" placeholder="Firm/Agency..." style="padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-size:13px;min-width:140px;background:#faf5ff;">
-          <button class="btn" id="applyExpFilters">Apply</button>
-          <button class="btn" onclick="clearExpFilters()" style="background:#6b7280;padding:8px 12px;">✖ Clear</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:12px;">
+          <div class="section-title" style="margin:0;">💸 EXPENDITURE LIST</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn" onclick="printExpenditure()" style="background:#475569;">🖨 Print / PDF</button>
+            <button class="btn" onclick="exportActiveTable('excel')" style="background:#16a34a;">📊 Excel</button>
+            <button class="btn" onclick="exportActiveTable('word')" style="background:#2563eb;">📝 Word</button>
+          </div>
         </div>
-        <div id="expPaginationTop" style="font-size:12px;color:#666;margin-bottom:6px;"></div>
+        <div class="filter-bar" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+          <select id="filterFyExp" style="min-width:110px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-weight:600;background:#fff;color:#0f172a;"><option value="">All FY</option></select>
+          <select id="filterMonthExp" style="min-width:120px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-weight:600;background:#fff;color:#0f172a;"><option value="">All Months</option></select>
+          <select id="filterCategoryExp" style="min-width:160px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-weight:600;background:#fff;color:#0f172a;"><option value="">All Categories</option></select>
+          <input id="filterSubExp" type="text" placeholder="Sub Category..." style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;min-width:130px;background:#fff;">
+          <input id="filterFirmExp" type="text" placeholder="Firm/Agency..." style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;min-width:130px;background:#fff;">
+          <button class="btn" id="applyExpFilters">Apply</button>
+          <button class="btn" onclick="clearExpFilters()" style="background:#64748b;padding:8px 12px;">✖ Clear</button>
+        </div>
+        <div id="expPaginationTop" style="font-size:12px;color:#64748b;margin-bottom:6px;"></div>
         <div style="overflow-x:auto;">
           <table id="expTable">
             <thead>
-              <tr style="background:#7c3aed;color:#fff;">
+              <tr>
                 <th>FY</th><th>Month</th><th>Category</th><th>Sub Category</th>
                 <th>Description</th><th>Firm / Agency</th>
                 <th style="text-align:right;">Amount (₹)</th>
