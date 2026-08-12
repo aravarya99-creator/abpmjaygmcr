@@ -80,7 +80,10 @@
       user = user || this.getUser();
       if (this.isAdmin(user)) return true;
       var roles = this.getUserRoles(user);
-      return roles.some(function(r){ return r.indexOf('accountant') !== -1 || r.indexOf('finance') !== -1; });
+      return roles.some(function(r){
+        var s = String(r).toLowerCase().trim();
+        return s.indexOf('accountant') !== -1 || s.indexOf('finance') !== -1;
+      });
     },
 
     /**
@@ -90,7 +93,11 @@
       user = user || this.getUser();
       if (this.isAdmin(user)) return true;
       var roles = this.getUserRoles(user);
-      return roles.some(function(r){ return r.indexOf('ic') !== -1 || r.indexOf('incharge') !== -1 || r.indexOf('in-charge') !== -1; });
+      return roles.some(function(r){
+        var s = String(r).toLowerCase().trim();
+        var norm = s.replace(/[^a-z0-9]/g, '');
+        return s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.indexOf('in-charge') !== -1 || s.indexOf('icnarge') !== -1 || s.indexOf('incherage') !== -1 || s.indexOf('inchrage') !== -1 || norm.indexOf('ic') !== -1 || norm.indexOf('inc') !== -1;
+      });
     },
 
     /**
@@ -98,8 +105,25 @@
      */
     isPMAM: function(user) {
       user = user || this.getUser();
+      if (this.isAdmin(user)) return true;
       var roles = this.getUserRoles(user);
-      return roles.some(function(r){ return r.indexOf('pmam') !== -1 || r.indexOf('arogya mitra') !== -1; });
+      return roles.some(function(r){
+        var s = String(r).toLowerCase().trim();
+        return s.indexOf('pmam') !== -1 || s.indexOf('arogya mitra') !== -1;
+      });
+    },
+
+    /**
+     * Check if user is DEO / Patient Services
+     */
+    isPatientService: function(user) {
+      user = user || this.getUser();
+      if (this.isAdmin(user)) return true;
+      var roles = this.getUserRoles(user);
+      return roles.some(function(r){
+        var s = String(r).toLowerCase().trim();
+        return s === 'deo' || s.indexOf('patient') !== -1 || s.indexOf('mts') !== -1;
+      });
     },
 
     /**
@@ -115,12 +139,16 @@
       if (allowedRoles && allowedRoles.length) {
         var userRoles = this.getUserRoles(user);
         var hasAccess = allowedRoles.some(function(reqRole) {
-          reqRole = reqRole.toLowerCase();
-          if (reqRole === 'admin' && GMCAuth.isAdmin(user)) return true;
-          if (reqRole === 'accountant' && GMCAuth.isAccountant(user)) return true;
-          if (reqRole === 'ic' && GMCAuth.isIC(user)) return true;
-          if (reqRole === 'pmam' && GMCAuth.isPMAM(user)) return true;
-          return userRoles.indexOf(reqRole) !== -1;
+          reqRole = reqRole.toLowerCase().trim();
+          if ((reqRole === 'admin' || reqRole === 'administrator') && GMCAuth.isAdmin(user)) return true;
+          if ((reqRole === 'accountant' || reqRole === 'finance') && GMCAuth.isAccountant(user)) return true;
+          if ((reqRole === 'ic' || reqRole === 'i/c' || reqRole === 'incharge' || reqRole === 'i/c ab-pmjay') && GMCAuth.isIC(user)) return true;
+          if ((reqRole === 'pmam') && GMCAuth.isPMAM(user)) return true;
+          if ((reqRole === 'deo' || reqRole === 'patient' || reqRole === 'patient_service') && GMCAuth.isPatientService(user)) return true;
+          return userRoles.some(function(ur){
+            var s = String(ur).toLowerCase().trim();
+            return s === reqRole || s.indexOf(reqRole) !== -1;
+          });
         });
 
         if (!hasAccess) {
