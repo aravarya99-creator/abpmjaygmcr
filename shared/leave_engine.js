@@ -182,7 +182,7 @@
       return new Promise(function(resolve, reject) {
         if (requireDigitalSign) {
           if (!pin || pin.length < 4) return reject(new Error('Please enter your 4-digit PIN.'));
-          var myEmail = (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : '').toLowerCase().trim();
+          var myEmail = (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : (self.userEmail || (global.GMCAuth && global.GMCAuth.getUser() ? global.GMCAuth.getUser().email : '') || '')).toLowerCase().trim();
           if (global.DSig && typeof global.DSig.verifyUserPin === 'function') {
             global.DSig.verifyUserPin(myEmail, pin).then(function(udata) {
               reqObj.applicantSignatureUrl = udata.signatureImage || '';
@@ -216,7 +216,7 @@
     approveSubstituteDuty: function(reqId, pin) {
       return new Promise(function(resolve, reject) {
         if (!pin || pin.length < 4) return reject(new Error('Please enter your 4-digit PIN.'));
-        var myEmail = (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : '').toLowerCase().trim();
+        var myEmail = (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : (this.userEmail || (global.GMCAuth && global.GMCAuth.getUser() ? global.GMCAuth.getUser().email : '') || '')).toLowerCase().trim();
         if (global.DSig && typeof global.DSig.verifyUserPin === 'function') {
           global.DSig.verifyUserPin(myEmail, pin).then(function(udata) {
             var sigUrl = udata.signatureImage || '';

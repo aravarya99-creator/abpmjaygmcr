@@ -77,7 +77,7 @@
         if (existingModal) existingModal.remove();
 
         title = title || 'Enter Digital Signature PIN';
-        user = global.GMCAuth ? global.GMCAuth.getUser() : null;
+        var user = global.GMCAuth ? global.GMCAuth.getUser() : null;
         var myEmail = email || (user ? user.email : '');
 
         var modal = document.createElement('div');
