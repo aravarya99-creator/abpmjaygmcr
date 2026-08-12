@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 <script src="js/config/firebase.config.js"></script>
 <script src="js/services/auth.service.js"></script>
 <script src="js/services/ward.service.js"></script>
@@ -285,12 +286,8 @@ tr:hover td{background:#EEF3FF}
 .hc-header{background:#1A3DB5;color:#fff;border-radius:6px;padding:6px 2px;text-align:center;font-size:10px;font-weight:800;letter-spacing:0.5px}
 
 </style>
-  <!-- Firebase v10 -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-  <script src="leave_engine.js"></script>
+  <!-- Shared Leave Engine & EmailJS -->
+  <script src="shared/leave_engine.js"></script>
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
@@ -2688,9 +2685,9 @@ function goSec(id,el){
 }
 
 // ===== DROPDOWN =====
-function toggleDD(){document.getElementById('userDD').classList.toggle('open');}
-function closeDD(){document.getElementById('userDD').classList.remove('open');}
-document.addEventListener('click',e=>{if(!e.target.closest('.user-pill'))document.getElementById('userDD').classList.remove('open');});
+function toggleDD(){var udd=document.getElementById('userDD');if(udd)udd.classList.toggle('open');}
+function closeDD(){var udd=document.getElementById('userDD');if(udd)udd.classList.remove('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.user-pill')){var udd=document.getElementById('userDD');if(udd)udd.classList.remove('open');}});
 function confirmLogout(){
   closeDD();
   if(confirm('Are you sure you want to logout?')) {
@@ -5762,29 +5759,30 @@ function saveHolidayToDb() {
 }
 
 function saveQuickLinks() {
+  var gVal = function(id, dflt){ var el=document.getElementById(id); return el ? (el.value.trim() || dflt) : dflt; };
   var links = {
-    pmam:        document.getElementById('qlPmam').value.trim(),
-    pmamLabel:   document.getElementById('qlPmamLabel').value.trim() || 'PMAM Portal',
-    ic:          document.getElementById('qlIc').value.trim(),
-    icLabel:     document.getElementById('qlIcLabel').value.trim() || 'I/C Portal',
-    admin:       document.getElementById('qlAdmin').value.trim(),
-    adminLabel:  document.getElementById('qlAdminLabel').value.trim() || 'Admin Portal',
-    nha:         document.getElementById('qlNha').value.trim(),
-    nhaLabel:    document.getElementById('qlNhaLabel').value.trim() || 'NHA Portal',
-    link5Label:  document.getElementById('qlLink5Label').value.trim(),
-    link5Url:    document.getElementById('qlLink5Url').value.trim(),
+    pmam:        gVal('qlPmam', ''),
+    pmamLabel:   gVal('qlPmamLabel', 'PMAM Portal'),
+    ic:          gVal('qlIc', ''),
+    icLabel:     gVal('qlIcLabel', 'I/C Portal'),
+    admin:       gVal('qlAdmin', ''),
+    adminLabel:  gVal('qlAdminLabel', 'Admin Portal'),
+    nha:         gVal('qlNha', ''),
+    nhaLabel:    gVal('qlNhaLabel', 'NHA Portal'),
+    link5Label:  gVal('qlLink5Label', ''),
+    link5Url:    gVal('qlLink5Url', ''),
     _updatedBy:  (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
     _updatedAt:  Date.now()
   };
   var msg = document.getElementById('qlSaveMsg');
-  msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…';
+  if (msg) { msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…'; }
   db.collection('settings').doc('quicklinks').set(links, { merge: true })
     .then(function() {
-      msg.style.color='#166534'; msg.textContent='✅ Quick links saved! Landing page will pick up changes on next refresh.';
+      if (msg) { msg.style.color='#166534'; msg.textContent='✅ Quick links saved! Landing page will pick up changes on next refresh.'; }
       if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/quicklinks', 'quicklinks', links);
-      setTimeout(function(){msg.textContent='';},4000);
+      if (msg) setTimeout(function(){msg.textContent='';},4000);
     })
-    .catch(function(e) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; });
+    .catch(function(e) { if (msg) { msg.style.color='#dc2626'; msg.textContent='Error: '+e.message; } });
 }
 
 function loadQuickLinks() {
@@ -5804,24 +5802,25 @@ function loadQuickLinks() {
 // CONTACT US — save / load
 // ══════════════════════════════════════
 function saveContactUs() {
+  var gVal = function(id){ var el=document.getElementById(id); return el ? el.value.trim() : ''; };
   var data = {
-    name:        document.getElementById('cuName').value.trim(),
-    designation: document.getElementById('cuDesig').value.trim(),
-    mobile:      document.getElementById('cuMobile').value.trim(),
-    email:       document.getElementById('cuEmail').value.trim(),
-    address:     document.getElementById('cuAddr').value.trim(),
+    name:        gVal('cuName'),
+    designation: gVal('cuDesig'),
+    mobile:      gVal('cuMobile'),
+    email:       gVal('cuEmail'),
+    address:     gVal('cuAddr'),
     _updatedBy:  (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : ''),
     _updatedAt:  Date.now()
   };
   var msg = document.getElementById('cuSaveMsg');
-  msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…';
+  if (msg) { msg.style.color = '#1A3DB5'; msg.textContent = 'Saving…'; }
   db.collection('settings').doc('contactus').set(data, { merge: true })
     .then(function() {
-      msg.style.color = '#166534'; msg.textContent = '✅ Contact info saved! Landing page will pick up changes on next refresh.';
+      if (msg) { msg.style.color = '#166534'; msg.textContent = '✅ Contact info saved! Landing page will pick up changes on next refresh.'; }
       if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/contactus', 'contactus', data);
-      setTimeout(function(){msg.textContent='';},4000);
+      if (msg) setTimeout(function(){msg.textContent='';},4000);
     })
-    .catch(function(e) { msg.style.color = '#dc2626'; msg.textContent = 'Error: '+e.message; });
+    .catch(function(e) { if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Error: '+e.message; } });
 }
 
 function loadContactUs() {
@@ -5965,7 +5964,8 @@ function refreshSysStats() {
 //  above which targets #ordersBody and the new order data shape.)
 
 function saveTicker() {
-  const txt = document.getElementById('tickerTxt').value.trim();
+  const el = document.getElementById('tickerTxt');
+  const txt = el ? el.value.trim() : '';
   if(!txt) return showToast('Please enter a ticker message', 'error');
   db.collection('settings').doc('portal').set({ tickerMessage: txt }, { merge: true })
     .then(function() { showToast('Ticker saved successfully', 'success'); })
@@ -6156,10 +6156,39 @@ function openStaffEdit(encodedEmail) {
   var u = _allStaff.find(function(s){ return s.email === email || s._docId === email; });
   if (!u) { showToast('Staff not found','error'); return; }
   _staffPhotoBase64 = u.photoBase64 || '';
-  document.getElementById('seEmail').value = u.email || u._docId;
-  document.getElementById('seName').value = u.name || '';
-  document.getElementById('seRole').value = u.role || '';
-  document.getElementById('seEmailDisplay').value = u.email || '';
+  
+  if (!document.getElementById('staffEditModal')) {
+    var modalHtml = `
+      <div class="modal-bg" id="staffEditModal" style="z-index:999999!important;">
+        <div class="modal-box" style="max-width:480px;">
+          <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>Edit Staff Profile</span>
+            <button style="background:none;border:none;font-size:18px;cursor:pointer;" onclick="document.getElementById('staffEditModal').classList.remove('open')">&times;</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px;">
+            <input type="hidden" id="seEmail">
+            <div><label style="font-size:11px;font-weight:700;color:#334155;">Email</label><input type="text" id="seEmailDisplay" readonly style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;background:#f8fafc;"></div>
+            <div><label style="font-size:11px;font-weight:700;color:#334155;">Full Name</label><input type="text" id="seName" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;"></div>
+            <div><label style="font-size:11px;font-weight:700;color:#334155;">Role</label><input type="text" id="seRole" readonly style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;background:#f8fafc;"></div>
+            <div><label style="font-size:11px;font-weight:700;color:#334155;">Ward</label><input type="text" id="seWard" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;"></div>
+            <div><label style="font-size:11px;font-weight:700;color:#334155;">Status</label><select id="seStatus" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px;"><option value="approved">Active / Approved</option><option value="disabled">Disabled</option></select></div>
+            <div style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="seHideOnIndex"><label for="seHideOnIndex" style="font-size:11px;font-weight:600;">Hide on public directory</label></div>
+            <div><label style="font-size:11px;font-weight:700;color:#334155;">Profile Photo</label><div style="display:flex;align-items:center;gap:12px;margin-top:4px;"><div id="sePhotoPreview" style="width:48px;height:48px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:800;overflow:hidden;">?</div><input type="file" id="sePhotoFile" accept="image/*" onchange="sePreviewPhoto(this)"></div></div>
+            <div id="seErr" style="font-size:11px;color:#dc2626;font-weight:600;"></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+            <button class="mbtn mbtn-sec" onclick="document.getElementById('staffEditModal').classList.remove('open')">Cancel</button>
+            <button class="mbtn mbtn-pri" onclick="saveStaffEdit()">Save Changes</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  }
+
+  var elEmail = document.getElementById('seEmail'); if (elEmail) elEmail.value = u.email || u._docId;
+  var elName = document.getElementById('seName'); if (elName) elName.value = u.name || '';
+  var elRole = document.getElementById('seRole'); if (elRole) elRole.value = u.role || '';
+  var elEmailDisp = document.getElementById('seEmailDisplay'); if (elEmailDisp) elEmailDisp.value = u.email || '';
   var statusSel = document.getElementById('seStatus');
   if (statusSel) {
     statusSel.value = (u.status === 'active' || u.status === 'approved') ? 'approved' : (u.status || 'approved');
@@ -6178,9 +6207,9 @@ function openStaffEdit(encodedEmail) {
       prev.innerHTML = '<span>'+initials+'</span>';
     }
   }
-  document.getElementById('seErr').textContent = '';
-  document.getElementById('sePhotoFile').value = '';
-  document.getElementById('staffEditModal').classList.add('open');
+  var errEl = document.getElementById('seErr'); if (errEl) errEl.textContent = '';
+  var photoFile = document.getElementById('sePhotoFile'); if (photoFile) photoFile.value = '';
+  var sem = document.getElementById('staffEditModal'); if (sem) sem.classList.add('open');
 }
 
 function sePreviewPhoto(input) {
@@ -6197,22 +6226,26 @@ function sePreviewPhoto(input) {
 }
 
 function saveStaffEdit() {
-  var email = document.getElementById('seEmail').value;
-  var name = document.getElementById('seName').value.trim();
-  var ward = document.getElementById('seWard').value;
-  var status = document.getElementById('seStatus').value;
+  var elEmail = document.getElementById('seEmail');
+  var email = elEmail ? elEmail.value : '';
+  var elName = document.getElementById('seName');
+  var name = elName ? elName.value.trim() : '';
+  var elWard = document.getElementById('seWard');
+  var ward = elWard ? elWard.value : '';
+  var elStatus = document.getElementById('seStatus');
+  var status = elStatus ? elStatus.value : '';
   var hideCheckbox = document.getElementById('seHideOnIndex');
   var hideOnIndex = hideCheckbox ? hideCheckbox.checked : false;
   var errEl = document.getElementById('seErr');
-  if (!name) { errEl.textContent = 'Name is required.'; return; }
-  errEl.textContent = 'Saving...';
+  if (!name) { if (errEl) errEl.textContent = 'Name is required.'; return; }
+  if (errEl) errEl.textContent = 'Saving...';
   var patch = { name: name, ward: ward, status: status, hideOnIndex: hideOnIndex };
   if (_staffPhotoBase64) patch.photoBase64 = _staffPhotoBase64;
   db.collection('users').doc(email).update(patch).then(function() {
     // Update local cache
     var u = _allStaff.find(function(s){ return s.email === email || s._docId === email; });
     if (u) { u.name = name; u.ward = ward; u.status = status; u.hideOnIndex = hideOnIndex; if (_staffPhotoBase64) u.photoBase64 = _staffPhotoBase64; }
-    document.getElementById('staffEditModal').classList.remove('open');
+    var sem = document.getElementById('staffEditModal'); if (sem) sem.classList.remove('open');
     showToast('✅ Staff profile updated','success');
     if (typeof writeAudit === 'function') writeAudit('EDIT','users',email,{name:name,ward:ward,status:status});
     // Refresh display

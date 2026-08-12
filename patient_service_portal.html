@@ -746,7 +746,8 @@ function pspLogout() {
 // Set the header logo from the LOGO_AYUSHMAN constant defined later in the page
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof LOGO_AYUSHMAN !== 'undefined') {
-    document.getElementById('header-logo').src = LOGO_AYUSHMAN;
+    var hl = document.getElementById('header-logo');
+    if (hl) hl.src = LOGO_AYUSHMAN;
   }
 });
 </script>

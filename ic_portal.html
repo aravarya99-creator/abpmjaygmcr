@@ -213,10 +213,6 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
 .bell-wrap svg{width:22px;height:22px;fill:#fff;opacity:0.85}
 .bell-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:800;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center}
 </style>
-  <!-- Firebase v10 -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
@@ -1523,8 +1519,8 @@ function goSec(id,el){
     if (typeof genPmam === 'function') genPmam();
   }
 }
-function toggleDD(){document.getElementById('userDD').classList.toggle('open');}
-document.addEventListener('click',e=>{if(!e.target.closest('.user-pill'))document.getElementById('userDD').classList.remove('open');});
+function toggleDD(){var udd=document.getElementById('userDD');if(udd)udd.classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.user-pill')){var udd=document.getElementById('userDD');if(udd)udd.classList.remove('open');}});
 
 // ===== MONTHLY =====
 function genMonthly(){
@@ -1542,9 +1538,9 @@ function genMonthly(){
   });
 
   if(!filtered.length){
-    document.getElementById('monthlyMetrics').innerHTML='';
-    document.getElementById('monthlyTbody').innerHTML=`<tr><td colspan="12" class="empty-td">No data available for ${month}.</td></tr>`;
-    document.getElementById('monthlyFoot').innerHTML='';
+    var mm=document.getElementById('monthlyMetrics');if(mm)mm.innerHTML='';
+    var mt=document.getElementById('monthlyTbody');if(mt)mt.innerHTML=`<tr><td colspan="12" class="empty-td">No data available for ${month}.</td></tr>`;
+    var mf=document.getElementById('monthlyFoot');if(mf)mf.innerHTML='';
     return;
   }
 
@@ -1565,7 +1561,8 @@ function genMonthly(){
   rows.forEach(r=>{totIPD+=r.ipd;totMed+=r.med;totSurg+=r.surg;totReg+=r.reg;totPre+=r.pre;totPreAmt+=r.preAmt;totDis+=r.dis;totClm+=r.clm;});
 
   // Metrics
-  document.getElementById('monthlyMetrics').innerHTML=[
+  var mmEl = document.getElementById('monthlyMetrics');
+  if(mmEl) mmEl.innerHTML=[
     {c:'c1',n:totIPD,l:'Total IPD'},
     {c:'c2',n:totReg,l:'Registered'},
     {c:'c3',n:totPre,l:'Pre-Auth'},
@@ -1599,9 +1596,9 @@ function genAnnual(){
   const filtered = allReports.filter(r => r.date && new Date(r.date).getFullYear() === year);
   
   if(!filtered.length){
-    document.getElementById('annualTbody').innerHTML='<tr><td colspan="10" class="empty-td">No data available for ' + year + '</td></tr>';
-    document.getElementById('annualFoot').innerHTML='';
-    document.getElementById('annualMetrics').innerHTML='';
+    var at=document.getElementById('annualTbody');if(at)at.innerHTML='<tr><td colspan="10" class="empty-td">No data available for ' + year + '</td></tr>';
+    var af=document.getElementById('annualFoot');if(af)af.innerHTML='';
+    var am=document.getElementById('annualMetrics');if(am)am.innerHTML='';
     return;
   }
 
@@ -1639,7 +1636,8 @@ function genAnnual(){
     <tr><td>${i+1}</td><td><strong>${r.name}</strong></td><td>${r.ipd}</td><td>${r.reg}</td><td>${r.pre}</td><td>${r.dis}</td><td>${fmt(r.clm)}</td><td>${cv(r.ipd,r.reg)}</td></tr>
   `).join('');
 
-  document.getElementById('annualMetrics').innerHTML = [
+  var amEl = document.getElementById('annualMetrics');
+  if(amEl) amEl.innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
   ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
@@ -1710,11 +1708,11 @@ function genWard(){
   }
 
   if(!filtered.length){
-    document.getElementById('wardMetrics').innerHTML='';
-    document.getElementById('wardTbody').innerHTML='<tr><td colspan="11" class="empty-td">No data available for selected filters.</td></tr>';
+    var wm=document.getElementById('wardMetrics');if(wm)wm.innerHTML='';
+    var wt=document.getElementById('wardTbody');if(wt)wt.innerHTML='<tr><td colspan="11" class="empty-td">No data available for selected filters.</td></tr>';
     var wf=document.getElementById('wardFoot'); if(wf) wf.innerHTML='';
     // Restore default header
-    document.getElementById('wardThead').innerHTML = '<tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr>';
+    var wth=document.getElementById('wardThead');if(wth)wth.innerHTML = '<tr><th>Rank</th><th>Ward</th><th>PMAM</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr>';
     return;
   }
 
@@ -1754,7 +1752,8 @@ function _genWardAggregated(ward, filtered){
     wardFoot.innerHTML = `<tr class="tot-row"><td colspan="3">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
   }
 
-  document.getElementById('wardMetrics').innerHTML = [
+  var wmEl = document.getElementById('wardMetrics');
+  if(wmEl) wmEl.innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
   ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
@@ -1795,7 +1794,8 @@ function _genWardPmamBreakdown(ward, filtered){
     wardFoot.innerHTML = `<tr class="tot-row"><td colspan="3">TOTAL — ${rows.length} PMAM(s)</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
   }
 
-  document.getElementById('wardMetrics').innerHTML = [
+  var wmEl = document.getElementById('wardMetrics');
+  if(wmEl) wmEl.innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c2',n:tReg,l:'Registered'}, {c:'c3',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:rows.length+' PMAMs',l:'Contributors'}
   ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
@@ -1841,9 +1841,9 @@ function _genPmamYearWise(pmam, year, filtered){
   document.getElementById('pmamThead').innerHTML = '<tr><th>Month</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th></tr>';
 
   if(!filtered.length){
-    document.getElementById('pmamTbody').innerHTML='<tr><td colspan="10" class="empty-td">No trend data available for ' + pmam + '</td></tr>';
-    document.getElementById('pmamFoot').innerHTML='';
-    document.getElementById('pmamMetrics').innerHTML='';
+    var pt=document.getElementById('pmamTbody');if(pt)pt.innerHTML='<tr><td colspan="10" class="empty-td">No trend data available for ' + pmam + '</td></tr>';
+    var pf=document.getElementById('pmamFoot');if(pf)pf.innerHTML='';
+    var pm=document.getElementById('pmamMetrics');if(pm)pm.innerHTML='';
     return;
   }
 
@@ -1867,7 +1867,8 @@ function _genPmamYearWise(pmam, year, filtered){
 
   document.getElementById('pmamFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td>${cv(tIPD,tReg)}</td></tr>`;
 
-  document.getElementById('pmamMetrics').innerHTML = [
+  var pmEl = document.getElementById('pmamMetrics');
+  if(pmEl) pmEl.innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'}, {c:'c3',n:tReg,l:'Registered'}, {c:'c2',n:tPre,l:'Pre-Auth'}, {c:'c4',n:tDis,l:'Discharged'}, {c:'c5',n:'₹'+fmt(tClm),l:'Claim Amt'}, {c:'c6',n:cv(tIPD,tReg),l:'Conv%'}
   ].map(m=>`<div class="mcard ${m.c}${String(m.n).indexOf('₹')>=0?' has-currency':''}"><div class="mcard-num">${m.n}</div><div class="mcard-label">${m.l}</div></div>`).join('');
 }
@@ -1929,7 +1930,8 @@ function _genPmamDayWise(pmam, year, filtered){
   // TOTAL row — note: 11 columns total now (10 data + Wards), so colspan="1" for Date label
   document.getElementById('pmamFoot').innerHTML = `<tr class="tot-row"><td colspan="1">TOTAL</td><td>${tIPD}</td><td>${tMed}</td><td>${tSurg}</td><td>${tReg}</td><td>${tPre}</td><td>${fmt(tPreAmt)}</td><td>${tDis}</td><td>${fmt(tClm)}</td><td style="font-size:11px">${submittedDays} / ${daysInMonth} days</td><td>${cv(tIPD,tReg)}</td></tr>`;
 
-  document.getElementById('pmamMetrics').innerHTML = [
+  var pmEl = document.getElementById('pmamMetrics');
+  if(pmEl) pmEl.innerHTML = [
     {c:'c1',n:tIPD,l:'Total IPD'},
     {c:'c3',n:tReg,l:'Registered'},
     {c:'c2',n:tPre,l:'Pre-Auth'},
@@ -2383,52 +2385,58 @@ function loadLeaveReq(){
   const pending = LeaveEngine.requests.filter(l => l.status === 'Pending');
   const history = LeaveEngine.requests.filter(l => l.status !== 'Pending');
   
-  document.getElementById('lv-pending').textContent = pending.length;
-  document.getElementById('lv-approved').textContent = history.filter(l=>l.status==='Approved').length;
-  document.getElementById('lv-rejected').textContent = history.filter(l=>l.status==='Rejected').length;
+  var elP = document.getElementById('lv-pending'); if(elP) elP.textContent = pending.length;
+  var elA = document.getElementById('lv-approved'); if(elA) elA.textContent = history.filter(l=>l.status==='Approved').length;
+  var elR = document.getElementById('lv-rejected'); if(elR) elR.textContent = history.filter(l=>l.status==='Rejected').length;
   
-  if(!pending.length) {
-    document.getElementById('pendingList').innerHTML='<div style="padding:20px;text-align:center;color:#6b7280;font-size:12px">No pending leave requests.</div>';
-  } else {
-    document.getElementById('pendingList').innerHTML = pending.map(l => `
-      <div style="background:#fff;border:1px solid #c7d2e8;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(30,80,200,0.05)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">
-          <div style="font-weight:700;font-size:14px;color:#0F2B8C">${l.name} <span style="color:#6b7280;font-size:11px;font-weight:600;margin-left:6px">${l.desig}</span></div>
-          <div style="font-size:11px;color:#9ca3af">${new Date(l.timestamp).toLocaleDateString()}</div>
+  var elPList = document.getElementById('pendingList');
+  if(elPList) {
+    if(!pending.length) {
+      elPList.innerHTML='<div style="padding:20px;text-align:center;color:#6b7280;font-size:12px">No pending leave requests.</div>';
+    } else {
+      elPList.innerHTML = pending.map(l => `
+        <div style="background:#fff;border:1px solid #c7d2e8;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(30,80,200,0.05)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">
+            <div style="font-weight:700;font-size:14px;color:#0F2B8C">${l.name} <span style="color:#6b7280;font-size:11px;font-weight:600;margin-left:6px">${l.desig}</span></div>
+            <div style="font-size:11px;color:#9ca3af">${new Date(l.timestamp).toLocaleDateString()}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin-bottom:12px">
+            <div><span style="color:#6b7280;font-weight:600">Ward:</span> ${l.ward||'—'}</div>
+            <div><span style="color:#6b7280;font-weight:600">Leave Type:</span> ${l.ltype||'—'}</div>
+            <div><span style="color:#6b7280;font-weight:600">Dates:</span> ${l.fromDt||'—'} to ${l.toDt||'—'} (${l.days||0} days)</div>
+            <div><span style="color:#6b7280;font-weight:600">Substitute:</span> ${l.duty||'—'}</div>
+            <div style="grid-column:1/-1"><span style="color:#6b7280;font-weight:600">Reason:</span> ${l.reason||'—'}</div>
+          </div>
+          <div style="display:flex;gap:8px" id="lactions_${l.id}">
+            <input type="text" id="lremark_${l.id}" placeholder="Remarks (optional)" style="flex:1;padding:6px 10px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px">
+            <button style="background:#166534;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer" onclick="approveLeaveFb('${l.id}')">✓ Approve</button>
+            <button style="background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer" onclick="rejectLeaveFb('${l.id}')">✗ Reject</button>
+          </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin-bottom:12px">
-          <div><span style="color:#6b7280;font-weight:600">Ward:</span> ${l.ward||'—'}</div>
-          <div><span style="color:#6b7280;font-weight:600">Leave Type:</span> ${l.ltype||'—'}</div>
-          <div><span style="color:#6b7280;font-weight:600">Dates:</span> ${l.fromDt||'—'} to ${l.toDt||'—'} (${l.days||0} days)</div>
-          <div><span style="color:#6b7280;font-weight:600">Substitute:</span> ${l.duty||'—'}</div>
-          <div style="grid-column:1/-1"><span style="color:#6b7280;font-weight:600">Reason:</span> ${l.reason||'—'}</div>
-        </div>
-        <div style="display:flex;gap:8px" id="lactions_${l.id}">
-          <input type="text" id="lremark_${l.id}" placeholder="Remarks (optional)" style="flex:1;padding:6px 10px;border:1px solid #c7d2e8;border-radius:6px;font-size:11px">
-          <button style="background:#166534;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer" onclick="approveLeaveFb('${l.id}')">✓ Approve</button>
-          <button style="background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer" onclick="rejectLeaveFb('${l.id}')">✗ Reject</button>
-        </div>
-      </div>
-    `).join('');
+      `).join('');
+    }
   }
   
-  if(!history.length) {
-    document.getElementById('lvHistTbody').innerHTML='<tr><td colspan="10" class="empty-td">No leave history available.</td></tr>';
-  } else {
-    document.getElementById('lvHistTbody').innerHTML = history.map(l => `
-      <tr>
-        <td>${new Date(l.timestamp).toLocaleDateString()}</td>
-        <td><strong>${l.name}</strong></td>
-        <td>${l.desig}</td>
-        <td>${l.ltype}</td>
-        <td>${l.fromDt}</td>
-        <td>${l.toDt}</td>
-        <td>${l.days}</td>
-        <td>${l.duty}</td>
-        <td><span class="badge badge-${l.status==='Approved'?'green':'red'}">${l.status}</span></td>
-        <td>${l.remark||'—'}</td>
-      </tr>
-    `).join('');
+  var elHist = document.getElementById('lvHistTbody');
+  if(elHist) {
+    if(!history.length) {
+      elHist.innerHTML='<tr><td colspan="10" class="empty-td">No leave history available.</td></tr>';
+    } else {
+      elHist.innerHTML = history.map(l => `
+        <tr>
+          <td>${new Date(l.timestamp).toLocaleDateString()}</td>
+          <td><strong>${l.name}</strong></td>
+          <td>${l.desig}</td>
+          <td>${l.ltype}</td>
+          <td>${l.fromDt}</td>
+          <td>${l.toDt}</td>
+          <td>${l.days}</td>
+          <td>${l.duty||'—'}</td>
+          <td><span class="badge ${l.status==='Approved'?'b-app':l.status==='Rejected'?'b-rej':'b-pend'}">${l.status}</span></td>
+          <td style="font-size:11px;color:#6b7280">${l.remark||l.rejectReason||'—'}</td>
+        </tr>
+      `).join('');
+    }
   }
 }
 
@@ -4908,7 +4916,6 @@ window.addEventListener('DOMContentLoaded', function(){
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script src="shared/leave_engine.js"></script>
-<script src="shared/digital_signature.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     if (window.DSig) {
