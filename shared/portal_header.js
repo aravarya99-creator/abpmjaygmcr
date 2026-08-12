@@ -839,12 +839,11 @@
                   }
                 }
 
-                var existingRoles = Array.isArray(userObj && userObj.roles) ? userObj.roles.slice() : (userObj && userObj.role ? [userObj.role] : []);
-                var docRoles = Array.isArray(d.roles) ? d.roles.slice() : (d.role ? [d.role] : []);
-                var mergedRoles = Array.from(new Set(existingRoles.concat(docRoles)));
-                if (d.desig && !mergedRoles.includes(d.desig)) mergedRoles.push(d.desig);
+                var docRoles = Array.isArray(d.roles) && d.roles.length ? d.roles.slice() : (d.role ? [d.role] : (Array.isArray(userObj && userObj.roles) ? userObj.roles : []));
+                if (d.role && !docRoles.includes(d.role)) docRoles.push(d.role);
+                if (d.desig && !docRoles.includes(d.desig)) docRoles.push(d.desig);
 
-                var updatedUserObj = Object.assign({}, userObj || {}, d, { roles: mergedRoles });
+                var updatedUserObj = Object.assign({}, userObj || {}, d, { roles: docRoles });
                 var finalDisplayRole = activePortalRole || d.role || d.desig || displayRole;
 
                 try {
