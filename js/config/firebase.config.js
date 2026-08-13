@@ -56,6 +56,7 @@
 
   var res = initFirebase();
   global.GMCFirebase = res;
+  global.ADMIN_EMAIL = 'aravarya99@gmail.com';
   if (res) {
     if (res.db) global.db = res.db;
     if (res.auth) global.auth = res.auth;
@@ -65,4 +66,6 @@
 if (typeof window !== 'undefined') {
   window.db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
   window.auth = window.auth || (window.GMCFirebase ? window.GMCFirebase.auth : null);
+  window.ADMIN_EMAIL = window.ADMIN_EMAIL || 'aravarya99@gmail.com';
 }
+
