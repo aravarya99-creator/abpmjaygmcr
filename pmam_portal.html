@@ -1299,7 +1299,8 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div class="modal-content" style="background:#fff;padding:20px;border-radius:12px;width:90%;max-width:500px;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
           <h3 style="margin-bottom:15px;color:#0f2b8c;">Leave Request Details</h3>
           <div id="viewDutyDetails" style="margin:15px 0; font-size:14px; line-height:1.6;"></div>
-          <div style="text-align:right">
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:15px;">
+            <button class="btn btn-pri" id="viewDutyPdfBtn">📄 View Signed Application (PDF)</button>
             <button class="btn btn-sec" onclick="document.getElementById('viewDutyModal').style.display='none'">Close</button>
           </div>
         </div>
@@ -2336,6 +2337,7 @@ function renderSubstituteRequests() {
         htmlNew += '<td>' + fmtDate(req.to || req.toDt) + '</td>';
         htmlNew += '<td>' + (req.days || '-') + '</td>';
         htmlNew += '<td>';
+        htmlNew += '<button class="btn btn-sec" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="printHistoryLeave(\'' + req.id + '\')">📄 PDF</button>';
         htmlNew += '<button class="btn btn-pri" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="viewDutyRequest(\'' + req.id + '\')">View</button>';
         htmlNew += '<button class="btn btn-pri" style="background:#166534; padding:4px 8px; font-size:11px; margin-right:4px;" onclick="initiateApproveDuty(\'' + req.id + '\')">Approve</button>';
         htmlNew += '<button class="btn btn-sec" style="color:#dc2626; padding:4px 8px; font-size:11px;" onclick="rejectDutyRequest(\'' + req.id + '\')">Reject</button>';
@@ -2362,7 +2364,7 @@ function renderSubstituteRequests() {
         htmlHist += '<td>' + fmtDate(req.to || req.toDt) + '</td>';
         htmlHist += '<td>' + (req.days || '-') + '</td>';
         htmlHist += '<td><span style="font-size:11px; font-weight:700; color:' + statusColor + ';">' + (req.status || '-') + '</span></td>';
-        htmlHist += '<td><button class="btn btn-sec" style="padding:4px 8px; font-size:11px;" onclick="viewDutyRequest(\'' + req.id + '\')">View</button></td>';
+        htmlHist += '<td><button class="btn btn-sec" style="padding:4px 8px; font-size:11px;" onclick="printHistoryLeave(\'' + req.id + '\')">📄 PDF</button></td>';
         htmlHist += '</tr>';
       });
       tbodyHist.innerHTML = htmlHist;
@@ -2379,6 +2381,12 @@ function viewDutyRequest(id) {
                 '<strong>Leave Type:</strong> ' + req.ltype + '<br>' +
                 '<strong>Dates:</strong> ' + fmtDate(req.from) + ' to ' + fmtDate(req.to) + ' (' + req.days + ' days)<br>' +
                 '<strong>Reason:</strong> ' + req.reason;
+  var pdfBtn = document.getElementById('viewDutyPdfBtn');
+  if (pdfBtn) {
+    pdfBtn.onclick = function() {
+      LeaveEngine.printLeaveDocument(req);
+    };
+  }
   document.getElementById('viewDutyModal').style.display = 'flex';
 }
 
@@ -3046,98 +3054,11 @@ window.addEventListener('DOMContentLoaded', function(){
 // LEAVE - PRINT HISTORY (opens new window)
 // ---
 function printHistoryLeave(id) {
-  var r = LeaveEngine.requests.find(function(req) { return req.id === id; });
+  var r = LeaveEngine.requests.find(function(req) { return req.id === id; }) || (LeaveEngine.subRequests && LeaveEngine.subRequests.find(function(req) { return req.id === id; }));
   if (!r) return;
-  var dLabel = '';
-  if (r.days) dLabel += r.days + ' day(s)';
-  if (r.fromDt && r.toDt) dLabel += ' (' + fmtDate(r.fromDt) + ' to ' + fmtDate(r.toDt) + ')';
-  if (!dLabel) dLabel = '-';
-  
-  var reasonStr = r.reason || '-';
-  var todayStr = new Date(r.timestamp || Date.now()).toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
-
-  var FORM_TITLE = 'LEAVE APPLICATION FORM';
-  var bodyHTML = ''
-    + '<div class="date-row"><strong>Date:</strong> ' + todayStr + '</div>'
-    + '<table>'
-    + '<tbody>'
-    + '<tr><td class="lbl">Name of the Official</td><td>' + (r.name || '-')   + '</td></tr>'
-    + '<tr><td class="lbl">Designation</td><td>'          + (r.desig || 'PMAM')  + '</td></tr>'
-    + '<tr><td class="lbl">Ward / Unit</td><td>'          + (r.ward || '-')   + '</td></tr>'
-    + '<tr><td class="lbl">Reason for Leave</td><td>'     + reasonStr + '</td></tr>'
-    + '<tr><td class="lbl">Type of Leave</td><td>'        + (r.ltype || '-')  + '</td></tr>'
-    + '<tr><td class="lbl">Total Days Requested</td><td>' + dLabel + '</td></tr>'
-    + '<tr><td class="lbl">Return Date</td><td>'          + (r.retDate ? fmtDate(r.retDate) : '-') + '</td></tr>'
-    + '<tr><td class="lbl">Duty Assigned To</td><td>'     + (r.duty || '-') + '</td></tr>'
-    + '</tbody></table>'
-    + '<div style="page-break-inside: avoid; break-inside: avoid;">'
-    + '<div class="undertaking">'
-    +   '<div style="text-align:center;font-weight:700;margin-bottom:4px;font-size:10pt;text-decoration:underline">UNDERTAKING FOR PMAM DUTY COVERAGE DURING LEAVE</div>'
-    +   'I, Mr./Ms. <strong>' + (r.duty||'________________') + '</strong>, PMAM, hereby undertake that during the leave period of Mr./Ms. <strong>' + (r.name||'________________') + '</strong>, from <strong>' + (fmtDate(r.fromDt)||'___') + '</strong> to <strong>' + (fmtDate(r.toDt)||'___') + '</strong>, I shall assume full responsibility for all assigned AB PM-JAY work, including pre-auths, pre-auth queries, claim queries, enhancements, discharges, claim submissions, and all pending work. All IPDs from the assigned ward(s) during the leave period shall be counted under my IPD workload and shall be my responsibility.'
-    + '</div>'
-    + '<div class="sig-row">'
-    + '<div class="sig-box"><div class="sig-label">Signature of Applicant - PMAM</div><div class="sig-desig">' + (r.name || '-') + '</div></div>'
-    + '<div class="sig-box"><div class="sig-label">Signature of Substitute PMAM</div><div class="sig-desig">' + (r.duty || '-') + '</div></div>'
-    + '</div>'
-    + '<div class="sig-row" style="margin-top:10mm">'
-    + '<div class="sig-box"><div class="sig-label">I/C AB-PMJAY</div><div class="sig-desig">GMC &amp; AH, Rajouri</div></div>'
-    + '<div class="sig-box"><div class="sig-label">Medical Superintendent</div><div class="sig-desig">GMC &amp; AH, Rajouri</div></div>'
-    + '</div>'
-    + '</div>'
-    + '<div class="print-footer">'
-    + '<span class="footer-brand">Computer generated leave application. | PMAM Reporting Portal @ MIS AB-PMJAY GMCR</span>'
-    + '</div>';
-
-  var pageContent;
-  if (typeof GMCHeaders !== 'undefined' && GMCHeaders && typeof GMCHeaders.abpmjayReport === 'function') {
-    try {
-      var headerHTML = GMCHeaders.abpmjayReport({
-        title: FORM_TITLE,
-        editable: false,
-        orientation: 'portrait'
-      });
-      pageContent = '<div class="page-wrap">' + headerHTML + '<div class="page-body">' + bodyHTML + '</div></div>';
-    } catch (e) {
-      pageContent = '<div style="padding:14mm 14mm;color:#dc2626;font-weight:bold;">Letterhead failed to render: ' + e.message + '</div>' + '<div style="padding:0 14mm 14mm;">' + bodyHTML + '</div>';
-    }
-  } else {
-    pageContent = '<div style="padding:14mm 14mm;color:#dc2626;font-weight:bold;">Shared letterhead not loaded.</div>' + '<div style="padding:0 14mm 14mm;">' + bodyHTML + '</div>';
-  }
-
-  var baseHref = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
-  var page = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Leave Application</title>'
-    + '<base href="' + baseHref + '">'
-    + '<link rel="stylesheet" href="shared/headers.css?v=6">'
-    + '<style>'
-    + '*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}'
-    + 'img{image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges}'
-    + 'body{font-family:Tahoma,Verdana,Arial,sans-serif;background:#fff;font-size:12pt;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
-    + '.page-wrap{padding:5mm 14mm 6mm;max-width:210mm;margin:0 auto}'
-    + '.page-body{margin-top:3mm}'
-    + 'table{width:100%;border-collapse:separate;border-spacing:0;font-size:12pt;border:2px solid #1a1a1a;border-radius:10px;overflow:hidden;margin-bottom:3mm}'
-    + 'thead tr th{background:#1a1a1a;color:#fff;padding:4px 10px;font-size:11pt;text-align:left;font-weight:700}'
-    + 'tbody tr:nth-child(even){background:#f7f8fc}'
-    + 'tbody tr:nth-child(odd){background:#fff}'
-    + 'td{padding:4px 10px;border-bottom:1px solid #dde2ee;vertical-align:middle}'
-    + 'tbody tr:last-child td{border-bottom:none}'
-    + '.lbl{font-weight:700;width:70mm;color:#1a2340;border-right:2px solid #dde2ee}'
-    + '.date-row{text-align:right;font-size:11pt;margin-bottom:3mm;color:#444}'
-    + '.undertaking{font-size:9.5pt;text-align:justify;border:1px solid #1a3db5;border-left:4px solid #1a3db5;padding:8px 12px;background:#f7f8fc;margin:2mm 0;line-height:1.4}'
-    + '.sig-row{display:flex;justify-content:space-between;margin-top:4mm;gap:8mm}'
-    + '.sig-box{flex:1;text-align:center}'
-    + '.sig-label{font-weight:700;font-size:11pt;color:#1a2340;line-height:1.25;height:9mm;display:flex;align-items:center;justify-content:center;padding:0 2mm}'
-    + '.sig-desig{font-size:10pt;font-weight:normal;color:#555;margin-top:1mm;line-height:1.3;min-height:6mm}'
-    + '.print-footer{border-top:2px solid #1a2340;margin-top:6mm;padding-top:2mm;text-align:center;font-size:10pt;color:#555}'
-    + '.footer-brand{font-weight:700;color:#1a2340}'
-    + '@media print{body{margin:0}@page{size:A4 portrait;margin:6mm 10mm}}'
-    + '</style></head><body>'
-    + pageContent
-    + '<' + 'script>window.onload=function(){setTimeout(function(){window.print();},300);};</' + 'script></body></html>';
-
-  var printWin = window.open('','_blank');
-  printWin.document.write(page);
-  printWin.document.close();
+  LeaveEngine.printLeaveDocument(r);
 }
+
 
 // Restrict compensatory date pickers to current month
 (function(){

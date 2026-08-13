@@ -7076,6 +7076,10 @@ function dmViewLeaveDoc(id) {
 }
 
 function printLeaveCertificate() {
+  if (window._viewingLeaveDoc) {
+    LeaveEngine.printLeaveDocument(window._viewingLeaveDoc);
+    return;
+  }
   var content = document.getElementById('leaveDocCertBody').innerHTML;
   var win = window.open('', '_blank', 'width=800,height=900');
   win.document.write('<html><head><title>Leave Certificate - GMC & AH Rajouri</title><style>body { font-family: sans-serif; padding: 30px; color: #0f172a; }</style></head><body>' + content + '<script>setTimeout(function(){ window.print(); window.close(); }, 500);<\/script></body></html>');

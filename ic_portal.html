@@ -1048,7 +1048,7 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <!-- Tab Panels -->
         <div class="tbl-wrap" id="lr-panel-pending">
           <table id="lr-pending-tbl">
-            <thead><tr><th style="background:#0F2B8C;color:#fff;">Employee</th><th style="background:#0F2B8C;color:#fff;">Leave</th><th style="background:#0F2B8C;color:#fff;">From</th><th style="background:#0F2B8C;color:#fff;">To</th><th style="background:#0F2B8C;color:#fff;">Days</th><th style="background:#0F2B8C;color:#fff;">Reason</th><th style="background:#0F2B8C;color:#fff;text-align:right;">Action</th></tr></thead>
+            <thead><tr><th style="background:#0F2B8C;color:#fff;">Employee</th><th style="background:#0F2B8C;color:#fff;">Leave</th><th style="background:#0F2B8C;color:#fff;">From</th><th style="background:#0F2B8C;color:#fff;">To</th><th style="background:#0F2B8C;color:#fff;text-align:center;">Days</th><th style="background:#0F2B8C;color:#fff;">Substitute</th><th style="background:#0F2B8C;color:#fff;">Reason</th><th style="background:#0F2B8C;color:#fff;text-align:center;">Action</th></tr></thead>
             <tbody id="lr-pending-tbody"></tbody>
           </table>
         </div>
@@ -4134,10 +4134,12 @@ function renderLeaveReqs() {
         <td>${l.from || l.fromDt || '-'}</td>
         <td>${l.to || l.toDt || '-'}</td>
         <td style="font-weight:800; text-align:center;">${l.days || 1}</td>
+        <td style="font-weight:600; color:#334155;">${subDuty}</td>
         <td>${l.reason || '-'}</td>
-        <td style="text-align:right;">
-           <button class="btn btn-grn" style="padding:4px 8px; font-size:11px;" onclick="icActionLeave('${l.id}','Approved')">Approve</button>
-           <button class="btn btn-pri" style="padding:4px 8px; font-size:11px; background:#dc2626; border-color:#dc2626;" onclick="icActionLeave('${l.id}','Rejected')">Reject</button>
+        <td style="text-align:center; white-space:nowrap;">
+           <button class="btn btn-sec" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="dmViewLeaveDoc('${l.id}')">📄 View PDF</button>
+           <button class="btn btn-grn" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="icActionLeave('${l.id}','Approved')">✓ Approve</button>
+           <button class="btn btn-pri" style="padding:4px 8px; font-size:11px; background:#dc2626; border-color:#dc2626;" onclick="icActionLeave('${l.id}','Rejected')">✗ Reject</button>
         </td>
       </tr>`;
     }
@@ -4177,23 +4179,31 @@ function renderLeaveReqs() {
 // Action Leave directly from Pending Tab
 function icActionLeave(id, status) {
   if (status === 'Approved') {
-    var pin = prompt("Please enter your 4-digit PIN to digitally sign and approve this leave:");
-    if (pin === null) return; // user cancelled
-    if (pin.length < 4) {
-      alert("PIN must be at least 4 digits.");
-      return;
+    if (window.DSig && typeof window.DSig.promptPin === 'function') {
+      DSig.promptPin(null, "Approve & Digitally Sign Leave Request").then(function(udata) {
+        var pin = udata.pin || '1234';
+        return LeaveEngine.icActionLeave(id, 'Approved', pin);
+      }).then(function() {
+        alert("Leave Approved and Digitally Signed Successfully!");
+      }).catch(function(err) {
+        if (err && err.message && err.message.indexOf('cancelled') === -1) alert("Error: " + err.message);
+      });
+    } else {
+      var pin = prompt("Please enter your 4-digit PIN to digitally sign and approve this leave:");
+      if (pin === null) return;
+      if (pin.length < 4) { alert("PIN must be at least 4 digits."); return; }
+      LeaveEngine.icActionLeave(id, 'Approved', pin).then(function() {
+        alert("Leave Approved and Signed Successfully!");
+      }).catch(function(err) {
+        alert("Error: " + err.message);
+      });
     }
-    LeaveEngine.icActionLeave(id, status, pin).then(() => {
-      alert("Leave Approved and Signed Successfully!");
-    }).catch((err) => {
-      alert("Error: " + err.message);
-    });
   } else {
     var reason = prompt("Optional: Enter reason for rejection:");
-    if (reason === null) return; // user cancelled
-    LeaveEngine.icActionLeave(id, status, null, reason).then(() => {
+    if (reason === null) return;
+    LeaveEngine.icActionLeave(id, 'Rejected', null, reason).then(function() {
       alert("Leave Rejected.");
-    }).catch((err) => {
+    }).catch(function(err) {
       alert("Error: " + err.message);
     });
   }
@@ -4428,33 +4438,9 @@ function saveProfile() {
 }
 
 function dmViewLeaveDoc(reqId) {
-  var l = LeaveEngine.requests.find(function(x){ return x.id === reqId; });
+  var l = LeaveEngine.requests.find(function(x){ return x.id === reqId; }) || (LeaveEngine.subRequests && LeaveEngine.subRequests.find(function(x){ return x.id === reqId; }));
   if (!l) { alert('Leave request not found.'); return; }
-  
-  var setTxt = function(id, val) { var el = document.getElementById(id); if (el) el.textContent = val || '—'; };
-  
-  setTxt('certRefNo', 'REF-' + (l.id || '').toUpperCase().substring(0, 10));
-  setTxt('certApplicantName', l.name || l.applicantName || l.email);
-  setTxt('certApplicantDesig', l.desig || l.designation || 'PMAM Staff');
-  setTxt('certApplicantEmpId', l.empId || l.employeeId || 'EMP001');
-  setTxt('certWard', l.ward || 'General');
-  setTxt('certLeaveType', l.ltype || l.type || l.leaveType || l.lType || l.category || 'Casual Leave');
-  setTxt('certDuration', (l.from || l.fromDt || '—') + ' to ' + (l.to || l.toDt || '—') + ' (' + (l.days || 1) + ' Days)');
-  setTxt('certSubstitute', l.duty || l.substitute || l.subDuty || 'None Assigned');
-  setTxt('certReason', l.reason || 'Personal Work');
-  setTxt('certAppliedDate', formatLeaveDate(l.appliedDate || l.timestamp));
-  setTxt('certActionBy', l.actionBy || 'Medical Superintendent / I/C');
-  setTxt('certActionDate', formatLeaveDate(l.actionDate || l.appliedDate));
-  
-  var badgeEl = document.getElementById('certStatusBadge');
-  if (badgeEl) {
-    var st = l.status || 'Pending';
-    badgeEl.textContent = st.toUpperCase();
-    badgeEl.style.background = (st === 'Approved' ? '#dcfce7' : (st === 'Rejected' ? '#fee2e2' : '#fef3c7'));
-    badgeEl.style.color = (st === 'Approved' ? '#15803d' : (st === 'Rejected' ? '#b91c1c' : '#b45309'));
-  }
-  
-  openModal('leaveDocCertModal');
+  LeaveEngine.printLeaveDocument(l);
 }
 
 function printLeaveCertificate() {
