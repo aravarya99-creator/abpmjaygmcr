@@ -4076,11 +4076,26 @@ function switchLrTab(el) {
 
 function formatLeaveDate(dt) {
   if (!dt || dt === '-') return '—';
-  if (typeof dt === 'string' && (dt.indexOf('T') !== -1 || dt.indexOf('-') !== -1)) {
-    var d = new Date(dt);
-    if (!isNaN(d.getTime())) return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  var d;
+  if (typeof dt === 'number') {
+    d = new Date(dt);
+  } else if (typeof dt === 'string') {
+    if (!isNaN(dt) && dt.trim() !== '') {
+      d = new Date(Number(dt));
+    } else {
+      d = new Date(dt);
+    }
+  } else if (dt && typeof dt.toDate === 'function') {
+    d = dt.toDate();
+  } else if (dt && dt.seconds) {
+    d = new Date(dt.seconds * 1000);
+  } else if (dt instanceof Date) {
+    d = dt;
   }
-  return dt;
+  if (d && !isNaN(d.getTime())) {
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  return String(dt);
 }
 
 function renderLeaveReqs() {
@@ -4122,7 +4137,7 @@ function renderLeaveReqs() {
         <td><span style="padding:2px 8px; border-radius:12px; font-size:11px; font-weight:800; background:${l.status==='Approved'?'#dcfce7':(l.status==='Rejected'?'#fee2e2':'#fef3c7')}; color:${l.status==='Approved'?'#15803d':(l.status==='Rejected'?'#b91c1c':'#b45309')}">${l.status}</span></td>
         <td>${formattedDate}</td>
         <td style="text-align:center;">
-          <button onclick="dmViewLeaveDoc('${l.id}')" title="View Printable Leave Certificate" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; padding:3px 8px; cursor:pointer; font-weight:600; font-size:11px;">📄 Certificate</button>
+          <button onclick="dmViewLeaveDoc('${l.id}')" title="View Printable Leave Application (PDF)" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:6px; padding:3px 8px; cursor:pointer; font-weight:700; font-size:11px;">📄 View PDF</button>
         </td>
       </tr>`;
     }
