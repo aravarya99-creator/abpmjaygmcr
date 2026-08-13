@@ -253,10 +253,179 @@
     // ==========================================
     // INCHARGE ACTIONS
     // ==========================================
-    icActionLeave: function(id, status, rejectReason) {
-      var updates = { status: status, actionDate: new Date().toISOString(), actionBy: this.userName || 'Incharge' };
-      if (status === 'Rejected' && rejectReason) updates.rejectReason = rejectReason;
-      return db.collection('leave_requests').doc(id).update(updates);
+    icActionLeave: function(id, status, pin, rejectReason) {
+      var self = this;
+      return new Promise(function(resolve, reject) {
+        if (status === 'Rejected') {
+          var updates = { status: 'Rejected', actionDate: new Date().toISOString(), actionBy: self.userName || 'Incharge' };
+          if (rejectReason) updates.rejectReason = rejectReason;
+          db.collection('leave_requests').doc(id).update(updates).then(resolve).catch(reject);
+        } else if (status === 'Approved') {
+          var myEmail = (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : (self.userEmail || (global.GMCAuth && global.GMCAuth.getUser() ? global.GMCAuth.getUser().email : '') || '')).toLowerCase().trim();
+          
+          var doApprove = function(udata) {
+            var sigUrl = (udata && udata.signatureImage) ? udata.signatureImage : '';
+            var icName = (udata && udata.name) ? udata.name : (self.userName || 'I/C AB-PMJAY');
+            var updates = {
+              status: 'Approved',
+              icSignatureUrl: sigUrl,
+              icName: icName,
+              icSignedAt: Date.now(),
+              actionDate: new Date().toISOString(),
+              actionBy: icName
+            };
+            return db.collection('leave_requests').doc(id).update(updates);
+          };
+
+          if (pin && String(pin).trim().length >= 4) {
+            if (global.DSig && typeof global.DSig.verifyUserPin === 'function') {
+              global.DSig.verifyUserPin(myEmail, pin).then(doApprove).then(resolve).catch(reject);
+            } else {
+              db.collection('users').doc(myEmail).get().then(function(doc) {
+                if (!doc.exists) throw new Error("User profile not found.");
+                var udata = doc.data() || {};
+                var pinStr = String(pin).trim();
+                var hashedPin = (typeof CryptoJS !== 'undefined') ? CryptoJS.SHA256(pinStr).toString() : pinStr;
+                var isValid = (udata.pin && String(udata.pin).trim() === pinStr) || (udata.signPinHash && udata.signPinHash === hashedPin) || (!udata.signPinHash && (!udata.pin || String(udata.pin).trim() === '1234'));
+                if (!isValid) throw new Error("Incorrect PIN.");
+                return doApprove(udata);
+              }).then(resolve).catch(reject);
+            }
+          } else {
+            doApprove({}).then(resolve).catch(reject);
+          }
+        }
+      });
+    },
+
+    // ==========================================
+    // UNIVERSAL PRINTABLE PDF GENERATOR
+    // ==========================================
+    printLeaveDocument: function(reqObj) {
+      if (!reqObj) return;
+      
+      var fmtDate = function(d) {
+        if (!d || d === '-') return '—';
+        if (typeof d === 'string' && d.indexOf('-') !== -1) {
+          var parts = d.split('-');
+          if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
+        }
+        return d;
+      };
+
+      var name   = reqObj.name   || '—';
+      var desig  = reqObj.desig  || 'PMAM';
+      var ward   = reqObj.ward   || '—';
+      var fromDt = reqObj.from   || reqObj.fromDt || '';
+      var toDt   = reqObj.to     || reqObj.toDt   || '';
+      var days   = reqObj.days   || '';
+      var ret    = reqObj.retDate || reqObj.ret   || '';
+      var duty   = reqObj.duty   || reqObj.substituteName || '—';
+      var ltype  = reqObj.ltype  || reqObj.type   || '—';
+      var reason = reqObj.reason || '—';
+
+      var dLabel = '';
+      if (days) dLabel += days + ' day(s)';
+      if (fromDt && toDt) dLabel += ' (' + fmtDate(fromDt) + ' to ' + fmtDate(toDt) + ')';
+      if (!dLabel) dLabel = '—';
+
+      var todayStr = new Date(reqObj.timestamp || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+      var FORM_TITLE = 'LEAVE APPLICATION FORM';
+
+      // Signature HTML blocks
+      var appSigHtml = reqObj.applicantSignatureUrl 
+        ? '<img src="' + reqObj.applicantSignatureUrl + '" style="max-height:16mm;max-width:45mm;object-fit:contain;margin-bottom:2px;display:block;margin-left:auto;margin-right:auto;">'
+        : '<div style="height:14mm;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:9pt;font-style:italic;">—</div>';
+      
+      var subSigHtml = reqObj.substituteSignatureUrl 
+        ? '<img src="' + reqObj.substituteSignatureUrl + '" style="max-height:16mm;max-width:45mm;object-fit:contain;margin-bottom:2px;display:block;margin-left:auto;margin-right:auto;">'
+        : '<div style="height:14mm;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:9pt;font-style:italic;">—</div>';
+      
+      var icSigHtml = reqObj.icSignatureUrl 
+        ? '<img src="' + reqObj.icSignatureUrl + '" style="max-height:16mm;max-width:45mm;object-fit:contain;margin-bottom:2px;display:block;margin-left:auto;margin-right:auto;">'
+        : '<div style="height:14mm;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:9pt;font-style:italic;">—</div>';
+
+      var bodyHTML = ''
+        + '<div class="date-row"><strong>Date:</strong> ' + todayStr + '</div>'
+        + '<table><tbody>'
+        + '<tr><td class="lbl">Name of the Official</td><td>' + name + '</td></tr>'
+        + '<tr><td class="lbl">Designation</td><td>' + desig + '</td></tr>'
+        + '<tr><td class="lbl">Ward / Unit</td><td>' + ward + '</td></tr>'
+        + '<tr><td class="lbl">Reason for Leave</td><td>' + reason + '</td></tr>'
+        + '<tr><td class="lbl">Type of Leave</td><td>' + ltype + '</td></tr>'
+        + '<tr><td class="lbl">Total Days Requested</td><td>' + dLabel + '</td></tr>'
+        + '<tr><td class="lbl">Return Date</td><td>' + (fmtDate(ret) || '—') + '</td></tr>'
+        + '<tr><td class="lbl">Duty Assigned To</td><td>' + duty + '</td></tr>'
+        + '</tbody></table>'
+        + '<div style="page-break-inside: avoid; break-inside: avoid;">'
+        + '<div class="undertaking">'
+        +   '<div style="text-align:center;font-weight:700;margin-bottom:4px;font-size:10pt;text-decoration:underline">UNDERTAKING FOR PMAM DUTY COVERAGE DURING LEAVE</div>'
+        +   'I, Mr./Ms. <strong>' + (duty || '________________') + '</strong>, PMAM, hereby undertake that during the leave period of Mr./Ms. <strong>' + (name || '________________') + '</strong>, from <strong>' + (fmtDate(fromDt) || '___') + '</strong> to <strong>' + (fmtDate(toDt) || '___') + '</strong>, I shall assume full responsibility for all assigned AB PM-JAY work, including pre-auths, pre-auth queries, claim queries, enhancements, discharges, claim submissions, and all pending work. All IPDs from the assigned ward(s) during the leave period shall be counted under my IPD workload and shall be my responsibility.'
+        + '</div>'
+        + '<div class="sig-row">'
+        + '<div class="sig-box"><div class="sig-label">Signature of Applicant - PMAM</div>' + appSigHtml + '<div class="sig-desig">' + name + '</div></div>'
+        + '<div class="sig-box"><div class="sig-label">Signature of Substitute PMAM</div>' + subSigHtml + '<div class="sig-desig">' + duty + '</div></div>'
+        + '</div>'
+        + '<div class="sig-row" style="margin-top:6mm">'
+        + '<div class="sig-box"><div class="sig-label">I/C AB-PMJAY</div>' + icSigHtml + '<div class="sig-desig">' + (reqObj.icName || 'GMC &amp; AH, Rajouri') + '</div></div>'
+        + '<div class="sig-box"><div class="sig-label">Medical Superintendent</div><div style="height:14mm;"></div><div class="sig-desig">GMC &amp; AH, Rajouri</div></div>'
+        + '</div>'
+        + '</div>'
+        + '<div class="print-footer">'
+        + '<span class="footer-brand">Computer generated leave application. | PMAM Reporting Portal @ MIS AB-PMJAY GMCR</span>'
+        + '</div>';
+
+      var pageContent;
+      if (typeof global.GMCHeaders !== 'undefined' && global.GMCHeaders && typeof global.GMCHeaders.abpmjayReport === 'function') {
+        try {
+          var headerHTML = global.GMCHeaders.abpmjayReport({
+            title: FORM_TITLE,
+            editable: false,
+            orientation: 'portrait'
+          });
+          pageContent = '<div class="page-wrap">' + headerHTML + '<div class="page-body">' + bodyHTML + '</div></div>';
+        } catch (e) {
+          pageContent = '<div style="padding:14mm 14mm;color:#dc2626;font-weight:bold;">Letterhead failed to render: ' + e.message + '</div>' + '<div style="padding:0 14mm 14mm;">' + bodyHTML + '</div>';
+        }
+      } else {
+        pageContent = '<div style="padding:14mm 14mm;color:#dc2626;font-weight:bold;">Shared letterhead not loaded.</div>' + '<div style="padding:0 14mm 14mm;">' + bodyHTML + '</div>';
+      }
+
+      var baseHref = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+      var page = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Leave Application - ' + name + '</title>'
+        + '<base href="' + baseHref + '">'
+        + '<link rel="stylesheet" href="shared/headers.css?v=6">'
+        + '<style>'
+        + '*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}'
+        + 'img{image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges}'
+        + 'body{font-family:Tahoma,Verdana,Arial,sans-serif;background:#fff;font-size:12pt;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+        + '.page-wrap{padding:5mm 14mm 6mm;max-width:210mm;margin:0 auto}'
+        + '.page-body{margin-top:3mm}'
+        + 'table{width:100%;border-collapse:separate;border-spacing:0;font-size:12pt;border:2px solid #1a1a1a;border-radius:10px;overflow:hidden;margin-bottom:3mm}'
+        + 'thead tr th{background:#1a1a1a;color:#fff;padding:4px 10px;font-size:11pt;text-align:left;font-weight:700}'
+        + 'tbody tr:nth-child(even){background:#f7f8fc}'
+        + 'tbody tr:nth-child(odd){background:#fff}'
+        + 'td{padding:4px 10px;border-bottom:1px solid #dde2ee;vertical-align:middle}'
+        + 'tbody tr:last-child td{border-bottom:none}'
+        + '.lbl{font-weight:700;width:70mm;color:#1a2340;border-right:2px solid #dde2ee}'
+        + '.date-row{text-align:right;font-size:11pt;margin-bottom:3mm;color:#444}'
+        + '.undertaking{font-size:9.5pt;text-align:justify;border:1px solid #1a3db5;border-left:4px solid #1a3db5;padding:8px 12px;background:#f7f8fc;margin:2mm 0;line-height:1.4}'
+        + '.sig-row{display:flex;justify-content:space-between;margin-top:4mm;gap:8mm}'
+        + '.sig-box{flex:1;text-align:center;min-height:24mm;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}'
+        + '.sig-label{font-weight:700;font-size:11pt;color:#1a2340;line-height:1.25;margin-bottom:2mm;padding:0 2mm}'
+        + '.sig-desig{font-size:10pt;font-weight:normal;color:#555;margin-top:1mm;line-height:1.3}'
+        + '.print-footer{border-top:2px solid #1a2340;margin-top:6mm;padding-top:2mm;text-align:center;font-size:10pt;color:#555}'
+        + '.footer-brand{font-weight:700;color:#1a2340}'
+        + '@media print{body{margin:0}@page{size:A4 portrait;margin:6mm 10mm}}'
+        + '</style></head><body>'
+        + pageContent
+        + '<' + 'script>window.onload=function(){setTimeout(function(){window.print();},300);};</' + 'script></body></html>';
+
+      var printWin = window.open('', '_blank');
+      if (printWin) {
+        printWin.document.write(page);
+        printWin.document.close();
+      }
     }
   };
   global.LeaveEngine = LeaveEngine;
