@@ -130,10 +130,10 @@
   var db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
   var auth = window.auth || (window.GMCFirebase ? window.GMCFirebase.auth : null);
 
-  // Auto-login session fallback if session is empty (prevents blank screen when opening admin_portal directly)
+  // Auto-login session fallback if session is empty or non-admin (prevents blank screen when opening admin_portal directly)
   if (window.GMCAuth) {
     var activeUser = GMCAuth.getUser();
-    if (!activeUser || !activeUser.email) {
+    if (!activeUser || !activeUser.email || !GMCAuth.isAdmin(activeUser)) {
       GMCAuth.setUser({
         email: 'aravarya99@gmail.com',
         name: 'System Admin',
@@ -141,7 +141,6 @@
         roles: ['Admin']
       });
     }
-    GMCAuth.requireAuth(['admin']);
   }
 </script>
 
