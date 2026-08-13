@@ -387,9 +387,11 @@ tr:hover td{background:#EEF3FF}
       appId: "1:115490476421:web:871a91987e1a92a45f34ec",
       measurementId: "G-NK9VL87CJC"
     };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    var db   = firebase.firestore();
-    var auth = firebase.auth();
+    if (typeof firebase !== 'undefined') {
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      var db   = window.db || (typeof firebase.firestore === 'function' ? firebase.firestore() : null);
+      var auth = window.auth || (typeof firebase.auth === 'function' ? firebase.auth() : null);
+    }
     var EMAILJS_PUBLIC_KEY = 'TLcdrNTVwdEBBvByn';
     var EMAILJS_SERVICE    = 'service_1x9ecam';
     var EMAILJS_TEMPLATE   = 'template_w2r2b0h';
@@ -9756,11 +9758,12 @@ function filterDirectory(role, el) {
     el.classList.add('active');
   }
   
-  var filtered = window._allDirectoryUsers;
-  if (role !== 'all') {
-    filtered = window._allDirectoryUsers.filter(u => {
+  var filtered = Array.isArray(window._allDirectoryUsers) ? window._allDirectoryUsers.slice() : [];
+  if (role && role !== 'all') {
+    filtered = filtered.filter(u => {
+      if (!u) return false;
       var uR = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
-      return matchesRole(role, uR);
+      return typeof matchesRole === 'function' ? matchesRole(role, uR) : true;
     });
   }
   
@@ -9768,9 +9771,11 @@ function filterDirectory(role, el) {
 }
 
 function renderDirectoryGrid(list) {
+  list = Array.isArray(list) ? list : [];
   var grid = document.getElementById('directoryGrid');
   var badge = document.getElementById('dirCountBadge');
   if (badge) badge.textContent = list.length + ' user(s)';
+  if (!grid) return;
   
   if (!list.length) {
     grid.innerHTML = '<div style="color:#9ca3af;font-style:italic;padding:20px;grid-column:1/-1">No users found for this filter.</div>';
