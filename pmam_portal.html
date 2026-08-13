@@ -1420,9 +1420,6 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             </div>
             <div style="font-size:12px; color:#64748b; margin-top:2px;">Select your availability preference for Holidays &amp; Sundays. Upon I/C approval, +1 Compensatory Leave Day is credited for each approved duty day.</div>
           </div>
-          <div id="pmamRosterStatusBadge">
-            <span style="background:#f1f5f9; color:#475569; padding:4px 14px; border-radius:14px; font-weight:800; font-size:12px;">Status: Loading...</span>
-          </div>
         </div>
 
         <!-- Roster Sub-Tabs (Holidays vs Sundays) -->
@@ -1441,25 +1438,31 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
             <label style="font-size:13px; font-weight:800; color:#334155;">Select Month/Year:</label>
             <input type="month" id="rosterYmSel" onchange="renderPmamRoster(this.value)" style="padding:8px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:700; color:#0f172a; background:#ffffff;">
           </div>
-          <button class="btn btn-pri" id="btnSaveRosterChoices" onclick="savePmamRosterChoices()" style="padding:9px 20px; font-size:13px; font-weight:700;">Submit Roster Preferences</button>
         </div>
 
         <!-- Roster Table -->
         <div class="tbl-wrap" style="background:#ffffff; border-radius:14px; border:1px solid #e2e8f0; overflow:hidden;">
           <table style="width:100%; border-collapse:collapse;">
             <thead>
-              <tr style="background:#f1f5f9; border-bottom:2px solid #cbd5e1;">
-                <th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:800; color:#475569;">DATE</th>
-                <th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:800; color:#475569;">DAY</th>
-                <th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:800; color:#475569;">EVENT / TYPE</th>
-                <th style="padding:12px 16px; text-align:center; font-size:12px; font-weight:800; color:#475569;">DUTY CHOICE</th>
-                <th style="padding:12px 16px; text-align:center; font-size:12px; font-weight:800; color:#475569;">I/C APPROVAL &amp; COMP CREDIT</th>
+              <tr style="background:#0F2B8C; border-bottom:2px solid #0A1B60;">
+                <th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:800; color:#ffffff;">DATE</th>
+                <th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:800; color:#ffffff;">DAY</th>
+                <th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:800; color:#ffffff;">EVENT / TYPE</th>
+                <th style="padding:12px 16px; text-align:center; font-size:12px; font-weight:800; color:#ffffff;">DUTY CHOICE</th>
+                <th style="padding:12px 16px; text-align:center; font-size:12px; font-weight:800; color:#ffffff;">I/C APPROVAL &amp; COMP CREDIT</th>
               </tr>
             </thead>
             <tbody id="pmamRosterTbody">
               <tr><td colspan="5" style="text-align:center; padding:24px; color:#64748b; font-style:italic;">Select a month to view the Holiday &amp; Sunday Roster</td></tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Roster Table Footer Action Strip -->
+        <div style="display:flex; justify-content:flex-end; align-items:center; background:#f8fafc; padding:14px 20px; border-radius:14px; border:1px solid #e2e8f0; margin-top:16px;">
+          <button class="btn btn-pri" id="btnSaveRosterChoices" onclick="savePmamRosterChoices()" style="padding:10px 24px; font-size:14px; font-weight:800; background:#2563eb; color:#ffffff; border:none; border-radius:10px; cursor:pointer; box-shadow:0 2px 8px rgba(37,99,235,0.25);">
+            Submit Roster Preferences
+          </button>
         </div>
 
       </div>

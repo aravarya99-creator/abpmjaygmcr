@@ -1648,21 +1648,47 @@ function renderIcRoster(yearMonth) {
     var usersSnap = results[0];
     var rosterSnap = results[1];
 
-    var pmamList = [];
+    var pmamMap = {};
+
     usersSnap.forEach(function(uDoc) {
       var uData = uDoc.data() || {};
-      var uRoles = Array.isArray(uData.roles) ? uData.roles : (uData.role ? [uData.role] : []);
+      var uRoles = Array.isArray(uData.roles) ? uData.roles.slice() : (uData.role ? [uData.role] : []);
       if (uData.desig && !uRoles.includes(uData.desig)) uRoles.push(uData.desig);
-      var isPmam = uRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
+      var isPmam = uRoles.some(function(r){
+        var s = String(r).toLowerCase().trim();
+        return s === 'pmam' || s.indexOf('pmam') !== -1;
+      });
+
       if (isPmam) {
-        pmamList.push({
+        var em = (uData.email || uDoc.id).toLowerCase().trim();
+        pmamMap[em] = {
           id: uDoc.id,
           name: uData.name || uData.displayName || uData.email || 'PMAM',
-          email: (uData.email || uDoc.id).toLowerCase().trim(),
-          ward: uData.ward || uData.assignedWard || 'General Ward'
-        });
+          email: em,
+          ward: uData.ward || uData.assignedWard || uData.wardName || 'General Ward'
+        };
       }
     });
+
+    rosterSnap.forEach(function(rDoc) {
+      var rData = rDoc.data() || {};
+      var rEmail = (rData.email || rDoc.id || '').toLowerCase().trim();
+      if (rEmail) {
+        if (rEmail.indexOf('roster_') === 0) {
+          rEmail = rData.email ? rData.email.toLowerCase().trim() : rEmail;
+        }
+        if (!pmamMap[rEmail]) {
+          pmamMap[rEmail] = {
+            id: rEmail,
+            name: rData.name || rEmail,
+            email: rEmail,
+            ward: 'Assigned Ward'
+          };
+        }
+      }
+    });
+
+    var pmamList = Object.keys(pmamMap).map(function(k){ return pmamMap[k]; });
 
     var state = {};
     pmamList.forEach(function(p) {
@@ -1678,6 +1704,9 @@ function renderIcRoster(yearMonth) {
       var rEmail = (rData.email || '').toLowerCase().trim();
       if (rEmail && state[rEmail]) {
         state[rEmail].choices = rData.choices || {};
+        if (rData.name && state[rEmail].name === rEmail) {
+          state[rEmail].name = rData.name;
+        }
       }
     });
 
