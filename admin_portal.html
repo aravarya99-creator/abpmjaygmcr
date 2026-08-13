@@ -7293,7 +7293,7 @@ function printLeaveCertificate() {
   }
   var content = document.getElementById('leaveDocCertBody').innerHTML;
   var win = window.open('', '_blank', 'width=800,height=900');
-  win.document.write('<html><head><title>Leave Certificate - GMC & AH Rajouri</title><style>body { font-family: sans-serif; padding: 30px; color: #0f172a; }</style></head><body>' + content + '<script>setTimeout(function(){ window.print(); window.close(); }, 500);<\/script></body></html>');
+  win.document.write('<html><head><title>Leave Certificate - GMC & AH Rajouri</title><style>body { font-family: sans-serif; padding: 30px; color: #0f172a; }</style></head><body>' + content + '<' + 'script>setTimeout(function(){ window.print(); window.close(); }, 500);<\/script></body></html>');
   win.document.close();
 }
 
@@ -10289,6 +10289,6 @@ function resetLeaveLimitsToDefault() {
 
 
 <script src="shared/logos.js"></script>
-<script src="shared/portal_header.js?v=20260725_16"></script>
+<script src="shared/portal_header.js?v=20260813_RESET_CACHE_V2"></script>
 </body>
 
