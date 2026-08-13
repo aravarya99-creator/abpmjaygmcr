@@ -1893,40 +1893,212 @@ window.addEventListener('DOMContentLoaded', function() {
       try { renderGetInTouch(d.getInTouch); }              catch(e){ console.warn('getInTouch render:', e); }
       try { renderImportantLinks(d.importantLinks); }      catch(e){ console.warn('importantLinks render:', e); }
     }, function(err){
+    };
+    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    // Known content ids that always open a modal on the landing page.
+    var MODAL_IDS = ['home','staff','calendar','roster','holiday','weekend','orders'];
+
+    // Map any id/label variant to a canonical id. Handles stale Firestore
+    // data ('weekendroster', 'weekend_roster', '#weekend', etc.).
+    function navIdCanon(raw){
+      var s = String(raw || '').toLowerCase().replace(/^#/, '').replace(/[^a-z]/g, '');
+      if (!s) return '';
+      var M = {
+        home:'home', staff:'staff', about:'about', aboutus:'about',
+        calendar:'calendar', holidaycalendar:'calendar', holidaycal:'calendar',
+        roster:'roster', wardroster:'roster', ward:'roster', wards:'roster',
+        holiday:'holiday', holidayduty:'holiday', holidayroster:'holiday', holidayrost:'holiday',
+        weekend:'weekend', weekendroster:'weekend', weekendrost:'weekend', weekendduty:'weekend',
+        contact:'contact', contactus:'contact',
+        orders:'orders', order:'orders', officeorders:'orders', circulars:'orders', notices:'orders',
+        developer:'developer', aboutdeveloper:'developer', aboutdev:'developer', dev:'developer', webdeveloper:'developer'
+      };
+      return M[s] || s;
+    }
+    window.normalizeNavId = navIdCanon;
+
+    // Core tabs that must always be reachable. If Firestore's saved navBar is
+    // missing any, we append it — so a stale config can never make a working
+    // feature (Weekend Roster, Orders, About Us) disappear from the nav.
+    var CORE_TABS = [
+      { id:'home',      label:'Home',           order:-1 },
+      { id:'about',     label:'About Us',       order:0 },
+      { id:'developer', label:'Developer',      order:1 },
+      { id:'staff',     label:'Staff',          order:2 },
+      { id:'roster',    label:'Ward Roster',    order:3 },
+      { id:'weekend',   label:'Weekend Roster', order:4 },
+      { id:'holiday',   label:'Holiday Roster', order:5 },
+      { id:'calendar',  label:'Holidays',       order:6 },
+      { id:'orders',    label:'Orders',         order:7 }
+    ]
+
+    function renderNav(items){
+      var nav = document.getElementById('lpNavArea');
+      if (!nav) return;
+      if (!Array.isArray(items)) items = [];
+
+      // 0. Allow-list: the landing page is built around exactly the 8 CORE
+      //    tab ids. Any saved item whose canonical id isn't one of these
+      //    (e.g. stale 'home' / 'contact' entries from an old config) is
+      //    dropped so removed tabs never reappear. Custom-id items with a
+      //    real URL are kept, since an admin may have added them on purpose.
+      var ALLOWED = {};
+      CORE_TABS.forEach(function(ct){ ALLOWED[ct.id] = true; });
+      items = items.filter(function(it){
+        var cid = navIdCanon(it.id || it.label || '');
+        if (ALLOWED[cid]) return true;
+        // keep genuine custom external links, drop stale known-but-removed ids
+        var REMOVED = { contact:true, leave:true, staffold:true };
+        if (REMOVED[cid]) return false;
+        return !!(it.url && /^(https?:|//)/i.test(it.url));
+      });
+
+      // 1. Start with saved items, then append any missing CORE_TABS.
+      //    Home gets a sentinel low order (-1000) so it ALWAYS renders first,
+      //    even when admin's saved navBar already covers orders 0..7. Other
+      //    missing core tabs are appended after the saved items in their
+      //    canonical order.
+      var merged = items.slice();
+      var seenForAppend = {};
+      items.forEach(function(it){ seenForAppend[navIdCanon(it.id || it.label || '')] = true; });
+      var maxOrder = items.reduce(function(m,it){ return Math.max(m, it.order||0); }, 0);
+      CORE_TABS.forEach(function(ct){
+        if (!seenForAppend[ct.id]) {
+          var assignedOrder = (ct.id === 'home') ? -1000 : (maxOrder + 1 + ct.order);
+          merged.push({ id:ct.id, label:ct.label, order:assignedOrder, visible:true, active:false });
+        }
+      });
+
+      // 2. Sort by order.
+      var sorted = merged.filter(function(i){ return i; })
+                         .sort(function(a,b){ return (a.order||0) - (b.order||0); });
+
+      // 3. Deduplicate by CANONICAL id — keep the first occurrence only.
+      //    This kills any doubled tabs (e.g. two "Weekend Roster" entries)
+      //    regardless of whether the duplication came from stale Firestore
+      //    data or the CORE_TABS merge.
+      var seen = {};
+      var deduped = [];
+      sorted.forEach(function(it){
+        var cid = navIdCanon(it.id || it.label || '');
+        if (!cid) { deduped.push(it); return; } // keep id-less custom items
+        if (seen[cid]) return;
+        seen[cid] = true;
+        deduped.push(it);
+      });
+
+      // 4. Only show visible items.
+      var visible = deduped.filter(function(i){ return i.visible !== false; });
+      if (visible.length === 0) return;
+
+      // Persist the active tab across Firestore re-renders. Each click sets
+      // window.__activeNavId; on first load (nothing clicked yet) it stays
+      // an empty string so NO tab gets the green pill — the page opens blank.
+      // The active state is only painted once the user actually clicks a tab.
+      if (typeof window.__activeNavId !== 'string') window.__activeNavId = '';
+      var activeId = window.__activeNavId;
+
+      // Build the label as a single-line span. (Earlier the two-word labels
+      // wrapped to two rows inside the pill, but tabs now sit on a single
+      // horizontal row, so each label stays on one line.)
+      function buildLabelHTML(rawLabel){
+        var safe = esc(rawLabel || '');
+        return '<span class="nav-label"><span class="nl-row">'+safe+'</span></span>';
+      }
+
+      // Labels that were renamed. Until the admin re-saves the nav bar,
+      // Firestore still holds the old labels — patch them on read so the
+      // user always sees the new names.
+      var LABEL_RENAMES = {
+        'about developer':  'Developer',
+        'holiday calendar': 'Holidays'
+      };
+
+nav.innerHTML = visible.map(function(it){
+        var navIdRaw = navIdCanon(it.id || it.label || '');
+        var isActive = (navIdRaw === activeId);
+        var cls = 'nav-item' + (isActive ? ' active' : '');
+        var navId = esc(navIdRaw);
+        var url = (MODAL_IDS.indexOf(navId) !== -1) ? '#' : (it.url || '#');
+        var rawLabel = (it.label || '').trim();
+        var lowered = rawLabel.toLowerCase();
+        if (LABEL_RENAMES[lowered]) rawLabel = LABEL_RENAMES[lowered];
+        var labelHTML = buildLabelHTML(rawLabel);
+        var isExternal = /^(https?:|//)/i.test(url);
+        var targetAttr = isExternal ? ' target="_blank" rel="noopener"' : '';
+        // data-nav lets click delegation route the tab regardless of label.
+        var dataAttr   = navId ? ' data-nav="'+navId+'"' : '';
+        return '<a class="'+cls+'" href="'+esc(url)+'"'+targetAttr+dataAttr+'>'+labelHTML+'</a>';
+      }).join('');
+    }
+
+    function renderQuickLinks(items){
+      var row = document.getElementById('lpQuickLinksRow');
+      if (!row || !Array.isArray(items) || items.length === 0) return;
+      var sorted = items.slice().sort(function(a,b){ return (a.order||0) - (b.order||0); });
+      row.innerHTML = sorted.map(function(it){
+        var url = it.url || '#';
+        var iconKey = (it.id || '').toLowerCase();
+        if (!QL_ICONS[iconKey]) iconKey = 'generic';
+        var colorClass = COLOR_TO_CLASS[it.color] || 'tms';
+        return '<a class="hql-card" href="'+esc(url)+'" target="_blank" rel="noopener">'
+             +   '<div class="hql-icon '+colorClass+'">'+QL_ICONS[iconKey]+'</div>'
+             +   '<div class="hql-t1">'+esc(it.label||'')+'</div>'
+             + '</a>';
+      }).join('');
+    }
+
+    function renderGetInTouch(items){
+      var list = document.getElementById('lpGetInTouchList');
+      if (!list || !Array.isArray(items) || items.length === 0) return;
+      var sorted = items.slice().sort(function(a,b){ return (a.order||0) - (b.order||0); });
+      list.innerHTML = sorted.map(function(it){
+        var type = (it.type || 'other').toLowerCase();
+        var icon = TYPE_ICONS[type] || TYPE_ICONS.other;
+        var val = esc(it.value || '');
+        // Make phone/email clickable
+        if (type === 'phone') {
+          return '<a class="hero-gc-ci" href="tel:'+val.replace(/\s/g,'')+'">'+icon+'<span>'+val+'</span></a>';
+        } else if (type === 'email') {
+          return '<a class="hero-gc-ci" href="mailto:'+val+'">'+icon+'<span>'+val+'</span></a>';
+        } else if (type === 'website') {
+          return '<a class="hero-gc-ci" href="'+val+'" target="_blank" rel="noopener">'+icon+'<span>'+val+'</span></a>';
+        }
+        return '<div class="hero-gc-ci">'+icon+'<span>'+val+'</span></div>';
+      }).join('');
+    }
+
+    function renderImportantLinks(items){
+      var row = document.getElementById('lpImportantLinksRow');
+      if (!row || !Array.isArray(items) || items.length === 0) return;
+      var sorted = items.slice().sort(function(a,b){ return (a.order||0) - (b.order||0); });
+      row.innerHTML = sorted.map(function(it){
+        var url = it.url || '#';
+        return '<a href="'+esc(url)+'">→ '+esc(it.label||'')+'</a>';
+      }).join('');
+    }
+
+    // Real-time listener — updates the page instantly when admin saves
+    db.collection('settings').doc('landing_page').onSnapshot(function(doc){
+      if (!doc.exists) return; // keep hardcoded fallback values
+      var d = doc.data() || {};
+      try { renderNav(d.navBar); }                         catch(e){ console.warn('navBar render:', e); }
+      try { renderQuickLinks(d.quickLinks); }              catch(e){ console.warn('quickLinks render:', e); }
+      try { renderGetInTouch(d.getInTouch); }              catch(e){ console.warn('getInTouch render:', e); }
+      try { renderImportantLinks(d.importantLinks); }      catch(e){ console.warn('importantLinks render:', e); }
+    }, function(err){
       console.warn('landing_page sync failed (using fallback):', err && err.message);
     });
   })();
 });
 
-// ══════════════════════════════════════
-// 4C: SESSION TIMEOUT HELPER
-// Used by all portals — not index (login page has no session to timeout)
-// Copy this block into every portal's script section
-// ══════════════════════════════════════
-// function initSessionTimeout() {
-//   var SESSION_TIMEOUT = 2 * 60 * 60 * 1000; // 2 hours
-//   var _sessionTimer;
-//   function resetSessionTimer() {
-//     clearTimeout(_sessionTimer);
-//     _sessionTimer = setTimeout(function() {
-//       sessionStorage.removeItem('pmjay_user');
-//       alert('Session expired due to inactivity. Please login again.');
-//       window.location.href = 'index.html';
-//     }, SESSION_TIMEOUT);
-//   }
-//   document.addEventListener('mousemove', resetSessionTimer);
-//   document.addEventListener('keypress', resetSessionTimer);
-//   document.addEventListener('click', resetSessionTimer);
-//   resetSessionTimer();
-// }
-
-
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════
 // PMAM REPORT STATUS — last 5 days grid
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════
 (function rsInit(){
-  var REFRESH_SECS = 300; // 5 minutes
-  var _countdownTimer, _refreshTimer;
+  var REFRESH_SECS = 300;
+  var _countdownTimer;
 
   function getLast5Dates(){
     var dates = [];
@@ -1952,11 +2124,33 @@ window.addEventListener('DOMContentLoaded', function() {
     return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>';
   }
 
+  function processUserDocs(uSnap) {
+    var pmams = [];
+    uSnap.forEach(function(doc) {
+      var u = doc.data() || {};
+      var st = String(u.status || '').toLowerCase().trim();
+      var isApproved = (st === 'approved' || st === 'active' || !st);
+      var isPmamUser = (window.GMCAuth && typeof window.GMCAuth.isPMAM === 'function')
+        ? window.GMCAuth.isPMAM(u)
+        : (function(){
+            var r = String(u.role || '').toLowerCase().trim();
+            var rs = Array.isArray(u.roles) ? u.roles.map(function(x){return String(x).toLowerCase().trim();}) : [];
+            return r === 'pmam' || r.indexOf('pmam') !== -1 || rs.indexOf('pmam') !== -1 || rs.some(function(x){return x.indexOf('pmam') !== -1;});
+          })();
+      if (isApproved && isPmamUser) {
+        var em = ((doc.id || u.email || '') + '').trim().toLowerCase();
+        var nm = (u.name || doc.id || em).trim();
+        pmams.push({email: em, name: nm});
+      }
+    });
+    pmams.sort(function(a,b){ return a.name.localeCompare(b.name); });
+    return pmams;
+  }
+
   function loadStatus(){
     var dates = getLast5Dates();
     var todayStr = dates[dates.length-1].str;
 
-    // Update date range label
     var rng = document.getElementById('rsDateRange');
     if(rng){
       var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -1964,42 +2158,20 @@ window.addEventListener('DOMContentLoaded', function() {
       rng.textContent='('+d0.getDate()+' '+months[d0.getMonth()]+' — '+dN.getDate()+' '+months[dN.getMonth()]+' '+dN.getFullYear()+')';
     }
 
-    // Get PMAM users (fetching all users and filtering in-memory to handle casing & roles array)
-    function processUserDocs(uSnap) {
-      var pmams = [];
-      uSnap.forEach(function(doc) {
-        var u = doc.data() || {};
-        var st = String(u.status || '').toLowerCase().trim();
-        var isApproved = (st === 'approved' || st === 'active' || !st);
-        var isPmamUser = (window.GMCAuth && typeof window.GMCAuth.isPMAM === 'function')
-          ? window.GMCAuth.isPMAM(u)
-          : (function(){
-              var r = String(u.role || '').toLowerCase().trim();
-              var rs = Array.isArray(u.roles) ? u.roles.map(function(x){return String(x).toLowerCase().trim();}) : [];
-              return r === 'pmam' || r.indexOf('pmam') !== -1 || rs.indexOf('pmam') !== -1 || rs.some(function(x){return x.indexOf('pmam') !== -1;});
-            })();
-        if (isApproved && isPmamUser) {
-          var em = ((doc.id || u.email || '') + '').trim().toLowerCase();
-          var nm = (u.name || doc.id || em).trim();
-          pmams.push({email: em, name: nm});
-        }
-      });
-      pmams.sort(function(a,b){ return a.name.localeCompare(b.name); });
-      return pmams;
+    var db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
+    if (!db) {
+      console.warn('[PMAM Status] Database connection not initialized.');
+      return;
     }
 
     db.collection('users').get().then(function(uSnap){
       var pmams = processUserDocs(uSnap);
-
-      // Fetch reports — PMAM portal writes to 'daily_reports'
       var fromStr = dates[0].str;
       db.collection('daily_reports').where('date','>=',fromStr).get().then(function(s){
         var reports=[];
         s.forEach(function(d){ reports.push(d.data()); });
         renderTable(pmams,dates,reports,todayStr);
       }).catch(function(e){
-        // Fallback: if the where() fails (no index, mixed types, etc.),
-        // fetch everything and filter client-side. Still the right collection.
         db.collection('daily_reports').get().then(function(s){
           var reports=[];
           s.forEach(function(d){
@@ -2012,7 +2184,6 @@ window.addEventListener('DOMContentLoaded', function() {
           if(tb) tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#dc2626">Error: '+e2.message+'</td></tr>';
         });
       });
-
     }).catch(function(e){
       var tb=document.getElementById('rsTblBody');
       if(tb) tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#dc2626">Error: '+e.message+'</td></tr>';
@@ -2020,7 +2191,6 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   function renderTable(pmams, dates, reports, todayStr){
-    // Build header
     var thead=document.getElementById('rsTblHead');
     if(thead){
       var hRow='<tr><th class="name-col">PMAM NAME</th>';
@@ -2031,46 +2201,19 @@ window.addEventListener('DOMContentLoaded', function() {
       thead.innerHTML=hRow;
     }
 
-    // Build body
     var tbody=document.getElementById('rsTblBody');
     if(!tbody) return;
 
-    // Index reports by email+date AND name+date. We use both keys because:
-    //   - Some older PMAM reports may have email saved as 'unknown' (PMAM
-    //     portal falls back to that string if sessionStorage is empty), so
-    //     joining strictly on email would miss them.
-    //   - Both sides are normalized to lowercase + trimmed to defeat any
-    //     casing/whitespace mismatch between the user record and the report.
     var repMap = {};
-    var unmatched = []; // for the debug log
     reports.forEach(function(r){
-      var email = ((r.email || r.pmamEmail || '') + '').trim().toLowerCase();
-      var name  = ((r.name  || r.pmamName  || '') + '').trim().toLowerCase();
+      var email = ((r.email || r.pmamEmail || r.userEmail || r.applicantEmail || '') + '').trim().toLowerCase();
+      var name  = ((r.name  || r.pmamName  || r.userName  || r.applicantName  || '') + '').trim().toLowerCase();
       var date  = ((r.date  || r.reportDate || '') + '').trim();
       if (date) {
         if (email) repMap['e:' + email + '|' + date] = true;
         if (name)  repMap['n:' + name  + '|' + date] = true;
-        if (!email && !name) unmatched.push(r);
       }
     });
-
-    // Debug logger — open browser console to see why a row shows ✗.
-    // Prints once per render. Safe to leave in production; logs only.
-    try {
-      console.groupCollapsed('[PMAM Status] '+pmams.length+' PMAMs · '+reports.length+' reports in window');
-      console.log('PMAMs (key used for lookup):', pmams.map(function(p){return p.email+' = '+p.name;}));
-      console.log('Reports (raw email/name/date):',
-        reports.map(function(r){
-          return {
-            email: r.email || r.pmamEmail || '(none)',
-            name:  r.name  || r.pmamName  || '(none)',
-            date:  r.date  || r.reportDate || '(none)'
-          };
-        })
-      );
-      if (unmatched.length) console.warn('Reports with no email AND no name:', unmatched);
-      console.groupEnd();
-    } catch(_) {}
 
     var todayFilled=0, todayNotFilled=0;
 
@@ -2081,9 +2224,7 @@ window.addEventListener('DOMContentLoaded', function() {
         var pname = (p.name || '').trim().toLowerCase();
         var cells='<td class="name-cell">'+p.name+'</td>';
         dates.forEach(function(d){
-          // Try email match first, then fall back to name match.
-          var filled = !!repMap['e:' + p.email + '|' + d.str]
-                    || !!repMap['n:' + pname    + '|' + d.str];
+          var filled = !!repMap['e:' + p.email + '|' + d.str] || !!repMap['n:' + pname + '|' + d.str];
           if(d.isToday){ if(filled) todayFilled++; else todayNotFilled++; }
           cells+='<td>'+checkIcon(filled)+'</td>';
         });
@@ -2091,7 +2232,6 @@ window.addEventListener('DOMContentLoaded', function() {
       }).join('');
     }
 
-    // Update stats
     var total=pmams.length;
     var pct=total>0?Math.round(todayFilled/total*100):0;
     var set=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v;};
@@ -2100,7 +2240,6 @@ window.addEventListener('DOMContentLoaded', function() {
     set('rsNotFilled',todayNotFilled);
     set('rsCompletion',pct+'%');
 
-    // Timestamp
     var now=new Date();
     var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     var h=now.getHours(),mi=String(now.getMinutes()).padStart(2,'0'),ap=h>=12?'PM':'AM';
@@ -2108,13 +2247,11 @@ window.addEventListener('DOMContentLoaded', function() {
     var ts=String(now.getDate()).padStart(2,'0')+' '+months[now.getMonth()]+' '+now.getFullYear()+', '+h+':'+mi+' '+ap;
     set('rsLastUpdated',ts);
 
-    // Start countdown
     startCountdown();
   }
 
   function startCountdown(){
     clearInterval(_countdownTimer);
-    clearTimeout(_refreshTimer);
     var left=REFRESH_SECS;
     _countdownTimer=setInterval(function(){
       left--;
@@ -2124,19 +2261,17 @@ window.addEventListener('DOMContentLoaded', function() {
     },1000);
   }
 
-  // Fire on page load
   window.addEventListener('DOMContentLoaded', function(){
     setTimeout(loadStatus, 800);
   });
 })();
 
-// ══════════════════════════════════════════════════════════════════════
-// STAFF MODAL — opens when visitor clicks the "Staff" nav item.
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// STAFF MODAL â€” opens when visitor clicks the "Staff" nav item.
 // Pulls live from Firebase 'users' collection (excludes pending/rejected,
 // hides emails for privacy on the public page).
 // Auto-rebinds whenever the nav bar is re-rendered from settings/landing_page.
-// ══════════════════════════════════════════════════════════════════════
-(function setupStaffModal(){
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•(function setupStaffModal(){
   var _staffCache = null;
   var _staffLoading = false;
 
