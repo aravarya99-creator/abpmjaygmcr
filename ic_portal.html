@@ -1356,11 +1356,11 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
             <h2 style="font-size:18px; font-weight:800; color:#1e40af; margin:0; display:flex; align-items:center; gap:8px;">
               <span>📅</span> Holiday &amp; Sunday Duty Roster Management
             </h2>
-            <p style="font-size:12px; color:#64748b; margin:2px 0 0 0;">Review PMAM holiday/Sunday duty requests. Upon clicking Approve Roster, +1 Compensatory Leave Day is automatically credited for each approved duty day.</p>
+            <p style="font-size:12px; color:#64748b; margin:2px 0 0 0;">Review PMAM holiday/Sunday duty requests and submit recommendations to Admin for final publishing and Compensatory credit.</p>
           </div>
           <div style="display:flex; align-items:center; gap:12px;">
             <input type="month" id="icRosterYmSel" onchange="renderIcRoster(this.value)" style="padding:8px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:700; color:#0f172a;">
-            <button class="btn btn-pri" onclick="approveAllIcRosters()" style="padding:8px 18px; font-size:13px; font-weight:700;">Approve &amp; Publish Roster</button>
+            <button class="btn btn-pri" onclick="recommendAllIcRosters()" style="padding:8px 18px; font-size:13px; font-weight:700; background:#2563eb;">👍 Recommend All to Admin</button>
           </div>
         </div>
 
@@ -1597,8 +1597,9 @@ function renderIcRoster(yearMonth) {
         else offDates.push(dtKey);
       });
 
-      var badgeBg = status === 'Approved' ? '#dcfce7' : '#fef3c7';
-      var badgeColor = status === 'Approved' ? '#15803d' : '#b45309';
+      var badgeBg = d.icRecommended ? '#dbeafe' : (status === 'Approved' ? '#dcfce7' : '#fef3c7');
+      var badgeColor = d.icRecommended ? '#1e40af' : (status === 'Approved' ? '#15803d' : '#b45309');
+      var badgeText = status === 'Approved' ? 'Published by Admin' : (d.icRecommended ? 'Recommended to Admin' : 'Pending Review');
 
       html += '<tr style="border-bottom:1px solid #f1f5f9;">'
             + '<td style="padding:12px; font-weight:700; color:#0f172a;">' + name + '</td>'
@@ -1609,11 +1610,11 @@ function renderIcRoster(yearMonth) {
             + '<td style="padding:12px; text-align:center;">'
             + (offDates.length > 0 ? '<span style="color:#64748b; font-size:12px;">' + offDates.length + ' day(s) Off</span>' : '—')
             + '</td>'
-            + '<td style="padding:12px; text-align:center;"><span style="background:'+badgeBg+'; color:'+badgeColor+'; padding:3px 10px; border-radius:12px; font-weight:800; font-size:11px;">' + status + '</span></td>'
+            + '<td style="padding:12px; text-align:center;"><span style="background:'+badgeBg+'; color:'+badgeColor+'; padding:3px 10px; border-radius:12px; font-weight:800; font-size:11px;">' + badgeText + '</span></td>'
             + '<td style="padding:12px; text-align:center;">'
             + (status !== 'Approved'
-               ? '<button class="btn btn-pri" style="padding:4px 12px; font-size:11.5px;" onclick="approveIcRosterDoc(\'' + docId + '\', \'' + email + '\', ' + JSON.stringify(dutyDates).replace(/"/g, '&quot;') + ')">Approve &amp; Credit (' + dutyDates.length + ' Days)</button>'
-               : '<span style="color:#16a34a; font-size:11.5px; font-weight:800;">✅ Approved &amp; Credited</span>')
+               ? '<button class="btn btn-pri" style="padding:5px 12px; font-size:11.5px; background:#2563eb;" onclick="recommendIcRosterDoc(\'' + docId + '\', \'' + email + '\')">👍 Recommend to Admin</button>'
+               : '<span style="color:#16a34a; font-size:11.5px; font-weight:800;">✅ Published by Admin</span>')
             + '</td>'
             + '</tr>';
     });
@@ -1625,94 +1626,36 @@ function renderIcRoster(yearMonth) {
   });
 }
 
-function _syncApprovedRosterToLandingPage(yearMonth) {
-  var ym = yearMonth || (new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'));
-  db.collection('holiday_roster_requests').where('yearMonth', '==', ym).where('status', '==', 'Approved').get().then(function(snap) {
-    var dateMap = {};
-    snap.forEach(function(doc) {
-      var d = doc.data() || {};
-      var pmamName = d.name || d.email;
-      var choices = d.choices || {};
-      Object.keys(choices).forEach(function(dtKey) {
-        if (choices[dtKey] === 'Duty') {
-          if (!dateMap[dtKey]) {
-            dateMap[dtKey] = { date: dtKey, name: 'Holiday/Sunday Duty', pmams: [] };
-          }
-          if (dateMap[dtKey].pmams.indexOf(pmamName) === -1) {
-            dateMap[dtKey].pmams.push(pmamName);
-          }
-        }
-      });
-    });
-
-    var rows = [];
-    Object.keys(dateMap).sort().forEach(function(dtKey) {
-      rows.push(dateMap[dtKey]);
-    });
-
-    db.collection('settings').doc('landing_page').get().then(function(lDoc) {
-      var existing = lDoc.exists ? lDoc.data() : {};
-      existing.holidayDuty = { rows: rows, updatedAt: Date.now() };
-      db.collection('settings').doc('landing_page').set(existing, { merge: true });
-    });
-  });
-}
-
-function approveIcRosterDoc(docId, email, dutyDates) {
-  if (!confirm('Approve roster for ' + email + ' and credit ' + dutyDates.length + ' Compensatory Leave Day(s)?')) return;
-
+function recommendIcRosterDoc(docId, email) {
   var currentIC = (typeof window._icUserEmail !== 'undefined' && window._icUserEmail) ? window._icUserEmail : 'ic@gmc.com';
   var ym = document.getElementById('icRosterYmSel') ? document.getElementById('icRosterYmSel').value : '';
 
   db.collection('holiday_roster_requests').doc(docId).update({
-    status: 'Approved',
-    approvedBy: currentIC,
-    approvedAt: Date.now()
+    icRecommended: true,
+    icRecommendedBy: currentIC,
+    icRecommendedAt: Date.now()
   }).then(function() {
-    _syncApprovedRosterToLandingPage(ym);
-    var daysToCredit = dutyDates.length;
-    if (daysToCredit > 0 && email) {
-      db.collection('users').doc(email).get().then(function(uSnap) {
-        var curBal = 0;
-        if (uSnap.exists && uSnap.data().earnedCompLeave !== undefined) {
-          curBal = parseFloat(uSnap.data().earnedCompLeave) || 0;
-        }
-        var newBal = curBal + daysToCredit;
-        db.collection('users').doc(email).set({ earnedCompLeave: newBal }, { merge: true }).then(function() {
-          if (typeof showToast === 'function') showToast('✅ Approved roster for ' + email + ' & credited ' + daysToCredit + ' Compensatory Day(s)!', 'success');
-          else alert('✅ Approved roster for ' + email + ' & credited ' + daysToCredit + ' Compensatory Day(s)!');
-          renderIcRoster(ym);
-        });
-      });
-    } else {
-      if (typeof showToast === 'function') showToast('✅ Roster approved successfully!', 'success');
-      else alert('✅ Roster approved successfully!');
-      renderIcRoster(ym);
-    }
+    alert('👍 Recommendation submitted to Admin for final approval!');
+    renderIcRoster(ym);
   }).catch(function(err) {
-    alert('Error approving roster: ' + err.message);
+    alert('Error submitting recommendation: ' + err.message);
   });
 }
-
-function approveAllIcRosters() {
+function recommendAllIcRosters() {
   var ym = document.getElementById('icRosterYmSel').value;
   db.collection('holiday_roster_requests').where('yearMonth', '==', ym).get().then(function(snap) {
-    if (snap.empty) { alert('No pending roster submissions found for ' + ym); return; }
-    var promises = [];
+    if (snap.empty) { alert('No roster submissions found for ' + ym); return; }
+    var currentIC = (typeof window._icUserEmail !== 'undefined' && window._icUserEmail) ? window._icUserEmail : 'ic@gmc.com';
+    var batch = db.batch();
     snap.forEach(function(doc) {
-      var d = doc.data() || {};
-      if (d.status !== 'Approved') {
-        var dutyDates = [];
-        if (d.choices) {
-          Object.keys(d.choices).forEach(function(k) { if (d.choices[k] === 'Duty') dutyDates.push(k); });
-        }
-        promises.push(new Promise(function(resolve) {
-          approveIcRosterDoc(doc.id, d.email, dutyDates);
-          resolve();
-        }));
-      }
+      batch.update(doc.ref, {
+        icRecommended: true,
+        icRecommendedBy: currentIC,
+        icRecommendedAt: Date.now()
+      });
     });
-    Promise.all(promises).then(function() {
+    batch.commit().then(function() {
+      alert('👍 All roster recommendations submitted to Admin!');
       renderIcRoster(ym);
     });
   });
