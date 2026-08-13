@@ -1444,7 +1444,7 @@ input:checked + .slider:before { transform: translateX(20px); }
       </button>
       <button class="leaves-tab-btn" id="ltab-add_leaves" onclick="showLeavesTab('add_leaves', this)" style="padding:6px 14px; border:none; background:transparent; font-size:12px; font-weight:700; color:#64748b; cursor:pointer; display:flex; align-items:center; gap:6px;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Add Historical Leaves
+        Backdate Leave
       </button>
     </div>
 
@@ -1858,14 +1858,125 @@ input:checked + .slider:before { transform: translateX(20px); }
         </div>
         
         </div>
+        <!-- ===== BACKDATE LEAVE PANEL (FULL SCREEN / PAGE FORM) ===== -->
         <div class="leaves-panel" id="lpanel-add_leaves" style="display:none;">
-          <div class="panel-hd" style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:16px;">Add Leave (Backdated)</div>
-          <div style="background:#fff;padding:20px;border-radius:8px;border:1px solid #e2e8f0;max-width:500px;">
-            <div style="font-size:13px;color:#4b5563;margin-bottom:16px;line-height:1.5;">
-              Use this option to manually inject a backdated leave request for a PMAM into the database. 
-              It will be marked as "Admin-Entered" and will automatically adjust their balances.
+          <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:28px 32px; box-shadow:0 4px 20px rgba(0,0,0,0.04); margin-bottom:24px;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #f1f5f9; padding-bottom:18px; margin-bottom:20px;">
+              <div>
+                <h2 style="font-size:22px; font-weight:800; color:#0f172a; margin:0 0 4px 0; display:flex; align-items:center; gap:10px;">
+                  📅 Backdate Leave Entry <span style="font-size:12px; font-weight:700; background:#fef3c7; color:#92400e; padding:4px 12px; border-radius:12px;">Admin Backdated Record</span>
+                </h2>
+                <p style="font-size:13px; font-weight:500; color:#64748b; margin:0;">Inject a backdated leave record into the database and adjust employee balances.</p>
+              </div>
             </div>
-            <button class="btn btn-pri" onclick="openAddLeave()" style="width:100%;font-size:14px;padding:10px;">+ Open Add Leave Form</button>
+
+            <div style="font-size:13px; font-weight:600; color:#92400e; background:#fffbeb; border:1px solid #fde68a; padding:14px 18px; border-radius:12px; margin-bottom:24px; display:flex; align-items:center; gap:10px; line-height:1.4;">
+              <span style="font-size:18px;">⚠️</span>
+              <span>This record will be marked as admin-entered in the database. A valid audit reason is required.</span>
+            </div>
+
+            <!-- Full-Screen 2-Column Grid -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px 28px;">
+              
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">PMAM <span style="color:#dc2626">*</span></label>
+                <select id="alPmam" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;"><option value="">-- Select PMAM --</option></select>
+              </div>
+
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Leave Type <span style="color:#dc2626">*</span></label>
+                <select id="alType" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+                  <option value="Casual">Casual Leave (Paid)</option>
+                  <option value="Medical">Medical Leave (Unpaid)</option>
+                  <option value="Compensatory">Compensatory Leave (Paid)</option>
+                  <option value="Maternity">Maternity Leave (Unpaid)</option>
+                  <option value="Paternity">Paternity Leave (Unpaid)</option>
+                  <option value="LWP">LWP (Leave Without Pay)</option>
+                </select>
+              </div>
+
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Ward <span style="color:#dc2626">*</span></label>
+                <select id="alWard" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;"><option value="">-- Select Ward --</option></select>
+              </div>
+
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Duty Assigned To (Substitute)</label>
+                <input type="text" id="alDuty" placeholder="Substitute PMAM name" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+              </div>
+
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">From Date <span style="color:#dc2626">*</span></label>
+                <input type="date" id="alFrom" onchange="alCalcDates()" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+              </div>
+
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">To Date <span style="color:#dc2626">*</span></label>
+                <input type="date" id="alTo" onchange="alCalcDates()" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+              </div>
+
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Days (Auto-calculated)</label>
+                <input type="number" id="alDays" min="0.5" step="0.5" value="1" onchange="alCalcReturnDate()" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:800; color:#0f172a; background:#f8fafc;">
+              </div>
+
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Return Date (Auto-calculated)</label>
+                <input type="date" id="alReturn" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+              </div>
+
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#1d4ed8; margin-bottom:8px; display:block;">Approval Date <span style="font-size:11.5px; font-weight:600; color:#64748b;">(Reflects in history &amp; reports)</span> <span style="color:#dc2626">*</span></label>
+                <input type="date" id="alApprovalDate" style="width:100%; padding:12px 14px; border:1.5px solid #bfdbfe; border-radius:10px; font-size:14px; font-weight:700; color:#1e40af; background:#eff6ff;">
+              </div>
+
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Status</label>
+                <select id="alStatus" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+                  <option value="Approved">Approved</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+
+              <div class="mfld" style="grid-column:1/-1;">
+                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Leave Reason (From Leave Module) <span style="color:#dc2626">*</span></label>
+                <select id="alLeaveReasonSel" onchange="alSyncReason(this.value)" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+                  <option value="">-- Select Leave Reason --</option>
+                  <option value="Personal Work (Home)">Personal Work (Home)</option>
+                  <option value="Health Issue (Self/Family)">Health Issue (Self/Family)</option>
+                  <option value="Family Function">Family Function</option>
+                  <option value="Emergency / Urgent Work">Emergency / Urgent Work</option>
+                  <option value="Out of Station / Travel">Out of Station / Travel</option>
+                  <option value="Exam / Official Duty">Exam / Official Duty</option>
+                  <option value="other">Any Other (Specify below)</option>
+                </select>
+                <div id="alReasonOtherWrap" style="display:none; margin-top:8px;">
+                  <input type="text" id="alReasonOther" placeholder="Specify custom leave reason..." onkeyup="document.getElementById('alLeaveReason').value=this.value.trim()" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px;">
+                </div>
+                <input type="hidden" id="alLeaveReason">
+              </div>
+
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Remark (Optional Note)</label>
+                <input type="text" id="alRemark" placeholder="Note visible to PMAM" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+              </div>
+
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12.5px; color:#dc2626; margin-bottom:8px; display:block;">Reason for Backdated Entry <span style="color:#dc2626">*</span> <span style="font-size:11.5px; font-weight:600; color:#64748b;">(Audit Requirement)</span></label>
+                <input type="text" id="alAdminReason" placeholder="e.g. Regularizing historical leave, audit correction, etc." style="width:100%; padding:12px 14px; border:1.5px solid #fca5a5; border-radius:10px; font-size:14px; font-weight:600; color:#991b1b; background:#fef2f2;">
+              </div>
+
+            </div>
+
+            <div id="addLvErr" style="font-size:13px; font-weight:700; color:#dc2626; min-height:22px; margin-top:20px;"></div>
+
+            <div style="margin-top:24px; padding-top:20px; border-top:1px solid #e2e8f0; display:flex; align-items:center; justify-content:flex-end; gap:14px;">
+              <button type="button" class="btn btn-sec" onclick="resetBackdateForm()" style="padding:12px 24px; border-radius:10px; font-weight:700;">Cancel / Reset</button>
+              <button type="button" class="btn btn-pri" onclick="saveAddLeave()" style="padding:12px 28px; border-radius:10px; font-weight:800; background:#1d4ed8; color:#fff; font-size:14px;">Save Backdate Leave</button>
+            </div>
+
           </div>
         </div>
       </div>
@@ -7397,24 +7508,41 @@ function saveAddReport(){
     });
 }
 
-// --- Add Leave Request ---
-function openAddLeave(){
-  if (_dmPmamList.length === 0) { showToast('Loading PMAM list…', 'info'); dmLoadFilters(); setTimeout(openAddLeave, 800); return; }
-  _populatePmamSelect('alPmam');
-  _populateWardSelect('alWard');
-  ['alFrom','alTo','alReturn','alDuty','alLeaveReason','alReasonOther','alRemark','alAdminReason'].forEach(function(id){
+// --- Add / Backdate Leave Request ---
+function initBackdateLeavePanel() {
+  if (typeof _dmPmamList !== 'undefined' && _dmPmamList.length === 0) {
+    if (typeof dmLoadFilters === 'function') dmLoadFilters();
+    setTimeout(initBackdateLeavePanel, 600);
+    return;
+  }
+  if (typeof _populatePmamSelect === 'function') _populatePmamSelect('alPmam');
+  if (typeof _populateWardSelect === 'function') _populateWardSelect('alWard');
+
+  var todayStr = new Date().toISOString().split('T')[0];
+  if (document.getElementById('alFrom') && !document.getElementById('alFrom').value) document.getElementById('alFrom').value = todayStr;
+  if (document.getElementById('alTo') && !document.getElementById('alTo').value) document.getElementById('alTo').value = todayStr;
+  if (document.getElementById('alApprovalDate') && !document.getElementById('alApprovalDate').value) document.getElementById('alApprovalDate').value = todayStr;
+  if (typeof alCalcDates === 'function') alCalcDates();
+}
+
+function resetBackdateForm() {
+  ['alDuty','alLeaveReason','alReasonOther','alRemark','alAdminReason'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
-  var rSel = document.getElementById('alLeaveReasonSel');
-  if (rSel) rSel.selectedIndex = 0;
-  var rWrap = document.getElementById('alReasonOtherWrap');
-  if (rWrap) rWrap.style.display = 'none';
+  if (document.getElementById('alPmam')) document.getElementById('alPmam').selectedIndex = 0;
+  if (document.getElementById('alWard')) document.getElementById('alWard').selectedIndex = 0;
+  if (document.getElementById('alLeaveReasonSel')) document.getElementById('alLeaveReasonSel').selectedIndex = 0;
+  if (document.getElementById('alReasonOtherWrap')) document.getElementById('alReasonOtherWrap').style.display = 'none';
+  if (document.getElementById('addLvErr')) document.getElementById('addLvErr').textContent = '';
+  var todayStr = new Date().toISOString().split('T')[0];
+  if (document.getElementById('alFrom')) document.getElementById('alFrom').value = todayStr;
+  if (document.getElementById('alTo')) document.getElementById('alTo').value = todayStr;
+  if (document.getElementById('alApprovalDate')) document.getElementById('alApprovalDate').value = todayStr;
+  if (typeof alCalcDates === 'function') alCalcDates();
+}
 
-  document.getElementById('alDays').value = 1;
-  document.getElementById('alType').value = 'Casual';
-  document.getElementById('alStatus').value = 'Approved';
-  document.getElementById('addLvErr').textContent = '';
-  document.getElementById('addLvModal').classList.add('open');
+function openAddLeave(){
+  initBackdateLeavePanel();
 }
 
 function alSyncReason(val) {
@@ -7511,18 +7639,25 @@ function saveAddLeave(){
   var status = document.getElementById('alStatus').value;
   var remark = document.getElementById('alRemark').value.trim();
   var adminReason = document.getElementById('alAdminReason').value.trim();
+  var approvalDateVal = document.getElementById('alApprovalDate') ? document.getElementById('alApprovalDate').value : '';
 
   if (!pmamEmail) { err.textContent = 'Please select a PMAM.'; return; }
   if (!ward)      { err.textContent = 'Please select a ward.'; return; }
   if (!fromD || !toD) { err.textContent = 'Please set From and To dates.'; return; }
   if (fromD > toD)    { err.textContent = 'From date cannot be after To date.'; return; }
+  if (!approvalDateVal) { err.textContent = 'Please set Approval Date.'; return; }
   if (!lvReason)  { err.textContent = 'Please select or enter a leave reason.'; return; }
   if (!adminReason || adminReason.length < 5) { err.textContent = 'Admin reason is required (min 5 chars) for audit.'; return; }
+
+  var approvalTs = approvalDateVal ? new Date(approvalDateVal).getTime() : Date.now();
 
   var rec = {
     email: pmamEmail,
     name: pmamName,
     type: type,
+    ltype: type,
+    leaveType: type,
+    category: type,
     ward: ward,
     duty: duty,
     from: fromD,
@@ -7532,20 +7667,25 @@ function saveAddLeave(){
     reason: lvReason,
     status: status,
     remark: remark,
-    timestamp: Date.now(),
+    approvalDate: approvalDateVal,
+    actionDate: approvalDateVal,
+    appliedDate: approvalDateVal,
+    timestamp: approvalTs,
     _createdByAdmin: true,
-    _createdByAdminEmail: ADMIN_EMAIL,
+    _createdByAdminEmail: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'admin@gmc.com'),
     _adminReason: adminReason,
     _createdAt: Date.now()
   };
 
   db.collection('leave_requests').add(rec).then(function(docRef){
-    writeAudit('ADD_RECORD', 'leave_requests', docRef.id, {
-      pmam: pmamName, email: pmamEmail, type: type, from: fromD, to: toD, status: status, reason: adminReason
-    });
-    document.getElementById('addLvModal').classList.remove('open');
+    if (typeof writeAudit === 'function') {
+      writeAudit('ADD_RECORD', 'leave_requests', docRef.id, {
+        pmam: pmamName, email: pmamEmail, type: type, from: fromD, to: toD, approvalDate: approvalDateVal, status: status, reason: adminReason
+      });
+    }
     showToast('✅ Backdated leave added for '+pmamName, 'success');
-    dmLoadLeaves();
+    resetBackdateForm();
+    if (typeof dmLoadLeaves === 'function') dmLoadLeaves();
   }).catch(function(e){
     err.style.color = '#dc2626';
     err.textContent = 'Error: '+e.message;
@@ -9278,7 +9418,6 @@ window.addEventListener('DOMContentLoaded', function(){
 });
 
 function saveLeaveLimits() {
-  if (!requireAdminUnlock(saveLeaveLimits)) return;
   var btn = document.querySelector('#lpanel-leave_limits .btn-pri');
   if(btn) btn.textContent = 'Saving...';
   
@@ -9301,6 +9440,7 @@ function saveLeaveLimits() {
     var msg = document.getElementById('ll_msg');
     if(msg){ msg.textContent='Saved successfully'; msg.style.color='#166534'; setTimeout(function(){msg.textContent='';},3000); }
     if(btn) btn.textContent = 'Save Configuration';
+    if (typeof showToast === 'function') showToast('✅ Global Leave Configuration saved successfully', 'success');
     if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/leave_rules', 'leave_rules', data);
   }).catch(function(e){
     console.error(e);
