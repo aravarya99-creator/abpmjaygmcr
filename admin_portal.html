@@ -2878,9 +2878,28 @@ function goSec(id,el){
     window.GMCListenerManager.clearAll();
   }
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-  document.getElementById('sec-'+id).classList.add('active');
+  var sec = document.getElementById('sec-'+id);
+  if (sec) sec.classList.add('active');
   document.querySelectorAll('.sidebar .sbi').forEach(s=>s.classList.remove('active'));
   if(el)el.classList.add('active');
+
+  // Trigger section data loading automatically so tabs are never empty
+  if (id === 'directory') {
+    if (typeof loadDirectory === 'function') loadDirectory();
+  } else if (id === 'datamgmt' || id === 'reports') {
+    if (typeof dmLoadFilters === 'function') dmLoadFilters();
+    if (typeof dmLoadReports === 'function') dmLoadReports();
+  } else if (id === 'leaves') {
+    if (typeof dmLoadFilters === 'function') dmLoadFilters();
+    if (typeof dmLoadLeaves === 'function') dmLoadLeaves();
+  } else if (id === 'navbar' || id === 'nav') {
+    if (typeof nbmLoad === 'function') nbmLoad();
+  } else if (id === 'auditlog' || id === 'audit') {
+    if (typeof loadAuditLog === 'function') loadAuditLog();
+  } else if (id === 'settings') {
+    var activeStab = document.querySelector('#sec-settings .dmt-tab.active') || document.getElementById('stab-branding');
+    if (activeStab && typeof showSettingsTab === 'function') showSettingsTab(activeStab.id.replace('stab-', ''), activeStab);
+  }
 }
 
 // ===== DROPDOWN =====
@@ -3026,8 +3045,8 @@ function showDmTab(tab, el){
   if (pane) pane.classList.add('active');
   // Auto-actions when switching tabs (only the 3 panes that live in DM)
   if (tab === 'wardmgmt') { if (typeof wmReload === 'function') wmReload(); else if (typeof renderWards === 'function') renderWards(); }
-  if (tab === 'reports')  { dmLoadFilters(); }
-  if (tab === 'leaves')   { dmLoadFilters(); }
+  if (tab === 'reports')  { if (typeof dmLoadFilters === 'function') dmLoadFilters(); if (typeof dmLoadReports === 'function') dmLoadReports(); }
+  if (tab === 'leaves')   { if (typeof dmLoadFilters === 'function') dmLoadFilters(); if (typeof dmLoadLeaves === 'function') dmLoadLeaves(); }
 }
 
 // ══════════════════════════════════════════════════════
@@ -8801,7 +8820,11 @@ window.addEventListener('DOMContentLoaded', function() {
     return;
   }
   loadSessionUser();
-  setTimeout(loadAllUsers, 500);
+  setTimeout(loadAllUsers, 200);
+  setTimeout(function(){ if (typeof dmLoadFilters === 'function') dmLoadFilters(); }, 300);
+  setTimeout(function(){ if (typeof dmLoadReports === 'function') dmLoadReports(); }, 400);
+  setTimeout(function(){ if (typeof dmLoadLeaves === 'function') dmLoadLeaves(); }, 500);
+  setTimeout(function(){ if (typeof nbmLoad === 'function') nbmLoad(); }, 600);
   setTimeout(function(){ setAdminUnlocked(isAdminUnlocked()); }, 800);
   LeaveEngine.init({
     role: 'admin',
@@ -10114,7 +10137,11 @@ function showLeavesTab(tabName, el) {
 
   if (tabName === 'leave_requests') {
     if (typeof dmLoadFilters === 'function') dmLoadFilters();
-    dmLoadLeaves();
+    if (typeof dmLoadLeaves === 'function') dmLoadLeaves();
+  } else if (tabName === 'leave_limits') {
+    if (typeof loadLeaveLimits === 'function') loadLeaveLimits();
+  } else if (tabName === 'comp_balances') {
+    if (typeof loadCompBalances === 'function') loadCompBalances();
   }
 }
 
