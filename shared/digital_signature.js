@@ -86,9 +86,9 @@
 
         modal.innerHTML = `
           <div style="background:#fff;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,0.25);width:100%;max-width:380px;overflow:hidden;animation:dsigPop 0.2s ease-out;">
-            <style>
+            <' + 'style>
               @keyframes dsigPop { from{transform:scale(0.92);opacity:0} to{transform:scale(1);opacity:1} }
-            </style>
+            <' + '/style>
             <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
               <div style="display:flex;align-items:center;gap:10px;">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
