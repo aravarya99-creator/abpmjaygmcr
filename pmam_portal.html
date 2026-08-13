@@ -1643,8 +1643,8 @@ function goSec(id, el) {
   }
   if (id === 'dashboard') updateDashboard();
   if (id === 'roster') {
+    renderPmamRoster();
     if (typeof loadPmamHolidays === 'function') loadPmamHolidays(function(){ renderPmamRoster(); });
-    else renderPmamRoster();
   }
 }
 
@@ -1653,7 +1653,7 @@ function goSec(id, el) {
 // ═══════════════════════════════════════════════════════════════
 function renderPmamRoster(yearMonth) {
   var u = (typeof getPmjayUser === 'function') ? (getPmjayUser() || {}) : {};
-  if (!u.email) return;
+  var userEmail = u.email || u.id || u.userId || window._pmamUserEmail || 'pmam@gmc.com';
 
   var ym = yearMonth || (new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'));
   if (document.getElementById('rosterYmSel')) document.getElementById('rosterYmSel').value = ym;
@@ -1695,18 +1695,8 @@ function renderPmamRoster(yearMonth) {
 
   var wrap = document.getElementById('pmamRosterTbody');
   if (!wrap) return;
-  wrap.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#2563eb; font-weight:700;">Loading roster choices...</td></tr>';
 
-  var docId = 'roster_' + u.email.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + ym;
-  db.collection('holiday_roster_requests').doc(docId).get().then(function(docSnap) {
-    var savedChoices = {};
-    var status = 'Not Submitted';
-    if (docSnap.exists) {
-      var data = docSnap.data() || {};
-      savedChoices = data.choices || {};
-      status = data.status || 'Pending';
-    }
-
+  function renderTableRows(savedChoices, status) {
     var badgeBg = status === 'Approved' ? '#dcfce7' : (status === 'Pending' ? '#fef3c7' : '#f1f5f9');
     var badgeColor = status === 'Approved' ? '#15803d' : (status === 'Pending' ? '#b45309' : '#475569');
     if (document.getElementById('pmamRosterStatusBadge')) {
@@ -1741,15 +1731,29 @@ function renderPmamRoster(yearMonth) {
     });
 
     wrap.innerHTML = html;
-  }).catch(function(err) {
-    console.error('Error loading roster choices:', err);
-    wrap.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#dc2626;">Error loading roster: ' + err.message + '</td></tr>';
-  });
+  }
+
+  // Render immediately
+  renderTableRows({}, 'Not Submitted');
+
+  // Then fetch saved choices from Firestore
+  if (typeof db !== 'undefined' && db && userEmail) {
+    var docId = 'roster_' + userEmail.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + ym;
+    db.collection('holiday_roster_requests').doc(docId).get().then(function(docSnap) {
+      if (docSnap.exists) {
+        var data = docSnap.data() || {};
+        renderTableRows(data.choices || {}, data.status || 'Pending');
+      }
+    }).catch(function(err) {
+      console.warn('Could not fetch saved roster choices from Firestore:', err);
+    });
+  }
 }
 
 function savePmamRosterChoices() {
   var u = (typeof getPmjayUser === 'function') ? (getPmjayUser() || {}) : {};
-  if (!u.email) { alert('User email not found.'); return; }
+  var userEmail = u.email || u.id || u.userId || window._pmamUserEmail || 'pmam@gmc.com';
+  var userName = u.name || u.displayName || u.email || userEmail;
 
   var ym = document.getElementById('rosterYmSel').value;
   var btn = document.getElementById('btnSaveRosterChoices');
@@ -1764,10 +1768,10 @@ function savePmamRosterChoices() {
     if (val === 'Duty') dutyCount++;
   });
 
-  var docId = 'roster_' + u.email.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + ym;
+  var docId = 'roster_' + userEmail.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + ym;
   var rec = {
-    email: u.email,
-    name: u.name || u.email,
+    email: userEmail,
+    name: userName,
     yearMonth: ym,
     choices: choices,
     dutyCount: dutyCount,
