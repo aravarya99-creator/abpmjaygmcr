@@ -2958,7 +2958,8 @@ function renderLeaveSummary() {
   if (dashEl) dashEl.innerHTML = fullHtml;
 }
 function canTakeLeave(ltype, reqDays) {
-  var b = LeaveEngine.calculateBalances(getPmjayUser().email);
+  var u = getPmjayUser() || {};
+  var b = (typeof LeaveEngine !== 'undefined' && u.email) ? LeaveEngine.calculateBalances(u.email) : {};
   var t = (ltype || '').toLowerCase();
 
   var isMale = (window._currentUserGender || 'Male').toLowerCase() === 'male';
