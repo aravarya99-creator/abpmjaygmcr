@@ -1356,43 +1356,43 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
           <div>
             <h2 style="font-size:20px; font-weight:800; color:#1e40af; margin:0; display:flex; align-items:center; gap:8px;">
-              <span>🗓️</span> Roster Management Matrix
+              <span>🗓️</span> Roster Management
             </h2>
-            <p style="font-size:12px; color:#64748b; margin:2px 0 0 0;">Review and adjust PMAM duty assignments matrix. Submit recommendations to Admin for final publishing.</p>
+            <p style="font-size:12px; color:#64748b; margin:2px 0 0 0;">Review PMAM duty preferences, adjust ward assignments per date, and recommend for publishing.</p>
           </div>
           <div style="display:flex; align-items:center; gap:12px;">
             <input type="month" id="icRosterYmSel" onchange="renderIcRoster(this.value)" style="padding:8px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:700; color:#0f172a;">
-            <button class="btn btn-pri" onclick="recommendAllIcRosters()" style="padding:9px 20px; font-size:13px; font-weight:700; background:#2563eb;">👍 Submit Recommendations to Admin</button>
+            <button class="btn btn-pri" id="btnSaveRecommendRoster" onclick="saveAndRecommendIcRoster()" style="padding:9px 20px; font-size:13px; font-weight:800; background:#2563eb; color:#ffffff; border:none; border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+              👍 Save &amp; Recommend for Publish
+            </button>
           </div>
         </div>
 
-        <!-- Roster Sub-Tabs (Official Holidays vs Sundays Matrix) -->
+        <!-- Roster Sub-Tabs (Official Holidays vs Sundays) -->
         <div style="display:flex; gap:10px; margin-bottom:16px; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">
           <button id="icRtab-holidays" class="ic-roster-tab active" onclick="switchIcRosterTab('holidays', this)" style="padding:8px 18px; border:none; background:#2563eb; color:#ffffff; font-size:13px; font-weight:800; border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            🎉 Official Holidays Matrix
+            🎉 Official Holidays
           </button>
           <button id="icRtab-sundays" class="ic-roster-tab" onclick="switchIcRosterTab('sundays', this)" style="padding:8px 18px; border:1px solid #cbd5e1; background:#ffffff; color:#475569; font-size:13px; font-weight:700; border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            ☀️ Sundays Matrix
+            ☀️ Sundays Roster
           </button>
         </div>
 
-        <!-- Matrix Table Container -->
-        <div class="tbl-wrap" style="border:1px solid #e2e8f0; border-radius:12px; overflow-x:auto;">
-          <table style="width:100%; border-collapse:collapse; min-width:800px;" id="icRosterMatrixTable">
-            <thead id="icRosterThead">
+        <!-- Date-Wise Table Container -->
+        <div class="tbl-wrap" style="border:1px solid #e2e8f0; border-radius:12px; overflow-x:auto; background:#ffffff;">
+          <table style="width:100%; border-collapse:collapse; min-width:850px;" id="icRosterTable">
+            <thead>
               <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
-                <th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">S.NO</th>
-                <th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">PMAM NAME</th>
-                <th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">WARD</th>
-                <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#15803d;">TOTAL ON DUTY</th>
-                <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#b91c1c;">TOTAL OFF</th>
+                <th style="padding:12px 14px; text-align:left; font-size:12px; font-weight:800; color:#475569; width:160px;">DATE</th>
+                <th style="padding:12px 14px; text-align:left; font-size:12px; font-weight:800; color:#475569; width:160px;">HOLIDAY / EVENT</th>
+                <th style="padding:12px 14px; text-align:left; font-size:12px; font-weight:800; color:#15803d;">PMAM ON DUTY (SERIAL WISE)</th>
+                <th style="padding:12px 14px; text-align:left; font-size:12px; font-weight:800; color:#b91c1c;">PMAM ON HOLIDAY / OFF (SERIAL WISE)</th>
+                <th style="padding:12px 14px; text-align:center; font-size:12px; font-weight:800; color:#334155; width:140px;">TOTAL STATS</th>
               </tr>
             </thead>
             <tbody id="icRosterTbody">
-              <tr><td colspan="10" style="text-align:center; padding:24px; color:#64748b; font-style:italic;">Loading Matrix Roster...</td></tr>
+              <tr><td colspan="5" style="text-align:center; padding:24px; color:#64748b; font-style:italic;">Loading Roster...</td></tr>
             </tbody>
-            <tfoot id="icRosterTfoot" style="background:#f1f5f9; border-top:2px solid #cbd5e1; font-weight:800; font-size:12px; color:#0f172a;">
-            </tfoot>
           </table>
         </div>
 
@@ -1579,9 +1579,11 @@ function goSec(id,el){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// I/C HOLIDAY & SUNDAY DUTY MATRIX ROSTER LOGIC
+// I/C HOLIDAY & SUNDAY DUTY DATE-WISE ROSTER LOGIC
 // ═══════════════════════════════════════════════════════════════
 window._activeIcRosterTab = 'holidays';
+window._icCurrentRosterState = {};
+window._icRosterTargetDates = [];
 
 function switchIcRosterTab(tab, btn) {
   window._activeIcRosterTab = tab;
@@ -1634,34 +1636,10 @@ function renderIcRoster(yearMonth) {
     }
   }
 
-  var thead = document.getElementById('icRosterThead');
+  window._icRosterTargetDates = targetDates;
   var tbody = document.getElementById('icRosterTbody');
-  var tfoot = document.getElementById('icRosterTfoot');
   if (!tbody) return;
-
-  var headerHtml = '<tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">'
-                 + '<th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">S.NO</th>'
-                 + '<th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">PMAM NAME</th>'
-                 + '<th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">WARD</th>';
-
-  if (targetDates.length === 0) {
-    headerHtml += '<th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">DATES</th>';
-  } else {
-    targetDates.forEach(function(dItem) {
-      var dObj = new Date(dItem.date);
-      var fmt = dObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-      headerHtml += '<th style="padding:10px; text-align:center; font-size:11.5px; font-weight:800; color:#1e40af; border-left:1px solid #e2e8f0;">'
-                  + '<div>' + fmt + '</div>'
-                  + '<div style="font-size:10px; font-weight:600; color:#64748b;">' + (dItem.name.length > 15 ? dItem.name.substring(0,13)+'...' : dItem.name) + '</div>'
-                  + '</th>';
-    });
-  }
-
-  headerHtml += '<th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#15803d; border-left:2px solid #cbd5e1;">TOTAL ON DUTY</th>'
-              + '<th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#b91c1c;">TOTAL OFF</th>'
-              + '</tr>';
-
-  if (thead) thead.innerHTML = headerHtml;
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:#2563eb; font-weight:700;">Loading Date-wise Roster...</td></tr>';
 
   Promise.all([
     db.collection('users').get(),
@@ -1686,92 +1664,163 @@ function renderIcRoster(yearMonth) {
       }
     });
 
-    var rosterChoicesMap = {};
+    var state = {};
+    pmamList.forEach(function(p) {
+      state[p.email] = {
+        name: p.name,
+        ward: p.ward,
+        choices: {}
+      };
+    });
+
     rosterSnap.forEach(function(rDoc) {
       var rData = rDoc.data() || {};
       var rEmail = (rData.email || '').toLowerCase().trim();
-      if (rEmail) {
-        rosterChoicesMap[rEmail] = rData.choices || {};
+      if (rEmail && state[rEmail]) {
+        state[rEmail].choices = rData.choices || {};
       }
     });
 
-    if (pmamList.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; padding:24px; color:#94a3b8; font-weight:600;">No PMAM users found in database.</td></tr>';
-      if (tfoot) tfoot.innerHTML = '';
-      return;
-    }
+    window._icCurrentRosterState = state;
+    window._icPmamList = pmamList;
 
-    var bodyHtml = '';
-    var dateSummaryOnDuty = {};
-    var dateSummaryOff = {};
+    renderIcRosterTable();
 
-    targetDates.forEach(function(dItem) {
-      dateSummaryOnDuty[dItem.date] = 0;
-      dateSummaryOff[dItem.date] = 0;
-    });
+  }).catch(function(err) {
+    console.error('Error rendering Roster Table:', err);
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:#dc2626;">Error: ' + err.message + '</td></tr>';
+  });
+}
 
-    pmamList.forEach(function(pmam, idx) {
-      var pmamChoices = rosterChoicesMap[pmam.email] || {};
-      var totalOnDuty = 0;
-      var totalOff = 0;
+function renderIcRosterTable() {
+  var tbody = document.getElementById('icRosterTbody');
+  if (!tbody) return;
 
-      bodyHtml += '<tr style="border-bottom:1px solid #f1f5f9;">'
-                + '<td style="padding:10px 12px; font-size:12px; font-weight:700; color:#64748b;">' + (idx + 1) + '</td>'
-                + '<td style="padding:10px 12px; font-weight:700; color:#0f172a; font-size:13px;">' + pmam.name + '</td>'
-                + '<td style="padding:10px 12px; font-size:12px; color:#475569; font-weight:600;">' + pmam.ward + '</td>';
+  var targetDates = window._icRosterTargetDates || [];
+  var state = window._icCurrentRosterState || {};
+  var pmamList = window._icPmamList || [];
 
-      if (targetDates.length === 0) {
-        bodyHtml += '<td style="padding:10px; text-align:center; color:#94a3b8; font-style:italic;">No dates</td>';
+  if (targetDates.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:28px; color:#94a3b8; font-weight:600;">No ' + (window._activeIcRosterTab === 'holidays' ? 'official holidays' : 'Sundays') + ' found for this month.</td></tr>';
+    return;
+  }
+
+  var html = '';
+  targetDates.forEach(function(dItem) {
+    var dObj = new Date(dItem.date);
+    var formattedDate = dObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', weekday: 'short' });
+
+    var onDutyList = [];
+    var offList = [];
+
+    pmamList.forEach(function(p) {
+      var userChoices = (state[p.email] && state[p.email].choices) ? state[p.email].choices : {};
+      var c = userChoices[dItem.date] || 'Off';
+      if (c === 'Duty') {
+        onDutyList.push(p);
       } else {
-        targetDates.forEach(function(dItem) {
-          var choice = pmamChoices[dItem.date] || 'Off';
-          if (choice === 'Duty') {
-            totalOnDuty++;
-            dateSummaryOnDuty[dItem.date]++;
-            bodyHtml += '<td style="padding:8px; text-align:center; border-left:1px solid #f1f5f9;">'
-                      + '<span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:12px; font-weight:800; font-size:11px; display:inline-block;">🟩 ON DUTY</span>'
-                      + '</td>';
-          } else {
-            totalOff++;
-            dateSummaryOff[dItem.date]++;
-            bodyHtml += '<td style="padding:8px; text-align:center; border-left:1px solid #f1f5f9;">'
-                      + '<span style="background:#fee2e2; color:#991b1b; padding:4px 10px; border-radius:12px; font-weight:800; font-size:11px; display:inline-block;">🟥 OFF</span>'
-                      + '</td>';
-          }
-        });
+        offList.push(p);
       }
-
-      bodyHtml += '<td style="padding:10px; text-align:center; font-weight:800; color:#15803d; font-size:13px; border-left:2px solid #e2e8f0; background:#f0fdf4;">' + totalOnDuty + ' Days</td>'
-                + '<td style="padding:10px; text-align:center; font-weight:800; color:#b91c1c; font-size:13px; background:#fef2f2;">' + totalOff + ' Days</td>'
-                + '</tr>';
     });
 
-    tbody.innerHTML = bodyHtml;
-
-    var footHtml = '<tr style="background:#f1f5f9;">'
-                 + '<td colspan="3" style="padding:12px; text-align:right; font-weight:800; color:#1e40af;">SUMMARY TOTALS (ON DUTY / OFF):</td>';
-
-    if (targetDates.length === 0) {
-      footHtml += '<td style="padding:12px; text-align:center;">—</td>';
+    var onDutyHtml = '';
+    if (onDutyList.length === 0) {
+      onDutyHtml = '<span style="color:#94a3b8; font-style:italic; font-size:12px;">No PMAM assigned On Duty</span>';
     } else {
-      targetDates.forEach(function(dItem) {
-        var onCnt = dateSummaryOnDuty[dItem.date] || 0;
-        var offCnt = dateSummaryOff[dItem.date] || 0;
-        footHtml += '<td style="padding:10px; text-align:center; border-left:1px solid #cbd5e1;">'
-                  + '<div style="color:#15803d; font-weight:800;">' + onCnt + ' On Duty</div>'
-                  + '<div style="color:#b91c1c; font-size:11px; font-weight:700;">' + offCnt + ' Off</div>'
-                  + '</td>';
+      onDutyList.forEach(function(p, i) {
+        onDutyHtml += '<div style="display:flex; align-items:center; justify-content:space-between; background:#f0fdf4; border:1px solid #bbf7d0; padding:5px 10px; border-radius:8px; margin-bottom:4px;">'
+                    + '<span style="font-weight:700; font-size:12.5px; color:#166534;">' + (i + 1) + '. ' + p.name + ' <span style="font-size:11px; font-weight:500; color:#15803d;">(' + p.ward + ')</span></span>'
+                    + '<button type="button" onclick="toggleIcDutyState(\'' + dItem.date + '\', \'' + p.email + '\', \'Off\')" style="padding:2px 8px; border:1px solid #86efac; background:#ffffff; color:#15803d; border-radius:6px; font-size:10.5px; font-weight:700; cursor:pointer;" title="Move PMAM to Off">⇄ Move Off</button>'
+                    + '</div>';
       });
     }
 
-    footHtml += '<td colspan="2" style="padding:12px; text-align:center; color:#1e40af; font-weight:800; border-left:2px solid #cbd5e1;">Total PMAMs: ' + pmamList.length + '</td>'
-              + '</tr>';
+    var offHtml = '';
+    if (offList.length === 0) {
+      offHtml = '<span style="color:#94a3b8; font-style:italic; font-size:12px;">No PMAM on Off</span>';
+    } else {
+      offList.forEach(function(p, i) {
+        offHtml += '<div style="display:flex; align-items:center; justify-content:space-between; background:#fef2f2; border:1px solid #fecaca; padding:5px 10px; border-radius:8px; margin-bottom:4px;">'
+                 + '<span style="font-weight:700; font-size:12.5px; color:#991b1b;">' + (i + 1) + '. ' + p.name + ' <span style="font-size:11px; font-weight:500; color:#b91c1c;">(' + p.ward + ')</span></span>'
+                 + '<button type="button" onclick="toggleIcDutyState(\'' + dItem.date + '\', \'' + p.email + '\', \'Duty\')" style="padding:2px 8px; border:1px solid #fca5a5; background:#ffffff; color:#b91c1c; border-radius:6px; font-size:10.5px; font-weight:700; cursor:pointer;" title="Move PMAM to On Duty">⇄ Move Duty</button>'
+                 + '</div>';
+      });
+    }
 
-    if (tfoot) tfoot.innerHTML = footHtml;
+    html += '<tr style="border-bottom:1.5px solid #e2e8f0;">'
+          + '<td style="padding:14px; font-weight:800; color:#0f172a; font-size:13px; vertical-align:top;">' + formattedDate + '</td>'
+          + '<td style="padding:14px; vertical-align:top;"><span style="background:#e0e7ff; color:#3730a3; padding:4px 10px; border-radius:10px; font-weight:800; font-size:11.5px;">' + dItem.name + '</span></td>'
+          + '<td style="padding:10px 14px; vertical-align:top;">' + onDutyHtml + '</td>'
+          + '<td style="padding:10px 14px; vertical-align:top;">' + offHtml + '</td>'
+          + '<td style="padding:14px; text-align:center; vertical-align:top;">'
+          + '  <div style="background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d; padding:4px 8px; border-radius:8px; font-weight:800; font-size:12px; margin-bottom:4px;">' + onDutyList.length + ' On Duty</div>'
+          + '  <div style="background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; padding:4px 8px; border-radius:8px; font-weight:800; font-size:12px;">' + offList.length + ' Off</div>'
+          + '</td>'
+          + '</tr>';
+  });
 
+  tbody.innerHTML = html;
+}
+
+function toggleIcDutyState(dateKey, email, newChoice) {
+  if (!window._icCurrentRosterState[email]) {
+    window._icCurrentRosterState[email] = { choices: {} };
+  }
+  if (!window._icCurrentRosterState[email].choices) {
+    window._icCurrentRosterState[email].choices = {};
+  }
+  window._icCurrentRosterState[email].choices[dateKey] = newChoice;
+  renderIcRosterTable();
+}
+
+function saveAndRecommendIcRoster() {
+  var ym = document.getElementById('icRosterYmSel') ? document.getElementById('icRosterYmSel').value : '';
+  var btn = document.getElementById('btnSaveRecommendRoster');
+  if (btn) btn.textContent = 'Saving...';
+
+  var state = window._icCurrentRosterState || {};
+  var pmamEmails = Object.keys(state);
+
+  if (pmamEmails.length === 0) {
+    alert('No roster state to save.');
+    if (btn) btn.textContent = '👍 Save & Recommend for Publish';
+    return;
+  }
+
+  var currentIC = (typeof window._icUserEmail !== 'undefined' && window._icUserEmail) ? window._icUserEmail : 'ic@gmc.com';
+  var batch = db.batch();
+
+  pmamEmails.forEach(function(email) {
+    var pData = state[email];
+    var docId = 'roster_' + email.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + ym;
+    var choices = pData.choices || {};
+
+    var dutyCount = 0;
+    Object.keys(choices).forEach(function(k) { if (choices[k] === 'Duty') dutyCount++; });
+
+    var docRef = db.collection('holiday_roster_requests').doc(docId);
+    batch.set(docRef, {
+      email: email,
+      name: pData.name || email,
+      yearMonth: ym,
+      choices: choices,
+      dutyCount: dutyCount,
+      icRecommended: true,
+      icRecommendedBy: currentIC,
+      icRecommendedAt: Date.now(),
+      status: 'Recommended for Publish',
+      updatedAt: Date.now()
+    }, { merge: true });
+  });
+
+  batch.commit().then(function() {
+    if (btn) btn.textContent = '👍 Save & Recommend for Publish';
+    if (typeof showToast === 'function') showToast('✅ Roster saved & recommended for publish to Admin!', 'success');
+    else alert('✅ Roster saved & recommended for publish to Admin!');
+    renderIcRoster(ym);
   }).catch(function(err) {
-    console.error('Error rendering Matrix Roster:', err);
-    tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; padding:24px; color:#dc2626;">Error: ' + err.message + '</td></tr>';
+    if (btn) btn.textContent = '👍 Save & Recommend for Publish';
+    alert('Error saving roster: ' + err.message);
   });
 }
 
