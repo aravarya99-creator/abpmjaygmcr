@@ -885,9 +885,10 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         window._currentUserGender = 'Male';
 
         function applyGenderLeaveRules(gender) {
-          window._currentUserGender = (gender || 'Male').trim();
-          var isMale = (window._currentUserGender.toLowerCase() === 'male');
-          var isFemale = (window._currentUserGender.toLowerCase() === 'female');
+          window._currentUserGender = (gender || (window._pmamUserData && window._pmamUserData.gender) || 'Male').trim();
+          var g = window._currentUserGender.toLowerCase();
+          var isFemale = (g === 'female' || g === 'f');
+          var isMale = !isFemale;
           var rules = (typeof LeaveEngine !== 'undefined' && LeaveEngine.rules) ? LeaveEngine.rules : {};
 
           var sel = document.getElementById('lvTypeSel');
@@ -905,23 +906,23 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
                 else { opt.disabled = false; opt.textContent = 'Medical Leave (Unpaid)'; }
               } else if (val.indexOf('maternity') !== -1) {
                 if (rules.en_mat === false) {
-                  opt.disabled = true; opt.textContent = 'Maternity Leave (Disabled by Admin)';
-                  if (sel.value === opt.value) sel.value = '';
+                  opt.disabled = true; opt.hidden = true; opt.style.display = 'none'; opt.textContent = 'Maternity Leave (Disabled by Admin)';
+                  if (sel.value === opt.value) sel.value = 'Casual';
                 } else if (isMale) {
-                  opt.disabled = true; opt.textContent = 'Maternity Leave (Female Only)';
-                  if (sel.value === opt.value) sel.value = '';
+                  opt.disabled = true; opt.hidden = true; opt.style.display = 'none'; opt.textContent = 'Maternity Leave (Female Only)';
+                  if (sel.value === opt.value) sel.value = 'Casual';
                 } else {
-                  opt.disabled = false; opt.textContent = 'Maternity Leave (Unpaid)';
+                  opt.disabled = false; opt.hidden = false; opt.style.display = ''; opt.textContent = 'Maternity Leave (Unpaid)';
                 }
               } else if (val.indexOf('paternity') !== -1) {
                 if (rules.en_pat === false) {
-                  opt.disabled = true; opt.textContent = 'Paternity Leave (Disabled by Admin)';
-                  if (sel.value === opt.value) sel.value = '';
+                  opt.disabled = true; opt.hidden = true; opt.style.display = 'none'; opt.textContent = 'Paternity Leave (Disabled by Admin)';
+                  if (sel.value === opt.value) sel.value = 'Casual';
                 } else if (isFemale) {
-                  opt.disabled = true; opt.textContent = 'Paternity Leave (Male Only)';
-                  if (sel.value === opt.value) sel.value = '';
+                  opt.disabled = true; opt.hidden = true; opt.style.display = 'none'; opt.textContent = 'Paternity Leave (Male Only)';
+                  if (sel.value === opt.value) sel.value = 'Casual';
                 } else {
-                  opt.disabled = false; opt.textContent = 'Paternity Leave (Unpaid)';
+                  opt.disabled = false; opt.hidden = false; opt.style.display = ''; opt.textContent = 'Paternity Leave (Unpaid)';
                 }
               } else if (val.indexOf('lwp') !== -1 || val.indexOf('pay') !== -1) {
                 if (rules.en_lwp === false) { opt.disabled = true; opt.textContent = 'Leave Without Pay (Disabled by Admin)'; }
@@ -932,8 +933,28 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
           var matRadio = document.getElementById('lt4');
           var patRadio = document.getElementById('lt5');
-          if (matRadio && (isMale || rules.en_mat === false)) { matRadio.disabled = true; if (matRadio.checked) matRadio.checked = false; }
-          if (patRadio && (isFemale || rules.en_pat === false)) { patRadio.disabled = true; if (patRadio.checked) patRadio.checked = false; }
+          if (matRadio) {
+            if (isMale || rules.en_mat === false) {
+              matRadio.disabled = true;
+              if (matRadio.parentElement) matRadio.parentElement.style.display = 'none';
+              if (matRadio.checked) matRadio.checked = false;
+            } else {
+              matRadio.disabled = false;
+              if (matRadio.parentElement) matRadio.parentElement.style.display = 'inline-flex';
+            }
+          }
+          if (patRadio) {
+            if (isFemale || rules.en_pat === false) {
+              patRadio.disabled = true;
+              if (patRadio.parentElement) patRadio.parentElement.style.display = 'none';
+              if (patRadio.checked) patRadio.checked = false;
+            } else {
+              patRadio.disabled = false;
+              if (patRadio.parentElement) patRadio.parentElement.style.display = 'inline-flex';
+            }
+          }
+
+          if (typeof renderLeaveSummary === 'function') renderLeaveSummary();
         }
 
         function initSubstitutePMAMLoader() {
@@ -2454,6 +2475,11 @@ function executeApproveDuty() {
 function renderLeaveSummary() {
   var u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
   var b = LeaveEngine.calculateBalances(u.email || u.name);
+  var rules = LeaveEngine.rules || {};
+
+  var g = String((window._currentUserGender || (window._pmamUserData && window._pmamUserData.gender) || u.gender || 'Male')).toLowerCase().trim();
+  var isFemale = (g === 'female' || g === 'f');
+  var isMale = !isFemale;
 
   var leaveTypes = [
     {
@@ -2461,74 +2487,81 @@ function renderLeaveSummary() {
       title: 'Casual Leave (CL)',
       label: 'Casual Leave',
       code: '(CL)',
-      eligible: b.eligible.casual !== undefined ? b.eligible.casual : 15,
+      eligible: rules.casual !== undefined ? rules.casual : (rules.casual_limit !== undefined ? rules.casual_limit : 15),
       taken: b.taken.casual || 0,
-      balance: Math.max(0, (b.eligible.casual !== undefined ? b.eligible.casual : 15) - (b.taken.casual || 0)),
+      balance: Math.max(0, (rules.casual !== undefined ? rules.casual : (rules.casual_limit !== undefined ? rules.casual_limit : 15)) - (b.taken.casual || 0)),
       color: '#3b82f6',
       bgColor: '#eff6ff',
       iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M12 2a10 10 0 0 0-10 10c0 1 0 2 10 2 10 0 10-1 10-2A10 10 0 0 0 12 2z"/></svg>`
-    },
-    {
-      key: 'comp',
-      title: 'Compensatory',
-      label: 'Compensatory',
-      code: '',
-      eligible: (typeof _myCompEarned !== 'undefined') ? _myCompEarned : 0,
-      taken: b.taken.comp || 0,
-      balance: Math.max(0, ((typeof _myCompEarned !== 'undefined') ? _myCompEarned : 0) - (b.taken.comp || 0)),
-      color: '#22c55e',
-      bgColor: '#f0fdf4',
-      iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`
     },
     {
       key: 'medical',
       title: 'Medical Leave (ML)',
       label: 'Medical Leave',
       code: '(ML)',
-      eligible: b.eligible.medical !== undefined ? b.eligible.medical : 10,
+      eligible: rules.medical !== undefined ? rules.medical : (rules.medical_limit !== undefined ? rules.medical_limit : 30),
       taken: b.taken.medical || 0,
-      balance: Math.max(0, (b.eligible.medical !== undefined ? b.eligible.medical : 10) - (b.taken.medical || 0)),
+      balance: Math.max(0, (rules.medical !== undefined ? rules.medical : (rules.medical_limit !== undefined ? rules.medical_limit : 30)) - (b.taken.medical || 0)),
       color: '#a855f7',
       bgColor: '#f3e8ff',
       iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>`
     },
     {
+      key: 'comp',
+      title: 'Compensatory Leave',
+      label: 'Compensatory',
+      code: '(COMP)',
+      eligible: (typeof _myCompEarned !== 'undefined') ? _myCompEarned : 0,
+      taken: b.taken.comp || 0,
+      balance: Math.max(0, ((typeof _myCompEarned !== 'undefined') ? _myCompEarned : 0) - (b.taken.comp || 0)),
+      color: '#22c55e',
+      bgColor: '#f0fdf4',
+      iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`
+    }
+  ];
+
+  if (isMale) {
+    leaveTypes.push({
       key: 'paternity',
       title: 'Paternity Leave (PTL)',
       label: 'Paternity Leave',
       code: '(PTL)',
-      eligible: b.eligible.paternity !== undefined ? b.eligible.paternity : 15,
+      eligible: rules.paternity !== undefined ? rules.paternity : (rules.pat_limit !== undefined ? rules.pat_limit : 15),
       taken: b.taken.paternity || 0,
-      balance: Math.max(0, (b.eligible.paternity !== undefined ? b.eligible.paternity : 15) - (b.taken.paternity || 0)),
+      balance: Math.max(0, (rules.paternity !== undefined ? rules.paternity : (rules.pat_limit !== undefined ? rules.pat_limit : 15)) - (b.taken.paternity || 0)),
       color: '#f97316',
       bgColor: '#fff7ed',
       iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
-    },
-    {
+    });
+  }
+
+  if (isFemale) {
+    leaveTypes.push({
       key: 'maternity',
       title: 'Maternity Leave (MTL)',
       label: 'Maternity Leave',
       code: '(MTL)',
-      eligible: b.eligible.maternity !== undefined ? b.eligible.maternity : 180,
+      eligible: rules.maternity !== undefined ? rules.maternity : (rules.mat_limit !== undefined ? rules.mat_limit : 180),
       taken: b.taken.maternity || 0,
-      balance: Math.max(0, (b.eligible.maternity !== undefined ? b.eligible.maternity : 180) - (b.taken.maternity || 0)),
+      balance: Math.max(0, (rules.maternity !== undefined ? rules.maternity : (rules.mat_limit !== undefined ? rules.mat_limit : 180)) - (b.taken.maternity || 0)),
       color: '#ec4899',
       bgColor: '#fce7f3',
       iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9z"/><circle cx="12" cy="7" r="4"/></svg>`
-    },
-    {
-      key: 'lwp',
-      title: 'LWP',
-      label: 'LWP',
-      code: '',
-      eligible: 0,
-      taken: b.taken.lwp || 0,
-      balance: 0,
-      color: '#cbd5e1',
-      bgColor: '#f1f5f9',
-      iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 8h6"/><path d="M9 11h6"/><path d="M9 8v7c0 1.5 2 2 3 2s3-.5 3-2"/></svg>`
-    }
-  ];
+    });
+  }
+
+  leaveTypes.push({
+    key: 'lwp',
+    title: 'Leave Without Pay (LWP)',
+    label: 'LWP',
+    code: '(LWP)',
+    eligible: rules.lwp !== undefined ? rules.lwp : (rules.lwp_limit !== undefined ? rules.lwp_limit : 0),
+    taken: b.taken.lwp || 0,
+    balance: 0,
+    color: '#64748b',
+    bgColor: '#f1f5f9',
+    iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 8h6"/><path d="M9 11h6"/><path d="M9 8v7c0 1.5 2 2 3 2s3-.5 3-2"/></svg>`
+  });
 
   var totalEligible = 0;
   var totalTaken = 0;
@@ -2558,15 +2591,15 @@ function renderLeaveSummary() {
         <div>
           <div class="ld-card-stats">
             <div class="ld-stat-col">
-              <span class="ld-stat-lbl">Eligible</span>
+              <span class="ld-stat-lbl">TOTAL LEAVE</span>
               <span class="ld-stat-val">${item.eligible}</span>
             </div>
             <div class="ld-stat-col">
-              <span class="ld-stat-lbl">Taken</span>
+              <span class="ld-stat-lbl">TAKEN</span>
               <span class="ld-stat-val">${item.taken}</span>
             </div>
             <div class="ld-stat-col">
-              <span class="ld-stat-lbl">Balance</span>
+              <span class="ld-stat-lbl">BALANCE</span>
               <span class="ld-stat-val bal">${item.balance}</span>
             </div>
           </div>

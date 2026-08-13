@@ -1754,8 +1754,10 @@ input:checked + .slider:before { transform: translateX(20px); }
                     <label class="switch"><input type="checkbox" id="ll_en_mat" checked><span class="slider round"></span></label>
                   </div>
                 </div>
-                <div style="font-size:12.5px; color:#475569; font-weight:500; line-height:1.5; background:#f8fafc; padding:12px 14px; border-radius:10px; border:1px solid #f1f5f9; min-height:48px; display:flex; align-items:center;">
-                  <span>Quota: <strong style="color:#be185d;">26 weeks</strong> (1st/2nd child), <strong style="color:#be185d;">12 weeks</strong> (3rd+). Checked and approved manually.</span>
+                <div style="display:flex; align-items:center; gap:10px; font-size:13px; font-weight:600; color:#475569; background:#f8fafc; padding:10px 14px; border-radius:10px; border:1px solid #f1f5f9;">
+                  <span>Quota (Days):</span>
+                  <input type="number" id="ll_mat" class="frm-inp" style="width:75px; padding:6px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px; font-weight:800; color:#0f172a; text-align:center;" value="180">
+                  <span style="color:#64748b; font-weight:500;">days</span>
                 </div>
                 <div style="font-size:11.5px; color:#64748b; font-weight:500; display:flex; align-items:center; gap:6px; border-top:1px solid #f1f5f9; padding-top:10px;">
                   <span style="color:#db2777; font-size:14px;">ⓘ</span>
@@ -9258,6 +9260,7 @@ function loadLeaveLimits() {
       if (document.getElementById('ll_casual') && d.casual_limit !== undefined) document.getElementById('ll_casual').value = d.casual_limit;
       if (document.getElementById('ll_medical') && d.medical_limit !== undefined) document.getElementById('ll_medical').value = d.medical_limit;
       if (document.getElementById('ll_pat') && d.pat_limit !== undefined) document.getElementById('ll_pat').value = d.pat_limit;
+      if (document.getElementById('ll_mat') && (d.mat_limit !== undefined || d.maternity !== undefined)) document.getElementById('ll_mat').value = d.mat_limit !== undefined ? d.mat_limit : d.maternity;
       if (document.getElementById('ll_lwp') && d.lwp_limit !== undefined) document.getElementById('ll_lwp').value = d.lwp_limit;
       
       if (document.getElementById('ll_en_casual') && d.en_casual !== undefined) document.getElementById('ll_en_casual').checked = !!d.en_casual;
@@ -9284,6 +9287,7 @@ function saveLeaveLimits() {
     medical_limit: parseInt(document.getElementById('ll_medical').value)||30,
     lwp_limit: parseInt(document.getElementById('ll_lwp').value)||30,
     pat_limit: parseInt(document.getElementById('ll_pat').value)||15,
+    mat_limit: parseInt(document.getElementById('ll_mat').value)||180,
     en_casual: document.getElementById('ll_en_casual').checked,
     en_comp: document.getElementById('ll_en_comp').checked,
     en_medical: document.getElementById('ll_en_medical').checked,
