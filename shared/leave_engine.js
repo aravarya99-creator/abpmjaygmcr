@@ -299,7 +299,7 @@
     },
 
     // ==========================================
-    // UNIVERSAL PRINTABLE PDF GENERATOR
+    // UNIVERSAL PRINTABLE PDF & EMBEDDED PREVIEW GENERATOR
     // ==========================================
     printLeaveDocument: function(reqObj) {
       if (!reqObj) return;
@@ -392,7 +392,7 @@
       }
 
       var baseHref = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
-      var page = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Leave Application - ' + name + '</title>'
+      var pageFull = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Leave Application - ' + name + '</title>'
         + '<base href="' + baseHref + '">'
         + '<link rel="stylesheet" href="shared/headers.css?v=6">'
         + '<style>'
@@ -419,13 +419,72 @@
         + '@media print{body{margin:0}@page{size:A4 portrait;margin:6mm 10mm}}'
         + '</style></head><body>'
         + pageContent
-        + '<' + 'script>window.onload=function(){setTimeout(function(){window.print();},300);};</' + 'script></body></html>';
+        + '</body></html>';
 
-      var printWin = window.open('', '_blank');
-      if (printWin) {
-        printWin.document.write(page);
-        printWin.document.close();
+      // Create modal container if not present
+      var modalId = 'leavePdfPreviewModalOverlay';
+      var modal = document.getElementById(modalId);
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = modalId;
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.8);backdrop-filter:blur(4px);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';
+        document.body.appendChild(modal);
       }
+
+      modal.innerHTML = ''
+        + '<div style="background:#fff; width:100%; max-width:920px; height:90vh; border-radius:16px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.4); display:flex; flex-direction:column; overflow:hidden; border:1px solid #cbd5e1;">'
+        + '  <div style="background:#0f172a; color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #334155;">'
+        + '    <div style="display:flex; align-items:center; gap:10px;">'
+        + '      <span style="font-size:20px;">📄</span>'
+        + '      <div>'
+        + '        <div style="font-weight:800; font-size:15px; letter-spacing:0.3px;">Leave Application Document</div>'
+        + '        <div style="font-size:11px; color:#94a3b8;">' + name + ' (' + ltype + ')</div>'
+        + '      </div>'
+        + '    </div>'
+        + '    <div style="display:flex; align-items:center; gap:10px;">'
+        + '      <button id="leavePdfPrintBtn" style="background:#166534; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;">'
+        + '        🖨️ Print Application'
+        + '      </button>'
+        + '      <button id="leavePdfNewTabBtn" style="background:#334155; color:#f8fafc; border:none; padding:8px 14px; border-radius:8px; font-weight:600; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">'
+        + '        🔗 Open in New Tab'
+        + '      </button>'
+        + '      <button id="leavePdfCloseBtn" style="background:#dc2626; color:#fff; border:none; width:32px; height:32px; border-radius:50%; font-weight:800; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;">'
+        + '        ✕'
+        + '      </button>'
+        + '    </div>'
+        + '  </div>'
+        + '  <div style="flex:1; background:#f1f5f9; padding:16px; overflow:hidden;">'
+        + '    <iframe id="leavePdfFrame" style="width:100%; height:100%; border:none; background:#fff; border-radius:8px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);"></iframe>'
+        + '  </div>'
+        + '</div>';
+
+      modal.style.display = 'flex';
+
+      var iframe = document.getElementById('leavePdfFrame');
+      var doc = iframe.contentWindow.document;
+      doc.open();
+      doc.write(pageFull);
+      doc.close();
+
+      document.getElementById('leavePdfCloseBtn').onclick = function() {
+        modal.style.display = 'none';
+      };
+
+      document.getElementById('leavePdfPrintBtn').onclick = function() {
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+        }
+      };
+
+      document.getElementById('leavePdfNewTabBtn').onclick = function() {
+        var printWin = window.open('', '_blank');
+        if (printWin) {
+          var printPage = pageFull.replace('</body></html>', '<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>');
+          printWin.document.write(printPage);
+          printWin.document.close();
+        }
+      };
     }
   };
   global.LeaveEngine = LeaveEngine;
