@@ -2796,6 +2796,68 @@ input:checked + .slider:before { transform: translateX(20px); }
 </div>
 
 <script>
+// ===== CENTRALIZED DIRECTORY LOADER & HELPER FUNCTIONS =====
+function loadDirectory(forceRefresh) {
+  if (typeof forceRefresh === 'undefined') forceRefresh = true;
+  var db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
+  if (window.GMCUserService) {
+    GMCUserService.getAllUsers(db, function(err, users) {
+      if (err) {
+        console.error('[AdminPortal] Error loading directory users:', err);
+        return;
+      }
+      window._allDirectoryUsers = users || [];
+      if (typeof filterDirectory === 'function') {
+        var activeTab = document.querySelector('[id^="dir-tab-"].active');
+        var role = activeTab ? activeTab.id.replace('dir-tab-', '') : 'all';
+        filterDirectory(role);
+      }
+    }, forceRefresh);
+  } else if (db) {
+    db.collection('users').get().then(function(snap) {
+      var list = [];
+      snap.forEach(function(doc) {
+        var d = doc.data() || {};
+        d.id = doc.id;
+        list.push(d);
+      });
+      window._allDirectoryUsers = list;
+      if (typeof filterDirectory === 'function') {
+        filterDirectory('all');
+      }
+    });
+  }
+}
+window.loadDirectory = loadDirectory;
+window.loadAllUsers = loadDirectory;
+window.loadStaffFromUsers = loadDirectory;
+window.renderPmams = function() { if (typeof renderDirectoryGrid === 'function') renderDirectoryGrid(window._allDirectoryUsers || []); };
+window.renderOthers = function() { if (typeof renderDirectoryGrid === 'function') renderDirectoryGrid(window._allDirectoryUsers || []); };
+
+window.exportExcel = function(tableId, filename) {
+  var table = document.getElementById(tableId);
+  if (!table) return;
+  var html = table.outerHTML;
+  var blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = (filename || 'export') + '.xls';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
+
+window.renderAdminRoster = function(ym) {
+  console.log('[AdminPortal] renderAdminRoster called with month:', ym);
+};
+
+window.publishAdminRoster = function() {
+  if (typeof saveRosterToDb === 'function') {
+    saveRosterToDb();
+  }
+};
+
 // ===== DATA =====
 let pmams=[];
 let others=[];
@@ -10081,53 +10143,5 @@ function resetLeaveLimitsToDefault() {
 
 <script src="shared/logos.js"></script>
 <script src="shared/portal_header.js?v=20260725_16"></script>
-<script>
-// ===== CENTRALIZED DIRECTORY LOADER & HELPER FUNCTIONS =====
-window.loadDirectory = function(forceRefresh) {
-  if (typeof forceRefresh === 'undefined') forceRefresh = true;
-  if (!window.GMCUserService) return;
-  window.GMCUserService.getAllUsers(window.db, function(err, users) {
-    if (err) {
-      console.error('[AdminPortal] Error loading directory users:', err);
-      return;
-    }
-    window._allDirectoryUsers = users || [];
-    if (typeof filterDirectory === 'function') {
-      var activeTab = document.querySelector('[id^="dir-tab-"].active');
-      var role = activeTab ? activeTab.id.replace('dir-tab-', '') : 'all';
-      filterDirectory(role);
-    }
-  }, forceRefresh);
-};
-
-window.loadAllUsers = window.loadDirectory;
-window.loadStaffFromUsers = window.loadDirectory;
-window.renderPmams = window.renderDirectoryGrid || function(){};
-window.renderOthers = window.renderDirectoryGrid || function(){};
-
-window.exportExcel = function(tableId, filename) {
-  var table = document.getElementById(tableId);
-  if (!table) return;
-  var html = table.outerHTML;
-  var blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = (filename || 'export') + '.xls';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-};
-
-window.renderAdminRoster = function(ym) {
-  console.log('[AdminPortal] renderAdminRoster called with month:', ym);
-};
-
-window.publishAdminRoster = function() {
-  if (typeof saveRosterToDb === 'function') {
-    saveRosterToDb();
-  }
-};
-</script>
 </body>
 
