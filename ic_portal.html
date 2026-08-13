@@ -1611,42 +1611,27 @@ function renderIcRoster(yearMonth) {
   var mo = parseInt(parts[1]) - 1;
   var daysInMonth = new Date(yr, mo + 1, 0).getDate();
 
-  var holidayMap = {};
-  if (Array.isArray(window._pmamHolidays)) {
-    window._pmamHolidays.forEach(function(h) {
-      if (h.date && h.date.indexOf(ym) === 0) {
-        holidayMap[h.date] = h.name || 'Official Holiday';
-      }
-    });
-  }
-
-  var targetDates = [];
-  var activeTab = window._activeIcRosterTab || 'holidays';
-
-  for (var day = 1; day <= daysInMonth; day++) {
-    var dt = new Date(yr, mo, day);
-    var dateStr = ym + '-' + String(day).padStart(2, '0');
-    var isSunday = (dt.getDay() === 0);
-    var isHoliday = !!holidayMap[dateStr];
-
-    if (activeTab === 'holidays' && isHoliday) {
-      targetDates.push({ date: dateStr, name: holidayMap[dateStr] || 'Holiday', dayName: 'Holiday' });
-    } else if (activeTab === 'sundays' && isSunday) {
-      targetDates.push({ date: dateStr, name: 'Sunday Off', dayName: 'Sunday' });
-    }
-  }
-
-  window._icRosterTargetDates = targetDates;
   var tbody = document.getElementById('icRosterTbody');
   if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:#2563eb; font-weight:700;">Loading Date-wise Roster...</td></tr>';
 
   Promise.all([
+    db.collection('settings').doc('holiday_calendar').get().catch(function(){ return { exists: false }; }),
     db.collection('users').get(),
     db.collection('holiday_roster_requests').where('yearMonth', '==', ym).get()
   ]).then(function(results) {
-    var usersSnap = results[0];
-    var rosterSnap = results[1];
+    var holidayDoc = results[0];
+    var usersSnap = results[1];
+    var rosterSnap = results[2];
+
+    var holidayMap = {};
+    if (holidayDoc.exists && Array.isArray(holidayDoc.data().holidays)) {
+      holidayDoc.data().holidays.forEach(function(h) {
+        if (h.date && h.date.indexOf(ym) === 0) {
+          holidayMap[h.date] = h.name || 'Official Holiday';
+        }
+      });
+    }
 
     var pmamMap = {};
 
@@ -1659,7 +1644,7 @@ function renderIcRoster(yearMonth) {
         return s === 'pmam' || s.indexOf('pmam') !== -1;
       });
 
-      if (isPmam) {
+      if (isPmam || uData.role === 'PMAM') {
         var em = (uData.email || uDoc.id).toLowerCase().trim();
         pmamMap[em] = {
           id: uDoc.id,
@@ -1669,6 +1654,9 @@ function renderIcRoster(yearMonth) {
         };
       }
     });
+
+    var rosterChoicesMap = {};
+    var submittedDateKeys = {};
 
     rosterSnap.forEach(function(rDoc) {
       var rData = rDoc.data() || {};
@@ -1685,8 +1673,41 @@ function renderIcRoster(yearMonth) {
             ward: 'Assigned Ward'
           };
         }
+        rosterChoicesMap[rEmail] = rData.choices || {};
+
+        if (rData.choices) {
+          Object.keys(rData.choices).forEach(function(dtKey) {
+            if (dtKey.indexOf(ym) === 0) {
+              submittedDateKeys[dtKey] = true;
+            }
+          });
+        }
       }
     });
+
+    var targetDates = [];
+    var activeTab = window._activeIcRosterTab || 'holidays';
+
+    for (var day = 1; day <= daysInMonth; day++) {
+      var dt = new Date(yr, mo, day);
+      var dateStr = ym + '-' + String(day).padStart(2, '0');
+      var isSunday = (dt.getDay() === 0);
+      var isHoliday = !!holidayMap[dateStr] || (activeTab === 'holidays' && !!submittedDateKeys[dateStr] && !isSunday);
+
+      if (activeTab === 'holidays' && (isHoliday || submittedDateKeys[dateStr]) && !isSunday) {
+        targetDates.push({
+          date: dateStr,
+          name: holidayMap[dateStr] || 'Holiday / Submitted Date',
+          dayName: 'Holiday'
+        });
+      } else if (activeTab === 'sundays' && isSunday) {
+        targetDates.push({
+          date: dateStr,
+          name: 'Sunday Off',
+          dayName: 'Sunday'
+        });
+      }
+    }
 
     var pmamList = Object.keys(pmamMap).map(function(k){ return pmamMap[k]; });
 
@@ -1695,21 +1716,11 @@ function renderIcRoster(yearMonth) {
       state[p.email] = {
         name: p.name,
         ward: p.ward,
-        choices: {}
+        choices: rosterChoicesMap[p.email] || {}
       };
     });
 
-    rosterSnap.forEach(function(rDoc) {
-      var rData = rDoc.data() || {};
-      var rEmail = (rData.email || '').toLowerCase().trim();
-      if (rEmail && state[rEmail]) {
-        state[rEmail].choices = rData.choices || {};
-        if (rData.name && state[rEmail].name === rEmail) {
-          state[rEmail].name = rData.name;
-        }
-      }
-    });
-
+    window._icRosterTargetDates = targetDates;
     window._icCurrentRosterState = state;
     window._icPmamList = pmamList;
 
