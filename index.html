@@ -302,6 +302,7 @@ a.hero-gc-ci:hover{color:#7c3aed}
 
   var res = initFirebase();
   global.GMCFirebase = res;
+  global.ADMIN_EMAIL = 'aravarya99@gmail.com';
   if (res) {
     if (res.db) global.db = res.db;
     if (res.auth) global.auth = res.auth;
@@ -309,8 +310,9 @@ a.hero-gc-ci:hover{color:#7c3aed}
 })(typeof window !== 'undefined' ? window : this);
 
 if (typeof window !== 'undefined') {
-  window.db = window.db \|\| (window.GMCFirebase ? window.GMCFirebase.db : null);
-  window.auth = window.auth \|\| (window.GMCFirebase ? window.GMCFirebase.auth : null);
+  window.db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
+  window.auth = window.auth || (window.GMCFirebase ? window.GMCFirebase.auth : null);
+  window.ADMIN_EMAIL = window.ADMIN_EMAIL || 'aravarya99@gmail.com';
 }
 
 </script>
@@ -365,7 +367,7 @@ if (typeof window !== 'undefined') {
      * Get user roles as an normalized array of lowercase strings
      */
     getUserRoles: function(user) {
-      user = user \|\| this.getUser();
+      user = user || this.getUser();
       if (!user) return [];
       var roles = [];
       if (Array.isArray(user.roles)) {
@@ -383,12 +385,13 @@ if (typeof window !== 'undefined') {
      * Check if user is an Admin
      */
     isAdmin: function(user) {
-      user = user \|\| this.getUser();
-      if (!user \|\| !user.email) return false;
+      user = user || this.getUser();
+      if (!user || !user.email) return false;
       var email = String(user.email).toLowerCase().trim();
-      if (email === 'aravarya99@gmail.com') return true;
+      var adminEm = (typeof window !== 'undefined' && window.ADMIN_EMAIL) ? String(window.ADMIN_EMAIL).toLowerCase().trim() : 'aravarya99@gmail.com';
+      if (email === adminEm || email === 'aravarya99@gmail.com') return true;
       var roles = this.getUserRoles(user);
-      return roles.indexOf('admin') !== -1 \|\| roles.indexOf('administrator') !== -1;
+      return roles.indexOf('admin') !== -1 || roles.indexOf('administrator') !== -1;
     },
 
     /**
@@ -1442,8 +1445,10 @@ function doLogin() {
       }
       return;
     }
-    if (email !== ADMIN_EMAIL && u.status !== 'approved' && u.status !== 'active') {
-      setMsg('loginMsg', u.status==='rejected' ? 'Account rejected. Contact Admin.' : 'Account pending Admin approval.', '#dc2626');
+    var adminEmail = (typeof window !== 'undefined' && window.ADMIN_EMAIL) ? String(window.ADMIN_EMAIL).toLowerCase().trim() : 'aravarya99@gmail.com';
+    var uStatus = String(u.status || '').toLowerCase().trim();
+    if (email !== adminEmail && uStatus !== 'approved' && uStatus !== 'active') {
+      setMsg('loginMsg', uStatus==='rejected' ? 'Account rejected. Contact Admin.' : 'Account pending Admin approval.', '#dc2626');
       return;
     }
     // Success — clear attempt counters
@@ -1467,7 +1472,7 @@ function doLogin() {
     else localStorage.removeItem('pmjay_remember');
     setMsg('loginMsg','Login successful! Redirecting...','#16a34a');
     setTimeout(function(){
-      var isAdmin = email === ADMIN_EMAIL || uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s==='admin'||s==='administrator'; });
+      var isAdmin = email === adminEmail || uRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s==='admin'||s==='administrator'; });
       var isIc = uRoles.some(function(r){
         var s = String(r).toLowerCase().trim();
         var norm = s.replace(/[^a-z0-9]/g, '');
@@ -1959,26 +1964,34 @@ window.addEventListener('DOMContentLoaded', function() {
       rng.textContent='('+d0.getDate()+' '+months[d0.getMonth()]+' — '+dN.getDate()+' '+months[dN.getMonth()]+' '+dN.getFullYear()+')';
     }
 
-    // Get PMAM users
-    db.collection('users').where('role','==','PMAM').get().then(function(uSnap){
-      var pmams=[];
-      uSnap.forEach(function(doc){
-        var u=doc.data();
-        if(u.status==='approved'||u.status==='active'){
-          // Use doc.id as the source of truth for email — it's the canonical
-          // primary key (signup writes db.collection('users').doc(email).set).
-          // Older accounts may not have an `email` field in the document body,
-          // which would make u.email undefined and break the join with reports.
+    // Get PMAM users (fetching all users and filtering in-memory to handle casing & roles array)
+    function processUserDocs(uSnap) {
+      var pmams = [];
+      uSnap.forEach(function(doc) {
+        var u = doc.data() || {};
+        var st = String(u.status || '').toLowerCase().trim();
+        var isApproved = (st === 'approved' || st === 'active' || !st);
+        var isPmamUser = (window.GMCAuth && typeof window.GMCAuth.isPMAM === 'function')
+          ? window.GMCAuth.isPMAM(u)
+          : (function(){
+              var r = String(u.role || '').toLowerCase().trim();
+              var rs = Array.isArray(u.roles) ? u.roles.map(function(x){return String(x).toLowerCase().trim();}) : [];
+              return r === 'pmam' || r.indexOf('pmam') !== -1 || rs.indexOf('pmam') !== -1 || rs.some(function(x){return x.indexOf('pmam') !== -1;});
+            })();
+        if (isApproved && isPmamUser) {
           var em = ((doc.id || u.email || '') + '').trim().toLowerCase();
-          pmams.push({email: em, name: u.name || em});
+          var nm = (u.name || doc.id || em).trim();
+          pmams.push({email: em, name: nm});
         }
       });
-      pmams.sort(function(a,b){return a.name.localeCompare(b.name);});
+      pmams.sort(function(a,b){ return a.name.localeCompare(b.name); });
+      return pmams;
+    }
 
-      // Fetch reports — PMAM portal writes to 'daily_reports' (canonical
-      // collection shared across PMAM, I/C, and Admin portals; schema:
-      // {date, email, name, wards, ipd, reg, ...}). Narrow to last 5 days
-      // server-side to cut bandwidth on the public landing page.
+    db.collection('users').get().then(function(uSnap){
+      var pmams = processUserDocs(uSnap);
+
+      // Fetch reports — PMAM portal writes to 'daily_reports'
       var fromStr = dates[0].str;
       db.collection('daily_reports').where('date','>=',fromStr).get().then(function(s){
         var reports=[];

@@ -67,6 +67,7 @@
 
   var res = initFirebase();
   global.GMCFirebase = res;
+  global.ADMIN_EMAIL = 'aravarya99@gmail.com';
   if (res) {
     if (res.db) global.db = res.db;
     if (res.auth) global.auth = res.auth;
@@ -74,8 +75,9 @@
 })(typeof window !== 'undefined' ? window : this);
 
 if (typeof window !== 'undefined') {
-  window.db = window.db \|\| (window.GMCFirebase ? window.GMCFirebase.db : null);
-  window.auth = window.auth \|\| (window.GMCFirebase ? window.GMCFirebase.auth : null);
+  window.db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
+  window.auth = window.auth || (window.GMCFirebase ? window.GMCFirebase.auth : null);
+  window.ADMIN_EMAIL = window.ADMIN_EMAIL || 'aravarya99@gmail.com';
 }
 
 </script>
@@ -148,12 +150,13 @@ if (typeof window !== 'undefined') {
      * Check if user is an Admin
      */
     isAdmin: function(user) {
-      user = user \|\| this.getUser();
-      if (!user \|\| !user.email) return false;
+      user = user || this.getUser();
+      if (!user || !user.email) return false;
       var email = String(user.email).toLowerCase().trim();
-      if (email === 'aravarya99@gmail.com') return true;
+      var adminEm = (typeof window !== 'undefined' && window.ADMIN_EMAIL) ? String(window.ADMIN_EMAIL).toLowerCase().trim() : 'aravarya99@gmail.com';
+      if (email === adminEm || email === 'aravarya99@gmail.com') return true;
       var roles = this.getUserRoles(user);
-      return roles.indexOf('admin') !== -1 \|\| roles.indexOf('administrator') !== -1;
+      return roles.indexOf('admin') !== -1 || roles.indexOf('administrator') !== -1;
     },
 
     /**
