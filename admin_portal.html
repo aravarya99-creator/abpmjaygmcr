@@ -1876,17 +1876,18 @@ input:checked + .slider:before { transform: translateX(20px); }
               <span>This record will be marked as admin-entered in the database. A valid audit reason is required.</span>
             </div>
 
-            <!-- Full-Screen 2-Column Grid -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px 28px;">
+            <!-- Full-Screen 4-Column 3-Row Grid -->
+            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px 18px;">
               
+              <!-- ROW 1 (4 Fields) -->
               <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">PMAM <span style="color:#dc2626">*</span></label>
-                <select id="alPmam" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;"><option value="">-- Select PMAM --</option></select>
+                <label style="font-weight:800; font-size:12px; color:#334155; margin-bottom:6px; display:block;">PMAM <span style="color:#dc2626">*</span></label>
+                <select id="alPmam" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13.5px; font-weight:600; color:#0f172a; background:#f8fafc;"><option value="">-- Select PMAM --</option></select>
               </div>
 
               <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Leave Type <span style="color:#dc2626">*</span></label>
-                <select id="alType" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+                <label style="font-weight:800; font-size:12px; color:#334155; margin-bottom:6px; display:block;">LEAVE TYPE <span style="color:#dc2626">*</span></label>
+                <select id="alType" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13.5px; font-weight:600; color:#0f172a; background:#f8fafc;">
                   <option value="Casual">Casual Leave (Paid)</option>
                   <option value="Medical">Medical Leave (Unpaid)</option>
                   <option value="Compensatory">Compensatory Leave (Paid)</option>
@@ -1897,52 +1898,54 @@ input:checked + .slider:before { transform: translateX(20px); }
               </div>
 
               <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Ward <span style="color:#dc2626">*</span></label>
-                <select id="alWard" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;"><option value="">-- Select Ward --</option></select>
+                <label style="font-weight:800; font-size:12px; color:#334155; margin-bottom:6px; display:block;">WARD <span style="color:#dc2626">*</span></label>
+                <select id="alWard" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13.5px; font-weight:600; color:#0f172a; background:#f8fafc;"><option value="">-- Select Ward --</option></select>
               </div>
 
               <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Duty Assigned To (Substitute)</label>
-                <input type="text" id="alDuty" placeholder="Substitute PMAM name" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+                <label style="font-weight:800; font-size:12px; color:#334155; margin-bottom:6px; display:block;">DUTY ASSIGNED TO (SUBSTITUTE)</label>
+                <input type="text" id="alDuty" placeholder="Substitute PMAM name" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13.5px; font-weight:600; color:#0f172a; background:#f8fafc;">
+              </div>
+
+              <!-- ROW 2 (4 Fields) -->
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12px; color:#334155; margin-bottom:6px; display:block;">FROM DATE <span style="color:#dc2626">*</span></label>
+                <input type="date" id="alFrom" onchange="alCalcDates()" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13.5px; font-weight:600; color:#0f172a; background:#f8fafc;">
               </div>
 
               <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">From Date <span style="color:#dc2626">*</span></label>
-                <input type="date" id="alFrom" onchange="alCalcDates()" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+                <label style="font-weight:800; font-size:12px; color:#334155; margin-bottom:6px; display:block;">TO DATE <span style="color:#dc2626">*</span></label>
+                <input type="date" id="alTo" onchange="alCalcDates()" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13.5px; font-weight:600; color:#0f172a; background:#f8fafc;">
               </div>
 
               <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">To Date <span style="color:#dc2626">*</span></label>
-                <input type="date" id="alTo" onchange="alCalcDates()" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+                <label style="font-weight:800; font-size:12px; color:#334155; margin-bottom:6px; display:block;">DAYS (AUTO-CALCULATED)</label>
+                <input type="number" id="alDays" min="0.5" step="0.5" value="1" onchange="alCalcReturnDate()" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13.5px; font-weight:800; color:#0f172a; background:#f8fafc;">
               </div>
 
               <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Days (Auto-calculated)</label>
-                <input type="number" id="alDays" min="0.5" step="0.5" value="1" onchange="alCalcReturnDate()" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:800; color:#0f172a; background:#f8fafc;">
+                <label style="font-weight:800; font-size:12px; color:#334155; margin-bottom:6px; display:block;">RETURN DATE (AUTO-CALCULATED)</label>
+                <input type="date" id="alReturn" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13.5px; font-weight:600; color:#0f172a; background:#f8fafc;">
+              </div>
+
+              <!-- ROW 3 (4 Fields) -->
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12px; color:#1d4ed8; margin-bottom:6px; display:block;">APPROVAL DATE <span style="color:#dc2626">*</span></label>
+                <input type="date" id="alApprovalDate" style="width:100%; padding:10px 12px; border:1.5px solid #bfdbfe; border-radius:10px; font-size:13.5px; font-weight:700; color:#1e40af; background:#eff6ff;">
               </div>
 
               <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Return Date (Auto-calculated)</label>
-                <input type="date" id="alReturn" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
-              </div>
-
-              <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#1d4ed8; margin-bottom:8px; display:block;">Approval Date <span style="font-size:11.5px; font-weight:600; color:#64748b;">(Reflects in history &amp; reports)</span> <span style="color:#dc2626">*</span></label>
-                <input type="date" id="alApprovalDate" style="width:100%; padding:12px 14px; border:1.5px solid #bfdbfe; border-radius:10px; font-size:14px; font-weight:700; color:#1e40af; background:#eff6ff;">
-              </div>
-
-              <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Status</label>
-                <select id="alStatus" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+                <label style="font-weight:800; font-size:12px; color:#334155; margin-bottom:6px; display:block;">STATUS</label>
+                <select id="alStatus" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13.5px; font-weight:600; color:#0f172a; background:#f8fafc;">
                   <option value="Approved">Approved</option>
                   <option value="Pending">Pending</option>
                   <option value="Rejected">Rejected</option>
                 </select>
               </div>
 
-              <div class="mfld" style="grid-column:1/-1;">
-                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Leave Reason (From Leave Module) <span style="color:#dc2626">*</span></label>
-                <select id="alLeaveReasonSel" onchange="alSyncReason(this.value)" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
+              <div class="mfld">
+                <label style="font-weight:800; font-size:12px; color:#334155; margin-bottom:6px; display:block;">LEAVE REASON <span style="color:#dc2626">*</span></label>
+                <select id="alLeaveReasonSel" onchange="alSyncReason(this.value)" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13.5px; font-weight:600; color:#0f172a; background:#f8fafc;">
                   <option value="">-- Select Leave Reason --</option>
                   <option value="Personal Work (Home)">Personal Work (Home)</option>
                   <option value="Health Issue (Self/Family)">Health Issue (Self/Family)</option>
@@ -1953,19 +1956,14 @@ input:checked + .slider:before { transform: translateX(20px); }
                   <option value="other">Any Other (Specify below)</option>
                 </select>
                 <div id="alReasonOtherWrap" style="display:none; margin-top:8px;">
-                  <input type="text" id="alReasonOther" placeholder="Specify custom leave reason..." onkeyup="document.getElementById('alLeaveReason').value=this.value.trim()" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px;">
+                  <input type="text" id="alReasonOther" placeholder="Specify custom leave reason..." onkeyup="document.getElementById('alLeaveReason').value=this.value.trim()" style="width:100%; padding:10px 12px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:13.5px;">
                 </div>
                 <input type="hidden" id="alLeaveReason">
               </div>
 
               <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#334155; margin-bottom:8px; display:block;">Remark (Optional Note)</label>
-                <input type="text" id="alRemark" placeholder="Note visible to PMAM" style="width:100%; padding:12px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:600; color:#0f172a; background:#f8fafc;">
-              </div>
-
-              <div class="mfld">
-                <label style="font-weight:800; font-size:12.5px; color:#dc2626; margin-bottom:8px; display:block;">Reason for Backdated Entry <span style="color:#dc2626">*</span> <span style="font-size:11.5px; font-weight:600; color:#64748b;">(Audit Requirement)</span></label>
-                <input type="text" id="alAdminReason" placeholder="e.g. Regularizing historical leave, audit correction, etc." style="width:100%; padding:12px 14px; border:1.5px solid #fca5a5; border-radius:10px; font-size:14px; font-weight:600; color:#991b1b; background:#fef2f2;">
+                <label style="font-weight:800; font-size:12px; color:#dc2626; margin-bottom:6px; display:block;">REASON FOR BACKDATED ENTRY <span style="color:#dc2626">*</span></label>
+                <input type="text" id="alAdminReason" placeholder="e.g. Audit correction, historical regularization" style="width:100%; padding:10px 12px; border:1.5px solid #fca5a5; border-radius:10px; font-size:13.5px; font-weight:600; color:#991b1b; background:#fef2f2;">
               </div>
 
             </div>
