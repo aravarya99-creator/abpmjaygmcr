@@ -1778,7 +1778,7 @@ function renderPmamRoster(yearMonth) {
             + '<td style="padding:12px 16px; text-align:center;">'
             + '  <select data-date="' + item.date + '" class="pmam-roster-choice" style="padding:7px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:700; font-size:13px; color:'+(userChoice==='Duty'?'#166534':'#475569')+'; background:'+(userChoice==='Duty'?'#f0fdf4':'#f8fafc')+';" onchange="this.style.color=(this.value===\'Duty\'?\'#166534\':\'#475569\'); this.style.background=(this.value===\'Duty\'?\'#f0fdf4\':\'#f8fafc\');">'
             + '    <option value="Off"' + (userChoice === 'Off' ? ' selected' : '') + '>🌴 Off / Holiday</option>'
-            + '    <option value="Duty"' + (userChoice === 'Duty' ? ' selected' : '') + '>🏥 On Duty (Earn Comp Leave)</option>'
+            + '    <option value="Duty"' + (userChoice === 'Duty' ? ' selected' : '') + '>🏥 On Duty</option>'
             + '  </select>'
             + '</td>'
             + '<td style="padding:12px 16px; text-align:center; font-weight:700; color:'+(status==='Approved'?(userChoice==='Duty'?'#16a34a':'#64748b'):'#d97706')+'; font-size:12px;">'
