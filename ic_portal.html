@@ -447,6 +447,10 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       <span class="sbl">Leave Management</span>
       <span class="bdg" id="sb-pend-req" style="margin-left:auto;background:#ef4444;color:#fff;font-size:9.5px;padding:1px 5px;border-radius:8px;">0</span>
     </div>
+    <div class="sbi" onclick="goSec('roster',this)" title="Holiday &amp; Sunday Roster">
+      <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z"/></svg>
+      <span class="sbl">Holiday &amp; Sunday Roster</span>
+    </div>
       <div class="sidebar-category">AUDIT & MONITORING</div>
     
     <div class="sbi" onclick="goSec('allrecords',this)" title="Audit Log">
@@ -1343,6 +1347,44 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
       </div>
     </div>
 
+    <!-- ===== HOLIDAY & SUNDAY DUTY ROSTER MANAGEMENT (sec-roster) ===== -->
+    <div class="sec" id="sec-roster" style="display:none; padding:16px;">
+      <div style="background:#ffffff; border-radius:16px; border:1px solid #e2e8f0; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h2 style="font-size:18px; font-weight:800; color:#1e40af; margin:0; display:flex; align-items:center; gap:8px;">
+              <span>📅</span> Holiday &amp; Sunday Duty Roster Management
+            </h2>
+            <p style="font-size:12px; color:#64748b; margin:2px 0 0 0;">Review PMAM holiday/Sunday duty requests. Upon clicking Approve Roster, +1 Compensatory Leave Day is automatically credited for each approved duty day.</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <input type="month" id="icRosterYmSel" onchange="renderIcRoster(this.value)" style="padding:8px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:700; color:#0f172a;">
+            <button class="btn btn-pri" onclick="approveAllIcRosters()" style="padding:8px 18px; font-size:13px; font-weight:700;">Approve &amp; Publish Roster</button>
+          </div>
+        </div>
+
+        <div class="tbl-wrap" style="border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
+          <table style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
+                <th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">PMAM NAME</th>
+                <th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">EMAIL</th>
+                <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">REQUESTED DUTY DATES</th>
+                <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">OFF DAYS</th>
+                <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">STATUS</th>
+                <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="icRosterTbody">
+              <tr><td colspan="6" style="text-align:center; padding:24px; color:#64748b; font-style:italic;">Loading PMAM roster submissions...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
     <!-- ===== DETAILED EMPLOYEE LEAVE CARD (SUB-VIEW MATCHING IMAGE 2) ===== -->
     <div class="sec" id="sec-emp-detail" style="display:none; padding:16px;">
       <!-- Breadcrumb & Header Bar -->
@@ -1517,7 +1559,163 @@ function goSec(id,el){
     if (typeof genWard === 'function') genWard();
   } else if (id === 'pmamwise') {
     if (typeof genPmam === 'function') genPmam();
+  } else if (id === 'roster') {
+    if (typeof renderIcRoster === 'function') renderIcRoster();
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// I/C HOLIDAY & SUNDAY DUTY ROSTER APPROVAL LOGIC
+// ═══════════════════════════════════════════════════════════════
+function renderIcRoster(yearMonth) {
+  var ym = yearMonth || (new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'));
+  if (document.getElementById('icRosterYmSel')) document.getElementById('icRosterYmSel').value = ym;
+
+  var wrap = document.getElementById('icRosterTbody');
+  if (!wrap) return;
+  wrap.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#2563eb; font-weight:700;">Loading PMAM Roster submissions...</td></tr>';
+
+  db.collection('holiday_roster_requests').where('yearMonth', '==', ym).get().then(function(snap) {
+    if (snap.empty) {
+      wrap.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:#94a3b8; font-weight:600;">No PMAM roster submissions found for ' + ym + '.</td></tr>';
+      return;
+    }
+
+    var html = '';
+    snap.forEach(function(doc) {
+      var d = doc.data() || {};
+      var docId = doc.id;
+      var name = d.name || d.email || 'Unknown';
+      var email = d.email || '';
+      var choices = d.choices || {};
+      var status = d.status || 'Pending';
+
+      var dutyDates = [];
+      var offDates = [];
+      Object.keys(choices).forEach(function(dtKey) {
+        if (choices[dtKey] === 'Duty') dutyDates.push(dtKey);
+        else offDates.push(dtKey);
+      });
+
+      var badgeBg = status === 'Approved' ? '#dcfce7' : '#fef3c7';
+      var badgeColor = status === 'Approved' ? '#15803d' : '#b45309';
+
+      html += '<tr style="border-bottom:1px solid #f1f5f9;">'
+            + '<td style="padding:12px; font-weight:700; color:#0f172a;">' + name + '</td>'
+            + '<td style="padding:12px; font-size:12px; color:#64748b;">' + email + '</td>'
+            + '<td style="padding:12px; text-align:center;">'
+            + (dutyDates.length > 0 ? dutyDates.map(function(dt){ return '<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:8px; font-weight:700; font-size:11px; margin:2px; display:inline-block;">🏥 ' + dt + '</span>'; }).join('') : '<span style="color:#94a3b8; font-style:italic;">None</span>')
+            + '</td>'
+            + '<td style="padding:12px; text-align:center;">'
+            + (offDates.length > 0 ? '<span style="color:#64748b; font-size:12px;">' + offDates.length + ' day(s) Off</span>' : '—')
+            + '</td>'
+            + '<td style="padding:12px; text-align:center;"><span style="background:'+badgeBg+'; color:'+badgeColor+'; padding:3px 10px; border-radius:12px; font-weight:800; font-size:11px;">' + status + '</span></td>'
+            + '<td style="padding:12px; text-align:center;">'
+            + (status !== 'Approved'
+               ? '<button class="btn btn-pri" style="padding:4px 12px; font-size:11.5px;" onclick="approveIcRosterDoc(\'' + docId + '\', \'' + email + '\', ' + JSON.stringify(dutyDates).replace(/"/g, '&quot;') + ')">Approve &amp; Credit (' + dutyDates.length + ' Days)</button>'
+               : '<span style="color:#16a34a; font-size:11.5px; font-weight:800;">✅ Approved &amp; Credited</span>')
+            + '</td>'
+            + '</tr>';
+    });
+
+    wrap.innerHTML = html;
+  }).catch(function(err) {
+    console.error('Error loading I/C Roster:', err);
+    wrap.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#dc2626;">Error: ' + err.message + '</td></tr>';
+  });
+}
+
+function _syncApprovedRosterToLandingPage(yearMonth) {
+  var ym = yearMonth || (new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'));
+  db.collection('holiday_roster_requests').where('yearMonth', '==', ym).where('status', '==', 'Approved').get().then(function(snap) {
+    var dateMap = {};
+    snap.forEach(function(doc) {
+      var d = doc.data() || {};
+      var pmamName = d.name || d.email;
+      var choices = d.choices || {};
+      Object.keys(choices).forEach(function(dtKey) {
+        if (choices[dtKey] === 'Duty') {
+          if (!dateMap[dtKey]) {
+            dateMap[dtKey] = { date: dtKey, name: 'Holiday/Sunday Duty', pmams: [] };
+          }
+          if (dateMap[dtKey].pmams.indexOf(pmamName) === -1) {
+            dateMap[dtKey].pmams.push(pmamName);
+          }
+        }
+      });
+    });
+
+    var rows = [];
+    Object.keys(dateMap).sort().forEach(function(dtKey) {
+      rows.push(dateMap[dtKey]);
+    });
+
+    db.collection('settings').doc('landing_page').get().then(function(lDoc) {
+      var existing = lDoc.exists ? lDoc.data() : {};
+      existing.holidayDuty = { rows: rows, updatedAt: Date.now() };
+      db.collection('settings').doc('landing_page').set(existing, { merge: true });
+    });
+  });
+}
+
+function approveIcRosterDoc(docId, email, dutyDates) {
+  if (!confirm('Approve roster for ' + email + ' and credit ' + dutyDates.length + ' Compensatory Leave Day(s)?')) return;
+
+  var currentIC = (typeof window._icUserEmail !== 'undefined' && window._icUserEmail) ? window._icUserEmail : 'ic@gmc.com';
+  var ym = document.getElementById('icRosterYmSel') ? document.getElementById('icRosterYmSel').value : '';
+
+  db.collection('holiday_roster_requests').doc(docId).update({
+    status: 'Approved',
+    approvedBy: currentIC,
+    approvedAt: Date.now()
+  }).then(function() {
+    _syncApprovedRosterToLandingPage(ym);
+    var daysToCredit = dutyDates.length;
+    if (daysToCredit > 0 && email) {
+      db.collection('users').doc(email).get().then(function(uSnap) {
+        var curBal = 0;
+        if (uSnap.exists && uSnap.data().earnedCompLeave !== undefined) {
+          curBal = parseFloat(uSnap.data().earnedCompLeave) || 0;
+        }
+        var newBal = curBal + daysToCredit;
+        db.collection('users').doc(email).set({ earnedCompLeave: newBal }, { merge: true }).then(function() {
+          if (typeof showToast === 'function') showToast('✅ Approved roster for ' + email + ' & credited ' + daysToCredit + ' Compensatory Day(s)!', 'success');
+          else alert('✅ Approved roster for ' + email + ' & credited ' + daysToCredit + ' Compensatory Day(s)!');
+          renderIcRoster(ym);
+        });
+      });
+    } else {
+      if (typeof showToast === 'function') showToast('✅ Roster approved successfully!', 'success');
+      else alert('✅ Roster approved successfully!');
+      renderIcRoster(ym);
+    }
+  }).catch(function(err) {
+    alert('Error approving roster: ' + err.message);
+  });
+}
+
+function approveAllIcRosters() {
+  var ym = document.getElementById('icRosterYmSel').value;
+  db.collection('holiday_roster_requests').where('yearMonth', '==', ym).get().then(function(snap) {
+    if (snap.empty) { alert('No pending roster submissions found for ' + ym); return; }
+    var promises = [];
+    snap.forEach(function(doc) {
+      var d = doc.data() || {};
+      if (d.status !== 'Approved') {
+        var dutyDates = [];
+        if (d.choices) {
+          Object.keys(d.choices).forEach(function(k) { if (d.choices[k] === 'Duty') dutyDates.push(k); });
+        }
+        promises.push(new Promise(function(resolve) {
+          approveIcRosterDoc(doc.id, d.email, dutyDates);
+          resolve();
+        }));
+      }
+    });
+    Promise.all(promises).then(function() {
+      renderIcRoster(ym);
+    });
+  });
 }
 function toggleDD(){var udd=document.getElementById('userDD');if(udd)udd.classList.toggle('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('.user-pill')){var udd=document.getElementById('userDD');if(udd)udd.classList.remove('open');}});

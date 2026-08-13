@@ -9531,67 +9531,94 @@ function submitHistoricalLeave() {
   });
 }
 
+function _isUserPmam(d) {
+  if (!d) return false;
+  var roleStr = String(d.role || '').toUpperCase();
+  var desigStr = String(d.desig || '').toUpperCase();
+  var rolesArr = Array.isArray(d.roles) ? d.roles.map(function(r){ return String(r).toUpperCase(); }) : [];
+  return roleStr.indexOf('PMAM') !== -1 || desigStr.indexOf('PMAM') !== -1 || rolesArr.some(function(r){ return r.indexOf('PMAM') !== -1; });
+}
+
 function loadCompBalances() {
   var wrap = document.getElementById('comp_balances_table_wrap');
   if(!wrap) return;
-  wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#6b7280;font-style:italic">Loading PMAMs... (v1.3)</div>';
+  wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#2563eb;font-weight:700;">Loading PMAM Compensatory Balances...</div>';
   db.collection('users').get().then(function(snap){
     var arr = [];
     snap.forEach(function(doc){
-      var d = doc.data();
-      if ((d.role || '').trim().toLowerCase() === 'pmam') {
-        arr.push({id: doc.id, name: d.name||'Unknown', bal: d.earnedCompLeave||0});
+      var d = doc.data() || {};
+      if (_isUserPmam(d)) {
+        var email = doc.id;
+        var name = d.name || d.displayName || d.email || doc.id;
+        var ward = d.ward || d.wardName || '—';
+        var bal = d.earnedCompLeave !== undefined ? parseFloat(d.earnedCompLeave) : 0;
+        arr.push({id: doc.id, email: email, name: name, ward: ward, bal: bal});
       }
     });
     arr.sort(function(a,b){ return a.name.localeCompare(b.name); });
     
-    var html = '<table style="width:100%;border-collapse:collapse;margin-top:10px;">';
-    html += '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;"><th style="padding:10px;text-align:left;font-size:12px;color:#475569">PMAM</th><th style="padding:10px;text-align:center;font-size:12px;color:#475569">EARNED BALANCE (DAYS)</th></tr></thead><tbody>';
+    var html = '<table style="width:100%; border-collapse:collapse; margin-top:10px; background:#fff; border-radius:12px; overflow:hidden; border:1px solid #e2e8f0;">';
+    html += '<thead><tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">'
+          + '<th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:800; color:#475569;">PMAM NAME</th>'
+          + '<th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:800; color:#475569;">EMAIL</th>'
+          + '<th style="padding:12px 16px; text-align:center; font-size:12px; font-weight:800; color:#475569;">WARD</th>'
+          + '<th style="padding:12px 16px; text-align:center; font-size:12px; font-weight:800; color:#475569;">EARNED COMPENSATORY BALANCE (DAYS)</th>'
+          + '</tr></thead><tbody>';
     
     if(arr.length === 0){
-      html += '<tr><td colspan="2" style="padding:20px;text-align:center;color:#94a3b8;font-style:italic">No PMAMs found. (v1.3)</td></tr>';
+      html += '<tr><td colspan="4" style="padding:24px; text-align:center; color:#94a3b8; font-weight:600;">No PMAM users found in database.</td></tr>';
     } else {
       arr.forEach(function(p){
-        html += '<tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px;font-weight:500;color:#1e293b">'+p.name+'</td>';
-        html += '<td style="padding:10px;text-align:center;"><input type="number" id="cb_inp_'+p.id+'" value="'+p.bal+'" style="width:80px;text-align:center;padding:5px;border:1px solid #cbd5e1;border-radius:4px;" step="0.5" min="0"></td></tr>';
+        var safeId = p.id.replace(/[^a-zA-Z0-9_-]/g, '_');
+        html += '<tr style="border-bottom:1px solid #f1f5f9;">'
+              + '<td style="padding:12px 16px; font-weight:700; color:#0f172a;">' + p.name + '</td>'
+              + '<td style="padding:12px 16px; font-weight:500; color:#64748b; font-size:12.5px;">' + p.email + '</td>'
+              + '<td style="padding:12px 16px; text-align:center; font-weight:600; color:#475569; font-size:12px;">' + p.ward + '</td>'
+              + '<td style="padding:12px 16px; text-align:center;">'
+              + '<input type="number" id="cb_inp_' + safeId + '" data-docid="' + p.id + '" value="' + p.bal + '" style="width:100px; text-align:center; padding:7px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:800; font-size:14px; color:#0f172a; background:#f8fafc;" step="0.5" min="0">'
+              + '</td></tr>';
       });
     }
     html += '</tbody></table>';
     wrap.innerHTML = html;
   }).catch(function(err){
-    wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#dc2626">Error loading PMAMs: '+err.message+'</div>';
+    wrap.innerHTML = '<div style="padding:20px; text-align:center; color:#dc2626; font-weight:700;">Error loading PMAMs: '+err.message+'</div>';
   });
 }
 
 function saveCompBalances() {
-  var btn = event.target;
-  btn.textContent = 'Saving...';
-  db.collection('users').get().then(function(snap){
-    var batch = db.batch();
-    var count = 0;
-    snap.forEach(function(doc){
-      var d = doc.data();
-      if ((d.role || '').trim().toLowerCase() === 'pmam') {
-        var inp = document.getElementById('cb_inp_' + doc.id);
-        if(inp){
-          var val = parseFloat(inp.value) || 0;
-          batch.update(db.collection('users').doc(doc.id), { earnedCompLeave: val });
-          count++;
-        }
-      }
-    });
-    if(count > 0){
-      batch.commit().then(function(){
-        btn.textContent = 'Save Balances';
-        showToast('Compensatory balances updated for '+count+' PMAM(s).', 'success');
-      }).catch(function(err){
-        btn.textContent = 'Save Balances';
-        showToast('Error saving: '+err.message, 'error');
-      });
-    } else {
-      btn.textContent = 'Save Balances';
-    }
+  var btn = (typeof event !== 'undefined' && event && event.target) ? event.target : document.querySelector('#lpanel-comp_balances .btn-pri');
+  if (btn) btn.textContent = 'Saving...';
+  
+  var inputs = document.querySelectorAll('[id^="cb_inp_"]');
+  if (inputs.length === 0) {
+    if (btn) btn.textContent = 'Save Balances';
+    return;
+  }
+  
+  var batch = db.batch();
+  var count = 0;
+  inputs.forEach(function(inp){
+    var docId = inp.getAttribute('data-docid') || inp.id.replace('cb_inp_', '');
+    var val = parseFloat(inp.value) || 0;
+    batch.update(db.collection('users').doc(docId), { earnedCompLeave: val });
+    count++;
   });
+  
+  if (count > 0) {
+    batch.commit().then(function(){
+      if (btn) btn.textContent = 'Save Balances';
+      var msg = document.getElementById('cb_msg');
+      if(msg){ msg.textContent='✅ Balances updated successfully!'; msg.style.color='#166534'; setTimeout(function(){msg.textContent='';},3000); }
+      if (typeof showToast === 'function') showToast('✅ PMAM Compensatory Balances updated successfully', 'success');
+      if (typeof writeAudit === 'function') writeAudit('EDIT', 'users', 'earnedCompLeave', { updatedCount: count });
+    }).catch(function(err){
+      if (btn) btn.textContent = 'Save Balances';
+      alert('Error updating balances: ' + err.message);
+    });
+  } else {
+    if (btn) btn.textContent = 'Save Balances';
+  }
 }
 </script>
 

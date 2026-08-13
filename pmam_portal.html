@@ -561,6 +561,10 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
       <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
       <div class="sbl">Leave</div>
     </div>
+    <div class="sbi" onclick="goSec('roster',this)" title="Roster">
+      <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z"/></svg>
+      <div class="sbl">Roster</div>
+    </div>
   </div>
 
   <!-- CONTENT -->
@@ -1400,8 +1404,53 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
               <div style="font-weight:700;font-size:10pt">Medical Superintendent</div>
               <div style="font-size:10pt">GMC &amp; AH Rajouri</div>
             </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOLIDAY & SUNDAY DUTY ROSTER -->
+    <div class="sec" id="sec-roster">
+      <div style="background:rgba(255,255,255,0.75); backdrop-filter:blur(12px); border-radius:20px; border:1.5px solid rgba(255,255,255,0.85); padding:24px; box-shadow:0 4px 20px rgba(30,80,200,0.06); color:#0F2B8C;">
+        
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <div style="font-size:18px; font-weight:800; color:#1e40af; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:22px;">📅</span> Holiday &amp; Sunday Duty Roster
+            </div>
+            <div style="font-size:12px; color:#64748b; margin-top:2px;">Select your availability preference for Holidays &amp; Sundays. Upon I/C approval, +1 Compensatory Leave Day is credited for each approved duty day.</div>
+          </div>
+          <div id="pmamRosterStatusBadge">
+            <span style="background:#f1f5f9; color:#475569; padding:4px 14px; border-radius:14px; font-weight:800; font-size:12px;">Status: Loading...</span>
           </div>
         </div>
+
+        <!-- Month & Year Selector Strip -->
+        <div style="display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:12px 18px; border-radius:14px; border:1px solid #e2e8f0; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <label style="font-size:13px; font-weight:800; color:#334155;">Select Month/Year:</label>
+            <input type="month" id="rosterYmSel" onchange="renderPmamRoster(this.value)" style="padding:8px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:700; color:#0f172a; background:#ffffff;">
+          </div>
+          <button class="btn btn-pri" id="btnSaveRosterChoices" onclick="savePmamRosterChoices()" style="padding:9px 20px; font-size:13px; font-weight:700;">Submit Roster Preferences</button>
+        </div>
+
+        <!-- Roster Table -->
+        <div class="tbl-wrap" style="background:#ffffff; border-radius:14px; border:1px solid #e2e8f0; overflow:hidden;">
+          <table style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="background:#f1f5f9; border-bottom:2px solid #cbd5e1;">
+                <th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:800; color:#475569;">DATE</th>
+                <th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:800; color:#475569;">DAY</th>
+                <th style="padding:12px 16px; text-align:left; font-size:12px; font-weight:800; color:#475569;">EVENT / TYPE</th>
+                <th style="padding:12px 16px; text-align:center; font-size:12px; font-weight:800; color:#475569;">DUTY CHOICE</th>
+                <th style="padding:12px 16px; text-align:center; font-size:12px; font-weight:800; color:#475569;">I/C APPROVAL &amp; COMP CREDIT</th>
+              </tr>
+            </thead>
+            <tbody id="pmamRosterTbody">
+              <tr><td colspan="5" style="text-align:center; padding:24px; color:#64748b; font-style:italic;">Select a month to view the Holiday &amp; Sunday Roster</td></tr>
+            </tbody>
+          </table>
+        </div>
+
       </div>
     </div>
 
@@ -1593,6 +1642,147 @@ function goSec(id, el) {
     filterRecords();
   }
   if (id === 'dashboard') updateDashboard();
+  if (id === 'roster') {
+    if (typeof loadPmamHolidays === 'function') loadPmamHolidays(function(){ renderPmamRoster(); });
+    else renderPmamRoster();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PMAM HOLIDAY & SUNDAY DUTY ROSTER LOGIC
+// ═══════════════════════════════════════════════════════════════
+function renderPmamRoster(yearMonth) {
+  var u = (typeof getPmjayUser === 'function') ? (getPmjayUser() || {}) : {};
+  if (!u.email) return;
+
+  var ym = yearMonth || (new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'));
+  if (document.getElementById('rosterYmSel')) document.getElementById('rosterYmSel').value = ym;
+
+  var parts = ym.split('-');
+  var yr = parseInt(parts[0]);
+  var mo = parseInt(parts[1]) - 1;
+
+  var datesInMonth = [];
+  var daysInMonth = new Date(yr, mo + 1, 0).getDate();
+
+  var holidayMap = {};
+  if (Array.isArray(_pmamHolidays)) {
+    _pmamHolidays.forEach(function(h) {
+      if (h.date && h.date.indexOf(ym) === 0) {
+        holidayMap[h.date] = h.name || 'Official Holiday';
+      }
+    });
+  }
+
+  for (var day = 1; day <= daysInMonth; day++) {
+    var dt = new Date(yr, mo, day);
+    var dateStr = ym + '-' + String(day).padStart(2, '0');
+    var isSunday = (dt.getDay() === 0);
+    var isHoliday = !!holidayMap[dateStr];
+
+    if (isSunday || isHoliday) {
+      var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      datesInMonth.push({
+        date: dateStr,
+        dayName: dayNames[dt.getDay()],
+        type: isHoliday ? 'Official Holiday' : 'Sunday',
+        name: holidayMap[dateStr] || 'Sunday Off',
+        isSunday: isSunday,
+        isHoliday: isHoliday
+      });
+    }
+  }
+
+  var wrap = document.getElementById('pmamRosterTbody');
+  if (!wrap) return;
+  wrap.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#2563eb; font-weight:700;">Loading roster choices...</td></tr>';
+
+  var docId = 'roster_' + u.email.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + ym;
+  db.collection('holiday_roster_requests').doc(docId).get().then(function(docSnap) {
+    var savedChoices = {};
+    var status = 'Not Submitted';
+    if (docSnap.exists) {
+      var data = docSnap.data() || {};
+      savedChoices = data.choices || {};
+      status = data.status || 'Pending';
+    }
+
+    var badgeBg = status === 'Approved' ? '#dcfce7' : (status === 'Pending' ? '#fef3c7' : '#f1f5f9');
+    var badgeColor = status === 'Approved' ? '#15803d' : (status === 'Pending' ? '#b45309' : '#475569');
+    if (document.getElementById('pmamRosterStatusBadge')) {
+      document.getElementById('pmamRosterStatusBadge').innerHTML = '<span style="background:'+badgeBg+'; color:'+badgeColor+'; padding:4px 14px; border-radius:14px; font-weight:800; font-size:12px;">Status: '+status+'</span>';
+    }
+
+    if (datesInMonth.length === 0) {
+      wrap.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:#94a3b8; font-weight:600;">No holidays or Sundays found for this month.</td></tr>';
+      return;
+    }
+
+    var html = '';
+    datesInMonth.forEach(function(item) {
+      var userChoice = savedChoices[item.date] || 'Off';
+      var dObj = new Date(item.date);
+      var formattedDate = dObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+      html += '<tr style="border-bottom:1px solid #f1f5f9;">'
+            + '<td style="padding:12px 16px; font-weight:700; color:#0f172a;">' + formattedDate + '</td>'
+            + '<td style="padding:12px 16px; font-weight:600; color:#475569;">' + item.dayName + '</td>'
+            + '<td style="padding:12px 16px;"><span style="background:'+(item.isHoliday?'#fce7f3':'#e0e7ff')+'; color:'+(item.isHoliday?'#be185d':'#3730a3')+'; padding:3px 10px; border-radius:12px; font-weight:800; font-size:11px;">' + item.type + '</span> <span style="font-size:12px; font-weight:600; color:#334155; margin-left:6px;">' + item.name + '</span></td>'
+            + '<td style="padding:12px 16px; text-align:center;">'
+            + '  <select data-date="' + item.date + '" class="pmam-roster-choice" style="padding:7px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:700; font-size:13px; color:'+(userChoice==='Duty'?'#166534':'#475569')+'; background:'+(userChoice==='Duty'?'#f0fdf4':'#f8fafc')+';" onchange="this.style.color=(this.value===\'Duty\'?\'#166534\':\'#475569\'); this.style.background=(this.value===\'Duty\'?\'#f0fdf4\':\'#f8fafc\');">'
+            + '    <option value="Off"' + (userChoice === 'Off' ? ' selected' : '') + '>🌴 Off / Holiday</option>'
+            + '    <option value="Duty"' + (userChoice === 'Duty' ? ' selected' : '') + '>🏥 On Duty (Earn Comp Leave)</option>'
+            + '  </select>'
+            + '</td>'
+            + '<td style="padding:12px 16px; text-align:center; font-weight:700; color:'+(status==='Approved'?(userChoice==='Duty'?'#16a34a':'#64748b'):'#d97706')+'; font-size:12px;">'
+            + (status === 'Approved' ? (userChoice === 'Duty' ? '✅ Approved (+1 Comp Leave)' : 'Off Day') : '⏳ Pending I/C Approval')
+            + '</td>'
+            + '</tr>';
+    });
+
+    wrap.innerHTML = html;
+  }).catch(function(err) {
+    console.error('Error loading roster choices:', err);
+    wrap.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#dc2626;">Error loading roster: ' + err.message + '</td></tr>';
+  });
+}
+
+function savePmamRosterChoices() {
+  var u = (typeof getPmjayUser === 'function') ? (getPmjayUser() || {}) : {};
+  if (!u.email) { alert('User email not found.'); return; }
+
+  var ym = document.getElementById('rosterYmSel').value;
+  var btn = document.getElementById('btnSaveRosterChoices');
+  if (btn) btn.textContent = 'Submitting...';
+
+  var choices = {};
+  var dutyCount = 0;
+  document.querySelectorAll('.pmam-roster-choice').forEach(function(sel) {
+    var dateKey = sel.getAttribute('data-date');
+    var val = sel.value;
+    choices[dateKey] = val;
+    if (val === 'Duty') dutyCount++;
+  });
+
+  var docId = 'roster_' + u.email.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + ym;
+  var rec = {
+    email: u.email,
+    name: u.name || u.email,
+    yearMonth: ym,
+    choices: choices,
+    dutyCount: dutyCount,
+    status: 'Pending',
+    updatedAt: Date.now()
+  };
+
+  db.collection('holiday_roster_requests').doc(docId).set(rec, { merge: true }).then(function() {
+    if (btn) btn.textContent = 'Submit Roster Preferences';
+    alert('✅ Your Holiday & Sunday Roster preferences submitted successfully! Pending I/C approval.');
+    renderPmamRoster(ym);
+  }).catch(function(err) {
+    if (btn) btn.textContent = 'Submit Roster Preferences';
+    alert('Error saving preferences: ' + err.message);
+  });
 }
 function toggleDD() {
   var dd = document.getElementById('userDD');
