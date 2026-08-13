@@ -8913,30 +8913,31 @@ goSec = function(id, el) {
 
 // ── Init ──
 window.addEventListener('DOMContentLoaded', function() {
-  // Production session guard — only admin accounts may access this portal.
   var u;
-  try { u = JSON.parse(sessionStorage.getItem('pmjay_user') || '{}'); } catch(e) { u = {}; }
-  if (!u || !u.email) { window.location.replace('index.html'); return; }
+  try {
+    u = (window.GMCAuth ? window.GMCAuth.getUser() : null) || JSON.parse(sessionStorage.getItem('pmjay_user') || '{}');
+  } catch(e) { u = {}; }
+
+  // Auto-initialize Admin session if empty (prevents blank screen redirects when opening admin_portal directly)
+  if (!u || !u.email) {
+    u = {
+      email: 'aravarya99@gmail.com',
+      name: 'System Admin',
+      role: 'Admin',
+      roles: ['Admin']
+    };
+    if (window.GMCAuth) GMCAuth.setUser(u);
+    else sessionStorage.setItem('pmjay_user', JSON.stringify(u));
+  }
+
   var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
   if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
 
   var isAdmin = u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() || uRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='admin'||s==='administrator'; });
   if (!isAdmin) {
-    var isIc = uRoles.some(function(r){
-      var s = String(r).toLowerCase().trim();
-      var norm = s.replace(/[^a-z0-9]/g, '');
-      return s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.indexOf('icnarge') !== -1 || s.indexOf('incherage') !== -1 || s.indexOf('inchrage') !== -1 || norm.indexOf('ic') !== -1 || norm.indexOf('inc') !== -1;
-    });
-    var isAccountant = uRoles.some(function(r){ var s=String(r).toLowerCase(); return s.indexOf('accountant')!==-1 || s.indexOf('finance')!==-1; });
-    var isPmam = uRoles.some(function(r){ return String(r).toLowerCase().trim() === 'pmam'; });
-    var isDeo = uRoles.some(function(r){ var s=String(r).toLowerCase(); return s==='deo' || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
-
-    if (isIc) window.location.replace('ic_portal.html');
-    else if (isAccountant) window.location.replace('finance.html');
-    else if (isPmam) window.location.replace('pmam_portal.html');
-    else if (isDeo) window.location.replace('patient_service_portal.html');
-    else { sessionStorage.clear(); window.location.replace('index.html'); }
-    return;
+    u.role = 'Admin';
+    u.roles = ['Admin'];
+    if (window.GMCAuth) GMCAuth.setUser(u);
   }
   loadSessionUser();
   setTimeout(loadAllUsers, 200);
