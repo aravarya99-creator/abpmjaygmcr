@@ -1475,7 +1475,6 @@ function doLogin() {
     // Success — clear attempt counters
     localStorage.setItem(attemptKey, '0');
     localStorage.removeItem(lockKey);
-    // Save login PIN for in-app PIN re-verification on protected sections (e.g. Bulk Import / Bulk Delete)
     localStorage.setItem('userPin', pin);
     var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
     if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
@@ -1511,8 +1510,26 @@ function doLogin() {
       else if (isDeo) window.location.href='patient_service_portal.html';
       else window.location.href='pmam_portal.html';
     }, 800);
+  }
+
+  db.collection('users').doc(email).get().then(function(doc) {
+    if (doc.exists) {
+      processLoginWithUserData(doc.data() || {});
+    } else {
+      db.collection('users').where('email', '==', email).get().then(function(snap) {
+        if (!snap.empty) {
+          processLoginWithUserData(snap.docs[0].data() || {});
+        } else {
+          setMsg('loginMsg','Email not registered. Please sign up first.','#dc2626');
+        }
+      }).catch(function() {
+        setMsg('loginMsg','Email not registered. Please sign up first.','#dc2626');
+      });
+    }
   }).catch(function(e){ setMsg('loginMsg','Connection error: '+e.message,'#dc2626'); });
 }
+
+
 
 // ══════════════════════════════════════
 // SIGNUP
@@ -3480,8 +3497,7 @@ nav.innerHTML = visible.map(function(it){
     var checkIcon  = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="' + esc(titleColor) + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>';
     // Decide list vs paragraph. New admin saves a string ('auto'|'bullets'|
     // 'paragraph'); legacy data may have boolean or be missing entirely.
-    var lines = String(sec.text || '').split(/\r?
-/).map(function(s){ return s.trim(); }).filter(Boolean);
+    var lines = String(sec.text || '').split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean);
     var asList;
     if (sec.list === 'bullets' || sec.list === true)      asList = true;
     else if (sec.list === 'paragraph' || sec.list === false) asList = false;
@@ -3683,8 +3699,7 @@ nav.innerHTML = visible.map(function(it){
         var num     = String(i+1).padStart(2,'0');
         var iconKey = s.icon || ['code','chart','activity','layers','cpu'][i % 5];
 
-        var lines = String(s.text || '').split(/\r?
-/).map(function(x){ return x.trim(); }).filter(Boolean);
+        var lines = String(s.text || '').split(/\r?\n/).map(function(x){ return x.trim(); }).filter(Boolean);
         var asList;
         if (s.list === 'bullets' || s.list === true)            asList = true;
         else if (s.list === 'paragraph' || s.list === false)    asList = false;
