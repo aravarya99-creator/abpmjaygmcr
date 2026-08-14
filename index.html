@@ -1795,7 +1795,7 @@ window.addEventListener('DOMContentLoaded', function() {
         // keep genuine custom external links, drop stale known-but-removed ids
         var REMOVED = { contact:true, leave:true, staffold:true };
         if (REMOVED[cid]) return false;
-        return !!(it.url && /^(https?:|//)/i.test(it.url));
+        return !!(it.url && /^(https?:|\/\/)/i.test(it.url));
       });
 
       // 1. Start with saved items, then append any missing CORE_TABS.
@@ -3852,7 +3852,7 @@ nav.innerHTML = visible.map(function(it){
     try { body.innerHTML = fn(); }
     catch(e){
       console.error('Renderer error for '+id+':', e);
-      body.innerHTML = '<div class="cm-empty">Couldn't display this data: '+esc(e.message||'unknown error')+'</div>';
+      body.innerHTML = '<div class="cm-empty">Could not display this data: '+esc(e.message||'unknown error')+'</div>';
     }
     // Rebind calendar month/year selects (if calendar is showing)
     if (id === 'calendar') {
