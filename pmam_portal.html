@@ -110,7 +110,7 @@ if (typeof window !== 'undefined') {
         if (raw) {
           try {
             var u = JSON.parse(raw);
-            if (u && (u.email \|\| u.userName \|\| u.id)) return u;
+            if (u && (u.email || u.userName || u.id)) return u;
           } catch(e) {}
         }
       }
@@ -171,12 +171,12 @@ if (typeof window !== 'undefined') {
      * Check if user has Accountant / Finance access
      */
     isAccountant: function(user) {
-      user = user \|\| this.getUser();
+      user = user || this.getUser();
       if (this.isAdmin(user)) return true;
       var roles = this.getUserRoles(user);
       return roles.some(function(r){
         var s = String(r).toLowerCase().trim();
-        return s.indexOf('accountant') !== -1 \|\| s.indexOf('finance') !== -1;
+        return s.indexOf('accountant') !== -1 || s.indexOf('finance') !== -1;
       });
     },
 
@@ -184,13 +184,13 @@ if (typeof window !== 'undefined') {
      * Check if user is an In-Charge (I/C)
      */
     isIC: function(user) {
-      user = user \|\| this.getUser();
+      user = user || this.getUser();
       if (this.isAdmin(user)) return true;
       var roles = this.getUserRoles(user);
       return roles.some(function(r){
         var s = String(r).toLowerCase().trim();
         var norm = s.replace(/[\^a-z0-9]/g, '');
-        return s.indexOf('ic') !== -1 \|\| s.indexOf('i/c') !== -1 \|\| s.indexOf('incharge') !== -1 \|\| s.indexOf('in-charge') !== -1 \|\| s.indexOf('icnarge') !== -1 \|\| s.indexOf('incherage') !== -1 \|\| s.indexOf('inchrage') !== -1 \|\| norm.indexOf('ic') !== -1 \|\| norm.indexOf('inc') !== -1;
+        return s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.indexOf('in-charge') !== -1 || s.indexOf('icnarge') !== -1 || s.indexOf('incherage') !== -1 || s.indexOf('inchrage') !== -1 || norm.indexOf('ic') !== -1 || norm.indexOf('inc') !== -1;
       });
     },
 
@@ -198,12 +198,12 @@ if (typeof window !== 'undefined') {
      * Check if user is a PMAM
      */
     isPMAM: function(user) {
-      user = user \|\| this.getUser();
+      user = user || this.getUser();
       if (this.isAdmin(user)) return true;
       var roles = this.getUserRoles(user);
       return roles.some(function(r){
         var s = String(r).toLowerCase().trim();
-        return s.indexOf('pmam') !== -1 \|\| s.indexOf('arogya mitra') !== -1;
+        return s.indexOf('pmam') !== -1 || s.indexOf('arogya mitra') !== -1;
       });
     },
 
@@ -211,12 +211,12 @@ if (typeof window !== 'undefined') {
      * Check if user is DEO / Patient Services
      */
     isPatientService: function(user) {
-      user = user \|\| this.getUser();
+      user = user || this.getUser();
       if (this.isAdmin(user)) return true;
       var roles = this.getUserRoles(user);
       return roles.some(function(r){
         var s = String(r).toLowerCase().trim();
-        return s === 'deo' \|\| s.indexOf('patient') !== -1 \|\| s.indexOf('mts') !== -1;
+        return s === 'deo' || s.indexOf('patient') !== -1 || s.indexOf('mts') !== -1;
       });
     },
 
@@ -224,9 +224,9 @@ if (typeof window !== 'undefined') {
      * Session Guard: Redirects to index.html if user is unauthenticated or lacks required role
      */
     requireAuth: function(allowedRoles, redirectUrl) {
-      redirectUrl = redirectUrl \|\| 'index.html';
+      redirectUrl = redirectUrl || 'index.html';
       var user = this.getUser();
-      if (!user \|\| !user.email) {
+      if (!user || !user.email) {
         window.location.href = redirectUrl;
         return false;
       }
@@ -234,14 +234,14 @@ if (typeof window !== 'undefined') {
         var userRoles = this.getUserRoles(user);
         var hasAccess = allowedRoles.some(function(reqRole) {
           reqRole = reqRole.toLowerCase().trim();
-          if ((reqRole === 'admin' \|\| reqRole === 'administrator') && GMCAuth.isAdmin(user)) return true;
-          if ((reqRole === 'accountant' \|\| reqRole === 'finance') && GMCAuth.isAccountant(user)) return true;
-          if ((reqRole === 'ic' \|\| reqRole === 'i/c' \|\| reqRole === 'incharge' \|\| reqRole === 'i/c ab-pmjay') && GMCAuth.isIC(user)) return true;
+          if ((reqRole === 'admin' || reqRole === 'administrator') && GMCAuth.isAdmin(user)) return true;
+          if ((reqRole === 'accountant' || reqRole === 'finance') && GMCAuth.isAccountant(user)) return true;
+          if ((reqRole === 'ic' || reqRole === 'i/c' || reqRole === 'incharge' || reqRole === 'i/c ab-pmjay') && GMCAuth.isIC(user)) return true;
           if ((reqRole === 'pmam') && GMCAuth.isPMAM(user)) return true;
-          if ((reqRole === 'deo' \|\| reqRole === 'patient' \|\| reqRole === 'patient_service') && GMCAuth.isPatientService(user)) return true;
+          if ((reqRole === 'deo' || reqRole === 'patient' || reqRole === 'patient_service') && GMCAuth.isPatientService(user)) return true;
           return userRoles.some(function(ur){
             var s = String(ur).toLowerCase().trim();
-            return s === reqRole \|\| s.indexOf(reqRole) !== -1;
+            return s === reqRole || s.indexOf(reqRole) !== -1;
           });
         });
 
@@ -304,11 +304,11 @@ if (typeof window !== 'undefined') {
     canonical: function(name) {
       if (!name) return '';
       var trimmed = String(name).trim();
-      return WARD_ALIASES[trimmed] \|\| trimmed;
+      return WARD_ALIASES[trimmed] || trimmed;
     },
 
     getById: function(id) {
-      return _wards.find(function(w){ return w.id === id \|\| w.label === id; });
+      return _wards.find(function(w){ return w.id === id || w.label === id; });
     },
 
     onChange: function(fn) {
@@ -324,9 +324,9 @@ if (typeof window !== 'undefined') {
 
     populateSelect: function(selectEl, selectedValue, options) {
       if (!selectEl) return;
-      options = options \|\| {};
-      var placeholder = options.placeholderText \|\| '— Select Ward —';
-      var filterCaseType = options.caseType \|\| null;
+      options = options || {};
+      var placeholder = options.placeholderText || '— Select Ward —';
+      var filterCaseType = options.caseType || null;
 
       selectEl.innerHTML = '';
       if (placeholder) {
@@ -336,7 +336,7 @@ if (typeof window !== 'undefined') {
         selectEl.appendChild(ph);
       }
 
-      var canonSelected = this.canonical(selectedValue \|\| selectEl.value);
+      var canonSelected = this.canonical(selectedValue || selectEl.value);
 
       _wards.forEach(function(w) {
         if (filterCaseType && w.caseType && w.caseType !== 'both' && w.caseType !== filterCaseType) {
@@ -345,7 +345,7 @@ if (typeof window !== 'undefined') {
         var opt = document.createElement('option');
         opt.value = w.label;
         opt.textContent = w.label;
-        if (w.label === canonSelected \|\| w.id === selectedValue) {
+        if (w.label === canonSelected || w.id === selectedValue) {
           opt.selected = true;
         }
         selectEl.appendChild(opt);
@@ -354,7 +354,7 @@ if (typeof window !== 'undefined') {
 
     init: function() {
       var self = this;
-      var db = global.db \|\| (global.GMCFirebase ? global.GMCFirebase.db : null);
+      var db = global.db || (global.GMCFirebase ? global.GMCFirebase.db : null);
       if (!db) {
         _isReady = true;
         _readyListeners.forEach(function(fn){ fn(_wards); });
@@ -364,7 +364,7 @@ if (typeof window !== 'undefined') {
 
       db.collection('settings').doc('wards').onSnapshot(function(doc) {
         if (doc.exists) {
-          var data = doc.data() \|\| {};
+          var data = doc.data() || {};
           if (Array.isArray(data.wards) && data.wards.length > 0) {
             _wards = data.wards.map(function(w, i) {
               if (typeof w === 'string') {
@@ -441,10 +441,10 @@ if (typeof window !== 'undefined') {
      * Calculate difference in days between two date strings (YYYY-MM-DD)
      */
     calculateDays: function(fromDateStr, toDateStr) {
-      if (!fromDateStr \|\| !toDateStr) return 0;
+      if (!fromDateStr || !toDateStr) return 0;
       var d1 = new Date(fromDateStr);
       var d2 = new Date(toDateStr);
-      if (isNaN(d1.getTime()) \|\| isNaN(d2.getTime())) return 0;
+      if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return 0;
       var diffTime = d2.getTime() - d1.getTime();
       var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
       return diffDays > 0 ? diffDays : 0;
@@ -477,35 +477,35 @@ if (typeof window !== 'undefined') {
      */
     calculateEmployeeBalances: function(userEmail, approvedRequests) {
       var r = this.getRules();
-      var reqs = (approvedRequests \|\| []).filter(function(req) {
-        var applicant = (req.applicantEmail \|\| req.email \|\| '').toLowerCase().trim();
-        var target = (userEmail \|\| '').toLowerCase().trim();
-        var status = String(req.status \|\| '').toLowerCase();
-        return applicant === target && (status === 'approved' \|\| req.verified === true);
+      var reqs = (approvedRequests || []).filter(function(req) {
+        var applicant = (req.applicantEmail || req.email || '').toLowerCase().trim();
+        var target = (userEmail || '').toLowerCase().trim();
+        var status = String(req.status || '').toLowerCase();
+        return applicant === target && (status === 'approved' || req.verified === true);
       });
 
       var taken = { casual: 0, comp: 0, medical: 0, paternity: 0, maternity: 0, lwp: 0 };
 
       reqs.forEach(function(req) {
-        var type = String(req.leaveType \|\| '').toLowerCase();
-        var days = parseInt(req.totalDays \|\| req.days \|\| 0, 10) \|\| 0;
+        var type = String(req.leaveType || '').toLowerCase();
+        var days = parseInt(req.totalDays || req.days || 0, 10) || 0;
 
         if (type.indexOf('casual') !== -1) taken.casual += days;
         else if (type.indexOf('comp') !== -1) taken.comp += days;
-        else if (type.indexOf('medical') !== -1 \|\| type.indexOf('sick') !== -1) taken.medical += days;
-        else if (type.indexOf('paternity') !== -1 \|\| type.indexOf('ptl') !== -1) taken.paternity += days;
-        else if (type.indexOf('maternity') !== -1 \|\| type.indexOf('mtl') !== -1) taken.maternity += days;
-        else if (type.indexOf('without pay') !== -1 \|\| type.indexOf('lwp') !== -1) taken.lwp += days;
+        else if (type.indexOf('medical') !== -1 || type.indexOf('sick') !== -1) taken.medical += days;
+        else if (type.indexOf('paternity') !== -1 || type.indexOf('ptl') !== -1) taken.paternity += days;
+        else if (type.indexOf('maternity') !== -1 || type.indexOf('mtl') !== -1) taken.maternity += days;
+        else if (type.indexOf('without pay') !== -1 || type.indexOf('lwp') !== -1) taken.lwp += days;
         else taken.casual += days;
       });
 
       var eligible = {
-        casual: r.enabled.casual !== false ? (parseInt(r.casual, 10) \|\| 0) : 0,
-        comp: r.enabled.comp !== false ? (parseInt(r.comp, 10) \|\| 0) : 0,
-        medical: r.enabled.medical !== false ? (parseInt(r.medical, 10) \|\| 0) : 0,
-        paternity: r.enabled.paternity !== false ? (parseInt(r.paternity, 10) \|\| 0) : 0,
-        maternity: r.enabled.maternity !== false ? (parseInt(r.maternity, 10) \|\| 0) : 0,
-        lwp: r.enabled.lwp !== false ? (parseInt(r.lwp, 10) \|\| 0) : 0
+        casual: r.enabled.casual !== false ? (parseInt(r.casual, 10) || 0) : 0,
+        comp: r.enabled.comp !== false ? (parseInt(r.comp, 10) || 0) : 0,
+        medical: r.enabled.medical !== false ? (parseInt(r.medical, 10) || 0) : 0,
+        paternity: r.enabled.paternity !== false ? (parseInt(r.paternity, 10) || 0) : 0,
+        maternity: r.enabled.maternity !== false ? (parseInt(r.maternity, 10) || 0) : 0,
+        lwp: r.enabled.lwp !== false ? (parseInt(r.lwp, 10) || 0) : 0
       };
 
       var totalEligible = eligible.casual + eligible.comp + eligible.medical + eligible.paternity + eligible.maternity + eligible.lwp;
@@ -516,7 +516,7 @@ if (typeof window !== 'undefined') {
       var overallUtilization = totalEligible > 0 ? ((totalTaken / totalEligible) * 100).toFixed(2) : '0.00';
 
       function calcPct(tk, el) {
-        if (!el \|\| el <= 0) return '0%';
+        if (!el || el <= 0) return '0%';
         var pct = ((tk / el) * 100).toFixed(2);
         return parseFloat(pct) + '%';
       }
@@ -533,7 +533,7 @@ if (typeof window !== 'undefined') {
           ml: { name: 'Medical Leave (ML)', eligible: eligible.medical, taken: taken.medical, balance: Math.max(0, eligible.medical - taken.medical), pct: calcPct(taken.medical, eligible.medical), color: '\#9333ea' },
           ptl: { name: 'Paternity Leave (PTL)', eligible: eligible.paternity, taken: taken.paternity, balance: Math.max(0, eligible.paternity - taken.paternity), pct: calcPct(taken.paternity, eligible.paternity), color: '\#ea580c' },
           mtl: { name: 'Maternity Leave (MTL)', eligible: eligible.maternity, taken: taken.maternity, balance: Math.max(0, eligible.maternity - taken.maternity), pct: calcPct(taken.maternity, eligible.maternity), color: '\#ec4899' },
-          lwp: { name: 'Leave Without Pay (LWP)', eligible: eligible.lwp, taken: taken.lwp, balance: 0, pct: calcPct(taken.lwp, eligible.lwp \|\| 1), color: '\#94a3b8' }
+          lwp: { name: 'Leave Without Pay (LWP)', eligible: eligible.lwp, taken: taken.lwp, balance: 0, pct: calcPct(taken.lwp, eligible.lwp || 1), color: '\#94a3b8' }
         }
       };
     },
@@ -543,12 +543,12 @@ if (typeof window !== 'undefined') {
      */
     submitLeaveRequest: function(data) {
       return new Promise(function(resolve, reject) {
-        var db = global.db \|\| (global.GMCFirebase ? global.GMCFirebase.db : null);
+        var db = global.db || (global.GMCFirebase ? global.GMCFirebase.db : null);
         if (!db) return reject(new Error('Database connection not initialized.'));
 
         var user = global.GMCAuth ? global.GMCAuth.getUser() : null;
-        var email = data.email \|\| (user ? user.email : '');
-        var name  = data.name  \|\| (user ? (user.name \|\| user.userName) : '');
+        var email = data.email || (user ? user.email : '');
+        var name  = data.name  || (user ? (user.name || user.userName) : '');
 
         if (!email) return reject(new Error('User email required to submit leave application.'));
 
@@ -557,17 +557,17 @@ if (typeof window !== 'undefined') {
 
         var payload = {
           applicantEmail: email.toLowerCase().trim(),
-          applicantName: name \|\| email,
-          leaveType: data.leaveType \|\| 'Casual Leave',
+          applicantName: name || email,
+          leaveType: data.leaveType || 'Casual Leave',
           fromDate: data.fromDate,
           toDate: data.toDate,
           totalDays: days,
-          returnDate: data.returnDate \|\| GMCLeave.calculateReturnDate(data.toDate),
-          substituteEmail: (data.substituteEmail \|\| '').toLowerCase().trim(),
-          substituteName: data.substituteName \|\| '',
-          wardName: data.wardName \|\| '',
-          assignedWards: data.assignedWards \|\| (data.wardName ? [data.wardName] : []),
-          reason: data.reason \|\| '',
+          returnDate: data.returnDate || GMCLeave.calculateReturnDate(data.toDate),
+          substituteEmail: (data.substituteEmail || '').toLowerCase().trim(),
+          substituteName: data.substituteName || '',
+          wardName: data.wardName || '',
+          assignedWards: data.assignedWards || (data.wardName ? [data.wardName] : []),
+          reason: data.reason || '',
           status: data.substituteEmail ? 'Needs Substitute' : 'Pending',
           substituteStatus: data.substituteEmail ? 'Pending' : 'N/A',
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -587,12 +587,12 @@ if (typeof window !== 'undefined') {
      */
     initRulesSync: function() {
       var self = this;
-      var db = global.db \|\| (global.GMCFirebase ? global.GMCFirebase.db : null);
+      var db = global.db || (global.GMCFirebase ? global.GMCFirebase.db : null);
       if (!db) return;
 
       this._unsubRules = db.collection('settings').doc('leave_rules').onSnapshot(function(doc) {
         if (doc.exists) {
-          var d = doc.data() \|\| {};
+          var d = doc.data() || {};
           self.rules.casual = d.casual_limit !== undefined ? parseInt(d.casual_limit, 10) : (d.casual !== undefined ? parseInt(d.casual, 10) : 15);
           self.rules.comp = d.comp_limit !== undefined ? parseInt(d.comp_limit, 10) : (d.comp !== undefined ? parseInt(d.comp, 10) : 0);
           self.rules.medical = d.medical_limit !== undefined ? parseInt(d.medical_limit, 10) : (d.medical !== undefined ? parseInt(d.medical, 10) : 15);
@@ -658,7 +658,7 @@ if (typeof window !== 'undefined') {
 
     init: function() {
       var self = this;
-      var db = global.db \|\| (global.GMCFirebase ? global.GMCFirebase.db : null);
+      var db = global.db || (global.GMCFirebase ? global.GMCFirebase.db : null);
       if (!db) return;
 
       var todayStr = this.getTodayStr();
@@ -672,15 +672,15 @@ if (typeof window !== 'undefined') {
           var preAuth = 0;
 
           snapshot.forEach(function(doc) {
-            var d = doc.data() \|\| {};
+            var d = doc.data() || {};
             submitted++;
-            if (d.status === 'Approved' \|\| d.verified) {
+            if (d.status === 'Approved' || d.verified) {
               approved++;
             } else {
               pending++;
             }
-            if (d.totalPreAuth \|\| d.preAuthCount) {
-              preAuth += parseInt(d.totalPreAuth \|\| d.preAuthCount \|\| 0, 10);
+            if (d.totalPreAuth || d.preAuthCount) {
+              preAuth += parseInt(d.totalPreAuth || d.preAuthCount || 0, 10);
             }
           });
 
@@ -723,16 +723,16 @@ if (typeof window !== 'undefined') {
 
     verifyUserPin: function(email, pin) {
       return new Promise(function(resolve, reject) {
-        if (!pin \|\| String(pin).trim().length < 4) {
+        if (!pin || String(pin).trim().length < 4) {
           return reject(new Error('Please enter your 4-digit Signature PIN.'));
         }
-        var db = global.db \|\| (global.GMCFirebase ? global.GMCFirebase.db : null);
+        var db = global.db || (global.GMCFirebase ? global.GMCFirebase.db : null);
         if (!db) {
           return reject(new Error('Database connection not available.'));
         }
         
         var user = global.GMCAuth ? global.GMCAuth.getUser() : null;
-        var myEmail = (email \|\| (user ? user.email : '') \|\| '').toLowerCase().trim();
+        var myEmail = (email || (user ? user.email : '') || '').toLowerCase().trim();
         if (!myEmail) {
           return reject(new Error('User email not found. Please log in again.'));
         }
@@ -741,7 +741,7 @@ if (typeof window !== 'undefined') {
           if (!doc.exists) {
             return reject(new Error('User profile not found in database.'));
           }
-          var udata = doc.data() \|\| {};
+          var udata = doc.data() || {};
           var pinStr = String(pin).trim();
           var hashedPin = (typeof CryptoJS !== 'undefined') ? CryptoJS.SHA256(pinStr).toString() : pinStr;
 
@@ -751,7 +751,7 @@ if (typeof window !== 'undefined') {
             isValid = true;
           } else if (udata.signPinHash && udata.signPinHash === hashedPin) {
             isValid = true;
-          } else if (!udata.signPinHash && (!udata.pin \|\| String(udata.pin).trim() === '1234')) {
+          } else if (!udata.signPinHash && (!udata.pin || String(udata.pin).trim() === '1234')) {
             // First time user or default admin reset PIN (1234) -> set/update PIN
             isValid = true;
             db.collection('users').doc(myEmail).update({
@@ -787,9 +787,9 @@ if (typeof window !== 'undefined') {
         var existingModal = document.getElementById('dsig-pin-modal');
         if (existingModal) existingModal.remove();
 
-        title = title \|\| 'Enter Digital Signature PIN';
+        title = title || 'Enter Digital Signature PIN';
         var user = global.GMCAuth ? global.GMCAuth.getUser() : null;
-        var myEmail = email \|\| (user ? user.email : '');
+        var myEmail = email || (user ? user.email : '');
 
         var modal = document.createElement('div');
         modal.id = 'dsig-pin-modal';
@@ -862,7 +862,7 @@ if (typeof window !== 'undefined') {
             cleanup();
             resolve(udata);
           }).catch(function(err) {
-            errDiv.textContent = err.message \|\| 'Invalid PIN.';
+            errDiv.textContent = err.message || 'Invalid PIN.';
             boxes.forEach(function(b){ b.value = ''; });
             boxes[0].focus();
           });
@@ -876,11 +876,11 @@ if (typeof window !== 'undefined') {
         if (!reqObj) return reject(new Error('Leave request details missing.'));
         
         var user = global.GMCAuth ? global.GMCAuth.getUser() : null;
-        var email = reqObj.email \|\| (user ? user.email : '');
-        var db = global.db \|\| (global.GMCFirebase ? global.GMCFirebase.db : null);
+        var email = reqObj.email || (user ? user.email : '');
+        var db = global.db || (global.GMCFirebase ? global.GMCFirebase.db : null);
 
         self.verifyUserPin(email, pin).then(function(udata) {
-          reqObj.applicantSignatureUrl = udata.signatureImage \|\| '';
+          reqObj.applicantSignatureUrl = udata.signatureImage || '';
           reqObj.applicantSignedAt = Date.now();
           reqObj.status = 'Pending Substitute';
           if (!reqObj.timestamp) reqObj.timestamp = Date.now();
@@ -1472,7 +1472,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="dashDate"></div>
       </div>
       <div id="dashAlert" style="background:rgba(245,158,11,0.15);border:1.5px solid rgba(245,158,11,0.4);border-radius:14px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px;box-shadow:0 4px 15px rgba(245,158,11,0.1)">
-        <div style="color:#fbbf24;font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px">⚠️ Today's report not filled yet!</div>
+        <div style="color:#fbbf24;font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px">⚠️ Today\'s report not filled yet!</div>
         <div style="display:flex;align-items:center;gap:10px">
           <span style="font-size:11px;color:#fef08a;font-weight:600">Please fill before 5:00 PM</span>
           <button class="btn btn-pri" style="height:32px;font-size:11px;padding:0 16px;" onclick="goSec('fillReport',null)">Fill Now →</button>
@@ -2673,7 +2673,7 @@ function renderPmamRoster(yearMonth) {
             + '<td style="padding:12px 16px; font-weight:600; color:#475569;">' + item.dayName + '</td>'
             + '<td style="padding:12px 16px;"><span style="background:'+(item.isHoliday?'#fce7f3':'#e0e7ff')+'; color:'+(item.isHoliday?'#be185d':'#3730a3')+'; padding:3px 10px; border-radius:12px; font-weight:800; font-size:11px;">' + item.type + '</span> <span style="font-size:12px; font-weight:600; color:#334155; margin-left:6px;">' + item.name + '</span></td>'
             + '<td style="padding:12px 16px; text-align:center;">'
-            + '  <select data-date="' + item.date + '" class="pmam-roster-choice" style="padding:7px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:700; font-size:13px; color:'+(userChoice==='Duty'?'#166534':'#475569')+'; background:'+(userChoice==='Duty'?'#f0fdf4':'#f8fafc')+';" onchange="this.style.color=(this.value==='Duty'?'#166534':'#475569'); this.style.background=(this.value==='Duty'?'#f0fdf4':'#f8fafc');">'
+            + '  <select data-date="' + item.date + '" class="pmam-roster-choice" style="padding:7px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:700; font-size:13px; color:'+(userChoice==='Duty'?'#166534':'#475569')+'; background:'+(userChoice==='Duty'?'#f0fdf4':'#f8fafc')+';" onchange="this.style.color=(this.value===\&quot;Duty\&quot;?\&quot;#166534\&quot;:\&quot;#475569\&quot;); this.style.background=(this.value===\&quot;Duty\&quot;?\&quot;#f0fdf4\&quot;:\&quot;#f8fafc\&quot;);">'
             + '    <option value="Off"' + (userChoice === 'Off' ? ' selected' : '') + '>🌴 Off / Holiday</option>'
             + '    <option value="Duty"' + (userChoice === 'Duty' ? ' selected' : '') + '>🏥 On Duty</option>'
             + '  </select>'
@@ -3263,8 +3263,8 @@ function renderRecords(data) {
       + '<td>' + e.preAmt.toLocaleString('en-IN') + '</td>'
       + '<td>' + e.dis + '</td><td>' + e.clm.toLocaleString('en-IN') + '</td>'
       + '<td style="font-weight:700;color:' + (parseFloat(e.conv)>=60?'#166534':'#92400e') + '">' + e.conv + '</td>'
-      + '<td style="white-space:nowrap"><button onclick="editRecord('' + (e.id||'') + '')" style="background:#E8EFFF;color:#0F2B8C;border:1.5px solid rgba(26,61,181,0.25);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px" title="Edit this entry">Edit</button>'
-      + '<button onclick="deleteRecord('' + (e.id||'') + '')" style="background:#FEE2E2;color:#DC2626;border:1.5px solid rgba(220,38,38,0.25);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer" title="Delete this entry">Del</button></td>'
+      + '<td style="white-space:nowrap"><button onclick="editRecord(&quot;' + (e.id||"") + '&quot;)" style="background:#E8EFFF;color:#0F2B8C;border:1.5px solid rgba(26,61,181,0.25);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px" title="Edit this entry">Edit</button>'
+      + '<button onclick="deleteRecord(&quot;' + (e.id||"") + '&quot;)" style="background:#FEE2E2;color:#DC2626;border:1.5px solid rgba(220,38,38,0.25);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer" title="Delete this entry">Del</button></td>'
       + '</tr>';
   }).join('');
 }
@@ -3506,10 +3506,10 @@ function renderSubstituteRequests() {
         htmlNew += '<td>' + fmtDate(req.to || req.toDt) + '</td>';
         htmlNew += '<td>' + (req.days || '-') + '</td>';
         htmlNew += '<td>';
-        htmlNew += '<button class="btn btn-sec" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="printHistoryLeave('' + req.id + '')">📄 PDF</button>';
-        htmlNew += '<button class="btn btn-pri" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="viewDutyRequest('' + req.id + '')">View</button>';
-        htmlNew += '<button class="btn btn-pri" style="background:#166534; padding:4px 8px; font-size:11px; margin-right:4px;" onclick="initiateApproveDuty('' + req.id + '')">Approve</button>';
-        htmlNew += '<button class="btn btn-sec" style="color:#dc2626; padding:4px 8px; font-size:11px;" onclick="rejectDutyRequest('' + req.id + '')">Reject</button>';
+        htmlNew += '<button class="btn btn-sec" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="printHistoryLeave(&quot; + req.id + &quot;)">📄 PDF</button>';
+        htmlNew += '<button class="btn btn-pri" style="padding:4px 8px; font-size:11px; margin-right:4px;" onclick="viewDutyRequest(\'" + req.id + "\')">View</button>';
+        htmlNew += '<button class="btn btn-pri" style="background:#166534; padding:4px 8px; font-size:11px; margin-right:4px;" onclick="initiateApproveDuty(\'" + req.id + "\')">Approve</button>';
+        htmlNew += '<button class="btn btn-sec" style="color:#dc2626; padding:4px 8px; font-size:11px;" onclick="rejectDutyRequest(\'" + req.id + "\')">Reject</button>';
         htmlNew += '</td>';
         htmlNew += '</tr>';
       });
@@ -3533,7 +3533,7 @@ function renderSubstituteRequests() {
         htmlHist += '<td>' + fmtDate(req.to || req.toDt) + '</td>';
         htmlHist += '<td>' + (req.days || '-') + '</td>';
         htmlHist += '<td><span style="font-size:11px; font-weight:700; color:' + statusColor + ';">' + (req.status || '-') + '</span></td>';
-        htmlHist += '<td><button class="btn btn-sec" style="padding:4px 8px; font-size:11px;" onclick="printHistoryLeave('' + req.id + '')">📄 PDF</button></td>';
+        htmlHist += '<td><button class="btn btn-sec" style="padding:4px 8px; font-size:11px;" onclick="printHistoryLeave(&quot; + req.id + &quot;)">📄 PDF</button></td>';
         htmlHist += '</tr>';
       });
       tbodyHist.innerHTML = htmlHist;
@@ -4197,8 +4197,7 @@ function onHolidayPicked(i) {
     if (j === i) continue;
     var otherHol = document.getElementById('cd'+j+'_hol');
     if (otherHol && otherHol.value === holEl.value) {
-      alert('You have already selected this holiday in row ' + j + '.
-Please select a different holiday.');
+      alert('You have already selected this holiday in row ' + j + '.\nPlease select a different holiday.');
       holEl.value = '';
       dateEl.value = '';
       dateEl.style.background = '';
@@ -4308,7 +4307,7 @@ function renderLeaveHistory() {
       + '<td>' + (r.duty||'—') + '</td>'
       + '<td>' + (r.reason||'—') + '</td>'
             + '<td>' + statusHtml + '</td>'
-      + '<td><button class="btn btn-sec" style="padding:4px 8px; font-size:11px;" onclick="printHistoryLeave('' + r.id + '')">Print</button></td>'
+      + '<td><button class="btn btn-sec" style="padding:4px 8px; font-size:11px;" onclick="printHistoryLeave(&quot; + r.id + &quot;)">Print</button></td>'
       + '</tr>';
   }).join('');
 }
@@ -4510,7 +4509,7 @@ function fetchPmamReports() {
           badge.innerHTML = '<svg viewBox="0 0 24 24" fill="#2E7D32" style="width:13px;height:13px"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Report Submitted!';
         } else {
           badge.className = 'fr-alert-pill';
-          badge.innerHTML = '<svg viewBox="0 0 24 24" fill="#E65100" style="width:13px;height:13px;flex-shrink:0;"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg> Today's report not filled yet';
+          badge.innerHTML = '<svg viewBox="0 0 24 24" fill="#E65100" style="width:13px;height:13px;flex-shrink:0;"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg> Today\'s report not filled yet';
         }
       }
 
@@ -5290,19 +5289,19 @@ function updateWardStatus(){
     _unsubRules: null,\r
     \r
     init: function(config) {\r
-      this.role = config.role \|\| 'pmam';\r
-      this.userEmail = config.email \|\| null;\r
-      this.userName = config.name \|\| null;\r
+      this.role = config.role || 'pmam';\r
+      this.userEmail = config.email || null;\r
+      this.userName = config.name || null;\r
       var self = this;\r
-      var origUpdate = config.onUpdate \|\| function(){};\r
+      var origUpdate = config.onUpdate || function(){};\r
       this.onUpdate = function() {\r
           origUpdate();\r
           var actionable = 0;\r
           if (self.role === 'pmam') {\r
-              var subNeed = self.subRequests.filter(function(r) { return r.status === 'Needs Substitute' \|\| r.status === 'Pending Substitute'; }).length;\r
-              var myPending = self.requests.filter(function(r) { return r.status === 'Pending' \|\| r.status === 'Pending Substitute'; }).length;\r
+              var subNeed = self.subRequests.filter(function(r) { return r.status === 'Needs Substitute' || r.status === 'Pending Substitute'; }).length;\r
+              var myPending = self.requests.filter(function(r) { return r.status === 'Pending' || r.status === 'Pending Substitute'; }).length;\r
               actionable = subNeed + myPending;\r
-          } else if (self.role === 'ic' \|\| self.role === 'admin') {\r
+          } else if (self.role === 'ic' || self.role === 'admin') {\r
               actionable = self.requests.filter(function(r) { return r.status === 'Pending'; }).length;\r
           }\r
           var bellBadge = document.getElementById('topBellBadge');\r
@@ -5326,7 +5325,7 @@ function updateWardStatus(){
       var self = this;\r
       this._unsubRules = db.collection('settings').doc('leave_rules').onSnapshot(function(doc) {\r
         if (doc.exists) {\r
-          var d = doc.data() \|\| {};\r
+          var d = doc.data() || {};\r
           var casual = d.casual_limit !== undefined ? parseInt(d.casual_limit) : (d.casual !== undefined ? parseInt(d.casual) : 15);\r
           var medical = d.medical_limit !== undefined ? parseInt(d.medical_limit) : (d.medical !== undefined ? parseInt(d.medical) : 30);\r
           var paternity = d.pat_limit !== undefined ? parseInt(d.pat_limit) : (d.paternity !== undefined ? parseInt(d.paternity) : 15);\r
@@ -5368,26 +5367,26 @@ function updateWardStatus(){
         if (!this.userEmail) return;\r
         query = query.where('email', '==', this.userEmail);\r
         \r
-                if (this.userName \|\| this.userEmail) {\r
+                if (this.userName || this.userEmail) {\r
           this._unsubSub = db.collection('leave_requests')\r
             .onSnapshot(function(snap) {\r
               self.subRequests = [];\r
               snap.forEach(function(doc) {\r
                 var d = doc.data();\r
-                var dutyName = (d.duty \|\| '').toLowerCase().trim();\r
-                var myName = (self.userName \|\| '').toLowerCase().trim();\r
-                var myEmail = (self.userEmail \|\| '').toLowerCase().trim();\r
-                var dutyEmail = (d.dutyEmail \|\| '').toLowerCase().trim();\r
+                var dutyName = (d.duty || '').toLowerCase().trim();\r
+                var myName = (self.userName || '').toLowerCase().trim();\r
+                var myEmail = (self.userEmail || '').toLowerCase().trim();\r
+                var dutyEmail = (d.dutyEmail || '').toLowerCase().trim();\r
                 \r
                 var isMatch = false;\r
-                if (myName && dutyName && (dutyName === myName \|\| dutyName.indexOf(myName) !== -1 \|\| myName.indexOf(dutyName) !== -1)) isMatch = true;\r
-                if (myEmail && (dutyName === myEmail \|\| dutyEmail === myEmail)) isMatch = true;\r
+                if (myName && dutyName && (dutyName === myName || dutyName.indexOf(myName) !== -1 || myName.indexOf(dutyName) !== -1)) isMatch = true;\r
+                if (myEmail && (dutyName === myEmail || dutyEmail === myEmail)) isMatch = true;\r
                 \r
                 if (isMatch) {\r
                   self.subRequests.push(Object.assign({\r
                     id: doc.id, type: d.ltype, name: d.name, ward: d.ward, from: d.fromDt,\r
                     to: d.toDt, days: d.days, retDate: d.ret, duty: d.duty,\r
-                    reason: d.reason, status: d.status, remark: d.remark \|\| '', timestamp: d.timestamp \|\| 0\r
+                    reason: d.reason, status: d.status, remark: d.remark || '', timestamp: d.timestamp || 0\r
                   }, d));\r
                 }\r
               });\r
@@ -5403,12 +5402,12 @@ function updateWardStatus(){
           self.requests.push(Object.assign({\r
             id: doc.id, type: d.ltype, name: d.name, ward: d.ward, from: d.fromDt,\r
             to: d.toDt, days: d.days, retDate: d.ret, duty: d.duty,\r
-            reason: d.reason, status: d.status, remark: d.remark \|\| '', timestamp: d.timestamp \|\| 0\r
+            reason: d.reason, status: d.status, remark: d.remark || '', timestamp: d.timestamp || 0\r
           }, d));\r
         });\r
         \r
         // Sort newest first\r
-        self.requests.sort(function(a,b){ return (b.timestamp\|\|0) - (a.timestamp\|\|0); });\r
+        self.requests.sort(function(a,b){ return (b.timestamp||0) - (a.timestamp||0); });\r
         \r
         self.onUpdate();\r
       });\r
@@ -5422,16 +5421,16 @@ function updateWardStatus(){
       \r
       this.requests.forEach(function(l) {\r
         // In Admin/IC portal we might need to count by name since not all records have email\r
-        if (l.status === 'Approved' && (l.email === emailOrName \|\| l.name === emailOrName)) {\r
-          var d = parseFloat(l.days) \|\| 0;\r
-          var t = (l.ltype \|\| l.type \|\| '').toLowerCase();\r
+        if (l.status === 'Approved' && (l.email === emailOrName || l.name === emailOrName)) {\r
+          var d = parseFloat(l.days) || 0;\r
+          var t = (l.ltype || l.type || '').toLowerCase();\r
           \r
           if(t.indexOf('casual') !== -1) casualTaken += d;\r
           else if(t.indexOf('medical') !== -1) medicalTaken += d;\r
           else if(t.indexOf('compensatory') !== -1) compTaken += d;\r
           else if(t.indexOf('maternity') !== -1) maternityTaken += d;\r
           else if(t.indexOf('paternity') !== -1) paternityTaken += d;\r
-          else if(t.indexOf('pay') !== -1 \|\| t.indexOf('lwp') !== -1) lwpTaken += d;\r
+          else if(t.indexOf('pay') !== -1 || t.indexOf('lwp') !== -1) lwpTaken += d;\r
         }\r
       });\r
       \r
@@ -5453,11 +5452,11 @@ function updateWardStatus(){
     submitLeave: function(reqObj, pin, requireDigitalSign) {\r
       return new Promise(function(resolve, reject) {\r
         if (requireDigitalSign) {\r
-          if (!pin \|\| pin.length < 4) return reject(new Error('Please enter your 4-digit PIN.'));\r
-          var myEmail = (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : (self.userEmail \|\| (global.GMCAuth && global.GMCAuth.getUser() ? global.GMCAuth.getUser().email : '') \|\| '')).toLowerCase().trim();\r
+          if (!pin || pin.length < 4) return reject(new Error('Please enter your 4-digit PIN.'));\r
+          var myEmail = (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : (self.userEmail || (global.GMCAuth && global.GMCAuth.getUser() ? global.GMCAuth.getUser().email : '') || '')).toLowerCase().trim();\r
           if (global.DSig && typeof global.DSig.verifyUserPin === 'function') {\r
             global.DSig.verifyUserPin(myEmail, pin).then(function(udata) {\r
-              reqObj.applicantSignatureUrl = udata.signatureImage \|\| '';\r
+              reqObj.applicantSignatureUrl = udata.signatureImage || '';\r
               reqObj.status = 'Pending Substitute';\r
               reqObj.timestamp = Date.now();\r
               return db.collection('leave_requests').add(reqObj);\r
@@ -5465,15 +5464,15 @@ function updateWardStatus(){
           } else {\r
             db.collection('users').doc(myEmail).get().then(function(doc) {\r
               if (!doc.exists) throw new Error("User profile not found.");\r
-              var udata = doc.data() \|\| {};\r
+              var udata = doc.data() || {};\r
               var pinStr = String(pin).trim();\r
               var hashedPin = (typeof CryptoJS !== 'undefined') ? CryptoJS.SHA256(pinStr).toString() : pinStr;\r
-              var isValid = (udata.pin && String(udata.pin).trim() === pinStr) \|\| (udata.signPinHash && udata.signPinHash === hashedPin) \|\| (!udata.signPinHash && (!udata.pin \|\| String(udata.pin).trim() === '1234'));\r
+              var isValid = (udata.pin && String(udata.pin).trim() === pinStr) || (udata.signPinHash && udata.signPinHash === hashedPin) || (!udata.signPinHash && (!udata.pin || String(udata.pin).trim() === '1234'));\r
               if (!isValid) throw new Error("Incorrect PIN.");\r
               if (!udata.signPinHash) {\r
                 db.collection('users').doc(myEmail).update({ pin: pinStr, signPinHash: hashedPin }).catch(function(e){});\r
               }\r
-              reqObj.applicantSignatureUrl = udata.signatureImage \|\| '';\r
+              reqObj.applicantSignatureUrl = udata.signatureImage || '';\r
               reqObj.status = 'Pending Substitute';\r
               reqObj.timestamp = Date.now();\r
               return db.collection('leave_requests').add(reqObj);\r
@@ -5487,11 +5486,11 @@ function updateWardStatus(){
     \r
     approveSubstituteDuty: function(reqId, pin) {\r
       return new Promise(function(resolve, reject) {\r
-        if (!pin \|\| pin.length < 4) return reject(new Error('Please enter your 4-digit PIN.'));\r
-        var myEmail = (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : (this.userEmail \|\| (global.GMCAuth && global.GMCAuth.getUser() ? global.GMCAuth.getUser().email : '') \|\| '')).toLowerCase().trim();\r
+        if (!pin || pin.length < 4) return reject(new Error('Please enter your 4-digit PIN.'));\r
+        var myEmail = (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : (this.userEmail || (global.GMCAuth && global.GMCAuth.getUser() ? global.GMCAuth.getUser().email : '') || '')).toLowerCase().trim();\r
         if (global.DSig && typeof global.DSig.verifyUserPin === 'function') {\r
           global.DSig.verifyUserPin(myEmail, pin).then(function(udata) {\r
-            var sigUrl = udata.signatureImage \|\| '';\r
+            var sigUrl = udata.signatureImage || '';\r
             return db.collection('leave_requests').doc(reqId).update({\r
               status: 'Pending', substituteSignatureUrl: sigUrl, substituteSignedAt: Date.now()\r
             });\r
@@ -5499,15 +5498,15 @@ function updateWardStatus(){
         } else {\r
           db.collection('users').doc(myEmail).get().then(function(doc) {\r
             if (!doc.exists) throw new Error("User profile not found.");\r
-            var udata = doc.data() \|\| {};\r
+            var udata = doc.data() || {};\r
             var pinStr = String(pin).trim();\r
             var hashedPin = (typeof CryptoJS !== 'undefined') ? CryptoJS.SHA256(pinStr).toString() : pinStr;\r
-            var isValid = (udata.pin && String(udata.pin).trim() === pinStr) \|\| (udata.signPinHash && udata.signPinHash === hashedPin) \|\| (!udata.signPinHash && (!udata.pin \|\| String(udata.pin).trim() === '1234'));\r
+            var isValid = (udata.pin && String(udata.pin).trim() === pinStr) || (udata.signPinHash && udata.signPinHash === hashedPin) || (!udata.signPinHash && (!udata.pin || String(udata.pin).trim() === '1234'));\r
             if (!isValid) throw new Error("Incorrect PIN.");\r
             if (!udata.signPinHash) {\r
               db.collection('users').doc(myEmail).update({ pin: pinStr, signPinHash: hashedPin }).catch(function(e){});\r
             }\r
-            var sigUrl = udata.signatureImage \|\| '';\r
+            var sigUrl = udata.signatureImage || '';\r
             return db.collection('leave_requests').doc(reqId).update({\r
               status: 'Pending', substituteSignatureUrl: sigUrl, substituteSignedAt: Date.now()\r
             });\r
@@ -5529,15 +5528,15 @@ function updateWardStatus(){
       var self = this;\r
       return new Promise(function(resolve, reject) {\r
         if (status === 'Rejected') {\r
-          var updates = { status: 'Rejected', actionDate: new Date().toISOString(), actionBy: self.userName \|\| 'Incharge' };\r
+          var updates = { status: 'Rejected', actionDate: new Date().toISOString(), actionBy: self.userName || 'Incharge' };\r
           if (rejectReason) updates.rejectReason = rejectReason;\r
           db.collection('leave_requests').doc(id).update(updates).then(resolve).catch(reject);\r
         } else if (status === 'Approved') {\r
-          var myEmail = (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : (self.userEmail \|\| (global.GMCAuth && global.GMCAuth.getUser() ? global.GMCAuth.getUser().email : '') \|\| '')).toLowerCase().trim();\r
+          var myEmail = (typeof getPmjayUser === 'function' && getPmjayUser() ? getPmjayUser().email : (self.userEmail || (global.GMCAuth && global.GMCAuth.getUser() ? global.GMCAuth.getUser().email : '') || '')).toLowerCase().trim();\r
           \r
           var doApprove = function(udata) {\r
             var sigUrl = (udata && udata.signatureImage) ? udata.signatureImage : '';\r
-            var icName = (udata && udata.name) ? udata.name : (self.userName \|\| 'I/C AB-PMJAY');\r
+            var icName = (udata && udata.name) ? udata.name : (self.userName || 'I/C AB-PMJAY');\r
             var updates = {\r
               status: 'Approved',\r
               icSignatureUrl: sigUrl,\r
@@ -5555,10 +5554,10 @@ function updateWardStatus(){
             } else {\r
               db.collection('users').doc(myEmail).get().then(function(doc) {\r
                 if (!doc.exists) throw new Error("User profile not found.");\r
-                var udata = doc.data() \|\| {};\r
+                var udata = doc.data() || {};\r
                 var pinStr = String(pin).trim();\r
                 var hashedPin = (typeof CryptoJS !== 'undefined') ? CryptoJS.SHA256(pinStr).toString() : pinStr;\r
-                var isValid = (udata.pin && String(udata.pin).trim() === pinStr) \|\| (udata.signPinHash && udata.signPinHash === hashedPin) \|\| (!udata.signPinHash && (!udata.pin \|\| String(udata.pin).trim() === '1234'));\r
+                var isValid = (udata.pin && String(udata.pin).trim() === pinStr) || (udata.signPinHash && udata.signPinHash === hashedPin) || (!udata.signPinHash && (!udata.pin || String(udata.pin).trim() === '1234'));\r
                 if (!isValid) throw new Error("Incorrect PIN.");\r
                 return doApprove(udata);\r
               }).then(resolve).catch(reject);\r
@@ -5577,7 +5576,7 @@ function updateWardStatus(){
       if (!reqObj) return;\r
       \r
       var fmtDate = function(d) {\r
-        if (!d \|\| d === '-') return '—';\r
+        if (!d || d === '-') return '—';\r
         if (typeof d === 'string' && d.indexOf('-') !== -1) {\r
           var parts = d.split('-');\r
           if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];\r
@@ -5585,23 +5584,23 @@ function updateWardStatus(){
         return d;\r
       };\r
 \r
-      var name   = reqObj.name   \|\| '—';\r
-      var desig  = reqObj.desig  \|\| 'PMAM';\r
-      var ward   = reqObj.ward   \|\| '—';\r
-      var fromDt = reqObj.from   \|\| reqObj.fromDt \|\| '';\r
-      var toDt   = reqObj.to     \|\| reqObj.toDt   \|\| '';\r
-      var days   = reqObj.days   \|\| '';\r
-      var ret    = reqObj.retDate \|\| reqObj.ret   \|\| '';\r
-      var duty   = reqObj.duty   \|\| reqObj.substituteName \|\| '—';\r
-      var ltype  = reqObj.ltype  \|\| reqObj.type   \|\| '—';\r
-      var reason = reqObj.reason \|\| '—';\r
+      var name   = reqObj.name   || '—';\r
+      var desig  = reqObj.desig  || 'PMAM';\r
+      var ward   = reqObj.ward   || '—';\r
+      var fromDt = reqObj.from   || reqObj.fromDt || '';\r
+      var toDt   = reqObj.to     || reqObj.toDt   || '';\r
+      var days   = reqObj.days   || '';\r
+      var ret    = reqObj.retDate || reqObj.ret   || '';\r
+      var duty   = reqObj.duty   || reqObj.substituteName || '—';\r
+      var ltype  = reqObj.ltype  || reqObj.type   || '—';\r
+      var reason = reqObj.reason || '—';\r
 \r
       var dLabel = '';\r
       if (days) dLabel += days + ' day(s)';\r
       if (fromDt && toDt) dLabel += ' (' + fmtDate(fromDt) + ' to ' + fmtDate(toDt) + ')';\r
       if (!dLabel) dLabel = '—';\r
 \r
-      var todayStr = new Date(reqObj.timestamp \|\| Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });\r
+      var todayStr = new Date(reqObj.timestamp || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });\r
       var FORM_TITLE = 'LEAVE APPLICATION FORM';\r
 \r
       // Signature HTML blocks\r
@@ -5626,25 +5625,25 @@ function updateWardStatus(){
         + '<tr><td class="lbl">Reason for Leave</td><td>' + reason + '</td></tr>'\r
         + '<tr><td class="lbl">Type of Leave</td><td>' + ltype + '</td></tr>'\r
         + '<tr><td class="lbl">Total Days Requested</td><td>' + dLabel + '</td></tr>'\r
-        + '<tr><td class="lbl">Return Date</td><td>' + (fmtDate(ret) \|\| '—') + '</td></tr>'\r
+        + '<tr><td class="lbl">Return Date</td><td>' + (fmtDate(ret) || '—') + '</td></tr>'\r
         + '<tr><td class="lbl">Duty Assigned To</td><td>' + duty + '</td></tr>'\r
         + '</tbody></table>'\r
         + '<div style="page-break-inside: avoid; break-inside: avoid;">'\r
         + '<div class="undertaking">'\r
         +   '<div style="text-align:center;font-weight:700;margin-bottom:4px;font-size:10pt;text-decoration:underline">UNDERTAKING FOR PMAM DUTY COVERAGE DURING LEAVE</div>'\r
-        +   'I, Mr./Ms. <strong>' + (duty \|\| '________________') + '</strong>, PMAM, hereby undertake that during the leave period of Mr./Ms. <strong>' + (name \|\| '________________') + '</strong>, from <strong>' + (fmtDate(fromDt) \|\| '___') + '</strong> to <strong>' + (fmtDate(toDt) \|\| '___') + '</strong>, I shall assume full responsibility for all assigned AB PM-JAY work, including pre-auths, pre-auth queries, claim queries, enhancements, discharges, claim submissions, and all pending work. All IPDs from the assigned ward(s) during the leave period shall be counted under my IPD workload and shall be my responsibility.'\r
+        +   'I, Mr./Ms. <strong>' + (duty || '________________') + '</strong>, PMAM, hereby undertake that during the leave period of Mr./Ms. <strong>' + (name || '________________') + '</strong>, from <strong>' + (fmtDate(fromDt) || '___') + '</strong> to <strong>' + (fmtDate(toDt) || '___') + '</strong>, I shall assume full responsibility for all assigned AB PM-JAY work, including pre-auths, pre-auth queries, claim queries, enhancements, discharges, claim submissions, and all pending work. All IPDs from the assigned ward(s) during the leave period shall be counted under my IPD workload and shall be my responsibility.'\r
         + '</div>'\r
         + '<div class="sig-row">'\r
         + '<div class="sig-box"><div class="sig-label">Signature of Applicant - PMAM</div>' + appSigHtml + '<div class="sig-desig">' + name + '</div></div>'\r
         + '<div class="sig-box"><div class="sig-label">Signature of Substitute PMAM</div>' + subSigHtml + '<div class="sig-desig">' + duty + '</div></div>'\r
         + '</div>'\r
         + '<div class="sig-row" style="margin-top:6mm">'\r
-        + '<div class="sig-box"><div class="sig-label">I/C AB-PMJAY</div>' + icSigHtml + '<div class="sig-desig">' + (reqObj.icName \|\| 'GMC &amp; AH, Rajouri') + '</div></div>'\r
+        + '<div class="sig-box"><div class="sig-label">I/C AB-PMJAY</div>' + icSigHtml + '<div class="sig-desig">' + (reqObj.icName || 'GMC &amp; AH, Rajouri') + '</div></div>'\r
         + '<div class="sig-box"><div class="sig-label">Medical Superintendent</div><div style="height:14mm;"></div><div class="sig-desig">GMC &amp; AH, Rajouri</div></div>'\r
         + '</div>'\r
         + '</div>'\r
         + '<div class="print-footer">'\r
-        + '<span class="footer-brand">Computer generated leave application. \| PMAM Reporting Portal @ MIS AB-PMJAY GMCR</span>'\r
+        + '<span class="footer-brand">Computer generated leave application. | PMAM Reporting Portal @ MIS AB-PMJAY GMCR</span>'\r
         + '</div>';\r
 \r
       var pageContent;\r
@@ -6361,7 +6360,7 @@ function updateWardStatus(){
 
     var mounts = document.querySelectorAll('\#portal-header-mount');
     mounts.forEach(function(mount) {
-      var title = mount.getAttribute('data-title') \|\| 'PORTAL';
+      var title = mount.getAttribute('data-title') || 'PORTAL';
 
       // Fast zero-latency cached logo retrieval
       var cachedLogo1 = localStorage.getItem('gmc_logo1');
@@ -6371,7 +6370,7 @@ function updateWardStatus(){
         ? global.GMCLogos.gmc 
         : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 65"><circle cx="32.5" cy="32.5" r="32.5" fill="%231e3a8a"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-weight="bold" font-size="14" font-family="sans-serif">GMC</text></svg>';
       
-      var initialGmcLogo = cachedLogo1 \|\| defaultGmcLogo;
+      var initialGmcLogo = cachedLogo1 || defaultGmcLogo;
 
       var defaultPmjayLogo = (global.GMCLogos && global.GMCLogos.pmjay) 
         ? '<img src="' + global.GMCLogos.pmjay + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">' 
@@ -6383,7 +6382,7 @@ function updateWardStatus(){
 
       // Infer role from title default
       var defaultRole = 'PMAM';
-      if (title.indexOf('I/C') !== -1 \|\| title.indexOf('INCHARGE') !== -1) defaultRole = 'INCHARGE AB-PMJAY';
+      if (title.indexOf('I/C') !== -1 || title.indexOf('INCHARGE') !== -1) defaultRole = 'INCHARGE AB-PMJAY';
       else if (title.indexOf('FINANCE') !== -1) defaultRole = 'FINANCE';
       else if (title.indexOf('CLAIMS') !== -1) defaultRole = 'CLAIMS';
       else if (title.indexOf('ADMIN') !== -1) defaultRole = 'ADMIN';
@@ -6391,11 +6390,11 @@ function updateWardStatus(){
 
       // Current page path detection
       var path = window.location.pathname.toLowerCase();
-      var isAdmin = path.indexOf('admin') !== -1 \|\| title.indexOf('ADMIN') !== -1;
-      var isPmam = path.indexOf('pmam') !== -1 \|\| title.indexOf('PMAM') !== -1;
-      var isIc = path.indexOf('ic_') !== -1 \|\| path.indexOf('incharge') !== -1 \|\| title.indexOf('I/C') !== -1;
-      var isFinance = path.indexOf('finance') !== -1 \|\| title.indexOf('FINANCE') !== -1;
-      var isPatient = path.indexOf('patient') !== -1 \|\| title.indexOf('PATIENT') !== -1;
+      var isAdmin = path.indexOf('admin') !== -1 || title.indexOf('ADMIN') !== -1;
+      var isPmam = path.indexOf('pmam') !== -1 || title.indexOf('PMAM') !== -1;
+      var isIc = path.indexOf('ic_') !== -1 || path.indexOf('incharge') !== -1 || title.indexOf('I/C') !== -1;
+      var isFinance = path.indexOf('finance') !== -1 || title.indexOf('FINANCE') !== -1;
+      var isPatient = path.indexOf('patient') !== -1 || title.indexOf('PATIENT') !== -1;
 
       // Build workspace list excluding the current portal (initially empty until user permissions resolve)
       var workspaceItemsHTML = '';
@@ -6528,25 +6527,25 @@ function updateWardStatus(){
     var dd = document.getElementById('userDD');
     var pill = document.getElementById('userPillBtn');
     if (dd && dd.classList.contains('open')) {
-      if (!dd.contains(e.target) && (!pill \|\| !pill.contains(e.target))) {
+      if (!dd.contains(e.target) && (!pill || !pill.contains(e.target))) {
         dd.classList.remove('open');
       }
     }
   });
 
   function updateUserHeader(mountTitle) {
-    var title = mountTitle \|\| (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') \|\| 'PORTAL';
+    var title = mountTitle || (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') || 'PORTAL';
     var path = window.location.pathname.toLowerCase();
     var name = '';
     var role = '';
     var photoUrl = '';
     var userObj = null;
 
-    var isPageAdmin   = path.indexOf('admin') !== -1 \|\| title.indexOf('ADMIN') !== -1;
-    var isPageIc      = path.indexOf('ic_') !== -1 \|\| path.indexOf('incharge') !== -1 \|\| title.indexOf('I/C') !== -1;
-    var isPagePmam    = path.indexOf('pmam') !== -1 \|\| title.indexOf('PMAM') !== -1;
-    var isPageFinance = path.indexOf('finance') !== -1 \|\| title.indexOf('FINANCE') !== -1;
-    var isPagePatient = path.indexOf('patient') !== -1 \|\| title.indexOf('PATIENT') !== -1;
+    var isPageAdmin   = path.indexOf('admin') !== -1 || title.indexOf('ADMIN') !== -1;
+    var isPageIc      = path.indexOf('ic_') !== -1 || path.indexOf('incharge') !== -1 || title.indexOf('I/C') !== -1;
+    var isPagePmam    = path.indexOf('pmam') !== -1 || title.indexOf('PMAM') !== -1;
+    var isPageFinance = path.indexOf('finance') !== -1 || title.indexOf('FINANCE') !== -1;
+    var isPagePatient = path.indexOf('patient') !== -1 || title.indexOf('PATIENT') !== -1;
 
     var activePortalRole = 'USER';
     if (isPageAdmin) activePortalRole = 'ADMIN';
@@ -6555,19 +6554,19 @@ function updateWardStatus(){
     else if (isPageFinance) activePortalRole = 'FINANCE';
     else if (isPagePatient) activePortalRole = 'PATIENT SERVICES';
 
-    var userJson = sessionStorage.getItem('pmjay_user') \|\|
-                   sessionStorage.getItem('currentUser') \|\|
-                   localStorage.getItem('pmjay_user') \|\|
-                   localStorage.getItem('currentUser') \|\|
-                   sessionStorage.getItem('pmam_user') \|\|
+    var userJson = sessionStorage.getItem('pmjay_user') ||
+                   sessionStorage.getItem('currentUser') ||
+                   localStorage.getItem('pmjay_user') ||
+                   localStorage.getItem('currentUser') ||
+                   sessionStorage.getItem('pmam_user') ||
                    localStorage.getItem('pmam_user');
 
     if (userJson) {
       try {
         userObj = typeof userJson === 'string' ? JSON.parse(userJson) : userJson;
-        if (userObj.name \|\| userObj.displayName) name = userObj.name \|\| userObj.displayName;
-        if (userObj.role \|\| userObj.desig) role = userObj.role \|\| userObj.desig;
-        if (userObj.photo \|\| userObj.photoUrl) photoUrl = userObj.photo \|\| userObj.photoUrl;
+        if (userObj.name || userObj.displayName) name = userObj.name || userObj.displayName;
+        if (userObj.role || userObj.desig) role = userObj.role || userObj.desig;
+        if (userObj.photo || userObj.photoUrl) photoUrl = userObj.photo || userObj.photoUrl;
       } catch(e){}
     }
 
@@ -6576,7 +6575,7 @@ function updateWardStatus(){
     }
 
     // Always prefer active portal role for header display
-    var displayRole = activePortalRole \|\| role \|\| 'USER';
+    var displayRole = activePortalRole || role || 'USER';
 
     // Apply stored profile details immediately
     applyHeaderData(name, displayRole, photoUrl);
@@ -6589,7 +6588,7 @@ function updateWardStatus(){
       firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
           if (user.displayName && !name) name = user.displayName;
-          var lookupEmail = user.email \|\| (userObj ? userObj.email : '');
+          var lookupEmail = user.email || (userObj ? userObj.email : '');
           if (typeof db !== 'undefined' && lookupEmail) {
             lookupEmail = String(lookupEmail).trim().toLowerCase();
             db.collection('users').doc(lookupEmail).get().then(function(doc) {
@@ -6608,8 +6607,8 @@ function updateWardStatus(){
                 if (d.role && !docRoles.includes(d.role)) docRoles.push(d.role);
                 if (d.desig && !docRoles.includes(d.desig)) docRoles.push(d.desig);
 
-                var updatedUserObj = Object.assign({}, userObj \|\| {}, d, { roles: docRoles });
-                var finalDisplayRole = activePortalRole \|\| d.role \|\| d.desig \|\| displayRole;
+                var updatedUserObj = Object.assign({}, userObj || {}, d, { roles: docRoles });
+                var finalDisplayRole = activePortalRole || d.role || d.desig || displayRole;
 
                 try {
                   var uStr = JSON.stringify(Object.assign({}, updatedUserObj, { name: name }));
@@ -6621,7 +6620,7 @@ function updateWardStatus(){
 
                 checkPortalAccess(updatedUserObj, title);
                 updateWorkspaceSwitcher(updatedUserObj, title);
-                applyHeaderData(name, finalDisplayRole, d.photo \|\| d.photoUrl \|\| photoUrl);
+                applyHeaderData(name, finalDisplayRole, d.photo || d.photoUrl || photoUrl);
               }
             }).catch(function(){ applyHeaderData(name, displayRole, photoUrl); });
           }
@@ -6632,12 +6631,12 @@ function updateWardStatus(){
 
   function checkPortalAccess(userObj, currentTitle) {
     if (!userObj) return;
-    var curTitle = (currentTitle \|\| '').toUpperCase();
+    var curTitle = (currentTitle || '').toUpperCase();
     var path = window.location.pathname.toLowerCase();
-    var isPageAdmin = path.indexOf('admin') !== -1 \|\| curTitle.indexOf('ADMIN') !== -1;
+    var isPageAdmin = path.indexOf('admin') !== -1 || curTitle.indexOf('ADMIN') !== -1;
     if (isPageAdmin) return; // Admin portal access is always allowed in standalone mode
 
-    var email = String(userObj.email \|\| '').toLowerCase();
+    var email = String(userObj.email || '').toLowerCase();
     var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL.toLowerCase() : 'aravarya99@gmail.com';
 
     var userRoles = [];
@@ -6645,9 +6644,9 @@ function updateWardStatus(){
     if (userObj.role && !userRoles.includes(userObj.role)) userRoles.push(userObj.role);
     if (userObj.desig && !userRoles.includes(userObj.desig)) userRoles.push(userObj.desig);
 
-    var isUserAdmin = (email === adminEmail) \|\| userRoles.some(function(r) {
+    var isUserAdmin = (email === adminEmail) || userRoles.some(function(r) {
       var str = String(r).toLowerCase().trim();
-      return str === 'admin' \|\| str === 'administrator';
+      return str === 'admin' || str === 'administrator';
     });
 
     if (isUserAdmin) return; // Admin has unrestricted access
@@ -6656,15 +6655,15 @@ function updateWardStatus(){
     var isUserIc = userRoles.some(function(r){
       var s = String(r).toLowerCase().trim();
       var norm = s.replace(/[\^a-z0-9]/g, '');
-      return s.indexOf('ic') !== -1 \|\| s.indexOf('i/c') !== -1 \|\| s.indexOf('incharge') !== -1 \|\| s.indexOf('icnarge') !== -1 \|\| s.indexOf('incherage') !== -1 \|\| s.indexOf('inchrage') !== -1 \|\| norm.indexOf('ic') !== -1 \|\| norm.indexOf('inc') !== -1;
+      return s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.indexOf('icnarge') !== -1 || s.indexOf('incherage') !== -1 || s.indexOf('inchrage') !== -1 || norm.indexOf('ic') !== -1 || norm.indexOf('inc') !== -1;
     });
-    var isUserFinance = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('finance')!==-1 \|\| s.indexOf('accountant')!==-1; });
-    var isUserPatient = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('deo')!==-1 \|\| s.indexOf('patient')!==-1 \|\| s.indexOf('mts')!==-1; });
+    var isUserFinance = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('finance')!==-1 || s.indexOf('accountant')!==-1; });
+    var isUserPatient = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('deo')!==-1 || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
 
-    var isPagePmam = path.indexOf('pmam') !== -1 \|\| curTitle.indexOf('PMAM') !== -1;
-    var isPageIc = path.indexOf('ic') !== -1 \|\| path.indexOf('incharge') !== -1 \|\| curTitle.indexOf('I/C') !== -1 \|\| curTitle.indexOf('INCHARGE') !== -1;
-    var isPageFinance = path.indexOf('finance') !== -1 \|\| curTitle.indexOf('FINANCE') !== -1 \|\| curTitle.indexOf('ACCOUNTANT') !== -1;
-    var isPagePatient = path.indexOf('patient') !== -1 \|\| curTitle.indexOf('PATIENT') !== -1 \|\| curTitle.indexOf('DEO') !== -1;
+    var isPagePmam = path.indexOf('pmam') !== -1 || curTitle.indexOf('PMAM') !== -1;
+    var isPageIc = path.indexOf('ic') !== -1 || path.indexOf('incharge') !== -1 || curTitle.indexOf('I/C') !== -1 || curTitle.indexOf('INCHARGE') !== -1;
+    var isPageFinance = path.indexOf('finance') !== -1 || curTitle.indexOf('FINANCE') !== -1 || curTitle.indexOf('ACCOUNTANT') !== -1;
+    var isPagePatient = path.indexOf('patient') !== -1 || curTitle.indexOf('PATIENT') !== -1 || curTitle.indexOf('DEO') !== -1;
 
     var allowed = true;
     if (isPageIc && !isUserIc) allowed = false;
@@ -6686,21 +6685,21 @@ function updateWardStatus(){
     var listEl = document.getElementById('phWsList');
     if (!listEl) return;
 
-    var curTitle = (currentTitle \|\| (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') \|\| '').toUpperCase();
+    var curTitle = (currentTitle || (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') || '').toUpperCase();
     var path = window.location.pathname.toLowerCase();
-    var isCurrentAdmin = path.indexOf('admin') !== -1 \|\| curTitle.indexOf('ADMIN') !== -1;
-    var isCurrentPmam = path.indexOf('pmam') !== -1 \|\| curTitle.indexOf('PMAM') !== -1;
-    var isCurrentIc = path.indexOf('ic') !== -1 \|\| path.indexOf('incharge') !== -1 \|\| curTitle.indexOf('I/C') !== -1 \|\| curTitle.indexOf('INCHARGE') !== -1;
-    var isCurrentFinance = path.indexOf('finance') !== -1 \|\| curTitle.indexOf('FINANCE') !== -1 \|\| curTitle.indexOf('ACCOUNTANT') !== -1;
-    var isCurrentPatient = path.indexOf('patient') !== -1 \|\| curTitle.indexOf('PATIENT') !== -1 \|\| curTitle.indexOf('DEO') !== -1;
+    var isCurrentAdmin = path.indexOf('admin') !== -1 || curTitle.indexOf('ADMIN') !== -1;
+    var isCurrentPmam = path.indexOf('pmam') !== -1 || curTitle.indexOf('PMAM') !== -1;
+    var isCurrentIc = path.indexOf('ic') !== -1 || path.indexOf('incharge') !== -1 || curTitle.indexOf('I/C') !== -1 || curTitle.indexOf('INCHARGE') !== -1;
+    var isCurrentFinance = path.indexOf('finance') !== -1 || curTitle.indexOf('FINANCE') !== -1 || curTitle.indexOf('ACCOUNTANT') !== -1;
+    var isCurrentPatient = path.indexOf('patient') !== -1 || curTitle.indexOf('PATIENT') !== -1 || curTitle.indexOf('DEO') !== -1;
 
     // Fallback: If userObj not provided, try reading from storage
     if (!userObj) {
-      var uStr = sessionStorage.getItem('pmjay_user') \|\|
-                 sessionStorage.getItem('pmam_user') \|\|
-                 sessionStorage.getItem('currentUser') \|\|
-                 localStorage.getItem('pmjay_user') \|\|
-                 localStorage.getItem('pmam_user') \|\|
+      var uStr = sessionStorage.getItem('pmjay_user') ||
+                 sessionStorage.getItem('pmam_user') ||
+                 sessionStorage.getItem('currentUser') ||
+                 localStorage.getItem('pmjay_user') ||
+                 localStorage.getItem('pmam_user') ||
                  localStorage.getItem('currentUser');
       if (uStr) {
         try { userObj = typeof uStr === 'string' ? JSON.parse(uStr) : uStr; } catch(e){}
@@ -6718,29 +6717,29 @@ function updateWardStatus(){
     }
 
     var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL.toLowerCase() : 'aravarya99@gmail.com';
-    var isUserAdmin = (email === adminEmail) \|\| userRoles.some(function(r){
+    var isUserAdmin = (email === adminEmail) || userRoles.some(function(r){
       var str = String(r).toLowerCase().trim();
-      return str === 'admin' \|\| str === 'administrator';
+      return str === 'admin' || str === 'administrator';
     });
 
-    var isUserPmam = isUserAdmin \|\| userRoles.some(function(r){
+    var isUserPmam = isUserAdmin || userRoles.some(function(r){
       var str = String(r).toLowerCase().trim();
       return str === 'pmam';
     });
 
-    var isUserIc = isUserAdmin \|\| userRoles.some(function(r){
+    var isUserIc = isUserAdmin || userRoles.some(function(r){
       var s = String(r).toLowerCase().trim();
-      return s.indexOf('ic') !== -1 \|\| s.indexOf('i/c') !== -1 \|\| s.indexOf('incharge') !== -1 \|\| s.replace(/[\^a-z0-9]/g,'').indexOf('ic') !== -1;
+      return s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.replace(/[\^a-z0-9]/g,'').indexOf('ic') !== -1;
     });
 
-    var isUserFinance = isUserAdmin \|\| userRoles.some(function(r){
+    var isUserFinance = isUserAdmin || userRoles.some(function(r){
       var str = String(r).toLowerCase().trim();
-      return str.indexOf('finance') !== -1 \|\| str.indexOf('accountant') !== -1;
+      return str.indexOf('finance') !== -1 || str.indexOf('accountant') !== -1;
     });
 
-    var isUserPatient = isUserAdmin \|\| userRoles.some(function(r){
+    var isUserPatient = isUserAdmin || userRoles.some(function(r){
       var str = String(r).toLowerCase().trim();
-      return str.indexOf('deo') !== -1 \|\| str.indexOf('patient') !== -1 \|\| str.indexOf('mts') !== -1;
+      return str.indexOf('deo') !== -1 || str.indexOf('patient') !== -1 || str.indexOf('mts') !== -1;
     });
 
     var itemsHTML = '';
@@ -6814,7 +6813,7 @@ function updateWardStatus(){
 
   function applyHeaderData(name, role, photoUrl) {
     var displayName = (name && name.trim()) ? name.trim() : 'Active User';
-    var displayRole = role \|\| 'USER';
+    var displayRole = role || 'USER';
 
     var hName = document.getElementById('hName');
     var hRole = document.getElementById('hRole');
@@ -7003,9 +7002,9 @@ function updateWardStatus(){
   }
 
   global.phSubmitChangePassword = function() {
-    var curr = (document.getElementById('phCurrPass').value \|\| '').trim();
-    var newP = (document.getElementById('phNewPass').value \|\| '').trim();
-    var conf = (document.getElementById('phConfirmPass').value \|\| '').trim();
+    var curr = (document.getElementById('phCurrPass').value || '').trim();
+    var newP = (document.getElementById('phNewPass').value || '').trim();
+    var conf = (document.getElementById('phConfirmPass').value || '').trim();
     var msg = document.getElementById('phPassMsg');
 
     function showMsg(text, isErr) {
@@ -7018,7 +7017,7 @@ function updateWardStatus(){
       }
     }
 
-    if (!newP \|\| newP.length < 6) {
+    if (!newP || newP.length < 6) {
       showMsg('New password must be at least 6 characters long.', true);
       return;
     }
@@ -7040,7 +7039,7 @@ function updateWardStatus(){
         if (error.code === 'auth/requires-recent-login') {
           showMsg('Please log out and log in again before changing password for security.', true);
         } else {
-          showMsg(error.message \|\| 'Failed to update password.', true);
+          showMsg(error.message || 'Failed to update password.', true);
         }
       });
     } else {

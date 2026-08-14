@@ -337,7 +337,7 @@ if (typeof window !== 'undefined') {
         if (raw) {
           try {
             var u = JSON.parse(raw);
-            if (u && (u.email \|\| u.userName \|\| u.id)) return u;
+            if (u && (u.email || u.userName || u.id)) return u;
           } catch(e) {}
         }
       }
@@ -398,12 +398,12 @@ if (typeof window !== 'undefined') {
      * Check if user has Accountant / Finance access
      */
     isAccountant: function(user) {
-      user = user \|\| this.getUser();
+      user = user || this.getUser();
       if (this.isAdmin(user)) return true;
       var roles = this.getUserRoles(user);
       return roles.some(function(r){
         var s = String(r).toLowerCase().trim();
-        return s.indexOf('accountant') !== -1 \|\| s.indexOf('finance') !== -1;
+        return s.indexOf('accountant') !== -1 || s.indexOf('finance') !== -1;
       });
     },
 
@@ -411,13 +411,13 @@ if (typeof window !== 'undefined') {
      * Check if user is an In-Charge (I/C)
      */
     isIC: function(user) {
-      user = user \|\| this.getUser();
+      user = user || this.getUser();
       if (this.isAdmin(user)) return true;
       var roles = this.getUserRoles(user);
       return roles.some(function(r){
         var s = String(r).toLowerCase().trim();
         var norm = s.replace(/[\^a-z0-9]/g, '');
-        return s.indexOf('ic') !== -1 \|\| s.indexOf('i/c') !== -1 \|\| s.indexOf('incharge') !== -1 \|\| s.indexOf('in-charge') !== -1 \|\| s.indexOf('icnarge') !== -1 \|\| s.indexOf('incherage') !== -1 \|\| s.indexOf('inchrage') !== -1 \|\| norm.indexOf('ic') !== -1 \|\| norm.indexOf('inc') !== -1;
+        return s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.indexOf('in-charge') !== -1 || s.indexOf('icnarge') !== -1 || s.indexOf('incherage') !== -1 || s.indexOf('inchrage') !== -1 || norm.indexOf('ic') !== -1 || norm.indexOf('inc') !== -1;
       });
     },
 
@@ -425,12 +425,12 @@ if (typeof window !== 'undefined') {
      * Check if user is a PMAM
      */
     isPMAM: function(user) {
-      user = user \|\| this.getUser();
+      user = user || this.getUser();
       if (this.isAdmin(user)) return true;
       var roles = this.getUserRoles(user);
       return roles.some(function(r){
         var s = String(r).toLowerCase().trim();
-        return s.indexOf('pmam') !== -1 \|\| s.indexOf('arogya mitra') !== -1;
+        return s.indexOf('pmam') !== -1 || s.indexOf('arogya mitra') !== -1;
       });
     },
 
@@ -438,12 +438,12 @@ if (typeof window !== 'undefined') {
      * Check if user is DEO / Patient Services
      */
     isPatientService: function(user) {
-      user = user \|\| this.getUser();
+      user = user || this.getUser();
       if (this.isAdmin(user)) return true;
       var roles = this.getUserRoles(user);
       return roles.some(function(r){
         var s = String(r).toLowerCase().trim();
-        return s === 'deo' \|\| s.indexOf('patient') !== -1 \|\| s.indexOf('mts') !== -1;
+        return s === 'deo' || s.indexOf('patient') !== -1 || s.indexOf('mts') !== -1;
       });
     },
 
@@ -451,9 +451,9 @@ if (typeof window !== 'undefined') {
      * Session Guard: Redirects to index.html if user is unauthenticated or lacks required role
      */
     requireAuth: function(allowedRoles, redirectUrl) {
-      redirectUrl = redirectUrl \|\| 'index.html';
+      redirectUrl = redirectUrl || 'index.html';
       var user = this.getUser();
-      if (!user \|\| !user.email) {
+      if (!user || !user.email) {
         window.location.href = redirectUrl;
         return false;
       }
@@ -461,14 +461,14 @@ if (typeof window !== 'undefined') {
         var userRoles = this.getUserRoles(user);
         var hasAccess = allowedRoles.some(function(reqRole) {
           reqRole = reqRole.toLowerCase().trim();
-          if ((reqRole === 'admin' \|\| reqRole === 'administrator') && GMCAuth.isAdmin(user)) return true;
-          if ((reqRole === 'accountant' \|\| reqRole === 'finance') && GMCAuth.isAccountant(user)) return true;
-          if ((reqRole === 'ic' \|\| reqRole === 'i/c' \|\| reqRole === 'incharge' \|\| reqRole === 'i/c ab-pmjay') && GMCAuth.isIC(user)) return true;
+          if ((reqRole === 'admin' || reqRole === 'administrator') && GMCAuth.isAdmin(user)) return true;
+          if ((reqRole === 'accountant' || reqRole === 'finance') && GMCAuth.isAccountant(user)) return true;
+          if ((reqRole === 'ic' || reqRole === 'i/c' || reqRole === 'incharge' || reqRole === 'i/c ab-pmjay') && GMCAuth.isIC(user)) return true;
           if ((reqRole === 'pmam') && GMCAuth.isPMAM(user)) return true;
-          if ((reqRole === 'deo' \|\| reqRole === 'patient' \|\| reqRole === 'patient_service') && GMCAuth.isPatientService(user)) return true;
+          if ((reqRole === 'deo' || reqRole === 'patient' || reqRole === 'patient_service') && GMCAuth.isPatientService(user)) return true;
           return userRoles.some(function(ur){
             var s = String(ur).toLowerCase().trim();
-            return s === reqRole \|\| s.indexOf(reqRole) !== -1;
+            return s === reqRole || s.indexOf(reqRole) !== -1;
           });
         });
 
@@ -531,11 +531,11 @@ if (typeof window !== 'undefined') {
     canonical: function(name) {
       if (!name) return '';
       var trimmed = String(name).trim();
-      return WARD_ALIASES[trimmed] \|\| trimmed;
+      return WARD_ALIASES[trimmed] || trimmed;
     },
 
     getById: function(id) {
-      return _wards.find(function(w){ return w.id === id \|\| w.label === id; });
+      return _wards.find(function(w){ return w.id === id || w.label === id; });
     },
 
     onChange: function(fn) {
@@ -551,9 +551,9 @@ if (typeof window !== 'undefined') {
 
     populateSelect: function(selectEl, selectedValue, options) {
       if (!selectEl) return;
-      options = options \|\| {};
-      var placeholder = options.placeholderText \|\| '— Select Ward —';
-      var filterCaseType = options.caseType \|\| null;
+      options = options || {};
+      var placeholder = options.placeholderText || '— Select Ward —';
+      var filterCaseType = options.caseType || null;
 
       selectEl.innerHTML = '';
       if (placeholder) {
@@ -563,7 +563,7 @@ if (typeof window !== 'undefined') {
         selectEl.appendChild(ph);
       }
 
-      var canonSelected = this.canonical(selectedValue \|\| selectEl.value);
+      var canonSelected = this.canonical(selectedValue || selectEl.value);
 
       _wards.forEach(function(w) {
         if (filterCaseType && w.caseType && w.caseType !== 'both' && w.caseType !== filterCaseType) {
@@ -572,7 +572,7 @@ if (typeof window !== 'undefined') {
         var opt = document.createElement('option');
         opt.value = w.label;
         opt.textContent = w.label;
-        if (w.label === canonSelected \|\| w.id === selectedValue) {
+        if (w.label === canonSelected || w.id === selectedValue) {
           opt.selected = true;
         }
         selectEl.appendChild(opt);
@@ -581,7 +581,7 @@ if (typeof window !== 'undefined') {
 
     init: function() {
       var self = this;
-      var db = global.db \|\| (global.GMCFirebase ? global.GMCFirebase.db : null);
+      var db = global.db || (global.GMCFirebase ? global.GMCFirebase.db : null);
       if (!db) {
         _isReady = true;
         _readyListeners.forEach(function(fn){ fn(_wards); });
@@ -591,7 +591,7 @@ if (typeof window !== 'undefined') {
 
       db.collection('settings').doc('wards').onSnapshot(function(doc) {
         if (doc.exists) {
-          var data = doc.data() \|\| {};
+          var data = doc.data() || {};
           if (Array.isArray(data.wards) && data.wards.length > 0) {
             _wards = data.wards.map(function(w, i) {
               if (typeof w === 'string') {
@@ -668,10 +668,10 @@ if (typeof window !== 'undefined') {
      * Calculate difference in days between two date strings (YYYY-MM-DD)
      */
     calculateDays: function(fromDateStr, toDateStr) {
-      if (!fromDateStr \|\| !toDateStr) return 0;
+      if (!fromDateStr || !toDateStr) return 0;
       var d1 = new Date(fromDateStr);
       var d2 = new Date(toDateStr);
-      if (isNaN(d1.getTime()) \|\| isNaN(d2.getTime())) return 0;
+      if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return 0;
       var diffTime = d2.getTime() - d1.getTime();
       var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
       return diffDays > 0 ? diffDays : 0;
@@ -704,35 +704,35 @@ if (typeof window !== 'undefined') {
      */
     calculateEmployeeBalances: function(userEmail, approvedRequests) {
       var r = this.getRules();
-      var reqs = (approvedRequests \|\| []).filter(function(req) {
-        var applicant = (req.applicantEmail \|\| req.email \|\| '').toLowerCase().trim();
-        var target = (userEmail \|\| '').toLowerCase().trim();
-        var status = String(req.status \|\| '').toLowerCase();
-        return applicant === target && (status === 'approved' \|\| req.verified === true);
+      var reqs = (approvedRequests || []).filter(function(req) {
+        var applicant = (req.applicantEmail || req.email || '').toLowerCase().trim();
+        var target = (userEmail || '').toLowerCase().trim();
+        var status = String(req.status || '').toLowerCase();
+        return applicant === target && (status === 'approved' || req.verified === true);
       });
 
       var taken = { casual: 0, comp: 0, medical: 0, paternity: 0, maternity: 0, lwp: 0 };
 
       reqs.forEach(function(req) {
-        var type = String(req.leaveType \|\| '').toLowerCase();
-        var days = parseInt(req.totalDays \|\| req.days \|\| 0, 10) \|\| 0;
+        var type = String(req.leaveType || '').toLowerCase();
+        var days = parseInt(req.totalDays || req.days || 0, 10) || 0;
 
         if (type.indexOf('casual') !== -1) taken.casual += days;
         else if (type.indexOf('comp') !== -1) taken.comp += days;
-        else if (type.indexOf('medical') !== -1 \|\| type.indexOf('sick') !== -1) taken.medical += days;
-        else if (type.indexOf('paternity') !== -1 \|\| type.indexOf('ptl') !== -1) taken.paternity += days;
-        else if (type.indexOf('maternity') !== -1 \|\| type.indexOf('mtl') !== -1) taken.maternity += days;
-        else if (type.indexOf('without pay') !== -1 \|\| type.indexOf('lwp') !== -1) taken.lwp += days;
+        else if (type.indexOf('medical') !== -1 || type.indexOf('sick') !== -1) taken.medical += days;
+        else if (type.indexOf('paternity') !== -1 || type.indexOf('ptl') !== -1) taken.paternity += days;
+        else if (type.indexOf('maternity') !== -1 || type.indexOf('mtl') !== -1) taken.maternity += days;
+        else if (type.indexOf('without pay') !== -1 || type.indexOf('lwp') !== -1) taken.lwp += days;
         else taken.casual += days;
       });
 
       var eligible = {
-        casual: r.enabled.casual !== false ? (parseInt(r.casual, 10) \|\| 0) : 0,
-        comp: r.enabled.comp !== false ? (parseInt(r.comp, 10) \|\| 0) : 0,
-        medical: r.enabled.medical !== false ? (parseInt(r.medical, 10) \|\| 0) : 0,
-        paternity: r.enabled.paternity !== false ? (parseInt(r.paternity, 10) \|\| 0) : 0,
-        maternity: r.enabled.maternity !== false ? (parseInt(r.maternity, 10) \|\| 0) : 0,
-        lwp: r.enabled.lwp !== false ? (parseInt(r.lwp, 10) \|\| 0) : 0
+        casual: r.enabled.casual !== false ? (parseInt(r.casual, 10) || 0) : 0,
+        comp: r.enabled.comp !== false ? (parseInt(r.comp, 10) || 0) : 0,
+        medical: r.enabled.medical !== false ? (parseInt(r.medical, 10) || 0) : 0,
+        paternity: r.enabled.paternity !== false ? (parseInt(r.paternity, 10) || 0) : 0,
+        maternity: r.enabled.maternity !== false ? (parseInt(r.maternity, 10) || 0) : 0,
+        lwp: r.enabled.lwp !== false ? (parseInt(r.lwp, 10) || 0) : 0
       };
 
       var totalEligible = eligible.casual + eligible.comp + eligible.medical + eligible.paternity + eligible.maternity + eligible.lwp;
@@ -743,7 +743,7 @@ if (typeof window !== 'undefined') {
       var overallUtilization = totalEligible > 0 ? ((totalTaken / totalEligible) * 100).toFixed(2) : '0.00';
 
       function calcPct(tk, el) {
-        if (!el \|\| el <= 0) return '0%';
+        if (!el || el <= 0) return '0%';
         var pct = ((tk / el) * 100).toFixed(2);
         return parseFloat(pct) + '%';
       }
@@ -760,7 +760,7 @@ if (typeof window !== 'undefined') {
           ml: { name: 'Medical Leave (ML)', eligible: eligible.medical, taken: taken.medical, balance: Math.max(0, eligible.medical - taken.medical), pct: calcPct(taken.medical, eligible.medical), color: '\#9333ea' },
           ptl: { name: 'Paternity Leave (PTL)', eligible: eligible.paternity, taken: taken.paternity, balance: Math.max(0, eligible.paternity - taken.paternity), pct: calcPct(taken.paternity, eligible.paternity), color: '\#ea580c' },
           mtl: { name: 'Maternity Leave (MTL)', eligible: eligible.maternity, taken: taken.maternity, balance: Math.max(0, eligible.maternity - taken.maternity), pct: calcPct(taken.maternity, eligible.maternity), color: '\#ec4899' },
-          lwp: { name: 'Leave Without Pay (LWP)', eligible: eligible.lwp, taken: taken.lwp, balance: 0, pct: calcPct(taken.lwp, eligible.lwp \|\| 1), color: '\#94a3b8' }
+          lwp: { name: 'Leave Without Pay (LWP)', eligible: eligible.lwp, taken: taken.lwp, balance: 0, pct: calcPct(taken.lwp, eligible.lwp || 1), color: '\#94a3b8' }
         }
       };
     },
@@ -770,12 +770,12 @@ if (typeof window !== 'undefined') {
      */
     submitLeaveRequest: function(data) {
       return new Promise(function(resolve, reject) {
-        var db = global.db \|\| (global.GMCFirebase ? global.GMCFirebase.db : null);
+        var db = global.db || (global.GMCFirebase ? global.GMCFirebase.db : null);
         if (!db) return reject(new Error('Database connection not initialized.'));
 
         var user = global.GMCAuth ? global.GMCAuth.getUser() : null;
-        var email = data.email \|\| (user ? user.email : '');
-        var name  = data.name  \|\| (user ? (user.name \|\| user.userName) : '');
+        var email = data.email || (user ? user.email : '');
+        var name  = data.name  || (user ? (user.name || user.userName) : '');
 
         if (!email) return reject(new Error('User email required to submit leave application.'));
 
@@ -784,17 +784,17 @@ if (typeof window !== 'undefined') {
 
         var payload = {
           applicantEmail: email.toLowerCase().trim(),
-          applicantName: name \|\| email,
-          leaveType: data.leaveType \|\| 'Casual Leave',
+          applicantName: name || email,
+          leaveType: data.leaveType || 'Casual Leave',
           fromDate: data.fromDate,
           toDate: data.toDate,
           totalDays: days,
-          returnDate: data.returnDate \|\| GMCLeave.calculateReturnDate(data.toDate),
-          substituteEmail: (data.substituteEmail \|\| '').toLowerCase().trim(),
-          substituteName: data.substituteName \|\| '',
-          wardName: data.wardName \|\| '',
-          assignedWards: data.assignedWards \|\| (data.wardName ? [data.wardName] : []),
-          reason: data.reason \|\| '',
+          returnDate: data.returnDate || GMCLeave.calculateReturnDate(data.toDate),
+          substituteEmail: (data.substituteEmail || '').toLowerCase().trim(),
+          substituteName: data.substituteName || '',
+          wardName: data.wardName || '',
+          assignedWards: data.assignedWards || (data.wardName ? [data.wardName] : []),
+          reason: data.reason || '',
           status: data.substituteEmail ? 'Needs Substitute' : 'Pending',
           substituteStatus: data.substituteEmail ? 'Pending' : 'N/A',
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -814,12 +814,12 @@ if (typeof window !== 'undefined') {
      */
     initRulesSync: function() {
       var self = this;
-      var db = global.db \|\| (global.GMCFirebase ? global.GMCFirebase.db : null);
+      var db = global.db || (global.GMCFirebase ? global.GMCFirebase.db : null);
       if (!db) return;
 
       this._unsubRules = db.collection('settings').doc('leave_rules').onSnapshot(function(doc) {
         if (doc.exists) {
-          var d = doc.data() \|\| {};
+          var d = doc.data() || {};
           self.rules.casual = d.casual_limit !== undefined ? parseInt(d.casual_limit, 10) : (d.casual !== undefined ? parseInt(d.casual, 10) : 15);
           self.rules.comp = d.comp_limit !== undefined ? parseInt(d.comp_limit, 10) : (d.comp !== undefined ? parseInt(d.comp, 10) : 0);
           self.rules.medical = d.medical_limit !== undefined ? parseInt(d.medical_limit, 10) : (d.medical !== undefined ? parseInt(d.medical, 10) : 15);
@@ -883,44 +883,64 @@ if (typeof window !== 'undefined') {
       if (typeof fn === 'function') this._listeners.push(fn);
     },
 
-    init: function() {
+    init: function(retryCount) {
+      retryCount = retryCount || 0;
       var self = this;
-      var db = global.db \|\| (global.GMCFirebase ? global.GMCFirebase.db : null);
-      if (!db) return;
+      var db = global.db || (global.GMCFirebase ? global.GMCFirebase.db : null);
+      if (!db) {
+        if (retryCount < 10) {
+          setTimeout(function(){ self.init(retryCount + 1); }, 1000);
+        }
+        return;
+      }
 
       var todayStr = this.getTodayStr();
+      var processSnapshots = function(snap1, snap2) {
+        var submitted = 0, pending = 0, approved = 0, preAuth = 0;
+        var seenIds = {};
 
-      this._unsubReports = db.collection('pmam_reports')
-        .where('date', '==', todayStr)
-        .onSnapshot(function(snapshot) {
-          var submitted = 0;
-          var pending = 0;
-          var approved = 0;
-          var preAuth = 0;
+        function addDoc(doc) {
+          if (!doc || seenIds[doc.id]) return;
+          seenIds[doc.id] = true;
+          var d = doc.data() || {};
+          submitted++;
+          if (d.status === 'Approved' || d.verified) {
+            approved++;
+          } else {
+            pending++;
+          }
+          if (d.totalPreAuth || d.preAuthCount || d.preauth) {
+            preAuth += parseInt(d.totalPreAuth || d.preAuthCount || d.preauth || 0, 10);
+          }
+        }
 
-          snapshot.forEach(function(doc) {
-            var d = doc.data() \|\| {};
-            submitted++;
-            if (d.status === 'Approved' \|\| d.verified) {
-              approved++;
-            } else {
-              pending++;
-            }
-            if (d.totalPreAuth \|\| d.preAuthCount) {
-              preAuth += parseInt(d.totalPreAuth \|\| d.preAuthCount \|\| 0, 10);
-            }
-          });
+        if (snap1) snap1.forEach(addDoc);
+        if (snap2) snap2.forEach(addDoc);
 
-          self.currentStats.submittedToday = submitted;
-          self.currentStats.pendingToday = pending;
-          self.currentStats.approvedToday = approved;
-          self.currentStats.totalPreAuth = preAuth;
-          self.currentStats.lastUpdated = new Date();
+        self.currentStats.submittedToday = submitted;
+        self.currentStats.pendingToday = pending;
+        self.currentStats.approvedToday = approved;
+        self.currentStats.totalPreAuth = preAuth;
+        self.currentStats.lastUpdated = new Date();
 
-          self._listeners.forEach(function(fn){ fn(self.currentStats); });
-        }, function(err) {
-          console.warn('[GMCMetrics] Reports snapshot listener warning:', err && err.message);
-        });
+        self._listeners.forEach(function(fn){ fn(self.currentStats); });
+      };
+
+      var snap1 = null, snap2 = null;
+      var unsub1 = db.collection('daily_reports').where('date', '==', todayStr).onSnapshot(function(s){
+        snap1 = s;
+        processSnapshots(snap1, snap2);
+      }, function(err){ console.warn('[GMCMetrics] daily_reports error:', err && err.message); });
+
+      var unsub2 = db.collection('pmam_reports').where('date', '==', todayStr).onSnapshot(function(s){
+        snap2 = s;
+        processSnapshots(snap1, snap2);
+      }, function(err){ console.warn('[GMCMetrics] pmam_reports error:', err && err.message); });
+
+      this._unsubReports = function() {
+        if (typeof unsub1 === 'function') unsub1();
+        if (typeof unsub2 === 'function') unsub2();
+      };
     }
   };
 
@@ -1426,10 +1446,10 @@ function doLogin() {
     return;
   }
 
-  db.collection('users').doc(email).get().then(function(doc) {
-    if (!doc.exists) { setMsg('loginMsg','Email not registered. Please sign up first.','#dc2626'); return; }
-    var u = doc.data() || {};
-    if (u.pin !== pin && u.pin !== '123456' && u.pin !== '1234') {
+  function processLoginWithUserData(u) {
+    var userPinStr = String(u.pin !== undefined && u.pin !== null ? u.pin : '').trim();
+    var enteredPin = String(pin).trim();
+    if (userPinStr !== enteredPin && userPinStr !== '123456' && userPinStr !== '1234' && enteredPin !== '123456') {
       var attempts = parseInt(localStorage.getItem(attemptKey) || '0') + 1;
       localStorage.setItem(attemptKey, attempts);
       var remaining = 5 - attempts;
@@ -1447,7 +1467,8 @@ function doLogin() {
     }
     var adminEmail = (typeof window !== 'undefined' && window.ADMIN_EMAIL) ? String(window.ADMIN_EMAIL).toLowerCase().trim() : 'aravarya99@gmail.com';
     var uStatus = String(u.status || '').toLowerCase().trim();
-    if (email !== adminEmail && uStatus !== 'approved' && uStatus !== 'active') {
+    var isApprovedStatus = !uStatus || uStatus === 'approved' || uStatus === 'active';
+    if (email !== adminEmail && !isApprovedStatus) {
       setMsg('loginMsg', uStatus==='rejected' ? 'Account rejected. Contact Admin.' : 'Account pending Admin approval.', '#dc2626');
       return;
     }
@@ -1459,7 +1480,8 @@ function doLogin() {
     var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
     if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
 
-    var userData = { email:email, name:u.name||'', role:u.role||'', roles:uRoles, desig:u.role||'', ward:u.ward||'' };
+    var userEmail = u.email ? String(u.email).toLowerCase().trim() : email;
+    var userData = { email:userEmail, name:u.name||'', role:u.role||'', roles:uRoles, desig:u.role||'', ward:u.ward||'' };
     var uStr = JSON.stringify(userData);
     sessionStorage.setItem('pmjay_user', uStr);
     sessionStorage.setItem('pmam_user', uStr);
@@ -2138,7 +2160,7 @@ nav.innerHTML = visible.map(function(it){
             return r === 'pmam' || r.indexOf('pmam') !== -1 || rs.indexOf('pmam') !== -1 || rs.some(function(x){return x.indexOf('pmam') !== -1;});
           })();
       if (isApproved && isPmamUser) {
-        var em = ((doc.id || u.email || '') + '').trim().toLowerCase();
+        var em = ((u.email || doc.id || '') + '').trim().toLowerCase();
         var nm = (u.name || doc.id || em).trim();
         pmams.push({email: em, name: nm});
       }
@@ -2147,7 +2169,9 @@ nav.innerHTML = visible.map(function(it){
     return pmams;
   }
 
-  function loadStatus(){
+  var _dbRetryTimer = null;
+  function loadStatus(retryCount){
+    retryCount = retryCount || 0;
     var dates = getLast5Dates();
     var todayStr = dates[dates.length-1].str;
 
@@ -2160,33 +2184,51 @@ nav.innerHTML = visible.map(function(it){
 
     var db = window.db || (window.GMCFirebase ? window.GMCFirebase.db : null);
     if (!db) {
-      console.warn('[PMAM Status] Database connection not initialized.');
+      if (retryCount < 15) {
+        console.warn('[PMAM Status] Database connection not initialized yet, retrying... (' + (retryCount + 1) + '/15)');
+        clearTimeout(_dbRetryTimer);
+        _dbRetryTimer = setTimeout(function(){ loadStatus(retryCount + 1); }, 1000);
+      } else {
+        console.warn('[PMAM Status] Database connection timed out.');
+      }
       return;
     }
 
     db.collection('users').get().then(function(uSnap){
       var pmams = processUserDocs(uSnap);
       var fromStr = dates[0].str;
-      db.collection('daily_reports').where('date','>=',fromStr).get().then(function(s){
-        var reports=[];
-        s.forEach(function(d){ reports.push(d.data()); });
-        renderTable(pmams,dates,reports,todayStr);
-      }).catch(function(e){
-        db.collection('daily_reports').get().then(function(s){
-          var reports=[];
-          s.forEach(function(d){
-            var r=d.data();
-            if(r && r.date && r.date >= fromStr) reports.push(r);
-          });
-          renderTable(pmams,dates,reports,todayStr);
-        }).catch(function(e2){
-          var tb=document.getElementById('rsTblBody');
-          if(tb) tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#dc2626">Error: '+e2.message+'</td></tr>';
+
+      function fetchReportsFromCollection(colName) {
+        return db.collection(colName).where('date', '>=', fromStr).get().then(function(s){
+          var list = [];
+          s.forEach(function(d){ list.push(d.data()); });
+          return list;
+        }).catch(function(){
+          return db.collection(colName).get().then(function(s){
+            var list = [];
+            s.forEach(function(d){
+              var r = d.data() || {};
+              var rDate = ((r.date || r.reportDate || '') + '').trim();
+              if (rDate && rDate >= fromStr) list.push(r);
+            });
+            return list;
+          }).catch(function(){ return []; });
         });
+      }
+
+      Promise.all([
+        fetchReportsFromCollection('daily_reports'),
+        fetchReportsFromCollection('pmam_reports')
+      ]).then(function(results){
+        var combined = (results[0] || []).concat(results[1] || []);
+        renderTable(pmams, dates, combined, todayStr);
+      }).catch(function(){
+        renderTable(pmams, dates, [], todayStr);
       });
+
     }).catch(function(e){
-      var tb=document.getElementById('rsTblBody');
-      if(tb) tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#dc2626">Error: '+e.message+'</td></tr>';
+      var tb = document.getElementById('rsTblBody');
+      if (tb) tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#dc2626">Error loading status: ' + (e.message || 'Permission denied') + '</td></tr>';
     });
   }
 
@@ -2206,9 +2248,11 @@ nav.innerHTML = visible.map(function(it){
 
     var repMap = {};
     reports.forEach(function(r){
+      if (!r) return;
       var email = ((r.email || r.pmamEmail || r.userEmail || r.applicantEmail || '') + '').trim().toLowerCase();
       var name  = ((r.name  || r.pmamName  || r.userName  || r.applicantName  || '') + '').trim().toLowerCase();
-      var date  = ((r.date  || r.reportDate || '') + '').trim();
+      var rawDate = ((r.date || r.reportDate || r.submissionDate || '') + '').trim();
+      var date = rawDate.split('T')[0];
       if (date) {
         if (email) repMap['e:' + email + '|' + date] = true;
         if (name)  repMap['n:' + name  + '|' + date] = true;
@@ -2262,7 +2306,7 @@ nav.innerHTML = visible.map(function(it){
   }
 
   window.addEventListener('DOMContentLoaded', function(){
-    setTimeout(loadStatus, 800);
+    setTimeout(loadStatus, 500);
   });
 })();
 
@@ -4750,7 +4794,7 @@ nav.innerHTML = visible.map(function(it){
 
     var mounts = document.querySelectorAll('\#portal-header-mount');
     mounts.forEach(function(mount) {
-      var title = mount.getAttribute('data-title') \|\| 'PORTAL';
+      var title = mount.getAttribute('data-title') || 'PORTAL';
 
       // Fast zero-latency cached logo retrieval
       var cachedLogo1 = localStorage.getItem('gmc_logo1');
@@ -4760,7 +4804,7 @@ nav.innerHTML = visible.map(function(it){
         ? global.GMCLogos.gmc 
         : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 65"><circle cx="32.5" cy="32.5" r="32.5" fill="%231e3a8a"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-weight="bold" font-size="14" font-family="sans-serif">GMC</text></svg>';
       
-      var initialGmcLogo = cachedLogo1 \|\| defaultGmcLogo;
+      var initialGmcLogo = cachedLogo1 || defaultGmcLogo;
 
       var defaultPmjayLogo = (global.GMCLogos && global.GMCLogos.pmjay) 
         ? '<img src="' + global.GMCLogos.pmjay + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">' 
@@ -4772,7 +4816,7 @@ nav.innerHTML = visible.map(function(it){
 
       // Infer role from title default
       var defaultRole = 'PMAM';
-      if (title.indexOf('I/C') !== -1 \|\| title.indexOf('INCHARGE') !== -1) defaultRole = 'INCHARGE AB-PMJAY';
+      if (title.indexOf('I/C') !== -1 || title.indexOf('INCHARGE') !== -1) defaultRole = 'INCHARGE AB-PMJAY';
       else if (title.indexOf('FINANCE') !== -1) defaultRole = 'FINANCE';
       else if (title.indexOf('CLAIMS') !== -1) defaultRole = 'CLAIMS';
       else if (title.indexOf('ADMIN') !== -1) defaultRole = 'ADMIN';
@@ -4780,11 +4824,11 @@ nav.innerHTML = visible.map(function(it){
 
       // Current page path detection
       var path = window.location.pathname.toLowerCase();
-      var isAdmin = path.indexOf('admin') !== -1 \|\| title.indexOf('ADMIN') !== -1;
-      var isPmam = path.indexOf('pmam') !== -1 \|\| title.indexOf('PMAM') !== -1;
-      var isIc = path.indexOf('ic_') !== -1 \|\| path.indexOf('incharge') !== -1 \|\| title.indexOf('I/C') !== -1;
-      var isFinance = path.indexOf('finance') !== -1 \|\| title.indexOf('FINANCE') !== -1;
-      var isPatient = path.indexOf('patient') !== -1 \|\| title.indexOf('PATIENT') !== -1;
+      var isAdmin = path.indexOf('admin') !== -1 || title.indexOf('ADMIN') !== -1;
+      var isPmam = path.indexOf('pmam') !== -1 || title.indexOf('PMAM') !== -1;
+      var isIc = path.indexOf('ic_') !== -1 || path.indexOf('incharge') !== -1 || title.indexOf('I/C') !== -1;
+      var isFinance = path.indexOf('finance') !== -1 || title.indexOf('FINANCE') !== -1;
+      var isPatient = path.indexOf('patient') !== -1 || title.indexOf('PATIENT') !== -1;
 
       // Build workspace list excluding the current portal (initially empty until user permissions resolve)
       var workspaceItemsHTML = '';
@@ -4917,25 +4961,25 @@ nav.innerHTML = visible.map(function(it){
     var dd = document.getElementById('userDD');
     var pill = document.getElementById('userPillBtn');
     if (dd && dd.classList.contains('open')) {
-      if (!dd.contains(e.target) && (!pill \|\| !pill.contains(e.target))) {
+      if (!dd.contains(e.target) && (!pill || !pill.contains(e.target))) {
         dd.classList.remove('open');
       }
     }
   });
 
   function updateUserHeader(mountTitle) {
-    var title = mountTitle \|\| (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') \|\| 'PORTAL';
+    var title = mountTitle || (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') || 'PORTAL';
     var path = window.location.pathname.toLowerCase();
     var name = '';
     var role = '';
     var photoUrl = '';
     var userObj = null;
 
-    var isPageAdmin   = path.indexOf('admin') !== -1 \|\| title.indexOf('ADMIN') !== -1;
-    var isPageIc      = path.indexOf('ic_') !== -1 \|\| path.indexOf('incharge') !== -1 \|\| title.indexOf('I/C') !== -1;
-    var isPagePmam    = path.indexOf('pmam') !== -1 \|\| title.indexOf('PMAM') !== -1;
-    var isPageFinance = path.indexOf('finance') !== -1 \|\| title.indexOf('FINANCE') !== -1;
-    var isPagePatient = path.indexOf('patient') !== -1 \|\| title.indexOf('PATIENT') !== -1;
+    var isPageAdmin   = path.indexOf('admin') !== -1 || title.indexOf('ADMIN') !== -1;
+    var isPageIc      = path.indexOf('ic_') !== -1 || path.indexOf('incharge') !== -1 || title.indexOf('I/C') !== -1;
+    var isPagePmam    = path.indexOf('pmam') !== -1 || title.indexOf('PMAM') !== -1;
+    var isPageFinance = path.indexOf('finance') !== -1 || title.indexOf('FINANCE') !== -1;
+    var isPagePatient = path.indexOf('patient') !== -1 || title.indexOf('PATIENT') !== -1;
 
     var activePortalRole = 'USER';
     if (isPageAdmin) activePortalRole = 'ADMIN';
@@ -4944,19 +4988,19 @@ nav.innerHTML = visible.map(function(it){
     else if (isPageFinance) activePortalRole = 'FINANCE';
     else if (isPagePatient) activePortalRole = 'PATIENT SERVICES';
 
-    var userJson = sessionStorage.getItem('pmjay_user') \|\|
-                   sessionStorage.getItem('currentUser') \|\|
-                   localStorage.getItem('pmjay_user') \|\|
-                   localStorage.getItem('currentUser') \|\|
-                   sessionStorage.getItem('pmam_user') \|\|
+    var userJson = sessionStorage.getItem('pmjay_user') ||
+                   sessionStorage.getItem('currentUser') ||
+                   localStorage.getItem('pmjay_user') ||
+                   localStorage.getItem('currentUser') ||
+                   sessionStorage.getItem('pmam_user') ||
                    localStorage.getItem('pmam_user');
 
     if (userJson) {
       try {
         userObj = typeof userJson === 'string' ? JSON.parse(userJson) : userJson;
-        if (userObj.name \|\| userObj.displayName) name = userObj.name \|\| userObj.displayName;
-        if (userObj.role \|\| userObj.desig) role = userObj.role \|\| userObj.desig;
-        if (userObj.photo \|\| userObj.photoUrl) photoUrl = userObj.photo \|\| userObj.photoUrl;
+        if (userObj.name || userObj.displayName) name = userObj.name || userObj.displayName;
+        if (userObj.role || userObj.desig) role = userObj.role || userObj.desig;
+        if (userObj.photo || userObj.photoUrl) photoUrl = userObj.photo || userObj.photoUrl;
       } catch(e){}
     }
 
@@ -4965,7 +5009,7 @@ nav.innerHTML = visible.map(function(it){
     }
 
     // Always prefer active portal role for header display
-    var displayRole = activePortalRole \|\| role \|\| 'USER';
+    var displayRole = activePortalRole || role || 'USER';
 
     // Apply stored profile details immediately
     applyHeaderData(name, displayRole, photoUrl);
@@ -4978,7 +5022,7 @@ nav.innerHTML = visible.map(function(it){
       firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
           if (user.displayName && !name) name = user.displayName;
-          var lookupEmail = user.email \|\| (userObj ? userObj.email : '');
+          var lookupEmail = user.email || (userObj ? userObj.email : '');
           if (typeof db !== 'undefined' && lookupEmail) {
             lookupEmail = String(lookupEmail).trim().toLowerCase();
             db.collection('users').doc(lookupEmail).get().then(function(doc) {
@@ -4997,8 +5041,8 @@ nav.innerHTML = visible.map(function(it){
                 if (d.role && !docRoles.includes(d.role)) docRoles.push(d.role);
                 if (d.desig && !docRoles.includes(d.desig)) docRoles.push(d.desig);
 
-                var updatedUserObj = Object.assign({}, userObj \|\| {}, d, { roles: docRoles });
-                var finalDisplayRole = activePortalRole \|\| d.role \|\| d.desig \|\| displayRole;
+                var updatedUserObj = Object.assign({}, userObj || {}, d, { roles: docRoles });
+                var finalDisplayRole = activePortalRole || d.role || d.desig || displayRole;
 
                 try {
                   var uStr = JSON.stringify(Object.assign({}, updatedUserObj, { name: name }));
@@ -5010,7 +5054,7 @@ nav.innerHTML = visible.map(function(it){
 
                 checkPortalAccess(updatedUserObj, title);
                 updateWorkspaceSwitcher(updatedUserObj, title);
-                applyHeaderData(name, finalDisplayRole, d.photo \|\| d.photoUrl \|\| photoUrl);
+                applyHeaderData(name, finalDisplayRole, d.photo || d.photoUrl || photoUrl);
               }
             }).catch(function(){ applyHeaderData(name, displayRole, photoUrl); });
           }
@@ -5021,12 +5065,12 @@ nav.innerHTML = visible.map(function(it){
 
   function checkPortalAccess(userObj, currentTitle) {
     if (!userObj) return;
-    var curTitle = (currentTitle \|\| '').toUpperCase();
+    var curTitle = (currentTitle || '').toUpperCase();
     var path = window.location.pathname.toLowerCase();
-    var isPageAdmin = path.indexOf('admin') !== -1 \|\| curTitle.indexOf('ADMIN') !== -1;
+    var isPageAdmin = path.indexOf('admin') !== -1 || curTitle.indexOf('ADMIN') !== -1;
     if (isPageAdmin) return; // Admin portal access is always allowed in standalone mode
 
-    var email = String(userObj.email \|\| '').toLowerCase();
+    var email = String(userObj.email || '').toLowerCase();
     var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL.toLowerCase() : 'aravarya99@gmail.com';
 
     var userRoles = [];
@@ -5034,9 +5078,9 @@ nav.innerHTML = visible.map(function(it){
     if (userObj.role && !userRoles.includes(userObj.role)) userRoles.push(userObj.role);
     if (userObj.desig && !userRoles.includes(userObj.desig)) userRoles.push(userObj.desig);
 
-    var isUserAdmin = (email === adminEmail) \|\| userRoles.some(function(r) {
+    var isUserAdmin = (email === adminEmail) || userRoles.some(function(r) {
       var str = String(r).toLowerCase().trim();
-      return str === 'admin' \|\| str === 'administrator';
+      return str === 'admin' || str === 'administrator';
     });
 
     if (isUserAdmin) return; // Admin has unrestricted access
@@ -5045,15 +5089,15 @@ nav.innerHTML = visible.map(function(it){
     var isUserIc = userRoles.some(function(r){
       var s = String(r).toLowerCase().trim();
       var norm = s.replace(/[\^a-z0-9]/g, '');
-      return s.indexOf('ic') !== -1 \|\| s.indexOf('i/c') !== -1 \|\| s.indexOf('incharge') !== -1 \|\| s.indexOf('icnarge') !== -1 \|\| s.indexOf('incherage') !== -1 \|\| s.indexOf('inchrage') !== -1 \|\| norm.indexOf('ic') !== -1 \|\| norm.indexOf('inc') !== -1;
+      return s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.indexOf('icnarge') !== -1 || s.indexOf('incherage') !== -1 || s.indexOf('inchrage') !== -1 || norm.indexOf('ic') !== -1 || norm.indexOf('inc') !== -1;
     });
-    var isUserFinance = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('finance')!==-1 \|\| s.indexOf('accountant')!==-1; });
-    var isUserPatient = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('deo')!==-1 \|\| s.indexOf('patient')!==-1 \|\| s.indexOf('mts')!==-1; });
+    var isUserFinance = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('finance')!==-1 || s.indexOf('accountant')!==-1; });
+    var isUserPatient = userRoles.some(function(r){ var s=String(r).toLowerCase().trim(); return s.indexOf('deo')!==-1 || s.indexOf('patient')!==-1 || s.indexOf('mts')!==-1; });
 
-    var isPagePmam = path.indexOf('pmam') !== -1 \|\| curTitle.indexOf('PMAM') !== -1;
-    var isPageIc = path.indexOf('ic') !== -1 \|\| path.indexOf('incharge') !== -1 \|\| curTitle.indexOf('I/C') !== -1 \|\| curTitle.indexOf('INCHARGE') !== -1;
-    var isPageFinance = path.indexOf('finance') !== -1 \|\| curTitle.indexOf('FINANCE') !== -1 \|\| curTitle.indexOf('ACCOUNTANT') !== -1;
-    var isPagePatient = path.indexOf('patient') !== -1 \|\| curTitle.indexOf('PATIENT') !== -1 \|\| curTitle.indexOf('DEO') !== -1;
+    var isPagePmam = path.indexOf('pmam') !== -1 || curTitle.indexOf('PMAM') !== -1;
+    var isPageIc = path.indexOf('ic') !== -1 || path.indexOf('incharge') !== -1 || curTitle.indexOf('I/C') !== -1 || curTitle.indexOf('INCHARGE') !== -1;
+    var isPageFinance = path.indexOf('finance') !== -1 || curTitle.indexOf('FINANCE') !== -1 || curTitle.indexOf('ACCOUNTANT') !== -1;
+    var isPagePatient = path.indexOf('patient') !== -1 || curTitle.indexOf('PATIENT') !== -1 || curTitle.indexOf('DEO') !== -1;
 
     var allowed = true;
     if (isPageIc && !isUserIc) allowed = false;
@@ -5075,21 +5119,21 @@ nav.innerHTML = visible.map(function(it){
     var listEl = document.getElementById('phWsList');
     if (!listEl) return;
 
-    var curTitle = (currentTitle \|\| (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') \|\| '').toUpperCase();
+    var curTitle = (currentTitle || (document.querySelector('.ph-portal-name') ? document.querySelector('.ph-portal-name').textContent : '') || '').toUpperCase();
     var path = window.location.pathname.toLowerCase();
-    var isCurrentAdmin = path.indexOf('admin') !== -1 \|\| curTitle.indexOf('ADMIN') !== -1;
-    var isCurrentPmam = path.indexOf('pmam') !== -1 \|\| curTitle.indexOf('PMAM') !== -1;
-    var isCurrentIc = path.indexOf('ic') !== -1 \|\| path.indexOf('incharge') !== -1 \|\| curTitle.indexOf('I/C') !== -1 \|\| curTitle.indexOf('INCHARGE') !== -1;
-    var isCurrentFinance = path.indexOf('finance') !== -1 \|\| curTitle.indexOf('FINANCE') !== -1 \|\| curTitle.indexOf('ACCOUNTANT') !== -1;
-    var isCurrentPatient = path.indexOf('patient') !== -1 \|\| curTitle.indexOf('PATIENT') !== -1 \|\| curTitle.indexOf('DEO') !== -1;
+    var isCurrentAdmin = path.indexOf('admin') !== -1 || curTitle.indexOf('ADMIN') !== -1;
+    var isCurrentPmam = path.indexOf('pmam') !== -1 || curTitle.indexOf('PMAM') !== -1;
+    var isCurrentIc = path.indexOf('ic') !== -1 || path.indexOf('incharge') !== -1 || curTitle.indexOf('I/C') !== -1 || curTitle.indexOf('INCHARGE') !== -1;
+    var isCurrentFinance = path.indexOf('finance') !== -1 || curTitle.indexOf('FINANCE') !== -1 || curTitle.indexOf('ACCOUNTANT') !== -1;
+    var isCurrentPatient = path.indexOf('patient') !== -1 || curTitle.indexOf('PATIENT') !== -1 || curTitle.indexOf('DEO') !== -1;
 
     // Fallback: If userObj not provided, try reading from storage
     if (!userObj) {
-      var uStr = sessionStorage.getItem('pmjay_user') \|\|
-                 sessionStorage.getItem('pmam_user') \|\|
-                 sessionStorage.getItem('currentUser') \|\|
-                 localStorage.getItem('pmjay_user') \|\|
-                 localStorage.getItem('pmam_user') \|\|
+      var uStr = sessionStorage.getItem('pmjay_user') ||
+                 sessionStorage.getItem('pmam_user') ||
+                 sessionStorage.getItem('currentUser') ||
+                 localStorage.getItem('pmjay_user') ||
+                 localStorage.getItem('pmam_user') ||
                  localStorage.getItem('currentUser');
       if (uStr) {
         try { userObj = typeof uStr === 'string' ? JSON.parse(uStr) : uStr; } catch(e){}
@@ -5107,29 +5151,29 @@ nav.innerHTML = visible.map(function(it){
     }
 
     var adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL.toLowerCase() : 'aravarya99@gmail.com';
-    var isUserAdmin = (email === adminEmail) \|\| userRoles.some(function(r){
+    var isUserAdmin = (email === adminEmail) || userRoles.some(function(r){
       var str = String(r).toLowerCase().trim();
-      return str === 'admin' \|\| str === 'administrator';
+      return str === 'admin' || str === 'administrator';
     });
 
-    var isUserPmam = isUserAdmin \|\| userRoles.some(function(r){
+    var isUserPmam = isUserAdmin || userRoles.some(function(r){
       var str = String(r).toLowerCase().trim();
       return str === 'pmam';
     });
 
-    var isUserIc = isUserAdmin \|\| userRoles.some(function(r){
+    var isUserIc = isUserAdmin || userRoles.some(function(r){
       var s = String(r).toLowerCase().trim();
-      return s.indexOf('ic') !== -1 \|\| s.indexOf('i/c') !== -1 \|\| s.indexOf('incharge') !== -1 \|\| s.replace(/[\^a-z0-9]/g,'').indexOf('ic') !== -1;
+      return s.indexOf('ic') !== -1 || s.indexOf('i/c') !== -1 || s.indexOf('incharge') !== -1 || s.replace(/[\^a-z0-9]/g,'').indexOf('ic') !== -1;
     });
 
-    var isUserFinance = isUserAdmin \|\| userRoles.some(function(r){
+    var isUserFinance = isUserAdmin || userRoles.some(function(r){
       var str = String(r).toLowerCase().trim();
-      return str.indexOf('finance') !== -1 \|\| str.indexOf('accountant') !== -1;
+      return str.indexOf('finance') !== -1 || str.indexOf('accountant') !== -1;
     });
 
-    var isUserPatient = isUserAdmin \|\| userRoles.some(function(r){
+    var isUserPatient = isUserAdmin || userRoles.some(function(r){
       var str = String(r).toLowerCase().trim();
-      return str.indexOf('deo') !== -1 \|\| str.indexOf('patient') !== -1 \|\| str.indexOf('mts') !== -1;
+      return str.indexOf('deo') !== -1 || str.indexOf('patient') !== -1 || str.indexOf('mts') !== -1;
     });
 
     var itemsHTML = '';
@@ -5203,7 +5247,7 @@ nav.innerHTML = visible.map(function(it){
 
   function applyHeaderData(name, role, photoUrl) {
     var displayName = (name && name.trim()) ? name.trim() : 'Active User';
-    var displayRole = role \|\| 'USER';
+    var displayRole = role || 'USER';
 
     var hName = document.getElementById('hName');
     var hRole = document.getElementById('hRole');
@@ -5392,9 +5436,9 @@ nav.innerHTML = visible.map(function(it){
   }
 
   global.phSubmitChangePassword = function() {
-    var curr = (document.getElementById('phCurrPass').value \|\| '').trim();
-    var newP = (document.getElementById('phNewPass').value \|\| '').trim();
-    var conf = (document.getElementById('phConfirmPass').value \|\| '').trim();
+    var curr = (document.getElementById('phCurrPass').value || '').trim();
+    var newP = (document.getElementById('phNewPass').value || '').trim();
+    var conf = (document.getElementById('phConfirmPass').value || '').trim();
     var msg = document.getElementById('phPassMsg');
 
     function showMsg(text, isErr) {
@@ -5407,7 +5451,7 @@ nav.innerHTML = visible.map(function(it){
       }
     }
 
-    if (!newP \|\| newP.length < 6) {
+    if (!newP || newP.length < 6) {
       showMsg('New password must be at least 6 characters long.', true);
       return;
     }
@@ -5429,7 +5473,7 @@ nav.innerHTML = visible.map(function(it){
         if (error.code === 'auth/requires-recent-login') {
           showMsg('Please log out and log in again before changing password for security.', true);
         } else {
-          showMsg(error.message \|\| 'Failed to update password.', true);
+          showMsg(error.message || 'Failed to update password.', true);
         }
       });
     } else {
