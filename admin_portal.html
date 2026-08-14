@@ -6411,7 +6411,7 @@ function saveStaffEdit() {
 }
 
 // ===== INIT =====
-loadDirectory();
+if (typeof loadDirectory === 'function') loadDirectory();
 // renderPmams();
 // renderOthers();
 renderRoster();
@@ -10261,6 +10261,8 @@ function resetLeaveLimitsToDefault() {
     saveLeaveLimits();
   }
 }
+
+if (typeof loadDirectory === 'function') loadDirectory();
 </script>
 
 
