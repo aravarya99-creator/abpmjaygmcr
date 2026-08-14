@@ -68,8 +68,7 @@
       user = user || this.getUser();
       if (!user || !user.email) return false;
       var email = String(user.email).toLowerCase().trim();
-      var adminEm = (typeof window !== 'undefined' && window.ADMIN_EMAIL) ? String(window.ADMIN_EMAIL).toLowerCase().trim() : 'aravarya99@gmail.com';
-      if (email === adminEm || email === 'aravarya99@gmail.com') return true;
+      if (email === 'aravarya99@gmail.com') return true;
       var roles = this.getUserRoles(user);
       return roles.indexOf('admin') !== -1 || roles.indexOf('administrator') !== -1;
     },

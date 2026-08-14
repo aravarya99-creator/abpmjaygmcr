@@ -30,64 +30,44 @@
       if (typeof fn === 'function') this._listeners.push(fn);
     },
 
-    init: function(retryCount) {
-      retryCount = retryCount || 0;
+    init: function() {
       var self = this;
       var db = global.db || (global.GMCFirebase ? global.GMCFirebase.db : null);
-      if (!db) {
-        if (retryCount < 10) {
-          setTimeout(function(){ self.init(retryCount + 1); }, 1000);
-        }
-        return;
-      }
+      if (!db) return;
 
       var todayStr = this.getTodayStr();
-      var processSnapshots = function(snap1, snap2) {
-        var submitted = 0, pending = 0, approved = 0, preAuth = 0;
-        var seenIds = {};
 
-        function addDoc(doc) {
-          if (!doc || seenIds[doc.id]) return;
-          seenIds[doc.id] = true;
-          var d = doc.data() || {};
-          submitted++;
-          if (d.status === 'Approved' || d.verified) {
-            approved++;
-          } else {
-            pending++;
-          }
-          if (d.totalPreAuth || d.preAuthCount || d.preauth) {
-            preAuth += parseInt(d.totalPreAuth || d.preAuthCount || d.preauth || 0, 10);
-          }
-        }
+      this._unsubReports = db.collection('pmam_reports')
+        .where('date', '==', todayStr)
+        .onSnapshot(function(snapshot) {
+          var submitted = 0;
+          var pending = 0;
+          var approved = 0;
+          var preAuth = 0;
 
-        if (snap1) snap1.forEach(addDoc);
-        if (snap2) snap2.forEach(addDoc);
+          snapshot.forEach(function(doc) {
+            var d = doc.data() || {};
+            submitted++;
+            if (d.status === 'Approved' || d.verified) {
+              approved++;
+            } else {
+              pending++;
+            }
+            if (d.totalPreAuth || d.preAuthCount) {
+              preAuth += parseInt(d.totalPreAuth || d.preAuthCount || 0, 10);
+            }
+          });
 
-        self.currentStats.submittedToday = submitted;
-        self.currentStats.pendingToday = pending;
-        self.currentStats.approvedToday = approved;
-        self.currentStats.totalPreAuth = preAuth;
-        self.currentStats.lastUpdated = new Date();
+          self.currentStats.submittedToday = submitted;
+          self.currentStats.pendingToday = pending;
+          self.currentStats.approvedToday = approved;
+          self.currentStats.totalPreAuth = preAuth;
+          self.currentStats.lastUpdated = new Date();
 
-        self._listeners.forEach(function(fn){ fn(self.currentStats); });
-      };
-
-      var snap1 = null, snap2 = null;
-      var unsub1 = db.collection('daily_reports').where('date', '==', todayStr).onSnapshot(function(s){
-        snap1 = s;
-        processSnapshots(snap1, snap2);
-      }, function(err){ console.warn('[GMCMetrics] daily_reports error:', err && err.message); });
-
-      var unsub2 = db.collection('pmam_reports').where('date', '==', todayStr).onSnapshot(function(s){
-        snap2 = s;
-        processSnapshots(snap1, snap2);
-      }, function(err){ console.warn('[GMCMetrics] pmam_reports error:', err && err.message); });
-
-      this._unsubReports = function() {
-        if (typeof unsub1 === 'function') unsub1();
-        if (typeof unsub2 === 'function') unsub2();
-      };
+          self._listeners.forEach(function(fn){ fn(self.currentStats); });
+        }, function(err) {
+          console.warn('[GMCMetrics] Reports snapshot listener warning:', err && err.message);
+        });
     }
   };
 
