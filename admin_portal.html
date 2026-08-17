@@ -831,13 +831,16 @@ input:checked + .slider:before { transform: translateX(20px); }
     </div>
 
     <div class="sec" id="sec-datamgmt">
-      <div class="page-hd">Data Management</div>
 
-      <!-- Sub-tab nav -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
-        <button class="dmt-tab active" id="dmt-wardmgmt" onclick="showDmTab('wardmgmt',this)">🏨 Ward Management</button>
-        <button class="dmt-tab"        id="dmt-reports"  onclick="showDmTab('reports',this)">📊 Monthly Reports</button>
-        <button class="dmt-tab"        id="dmt-cleanup"  onclick="showDmTab('cleanup',this)">🧹 Data Cleanup</button>
+      <!-- Dark Sleek Header Banner for Data Management Sub-Tabs -->
+      <div class="um-banner-wrap">
+        <button class="um-banner-btn active" id="dmt-wardmgmt" onclick="showDmTab('wardmgmt',this)">🏨 Ward Management</button>
+        <button class="um-banner-btn" id="dmt-reports" onclick="showDmTab('reports',this)">📊 Monthly Reports</button>
+        <button class="um-banner-btn" id="dmt-cleanup" onclick="showDmTab('cleanup',this)">🧹 Data Cleanup</button>
+        <button class="um-refresh-btn" onclick="showDmTab('wardmgmt')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M2.5 16l1.2 1.8a10 10 0 0 0 18.8-4.3"/></svg>
+          Refresh
+        </button>
       </div>
 
       <!-- ── TAB: Holiday Calendar ── -->
@@ -1177,15 +1180,18 @@ input:checked + .slider:before { transform: translateX(20px); }
 
     <!-- ===== ROSTERS & CALENDARS ===== -->
     <div class="sec" id="sec-rosters">
-      <div class="page-hd">Rosters &amp; Calendars</div>
 
-      <!-- Sub-tab nav -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
-        <button class="dmt-tab active" id="rst-wardroster"    onclick="showRosterTab('wardroster',this)">🏥 Ward Roster</button>
-        <button class="dmt-tab"        id="rst-weekendroster" onclick="showRosterTab('weekendroster',this)">📆 Weekend Roster</button>
-        <button class="dmt-tab"        id="rst-holidayrost"   onclick="showRosterTab('holidayrost',this)">🎉 Holiday Roster</button>
-        <button class="dmt-tab"        id="rst-holidaycal"    onclick="showRosterTab('holidaycal',this)">📅 Holiday Calendar</button>
-        <button class="dmt-tab"        id="rst-pubroster"     onclick="showRosterTab('pubroster',this)">🚀 Roster Publishing &amp; Comp Credits</button>
+      <!-- Dark Sleek Header Banner for Rosters & Calendars Sub-Tabs -->
+      <div class="um-banner-wrap">
+        <button class="um-banner-btn active" id="rst-wardroster" onclick="showRosterTab('wardroster',this)">🏥 Ward Roster</button>
+        <button class="um-banner-btn" id="rst-weekendroster" onclick="showRosterTab('weekendroster',this)">📆 Weekend Roster</button>
+        <button class="um-banner-btn" id="rst-holidayrost" onclick="showRosterTab('holidayrost',this)">🎉 Holiday Roster</button>
+        <button class="um-banner-btn" id="rst-holidaycal" onclick="showRosterTab('holidaycal',this)">📅 Holiday Calendar</button>
+        <button class="um-banner-btn" id="rst-pubroster" onclick="showRosterTab('pubroster',this)">🚀 Roster Publishing &amp; Comp Credits</button>
+        <button class="um-refresh-btn" onclick="showRosterTab('wardroster')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M2.5 16l1.2 1.8a10 10 0 0 0 18.8-4.3"/></svg>
+          Refresh
+        </button>
       </div>
 
       <div class="dmt-pane active" id="dmpane-wardroster">
@@ -1346,15 +1352,18 @@ input:checked + .slider:before { transform: translateX(20px); }
 
     <!-- ===== NAV BAR ===== -->
     <div class="sec" id="sec-navbar">
-      <div class="page-hd">Nav Bar</div>
 
-      <!-- Sub-tab nav -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
-        <button class="dmt-tab active" id="nbt-aboutpage"     onclick="showNavTab('aboutpage',this)">ℹ️ About Us</button>
-        <button class="dmt-tab"        id="nbt-developer"     onclick="showNavTab('developer',this)">👨‍💻 About Developer</button>
-        <button class="dmt-tab"        id="nbt-staff"         onclick="showNavTab('staff',this)">👥 Staff</button>
-        <button class="dmt-tab"        id="nbt-orders"        onclick="showNavTab('orders',this)">📋 Orders</button>
-        <button class="dmt-tab"        id="nbt-navbar"        onclick="showNavTab('navbar',this)">⚙️ Nav Bar Settings</button>
+      <!-- Dark Sleek Header Banner for Nav Bar Sub-Tabs -->
+      <div class="um-banner-wrap">
+        <button class="um-banner-btn active" id="nbt-aboutpage" onclick="showNavTab('aboutpage',this)">ℹ️ About Us</button>
+        <button class="um-banner-btn" id="nbt-developer" onclick="showNavTab('developer',this)">👨‍💻 About Developer</button>
+        <button class="um-banner-btn" id="nbt-staff" onclick="showNavTab('staff',this)">👥 Staff</button>
+        <button class="um-banner-btn" id="nbt-orders" onclick="showNavTab('orders',this)">📋 Orders</button>
+        <button class="um-banner-btn" id="nbt-navbar" onclick="showNavTab('navbar',this)">⚙️ Nav Bar Settings</button>
+        <button class="um-refresh-btn" onclick="showNavTab('aboutpage')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M2.5 16l1.2 1.8a10 10 0 0 0 18.8-4.3"/></svg>
+          Refresh
+        </button>
       </div>
       <div class="dmt-pane" id="dmpane-orders">
         <div class="card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;margin-bottom:12px">
@@ -1639,27 +1648,16 @@ input:checked + .slider:before { transform: translateX(20px); }
     
   <div class="sec" id="sec-leaves">
     
-    <!-- Top Horizontal Sub-Tab Bar (Refined Height & Crisp 1.5px Border) -->
-    <div style="display:flex; gap:8px; background:#ffffff; padding:6px 12px; border-radius:12px; border:1.5px solid #cbd5e1; margin-bottom:12px; flex-wrap:wrap; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
-      <button class="leaves-tab-btn active" id="ltab-leave_requests" onclick="showLeavesTab('leave_requests', this)" style="padding:6px 14px; border:none; background:transparent; font-size:12px; font-weight:800; color:#2563eb; cursor:pointer; border-bottom:3px solid #2563eb; display:flex; align-items:center; gap:6px;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Leave Requests
-      </button>
-      <button class="leaves-tab-btn" id="ltab-employee_overview" onclick="showLeavesTab('employee_overview', this); renderAdminOverview();" style="padding:6px 14px; border:none; background:transparent; font-size:12px; font-weight:700; color:#64748b; cursor:pointer; display:flex; align-items:center; gap:6px;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Employee Overview
-      </button>
-      <button class="leaves-tab-btn" id="ltab-leave_limits" onclick="showLeavesTab('leave_limits', this)" style="padding:6px 14px; border:none; background:transparent; font-size:12px; font-weight:700; color:#64748b; cursor:pointer; display:flex; align-items:center; gap:6px;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-        Global Leave Rules
-      </button>
-      <button class="leaves-tab-btn" id="ltab-comp_balances" onclick="showLeavesTab('comp_balances', this)" style="padding:6px 14px; border:none; background:transparent; font-size:12px; font-weight:700; color:#64748b; cursor:pointer; display:flex; align-items:center; gap:6px;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4-9 4-9-4 9-4z"/><path d="M3 7v6c0 2 4 4 9 4s9-2 9-4V7"/></svg>
-        Compensatory Balances
-      </button>
-      <button class="leaves-tab-btn" id="ltab-add_leaves" onclick="showLeavesTab('add_leaves', this)" style="padding:6px 14px; border:none; background:transparent; font-size:12px; font-weight:700; color:#64748b; cursor:pointer; display:flex; align-items:center; gap:6px;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Backdate Leave
+    <!-- Dark Sleek Header Banner for Leaves & Balances Sub-Tabs -->
+    <div class="um-banner-wrap">
+      <button class="um-banner-btn active" id="ltab-leave_requests" onclick="showLeavesTab('leave_requests', this)">📋 Leave Requests</button>
+      <button class="um-banner-btn" id="ltab-employee_overview" onclick="showLeavesTab('employee_overview', this); renderAdminOverview();">👤 Employee Overview</button>
+      <button class="um-banner-btn" id="ltab-leave_limits" onclick="showLeavesTab('leave_limits', this)">⚙️ Global Leave Rules</button>
+      <button class="um-banner-btn" id="ltab-comp_balances" onclick="showLeavesTab('comp_balances', this)">⚖️ Compensatory Balances</button>
+      <button class="um-banner-btn" id="ltab-add_leaves" onclick="showLeavesTab('add_leaves', this)">⏳ Backdate Leave</button>
+      <button class="um-refresh-btn" onclick="showLeavesTab('leave_requests')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M2.5 16l1.2 1.8a10 10 0 0 0 18.8-4.3"/></svg>
+        Refresh
       </button>
     </div>
 
@@ -2259,14 +2257,17 @@ input:checked + .slider:before { transform: translateX(20px); }
     </div>
 
   <div class="sec" id="sec-settings">
-      <div class="page-hd">Settings</div>
 
-      <!-- Settings Tabs -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
-        <button class="dmt-tab active" id="stab-branding" onclick="showSettingsTab('branding',this)">🖼️ Branding</button>
-        <button class="dmt-tab" id="stab-tickers" onclick="showSettingsTab('tickers',this)">📣 Tickers</button>
-        <button class="dmt-tab" id="stab-sysinfo" onclick="showSettingsTab('sysinfo',this)">⚙️ System</button>
-        <button class="dmt-tab" id="stab-audit" onclick="goSec('auditlog')">📜 Audit Log</button>
+      <!-- Dark Sleek Header Banner for Settings Sub-Tabs -->
+      <div class="um-banner-wrap">
+        <button class="um-banner-btn active" id="stab-branding" onclick="showSettingsTab('branding',this)">🖼️ Branding</button>
+        <button class="um-banner-btn" id="stab-tickers" onclick="showSettingsTab('tickers',this)">📣 Tickers</button>
+        <button class="um-banner-btn" id="stab-sysinfo" onclick="showSettingsTab('sysinfo',this)">⚙️ System</button>
+        <button class="um-banner-btn" id="stab-audit" onclick="goSec('auditlog')">📜 Audit Log</button>
+        <button class="um-refresh-btn" onclick="showSettingsTab('branding')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M2.5 16l1.2 1.8a10 10 0 0 0 18.8-4.3"/></svg>
+          Refresh
+        </button>
       </div>
 
       <div class="settings-layout">
@@ -2607,9 +2608,17 @@ input:checked + .slider:before { transform: translateX(20px); }
 
     <!-- ===== AUDIT LOG ===== -->
     <div class="sec" id="sec-auditlog">
-      <div class="page-hd" style="justify-content:space-between">
-        📜 Audit Log
-        <button class="btn btn-pri" onclick="loadAuditLog()">🔄 Refresh</button>
+
+      <!-- Dark Sleek Header Banner for Audit Log -->
+      <div class="um-banner-wrap">
+        <button class="um-banner-btn active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+          Audit Log &amp; Activity Trail
+        </button>
+        <button class="um-refresh-btn" onclick="loadAuditLog()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M2.5 16l1.2 1.8a10 10 0 0 0 18.8-4.3"/></svg>
+          Refresh
+        </button>
       </div>
       <div class="card">
         <div class="card-hd">Admin Actions History <span id="auditCount" style="font-weight:400;color:#6b7280;font-size:12px;margin-left:8px"></span></div>
@@ -3368,13 +3377,11 @@ function showUmTab(tab, el){
 // DATA MANAGEMENT — Tab switcher
 // ══════════════════════════════════════════════════════
 function showDmTab(tab, el){
-  // Only deactivate DM tab buttons (in sec-datamgmt) and DM panes
-  document.querySelectorAll('#sec-datamgmt .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('#sec-datamgmt .um-banner-btn, #sec-datamgmt .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
   document.querySelectorAll('#sec-datamgmt .dmt-pane').forEach(function(p){ p.classList.remove('active'); });
   if (el) el.classList.add('active');
   var pane = document.getElementById('dmpane-'+tab);
   if (pane) pane.classList.add('active');
-  // Auto-actions when switching tabs (only the 3 panes that live in DM)
   if (tab === 'wardmgmt') { if (typeof wmReload === 'function') wmReload(); else if (typeof renderWards === 'function') renderWards(); }
   if (tab === 'reports')  { dmLoadFilters(); }
   if (tab === 'leaves')   { dmLoadFilters(); }
@@ -3382,16 +3389,13 @@ function showDmTab(tab, el){
 
 // ══════════════════════════════════════════════════════
 // ROSTERS & CALENDARS — Tab switcher
-// Handles the 5 panes in sec-rosters:
-//   wardroster, weekendroster, holidayrost, holidaycal, pubroster
 // ══════════════════════════════════════════════════════
 function showRosterTab(tab, el){
-  document.querySelectorAll('#sec-rosters .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('#sec-rosters .um-banner-btn, #sec-rosters .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
   document.querySelectorAll('#sec-rosters .dmt-pane').forEach(function(p){ p.classList.remove('active'); p.style.display = 'none'; });
   if (el) el.classList.add('active');
   var pane = document.getElementById('dmpane-' + tab);
   if (pane) { pane.classList.add('active'); pane.style.display = 'block'; }
-  // Auto-actions
   if (tab === 'wardroster')    { if (typeof loadRosterFromDb === 'function') loadRosterFromDb(); }
   if (tab === 'weekendroster') { if (typeof wrInit === 'function') wrInit(); }
   if (tab === 'holidayrost')   {
@@ -3406,6 +3410,17 @@ function showRosterTab(tab, el){
       renderAdminRoster(val);
     }
   }
+}
+
+// ══════════════════════════════════════════════════════
+// NAV BAR section — Tab switcher
+// ══════════════════════════════════════════════════════
+function showNavTab(tab, el){
+  document.querySelectorAll('#sec-navbar .um-banner-btn, #sec-navbar .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('#sec-navbar .dmt-pane').forEach(function(p){ p.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  var pane = document.getElementById('dmpane-'+tab);
+  if (pane) pane.classList.add('active');
 }
 
 // ══════════════════════════════════════════════════════
@@ -10492,13 +10507,8 @@ function closeAdminEmpDetail() {
 
 function showLeavesTab(tabName, el) {
   document.querySelectorAll('.leaves-panel').forEach(function(p){ p.style.display = 'none'; p.classList.remove('active'); });
-  document.querySelectorAll('.leaves-tab-btn').forEach(function(b){
+  document.querySelectorAll('#sec-leaves .um-banner-btn, .leaves-tab-btn').forEach(function(b){
     b.classList.remove('active');
-    b.style.color = '#64748b';
-    b.style.fontWeight = '700';
-    b.style.borderBottom = 'none';
-    var svg = b.querySelector('svg');
-    if (svg) svg.setAttribute('stroke', '#64748b');
   });
 
   var panel = document.getElementById('lpanel-' + tabName);
@@ -10509,21 +10519,9 @@ function showLeavesTab(tabName, el) {
 
   if (el) {
     el.classList.add('active');
-    el.style.color = '#2563eb';
-    el.style.fontWeight = '800';
-    el.style.borderBottom = '3px solid #2563eb';
-    var svg = el.querySelector('svg');
-    if (svg) svg.setAttribute('stroke', '#2563eb');
   } else {
     var btn = document.getElementById('ltab-' + tabName);
-    if (btn) {
-      btn.classList.add('active');
-      btn.style.color = '#2563eb';
-      btn.style.fontWeight = '800';
-      btn.style.borderBottom = '3px solid #2563eb';
-      var svg = btn.querySelector('svg');
-      if (svg) svg.setAttribute('stroke', '#2563eb');
-    }
+    if (btn) btn.classList.add('active');
   }
 
   if (tabName === 'leave_requests') {
