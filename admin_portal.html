@@ -3550,6 +3550,8 @@ function publishAdminRoster() {
   db.collection('holiday_roster_requests').get().then(function(snap) {
     var batch = db.batch();
     var count = 0;
+    var dateMap = {};
+
     snap.forEach(function(doc) {
       var d = doc.data() || {};
       var docYm = d.yearMonth || (doc.id.indexOf('_') !== -1 ? doc.id.split('_')[1] : '');
@@ -3561,6 +3563,15 @@ function publishAdminRoster() {
           publishedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'admin@gmc.com')
         });
         count++;
+
+        var name = d.name || d.email || 'PMAM';
+        var choices = d.choices || {};
+        Object.keys(choices).forEach(function(dt){
+          if (choices[dt] === 'Duty') {
+            if (!dateMap[dt]) dateMap[dt] = [];
+            if (!dateMap[dt].includes(name)) dateMap[dt].push(name);
+          }
+        });
       }
     });
 
@@ -3570,6 +3581,17 @@ function publishAdminRoster() {
     }
 
     batch.commit().then(function() {
+      // Dual-sync into settings/holidays for backwards compatibility across all views
+      db.collection('settings').doc('holidays').get().then(function(hDoc){
+        var existingRows = (hDoc.exists && Array.isArray(hDoc.data().rows)) ? hDoc.data().rows : [];
+        var otherRows = existingRows.filter(function(r){ return !r.date || r.date.indexOf(ym) !== 0; });
+        var newRows = Object.keys(dateMap).map(function(dt){
+          return { date: dt, name: 'Official Holiday Duty', pmams: dateMap[dt] };
+        });
+        var finalRows = otherRows.concat(newRows);
+        db.collection('settings').doc('holidays').set({ rows: finalRows, updatedAt: Date.now() }, { merge: true });
+      }).catch(function(){});
+
       showToast('🎉 Official Roster for ' + ym + ' published successfully! (' + count + ' records updated)', 'success');
       renderAdminRoster(ym);
     }).catch(function(err) {
