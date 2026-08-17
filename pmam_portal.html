@@ -1797,6 +1797,7 @@ function renderPmamRoster(yearMonth) {
     });
 
     wrap.innerHTML = html;
+    applyRosterLockUi();
   }
 
   // Render immediately
@@ -1835,18 +1836,43 @@ function initPmamRosterLockListener() {
 }
 
 function applyRosterLockUi() {
-  var isLocked = !!window._pmamRosterLocked;
+  var isSundayTab = (typeof window._activeRosterTab !== 'undefined') ? (window._activeRosterTab === 'sundays') : true;
+  var isLocked = !!window._pmamRosterLocked && isSundayTab;
   var btn = document.getElementById('btnSaveRosterChoices');
   var lockBanner = document.getElementById('pmamRosterLockBanner');
 
-  if (lockBanner) lockBanner.style.display = isLocked ? 'flex' : 'none';
+  if (lockBanner) {
+    lockBanner.style.display = isLocked ? 'flex' : 'none';
+    lockBanner.innerHTML = '<span style="font-size:18px;">🔒</span> <span>Weekend / Sunday Roster Preference Submission is currently locked by Admin (Trial Basis). Sunday dropdowns are view-only.</span>';
+  }
+
+  document.querySelectorAll('.pmam-roster-choice').forEach(function(sel){
+    var dtStr = sel.getAttribute('data-date');
+    var isSun = false;
+    if (dtStr) {
+      var dt = new Date(dtStr);
+      if (!isNaN(dt.getTime()) && dt.getDay() === 0) isSun = true;
+    }
+
+    if (window._pmamRosterLocked && isSun) {
+      sel.disabled = true;
+      sel.style.opacity = '0.7';
+      sel.style.cursor = 'not-allowed';
+      sel.title = 'Sunday duty choices are currently locked by Admin (Trial Basis).';
+    } else {
+      sel.disabled = false;
+      sel.style.opacity = '1';
+      sel.style.cursor = 'pointer';
+      sel.title = '';
+    }
+  });
 
   if (btn) {
-    if (isLocked) {
+    if (window._pmamRosterLocked && isSundayTab) {
       btn.disabled = true;
       btn.style.opacity = '0.55';
       btn.style.cursor = 'not-allowed';
-      btn.title = 'Roster preference submission is currently locked by Admin.';
+      btn.title = 'Sunday Roster preference submission is currently locked by Admin.';
     } else {
       btn.disabled = false;
       btn.style.opacity = '1';
@@ -1854,20 +1880,6 @@ function applyRosterLockUi() {
       btn.title = '';
     }
   }
-
-  document.querySelectorAll('.pmam-roster-choice').forEach(function(sel){
-    if (isLocked) {
-      sel.disabled = true;
-      sel.style.opacity = '0.7';
-      sel.style.cursor = 'not-allowed';
-      sel.onclick = function(){ alert('ℹ️ Roster Preference submission is currently disabled by Admin on a trial basis. Contact your Incharge for details.'); };
-    } else {
-      sel.disabled = false;
-      sel.style.opacity = '1';
-      sel.style.cursor = 'pointer';
-      sel.onclick = null;
-    }
-  });
 }
 
 if (document.readyState === 'loading') {
@@ -1877,10 +1889,11 @@ if (document.readyState === 'loading') {
 }
 
 function savePmamRosterChoices() {
-  if (window._pmamRosterLocked) {
+  var isSundayTab = (typeof window._activeRosterTab !== 'undefined') ? (window._activeRosterTab === 'sundays') : false;
+  if (window._pmamRosterLocked && isSundayTab) {
     var btn = document.getElementById('btnSaveRosterChoices');
     if (btn) btn.textContent = 'Submit Roster Preferences';
-    alert('ℹ️ Roster Preference submission is currently locked / disabled on a trial basis. Contact your Incharge for details.');
+    alert('ℹ️ Sunday Roster preference submission is currently locked / disabled on a trial basis. Contact your Incharge for details.');
     return;
   }
 
