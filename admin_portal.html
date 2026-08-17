@@ -272,7 +272,15 @@ tr:hover td{background:#EEF3FF}
 /* ── Data Management unified tabs ── */
 .dmt-tab{padding:8px 16px;font-size:12px;border-radius:10px;border:1.5px solid #e0e8ff;cursor:pointer;font-weight:600;color:#374151;background:#f8faff;transition:all 0.18s;white-space:nowrap}
 .dmt-tab:hover{background:#dbeafe;color:#1e3a8a;border-color:#93c5fd}
-.dmt-tab.active{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border-color:#1d4ed8;box-shadow:0 2px 8px rgba(29,78,216,0.25)}
+/* ── User Management sub-tabs ── */
+.um-tab-users{padding:8px 18px;font-size:12.5px;border-radius:10px;border:1.5px solid #bfdbfe;cursor:pointer;font-weight:700;color:#1e3a8a;background:#eff6ff;transition:all 0.18s;white-space:nowrap}
+.um-tab-users:hover{background:#dbeafe}
+.um-tab-users.active{background:linear-gradient(135deg,#0F2B8C,#1A3DB5)!important;color:#fff!important;border-color:#0F2B8C!important;box-shadow:0 3px 10px rgba(15,43,140,0.3)!important;font-weight:800}
+
+.um-tab-requests{padding:8px 18px;font-size:12.5px;border-radius:10px;border:1.5px solid #fde68a;cursor:pointer;font-weight:700;color:#92400e;background:#fffbeb;transition:all 0.18s;white-space:nowrap}
+.um-tab-requests:hover{background:#fef3c7}
+.um-tab-requests.active{background:linear-gradient(135deg,#d97706,#f59e0b)!important;color:#fff!important;border-color:#d97706!important;box-shadow:0 3px 10px rgba(217,119,6,0.3)!important;font-weight:800}
+
 .dmt-pane{display:none}
 .dmt-pane.active{display:block}
 /* ── Holiday Calendar cells ── */
@@ -533,14 +541,12 @@ input:checked + .slider:before { transform: translateX(20px); }
     <!-- ===== USER MANAGEMENT ===== -->
     <!-- ===== UNIFIED DIRECTORY ===== -->
     <div class="sec active" id="sec-directory">
-      <div class="page-hd">User Management
-        <button class="btn btn-pri" onclick="loadDirectory()">🔄 Refresh</button>
-      </div>
 
       <!-- Main Top Sub-Tabs Bar for User Management -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
-        <button class="dmt-tab active" id="umtab-users" onclick="showUmTab('users',this)">👤 Users</button>
-        <button class="dmt-tab" id="umtab-requests" onclick="showUmTab('requests',this)">⏳ New User Requests <span id="umPendingBadge" style="background:#F59E0B;color:#fff;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:800;margin-left:4px">0</span></button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 3px 12px rgba(26,61,181,0.08);border:1.5px solid #e0e8ff">
+        <button class="um-tab-users active" id="umtab-users" onclick="showUmTab('users',this)">👤 Users</button>
+        <button class="um-tab-requests" id="umtab-requests" onclick="showUmTab('requests',this)">⏳ New User Requests <span id="umPendingBadge" style="background:#F59E0B;color:#fff;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:800;margin-left:6px">0</span></button>
+        <button class="btn btn-pri" onclick="loadDirectory()" style="margin-left:auto;height:38px;padding:0 18px;border-radius:10px;display:inline-flex;align-items:center;gap:6px;font-weight:800;background:linear-gradient(135deg,#0F2B8C,#1A3DB5)">🔄 Refresh</button>
       </div>
 
       <!-- TAB PANE 1: USERS -->
@@ -3232,7 +3238,7 @@ function addUser(){
 // Handles 2 top sub-tabs: users, requests
 // ══════════════════════════════════════════════════════
 function showUmTab(tab, el){
-  document.querySelectorAll('#sec-directory > div > .dmt-tab, #sec-directory > .dmt-tab-bar .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('#sec-directory button[id^="umtab-"]').forEach(function(b){ b.classList.remove('active'); });
   document.querySelectorAll('#sec-directory > .dmt-pane').forEach(function(p){ p.classList.remove('active'); p.style.display = 'none'; });
   if (el) el.classList.add('active');
   var pane = document.getElementById('umpane-' + tab);
