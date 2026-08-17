@@ -1187,7 +1187,6 @@ input:checked + .slider:before { transform: translateX(20px); }
         <button class="um-banner-btn" id="rst-weekendroster" onclick="showRosterTab('weekendroster',this)">📆 Weekend Roster</button>
         <button class="um-banner-btn" id="rst-holidayrost" onclick="showRosterTab('holidayrost',this)">🎉 Holiday Roster</button>
         <button class="um-banner-btn" id="rst-holidaycal" onclick="showRosterTab('holidaycal',this)">📅 Holiday Calendar</button>
-        <button class="um-banner-btn" id="rst-pubroster" onclick="showRosterTab('pubroster',this)">🚀 Roster Publishing &amp; Comp Credits</button>
         <button class="um-refresh-btn" onclick="showRosterTab('wardroster')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M2.5 16l1.2 1.8a10 10 0 0 0 18.8-4.3"/></svg>
           Refresh
@@ -1249,23 +1248,76 @@ input:checked + .slider:before { transform: translateX(20px); }
         </div>
       </div>
 
+      <!-- ===== UNIFIED HOLIDAY ROSTER ===== -->
       <div class="dmt-pane" id="dmpane-holidayrost">
-        <div class="card">
-          <div class="card-hd">
-            Holiday Duty Assignments
-            <button class="btn-add" onclick="addHolidayRow()">+ Add Holiday</button>
+        <!-- Inner Sub-Tabs Bar for Holiday Roster Modes -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.04);border:1.5px solid #e2e8f0;flex-wrap:wrap">
+          <button class="dir-tab-pill active" id="hrsubtab-publishing" onclick="showHolidaySubTab('publishing',this)">
+            📥 PMAM &amp; I/C Portal Submissions &amp; Publishing
+          </button>
+          <button class="dir-tab-pill" id="hrsubtab-manual" onclick="showHolidaySubTab('manual',this)">
+            ✏️ Manual Admin Duty Assignments
+          </button>
+        </div>
+
+        <!-- MODE 1: PMAM & I/C Portal Submissions & Publishing -->
+        <div id="hrpane-publishing" style="display:block">
+          <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:24px 28px; box-shadow:0 4px 20px rgba(0,0,0,0.04); margin-bottom:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #f1f5f9; padding-bottom:18px; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+              <div>
+                <h2 style="font-size:18px; font-weight:800; color:#0f172a; margin:0 0 4px 0; display:flex; align-items:center; gap:10px;">
+                  📅 Official Holiday &amp; Sunday Duty Roster Publishing <span style="font-size:12px; font-weight:700; background:#dbeafe; color:#1e40af; padding:4px 12px; border-radius:12px;">Admin Publishing Control</span>
+                </h2>
+                <p style="font-size:13px; font-weight:500; color:#64748b; margin:0;">Review PMAM requests &amp; I/C recommendations. Edit assignments and click Publish to sync to public Portal &amp; credit Compensatory Days.</p>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <input type="month" id="adminRosterYmSel" onchange="renderAdminRoster(this.value)" style="padding:8px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:700; color:#0f172a;">
+                <button class="btn btn-pri" id="btnAdminPublishRoster" onclick="publishAdminRoster()" style="background:#166534; padding:10px 22px; border-radius:10px; font-size:13px; font-weight:800; color:#ffffff; border:none; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                  🚀 Publish Official Roster &amp; Credit Comp Days
+                </button>
+              </div>
+            </div>
+
+            <!-- Roster Table -->
+            <div class="tbl-wrap" style="border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
+              <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                  <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
+                    <th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">PMAM NAME</th>
+                    <th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">EMAIL</th>
+                    <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">PMAM REQUESTED DUTIES</th>
+                    <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">I/C RECOMMENDATIONS</th>
+                    <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">PUBLISH STATUS</th>
+                    <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">ADMIN ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody id="adminRosterTbody">
+                  <tr><td colspan="6" style="text-align:center; padding:24px; color:#64748b; font-style:italic;">Loading roster submissions...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div class="tbl-wrap">
-            <table class="holiday-tbl">
-              <thead><tr>
-                <th>S.No</th><th>Holiday Name</th><th>Date</th><th>PMAMs on Duty (Max 7)</th><th>Action</th>
-              </tr></thead>
-              <tbody id="holidayBody"></tbody>
-            </table>
-          </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:12px">
-            <span id="holidaySaveMsg" style="font-size:11px;font-weight:600;margin-right:12px;align-self:center"></span>
-            <button class="btn btn-pri" onclick="saveHolidayToDb()">💾 Save Holiday Roster</button>
+        </div>
+
+        <!-- MODE 2: Manual Admin Duty Assignments -->
+        <div id="hrpane-manual" style="display:none">
+          <div class="card">
+            <div class="card-hd">
+              Manual Holiday Duty Assignments
+              <button class="btn-add" onclick="addHolidayRow()">+ Add Holiday</button>
+            </div>
+            <div class="tbl-wrap">
+              <table class="holiday-tbl">
+                <thead><tr>
+                  <th>S.No</th><th>Holiday Name</th><th>Date</th><th>PMAMs on Duty (Max 7)</th><th>Action</th>
+                </tr></thead>
+                <tbody id="holidayBody"></tbody>
+              </table>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:12px">
+              <span id="holidaySaveMsg" style="font-size:11px;font-weight:600;margin-right:12px;align-self:center"></span>
+              <button class="btn btn-pri" onclick="saveHolidayToDb()">💾 Save Holiday Roster</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1308,44 +1360,6 @@ input:checked + .slider:before { transform: translateX(20px); }
           <!-- Holiday list for selected month -->
           <div style="font-size:12px;font-weight:700;color:#0F2B8C;margin-bottom:8px">Holidays this month:</div>
           <div id="hcHolidayList" style="display:flex;flex-direction:column;gap:5px"></div>
-        </div>
-      </div>
-
-      <div class="dmt-pane" id="dmpane-pubroster">
-        <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:16px; padding:24px 28px; box-shadow:0 4px 20px rgba(0,0,0,0.04); margin-bottom:24px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #f1f5f9; padding-bottom:18px; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-            <div>
-              <h2 style="font-size:20px; font-weight:800; color:#0f172a; margin:0 0 4px 0; display:flex; align-items:center; gap:10px;">
-                📅 Official Holiday &amp; Sunday Duty Roster Publishing <span style="font-size:12px; font-weight:700; background:#dbeafe; color:#1e40af; padding:4px 12px; border-radius:12px;">Admin Publishing Control</span>
-              </h2>
-              <p style="font-size:13px; font-weight:500; color:#64748b; margin:0;">Review PMAM requests &amp; I/C recommendations. Edit assignments and click Publish to sync to public Portal &amp; credit Compensatory Days.</p>
-            </div>
-            <div style="display:flex; align-items:center; gap:12px;">
-              <input type="month" id="adminRosterYmSel" onchange="renderAdminRoster(this.value)" style="padding:8px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:700; color:#0f172a;">
-              <button class="btn btn-pri" id="btnAdminPublishRoster" onclick="publishAdminRoster()" style="background:#166534; padding:10px 22px; border-radius:10px; font-size:13px; font-weight:800; color:#ffffff; border:none; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                🚀 Publish Official Roster &amp; Credit Comp Days
-              </button>
-            </div>
-          </div>
-
-          <!-- Roster Table -->
-          <div class="tbl-wrap" style="border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
-            <table style="width:100%; border-collapse:collapse;">
-              <thead>
-                <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
-                  <th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">PMAM NAME</th>
-                  <th style="padding:12px; text-align:left; font-size:12px; font-weight:800; color:#475569;">EMAIL</th>
-                  <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">PMAM REQUESTED DUTIES</th>
-                  <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">I/C RECOMMENDATIONS</th>
-                  <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">PUBLISH STATUS</th>
-                  <th style="padding:12px; text-align:center; font-size:12px; font-weight:800; color:#475569;">ADMIN ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody id="adminRosterTbody">
-                <tr><td colspan="6" style="text-align:center; padding:24px; color:#64748b; font-style:italic;">Loading roster submissions...</td></tr>
-              </tbody>
-            </table>
-          </div>
         </div>
       </div>
     </div>
@@ -3401,14 +3415,23 @@ function showRosterTab(tab, el){
   if (tab === 'holidayrost')   {
     if (typeof hcEnsureLoaded === 'function') hcEnsureLoaded();
     if (typeof loadHolidayFromDb === 'function') loadHolidayFromDb();
+    var firstSub = document.getElementById('hrsubtab-publishing');
+    if (firstSub) showHolidaySubTab('publishing', firstSub);
   }
   if (tab === 'holidaycal')    { if (typeof hcInit === 'function') hcInit(); }
-  if (tab === 'pubroster')     {
-    if (typeof renderAdminRoster === 'function') {
-      var sel = document.getElementById('adminRosterYmSel');
-      var val = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
-      renderAdminRoster(val);
-    }
+}
+
+function showHolidaySubTab(mode, el) {
+  document.querySelectorAll('[id^="hrsubtab-"]').forEach(function(b){ b.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  var pPub = document.getElementById('hrpane-publishing');
+  var pMan = document.getElementById('hrpane-manual');
+  if (pPub) pPub.style.display = (mode === 'publishing') ? 'block' : 'none';
+  if (pMan) pMan.style.display = (mode === 'manual') ? 'block' : 'none';
+  if (mode === 'publishing') {
+    var sel = document.getElementById('adminRosterYmSel');
+    var val = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
+    if (typeof renderAdminRoster === 'function') renderAdminRoster(val);
   }
 }
 
@@ -3452,23 +3475,50 @@ function showNavTab(tab, el){
 
 // ── Load roster from Firebase ──
 function loadRosterFromDb(){
+  // 1. Fetch saved ward assignments from Firestore settings/roster
   db.collection('settings').doc('roster').get().then(function(doc){
+    var savedMap = {};
     if (doc.exists && doc.data() && Array.isArray(doc.data().rows)) {
-      rosterData = doc.data().rows.map(function(r){
-        var wards;
-        if (Array.isArray(r.wards)) {
-          wards = r.wards.slice();
-        } else if (typeof r.ward === 'string' && r.ward.trim()) {
-          wards = r.ward.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
-        } else if (Array.isArray(r.ward)) {
-          wards = r.ward.slice();
-        } else {
-          wards = [];
-        }
-        return { name: r.pmam || r.name || '', wards: wards };
+      doc.data().rows.forEach(function(r){
+        var name = (r.pmam || r.name || '').trim().toUpperCase();
+        var wards = Array.isArray(r.wards) ? r.wards.slice() : (typeof r.ward === 'string' && r.ward.trim() ? r.ward.split(',').map(function(s){ return s.trim(); }).filter(Boolean) : []);
+        if (name) savedMap[name] = wards;
       });
     }
-    renderRoster();
+
+    // 2. Fetch all active PMAM users from Firestore directory
+    db.collection('users').get().then(function(snap){
+      var pmamList = [];
+      snap.forEach(function(uDoc){
+        var u = uDoc.data();
+        if (u.status === 'rejected' || u.status === 'pending') return;
+        var rArr = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+        var isPmam = rArr.some(function(r){ return r && r.toString().toUpperCase() === 'PMAM'; });
+        if (isPmam && u.name) {
+          var normName = u.name.trim().toUpperCase();
+          if (!pmamList.some(function(p){ return p.name.toUpperCase() === normName; })) {
+            pmamList.push({
+              name: u.name.trim(),
+              wards: savedMap[normName] || (u.ward ? [u.ward] : [])
+            });
+          }
+        }
+      });
+
+      // Sort alphabetically by name
+      pmamList.sort(function(a,b){ return a.name.localeCompare(b.name); });
+
+      // If PMAMs found, use them; fallback to savedMap entries
+      if (pmamList.length > 0) {
+        rosterData = pmamList;
+      } else if (Object.keys(savedMap).length > 0) {
+        rosterData = Object.keys(savedMap).map(function(n){ return { name: n, wards: savedMap[n] }; });
+      }
+      renderRoster();
+    }).catch(function(err){
+      console.warn('loadRosterFromDb users fetch err:', err);
+      renderRoster();
+    });
   }).catch(function(){ renderRoster(); });
 }
 
@@ -5182,13 +5232,19 @@ function rosterWardCellHtml(i){
 function renderRoster(){
   const b=document.getElementById('rosterBody');
   if(!b) return;
-  if(!rosterData.length){b.innerHTML='<tr><td colspan="4" class="empty-td">No rows yet. Click + Add Row.</td></tr>';return;}
-  b.innerHTML=rosterData.map((r,i)=>`<tr style="vertical-align:top">
-    <td style="padding-top:9px">${i+1}</td>
-    <td style="padding-top:7px"><input value="${escAttr(r.name||'')}" placeholder="PMAM Name" style="width:150px;padding:4px 8px;border:1px solid #c7d2e8;border-radius:6px;font-size:12px;outline:none" onchange="rosterData[${i}].name=this.value"></td>
-    <td id="rwCell-${i}">${rosterWardCellHtml(i)}</td>
-    <td style="padding-top:7px"><button class="li-btn li-del" onclick="rosterData.splice(${i},1);renderRoster()">Remove</button></td>
-  </tr>`).join('');
+  if(!rosterData.length){b.innerHTML='<tr><td colspan="4" class="empty-td">No PMAMs found. Click + Add Row to add manually.</td></tr>';return;}
+  b.innerHTML=rosterData.map((r,i)=>{
+    var nameHtml = r.name ? 
+      `<div style="font-weight:800;font-size:13px;color:#0F2B8C;background:#eff6ff;border:1.5px solid #bfdbfe;padding:6px 14px;border-radius:10px;display:inline-flex;align-items:center;gap:6px"><span>👤</span> ${escAttr(r.name)}</div>`
+      : `<input value="" placeholder="Enter PMAM Name" style="width:180px;padding:6px 10px;border:1.5px solid #c7d2e8;border-radius:8px;font-size:12px;outline:none;font-weight:700" onchange="rosterData[${i}].name=this.value">`;
+
+    return `<tr style="vertical-align:top">
+      <td style="padding-top:12px;font-weight:700;color:#64748b">${i+1}</td>
+      <td style="padding-top:8px">${nameHtml}</td>
+      <td id="rwCell-${i}">${rosterWardCellHtml(i)}</td>
+      <td style="padding-top:8px"><button class="li-btn li-del" onclick="rosterData.splice(${i},1);renderRoster()">Remove</button></td>
+    </tr>`;
+  }).join('');
   if (window.WARD_REGISTRY && !WARD_REGISTRY.isReady() && !renderRoster._waiting) {
     renderRoster._waiting = true;
     WARD_REGISTRY.onReady(function(){ renderRoster._waiting = false; renderRoster(); });
