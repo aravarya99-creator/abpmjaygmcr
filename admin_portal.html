@@ -537,42 +537,53 @@ input:checked + .slider:before { transform: translateX(20px); }
         <button class="btn btn-pri" onclick="loadDirectory()">🔄 Refresh</button>
       </div>
 
-      <!-- ACTIVE USERS (Unified Grid) -->
-      <div class="section-wrap">
-        <!-- Filter bar -->
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
-          <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px">Filter:</div>
-          <button class="dmt-tab active" id="dir-tab-all" onclick="filterDirectory('all',this)">All Users</button>
-          <button class="dmt-tab" id="dir-tab-pmam" onclick="filterDirectory('PMAM',this)">PMAMs</button>
-          <button class="dmt-tab" id="dir-tab-ic" onclick="filterDirectory('I/C AB-PMJAY',this)">I/C</button>
-          <button class="dmt-tab" id="dir-tab-deo" onclick="filterDirectory('DEO',this)">DEO</button>
-          <button class="dmt-tab" id="dir-tab-admin" onclick="filterDirectory('Admin',this)">Admin</button>
-          <button class="dmt-tab" id="dir-tab-accountant" onclick="filterDirectory('Accountant',this)">Accountant</button>
-          <div style="margin-left:auto;font-size:11px;color:#6b7280" id="dirCountBadge"></div>
-        </div>
+      <!-- Main Top Sub-Tabs Bar for User Management -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
+        <button class="dmt-tab active" id="umtab-users" onclick="showUmTab('users',this)">👤 Users</button>
+        <button class="dmt-tab" id="umtab-requests" onclick="showUmTab('requests',this)">⏳ New User Requests <span id="umPendingBadge" style="background:#F59E0B;color:#fff;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:800;margin-left:4px">0</span></button>
+      </div>
 
-        <div class="users-grid" id="directoryGrid">
-          <div style="color:#9ca3af;font-style:italic;padding:20px;grid-column:1/-1">Loading directory...</div>
+      <!-- TAB PANE 1: USERS -->
+      <div class="dmt-pane active" id="umpane-users">
+        <!-- ACTIVE USERS (Unified Grid) -->
+        <div class="section-wrap">
+          <!-- Filter bar -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:0 2px 8px rgba(26,61,181,0.07)">
+            <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px">Filter:</div>
+            <button class="dmt-tab active" id="dir-tab-all" onclick="filterDirectory('all',this)">All Users</button>
+            <button class="dmt-tab" id="dir-tab-pmam" onclick="filterDirectory('PMAM',this)">PMAMs</button>
+            <button class="dmt-tab" id="dir-tab-ic" onclick="filterDirectory('I/C AB-PMJAY',this)">I/C</button>
+            <button class="dmt-tab" id="dir-tab-deo" onclick="filterDirectory('DEO',this)">DEO</button>
+            <button class="dmt-tab" id="dir-tab-admin" onclick="filterDirectory('Admin',this)">Admin</button>
+            <button class="dmt-tab" id="dir-tab-accountant" onclick="filterDirectory('Accountant',this)">Accountant</button>
+            <div style="margin-left:auto;font-size:11px;color:#6b7280" id="dirCountBadge"></div>
+          </div>
+
+          <div class="users-grid" id="directoryGrid">
+            <div style="color:#9ca3af;font-style:italic;padding:20px;grid-column:1/-1">Loading directory...</div>
+          </div>
         </div>
       </div>
 
-      <!-- USER REQUESTS SECTION (Pending / Rejected) -->
-      <div class="section-wrap" style="background: rgba(255, 255, 255, 0.4); border-color: rgba(15, 43, 140, 0.1);">
-        <div class="section-hd"><div class="section-title">User Access Requests</div></div>
-        
-        <!-- PENDING APPROVALS -->
-        <div style="background:#FFFBEB;border:2px solid #FDE68A;border-radius:12px;padding:14px;margin-bottom:14px">
-          <div style="display:flex;align-items:center;margin-bottom:10px">
-            <span style="font-size:13px;font-weight:800;color:#92400e">⏳ Pending Approvals</span>
-            <span id="pendingCntBadge" style="background:#F59E0B;color:#fff;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-left:8px">0</span>
+      <!-- TAB PANE 2: NEW USER REQUESTS -->
+      <div class="dmt-pane" id="umpane-requests" style="display:none">
+        <div class="section-wrap" style="background: rgba(255, 255, 255, 0.4); border-color: rgba(15, 43, 140, 0.1);">
+          <div class="section-hd"><div class="section-title">User Access Requests</div></div>
+          
+          <!-- PENDING APPROVALS -->
+          <div style="background:#FFFBEB;border:2px solid #FDE68A;border-radius:12px;padding:14px;margin-bottom:14px">
+            <div style="display:flex;align-items:center;margin-bottom:10px">
+              <span style="font-size:13px;font-weight:800;color:#92400e">⏳ Pending Approvals</span>
+              <span id="pendingCntBadge" style="background:#F59E0B;color:#fff;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-left:8px">0</span>
+            </div>
+            <div id="pendingUsersGrid"><div style="color:#9ca3af;font-style:italic;font-size:12px">Loading...</div></div>
           </div>
-          <div id="pendingUsersGrid"><div style="color:#9ca3af;font-style:italic;font-size:12px">Loading...</div></div>
-        </div>
 
-        <!-- REJECTED USERS -->
-        <div style="background:#FFF5F5;border:2px solid #FECACA;border-radius:12px;padding:14px;margin-bottom:0">
-          <div style="font-size:13px;font-weight:800;color:#991b1b;margin-bottom:10px">✗ Rejected Users</div>
-          <div id="rejectedUsersGrid"><div style="color:#9ca3af;font-style:italic;font-size:12px">Loading...</div></div>
+          <!-- REJECTED USERS -->
+          <div style="background:#FFF5F5;border:2px solid #FECACA;border-radius:12px;padding:14px;margin-bottom:0">
+            <div style="font-size:13px;font-weight:800;color:#991b1b;margin-bottom:10px">✗ Rejected Users</div>
+            <div id="rejectedUsersGrid"><div style="color:#9ca3af;font-style:italic;font-size:12px">Loading...</div></div>
+          </div>
         </div>
       </div>
 
@@ -3214,6 +3225,19 @@ function addUser(){
   }, function(err) {
     showToast('Failed to send OTP: ' + err, 'error');
   });
+}
+
+// ══════════════════════════════════════════════════════
+// USER MANAGEMENT — Tab switcher
+// Handles 2 top sub-tabs: users, requests
+// ══════════════════════════════════════════════════════
+function showUmTab(tab, el){
+  document.querySelectorAll('#sec-directory > div > .dmt-tab, #sec-directory > .dmt-tab-bar .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('#sec-directory > .dmt-pane').forEach(function(p){ p.classList.remove('active'); p.style.display = 'none'; });
+  if (el) el.classList.add('active');
+  var pane = document.getElementById('umpane-' + tab);
+  if (pane) { pane.classList.add('active'); pane.style.display = 'block'; }
+  if (typeof loadDirectory === 'function') loadDirectory();
 }
 
 // ══════════════════════════════════════════════════════
@@ -6649,6 +6673,8 @@ function loadAllUsers() { return;
     // Update badge
     var badge = document.getElementById('pendingCntBadge');
     if (badge) badge.textContent = pending.length || '0';
+    var umBadge = document.getElementById('umPendingBadge');
+    if (umBadge) umBadge.textContent = pending.length || '0';
     var bell = document.querySelector('.bell-badge');
     if (bell) bell.textContent = pending.length || '0';
     // Render
@@ -8958,6 +8984,10 @@ function loadAuditLog(){
 var _goSecOrig = goSec;
 goSec = function(id, el) {
   _goSecOrig(id, el);
+  if (id === 'directory') {
+    var firstTab = document.getElementById('umtab-users');
+    if (firstTab) showUmTab('users', firstTab);
+  }
   if (id === 'users')    loadAllUsers();
   if (id === 'staff')    loadStaffFromUsers();
   if (id === 'rosters') {
@@ -9833,6 +9863,8 @@ function loadDirectory() {
     // Update pending badges
     var badge = document.getElementById('pendingCntBadge');
     if (badge) badge.textContent = pending.length || '0';
+    var umBadge = document.getElementById('umPendingBadge');
+    if (umBadge) umBadge.textContent = pending.length || '0';
     var bell = document.querySelector('.bell-badge');
     if (bell) bell.textContent = pending.length || '0';
 
