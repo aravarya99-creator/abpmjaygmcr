@@ -1187,6 +1187,14 @@ input:checked + .slider:before { transform: translateX(20px); }
         <button class="um-banner-btn" id="rst-weekendroster" onclick="showRosterTab('weekendroster',this)">📆 Weekend Roster</button>
         <button class="um-banner-btn" id="rst-holidayrost" onclick="showRosterTab('holidayrost',this)">🎉 Holiday Roster</button>
         <button class="um-banner-btn" id="rst-holidaycal" onclick="showRosterTab('holidaycal',this)">📅 Holiday Calendar</button>
+
+        <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+          <span style="font-size:11px; font-weight:700; color:#94a3b8;">PMAM Preferences:</span>
+          <button type="button" class="admin-roster-lock-btn" onclick="toggleAdminRosterLock()" style="padding:6px 14px; border-radius:20px; font-size:12px; font-weight:800; border:none; cursor:pointer; background:#dcfce7; color:#166534; display:inline-flex; align-items:center; gap:6px;">
+            🔓 Open / Unlocked
+          </button>
+        </div>
+
         <button class="um-refresh-btn" onclick="showRosterTab('wardroster')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M2.5 16l1.2 1.8a10 10 0 0 0 18.8-4.3"/></svg>
           Refresh
@@ -3544,7 +3552,11 @@ function renderAdminRosterRows(list, tbody, ym) {
     var email = d.email || (item.id.indexOf('_') !== -1 ? item.id.split('_')[0] : '—');
     var choices = d.choices || {};
 
-    var pmamReqDates = Object.keys(choices).filter(function(k){ return choices[k] === 'Duty' || choices[k] === 'Off'; });
+    // Filter out Sundays from Official Holiday Roster view (Sundays belong to Weekend Roster)
+    var pmamReqDates = Object.keys(choices).filter(function(k){
+      var dt = new Date(k);
+      return (choices[k] === 'Duty' || choices[k] === 'Off') && !isNaN(dt.getTime()) && dt.getDay() !== 0;
+    });
     var reqBadgeHtml = pmamReqDates.length ? pmamReqDates.map(function(dt){
       var c = choices[dt];
       var bg = (c === 'Duty') ? '#dcfce7' : '#fee2e2';
@@ -3552,12 +3564,12 @@ function renderAdminRosterRows(list, tbody, ym) {
       return '<span style="background:'+bg+';color:'+fg+';padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;margin:2px;display:inline-block">' + dt + ' (' + c + ')</span>';
     }).join('') : '<span style="font-style:italic;color:#94a3b8;font-size:11px">No specific request</span>';
 
-    var icDutyDates = Object.keys(choices).filter(function(k){ return choices[k] === 'Duty'; });
+    var icDutyDates = Object.keys(choices).filter(function(k){
+      var dt = new Date(k);
+      return choices[k] === 'Duty' && !isNaN(dt.getTime()) && dt.getDay() !== 0;
+    });
     var icBadgeHtml = icDutyDates.length ? icDutyDates.map(function(dt){
-      var isSun = (new Date(dt).getDay() === 0);
-      var badgeBg = isSun ? '#b45309' : '#0F2B8C';
-      var label = isSun ? '🟡 ' + dt + ' (Sunday + Sat Duty)' : '🎉 ' + dt + ' (Holiday)';
-      return '<span style="background:'+badgeBg+';color:#fff;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:800;margin:2px;display:inline-block">' + label + '</span>';
+      return '<span style="background:#0F2B8C;color:#fff;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:800;margin:2px;display:inline-block">🎉 ' + dt + ' (Holiday)</span>';
     }).join('') : '<span style="font-style:italic;color:#64748b;font-size:11px">Off / No duty</span>';
 
     var isPub = (d.status === 'Published' || d.published === true);
@@ -3833,6 +3845,54 @@ function publishAdminWeekendRoster() {
   }).catch(function(err) {
     showToast('Error querying submissions: ' + err.message, 'error');
   });
+}
+
+window._adminRosterLocked = false;
+
+function initAdminRosterLockState() {
+  if (typeof db !== 'undefined' && db) {
+    db.collection('settings').doc('roster_settings').onSnapshot(function(doc){
+      window._adminRosterLocked = (doc.exists && typeof doc.data().pmamRosterLocked !== 'undefined') ? !!doc.data().pmamRosterLocked : false;
+      renderAdminRosterLockBtn();
+    }, function(err){
+      window._adminRosterLocked = false;
+      renderAdminRosterLockBtn();
+    });
+  }
+}
+
+function renderAdminRosterLockBtn() {
+  var btns = document.querySelectorAll('.admin-roster-lock-btn');
+  btns.forEach(function(b){
+    if (window._adminRosterLocked) {
+      b.style.background = '#fee2e2';
+      b.style.color = '#991b1b';
+      b.innerHTML = '🔒 Locked (Trial Basis)';
+    } else {
+      b.style.background = '#dcfce7';
+      b.style.color = '#166534';
+      b.innerHTML = '🔓 Open / Unlocked';
+    }
+  });
+}
+
+function toggleAdminRosterLock() {
+  var nextState = !window._adminRosterLocked;
+  db.collection('settings').doc('roster_settings').set({
+    pmamRosterLocked: nextState,
+    updatedAt: Date.now(),
+    updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'admin@gmc.com')
+  }, { merge: true }).then(function(){
+    showToast('PMAM Roster Submissions are now ' + (nextState ? 'LOCKED (Trial Basis)' : 'OPEN / UNLOCKED') + '!', nextState ? 'warning' : 'success');
+  }).catch(function(err){
+    showToast('Error toggling lock state: ' + err.message, 'error');
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAdminRosterLockState);
+} else {
+  initAdminRosterLockState();
 }
 
 // ══════════════════════════════════════════════════════

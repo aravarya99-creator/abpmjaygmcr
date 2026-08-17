@@ -1440,10 +1440,10 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           </div>
         </div>
 
-        <!-- Trial Basis Lock Banner -->
-        <div id="pmamRosterLockBanner" style="display:flex; align-items:center; gap:10px; background:#fffbeb; border:1.5px solid #fde68a; border-radius:12px; padding:12px 18px; margin-bottom:16px; font-size:13px; font-weight:700; color:#b45309;">
+        <!-- Trial Basis Lock Banner (Hidden by default; controlled by Admin toggle) -->
+        <div id="pmamRosterLockBanner" style="display:none; align-items:center; gap:10px; background:#fffbeb; border:1.5px solid #fde68a; border-radius:12px; padding:12px 18px; margin-bottom:16px; font-size:13px; font-weight:700; color:#b45309;">
           <span style="font-size:18px;">🔒</span>
-          <span>Roster Preference Submission is currently locked (Trial Basis). Dropdowns are view-only.</span>
+          <span>Roster Preference Submission is currently locked by Admin (Trial Basis). Dropdowns are view-only.</span>
         </div>
 
         <!-- Roster Table -->
@@ -1813,7 +1813,64 @@ function renderPmamRoster(yearMonth) {
     }).catch(function(err) {
       console.warn('Could not fetch saved roster choices from Firestore:', err);
     });
+window._pmamRosterLocked = false; // Default: unlocked
+
+function initPmamRosterLockListener() {
+  if (typeof db !== 'undefined' && db) {
+    db.collection('settings').doc('roster_settings').onSnapshot(function(doc){
+      if (doc.exists && typeof doc.data().pmamRosterLocked !== 'undefined') {
+        window._pmamRosterLocked = !!doc.data().pmamRosterLocked;
+      } else {
+        window._pmamRosterLocked = false;
+      }
+      applyRosterLockUi();
+    }, function(err){
+      window._pmamRosterLocked = false;
+      applyRosterLockUi();
+    });
   }
+}
+
+function applyRosterLockUi() {
+  var isLocked = !!window._pmamRosterLocked;
+  var btn = document.getElementById('btnSaveRosterChoices');
+  var lockBanner = document.getElementById('pmamRosterLockBanner');
+
+  if (lockBanner) lockBanner.style.display = isLocked ? 'flex' : 'none';
+
+  if (btn) {
+    if (isLocked) {
+      btn.disabled = true;
+      btn.style.opacity = '0.55';
+      btn.style.cursor = 'not-allowed';
+      btn.title = 'Roster preference submission is currently locked by Admin.';
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      btn.title = '';
+    }
+  }
+
+  document.querySelectorAll('.pmam-roster-choice').forEach(function(sel){
+    if (isLocked) {
+      sel.disabled = true;
+      sel.style.opacity = '0.7';
+      sel.style.cursor = 'not-allowed';
+      sel.onclick = function(){ alert('ℹ️ Roster Preference submission is currently disabled by Admin on a trial basis. Contact your Incharge for details.'); };
+    } else {
+      sel.disabled = false;
+      sel.style.opacity = '1';
+      sel.style.cursor = 'pointer';
+      sel.onclick = null;
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPmamRosterLockListener);
+} else {
+  initPmamRosterLockListener();
 }
 
 function savePmamRosterChoices() {
