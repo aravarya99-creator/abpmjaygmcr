@@ -1272,6 +1272,9 @@ input:checked + .slider:before { transform: translateX(20px); }
               </div>
               <div style="display:flex; align-items:center; gap:12px;">
                 <input type="month" id="adminRosterYmSel" onchange="renderAdminRoster(this.value)" style="padding:8px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:700; color:#0f172a;">
+                <button class="btn btn-pri" onclick="fetchIcRosters()" style="background:#2563eb; padding:10px 18px; border-radius:10px; font-size:13px; font-weight:800; color:#ffffff; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                  📥 Fetch I/C Submissions
+                </button>
                 <button class="btn btn-pri" id="btnAdminPublishRoster" onclick="publishAdminRoster()" style="background:#166534; padding:10px 22px; border-radius:10px; font-size:13px; font-weight:800; color:#ffffff; border:none; cursor:pointer; display:flex; align-items:center; gap:8px;">
                   🚀 Publish Official Roster &amp; Credit Comp Days
                 </button>
@@ -3433,6 +3436,148 @@ function showHolidaySubTab(mode, el) {
     var val = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
     if (typeof renderAdminRoster === 'function') renderAdminRoster(val);
   }
+}
+
+// ══════════════════════════════════════════════════════
+// OFFICIAL HOLIDAY ROSTER PUBLISHING (I/C SUBMISSIONS & ADMIN PUBLISH)
+// ══════════════════════════════════════════════════════
+function fetchIcRosters() {
+  var sel = document.getElementById('adminRosterYmSel');
+  var val = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
+  showToast('Fetching I/C Roster Submissions for ' + val + '...', 'info');
+  renderAdminRoster(val);
+}
+
+function renderAdminRoster(ym) {
+  var tbody = document.getElementById('adminRosterTbody');
+  if (!tbody) return;
+  if (!ym) {
+    var sel = document.getElementById('adminRosterYmSel');
+    ym = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
+    if (sel && !sel.value) sel.value = ym;
+  }
+
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#64748b;font-style:italic">Fetching I/C roster submissions for ' + ym + '...</td></tr>';
+
+  db.collection('holiday_roster_requests').get().then(function(snap) {
+    var list = [];
+    snap.forEach(function(doc) {
+      var d = doc.data() || {};
+      var docYm = d.yearMonth || (doc.id.indexOf('_') !== -1 ? doc.id.split('_')[1] : '');
+      if (docYm === ym || doc.id.indexOf(ym) !== -1) {
+        list.push({ id: doc.id, data: d });
+      }
+    });
+
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:28px;color:#64748b;">No I/C roster submissions found for <strong>' + ym + '</strong>.<br><span style="font-size:12px;color:#94a3b8">Make sure I/C opens <strong>I/C Portal &rarr; Roster Management</strong> and clicks <strong>Save & Recommend for Publish</strong>.</span></td></tr>';
+      return;
+    }
+
+    renderAdminRosterRows(list, tbody, ym);
+  }).catch(function(err) {
+    console.error('renderAdminRoster error:', err);
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#dc2626">Error loading submissions: ' + err.message + '</td></tr>';
+  });
+}
+
+function renderAdminRosterRows(list, tbody, ym) {
+  tbody.innerHTML = list.map(function(item, idx) {
+    var d = item.data;
+    var name = d.name || d.email || 'PMAM';
+    var email = d.email || (item.id.indexOf('_') !== -1 ? item.id.split('_')[0] : '—');
+    var choices = d.choices || {};
+
+    var pmamReqDates = Object.keys(choices).filter(function(k){ return choices[k] === 'Duty' || choices[k] === 'Off'; });
+    var reqBadgeHtml = pmamReqDates.length ? pmamReqDates.map(function(dt){
+      var c = choices[dt];
+      var bg = (c === 'Duty') ? '#dcfce7' : '#fee2e2';
+      var fg = (c === 'Duty') ? '#166534' : '#991b1b';
+      return '<span style="background:'+bg+';color:'+fg+';padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;margin:2px;display:inline-block">' + dt + ' (' + c + ')</span>';
+    }).join('') : '<span style="font-style:italic;color:#94a3b8;font-size:11px">No specific request</span>';
+
+    var icDutyDates = Object.keys(choices).filter(function(k){ return choices[k] === 'Duty'; });
+    var icBadgeHtml = icDutyDates.length ? icDutyDates.map(function(dt){
+      return '<span style="background:#0F2B8C;color:#fff;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:800;margin:2px;display:inline-block">🏥 ' + dt + '</span>';
+    }).join('') : '<span style="font-style:italic;color:#64748b;font-size:11px">Off / No duty</span>';
+
+    var isPub = (d.status === 'Published' || d.published === true);
+    var isRec = d.icRecommended || d.status === 'Recommended for Publish';
+    var statusHtml = isPub ?
+      '<span style="background:#dcfce7;color:#15803d;padding:4px 12px;border-radius:12px;font-weight:800;font-size:11px">✅ Published (Credited)</span>' :
+      isRec ?
+      '<span style="background:#fef3c7;color:#b45309;padding:4px 12px;border-radius:12px;font-weight:800;font-size:11px">⏳ Recommended by I/C</span>' :
+      '<span style="background:#f3f4f6;color:#6b7280;padding:4px 12px;border-radius:12px;font-weight:700;font-size:11px">Draft</span>';
+
+    var actionBtnHtml = isPub ?
+      '<span style="font-size:11px;color:#16a34a;font-weight:700">Published</span>' :
+      '<button class="btn btn-pri" onclick="publishAdminRosterDoc(\''+item.id+'\')" style="padding:4px 12px;font-size:11px;font-weight:800;background:#166534;border:none;border-radius:8px">🚀 Publish</button>';
+
+    return '<tr style="border-bottom:1px solid #f1f5f9">' +
+      '<td style="padding:12px;font-weight:800;color:#0f172a;font-size:13px">👤 ' + escAttr(name) + '</td>' +
+      '<td style="padding:12px;font-size:12px;color:#64748b">' + escAttr(email) + '</td>' +
+      '<td style="padding:12px;text-align:center">' + reqBadgeHtml + '</td>' +
+      '<td style="padding:12px;text-align:center">' + icBadgeHtml + '</td>' +
+      '<td style="padding:12px;text-align:center">' + statusHtml + '</td>' +
+      '<td style="padding:12px;text-align:center">' + actionBtnHtml + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function publishAdminRosterDoc(docId) {
+  var sel = document.getElementById('adminRosterYmSel');
+  var ym = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
+
+  db.collection('holiday_roster_requests').doc(docId).update({
+    status: 'Published',
+    published: true,
+    publishedAt: Date.now(),
+    publishedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'admin@gmc.com')
+  }).then(function() {
+    showToast('✅ Roster entry published successfully!', 'success');
+    renderAdminRoster(ym);
+  }).catch(function(err) {
+    showToast('Error publishing roster: ' + err.message, 'error');
+  });
+}
+
+function publishAdminRoster() {
+  var sel = document.getElementById('adminRosterYmSel');
+  var ym = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
+
+  showToast('Publishing official roster for ' + ym + '...', 'info');
+
+  db.collection('holiday_roster_requests').get().then(function(snap) {
+    var batch = db.batch();
+    var count = 0;
+    snap.forEach(function(doc) {
+      var d = doc.data() || {};
+      var docYm = d.yearMonth || (doc.id.indexOf('_') !== -1 ? doc.id.split('_')[1] : '');
+      if (docYm === ym || doc.id.indexOf(ym) !== -1) {
+        batch.update(doc.ref, {
+          status: 'Published',
+          published: true,
+          publishedAt: Date.now(),
+          publishedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'admin@gmc.com')
+        });
+        count++;
+      }
+    });
+
+    if (count === 0) {
+      showToast('No roster submissions found for ' + ym + ' to publish.', 'error');
+      return;
+    }
+
+    batch.commit().then(function() {
+      showToast('🎉 Official Roster for ' + ym + ' published successfully! (' + count + ' records updated)', 'success');
+      renderAdminRoster(ym);
+    }).catch(function(err) {
+      showToast('Error publishing roster: ' + err.message, 'error');
+    });
+  }).catch(function(err) {
+    showToast('Error querying submissions: ' + err.message, 'error');
+  });
 }
 
 // ══════════════════════════════════════════════════════
