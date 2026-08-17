@@ -2520,7 +2520,7 @@ window.addEventListener('DOMContentLoaded', function() {
     pubList.forEach(function(item){
       var d = item.data || {};
       var docYm = d.yearMonth || (item.id.indexOf('_') !== -1 ? item.id.split('_')[1] : '');
-      if ((docYm === ym || item.id.indexOf(ym) !== -1) && (d.status === 'Published' || d.published === true || d.icRecommended === true)) {
+      if ((docYm === ym || item.id.indexOf(ym) !== -1) && (d.status === 'Published' || d.published === true)) {
         var pmamName = d.name || d.email || 'PMAM';
         var choices = d.choices || {};
         Object.keys(choices).forEach(function(dt){
@@ -2626,7 +2626,7 @@ window.addEventListener('DOMContentLoaded', function() {
     pubList.forEach(function(item){
       var d = item.data || {};
       var docYm = d.yearMonth || (item.id.indexOf('_') !== -1 ? item.id.split('_')[1] : '');
-      if ((docYm === ym || item.id.indexOf(ym) !== -1) && (d.status === 'Published' || d.published === true || d.icRecommended === true)) {
+      if ((docYm === ym || item.id.indexOf(ym) !== -1) && (d.status === 'Published' || d.published === true)) {
         var pmamName = d.name || d.email || 'PMAM';
         var choices = d.choices || {};
         Object.keys(choices).forEach(function(dtStr){

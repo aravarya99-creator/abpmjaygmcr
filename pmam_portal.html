@@ -1440,6 +1440,12 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           </div>
         </div>
 
+        <!-- Trial Basis Lock Banner -->
+        <div id="pmamRosterLockBanner" style="display:flex; align-items:center; gap:10px; background:#fffbeb; border:1.5px solid #fde68a; border-radius:12px; padding:12px 18px; margin-bottom:16px; font-size:13px; font-weight:700; color:#b45309;">
+          <span style="font-size:18px;">🔒</span>
+          <span>Roster Preference Submission is currently locked (Trial Basis). Dropdowns are view-only.</span>
+        </div>
+
         <!-- Roster Table -->
         <div class="tbl-wrap" style="background:#ffffff; border-radius:14px; border:1px solid #e2e8f0; overflow:hidden;">
           <table style="width:100%; border-collapse:collapse;">
@@ -1811,6 +1817,13 @@ function renderPmamRoster(yearMonth) {
 }
 
 function savePmamRosterChoices() {
+  if (window._pmamRosterLocked) {
+    var btn = document.getElementById('btnSaveRosterChoices');
+    if (btn) btn.textContent = 'Submit Roster Preferences';
+    alert('ℹ️ Roster Preference submission is currently locked / disabled on a trial basis. Contact your Incharge for details.');
+    return;
+  }
+
   var u = (typeof getPmjayUser === 'function') ? (getPmjayUser() || {}) : {};
   var userEmail = u.email || u.id || u.userId || window._pmamUserEmail || 'pmam@gmc.com';
   var userName = u.name || u.displayName || u.email || userEmail;
