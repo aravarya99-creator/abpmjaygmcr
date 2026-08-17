@@ -1813,6 +1813,9 @@ function renderPmamRoster(yearMonth) {
     }).catch(function(err) {
       console.warn('Could not fetch saved roster choices from Firestore:', err);
     });
+  }
+}
+
 window._pmamRosterLocked = false; // Default: unlocked
 
 function initPmamRosterLockListener() {

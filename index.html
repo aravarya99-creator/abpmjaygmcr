@@ -2653,9 +2653,22 @@ window.addEventListener('DOMContentLoaded', function() {
     var wrData = LIVE.weekendRoster || {};
     var wrRows = Array.isArray(wrData.rows) ? wrData.rows : [];
     wrRows.forEach(function(r){
-      var sun = r.sunday;
-      var sat = r.saturday;
-      if (sun && sun.indexOf(ym) === 0) {
+      var sun = r.sunday || '';
+      var sat = r.saturday || '';
+      if (!sun) return;
+
+      var sunYm = '';
+      if (sun.indexOf('-') !== -1) {
+        sunYm = sun.substring(0, 7);
+      } else if (sun.indexOf('/') !== -1) {
+        var parts = sun.split('/');
+        if (parts.length === 3) {
+          if (parts[0].length === 4) sunYm = parts[0] + '-' + parts[1].padStart(2, '0');
+          else sunYm = parts[2] + '-' + parts[1].padStart(2, '0');
+        }
+      }
+
+      if (!ym || sunYm === ym || sun.indexOf(ym) === 0) {
         if (!weekendMap[sun]) {
           weekendMap[sun] = { sunday: sun, saturday: sat, pmams: [] };
         }
