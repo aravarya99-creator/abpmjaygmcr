@@ -2499,111 +2499,213 @@ window.addEventListener('DOMContentLoaded', function() {
     return html;
   }
 
+  window.lpSetHolidayMonth = function(ym) {
+    if (!ym) return;
+    window._lpHolidayMonth = ym;
+    renderInto('holidays');
+  };
+
   function renderHolidayDuty(){
-    var data = LIVE.holidayDuty || {};
-    var rows = Array.isArray(data.rows) ? data.rows : [];
-    if (!rows.length) {
-      return '<div class="cm-empty">No holiday duty roster published yet. Admin can add rows from <strong>Data Management → Holiday Duty Roster</strong>.</div>';
-    }
-    // Sort by date ascending
-    var sorted = rows.slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
-    var html = '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl">'
-      + '<thead><tr><th style="width:42px">#</th><th>Date</th><th>Day</th><th>Holiday</th><th>PMAMs on Duty</th></tr></thead>'
-      + '<tbody>';
-    sorted.forEach(function(r, i){
-      var pmams = Array.isArray(r.pmams) ? r.pmams.filter(function(p){ return (p||'').trim(); }) : [];
-      var pmamHtml = pmams.length
-        ? pmams.map(function(p){ return '<span class="cm-pill cm-pill-pmam">'+esc(p)+'</span>'; }).join('')
-        : '<span style="color:#9ca3af;font-style:italic;font-size:11px">No PMAMs assigned</span>';
-      html += '<tr><td style="text-align:center;color:#6b7280;font-weight:600">'+(i+1)+'</td>'
-            + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.date))+'</td>'
-            + '<td style="color:#475569">'+esc(weekday(r.date))+'</td>'
-            + '<td style="font-weight:600">'+esc(r.name||'')+'</td>'
-            + '<td>'+pmamHtml+'</td></tr>';
+    var ym = window._lpHolidayMonth || new Date().toISOString().substring(0, 7);
+    var now = new Date();
+    var currentYm = now.toISOString().substring(0, 7);
+    
+    var prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    var prevYm = prevDate.toISOString().substring(0, 7);
+
+    // 1. Gather all published roster requests for ym (EXCLUDING SUNDAYS)
+    var pubList = LIVE.publishedRosters || [];
+    var dateMap = {}; // { '2026-08-15': ['VINOD KUMAR', 'PAYAL SHARMA'] }
+
+    pubList.forEach(function(item){
+      var d = item.data || {};
+      var docYm = d.yearMonth || (item.id.indexOf('_') !== -1 ? item.id.split('_')[1] : '');
+      if ((docYm === ym || item.id.indexOf(ym) !== -1) && (d.status === 'Published' || d.published === true || d.icRecommended === true)) {
+        var pmamName = d.name || d.email || 'PMAM';
+        var choices = d.choices || {};
+        Object.keys(choices).forEach(function(dt){
+          var dtObj = new Date(dt);
+          // EXCLUDE SUNDAYS from Official Holiday Roster (Sundays go to Weekend Roster)
+          if (choices[dt] === 'Duty' && !isNaN(dtObj.getTime()) && dtObj.getDay() !== 0) {
+            if (!dateMap[dt]) dateMap[dt] = [];
+            if (!dateMap[dt].includes(pmamName)) dateMap[dt].push(pmamName);
+          }
+        });
+      }
     });
+
+    // 2. Fetch Holiday Calendar entries for event names
+    var calHols = (LIVE.holidayCalendar && Array.isArray(LIVE.holidayCalendar.holidays)) ? LIVE.holidayCalendar.holidays : [];
+    var holNameMap = {};
+    calHols.forEach(function(h){
+      if (h.date) holNameMap[h.date] = h.name || 'Official Holiday';
+    });
+
+    // 3. Fallback: manual rows from settings/holidays (excluding Sundays)
+    var manualData = LIVE.holidayDuty || {};
+    var manualRows = Array.isArray(manualData.rows) ? manualData.rows : [];
+    manualRows.forEach(function(r){
+      if (r.date && r.date.indexOf(ym) === 0) {
+        var dtObj = new Date(r.date);
+        if (!isNaN(dtObj.getTime()) && dtObj.getDay() !== 0) {
+          if (r.name && !holNameMap[r.date]) holNameMap[r.date] = r.name;
+          var pmams = Array.isArray(r.pmams) ? r.pmams.filter(Boolean) : [];
+          if (pmams.length) {
+            if (!dateMap[r.date]) dateMap[r.date] = [];
+            pmams.forEach(function(p){
+              if (!dateMap[r.date].includes(p)) dateMap[r.date].push(p);
+            });
+          }
+        }
+      }
+    });
+
+    var dates = Object.keys(dateMap).sort();
+
+    // Controls Header
+    var html = '<div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px 18px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">'
+      + '<div style="display:flex; align-items:center; gap:10px;">'
+      + '<label style="font-size:12.5px; font-weight:800; color:#1e293b; display:flex; align-items:center; gap:6px;"><span>🎉</span> Official Holiday Roster Month:</label>'
+      + '<input type="month" value="'+ym+'" onchange="window.lpSetHolidayMonth(this.value)" style="padding:6px 14px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:13px; font-weight:700; color:#0f172a; outline:none; background:#fff;">'
+      + '</div>'
+      + '<div style="display:flex; gap:8px; flex-wrap:wrap;">'
+      + '<button type="button" onclick="window.lpSetHolidayMonth(\''+currentYm+'\')" style="padding:6px 14px; border-radius:20px; font-size:12px; font-weight:800; cursor:pointer; border:none; background:'+(ym===currentYm?'#0F2B8C':'#e2e8f0')+'; color:'+(ym===currentYm?'#fff':'#334155')+';">Current Month ('+currentYm+')</button>'
+      + '<button type="button" onclick="window.lpSetHolidayMonth(\''+prevYm+'\')" style="padding:6px 14px; border-radius:20px; font-size:12px; font-weight:800; cursor:pointer; border:none; background:'+(ym===prevYm?'#0F2B8C':'#e2e8f0')+'; color:'+(ym===prevYm?'#fff':'#334155')+';">Previous Month ('+prevYm+')</button>'
+      + '</div>'
+      + '</div>';
+
+    if (!dates.length) {
+      html += '<div class="cm-empty">No published official holiday roster found for <strong>' + ym + '</strong>.<br><span style="font-size:12px;color:#94a3b8">Use the month selector above to switch to previous months or view roster history.</span></div>';
+      return html;
+    }
+
+    html += '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl">'
+      + '<thead><tr><th style="width:42px">#</th><th>DATE</th><th>DAY</th><th>HOLIDAY / EVENT</th><th>PMAMS ON DUTY</th></tr></thead>'
+      + '<tbody>';
+
+    dates.forEach(function(dt, i){
+      var pmams = dateMap[dt] || [];
+      var eventName = holNameMap[dt] || 'Official Holiday';
+      var pmamHtml = pmams.length
+        ? pmams.map(function(p){ return '<span class="cm-pill cm-pill-pmam" style="background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;font-weight:800;padding:4px 10px;margin:2px;display:inline-block">👤 '+esc(p)+'</span>'; }).join('')
+        : '<span style="color:#9ca3af;font-style:italic;font-size:11px">No PMAMs assigned</span>';
+
+      html += '<tr>'
+            + '<td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
+            + '<td style="font-weight:800;color:#1e293b;white-space:nowrap">'+esc(fmtDate(dt))+'</td>'
+            + '<td style="color:#475569;font-weight:700">'+esc(weekday(dt))+'</td>'
+            + '<td style="font-weight:700;color:#0F2B8C">'+esc(eventName)+'</td>'
+            + '<td>'+pmamHtml+'</td>'
+            + '</tr>';
+    });
+
     html += '</tbody></table></div></div>';
     return html;
   }
 
+  // Global active month for Weekend Roster on landing page
+  window._lpWeekendMonth = window._lpWeekendMonth || new Date().toISOString().substring(0, 7);
+  window.lpSetWeekendMonth = function(ym) {
+    if (!ym) return;
+    window._lpWeekendMonth = ym;
+    renderInto('weekend');
+  };
+
   function renderWeekendRoster(){
-    var data = LIVE.weekendRoster || {};
-    var rows = Array.isArray(data.rows) ? data.rows : [];
-    var history = Array.isArray(data.history) ? data.history : [];
+    var ym = window._lpWeekendMonth || new Date().toISOString().substring(0, 7);
+    var now = new Date();
+    var currentYm = now.toISOString().substring(0, 7);
     
-    if (!rows.length && !history.length) {
-      return '<div class="cm-empty">No weekend roster published yet. Admin can add rows from <strong>Data Management &rarr; Weekend Roster</strong>.</div>';
-    }
+    var prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    var prevYm = prevDate.toISOString().substring(0, 7);
 
-    // Prepare Current Roster rows (sorted chronologically by Saturday date)
-    var activeHtml = '';
-    if (rows.length) {
-      var sorted = rows.slice().sort(function(a,b){ return (a.saturday||'').localeCompare(b.saturday||''); });
-      activeHtml += '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
-        + '<thead><tr><th style="width:38px;text-align:center">#</th><th>PMAMs on Duty</th><th style="white-space:nowrap">Saturday</th><th style="white-space:nowrap">Sunday</th></tr></thead>'
-        + '<tbody>';
-      sorted.forEach(function(r, i){
-        var pmams = [r.pmam1, r.pmam2].filter(function(p){ return (p||'').trim(); });
-        var pmamCell = pmams.length
-          ? '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' + pmams.map(function(p){ return '<span style="display:inline-flex;align-items:center;background:#dbeafe;color:#1e3a8a;padding:3px 11px;border-radius:50px;font-size:11.5px;font-weight:700;white-space:nowrap;box-shadow:0 1px 2px rgba(30,58,138,0.06)">'+esc(p)+'</span>'; }).join('') + '</div>'
-          : '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
-        activeHtml += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
-              + '<td>'+pmamCell+'</td>'
-              + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.saturday))+'</td>'
-              + '<td style="font-weight:700;color:#1e293b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td></tr>';
-      });
-      activeHtml += '</tbody></table></div></div>';
-    } else {
-      activeHtml = '<div class="cm-empty">No active weekend roster for this week.</div>';
-    }
+    // 1. Gather all Sunday duty requests / published weekend rosters for ym
+    var pubList = LIVE.publishedRosters || [];
+    var weekendMap = {}; // { '2026-08-16' (Sunday): { sunday: '2026-08-16', saturday: '2026-08-15', pmams: ['VINOD KUMAR'] } }
 
-    // Prepare History Roster rows (deduplicated, past dates only, sorted strictly in descending date sequence)
-    var map = {};
-    var all = history.concat(rows);
-    all.forEach(function(r){ if(r.saturday) map[r.saturday] = r; });
-    var combined = Object.keys(map).map(function(k){return map[k];});
-    
-    var today = new Date().toISOString().slice(0,10);
-    var pastOnly = combined.filter(function(r){ return (r.saturday || '') < today; });
-    pastOnly.sort(function(a,b){ return (b.saturday || '').localeCompare(a.saturday || ''); }); // strict descending date sequence
+    pubList.forEach(function(item){
+      var d = item.data || {};
+      var docYm = d.yearMonth || (item.id.indexOf('_') !== -1 ? item.id.split('_')[1] : '');
+      if ((docYm === ym || item.id.indexOf(ym) !== -1) && (d.status === 'Published' || d.published === true || d.icRecommended === true)) {
+        var pmamName = d.name || d.email || 'PMAM';
+        var choices = d.choices || {};
+        Object.keys(choices).forEach(function(dtStr){
+          if (choices[dtStr] === 'Duty') {
+            var dt = new Date(dtStr);
+            if (!isNaN(dt.getTime()) && dt.getDay() === 0) { // Is Sunday
+              // Pair with preceding Saturday (Sunday - 1 day)
+              var satDt = new Date(dt.getTime() - 86400000);
+              var satStr = satDt.getFullYear() + '-' + String(satDt.getMonth() + 1).padStart(2, '0') + '-' + String(satDt.getDate()).padStart(2, '0');
 
-    var historyHtml = '';
-    if (pastOnly.length) {
-      historyHtml += '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
-        + '<thead><tr><th style="width:38px;text-align:center">#</th><th>PMAMs on Duty</th><th style="white-space:nowrap">Saturday</th><th style="white-space:nowrap">Sunday</th></tr></thead>'
-        + '<tbody>';
-      pastOnly.forEach(function(r, i){
-        var pmams = [r.pmam1, r.pmam2].filter(function(p){ return (p||'').trim(); });
-        var pmamCell = pmams.length
-          ? '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' + pmams.map(function(p){ return '<span style="display:inline-flex;align-items:center;background:#f3f4f6;color:#4b5563;border:1px solid #e5e7eb;padding:3px 11px;border-radius:50px;font-size:11.5px;font-weight:700;white-space:nowrap">'+esc(p)+'</span>'; }).join('') + '</div>'
-          : '<span style="color:#9ca3af;font-style:italic;font-size:11px">—</span>';
-        historyHtml += '<tr><td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
-              + '<td>'+pmamCell+'</td>'
-              + '<td style="font-weight:700;color:#64748b;white-space:nowrap">'+esc(fmtDate(r.saturday))+'</td>'
-              + '<td style="font-weight:700;color:#64748b;white-space:nowrap">'+esc(fmtDate(r.sunday))+'</td></tr>';
-      });
-      historyHtml += '</tbody></table></div></div>';
-    } else {
-      historyHtml = '<div class="cm-empty">No past weekend roster records found.</div>';
-    }
+              if (!weekendMap[dtStr]) {
+                weekendMap[dtStr] = { sunday: dtStr, saturday: satStr, pmams: [] };
+              }
+              if (!weekendMap[dtStr].pmams.includes(pmamName)) {
+                weekendMap[dtStr].pmams.push(pmamName);
+              }
+            }
+          }
+        });
+      }
+    });
 
-    // Render Side-by-Side 2-Column Responsive Grid Layout
-    var html = '<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap:20px; align-items:start;">'
-      + '<div>'
-      +   '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;border-bottom:2px solid #2563eb;padding-bottom:6px;">'
-      +     '<h3 style="font-size:15px;font-weight:800;color:#1e3a8a;margin:0;display:flex;align-items:center;gap:6px;"><span>📅</span> Current Weekend Roster</h3>'
-      +     '<span style="font-size:11px;font-weight:700;background:#dcfce7;color:#166534;padding:2px 10px;border-radius:12px;">Active</span>'
-      +   '</div>'
-      +   activeHtml
+    // 2. Fallback / Merge: rows from settings/weekend_roster
+    var wrData = LIVE.weekendRoster || {};
+    var wrRows = Array.isArray(wrData.rows) ? wrData.rows : [];
+    wrRows.forEach(function(r){
+      var sun = r.sunday;
+      var sat = r.saturday;
+      if (sun && sun.indexOf(ym) === 0) {
+        if (!weekendMap[sun]) {
+          weekendMap[sun] = { sunday: sun, saturday: sat, pmams: [] };
+        }
+        [r.pmam1, r.pmam2].forEach(function(p){
+          if (p && (p||'').trim() && !weekendMap[sun].pmams.includes(p.trim())) {
+            weekendMap[sun].pmams.push(p.trim());
+          }
+        });
+      }
+    });
+
+    var sunDates = Object.keys(weekendMap).sort();
+
+    // Controls Header
+    var html = '<div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px 18px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">'
+      + '<div style="display:flex; align-items:center; gap:10px;">'
+      + '<label style="font-size:12.5px; font-weight:800; color:#1e293b; display:flex; align-items:center; gap:6px;"><span>📆</span> Weekend Roster Month:</label>'
+      + '<input type="month" value="'+ym+'" onchange="window.lpSetWeekendMonth(this.value)" style="padding:6px 14px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:13px; font-weight:700; color:#0f172a; outline:none; background:#fff;">'
       + '</div>'
-      + '<div>'
-      +   '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;border-bottom:2px solid #64748b;padding-bottom:6px;">'
-      +     '<h3 style="font-size:15px;font-weight:800;color:#334155;margin:0;display:flex;align-items:center;gap:6px;"><span>📜</span> Past Weekend Rosters</h3>'
-      +     '<span style="font-size:11px;font-weight:700;background:#f1f5f9;color:#475569;padding:2px 10px;border-radius:12px;">History ('+pastOnly.length+')</span>'
-      +   '</div>'
-      +   historyHtml
+      + '<div style="display:flex; gap:8px; flex-wrap:wrap;">'
+      + '<button type="button" onclick="window.lpSetWeekendMonth(\''+currentYm+'\')" style="padding:6px 14px; border-radius:20px; font-size:12px; font-weight:800; cursor:pointer; border:none; background:'+(ym===currentYm?'#0F2B8C':'#e2e8f0')+'; color:'+(ym===currentYm?'#fff':'#334155')+';">Current Month ('+currentYm+')</button>'
+      + '<button type="button" onclick="window.lpSetWeekendMonth(\''+prevYm+'\')" style="padding:6px 14px; border-radius:20px; font-size:12px; font-weight:800; cursor:pointer; border:none; background:'+(ym===prevYm?'#0F2B8C':'#e2e8f0')+'; color:'+(ym===prevYm?'#fff':'#334155')+';">Previous Month ('+prevYm+')</button>'
       + '</div>'
       + '</div>';
 
+    if (!sunDates.length) {
+      html += '<div class="cm-empty">No published weekend/Sunday roster found for <strong>' + ym + '</strong>.<br><span style="font-size:12px;color:#94a3b8">Use the month selector above to switch to previous months or view roster history.</span></div>';
+      return html;
+    }
+
+    html += '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
+      + '<thead><tr><th style="width:42px;text-align:center">#</th><th>PMAMS ON WEEKEND DUTY</th><th>SATURDAY (DATE)</th><th>SUNDAY (DATE)</th></tr></thead>'
+      + '<tbody>';
+
+    sunDates.forEach(function(sDate, i){
+      var wItem = weekendMap[sDate];
+      var pmams = wItem.pmams || [];
+      var pmamHtml = pmams.length
+        ? pmams.map(function(p){ return '<span class="cm-pill cm-pill-pmam" style="background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;font-weight:800;padding:4px 10px;margin:2px;display:inline-block">👤 '+esc(p)+'</span>'; }).join('')
+        : '<span style="color:#9ca3af;font-style:italic;font-size:11px">No PMAMs assigned</span>';
+
+      html += '<tr>'
+            + '<td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
+            + '<td>'+pmamHtml+'</td>'
+            + '<td style="font-weight:800;color:#2563eb;white-space:nowrap">'+esc(fmtDate(wItem.saturday))+' <span style="font-size:10px;color:#64748b">(Sat)</span></td>'
+            + '<td style="font-weight:800;color:#dc2626;white-space:nowrap">'+esc(fmtDate(wItem.sunday))+' <span style="font-size:10px;color:#64748b">(Sun)</span></td>'
+            + '</tr>';
+    });
+
+    html += '</tbody></table></div></div>';
     return html;
   }
 
