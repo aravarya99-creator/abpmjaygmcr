@@ -2619,56 +2619,31 @@ window.addEventListener('DOMContentLoaded', function() {
     var prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     var prevYm = prevDate.toISOString().substring(0, 7);
 
-    // 1. Gather all Sunday duty requests / published weekend rosters for ym
-    var pubList = LIVE.publishedRosters || [];
-    var weekendMap = {}; // { '2026-08-16' (Sunday): { sunday: '2026-08-16', saturday: '2026-08-15', pmams: ['VINOD KUMAR'] } }
-
-    pubList.forEach(function(item){
-      var d = item.data || {};
-      var docYm = d.yearMonth || (item.id.indexOf('_') !== -1 ? item.id.split('_')[1] : '');
-      if ((docYm === ym || item.id.indexOf(ym) !== -1) && (d.status === 'Published' || d.published === true)) {
-        var pmamName = d.name || d.email || 'PMAM';
-        var choices = d.choices || {};
-        Object.keys(choices).forEach(function(dtStr){
-          if (choices[dtStr] === 'Duty') {
-            var dt = new Date(dtStr);
-            if (!isNaN(dt.getTime()) && dt.getDay() === 0) { // Is Sunday
-              // Pair with preceding Saturday (Sunday - 1 day)
-              var satDt = new Date(dt.getTime() - 86400000);
-              var satStr = satDt.getFullYear() + '-' + String(satDt.getMonth() + 1).padStart(2, '0') + '-' + String(satDt.getDate()).padStart(2, '0');
-
-              if (!weekendMap[dtStr]) {
-                weekendMap[dtStr] = { sunday: dtStr, saturday: satStr, pmams: [] };
-              }
-              if (!weekendMap[dtStr].pmams.includes(pmamName)) {
-                weekendMap[dtStr].pmams.push(pmamName);
-              }
-            }
-          }
-        });
-      }
-    });
-
-    // 2. Fallback / Merge: rows from settings/weekend_roster
+    // 1. Check if Admin saved manual weekend rows for ym in settings/weekend_roster
     var wrData = LIVE.weekendRoster || {};
     var wrRows = Array.isArray(wrData.rows) ? wrData.rows : [];
-    wrRows.forEach(function(r){
+    var manualMonthRows = wrRows.filter(function(r){
       var sun = r.sunday || '';
-      var sat = r.saturday || '';
-      if (!sun) return;
-
       var sunYm = '';
-      if (sun.indexOf('-') !== -1) {
-        sunYm = sun.substring(0, 7);
-      } else if (sun.indexOf('/') !== -1) {
+      if (sun.indexOf('-') !== -1) sunYm = sun.substring(0, 7);
+      else if (sun.indexOf('/') !== -1) {
         var parts = sun.split('/');
         if (parts.length === 3) {
           if (parts[0].length === 4) sunYm = parts[0] + '-' + parts[1].padStart(2, '0');
           else sunYm = parts[2] + '-' + parts[1].padStart(2, '0');
         }
       }
+      return sunYm === ym || sun.indexOf(ym) === 0;
+    });
 
-      if (!ym || sunYm === ym || sun.indexOf(ym) === 0) {
+    var weekendMap = {}; // { '2026-08-16' (Sunday): { sunday: '2026-08-16', saturday: '2026-08-15', pmams: ['VINOD KUMAR'] } }
+
+    if (manualMonthRows.length > 0) {
+      // PRECEDENCE: Admin manual weekend assignments take full control for this month
+      manualMonthRows.forEach(function(r){
+        var sun = r.sunday || '';
+        var sat = r.saturday || '';
+        if (!sun) return;
         if (!weekendMap[sun]) {
           weekendMap[sun] = { sunday: sun, saturday: sat, pmams: [] };
         }
@@ -2677,8 +2652,35 @@ window.addEventListener('DOMContentLoaded', function() {
             weekendMap[sun].pmams.push(p.trim());
           }
         });
-      }
-    });
+      });
+    } else {
+      // Fallback: Gather published Sunday duty requests from PMAM/IC workflow
+      var pubList = LIVE.publishedRosters || [];
+      pubList.forEach(function(item){
+        var d = item.data || {};
+        var docYm = d.yearMonth || (item.id.indexOf('_') !== -1 ? item.id.split('_')[1] : '');
+        if ((docYm === ym || item.id.indexOf(ym) !== -1) && (d.status === 'Published' || d.published === true)) {
+          var pmamName = d.name || d.email || 'PMAM';
+          var choices = d.choices || {};
+          Object.keys(choices).forEach(function(dtStr){
+            if (choices[dtStr] === 'Duty') {
+              var dt = new Date(dtStr);
+              if (!isNaN(dt.getTime()) && dt.getDay() === 0) { // Is Sunday
+                var satDt = new Date(dt.getTime() - 86400000);
+                var satStr = satDt.getFullYear() + '-' + String(satDt.getMonth() + 1).padStart(2, '0') + '-' + String(satDt.getDate()).padStart(2, '0');
+
+                if (!weekendMap[dtStr]) {
+                  weekendMap[dtStr] = { sunday: dtStr, saturday: satStr, pmams: [] };
+                }
+                if (!weekendMap[dtStr].pmams.includes(pmamName)) {
+                  weekendMap[dtStr].pmams.push(pmamName);
+                }
+              }
+            }
+          });
+        }
+      });
+    }
 
     var sunDates = Object.keys(weekendMap).sort();
 
