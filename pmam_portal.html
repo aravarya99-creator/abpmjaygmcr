@@ -1809,13 +1809,15 @@ function renderPmamRoster(yearMonth) {
 
   function renderTableRows(savedChoices, status, data) {
     var d = data || {};
-    var isApproved = (status === 'Approved' || status === 'Published' || status === 'Recommended for Publish' || d.published === true || d.icRecommended === true);
-    var isPublished = (status === 'Published' || d.published === true);
-    var isRecommended = (status === 'Recommended for Publish' || d.icRecommended === true);
+    var rawStatus = (status || d.status || 'Draft').trim();
+    var isPending = (rawStatus === 'Pending' || rawStatus === 'Submitted');
+    var isPublished = !isPending && (rawStatus === 'Published' || (d.published === true && !isPending));
+    var isRecommended = !isPending && (rawStatus === 'Recommended for Publish' || rawStatus === 'Approved' || (d.icRecommended === true && !isPending));
+    var isApproved = (isPublished || isRecommended) && !isPending;
 
-    var statusDisplay = isPublished ? 'Published by Admin' : (isRecommended ? 'Approved by I/C' : (status === 'Pending' ? 'Pending I/C Review' : status));
-    var badgeBg = isApproved ? '#dcfce7' : (status === 'Pending' ? '#fef3c7' : '#f1f5f9');
-    var badgeColor = isApproved ? '#15803d' : (status === 'Pending' ? '#b45309' : '#475569');
+    var statusDisplay = isPublished ? 'Published by Admin' : (isRecommended ? 'Approved by I/C' : (isPending ? 'Pending I/C Review' : 'Draft'));
+    var badgeBg = isApproved ? '#dcfce7' : (isPending ? '#fef3c7' : '#f1f5f9');
+    var badgeColor = isApproved ? '#15803d' : (isPending ? '#b45309' : '#475569');
 
     if (document.getElementById('pmamRosterStatusBadge')) {
       document.getElementById('pmamRosterStatusBadge').innerHTML = '<span style="background:'+badgeBg+'; color:'+badgeColor+'; padding:4px 14px; border-radius:14px; font-weight:800; font-size:12px;">Status: '+statusDisplay+'</span>';
@@ -1848,7 +1850,7 @@ function renderPmamRoster(yearMonth) {
                         + '  <span style="font-size:12px; font-weight:700; color:#64748b;">Off Day</span>'
                         + '</div>';
         }
-      } else if (status === 'Pending' || status === 'Submitted') {
+      } else if (isPending) {
         rowStatusHtml = '<div style="background:#fefce8; border:1.5px solid #fef08a; border-radius:10px; padding:6px 14px; display:inline-flex; align-items:center; gap:8px; text-align:left;">'
                       + '  <span style="font-size:14px;">⏳</span>'
                       + '  <div>'
@@ -2027,6 +2029,9 @@ function savePmamRosterChoices() {
     choices: choices,
     dutyCount: dutyCount,
     status: 'Pending',
+    icRecommended: false,
+    published: false,
+    adminApproved: false,
     updatedAt: Date.now()
   };
 
