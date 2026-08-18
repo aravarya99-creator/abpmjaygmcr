@@ -11,11 +11,14 @@
     
     requests: [],
     subRequests: [],
+    compDuties: [],
     rules: { casual: 15, medical: 10, maternity: 180, paternity: 15, lwp: 0 },
     
     _unsubReqs: null,
     _unsubSub: null,
     _unsubRules: null,
+    _unsubComp: null,
+    _holidayMap: {},
     
     init: function(config) {
       this.role = config.role || 'pmam';
@@ -46,6 +49,7 @@
       };
       
       this._fetchRules();
+      this._fetchCompDuties();
       this._fetchRequests();
     },
     
@@ -80,6 +84,63 @@
           });
         }
         if (self.onUpdate) self.onUpdate();
+      });
+    },
+
+    _fetchCompDuties: function() {
+      if (typeof db === 'undefined') return;
+      var self = this;
+
+      // Load holiday names map first
+      db.collection('settings').doc('holiday_calendar').get().then(function(hDoc){
+        if (hDoc.exists && Array.isArray(hDoc.data().holidays)) {
+          hDoc.data().holidays.forEach(function(h){
+            if (h.date) self._holidayMap[h.date] = h.name || 'Official Holiday';
+          });
+        }
+      }).catch(function(){});
+
+      if (this._unsubComp) this._unsubComp();
+
+      var compQuery = db.collection('holiday_roster_requests');
+      this._unsubComp = compQuery.onSnapshot(function(snap) {
+        self.compDuties = [];
+        var myEmail = (self.userEmail || '').toLowerCase().trim();
+        var myName = (self.userName || '').toLowerCase().trim();
+
+        snap.forEach(function(doc) {
+          var d = doc.data() || {};
+          var docEmail = (d.email || (doc.id.indexOf('_') !== -1 ? doc.id.split('_')[0] : '') || '').toLowerCase().trim();
+          var docName = (d.name || '').toLowerCase().trim();
+
+          var isMatch = false;
+          if (myEmail && docEmail && (docEmail === myEmail || docEmail.indexOf(myEmail) !== -1 || myEmail.indexOf(docEmail) !== -1)) isMatch = true;
+          if (myName && docName && (docName === myName || docName.indexOf(myName) !== -1 || myName.indexOf(docName) !== -1)) isMatch = true;
+          if (self.role !== 'pmam') isMatch = true; // IC / Admin can see all
+
+          // Must be approved / recommended by I/C or published by Admin
+          var isApproved = d.icRecommended === true || d.status === 'Recommended for Publish' || d.status === 'Published' || d.published === true;
+          if (isMatch && isApproved && d.choices && typeof d.choices === 'object') {
+            var choices = d.choices;
+            Object.keys(choices).forEach(function(dateStr) {
+              if (choices[dateStr] === 'Duty') {
+                var holName = self._holidayMap[dateStr] || (d.holidayNames && d.holidayNames[dateStr]) || 'Official Holiday';
+                self.compDuties.push({
+                  date: dateStr,
+                  holidayName: holName,
+                  yearMonth: d.yearMonth || dateStr.substring(0, 7),
+                  email: docEmail,
+                  name: d.name || 'PMAM',
+                  docId: doc.id
+                });
+              }
+            });
+          }
+        });
+
+        if (self.onUpdate) self.onUpdate();
+      }, function(err){
+        console.warn('Comp duties fetch error:', err);
       });
     },
     
@@ -143,14 +204,65 @@
     },
     
     // ==========================================
+    // GET AVAILABLE COMPENSATORY DUTIES (UNCONSUMED)
+    // ==========================================
+    getAvailableCompDuties: function(emailOrName, targetYm) {
+      var emailMatch = (emailOrName || this.userEmail || '').toLowerCase().trim();
+      var nameMatch = (emailOrName || this.userName || '').toLowerCase().trim();
+
+      // 1. Gather all approved duties for this user
+      var myDuties = this.compDuties.filter(function(d) {
+        if (!emailMatch && !nameMatch) return true;
+        var dEmail = (d.email || '').toLowerCase().trim();
+        var dName = (d.name || '').toLowerCase().trim();
+        var match = (emailMatch && (dEmail === emailMatch || dEmail.indexOf(emailMatch) !== -1 || emailMatch.indexOf(dEmail) !== -1)) ||
+                    (nameMatch && (dName === nameMatch || dName.indexOf(nameMatch) !== -1 || nameMatch.indexOf(dName) !== -1));
+        if (match && targetYm) {
+          return d.yearMonth === targetYm || d.date.substring(0, 7) === targetYm;
+        }
+        return match;
+      });
+
+      // 2. Identify consumed duty dates from existing non-rejected compensatory leave requests
+      var consumedDates = [];
+      this.requests.forEach(function(l) {
+        var t = (l.ltype || l.type || '').toLowerCase();
+        var isComp = t.indexOf('compensatory') !== -1;
+        var isNotRejected = l.status !== 'Rejected' && l.status !== 'Cancelled';
+        var userMatches = (!emailMatch && !nameMatch) || 
+                          (l.email && l.email.toLowerCase().trim() === emailMatch) ||
+                          (l.name && l.name.toLowerCase().trim() === nameMatch);
+
+        if (isComp && isNotRejected && userMatches) {
+          if (Array.isArray(l.claimedDutyDates)) {
+            l.claimedDutyDates.forEach(function(dt){ consumedDates.push(dt); });
+          } else if (Array.isArray(l.compDetails)) {
+            l.compDetails.forEach(function(cd){ if (cd.dutyDate) consumedDates.push(cd.dutyDate); });
+          }
+        }
+      });
+
+      // 3. Filter out consumed dates
+      return myDuties.filter(function(d) {
+        return consumedDates.indexOf(d.date) === -1;
+      });
+    },
+
+    // ==========================================
     // LEAVE BALANCES CALCULATION
     // ==========================================
-    calculateBalances: function(emailOrName) {
+    calculateBalances: function(emailOrName, targetYm) {
       var casualTaken = 0, medicalTaken = 0, compTaken = 0, lwpTaken = 0, maternityTaken = 0, paternityTaken = 0;
-      
+      var emailMatch = (emailOrName || this.userEmail || '').toLowerCase().trim();
+      var nameMatch = (emailOrName || this.userName || '').toLowerCase().trim();
+
       this.requests.forEach(function(l) {
-        // In Admin/IC portal we might need to count by name since not all records have email
-        if (l.status === 'Approved' && (l.email === emailOrName || l.name === emailOrName)) {
+        var isApproved = l.status === 'Approved';
+        var userMatches = (!emailMatch && !nameMatch) ||
+                          (l.email && l.email.toLowerCase().trim() === emailMatch) ||
+                          (l.name && l.name.toLowerCase().trim() === nameMatch);
+
+        if (isApproved && userMatches) {
           var d = parseFloat(l.days) || 0;
           var t = (l.ltype || l.type || '').toLowerCase();
           
@@ -162,16 +274,29 @@
           else if(t.indexOf('pay') !== -1 || t.indexOf('lwp') !== -1) lwpTaken += d;
         }
       });
+
+      var availableCompList = this.getAvailableCompDuties(emailOrName, targetYm);
+      var totalCompEarned = this.compDuties.filter(function(d) {
+        if (!emailMatch && !nameMatch) return true;
+        var dEmail = (d.email || '').toLowerCase().trim();
+        var dName = (d.name || '').toLowerCase().trim();
+        return (emailMatch && (dEmail === emailMatch || dEmail.indexOf(emailMatch) !== -1 || emailMatch.indexOf(dEmail) !== -1)) ||
+               (nameMatch && (dName === nameMatch || dName.indexOf(nameMatch) !== -1 || nameMatch.indexOf(dName) !== -1));
+      }).length;
       
+      var compBalance = availableCompList.length;
+
       return {
         taken: { casual: casualTaken, medical: medicalTaken, comp: compTaken, lwp: lwpTaken, maternity: maternityTaken, paternity: paternityTaken },
-        eligible: this.rules,
+        eligible: Object.assign({}, this.rules, { comp: totalCompEarned }),
         balance: {
           casual: Math.max(0, this.rules.casual - casualTaken),
           medical: Math.max(0, this.rules.medical - medicalTaken),
           maternity: Math.max(0, this.rules.maternity - maternityTaken),
-          paternity: Math.max(0, this.rules.paternity - paternityTaken)
-        }
+          paternity: Math.max(0, this.rules.paternity - paternityTaken),
+          comp: compBalance
+        },
+        availableCompDuties: availableCompList
       };
     },
     
@@ -345,6 +470,27 @@
         ? '<img src="' + reqObj.icSignatureUrl + '" style="max-height:16mm;max-width:45mm;object-fit:contain;margin-bottom:2px;display:block;margin-left:auto;margin-right:auto;">'
         : '<div style="height:14mm;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:9pt;font-style:italic;">—</div>';
 
+      var compTableHtml = '';
+      if ((ltype.toLowerCase().indexOf('compensatory') !== -1 || ltype.toLowerCase().indexOf('comp') !== -1) && Array.isArray(reqObj.compDetails) && reqObj.compDetails.length > 0) {
+        compTableHtml = '<div style="margin: 3mm 0 2mm 0;"><div style="font-weight:700;font-size:9.5pt;margin-bottom:1.5mm;color:#0f172a;">Compensatory Leave Details:</div>'
+          + '<table style="width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:2mm;">'
+          + '<thead><tr style="background:#f1f5f9;">'
+          + '<th style="border:1px solid #cbd5e1;padding:4px 6px;text-align:center;width:10mm;font-weight:700;">S.No</th>'
+          + '<th style="border:1px solid #cbd5e1;padding:4px 6px;text-align:left;font-weight:700;">Holiday Name</th>'
+          + '<th style="border:1px solid #cbd5e1;padding:4px 6px;text-align:center;font-weight:700;">Date on Duty Performed</th>'
+          + '<th style="border:1px solid #cbd5e1;padding:4px 6px;text-align:center;font-weight:700;">Leave Date Requested</th>'
+          + '</tr></thead><tbody>';
+        reqObj.compDetails.forEach(function(cd, i) {
+          compTableHtml += '<tr>'
+            + '<td style="border:1px solid #cbd5e1;padding:4px 6px;text-align:center;">' + (i + 1) + '</td>'
+            + '<td style="border:1px solid #cbd5e1;padding:4px 6px;">' + (cd.holidayName || 'Official Holiday') + '</td>'
+            + '<td style="border:1px solid #cbd5e1;padding:4px 6px;text-align:center;">' + fmtDate(cd.dutyDate) + '</td>'
+            + '<td style="border:1px solid #cbd5e1;padding:4px 6px;text-align:center;font-weight:700;">' + fmtDate(cd.leaveDateRequested) + '</td>'
+            + '</tr>';
+        });
+        compTableHtml += '</tbody></table></div>';
+      }
+
       var bodyHTML = ''
         + '<div class="date-row"><strong>Date:</strong> ' + todayStr + '</div>'
         + '<table><tbody>'
@@ -357,6 +503,7 @@
         + '<tr><td class="lbl">Return Date</td><td>' + (fmtDate(ret) || '—') + '</td></tr>'
         + '<tr><td class="lbl">Duty Assigned To</td><td>' + duty + '</td></tr>'
         + '</tbody></table>'
+        + compTableHtml
         + '<div style="page-break-inside: avoid; break-inside: avoid;">'
         + '<div class="undertaking">'
         +   '<div style="text-align:center;font-weight:700;margin-bottom:4px;font-size:10pt;text-decoration:underline">UNDERTAKING FOR PMAM DUTY COVERAGE DURING LEAVE</div>'
