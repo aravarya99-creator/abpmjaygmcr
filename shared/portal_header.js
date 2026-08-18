@@ -802,7 +802,7 @@
         userObj = typeof userJson === 'string' ? JSON.parse(userJson) : userJson;
         if (userObj.name || userObj.displayName) name = userObj.name || userObj.displayName;
         if (userObj.role || userObj.desig) role = userObj.role || userObj.desig;
-        if (userObj.photo || userObj.photoUrl) photoUrl = userObj.photo || userObj.photoUrl;
+        if (userObj.photoBase64 || userObj.photo || userObj.photoUrl) photoUrl = userObj.photoBase64 || userObj.photo || userObj.photoUrl;
       } catch(e){}
     }
 
@@ -856,7 +856,7 @@
 
                 checkPortalAccess(updatedUserObj, title);
                 updateWorkspaceSwitcher(updatedUserObj, title);
-                applyHeaderData(name, finalDisplayRole, d.photo || d.photoUrl || photoUrl);
+                applyHeaderData(name, finalDisplayRole, d.photoBase64 || d.photo || d.photoUrl || photoUrl);
               }
             }).catch(function(){ applyHeaderData(name, displayRole, photoUrl); });
           }
@@ -1178,7 +1178,7 @@
       if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser && typeof db !== 'undefined') {
         var email = firebase.auth().currentUser.email;
         if (email) {
-          db.collection('users').doc(email).set({ photo: photoUrl }, { merge: true }).catch(function(e){ console.warn(e); });
+          db.collection('users').doc(email).set({ photo: photoUrl, photoBase64: photoUrl, photoUrl: photoUrl }, { merge: true }).catch(function(e){ console.warn(e); });
         }
       }
 
