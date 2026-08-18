@@ -1444,13 +1444,15 @@ window.addEventListener('DOMContentLoaded', function() {
       snap.forEach(function(doc){
         var u = doc.data();
         if ((u.status === 'approved' || u.status === 'active') && !u.hideOnIndex) {
+          var uRoles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+          var photoSrc = u.photoBase64 || u.photo || u.photoUrl || '';
           list.push({
             _docId: doc.id,
             name: u.name || '',
-            role: u.role || '',
+            role: u.role || (uRoles.length ? uRoles[0] : 'Staff'),
+            roles: uRoles,
             ward: u.ward || '',
-            photoBase64: u.photoBase64 || ''
-            // keeping _docId for sorting purposes
+            photoBase64: photoSrc
           });
         }
       });
@@ -1519,17 +1521,22 @@ window.addEventListener('DOMContentLoaded', function() {
       RANK_GROUPS = ordered;
     })();
 
-    function groupFor(role){
-      var r = String(role || '').toLowerCase();
+    function groupFor(u){
+      var rList = Array.isArray(u.roles) && u.roles.length ? u.roles.slice() : (u.role ? [u.role] : []);
+      if (u.desig && !rList.includes(u.desig)) rList.push(u.desig);
+      var combined = rList.map(function(x){ return String(x).toLowerCase(); }).join(' ');
+
       // First try to match explicit roles
       for (var i = 0; i < RANK_GROUPS.length; i++) {
-        if (RANK_GROUPS[i].key !== 'other' && RANK_GROUPS[i].match(r)) return i;
+        if (RANK_GROUPS[i].key !== 'other' && (RANK_GROUPS[i].match(combined) || rList.some(function(x){ return RANK_GROUPS[i].match(String(x).toLowerCase()); }))) {
+          return i;
+        }
       }
       // Fallback to Administrative Staff (other)
       for (var i = 0; i < RANK_GROUPS.length; i++) {
         if (RANK_GROUPS[i].key === 'other') return i;
       }
-      return RANK_GROUPS.length; // Failsafe
+      return 0;
     }
 
     var memberOrder = (typeof window.lpGetStaffMemberOrder === 'function')
@@ -1537,7 +1544,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
     var buckets = {};
     list.forEach(function(u){
-      var gi = groupFor(u.role);
+      var gi = groupFor(u);
       (buckets[gi] = buckets[gi] || []).push(u);
     });
 

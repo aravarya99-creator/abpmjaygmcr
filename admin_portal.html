@@ -10820,8 +10820,6 @@ function loadDirectory() {
     
     snap.forEach(function(doc) {
       var u = doc.data();
-      if (u.email === ADMIN_EMAIL && u.role === 'Admin') return; // Skip main admin 
-      
       u._docId = doc.id;
       if (u.status === 'pending') {
         pending.push(u);
