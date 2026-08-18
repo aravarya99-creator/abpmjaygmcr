@@ -10486,8 +10486,8 @@ function saveCompBalances() {
   }
 }
 
-// Helper: Universal client-side auto-compression & resizing of uploaded images
-function ueCompressImage(file, maxWidth, maxHeight, quality, callback) {
+// Helper: Universal client-side auto-compression & resizing of uploaded images (Target < 20KB)
+function ueCompressImage(file, maxWidth, maxHeight, quality, asPng, callback) {
   if (!file) return;
   var reader = new FileReader();
   reader.onerror = function() {
@@ -10514,9 +10514,10 @@ function ueCompressImage(file, maxWidth, maxHeight, quality, callback) {
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, 0, 0, w, h);
       
-      // If PNG or has transparency, keep PNG, otherwise JPEG for small size
-      var isPng = (file.type === 'image/png');
-      var outUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', quality || 0.85);
+      var outUrl = asPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', quality || 0.72);
+      if (asPng && outUrl.length > 35000) {
+        outUrl = canvas.toDataURL('image/jpeg', 0.75);
+      }
       callback(outUrl);
     };
     img.src = evt.target.result;
@@ -10524,10 +10525,41 @@ function ueCompressImage(file, maxWidth, maxHeight, quality, callback) {
   reader.readAsDataURL(file);
 }
 
+// Compact helper to guarantee any existing legacy base64 from Firestore is shrunken to < 15KB
+function ueEnsureCompact(b64, maxWidth, maxHeight, quality, asPng) {
+  return new Promise(function(resolve) {
+    if (!b64 || b64.length < 35000) {
+      return resolve(b64 || '');
+    }
+    var img = new Image();
+    img.onload = function() {
+      var w = img.width;
+      var h = img.height;
+      if (w > maxWidth || h > maxHeight) {
+        var ratio = Math.min(maxWidth / w, maxHeight / h);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, w, h);
+      var res = asPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', quality || 0.72);
+      if (asPng && res.length > 35000) res = canvas.toDataURL('image/jpeg', 0.75);
+      resolve(res);
+    };
+    img.onerror = function() { resolve(b64); };
+    img.src = b64;
+  });
+}
+
 function uePreviewPhoto(input) {
   if (!input.files || !input.files[0]) return;
   var file = input.files[0];
-  ueCompressImage(file, 320, 320, 0.85, function(b64) {
+  ueCompressImage(file, 160, 160, 0.72, false, function(b64) {
     input.dataset.b64 = b64;
     var pPreview = document.getElementById('uePhotoPreview');
     if (pPreview) pPreview.innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover;">`;
@@ -10552,7 +10584,8 @@ function ueClearPhoto() {
 function uePreviewSign(input) {
   if (!input.files || !input.files[0]) return;
   var file = input.files[0];
-  ueCompressImage(file, 480, 180, 0.9, function(b64) {
+  var isPng = (file.type === 'image/png');
+  ueCompressImage(file, 350, 120, 0.75, isPng, function(b64) {
     input.dataset.b64 = b64;
     var sPreview = document.getElementById('ueSignPreview');
     if (sPreview) sPreview.innerHTML = `<img src="${b64}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
@@ -10678,8 +10711,8 @@ function saveUnifiedEdit() {
   var hideOnIndex = document.getElementById('ueHideOnIndex').checked;
   var selectedRoles = [];
   document.querySelectorAll('.ue-role-cb:checked').forEach(cb => selectedRoles.push(cb.value));
-  var pB64 = (document.getElementById('uePhotoFile') && document.getElementById('uePhotoFile').dataset.b64) || '';
-  var sB64 = (document.getElementById('ueSignFile') && document.getElementById('ueSignFile').dataset.b64) || '';
+  var rawPB64 = (document.getElementById('uePhotoFile') && document.getElementById('uePhotoFile').dataset.b64) || '';
+  var rawSB64 = (document.getElementById('ueSignFile') && document.getElementById('ueSignFile').dataset.b64) || '';
   
   if (!name) { document.getElementById('ueErr').textContent = 'Name is required.'; return; }
 
@@ -10692,23 +10725,6 @@ function saveUnifiedEdit() {
   if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
 
   var genderVal = document.getElementById('ueGender') ? document.getElementById('ueGender').value : 'Male';
-  var updates = {
-    name: name,
-    gender: genderVal,
-    status: status,
-    wards: selectedWards,
-    hideOnIndex: hideOnIndex,
-    roles: selectedRoles,
-    role: selectedRoles.length > 0 ? selectedRoles[0] : '',
-    ward: selectedWards.length > 0 ? selectedWards[0] : '',
-    photoBase64: pB64,
-    photo: pB64,
-    photoUrl: pB64,
-    signatureImage: sB64,
-    signatureUrl: sB64,
-    signature: sB64
-  };
-
   var targetDoc = docId || email;
   if (!targetDoc) {
     if (btn) { btn.textContent = origText; btn.disabled = false; }
@@ -10716,26 +10732,67 @@ function saveUnifiedEdit() {
     return;
   }
 
-  var savePromise = db.collection('users').doc(targetDoc).set(updates, { merge: true });
-  
-  // If email differs from targetDoc, sync to email doc too
-  if (email && email !== targetDoc) {
-    savePromise = savePromise.then(function() {
-      return db.collection('users').doc(email).set(updates, { merge: true });
-    });
-  }
+  // Ensure any existing legacy base64 strings are compacted to < 15KB before saving
+  Promise.all([
+    ueEnsureCompact(rawPB64, 160, 160, 0.72, false),
+    ueEnsureCompact(rawSB64, 350, 120, 0.75, false)
+  ]).then(function(compactImgs) {
+    var pB64 = compactImgs[0] || '';
+    var sB64 = compactImgs[1] || '';
 
-  savePromise.then(function() {
-    // Update memory object in _allDirectoryUsers directly
-    if (window._allDirectoryUsers) {
-      var cached = window._allDirectoryUsers.find(u => u._docId === targetDoc || u.email === email);
-      if (cached) {
-        Object.assign(cached, updates);
-      }
+    var updates = {
+      name: name,
+      gender: genderVal,
+      status: status,
+      wards: selectedWards,
+      hideOnIndex: hideOnIndex,
+      roles: selectedRoles,
+      role: selectedRoles.length > 0 ? selectedRoles[0] : '',
+      ward: selectedWards.length > 0 ? selectedWards[0] : '',
+      photoBase64: pB64,
+      signatureImage: sB64
+    };
+
+    // Scrub bloated duplicate keys to prevent Firestore 1MB document limit errors
+    if (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore.FieldValue) {
+      updates.photo = firebase.firestore.FieldValue.delete();
+      updates.photoUrl = firebase.firestore.FieldValue.delete();
+      updates.signatureUrl = firebase.firestore.FieldValue.delete();
+      updates.signature = firebase.firestore.FieldValue.delete();
     }
-    document.getElementById('unifiedEditModal').classList.remove('open');
-    showToast('User profile, photo & signature updated successfully', 'success');
-    loadDirectory();
+
+    var savePromise = db.collection('users').doc(targetDoc).set(updates, { merge: true });
+    
+    // If email differs from targetDoc, sync to email doc too
+    if (email && email !== targetDoc) {
+      savePromise = savePromise.then(function() {
+        return db.collection('users').doc(email).set(updates, { merge: true });
+      });
+    }
+
+    return savePromise.then(function() {
+      // Update memory object in _allDirectoryUsers directly
+      if (window._allDirectoryUsers) {
+        var cached = window._allDirectoryUsers.find(u => u._docId === targetDoc || u.email === email);
+        if (cached) {
+          Object.assign(cached, {
+            name: name,
+            gender: genderVal,
+            status: status,
+            wards: selectedWards,
+            hideOnIndex: hideOnIndex,
+            roles: selectedRoles,
+            role: updates.role,
+            ward: updates.ward,
+            photoBase64: pB64,
+            signatureImage: sB64
+          });
+        }
+      }
+      document.getElementById('unifiedEditModal').classList.remove('open');
+      showToast('User profile, photo & signature updated successfully', 'success');
+      loadDirectory();
+    });
   }).catch(function(e) {
     console.error(e);
     document.getElementById('ueErr').textContent = 'Error: ' + e.message;
