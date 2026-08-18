@@ -1231,23 +1231,38 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           </div>
 
           <!-- COMPENSATORY TABLE (shows only when Compensatory selected) -->
-          <div id="compSection" style="display:none; margin-top:12px; margin-bottom:14px;">
-            <div style="font-size:11px; font-weight:700; color:#0f172a; margin-bottom:6px;">Compensatory Leave Details</div>
-            <div style="overflow-x:auto; border-radius:10px; border:1px solid #e2e8f0;">
-              <table style="width:100%; border-collapse:collapse; font-size:11px; min-width:500px;">
+          <div id="compSection" style="display:none; margin-top:12px; margin-bottom:14px; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:14px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+              <div>
+                <div style="font-size:13px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                  <span>📆</span> Eligible Compensatory Leave Details (Same Month Rule)
+                </div>
+                <div style="font-size:11px; font-weight:600; color:#64748b;">
+                  Earned from Official Holiday duties approved by I/C. Enter the requested leave date for each duty.
+                </div>
+              </div>
+              <div id="compBalanceBadge" style="font-size:11px; font-weight:800; background:#dcfce7; color:#166534; padding:4px 12px; border-radius:20px; border:1px solid #86efac;">
+                Available Credits: 0
+              </div>
+            </div>
+
+            <!-- Zero balance alert banner -->
+            <div id="compZeroAlert" style="display:none; background:#fee2e2; border:1.5px solid #f87171; border-radius:10px; padding:12px 14px; color:#991b1b; font-size:12px; font-weight:700; margin-bottom:10px;">
+              ⚠️ You have 0 eligible Compensatory Leave credits on record. You must perform an Official Holiday duty approved by I/C before submitting a Compensatory Leave request.
+            </div>
+
+            <div class="tbl-wrap" style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; background:#fff;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px; min-width:550px;">
                 <thead>
-                  <tr>
-                    <th style="background:#0f172a; color:#fff; padding:8px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; width:45px;">S.No</th>
-                    <th style="background:#0f172a; color:#fff; padding:8px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase;">Holiday Name</th>
-                    <th style="background:#0f172a; color:#fff; padding:8px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase;">Date on Duty Performed</th>
-                    <th style="background:#0f172a; color:#fff; padding:8px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase;">Leave Date Requested</th>
+                  <tr style="background:#0f172a; color:#fff;">
+                    <th style="padding:10px 12px; text-align:center; font-size:11px; font-weight:700; text-transform:uppercase; width:50px;">S.No</th>
+                    <th style="padding:10px 12px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase;">Holiday Name</th>
+                    <th style="padding:10px 12px; text-align:center; font-size:11px; font-weight:700; text-transform:uppercase;">Date on Duty Performed</th>
+                    <th style="padding:10px 12px; text-align:center; font-size:11px; font-weight:700; text-transform:uppercase;">Leave Date Requested <span style="color:#f87171">*</span></th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr><td style="text-align:center; font-weight:700; padding:6px 8px; border-bottom:1px solid #f1f5f9;">1</td><td style="padding:6px 8px; border-bottom:1px solid #f1f5f9;"><select id="cd1_hol" style="width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif; background:#fff; cursor:pointer;"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd1_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif;"></td><td style="padding:6px 8px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd1_req" onclick="if(!document.getElementById('cd1_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd1_hol').value) { this.blur(); }" style="width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif;"></td></tr>
-                  <tr><td style="text-align:center; font-weight:700; padding:6px 8px; border-bottom:1px solid #f1f5f9;">2</td><td style="padding:6px 8px; border-bottom:1px solid #f1f5f9;"><select id="cd2_hol" style="width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif; background:#fff; cursor:pointer;"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd2_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif;"></td><td style="padding:6px 8px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd2_req" onclick="if(!document.getElementById('cd2_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd2_hol').value) { this.blur(); }" style="width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif;"></td></tr>
-                  <tr><td style="text-align:center; font-weight:700; padding:6px 8px; border-bottom:1px solid #f1f5f9;">3</td><td style="padding:6px 8px; border-bottom:1px solid #f1f5f9;"><select id="cd3_hol" style="width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif; background:#fff; cursor:pointer;"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd3_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif;"></td><td style="padding:6px 8px; border-bottom:1px solid #f1f5f9;"><input type="date" id="cd3_req" onclick="if(!document.getElementById('cd3_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd3_hol').value) { this.blur(); }" style="width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif;"></td></tr>
-                  <tr><td style="text-align:center; font-weight:700; padding:6px 8px;">4</td><td style="padding:6px 8px;"><select id="cd4_hol" style="width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif; background:#fff; cursor:pointer;"><option value="">-- Select Holiday --</option></select></td><td style="padding:6px 8px;"><input type="date" id="cd4_date" readonly style="background-color:#f1f5f9; cursor:not-allowed; width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif;"></td><td style="padding:6px 8px;"><input type="date" id="cd4_req" onclick="if(!document.getElementById('cd4_hol').value) { alert('Please select holiday first'); this.blur(); return false; }" onfocus="if(!document.getElementById('cd4_hol').value) { this.blur(); }" style="width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; outline:none; font-family:'Inter',sans-serif;"></td></tr>
+                <tbody id="compTableBody">
+                  <tr><td colspan="4" style="text-align:center; padding:18px; color:#64748b; font-style:italic;">Checking eligible holiday duties...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -2582,8 +2597,93 @@ function calcLvDays() {
   }
 }
 function toggleComp() {
-  var show = document.getElementById('lt2').checked;
-  document.getElementById('compSection').style.display = show ? 'block' : 'none';
+  var tEl = document.querySelector('input[name=lvType]:checked') || document.getElementById('lvTypeSel');
+  var isComp = (tEl && (tEl.value === 'Compensatory' || (tEl.value && tEl.value.toLowerCase().indexOf('comp') !== -1)));
+  var sec = document.getElementById('compSection');
+  if (sec) {
+    sec.style.display = isComp ? 'block' : 'none';
+    if (isComp) {
+      renderCompDutyRows();
+    }
+  }
+}
+
+function renderCompDutyRows() {
+  var u = (typeof getPmjayUser === 'function') ? (getPmjayUser() || {}) : {};
+  var userEmail = (u.email || '').toLowerCase().trim();
+  var tbody = document.getElementById('compTableBody');
+  var badge = document.getElementById('compBalanceBadge');
+  var zeroAlert = document.getElementById('compZeroAlert');
+  if (!tbody) return;
+
+  var duties = (typeof LeaveEngine !== 'undefined' && typeof LeaveEngine.getAvailableCompDuties === 'function')
+    ? LeaveEngine.getAvailableCompDuties(userEmail)
+    : [];
+
+  if (badge) badge.textContent = 'Available Credits: ' + duties.length;
+
+  if (duties.length === 0) {
+    if (zeroAlert) zeroAlert.style.display = 'block';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#dc2626; font-weight:700;">No unconsumed approved holiday duties found for your account.<br><span style="font-size:11px; font-weight:500; color:#64748b;">(Note: Duty choice must be marked \'Duty\' in Official Holiday Roster and recommended by I/C.)</span></td></tr>';
+    document.getElementById('lvFrom').value = '';
+    document.getElementById('lvTo').value = '';
+    document.getElementById('lvDays').value = '';
+    document.getElementById('lvReturn').value = '';
+    return;
+  }
+
+  if (zeroAlert) zeroAlert.style.display = 'none';
+
+  tbody.innerHTML = duties.map(function(d, idx) {
+    var dutyDate = d.date || '';
+    var holName = d.holidayName || 'Official Holiday';
+    var ym = d.yearMonth || dutyDate.substring(0, 7);
+    
+    // Same month boundaries
+    var minDate = ym + '-01';
+    var parts = ym.split('-');
+    var lastDay = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10), 0).getDate();
+    var maxDate = ym + '-' + String(lastDay).padStart(2, '0');
+
+    return '<tr style="border-bottom:1px solid #f1f5f9;" data-comp-row="1" data-duty-date="' + dutyDate + '" data-hol-name="' + escAttr(holName) + '" data-ym="' + ym + '">'
+      + '<td style="text-align:center; font-weight:800; color:#1e40af; padding:10px;">' + (idx + 1) + '</td>'
+      + '<td style="padding:10px;"><input type="text" value="' + escAttr(holName) + '" readonly style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; color:#0f172a; background:#f8fafc; outline:none; font-family:inherit;"></td>'
+      + '<td style="padding:10px; text-align:center;"><input type="date" value="' + dutyDate + '" readonly style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; color:#0f172a; background:#f8fafc; outline:none; font-family:inherit; text-align:center;"></td>'
+      + '<td style="padding:10px; text-align:center;"><input type="date" class="comp-req-input" data-idx="' + idx + '" min="' + minDate + '" max="' + maxDate + '" onchange="onCompLeaveDateChange()" placeholder="Select leave date" style="width:100%; border:1.5px solid #2563eb; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:800; color:#1e40af; background:#ffffff; outline:none; font-family:inherit; text-align:center; box-shadow:0 1px 4px rgba(37,99,235,0.15);"></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function onCompLeaveDateChange() {
+  var rows = document.querySelectorAll('#compTableBody tr[data-comp-row="1"]');
+  var filledDates = [];
+  rows.forEach(function(r) {
+    var inp = r.querySelector('.comp-req-input');
+    var expectedYm = r.getAttribute('data-ym');
+    if (inp && inp.value) {
+      if (expectedYm && inp.value.substring(0, 7) !== expectedYm) {
+        alert('SAME MONTH RULE: Compensatory leave must be requested within the same month (' + expectedYm + ') as the duty performed.');
+        inp.value = '';
+        return;
+      }
+      filledDates.push(inp.value);
+    }
+  });
+
+  if (filledDates.length > 0) {
+    filledDates.sort();
+    var minDate = filledDates[0];
+    var maxDate = filledDates[filledDates.length - 1];
+
+    document.getElementById('lvFrom').value = minDate;
+    document.getElementById('lvTo').value = maxDate;
+    document.getElementById('lvDays').value = filledDates.length + ' Day' + (filledDates.length > 1 ? 's' : '');
+
+    var maxDtObj = new Date(maxDate);
+    maxDtObj.setDate(maxDtObj.getDate() + 1);
+    var retStr = maxDtObj.getFullYear() + '-' + String(maxDtObj.getMonth() + 1).padStart(2, '0') + '-' + String(maxDtObj.getDate()).padStart(2, '0');
+    document.getElementById('lvReturn').value = retStr;
+  }
 }
 
 // ══════════════════════════════════════
@@ -3077,13 +3177,21 @@ function canTakeLeave(ltype, reqDays) {
   if (t.indexOf('pay') !== -1 || t.indexOf('lwp') !== -1) return {ok: true};
   
   var max = 0;
-  if (t.indexOf('casual') !== -1) max = b.balance.casual;
-  else if (t.indexOf('medical') !== -1) max = b.balance.medical;
-  else if (t.indexOf('maternity') !== -1) max = b.balance.maternity;
-  else if (t.indexOf('paternity') !== -1) max = b.balance.paternity;
-  else if (t.indexOf('compensatory') !== -1) max = 999; 
+  if (t.indexOf('casual') !== -1) max = b.balance ? b.balance.casual : 0;
+  else if (t.indexOf('medical') !== -1) max = b.balance ? b.balance.medical : 0;
+  else if (t.indexOf('maternity') !== -1) max = b.balance ? b.balance.maternity : 0;
+  else if (t.indexOf('paternity') !== -1) max = b.balance ? b.balance.paternity : 0;
+  else if (t.indexOf('compensatory') !== -1 || t.indexOf('comp') !== -1) {
+    var availDuties = (typeof LeaveEngine !== 'undefined' && typeof LeaveEngine.getAvailableCompDuties === 'function')
+      ? LeaveEngine.getAvailableCompDuties(u.email)
+      : [];
+    max = availDuties.length;
+  }
   
-  if (reqDays > max) {
+  if (reqDays <= 0 || reqDays > max) {
+    if ((t.indexOf('compensatory') !== -1 || t.indexOf('comp') !== -1) && max === 0) {
+      return {ok: false, msg: 'You have 0 eligible Compensatory Leave credits. You must have an approved Official Holiday duty on record to apply for Compensatory Off.'};
+    }
     return {ok: false, msg: 'You only have ' + max + ' days of ' + ltype + ' left.'};
   }
   return {ok: true};
@@ -3104,19 +3212,48 @@ function submitLeave() {
     if (!rEl) { msg.style.color='#dc2626'; msg.textContent='Please select a Reason for Leave.'; return; }
     if (rEl.value === 'other' && !document.getElementById('lvOther').value.trim()) { msg.style.color='#dc2626'; msg.textContent='Please specify the reason.'; return; }
     
-    var tEl  = document.querySelector('input[name=lvType]:checked');
-    if (!tEl) { msg.style.color='#dc2626'; msg.textContent='Please select a Type of Leave.'; return; }
+    var tEl  = document.querySelector('input[name=lvType]:checked') || document.getElementById('lvTypeSel');
+    if (!tEl || !tEl.value) { msg.style.color='#dc2626'; msg.textContent='Please select a Type of Leave.'; return; }
     
-    var reason = (rEl.value === 'other') ? document.getElementById('lvOther').value.trim() : rEl.value;
-    var u = getPmjayUser();
+    var reason = (rEl && rEl.value === 'other') ? document.getElementById('lvOther').value.trim() : (rEl ? rEl.value : document.getElementById('lvReasonSel').value);
+    var u = getPmjayUser() || {};
 
     var dLabelStr = document.getElementById('lvDays').value || "0";
     var reqDays = parseInt(dLabelStr) || 0;
     
     var chk = canTakeLeave(tEl.value, reqDays);
     if(!chk.ok) {
-      alert("LIMIT EXCEEDED: " + chk.msg);
+      alert("VALIDATION ERROR: " + chk.msg);
       return;
+    }
+
+    var compDetails = [];
+    var claimedDutyDates = [];
+
+    if (tEl.value === 'Compensatory' || tEl.value.toLowerCase().indexOf('comp') !== -1) {
+      var compRows = document.querySelectorAll('#compTableBody tr[data-comp-row="1"]');
+      compRows.forEach(function(r) {
+        var dutyDate = r.getAttribute('data-duty-date');
+        var holName = r.getAttribute('data-hol-name');
+        var expectedYm = r.getAttribute('data-ym');
+        var reqInp = r.querySelector('.comp-req-input');
+        if (reqInp && reqInp.value) {
+          if (expectedYm && reqInp.value.substring(0, 7) !== expectedYm) {
+            throw new Error('SAME MONTH RULE: Compensatory leave must be requested within the same month (' + expectedYm + ') as the duty performed.');
+          }
+          compDetails.push({
+            holidayName: holName,
+            dutyDate: dutyDate,
+            leaveDateRequested: reqInp.value
+          });
+          claimedDutyDates.push(dutyDate);
+        }
+      });
+
+      if (compDetails.length === 0) {
+        alert('Please fill the "Leave Date Requested" for at least one eligible holiday duty in the Compensatory Leave Details table.');
+        return;
+      }
     }
 
     var req = {
@@ -3134,6 +3271,12 @@ function submitLeave() {
       desig: 'PMAM',
       timestamp: Date.now()
     };
+
+    if (compDetails.length > 0) {
+      req.compDetails = compDetails;
+      req.claimedDutyDates = claimedDutyDates;
+    }
+
     msg.style.color = '#1A3DB5';
     msg.textContent = 'Submitting leave request...';
 
@@ -3485,6 +3628,23 @@ function printLeaveForm() {
   var other  = document.getElementById('lvOther').value   || '';
   var rEl    = document.querySelector('input[name=lvReason]:checked');
   var reason = rEl ? (rEl.value==='other' ? 'Any Other: '+other : rEl.value) : '—';
+  var compDetails = [];
+  if (ltype === 'Compensatory' || ltype.toLowerCase().indexOf('comp') !== -1) {
+    var compRows = document.querySelectorAll('#compTableBody tr[data-comp-row="1"]');
+    compRows.forEach(function(r) {
+      var dutyDate = r.getAttribute('data-duty-date');
+      var holName = r.getAttribute('data-hol-name');
+      var reqInp = r.querySelector('.comp-req-input');
+      if (reqInp && reqInp.value) {
+        compDetails.push({
+          holidayName: holName,
+          dutyDate: dutyDate,
+          leaveDateRequested: reqInp.value
+        });
+      }
+    });
+  }
+
   var reqObj = {
     name: name,
     desig: desig,
@@ -3496,6 +3656,7 @@ function printLeaveForm() {
     duty: duty,
     ltype: ltype,
     reason: reason,
+    compDetails: compDetails,
     applicantSignatureUrl: (window._pmamUserData && window._pmamUserData.signatureImage) || null
   };
 
