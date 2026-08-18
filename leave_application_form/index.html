@@ -177,6 +177,43 @@
 
         </div>
 
+        <!-- Compensatory Leave Details Section (Dynamic) -->
+        <div id="comp-details-box" style="display:none; margin: 16px 0; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <div>
+              <div style="font-size:13px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                <span>📆</span> Eligible Compensatory Leave Details (Same Month Rule)
+              </div>
+              <div style="font-size:11px; font-weight:600; color:#64748b;">
+                Auto-populated from approved Official Holiday duty records. Fill requested leave date for each duty.
+              </div>
+            </div>
+            <div id="form-comp-badge" style="font-size:11px; font-weight:800; background:#dcfce7; color:#166534; padding:4px 12px; border-radius:20px; border:1px solid #86efac;">
+              Available: 0
+            </div>
+          </div>
+
+          <div id="form-comp-zero-alert" style="display:none; background:#fee2e2; border:1.5px solid #f87171; border-radius:10px; padding:10px 14px; color:#991b1b; font-size:12px; font-weight:700; margin-bottom:10px;">
+            ⚠️ You have 0 eligible Compensatory Leave credits. You must perform an approved Official Holiday duty to claim Compensatory Off.
+          </div>
+
+          <div style="border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; background:#fff;">
+            <table style="width:100%; border-collapse:collapse; font-size:12px;">
+              <thead>
+                <tr style="background:#0f172a; color:#fff;">
+                  <th style="padding:8px 10px; text-align:center; width:45px;">S.No</th>
+                  <th style="padding:8px 10px; text-align:left;">Holiday Name</th>
+                  <th style="padding:8px 10px; text-align:center;">Date on Duty Performed</th>
+                  <th style="padding:8px 10px; text-align:center;">Leave Date Requested *</th>
+                </tr>
+              </thead>
+              <tbody id="form-comp-tbody">
+                <tr><td colspan="4" style="text-align:center; padding:14px; color:#64748b; font-style:italic;">No eligible holiday duties loaded.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Action Buttons -->
         <div class="form-actions">
           <button type="button" id="btn-clear" class="btn btn-outline">
