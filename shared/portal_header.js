@@ -1147,18 +1147,39 @@
 
   global.phHandlePhotoChange = function(input) {
     if (input.files && input.files[0]) {
+      var file = input.files[0];
       var reader = new FileReader();
       reader.onload = function(e) {
-        var img = document.getElementById('phModalAvatarImg');
-        var inits = document.getElementById('phModalAvatarInitials');
-        if (img) {
-          img.src = e.target.result;
-          img.style.display = 'block';
-        }
-        if (inits) inits.style.display = 'none';
-        window._tempNewPhotoUrl = e.target.result;
+        var img = new Image();
+        img.onload = function() {
+          var maxWidth = 160, maxHeight = 160;
+          var w = img.width, h = img.height;
+          if (w > maxWidth || h > maxHeight) {
+            var ratio = Math.min(maxWidth / w, maxHeight / h);
+            w = Math.round(w * ratio);
+            h = Math.round(h * ratio);
+          }
+          var canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, w, h);
+          var b64 = canvas.toDataURL('image/jpeg', 0.72);
+          
+          var avatarImg = document.getElementById('phModalAvatarImg');
+          var inits = document.getElementById('phModalAvatarInitials');
+          if (avatarImg) {
+            avatarImg.src = b64;
+            avatarImg.style.display = 'block';
+          }
+          if (inits) inits.style.display = 'none';
+          window._tempNewPhotoUrl = b64;
+        };
+        img.src = e.target.result;
       };
-      reader.readAsDataURL(input.files[0]);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -1178,7 +1199,12 @@
       if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser && typeof db !== 'undefined') {
         var email = firebase.auth().currentUser.email;
         if (email) {
-          db.collection('users').doc(email).set({ photo: photoUrl, photoBase64: photoUrl, photoUrl: photoUrl }, { merge: true }).catch(function(e){ console.warn(e); });
+          var updates = { photoBase64: photoUrl };
+          if (firebase.firestore && firebase.firestore.FieldValue) {
+            updates.photo = firebase.firestore.FieldValue.delete();
+            updates.photoUrl = firebase.firestore.FieldValue.delete();
+          }
+          db.collection('users').doc(email).set(updates, { merge: true }).catch(function(e){ console.warn(e); });
         }
       }
 
