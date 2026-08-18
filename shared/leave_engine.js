@@ -109,9 +109,12 @@
         snap.forEach(function(doc) {
           var d = doc.data() || {};
           var docEmail = (d.email || d.userEmail || d.userId || '').toLowerCase().trim();
+          var rawStatus = (d.status || '').trim();
 
-          // Must be approved / recommended by I/C or published by Admin
-          var isApproved = d.icRecommended === true || d.status === 'Recommended for Publish' || d.status === 'Published' || d.published === true || d.status === 'Approved';
+          // Must be approved / recommended by I/C or published by Admin, and NOT pending or draft
+          var isPending = (rawStatus === 'Pending' || rawStatus === 'Submitted' || rawStatus === 'Not Submitted' || !rawStatus);
+          var isApproved = !isPending && (rawStatus === 'Recommended for Publish' || rawStatus === 'Published' || rawStatus === 'Approved' || (d.published === true && !isPending) || (d.icRecommended === true && !isPending));
+
           if (isApproved && d.choices && typeof d.choices === 'object') {
             var choices = d.choices;
             Object.keys(choices).forEach(function(dateStr) {
