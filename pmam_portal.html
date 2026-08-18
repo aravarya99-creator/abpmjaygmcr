@@ -545,17 +545,9 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="sbi" onclick="goSec('dashboard',this)" title="Dashboard">
-      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-      <div class="sbl">Dashboard</div>
-    </div>
-    <div class="sbi active" onclick="goSec('fillReport',this)" title="Fill Report">
+    <div class="sbi active" onclick="goSec('reports',this)" title="Reports">
       <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-      <div class="sbl">Fill Report</div>
-    </div>
-    <div class="sbi" onclick="goSec('myRecords',this)" title="My Records">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-      <div class="sbl">My Records</div>
+      <div class="sbl">Reports</div>
     </div>
     <div class="sbi" onclick="goSec('leave',this)" title="Leave">
       <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
@@ -570,201 +562,192 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
   <!-- CONTENT -->
   <div class="content">
 
-    <!-- DASHBOARD -->
-    <div class="sec" id="sec-dashboard">
-      <div style="margin-bottom:16px">
-        <div style="font-size:12px;color:#93c5fd;font-weight:600">Hello, <strong id="dashName" style="color:#ffffff"></strong></div>
-        <div style="font-size:20px;font-weight:800;color:#ffffff;margin-top:2px">My Dashboard</div>
-        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="dashDate"></div>
-      </div>
-      <div id="dashAlert" style="background:rgba(245,158,11,0.15);border:1.5px solid rgba(245,158,11,0.4);border-radius:14px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px;box-shadow:0 4px 15px rgba(245,158,11,0.1)">
-        <div style="color:#fbbf24;font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px">⚠️ Today's report not filled yet!</div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:11px;color:#fef08a;font-weight:600">Please fill before 5:00 PM</span>
-          <button class="btn btn-pri" style="height:32px;font-size:11px;padding:0 16px;" onclick="goSec('fillReport',null)">Fill Now →</button>
-        </div>
-      </div>
-      <div class="metrics-grid">
-        <div class="mcard c1"><div class="mcard-num" id="dIPD">0</div><div class="mcard-label">Total Ward IPD</div></div>
-        <div class="mcard c2"><div class="mcard-num" id="dReg">0</div><div class="mcard-label">Total Register</div></div>
-        <div class="mcard c3"><div class="mcard-num" id="dPre">0</div><div class="mcard-label">Total Preauth</div></div>
-        <div class="mcard c4"><div class="mcard-num" id="dDis">0</div><div class="mcard-label">Total Discharge</div></div>
-        <div class="mcard c5 has-currency"><div class="mcard-num" id="dClm">₹0</div><div class="mcard-label">Total Claim</div></div>
-        <div class="mcard c6"><div class="mcard-num" id="dConv">—</div><div class="mcard-label">Overall Conv%</div></div>
-      </div>
-      <div class="card">
-        <div class="card-hd">All My Entries</div>
-        <div class="tbl-wrap">
-          <table><thead><tr><th>Date</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th></tr></thead>
-          <tbody id="dashTbody"><tr><td colspan="11" class="empty-td">No entries yet — fill your first daily report</td></tr></tbody></table>
-        </div>
-      </div>
-    </div>
+    <!-- REPORTS SECTION (Unified: Fill Report + My Records) -->
+    <div class="sec active" id="sec-reports">
+      <style>
+        .rep-tab { padding:8px 18px;font-size:12px;border-radius:10px;border:1.5px solid rgba(26,61,181,0.2);cursor:pointer;font-weight:700;color:#1A3DB5;background:#F0F4FF;transition:all 0.18s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;font-family:inherit; }
+        .rep-tab:hover { background:#E2ECFF;color:#0F2B8C;border-color:#1A3DB5; }
+        .rep-tab.active { background:linear-gradient(90deg,#0F2B8C,#1A3DB5);color:#fff;border-color:#0F2B8C;box-shadow:0 3px 10px rgba(26,61,181,0.25); }
+        .rep-pane { display:none; }
+        .rep-pane.active { display:block; }
+      </style>
 
-    <!-- FILL REPORT -->
-    <div class="sec active" id="sec-fillReport">
-      <div class="fr-card">
-        <div class="fr-card-header">
-          <div class="fr-card-header-left">
-            <div class="fr-card-title">Fill Today's Report</div>
-            <div class="fr-name-badge" id="pmamNameBadge"></div>
-          </div>
-          <div class="fr-alert-pill" id="fillBadge">
-            <svg viewBox="0 0 24 24" fill="#E65100" style="width:14px;height:14px;flex-shrink:0;"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-            Today's report not filled yet
-          </div>
-        </div>
-        <div id="flagCorrectionBanner" style="display:none;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);border-radius:10px;padding:10px 18px;font-size:12px;color:#fbbf24;font-weight:700;margin:10px 16px 0 16px">
-          ✏️ You are correcting a flagged report for <span id="flagCorrectionDate"></span>.
-          The original values are pre-filled — correct the wrong fields and click Submit.
-        </div>
-        <div class="fr-sec-banner">Basic Information</div>
-        <div class="fr-section" style="padding-top:6px">
-          <div class="fr-fields-row">
-            <div class="fr-field" style="width:145px">
-              <label>Date</label>
-              <input type="date" id="eDate">
-            </div>
-            <div class="fr-field" style="width:170px">
-              <label>PMAM Name</label>
-              <input type="text" id="ePmam" value="" disabled>
-            </div>
-            <div class="fr-field" style="flex:0.5;min-width:160px">
-              <label>Select Ward</label>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <select id="eWard" style="flex:1;min-width:140px;height:38px;padding:0 12px;border:1.5px solid #CE93D8;border-radius:8px;font-size:12px;background:#ffffff;color:#2D2D2D;outline:none;font-family:'Inter',sans-serif" data-ward-select="1">
-                  <option value="">-- Select Ward --</option>
-                  <option>Orthopaedics</option><option>Male Surgery Ward</option>
-                  <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
-                  <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
-                  <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
-                  <option>Optha</option><option>Onco</option><option>Gynae</option>
-                  <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
-                </select>
-                <button class="fr-ward-btn" onclick="addWard()">+ Add</button>
-                <span id="wardTags" class="fr-ward-inline"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="fr-divider"></div>
-        <div class="fr-sec-banner">Case Data</div>
-        <div class="fr-section" style="padding-top:6px;overflow-x:auto">
-          <div class="fr-fields-row" style="flex-wrap:nowrap">
-            <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eIPD">
-              <label>Ward IPD</label>
-              <input type="number" id="eIPD" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Ward IPD')">
-            </div>
-            <div class="fr-field" style="flex:1;min-width:95px" id="wrap-eMed">
-              <label>Conservative</label>
-              <input type="number" id="eMed" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Conservative');autoReg()">
-            </div>
-            <div class="fr-field" style="flex:1;min-width:85px" id="wrap-eSurg">
-              <label>Surgery Cases</label>
-              <input type="number" id="eSurg" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Surgery Cases');autoReg()">
-            </div>
-            <div class="fr-field" style="flex:1;min-width:80px;position:relative" id="wrap-eReg">
-              <label>Register</label>
-              <input type="number" id="eReg" placeholder="" readonly>
-              <span class="fr-auto-tag">AUTO</span>
-            </div>
-            <div class="fr-field" style="flex:1;min-width:95px;position:relative" id="wrap-ePre">
-              <label>Preauth Init</label>
-              <input type="number" id="ePre" placeholder="" readonly>
-              <span class="fr-auto-tag">AUTO</span>
-            </div>
-            <div class="fr-field" style="flex:1;min-width:105px" id="wrap-ePreAmt">
-              <label>Preauth Amt (₹)</label>
-              <div class="fr-rupee-wrap" onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'" onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
-                <span class="fr-rupee-sym">₹</span>
-                <input type="number" id="ePreAmt" placeholder="Amount" min="0" class="fr-rupee-input" oninput="capAmount(this,'Preauth Amt')">
-              </div>
-            </div>
-            <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eDis">
-              <label>Discharge</label>
-              <input type="number" id="eDis" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Discharge')">
-            </div>
-            <div class="fr-field" style="flex:1;min-width:105px" id="wrap-eClm">
-              <label>Claim Amt (₹)</label>
-              <div class="fr-rupee-wrap" onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'" onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
-                <span class="fr-rupee-sym">₹</span>
-                <input type="number" id="eClm" placeholder="Amount" min="0" class="fr-rupee-input" oninput="capAmount(this,'Claim Amt')">
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="entryMsg" style="padding:2px 18px 4px;font-size:12px;font-weight:500;min-height:20px"></div>
-        <div class="fr-action-row">
-          <button class="fr-btn-sec" onclick="clearForm()">Clear</button>
-          <button class="fr-btn-pri" onclick="saveEntry()">Save Report</button>
-        </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+        <button class="rep-tab active" id="reptab-fill" onclick="showReportsTab('fill', this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Fill Report
+        </button>
+        <button class="rep-tab" id="reptab-records" onclick="showReportsTab('records', this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          My Records
+        </button>
       </div>
-      <div class="fr-tbl-card">
-        <div class="fr-tbl-header">
-          <span>Today's Entries</span>
-          <span class="fr-tbl-note">Only today's data — check Records for other dates</span>
-        </div>
-        <div class="tbl-wrap">
-          <table><thead><tr><th>Date</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Action</th></tr></thead>
-          <tbody id="entryTbody"><tr><td colspan="12" class="empty-td">No entries today yet</td></tr></tbody></table>
-        </div>
-      </div>
-    </div>
 
-    <!-- MY RECORDS -->
-    <div class="sec" id="sec-myRecords">
-      <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(12px);border-radius:20px;border:1.5px solid rgba(255,255,255,0.85);padding:22px;box-shadow:0 4px 16px rgba(30,80,200,0.06);margin-bottom:18px;color:#0F2B8C">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-          <div style="font-size:13px;font-weight:800;color:#0F2B8C;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:8px">
-            <div style="width:8px;height:8px;border-radius:50%;background:#1A3DB5;flex-shrink:0;"></div>
-            My Records
-          </div>
-          <span id="recCount" style="background:#E8EFFF;color:#1A3DB5;border:1px solid rgba(26,61,181,0.2);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700"></span>
-        </div>
-        <!-- FILTERS -->
-        <div class="frow" style="margin-bottom:14px;align-items:flex-end">
-          <div class="fld"><label>From Date</label><input type="date" id="recFrom" style="width:150px"></div>
-          <div class="fld"><label>To Date</label><input type="date" id="recTo" style="width:150px"></div>
-          <div class="fld"><label>Ward</label>
-            <select id="recWard" style="width:170px" data-ward-select="1" data-ward-extras="All Wards">
-              <option value="">All Wards</option>
-              <option>Orthopaedics</option><option>Male Surgery Ward</option>
-              <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
-              <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
-              <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
-              <option>Optha</option><option>Onco</option><option>Gynae</option>
-              <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
-            </select>
-          </div>
-          <div class="fld" style="align-self:center;padding-bottom:4px">
-            <label style="visibility:hidden">View</label>
-            <div class="ios-toggle" title="Toggle between per-entry and day-cumulative view">
-              <span class="ios-label" id="recModeLabelEntry">Per-Entry</span>
-              <label class="ios-switch">
-                <input type="checkbox" id="recModeToggle" onchange="recToggleDayMode()">
-                <span class="ios-slider"></span>
-              </label>
-              <span class="ios-label off" id="recModeLabelDay">Day-Cumulative</span>
+      <!-- SUB-TAB 1: FILL REPORT -->
+      <div class="rep-pane active" id="reppane-fill">
+        <div class="fr-card">
+          <div class="fr-card-header">
+            <div class="fr-card-header-left">
+              <div class="fr-card-title">Fill Today's Report</div>
+              <div class="fr-name-badge" id="pmamNameBadge"></div>
+            </div>
+            <div class="fr-alert-pill" id="fillBadge">
+              <svg viewBox="0 0 24 24" fill="#E65100" style="width:14px;height:14px;flex-shrink:0;"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+              Today's report not filled yet
             </div>
           </div>
-          <button class="btn btn-pri" style="margin-top:18px" onclick="filterRecords()">Filter</button>
-          <button class="btn btn-sec" style="margin-top:18px" onclick="clearRecordsFilter()">Clear</button>
+          <div id="flagCorrectionBanner" style="display:none;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);border-radius:10px;padding:10px 18px;font-size:12px;color:#fbbf24;font-weight:700;margin:10px 16px 0 16px">
+            ✏️ You are correcting a flagged report for <span id="flagCorrectionDate"></span>.
+            The original values are pre-filled — correct the wrong fields and click Submit.
+          </div>
+          <div class="fr-sec-banner">Basic Information</div>
+          <div class="fr-section" style="padding-top:6px">
+            <div class="fr-fields-row">
+              <div class="fr-field" style="width:145px">
+                <label>Date</label>
+                <input type="date" id="eDate">
+              </div>
+              <div class="fr-field" style="width:170px">
+                <label>PMAM Name</label>
+                <input type="text" id="ePmam" value="" disabled>
+              </div>
+              <div class="fr-field" style="flex:0.5;min-width:160px">
+                <label>Select Ward</label>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                  <select id="eWard" style="flex:1;min-width:140px;height:38px;padding:0 12px;border:1.5px solid #CE93D8;border-radius:8px;font-size:12px;background:#ffffff;color:#2D2D2D;outline:none;font-family:'Inter',sans-serif" data-ward-select="1">
+                    <option value="">-- Select Ward --</option>
+                    <option>Orthopaedics</option><option>Male Surgery Ward</option>
+                    <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
+                    <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
+                    <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
+                    <option>Optha</option><option>Onco</option><option>Gynae</option>
+                    <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
+                  </select>
+                  <button class="fr-ward-btn" onclick="addWard()">+ Add</button>
+                  <span id="wardTags" class="fr-ward-inline"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="fr-divider"></div>
+          <div class="fr-sec-banner">Case Data</div>
+          <div class="fr-section" style="padding-top:6px;overflow-x:auto">
+            <div class="fr-fields-row" style="flex-wrap:nowrap">
+              <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eIPD">
+                <label>Ward IPD</label>
+                <input type="number" id="eIPD" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Ward IPD')">
+              </div>
+              <div class="fr-field" style="flex:1;min-width:95px" id="wrap-eMed">
+                <label>Conservative</label>
+                <input type="number" id="eMed" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Conservative');autoReg()">
+              </div>
+              <div class="fr-field" style="flex:1;min-width:85px" id="wrap-eSurg">
+                <label>Surgery Cases</label>
+                <input type="number" id="eSurg" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Surgery Cases');autoReg()">
+              </div>
+              <div class="fr-field" style="flex:1;min-width:80px;position:relative" id="wrap-eReg">
+                <label>Register</label>
+                <input type="number" id="eReg" placeholder="" readonly>
+                <span class="fr-auto-tag">AUTO</span>
+              </div>
+              <div class="fr-field" style="flex:1;min-width:95px;position:relative" id="wrap-ePre">
+                <label>Preauth Init</label>
+                <input type="number" id="ePre" placeholder="" readonly>
+                <span class="fr-auto-tag">AUTO</span>
+              </div>
+              <div class="fr-field" style="flex:1;min-width:105px" id="wrap-ePreAmt">
+                <label>Preauth Amt (₹)</label>
+                <div class="fr-rupee-wrap" onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'" onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
+                  <span class="fr-rupee-sym">₹</span>
+                  <input type="number" id="ePreAmt" placeholder="Amount" min="0" class="fr-rupee-input" oninput="capAmount(this,'Preauth Amt')">
+                </div>
+              </div>
+              <div class="fr-field" style="flex:1;min-width:80px" id="wrap-eDis">
+                <label>Discharge</label>
+                <input type="number" id="eDis" placeholder="Enter number" min="0" max="30" oninput="warnAndCap(this,30,'Discharge')">
+              </div>
+              <div class="fr-field" style="flex:1;min-width:105px" id="wrap-eClm">
+                <label>Claim Amt (₹)</label>
+                <div class="fr-rupee-wrap" onfocusin="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 0 0 3px rgba(91,45,142,0.08)'" onfocusout="this.style.borderColor='#CE93D8';this.style.boxShadow='none'">
+                  <span class="fr-rupee-sym">₹</span>
+                  <input type="number" id="eClm" placeholder="Amount" min="0" class="fr-rupee-input" oninput="capAmount(this,'Claim Amt')">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="entryMsg" style="padding:2px 18px 4px;font-size:12px;font-weight:500;min-height:20px"></div>
+          <div class="fr-action-row">
+            <button class="fr-btn-sec" onclick="clearForm()">Clear</button>
+            <button class="fr-btn-pri" onclick="saveEntry()">Save Report</button>
+          </div>
         </div>
-        <!-- SUMMARY STRIP -->
-        <div class="metrics-grid" style="margin-bottom:14px">
-          <div class="mcard c1"><div class="mcard-num" id="rec-s-ipd">—</div><div class="mcard-label">Total IPD</div></div>
-          <div class="mcard c2"><div class="mcard-num" id="rec-s-reg">—</div><div class="mcard-label">Total Register</div></div>
-          <div class="mcard c3"><div class="mcard-num" id="rec-s-pre">—</div><div class="mcard-label">Total Preauth</div></div>
-          <div class="mcard c4"><div class="mcard-num" id="rec-s-dis">—</div><div class="mcard-label">Total Discharge</div></div>
-          <div class="mcard c5"><div class="mcard-num" id="rec-s-clm">—</div><div class="mcard-label">Total Claim (₹)</div></div>
-          <div class="mcard c6"><div class="mcard-num" id="rec-s-conv">—</div><div class="mcard-label">Conversion %</div></div>
+        <div class="fr-tbl-card">
+          <div class="fr-tbl-header">
+            <span>Today's Entries</span>
+            <span class="fr-tbl-note">Only today's data — check My Records for other dates</span>
+          </div>
+          <div class="tbl-wrap">
+            <table><thead><tr><th>Date</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt</th><th>Discharge</th><th>Claim</th><th>Conv%</th><th>Action</th></tr></thead>
+            <tbody id="entryTbody"><tr><td colspan="12" class="empty-td">No entries today yet</td></tr></tbody></table>
+          </div>
         </div>
-        <!-- TABLE -->
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Date</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th><th>Action</th></tr></thead>
-            <tbody id="recTbody"><tr><td colspan="12" class="empty-td">No records yet — fill your first daily report</td></tr></tbody>
-          </table>
+      </div>
+
+      <!-- SUB-TAB 2: MY RECORDS -->
+      <div class="rep-pane" id="reppane-records">
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(12px);border-radius:20px;border:1.5px solid rgba(255,255,255,0.85);padding:22px;box-shadow:0 4px 16px rgba(30,80,200,0.06);margin-bottom:18px;color:#0F2B8C">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div style="font-size:13px;font-weight:800;color:#0F2B8C;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:8px">
+              <div style="width:8px;height:8px;border-radius:50%;background:#1A3DB5;flex-shrink:0;"></div>
+              My Records
+            </div>
+            <span id="recCount" style="background:#E8EFFF;color:#1A3DB5;border:1px solid rgba(26,61,181,0.2);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700"></span>
+          </div>
+          <!-- FILTERS -->
+          <div class="frow" style="margin-bottom:14px;align-items:flex-end">
+            <div class="fld"><label>From Date</label><input type="date" id="recFrom" style="width:150px"></div>
+            <div class="fld"><label>To Date</label><input type="date" id="recTo" style="width:150px"></div>
+            <div class="fld"><label>Ward</label>
+              <select id="recWard" style="width:170px" data-ward-select="1" data-ward-extras="All Wards">
+                <option value="">All Wards</option>
+                <option>Orthopaedics</option><option>Male Surgery Ward</option>
+                <option>Female Surgery Ward</option><option>Male Medicine Ward A</option>
+                <option>Male Medicine Ward B</option><option>Female Medicine Ward A</option>
+                <option>Female Medicine Ward B</option><option>MICU</option><option>SICU</option>
+                <option>Optha</option><option>Onco</option><option>Gynae</option>
+                <option>ENT</option><option>Dental</option><option>Disaster</option><option>Dialysis</option>
+              </select>
+            </div>
+            <div class="fld" style="align-self:center;padding-bottom:4px">
+              <label style="visibility:hidden">View</label>
+              <div class="ios-toggle" title="Toggle between per-entry and day-cumulative view">
+                <span class="ios-label" id="recModeLabelEntry">Per-Entry</span>
+                <label class="ios-switch">
+                  <input type="checkbox" id="recModeToggle" onchange="recToggleDayMode()">
+                  <span class="ios-slider"></span>
+                </label>
+                <span class="ios-label off" id="recModeLabelDay">Day-Cumulative</span>
+              </div>
+            </div>
+            <button class="btn btn-pri" style="margin-top:18px" onclick="filterRecords()">Filter</button>
+            <button class="btn btn-sec" style="margin-top:18px" onclick="clearRecordsFilter()">Clear</button>
+          </div>
+          <!-- SUMMARY STRIP -->
+          <div class="metrics-grid" style="margin-bottom:14px">
+            <div class="mcard c1"><div class="mcard-num" id="rec-s-ipd">—</div><div class="mcard-label">Total IPD</div></div>
+            <div class="mcard c2"><div class="mcard-num" id="rec-s-reg">—</div><div class="mcard-label">Total Register</div></div>
+            <div class="mcard c3"><div class="mcard-num" id="rec-s-pre">—</div><div class="mcard-label">Total Preauth</div></div>
+            <div class="mcard c4"><div class="mcard-num" id="rec-s-dis">—</div><div class="mcard-label">Total Discharge</div></div>
+            <div class="mcard c5"><div class="mcard-num" id="rec-s-clm">—</div><div class="mcard-label">Total Claim (₹)</div></div>
+            <div class="mcard c6"><div class="mcard-num" id="rec-s-conv">—</div><div class="mcard-label">Conversion %</div></div>
+          </div>
+          <!-- TABLE -->
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Wards</th><th>IPD</th><th>Conserv</th><th>Surgery</th><th>Register</th><th>Preauth</th><th>Pre Amt (₹)</th><th>Discharge</th><th>Claim (₹)</th><th>Conv%</th><th>Action</th></tr></thead>
+              <tbody id="recTbody"><tr><td colspan="12" class="empty-td">No records yet — fill your first daily report</td></tr></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -1657,18 +1640,42 @@ window.addEventListener('DOMContentLoaded', function() {
 // ══════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════
-function goSec(id, el) {
-  document.querySelectorAll('.sec').forEach(function(s) { s.classList.remove('active'); });
-  var sec = document.getElementById('sec-' + id);
-  if (sec) sec.classList.add('active');
-  document.querySelectorAll('.sbi').forEach(function(s) { s.classList.remove('active'); });
+function showReportsTab(tab, el) {
+  document.querySelectorAll('#sec-reports .rep-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('#sec-reports .rep-pane').forEach(function(p){ p.classList.remove('active'); });
   if (el) el.classList.add('active');
-  if (id === 'myRecords') {
+  var targetPane = document.getElementById('reppane-' + tab);
+  if (targetPane) targetPane.classList.add('active');
+  if (tab === 'records') {
     _recApplyCurrentMonthDefault();
     filterRecords();
   }
-  if (id === 'dashboard') updateDashboard();
-  if (id === 'roster') {
+}
+
+function goSec(id, el) {
+  var targetSecId = id;
+  if (id === 'dashboard' || id === 'fillReport') {
+    targetSecId = 'reports';
+    var fillBtn = document.getElementById('reptab-fill');
+    if (fillBtn) showReportsTab('fill', fillBtn);
+  } else if (id === 'myRecords') {
+    targetSecId = 'reports';
+    var recBtn = document.getElementById('reptab-records');
+    if (recBtn) showReportsTab('records', recBtn);
+  }
+
+  document.querySelectorAll('.sec').forEach(function(s) { s.classList.remove('active'); });
+  var sec = document.getElementById('sec-' + targetSecId);
+  if (sec) sec.classList.add('active');
+
+  document.querySelectorAll('.sbi').forEach(function(s) { s.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  else {
+    var matchingSbi = document.querySelector('.sbi[onclick*="\'' + targetSecId + '\'"]');
+    if (matchingSbi) matchingSbi.classList.add('active');
+  }
+
+  if (targetSecId === 'roster') {
     renderPmamRoster();
     if (typeof loadPmamHolidays === 'function') loadPmamHolidays(function(){ renderPmamRoster(); });
   }
@@ -2247,7 +2254,12 @@ function clearForm() {
   renderSelWards();
   document.getElementById('eDate').value = new Date().toISOString().split('T')[0];
   document.getElementById('entryMsg').textContent = '';
+
+  window._editingRecordId = null;
+  var btn = document.querySelector('.fr-btn-pri[onclick*="saveEntry"]');
+  if (btn) { btn.textContent = 'Save Report'; btn.style.background = ''; }
 }
+
 function saveEntry() {
   var msg = document.getElementById('entryMsg');
   if (!selWards.length) { msg.style.color='#dc2626'; msg.textContent='Please add at least one ward.'; return; }
@@ -2264,18 +2276,12 @@ function saveEntry() {
   var conv   = ipd > 0 ? ((reg / ipd) * 100).toFixed(1) + '%' : '—';
   var u = getPmjayUser();
 
-  // ── Derive immutable foreign keys (FK) for stable filtering across renames ──
-  // pmam_email and ward_ids[] are the persistent identifiers used by the I/C
-  // portal for filtering and aggregation. The free-text `name` and `wards[]`
-  // fields are still saved as display snapshots, but should never be used as
-  // primary keys in any query. See cleanup tool for backfill of old records.
   var pmamEmail = (u.email || '').toLowerCase().trim();
   var wardIds = selWards.map(function(label){
     if (window.WARD_REGISTRY && typeof WARD_REGISTRY.byLabel === 'function') {
       var w = WARD_REGISTRY.byLabel(label);
       if (w && w.id) return w.id;
     }
-    // Fallback: derive slug from label
     return String(label).toLowerCase()
       .replace(/&/g,'and').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
   });
@@ -2283,24 +2289,31 @@ function saveEntry() {
   var entry  = {
     date:date, wards:selWards.slice(), ipd:ipd, med:med, surg:surg,
     reg:reg, pre:pre, preAmt:preAmt, dis:dis, clm:clm, conv:conv,
-    email: u.email || 'unknown',                  // legacy field — kept for backwards compat
-    pmam_email: pmamEmail,                        // ← canonical FK to users collection
-    name: u.name || 'PMAM User',                  // display snapshot only
-    ward_ids: wardIds,                            // ← canonical FK array (parallel to wards[])
+    email: u.email || 'unknown',
+    pmam_email: pmamEmail,
+    name: u.name || 'PMAM User',
+    ward_ids: wardIds,
     timestamp: Date.now()
   };
 
   msg.style.color = '#166534';
-  msg.textContent = 'Saving to database…';
+  msg.textContent = window._editingRecordId ? 'Updating database record…' : 'Saving to database…';
 
-  // Save to Firebase — the onSnapshot listener (fetchPmamReports) will
-  // automatically pick up this new entry and re-render the dashboard,
-  // My Records table, badge, and alert. DO NOT push locally or append
-  // a row here, or the entry will appear twice on the next snapshot.
-  db.collection('daily_reports').add(entry)
+  var isEditing = !!window._editingRecordId;
+  var editDocId = window._editingRecordId;
+  var savePromise = isEditing
+    ? db.collection('daily_reports').doc(editDocId).set(entry, { merge: true })
+    : db.collection('daily_reports').add(entry);
+
+  savePromise
     .then(function() {
+      window._editingRecordId = null;
+      var btn = document.querySelector('.fr-btn-pri[onclick*="saveEntry"]');
+      if (btn) { btn.textContent = 'Save Report'; btn.style.background = ''; }
+
       msg.style.color='#166534';
-      msg.textContent='✅ Entry saved to database for ' + date + '!';
+      msg.textContent = isEditing ? ('✅ Entry updated successfully for ' + date + '!') : ('✅ Entry saved to database for ' + date + '!');
+      
       // Clear the form
       selWards = [];
       renderSelWards();
