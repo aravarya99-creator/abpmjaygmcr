@@ -1416,20 +1416,10 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
           <div>
             <div style="font-size:18px; font-weight:800; color:#1e40af; display:flex; align-items:center; gap:8px;">
-              <span style="font-size:22px;">📅</span> Holiday &amp; Sunday Duty Roster
+              <span style="font-size:22px;">📅</span> Official Holiday Duty Roster
             </div>
-            <div style="font-size:12px; color:#64748b; margin-top:2px;">Select your availability preference for Holidays &amp; Sundays. Upon I/C approval, +1 Compensatory Leave Day is credited for each approved duty day.</div>
+            <div style="font-size:12px; color:#64748b; margin-top:2px;">Select your availability preference for Official Holidays. Upon I/C approval, +1 Compensatory Leave Day is credited for each approved duty day.</div>
           </div>
-        </div>
-
-        <!-- Roster Sub-Tabs (Holidays vs Sundays) -->
-        <div style="display:flex; gap:10px; margin-bottom:16px; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">
-          <button id="rtab-holidays" class="pmam-roster-tab active" onclick="switchPmamRosterTab('holidays', this)" style="padding:8px 18px; border:none; background:#2563eb; color:#ffffff; font-size:13px; font-weight:800; border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            🎉 Official Holidays
-          </button>
-          <button id="rtab-sundays" class="pmam-roster-tab" onclick="switchPmamRosterTab('sundays', this)" style="padding:8px 18px; border:1px solid #cbd5e1; background:#ffffff; color:#475569; font-size:13px; font-weight:700; border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            ☀️ Sundays Roster
-          </button>
         </div>
 
         <!-- Month & Year Selector Strip -->
@@ -1667,50 +1657,20 @@ function goSec(id, el) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PMAM HOLIDAY & SUNDAY DUTY ROSTER LOGIC
+// PMAM OFFICIAL HOLIDAY DUTY ROSTER LOGIC
 // ═══════════════════════════════════════════════════════════════
 window._activePmamRosterTab = 'holidays';
 
 function switchPmamRosterTab(tab, btn) {
-  window._activePmamRosterTab = tab;
-  document.querySelectorAll('.pmam-roster-tab').forEach(function(b){
-    b.style.background = '#ffffff';
-    b.style.color = '#475569';
-    b.style.border = '1px solid #cbd5e1';
-    b.classList.remove('active');
-  });
-  if (btn) {
-    btn.style.background = '#2563eb';
-    btn.style.color = '#ffffff';
-    btn.style.border = 'none';
-    btn.classList.add('active');
-  }
+  window._activePmamRosterTab = 'holidays';
   renderPmamRoster();
 }
 
 function syncRosterTabVisibility() {
-  if (typeof db === 'undefined' || !db) return;
-  db.collection('settings').doc('leave_rules').onSnapshot(function(doc) {
-    if (doc.exists) {
-      var d = doc.data() || {};
-      var enHoliday = d.en_holiday_roster !== undefined ? !!d.en_holiday_roster : true;
-      var enSunday = d.en_sunday_roster !== undefined ? !!d.en_sunday_roster : true;
-
-      var btnH = document.getElementById('rtab-holidays');
-      var btnS = document.getElementById('rtab-sundays');
-
-      if (btnH) btnH.style.display = enHoliday ? 'inline-flex' : 'none';
-      if (btnS) btnS.style.display = enSunday ? 'inline-flex' : 'none';
-
-      if (!enHoliday && window._activePmamRosterTab === 'holidays' && enSunday) {
-        switchPmamRosterTab('sundays', btnS);
-      }
-    }
-  });
+  // Sunday choice tab removed; Official Holidays always active
 }
 
 function renderPmamRoster(yearMonth) {
-  syncRosterTabVisibility();
   var u = (typeof getPmjayUser === 'function') ? (getPmjayUser() || {}) : {};
   var userEmail = u.email || u.id || u.userId || window._pmamUserEmail || 'pmam@gmc.com';
 
@@ -1721,7 +1681,6 @@ function renderPmamRoster(yearMonth) {
   var yr = parseInt(parts[0]);
   var mo = parseInt(parts[1]) - 1;
 
-  var datesInMonth = [];
   var daysInMonth = new Date(yr, mo + 1, 0).getDate();
 
   var holidayMap = {};
@@ -1733,31 +1692,24 @@ function renderPmamRoster(yearMonth) {
     });
   }
 
+  var filteredDates = [];
   for (var day = 1; day <= daysInMonth; day++) {
     var dt = new Date(yr, mo, day);
     var dateStr = ym + '-' + String(day).padStart(2, '0');
-    var isSunday = (dt.getDay() === 0);
     var isHoliday = !!holidayMap[dateStr];
 
-    if (isSunday || isHoliday) {
+    if (isHoliday) {
       var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      datesInMonth.push({
+      filteredDates.push({
         date: dateStr,
         dayName: dayNames[dt.getDay()],
-        type: isHoliday ? 'Official Holiday' : 'Sunday',
-        name: holidayMap[dateStr] || 'Sunday Off',
-        isSunday: isSunday,
-        isHoliday: isHoliday
+        type: 'Official Holiday',
+        name: holidayMap[dateStr] || 'Official Holiday',
+        isSunday: (dt.getDay() === 0),
+        isHoliday: true
       });
     }
   }
-
-  var activeTab = window._activePmamRosterTab || 'holidays';
-  var filteredDates = datesInMonth.filter(function(item) {
-    if (activeTab === 'holidays') return item.isHoliday;
-    if (activeTab === 'sundays') return item.isSunday;
-    return true;
-  });
 
   var wrap = document.getElementById('pmamRosterTbody');
   if (!wrap) return;
@@ -1927,7 +1879,7 @@ function savePmamRosterChoices() {
 
   db.collection('holiday_roster_requests').doc(docId).set(rec, { merge: true }).then(function() {
     if (btn) btn.textContent = 'Submit Roster Preferences';
-    alert('✅ Your Holiday & Sunday Roster preferences submitted successfully! Pending I/C approval.');
+    alert('✅ Your Official Holiday Roster preferences submitted successfully! Pending I/C approval.');
     renderPmamRoster(ym);
   }).catch(function(err) {
     if (btn) btn.textContent = 'Submit Roster Preferences';

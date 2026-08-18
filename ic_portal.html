@@ -1356,9 +1356,9 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
           <div>
             <h2 style="font-size:20px; font-weight:800; color:#1e40af; margin:0; display:flex; align-items:center; gap:8px;">
-              <span>🗓️</span> Roster Management
+              <span>🗓️</span> Official Holiday Roster Management
             </h2>
-            <p style="font-size:12px; color:#64748b; margin:2px 0 0 0;">Review PMAM duty preferences, adjust ward assignments per date, and recommend for publishing.</p>
+            <p style="font-size:12px; color:#64748b; margin:2px 0 0 0;">Review PMAM duty preferences for Official Holidays, adjust ward assignments per date, and recommend for publishing.</p>
           </div>
           <div style="display:flex; align-items:center; gap:12px;">
             <input type="month" id="icRosterYmSel" onchange="renderIcRoster(this.value)" style="padding:8px 14px; border:1.5px solid #cbd5e1; border-radius:10px; font-size:14px; font-weight:700; color:#0f172a;">
@@ -1366,16 +1366,6 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
               👍 Save &amp; Recommend for Publish
             </button>
           </div>
-        </div>
-
-        <!-- Roster Sub-Tabs (Official Holidays vs Sundays) -->
-        <div style="display:flex; gap:10px; margin-bottom:16px; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">
-          <button id="icRtab-holidays" class="ic-roster-tab active" onclick="switchIcRosterTab('holidays', this)" style="padding:8px 18px; border:none; background:#2563eb; color:#ffffff; font-size:13px; font-weight:800; border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            🎉 Official Holidays
-          </button>
-          <button id="icRtab-sundays" class="ic-roster-tab" onclick="switchIcRosterTab('sundays', this)" style="padding:8px 18px; border:1px solid #cbd5e1; background:#ffffff; color:#475569; font-size:13px; font-weight:700; border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            ☀️ Sundays Roster
-          </button>
         </div>
 
         <!-- Date-Wise Table Container -->
@@ -1586,19 +1576,7 @@ window._icCurrentRosterState = {};
 window._icRosterTargetDates = [];
 
 function switchIcRosterTab(tab, btn) {
-  window._activeIcRosterTab = tab;
-  document.querySelectorAll('.ic-roster-tab').forEach(function(b){
-    b.style.background = '#ffffff';
-    b.style.color = '#475569';
-    b.style.border = '1px solid #cbd5e1';
-    b.classList.remove('active');
-  });
-  if (btn) {
-    btn.style.background = '#2563eb';
-    btn.style.color = '#ffffff';
-    btn.style.border = 'none';
-    btn.classList.add('active');
-  }
+  window._activeIcRosterTab = 'holidays';
   renderIcRoster();
 }
 
@@ -1686,25 +1664,16 @@ function renderIcRoster(yearMonth) {
     });
 
     var targetDates = [];
-    var activeTab = window._activeIcRosterTab || 'holidays';
-
     for (var day = 1; day <= daysInMonth; day++) {
       var dt = new Date(yr, mo, day);
       var dateStr = ym + '-' + String(day).padStart(2, '0');
-      var isSunday = (dt.getDay() === 0);
-      var isHoliday = !!holidayMap[dateStr] || (activeTab === 'holidays' && !!submittedDateKeys[dateStr] && !isSunday);
+      var isHoliday = !!holidayMap[dateStr] || !!submittedDateKeys[dateStr];
 
-      if (activeTab === 'holidays' && (isHoliday || submittedDateKeys[dateStr]) && !isSunday) {
+      if (isHoliday) {
         targetDates.push({
           date: dateStr,
-          name: holidayMap[dateStr] || 'Holiday / Submitted Date',
-          dayName: 'Holiday'
-        });
-      } else if (activeTab === 'sundays' && isSunday) {
-        targetDates.push({
-          date: dateStr,
-          name: 'Sunday Off',
-          dayName: 'Sunday'
+          name: holidayMap[dateStr] || 'Official Holiday',
+          dayName: 'Official Holiday'
         });
       }
     }
