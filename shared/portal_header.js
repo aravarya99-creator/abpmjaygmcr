@@ -820,52 +820,83 @@
     checkPortalAccess(userObj, title);
     updateWorkspaceSwitcher(userObj, title);
 
-    // Live Sync with Firestore (Works for PIN auth & Firebase Auth alike)
+    // Live Sync with Firestore (Supports direct doc ID, email key, and where('email') queries)
+    var lookupDocId = (userObj && (userObj._docId || userObj.docId || userObj.id)) ? String(userObj._docId || userObj.docId || userObj.id) : '';
     var lookupEmail = (userObj && userObj.email) ? String(userObj.email).trim().toLowerCase() : '';
-    if (typeof db !== 'undefined' && db && db.collection && lookupEmail) {
-      db.collection('users').doc(lookupEmail).get().then(function(doc) {
-        if (doc.exists && doc.data()) {
-          var d = doc.data();
-          if (d.name) {
-            name = d.name;
-            if (window.LeaveEngine) {
-              window.LeaveEngine.userName = name;
-              if (window.LeaveEngine.userEmail === null && lookupEmail) window.LeaveEngine.userEmail = lookupEmail;
-              if (typeof window.LeaveEngine._fetchRequests === 'function') window.LeaveEngine._fetchRequests();
-            }
-          }
+    if (!lookupEmail && typeof ADMIN_EMAIL !== 'undefined' && (isPageAdmin || (userObj && (userObj.role === 'Admin' || (Array.isArray(userObj.roles) && userObj.roles.includes('Admin')))))) {
+      lookupEmail = String(ADMIN_EMAIL).trim().toLowerCase();
+    }
 
-          var livePhoto = d.photoBase64 || d.photo || d.photoUrl || '';
-          if (livePhoto) photoUrl = livePhoto;
-
-          var docRoles = Array.isArray(d.roles) && d.roles.length ? d.roles.slice() : (d.role ? [d.role] : (Array.isArray(userObj && userObj.roles) ? userObj.roles : []));
-          if (d.role && !docRoles.includes(d.role)) docRoles.push(d.role);
-          if (d.desig && !docRoles.includes(d.desig)) docRoles.push(d.desig);
-
-          var updatedUserObj = Object.assign({}, userObj || {}, d, { 
-            name: name,
-            photoBase64: livePhoto,
-            photo: livePhoto,
-            photoUrl: livePhoto,
-            roles: docRoles 
-          });
-          var finalDisplayRole = activePortalRole || d.role || d.desig || displayRole;
-
-          try {
-            var uStr = JSON.stringify(updatedUserObj);
-            sessionStorage.setItem('pmjay_user', uStr);
-            sessionStorage.setItem('currentUser', uStr);
-            localStorage.setItem('pmjay_user', uStr);
-            localStorage.setItem('currentUser', uStr);
-          } catch(e){}
-
-          checkPortalAccess(updatedUserObj, title);
-          updateWorkspaceSwitcher(updatedUserObj, title);
-          applyHeaderData(name, finalDisplayRole, livePhoto || photoUrl);
+    function applyLiveUserData(d) {
+      if (!d) return;
+      if (d.name) {
+        name = d.name;
+        if (window.LeaveEngine) {
+          window.LeaveEngine.userName = name;
+          if (window.LeaveEngine.userEmail === null && lookupEmail) window.LeaveEngine.userEmail = lookupEmail;
+          if (typeof window.LeaveEngine._fetchRequests === 'function') window.LeaveEngine._fetchRequests();
         }
-      }).catch(function(e){
-        console.warn('portal_header Firestore sync:', e);
-        applyHeaderData(name, displayRole, photoUrl);
+      }
+
+      var livePhoto = d.photoBase64 || d.photo || d.photoUrl || '';
+      if (livePhoto) photoUrl = livePhoto;
+
+      var docRoles = Array.isArray(d.roles) && d.roles.length ? d.roles.slice() : (d.role ? [d.role] : (Array.isArray(userObj && userObj.roles) ? userObj.roles : []));
+      if (d.role && !docRoles.includes(d.role)) docRoles.push(d.role);
+      if (d.desig && !docRoles.includes(d.desig)) docRoles.push(d.desig);
+
+      var updatedUserObj = Object.assign({}, userObj || {}, d, { 
+        name: name,
+        photoBase64: livePhoto || photoUrl,
+        photo: livePhoto || photoUrl,
+        photoUrl: livePhoto || photoUrl,
+        roles: docRoles 
+      });
+      var finalDisplayRole = activePortalRole || d.role || d.desig || displayRole;
+
+      try {
+        var uStr = JSON.stringify(updatedUserObj);
+        sessionStorage.setItem('pmjay_user', uStr);
+        sessionStorage.setItem('currentUser', uStr);
+        localStorage.setItem('pmjay_user', uStr);
+        localStorage.setItem('currentUser', uStr);
+        if (livePhoto) localStorage.setItem('user_photo_url', livePhoto);
+      } catch(e){}
+
+      checkPortalAccess(updatedUserObj, title);
+      updateWorkspaceSwitcher(updatedUserObj, title);
+      applyHeaderData(name, finalDisplayRole, livePhoto || photoUrl);
+    }
+
+    if (typeof db !== 'undefined' && db && db.collection && (lookupDocId || lookupEmail)) {
+      var primaryTarget = lookupDocId || lookupEmail;
+      db.collection('users').doc(primaryTarget).get().then(function(doc) {
+        if (doc.exists && doc.data()) {
+          applyLiveUserData(doc.data());
+        } else if (lookupEmail) {
+          // Fallback in case document is stored under auto-generated Firestore ID
+          db.collection('users').where('email', '==', lookupEmail).limit(1).get().then(function(qSnap) {
+            if (!qSnap.empty && qSnap.docs[0].exists) {
+              applyLiveUserData(qSnap.docs[0].data());
+            } else {
+              applyHeaderData(name, displayRole, photoUrl);
+            }
+          }).catch(function(){ applyHeaderData(name, displayRole, photoUrl); });
+        } else {
+          applyHeaderData(name, displayRole, photoUrl);
+        }
+      }).catch(function(e) {
+        if (lookupEmail) {
+          db.collection('users').where('email', '==', lookupEmail).limit(1).get().then(function(qSnap) {
+            if (!qSnap.empty && qSnap.docs[0].exists) {
+              applyLiveUserData(qSnap.docs[0].data());
+            } else {
+              applyHeaderData(name, displayRole, photoUrl);
+            }
+          }).catch(function(){ applyHeaderData(name, displayRole, photoUrl); });
+        } else {
+          applyHeaderData(name, displayRole, photoUrl);
+        }
       });
     }
 
