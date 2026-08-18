@@ -118,6 +118,91 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Compensatory Leave Elements
+  const compDetailsBox = document.getElementById('comp-details-box');
+  const formCompBadge = document.getElementById('form-comp-badge');
+  const formCompZeroAlert = document.getElementById('form-comp-zero-alert');
+  const formCompTbody = document.getElementById('form-comp-tbody');
+
+  leaveTypeSelect.addEventListener('change', () => {
+    const isComp = leaveTypeSelect.value && leaveTypeSelect.value.indexOf('Compensatory') !== -1;
+    if (compDetailsBox) {
+      compDetailsBox.style.display = isComp ? 'block' : 'none';
+      if (isComp) {
+        renderFormCompDuties();
+      }
+    }
+  });
+
+  function renderFormCompDuties() {
+    if (!formCompTbody) return;
+    const duties = (window.LeaveEngine && typeof LeaveEngine.getAvailableCompDuties === 'function')
+      ? LeaveEngine.getAvailableCompDuties()
+      : [];
+
+    if (formCompBadge) formCompBadge.textContent = 'Available: ' + duties.length;
+
+    if (duties.length === 0) {
+      if (formCompZeroAlert) formCompZeroAlert.style.display = 'block';
+      formCompTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:16px; color:#dc2626; font-weight:700;">No eligible approved holiday duties found for this account.</td></tr>';
+      return;
+    }
+
+    if (formCompZeroAlert) formCompZeroAlert.style.display = 'none';
+
+    formCompTbody.innerHTML = duties.map((d, idx) => {
+      const dutyDate = d.date || '';
+      const holName = d.holidayName || 'Official Holiday';
+      const ym = d.yearMonth || dutyDate.substring(0, 7);
+      const minDate = ym + '-01';
+      const parts = ym.split('-');
+      const lastDay = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10), 0).getDate();
+      const maxDate = ym + '-' + String(lastDay).padStart(2, '0');
+
+      return `
+        <tr style="border-bottom:1px solid #f1f5f9;" data-comp-row="1" data-duty-date="${dutyDate}" data-hol-name="${holName}" data-ym="${ym}">
+          <td style="text-align:center; font-weight:700; padding:8px;">${idx + 1}</td>
+          <td style="padding:8px;"><input type="text" value="${holName}" readonly style="width:100%; border:1px solid #cbd5e1; border-radius:6px; padding:4px 8px; font-size:12px; font-weight:700; background:#f8fafc; font-family:inherit;"></td>
+          <td style="padding:8px; text-align:center;"><input type="date" value="${dutyDate}" readonly style="width:100%; border:1px solid #cbd5e1; border-radius:6px; padding:4px 8px; font-size:12px; font-weight:700; background:#f8fafc; text-align:center; font-family:inherit;"></td>
+          <td style="padding:8px; text-align:center;"><input type="date" class="form-comp-req-input" min="${minDate}" max="${maxDate}" style="width:100%; border:1.5px solid #2563eb; border-radius:6px; padding:4px 8px; font-size:12px; font-weight:700; color:#1e40af; text-align:center; font-family:inherit;"></td>
+        </tr>
+      `;
+    }).join('');
+
+    // Attach change listeners to date inputs
+    document.querySelectorAll('.form-comp-req-input').forEach(inp => {
+      inp.addEventListener('change', onFormCompDateChange);
+    });
+  }
+
+  function onFormCompDateChange() {
+    const rows = document.querySelectorAll('#form-comp-tbody tr[data-comp-row="1"]');
+    const filledDates = [];
+    rows.forEach(r => {
+      const inp = r.querySelector('.form-comp-req-input');
+      const expectedYm = r.getAttribute('data-ym');
+      if (inp && inp.value) {
+        if (expectedYm && inp.value.substring(0, 7) !== expectedYm) {
+          alert('SAME MONTH RULE: Compensatory leave must be taken in the same month (' + expectedYm + ') as the duty performed.');
+          inp.value = '';
+          return;
+        }
+        filledDates.push(inp.value);
+      }
+    });
+
+    if (filledDates.length > 0) {
+      filledDates.sort();
+      fromDateInput.value = filledDates[0];
+      toDateInput.value = filledDates[filledDates.length - 1];
+      totalDaysInput.value = filledDates.length + ' Day' + (filledDates.length > 1 ? 's' : '');
+
+      const maxDtObj = new Date(filledDates[filledDates.length - 1]);
+      maxDtObj.setDate(maxDtObj.getDate() + 1);
+      returnDateInput.value = formatDateForInput(maxDtObj);
+    }
+  }
+
   // Clear Form
   btnClear.addEventListener('click', () => {
     fromDateInput.value = '';
@@ -130,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     wardSelect.value = '';
     selectedWards = [];
     renderWardTags();
+    if (compDetailsBox) compDetailsBox.style.display = 'none';
   });
 
   // Modal Functions
@@ -140,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const returnStr = returnDateInput.value || 'Not selected';
     const reasonStr = reasonSelect.value || 'Not specified';
     const typeStr = leaveTypeSelect.value || 'Not specified';
-    const substituteStr = substituteSelect.value || 'None assigned';
+    const substituteStr = substituteSelect.options[substituteSelect.selectedIndex]?.text || 'None assigned';
     const wardsStr = selectedWards.length > 0 ? selectedWards.join(', ') : 'None';
 
     modalBodyContent.innerHTML = `
@@ -204,6 +290,33 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Please fill in all mandatory fields (From Date, To Date, Reason for Leave, Type of Leave).');
       return;
     }
+
+    const isComp = leaveTypeSelect.value.indexOf('Compensatory') !== -1;
+    const compDetails = [];
+    const claimedDutyDates = [];
+
+    if (isComp) {
+      const rows = document.querySelectorAll('#form-comp-tbody tr[data-comp-row="1"]');
+      rows.forEach(r => {
+        const dutyDate = r.getAttribute('data-duty-date');
+        const holName = r.getAttribute('data-hol-name');
+        const reqInp = r.querySelector('.form-comp-req-input');
+        if (reqInp && reqInp.value) {
+          compDetails.push({
+            holidayName: holName,
+            dutyDate: dutyDate,
+            leaveDateRequested: reqInp.value
+          });
+          claimedDutyDates.push(dutyDate);
+        }
+      });
+
+      if (compDetails.length === 0) {
+        alert('VALIDATION ERROR: Please enter the requested leave date for at least one approved holiday duty.');
+        return;
+      }
+    }
+
     closePreviewModal();
 
     if (window.DSig && typeof DSig.promptPin === 'function') {
@@ -221,7 +334,9 @@ document.addEventListener('DOMContentLoaded', () => {
             substituteEmail: substituteSelect.value || '',
             wardName: selectedWards.join(', '),
             assignedWards: selectedWards,
-            reason: reasonSelect.value
+            reason: reasonSelect.value,
+            compDetails: compDetails,
+            claimedDutyDates: claimedDutyDates
           };
 
           if (window.GMCLeave && typeof GMCLeave.submitLeaveRequest === 'function') {
