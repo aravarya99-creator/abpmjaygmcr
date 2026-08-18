@@ -105,22 +105,14 @@
       var compQuery = db.collection('holiday_roster_requests');
       this._unsubComp = compQuery.onSnapshot(function(snap) {
         self.compDuties = [];
-        var myEmail = (self.userEmail || '').toLowerCase().trim();
-        var myName = (self.userName || '').toLowerCase().trim();
 
         snap.forEach(function(doc) {
           var d = doc.data() || {};
-          var docEmail = (d.email || (doc.id.indexOf('_') !== -1 ? doc.id.split('_')[0] : '') || '').toLowerCase().trim();
-          var docName = (d.name || '').toLowerCase().trim();
-
-          var isMatch = false;
-          if (myEmail && docEmail && (docEmail === myEmail || docEmail.indexOf(myEmail) !== -1 || myEmail.indexOf(docEmail) !== -1)) isMatch = true;
-          if (myName && docName && (docName === myName || docName.indexOf(myName) !== -1 || myName.indexOf(docName) !== -1)) isMatch = true;
-          if (self.role !== 'pmam') isMatch = true; // IC / Admin can see all
+          var docEmail = (d.email || d.userEmail || d.userId || '').toLowerCase().trim();
 
           // Must be approved / recommended by I/C or published by Admin
-          var isApproved = d.icRecommended === true || d.status === 'Recommended for Publish' || d.status === 'Published' || d.published === true;
-          if (isMatch && isApproved && d.choices && typeof d.choices === 'object') {
+          var isApproved = d.icRecommended === true || d.status === 'Recommended for Publish' || d.status === 'Published' || d.published === true || d.status === 'Approved';
+          if (isApproved && d.choices && typeof d.choices === 'object') {
             var choices = d.choices;
             Object.keys(choices).forEach(function(dateStr) {
               if (choices[dateStr] === 'Duty') {
@@ -157,7 +149,7 @@
         if (!this.userEmail) return;
         query = query.where('email', '==', this.userEmail);
         
-                if (this.userName || this.userEmail) {
+        if (this.userName || this.userEmail) {
           this._unsubSub = db.collection('leave_requests')
             .onSnapshot(function(snap) {
               self.subRequests = [];
@@ -209,14 +201,20 @@
     getAvailableCompDuties: function(emailOrName, targetYm) {
       var emailMatch = (emailOrName || this.userEmail || '').toLowerCase().trim();
       var nameMatch = (emailOrName || this.userName || '').toLowerCase().trim();
+      var sanitizedEmail = emailMatch.replace(/[^a-zA-Z0-9]/g, '');
 
       // 1. Gather all approved duties for this user
       var myDuties = this.compDuties.filter(function(d) {
         if (!emailMatch && !nameMatch) return true;
         var dEmail = (d.email || '').toLowerCase().trim();
         var dName = (d.name || '').toLowerCase().trim();
-        var match = (emailMatch && (dEmail === emailMatch || dEmail.indexOf(emailMatch) !== -1 || emailMatch.indexOf(dEmail) !== -1)) ||
-                    (nameMatch && (dName === nameMatch || dName.indexOf(nameMatch) !== -1 || nameMatch.indexOf(dName) !== -1));
+        var dDocIdSanitized = (d.docId || '').toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+
+        var match = false;
+        if (emailMatch && (dEmail === emailMatch || dEmail.indexOf(emailMatch) !== -1 || emailMatch.indexOf(dEmail) !== -1)) match = true;
+        if (nameMatch && (dName === nameMatch || dName.indexOf(nameMatch) !== -1 || nameMatch.indexOf(dName) !== -1)) match = true;
+        if (sanitizedEmail && dDocIdSanitized && dDocIdSanitized.indexOf(sanitizedEmail) !== -1) match = true;
+
         if (match && targetYm) {
           return d.yearMonth === targetYm || d.date.substring(0, 7) === targetYm;
         }
@@ -227,7 +225,7 @@
       var consumedDates = [];
       this.requests.forEach(function(l) {
         var t = (l.ltype || l.type || '').toLowerCase();
-        var isComp = t.indexOf('compensatory') !== -1;
+        var isComp = t.indexOf('compensatory') !== -1 || t.indexOf('comp') !== -1;
         var isNotRejected = l.status !== 'Rejected' && l.status !== 'Cancelled';
         var userMatches = (!emailMatch && !nameMatch) || 
                           (l.email && l.email.toLowerCase().trim() === emailMatch) ||
@@ -255,6 +253,7 @@
       var casualTaken = 0, medicalTaken = 0, compTaken = 0, lwpTaken = 0, maternityTaken = 0, paternityTaken = 0;
       var emailMatch = (emailOrName || this.userEmail || '').toLowerCase().trim();
       var nameMatch = (emailOrName || this.userName || '').toLowerCase().trim();
+      var sanitizedEmail = emailMatch.replace(/[^a-zA-Z0-9]/g, '');
 
       this.requests.forEach(function(l) {
         var isApproved = l.status === 'Approved';
@@ -268,7 +267,7 @@
           
           if(t.indexOf('casual') !== -1) casualTaken += d;
           else if(t.indexOf('medical') !== -1) medicalTaken += d;
-          else if(t.indexOf('compensatory') !== -1) compTaken += d;
+          else if(t.indexOf('compensatory') !== -1 || t.indexOf('comp') !== -1) compTaken += d;
           else if(t.indexOf('maternity') !== -1) maternityTaken += d;
           else if(t.indexOf('paternity') !== -1) paternityTaken += d;
           else if(t.indexOf('pay') !== -1 || t.indexOf('lwp') !== -1) lwpTaken += d;
@@ -280,8 +279,10 @@
         if (!emailMatch && !nameMatch) return true;
         var dEmail = (d.email || '').toLowerCase().trim();
         var dName = (d.name || '').toLowerCase().trim();
+        var dDocIdSanitized = (d.docId || '').toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
         return (emailMatch && (dEmail === emailMatch || dEmail.indexOf(emailMatch) !== -1 || emailMatch.indexOf(dEmail) !== -1)) ||
-               (nameMatch && (dName === nameMatch || dName.indexOf(nameMatch) !== -1 || nameMatch.indexOf(dName) !== -1));
+               (nameMatch && (dName === nameMatch || dName.indexOf(nameMatch) !== -1 || nameMatch.indexOf(dName) !== -1)) ||
+               (sanitizedEmail && dDocIdSanitized && dDocIdSanitized.indexOf(sanitizedEmail) !== -1);
       }).length;
       
       var compBalance = availableCompList.length;
