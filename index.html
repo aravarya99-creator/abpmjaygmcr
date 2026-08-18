@@ -1522,17 +1522,45 @@ window.addEventListener('DOMContentLoaded', function() {
     })();
 
     function groupFor(u){
+      var primaryRole = String(u.role || u.desig || '').toLowerCase().trim();
       var rList = Array.isArray(u.roles) && u.roles.length ? u.roles.slice() : (u.role ? [u.role] : []);
       if (u.desig && !rList.includes(u.desig)) rList.push(u.desig);
-      var combined = rList.map(function(x){ return String(x).toLowerCase(); }).join(' ');
 
-      // First try to match explicit roles
+      // 1. Exact match on primary role/desig first
+      if (primaryRole) {
+        if (/pmam/.test(primaryRole) && !/i\/?c|in.?charge|incharge/.test(primaryRole)) {
+          for (var i = 0; i < RANK_GROUPS.length; i++) {
+            if (RANK_GROUPS[i].key === 'pmam') return i;
+          }
+        }
+        if (/i\/?c|in.?charge|incharge/.test(primaryRole)) {
+          for (var i = 0; i < RANK_GROUPS.length; i++) {
+            if (RANK_GROUPS[i].key === 'ic') return i;
+          }
+        }
+        if (/(^|\b)deo\b|data\s*entry|(^|\b)mts\b/.test(primaryRole)) {
+          for (var i = 0; i < RANK_GROUPS.length; i++) {
+            if (RANK_GROUPS[i].key === 'mts') return i;
+          }
+        }
+      }
+
+      // 2. Try explicit RANK_GROUPS matcher on primary role
       for (var i = 0; i < RANK_GROUPS.length; i++) {
-        if (RANK_GROUPS[i].key !== 'other' && (RANK_GROUPS[i].match(combined) || rList.some(function(x){ return RANK_GROUPS[i].match(String(x).toLowerCase()); }))) {
+        if (RANK_GROUPS[i].key !== 'other' && RANK_GROUPS[i].match(primaryRole)) {
           return i;
         }
       }
-      // Fallback to Administrative Staff (other)
+
+      // 3. Fallback matching across all roles
+      var combined = rList.map(function(x){ return String(x).toLowerCase(); }).join(' ');
+      for (var i = 0; i < RANK_GROUPS.length; i++) {
+        if (RANK_GROUPS[i].key !== 'other' && RANK_GROUPS[i].match(combined)) {
+          return i;
+        }
+      }
+
+      // 4. Default to Administrative Staff (other)
       for (var i = 0; i < RANK_GROUPS.length; i++) {
         if (RANK_GROUPS[i].key === 'other') return i;
       }
