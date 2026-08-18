@@ -731,7 +731,22 @@ function doLogin() {
     var uRoles = Array.isArray(u.roles) ? u.roles.slice() : (u.role ? [u.role] : []);
     if (u.desig && !uRoles.includes(u.desig)) uRoles.push(u.desig);
 
-    var userData = { email:email, name:u.name||'', role:u.role||'', roles:uRoles, desig:u.role||'', ward:u.ward||'' };
+    var photoSrc = u.photoBase64 || u.photo || u.photoUrl || '';
+    var sigSrc = u.signatureImage || u.signatureUrl || u.signature || '';
+    var userData = {
+      email: email,
+      name: u.name || '',
+      role: u.role || '',
+      roles: uRoles,
+      desig: u.role || '',
+      ward: u.ward || '',
+      photoBase64: photoSrc,
+      photo: photoSrc,
+      photoUrl: photoSrc,
+      signatureImage: sigSrc,
+      signatureUrl: sigSrc,
+      signature: sigSrc
+    };
     var uStr = JSON.stringify(userData);
     sessionStorage.setItem('pmjay_user', uStr);
     sessionStorage.setItem('pmam_user', uStr);
