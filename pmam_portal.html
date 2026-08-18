@@ -862,6 +862,9 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         </button>
       </div>
       <script>
+        function escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+        function escAttr(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
         function showLvTab(tab, el) {
           document.querySelectorAll('#sec-leave .lv-tab').forEach(function(b){ b.classList.remove('active'); });
           document.querySelectorAll('#sec-leave .lv-pane').forEach(function(p){ p.classList.remove('active'); });
@@ -2609,49 +2612,52 @@ function toggleComp() {
 }
 
 function renderCompDutyRows() {
-  var u = (typeof getPmjayUser === 'function') ? (getPmjayUser() || {}) : {};
-  var userEmail = (u.email || '').toLowerCase().trim();
-  var tbody = document.getElementById('compTableBody');
-  var badge = document.getElementById('compBalanceBadge');
-  var zeroAlert = document.getElementById('compZeroAlert');
-  if (!tbody) return;
+  try {
+    var u = (typeof getPmjayUser === 'function') ? (getPmjayUser() || {}) : {};
+    var userEmail = (u.email || '').toLowerCase().trim();
+    var tbody = document.getElementById('compTableBody');
+    var badge = document.getElementById('compBalanceBadge');
+    var zeroAlert = document.getElementById('compZeroAlert');
+    if (!tbody) return;
 
-  var duties = (typeof LeaveEngine !== 'undefined' && typeof LeaveEngine.getAvailableCompDuties === 'function')
-    ? LeaveEngine.getAvailableCompDuties(userEmail)
-    : [];
+    var duties = (typeof LeaveEngine !== 'undefined' && typeof LeaveEngine.getAvailableCompDuties === 'function')
+      ? LeaveEngine.getAvailableCompDuties(userEmail)
+      : [];
 
-  if (badge) badge.textContent = 'Available Credits: ' + duties.length;
+    if (badge) badge.textContent = 'Available Credits: ' + duties.length;
 
-  if (duties.length === 0) {
-    if (zeroAlert) zeroAlert.style.display = 'block';
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#dc2626; font-weight:700;">No unconsumed approved holiday duties found for your account.<br><span style="font-size:11px; font-weight:500; color:#64748b;">(Note: Duty choice must be marked \'Duty\' in Official Holiday Roster and recommended by I/C.)</span></td></tr>';
-    document.getElementById('lvFrom').value = '';
-    document.getElementById('lvTo').value = '';
-    document.getElementById('lvDays').value = '';
-    document.getElementById('lvReturn').value = '';
-    return;
+    if (duties.length === 0) {
+      if (zeroAlert) zeroAlert.style.display = 'block';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#dc2626; font-weight:700;">No unconsumed approved holiday duties found for your account.<br><span style="font-size:11px; font-weight:500; color:#64748b;">(Note: Duty choice must be marked \'Duty\' in Official Holiday Roster and recommended by I/C.)</span></td></tr>';
+      return;
+    }
+
+    if (zeroAlert) zeroAlert.style.display = 'none';
+
+    tbody.innerHTML = duties.map(function(d, idx) {
+      var dutyDate = d.date || '';
+      var holName = d.holidayName || 'Official Holiday';
+      var ym = d.yearMonth || dutyDate.substring(0, 7);
+      
+      // Same month boundaries
+      var minDate = ym + '-01';
+      var parts = ym.split('-');
+      var lastDay = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10), 0).getDate();
+      var maxDate = ym + '-' + String(lastDay).padStart(2, '0');
+
+      var safeHolName = String(holName).replace(/"/g, '&quot;');
+      return '<tr style="border-bottom:1px solid #f1f5f9;" data-comp-row="1" data-duty-date="' + dutyDate + '" data-hol-name="' + safeHolName + '" data-ym="' + ym + '">'
+        + '<td style="text-align:center; font-weight:800; color:#1e40af; padding:10px;">' + (idx + 1) + '</td>'
+        + '<td style="padding:10px;"><input type="text" value="' + safeHolName + '" readonly style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; color:#0f172a; background:#f8fafc; outline:none; font-family:inherit;"></td>'
+        + '<td style="padding:10px; text-align:center;"><input type="date" value="' + dutyDate + '" readonly style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; color:#0f172a; background:#f8fafc; outline:none; font-family:inherit; text-align:center;"></td>'
+        + '<td style="padding:10px; text-align:center;"><input type="date" class="comp-req-input" data-idx="' + idx + '" min="' + minDate + '" max="' + maxDate + '" onchange="onCompLeaveDateChange()" placeholder="Select leave date" style="width:100%; border:1.5px solid #2563eb; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:800; color:#1e40af; background:#ffffff; outline:none; font-family:inherit; text-align:center; box-shadow:0 1px 4px rgba(37,99,235,0.15);"></td>'
+        + '</tr>';
+    }).join('');
+  } catch (err) {
+    console.error('renderCompDutyRows error:', err);
+    var tb = document.getElementById('compTableBody');
+    if (tb) tb.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:16px; color:#dc2626;">Error rendering duties: ' + err.message + '</td></tr>';
   }
-
-  if (zeroAlert) zeroAlert.style.display = 'none';
-
-  tbody.innerHTML = duties.map(function(d, idx) {
-    var dutyDate = d.date || '';
-    var holName = d.holidayName || 'Official Holiday';
-    var ym = d.yearMonth || dutyDate.substring(0, 7);
-    
-    // Same month boundaries
-    var minDate = ym + '-01';
-    var parts = ym.split('-');
-    var lastDay = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10), 0).getDate();
-    var maxDate = ym + '-' + String(lastDay).padStart(2, '0');
-
-    return '<tr style="border-bottom:1px solid #f1f5f9;" data-comp-row="1" data-duty-date="' + dutyDate + '" data-hol-name="' + escAttr(holName) + '" data-ym="' + ym + '">'
-      + '<td style="text-align:center; font-weight:800; color:#1e40af; padding:10px;">' + (idx + 1) + '</td>'
-      + '<td style="padding:10px;"><input type="text" value="' + escAttr(holName) + '" readonly style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; color:#0f172a; background:#f8fafc; outline:none; font-family:inherit;"></td>'
-      + '<td style="padding:10px; text-align:center;"><input type="date" value="' + dutyDate + '" readonly style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; color:#0f172a; background:#f8fafc; outline:none; font-family:inherit; text-align:center;"></td>'
-      + '<td style="padding:10px; text-align:center;"><input type="date" class="comp-req-input" data-idx="' + idx + '" min="' + minDate + '" max="' + maxDate + '" onchange="onCompLeaveDateChange()" placeholder="Select leave date" style="width:100%; border:1.5px solid #2563eb; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:800; color:#1e40af; background:#ffffff; outline:none; font-family:inherit; text-align:center; box-shadow:0 1px 4px rgba(37,99,235,0.15);"></td>'
-      + '</tr>';
-  }).join('');
 }
 
 function onCompLeaveDateChange() {
@@ -3842,6 +3848,7 @@ window.addEventListener('DOMContentLoaded', function() {
         if(typeof renderLeaveHistory === 'function') renderLeaveHistory();
         if(typeof renderSubstituteRequests === 'function') renderSubstituteRequests();
         if(typeof applyGenderLeaveRules === 'function') applyGenderLeaveRules(window._currentUserGender);
+        if(typeof renderCompDutyRows === 'function') renderCompDutyRows();
       }
     });
     // fetchSubstituteRequests(); fetchMyLeaveBalances(); // Removed
