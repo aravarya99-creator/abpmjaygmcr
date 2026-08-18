@@ -820,45 +820,67 @@
     checkPortalAccess(userObj, title);
     updateWorkspaceSwitcher(userObj, title);
 
+    // Live Sync with Firestore (Works for PIN auth & Firebase Auth alike)
+    var lookupEmail = (userObj && userObj.email) ? String(userObj.email).trim().toLowerCase() : '';
+    if (typeof db !== 'undefined' && db && db.collection && lookupEmail) {
+      db.collection('users').doc(lookupEmail).get().then(function(doc) {
+        if (doc.exists && doc.data()) {
+          var d = doc.data();
+          if (d.name) {
+            name = d.name;
+            if (window.LeaveEngine) {
+              window.LeaveEngine.userName = name;
+              if (window.LeaveEngine.userEmail === null && lookupEmail) window.LeaveEngine.userEmail = lookupEmail;
+              if (typeof window.LeaveEngine._fetchRequests === 'function') window.LeaveEngine._fetchRequests();
+            }
+          }
+
+          var livePhoto = d.photoBase64 || d.photo || d.photoUrl || '';
+          if (livePhoto) photoUrl = livePhoto;
+
+          var docRoles = Array.isArray(d.roles) && d.roles.length ? d.roles.slice() : (d.role ? [d.role] : (Array.isArray(userObj && userObj.roles) ? userObj.roles : []));
+          if (d.role && !docRoles.includes(d.role)) docRoles.push(d.role);
+          if (d.desig && !docRoles.includes(d.desig)) docRoles.push(d.desig);
+
+          var updatedUserObj = Object.assign({}, userObj || {}, d, { 
+            name: name,
+            photoBase64: livePhoto,
+            photo: livePhoto,
+            photoUrl: livePhoto,
+            roles: docRoles 
+          });
+          var finalDisplayRole = activePortalRole || d.role || d.desig || displayRole;
+
+          try {
+            var uStr = JSON.stringify(updatedUserObj);
+            sessionStorage.setItem('pmjay_user', uStr);
+            sessionStorage.setItem('currentUser', uStr);
+            localStorage.setItem('pmjay_user', uStr);
+            localStorage.setItem('currentUser', uStr);
+          } catch(e){}
+
+          checkPortalAccess(updatedUserObj, title);
+          updateWorkspaceSwitcher(updatedUserObj, title);
+          applyHeaderData(name, finalDisplayRole, livePhoto || photoUrl);
+        }
+      }).catch(function(e){
+        console.warn('portal_header Firestore sync:', e);
+        applyHeaderData(name, displayRole, photoUrl);
+      });
+    }
+
     if (typeof firebase !== 'undefined' && firebase.auth) {
       firebase.auth().onAuthStateChanged(function(user) {
-        if (user) {
-          if (user.displayName && !name) name = user.displayName;
-          var lookupEmail = user.email || (userObj ? userObj.email : '');
-          if (typeof db !== 'undefined' && lookupEmail) {
-            lookupEmail = String(lookupEmail).trim().toLowerCase();
-            db.collection('users').doc(lookupEmail).get().then(function(doc) {
+        if (user && user.email) {
+          var authEmail = String(user.email).trim().toLowerCase();
+          if (authEmail !== lookupEmail && typeof db !== 'undefined' && db && db.collection) {
+            db.collection('users').doc(authEmail).get().then(function(doc) {
               if (doc.exists && doc.data()) {
                 var d = doc.data();
-                if (d.name) {
-                  name = d.name;
-                  if (window.LeaveEngine) {
-                    window.LeaveEngine.userName = name;
-                    if (window.LeaveEngine.userEmail === null && lookupEmail) window.LeaveEngine.userEmail = lookupEmail;
-                    if (typeof window.LeaveEngine._fetchRequests === 'function') window.LeaveEngine._fetchRequests();
-                  }
-                }
-
-                var docRoles = Array.isArray(d.roles) && d.roles.length ? d.roles.slice() : (d.role ? [d.role] : (Array.isArray(userObj && userObj.roles) ? userObj.roles : []));
-                if (d.role && !docRoles.includes(d.role)) docRoles.push(d.role);
-                if (d.desig && !docRoles.includes(d.desig)) docRoles.push(d.desig);
-
-                var updatedUserObj = Object.assign({}, userObj || {}, d, { roles: docRoles });
-                var finalDisplayRole = activePortalRole || d.role || d.desig || displayRole;
-
-                try {
-                  var uStr = JSON.stringify(Object.assign({}, updatedUserObj, { name: name }));
-                  sessionStorage.setItem('pmjay_user', uStr);
-                  sessionStorage.setItem('currentUser', uStr);
-                  localStorage.setItem('pmjay_user', uStr);
-                  localStorage.setItem('currentUser', uStr);
-                } catch(e){}
-
-                checkPortalAccess(updatedUserObj, title);
-                updateWorkspaceSwitcher(updatedUserObj, title);
-                applyHeaderData(name, finalDisplayRole, d.photoBase64 || d.photo || d.photoUrl || photoUrl);
+                var p = d.photoBase64 || d.photo || d.photoUrl || '';
+                applyHeaderData(d.name || name, displayRole, p || photoUrl);
               }
-            }).catch(function(){ applyHeaderData(name, displayRole, photoUrl); });
+            }).catch(function(){});
           }
         }
       });
@@ -1071,7 +1093,7 @@
     inits = inits.toUpperCase();
 
     if (photoUrl) {
-      var photoHTML = '<img src="' + photoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+      var photoHTML = '<img src="' + photoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display=\'none\'; if(this.nextElementSibling) this.nextElementSibling.style.display=\'flex\';"><span id="hInitials" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;">' + inits + '</span>';
       if (hAvatarContainer) hAvatarContainer.innerHTML = photoHTML;
     } else {
       if (hAvatarContainer) {
