@@ -732,10 +732,13 @@ input:checked + .slider:before { transform: translateX(20px); }
           <div style="display:flex; flex-direction:column; gap:16px; background:#fff; padding:18px; border-radius:16px; border:1.5px solid #e0e8ff; box-shadow:0 2px 8px rgba(26,61,181,0.04);">
             <!-- Profile Photo -->
             <div>
-              <label style="font-size:11px; font-weight:800; color:#1A3DB5; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">Profile Photo</label>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label style="font-size:11px; font-weight:800; color:#1A3DB5; text-transform:uppercase; letter-spacing:0.5px; margin:0;">Profile Photo</label>
+                <button type="button" id="ueRemovePhotoBtn" onclick="ueClearPhoto()" style="display:none; background:none; border:none; color:#dc2626; font-size:10px; font-weight:700; cursor:pointer; padding:0;">✕ Remove</button>
+              </div>
               <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
                 <div id="uePhotoPreview" style="width:84px; height:84px; border-radius:50%; background:linear-gradient(135deg,#1A3DB5,#2952D9); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:800; color:#fff; overflow:hidden; border:3px solid #dbeafe; box-shadow:0 4px 12px rgba(26,61,181,0.15);"></div>
-                <input type="file" id="uePhotoFile" accept="image/*" onchange="uePreviewPhoto(this)" style="font-size:11px; padding:6px; border:1.5px solid #e2e8f0; border-radius:8px; width:100%; background:#f8fafc;">
+                <input type="file" id="uePhotoFile" accept="image/*" onchange="uePreviewPhoto(this)" style="font-size:11px; padding:6px; border:1.5px solid #e2e8f0; border-radius:8px; width:100%; background:#f8fafc; cursor:pointer;">
               </div>
             </div>
 
@@ -743,11 +746,14 @@ input:checked + .slider:before { transform: translateX(20px); }
 
             <!-- Signature Image -->
             <div>
-              <label style="font-size:11px; font-weight:800; color:#1A3DB5; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">PNG Signature (Transparent)</label>
-              <div id="ueSignPreview" style="width:100%; height:52px; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:10px; margin-bottom:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:4px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label style="font-size:11px; font-weight:800; color:#1A3DB5; text-transform:uppercase; letter-spacing:0.5px; margin:0;">Signature Image</label>
+                <button type="button" id="ueRemoveSignBtn" onclick="ueClearSign()" style="display:none; background:none; border:none; color:#dc2626; font-size:10px; font-weight:700; cursor:pointer; padding:0;">✕ Remove</button>
+              </div>
+              <div id="ueSignPreview" style="width:100%; height:54px; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:10px; margin-bottom:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:4px;">
                 <span style="font-size:11px; color:#94a3b8; font-weight:500;">No Signature</span>
               </div>
-              <input type="file" id="ueSignFile" accept="image/png" onchange="uePreviewSign(this)" style="font-size:11px; padding:6px; border:1.5px solid #e2e8f0; border-radius:8px; width:100%; background:#f8fafc;">
+              <input type="file" id="ueSignFile" accept="image/*" onchange="uePreviewSign(this)" style="font-size:11px; padding:6px; border:1.5px solid #e2e8f0; border-radius:8px; width:100%; background:#f8fafc; cursor:pointer;">
             </div>
 
             <div style="height:1px; background:#f1f5f9; margin:2px 0;"></div>
@@ -10479,11 +10485,266 @@ function saveCompBalances() {
     if (btn) btn.textContent = 'Save Balances';
   }
 }
-</script>
 
+// Helper: Universal client-side auto-compression & resizing of uploaded images
+function ueCompressImage(file, maxWidth, maxHeight, quality, callback) {
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onerror = function() {
+    alert('Failed to read image file.');
+  };
+  reader.onload = function(evt) {
+    var img = new Image();
+    img.onerror = function() {
+      alert('Invalid or corrupted image format.');
+    };
+    img.onload = function() {
+      var w = img.width;
+      var h = img.height;
+      if (w > maxWidth || h > maxHeight) {
+        var ratio = Math.min(maxWidth / w, maxHeight / h);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, w, h);
+      
+      // If PNG or has transparency, keep PNG, otherwise JPEG for small size
+      var isPng = (file.type === 'image/png');
+      var outUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', quality || 0.85);
+      callback(outUrl);
+    };
+    img.src = evt.target.result;
+  };
+  reader.readAsDataURL(file);
+}
 
-<!-- UNIFIED DIRECTORY LOGIC -->
-<script>
+function uePreviewPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  ueCompressImage(file, 320, 320, 0.85, function(b64) {
+    input.dataset.b64 = b64;
+    var pPreview = document.getElementById('uePhotoPreview');
+    if (pPreview) pPreview.innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover;">`;
+    var rmBtn = document.getElementById('ueRemovePhotoBtn');
+    if (rmBtn) rmBtn.style.display = 'inline-block';
+  });
+}
+
+function ueClearPhoto() {
+  var fileInput = document.getElementById('uePhotoFile');
+  if (fileInput) {
+    fileInput.value = '';
+    fileInput.dataset.b64 = '';
+  }
+  var name = document.getElementById('ueName') ? document.getElementById('ueName').value : 'U';
+  var pPreview = document.getElementById('uePhotoPreview');
+  if (pPreview) pPreview.innerHTML = (name || 'U').substring(0, 2).toUpperCase();
+  var rmBtn = document.getElementById('ueRemovePhotoBtn');
+  if (rmBtn) rmBtn.style.display = 'none';
+}
+
+function uePreviewSign(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  ueCompressImage(file, 480, 180, 0.9, function(b64) {
+    input.dataset.b64 = b64;
+    var sPreview = document.getElementById('ueSignPreview');
+    if (sPreview) sPreview.innerHTML = `<img src="${b64}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+    var rmBtn = document.getElementById('ueRemoveSignBtn');
+    if (rmBtn) rmBtn.style.display = 'inline-block';
+  });
+}
+
+function ueClearSign() {
+  var fileInput = document.getElementById('ueSignFile');
+  if (fileInput) {
+    fileInput.value = '';
+    fileInput.dataset.b64 = '';
+  }
+  var sPreview = document.getElementById('ueSignPreview');
+  if (sPreview) sPreview.innerHTML = '<span style="font-size:11px; color:#94a3b8; font-weight:500;">No Signature</span>';
+  var rmBtn = document.getElementById('ueRemoveSignBtn');
+  if (rmBtn) rmBtn.style.display = 'none';
+}
+
+// Unified Edit Modal Logic
+function openUnifiedEdit(docId) {
+  var user = (window._allDirectoryUsers || []).find(u => u._docId === docId || u.email === docId);
+  if (!user) return;
+  
+  document.getElementById('ueDocId').value = user._docId || docId;
+  document.getElementById('ueEmail').value = user.email || '';
+  document.getElementById('ueName').value = user.name || '';
+  document.getElementById('ueEmailDisplay').value = user.email || '';
+  
+  // Populate Roles Checkboxes
+  var rContainer = document.getElementById('ueRolesContainer');
+  var allRoles = ['PMAM', 'I/C AB-PMJAY', 'DEO', 'Admin', 'Accountant'];
+  var userRoles = Array.isArray(user.roles) ? user.roles.slice() : (user.role ? [user.role] : []);
+  if (user.desig && !userRoles.includes(user.desig)) userRoles.push(user.desig);
+
+  var rHtml = '';
+  allRoles.forEach(r => {
+    var isChecked = matchesRole(r, userRoles) ? 'checked' : '';
+    rHtml += `
+      <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;cursor:pointer;">
+        <input type="checkbox" value="${r}" class="ue-role-cb" ${isChecked}> ${r}
+      </label>
+    `;
+  });
+  rContainer.innerHTML = rHtml;
+  if (document.getElementById('ueGender')) document.getElementById('ueGender').value = user.gender || 'Male';
+  document.getElementById('ueStatus').value = (user.status === 'active' ? 'approved' : (user.status || 'approved'));
+  document.getElementById('ueHideOnIndex').checked = !!user.hideOnIndex;
+  
+  // Profile Photo
+  var photoSrc = user.photoBase64 || user.photo || user.photoUrl || '';
+  var photoFile = document.getElementById('uePhotoFile');
+  if (photoFile) {
+    photoFile.value = '';
+    photoFile.dataset.b64 = photoSrc;
+  }
+  var pPreview = document.getElementById('uePhotoPreview');
+  var rmPhotoBtn = document.getElementById('ueRemovePhotoBtn');
+  if (photoSrc) {
+    pPreview.innerHTML = `<img src="${photoSrc}" style="width:100%;height:100%;object-fit:cover;">`;
+    if (rmPhotoBtn) rmPhotoBtn.style.display = 'inline-block';
+  } else {
+    pPreview.innerHTML = (user.name||'U').substring(0,2).toUpperCase();
+    if (rmPhotoBtn) rmPhotoBtn.style.display = 'none';
+  }
+
+  // Signature Image
+  var sigSrc = user.signatureImage || user.signatureUrl || user.signature || '';
+  var signFile = document.getElementById('ueSignFile');
+  if (signFile) {
+    signFile.value = '';
+    signFile.dataset.b64 = sigSrc;
+  }
+  var sPreview = document.getElementById('ueSignPreview');
+  var rmSignBtn = document.getElementById('ueRemoveSignBtn');
+  if (sigSrc) {
+    sPreview.innerHTML = `<img src="${sigSrc}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+    if (rmSignBtn) rmSignBtn.style.display = 'inline-block';
+  } else {
+    sPreview.innerHTML = '<span style="font-size:11px;color:#94a3b8;font-weight:500;">No Signature</span>';
+    if (rmSignBtn) rmSignBtn.style.display = 'none';
+  }
+
+  // Populate Wards Checkboxes
+  var wContainer = document.getElementById('ueWardsContainer');
+  var allWards = [];
+  if (window.WARD_REGISTRY && typeof window.WARD_REGISTRY.list === 'function') {
+    allWards = window.WARD_REGISTRY.list().map(w => w.label);
+  }
+  
+  // Also add any legacy wards that user has but aren't in registry
+  var userWards = Array.isArray(user.wards) ? user.wards : (user.ward ? [user.ward] : []);
+  userWards.forEach(w => {
+    if (w && !allWards.includes(w)) allWards.push(w);
+  });
+  // Extras
+  ['Admin', 'Finance', 'OPD'].forEach(w => {
+     if(!allWards.includes(w)) allWards.push(w);
+  });
+  
+  var wHtml = '';
+  allWards.forEach(wLabel => {
+    var isChecked = userWards.includes(wLabel) ? 'checked' : '';
+    wHtml += `
+      <label style="display:flex;align-items:center;gap:4px;background:#fff;border:1px solid #cbd5e1;padding:4px 8px;border-radius:20px;font-size:11px;cursor:pointer;white-space:nowrap;font-weight:600;color:#334155;">
+        <input type="checkbox" value="${wLabel}" class="ue-ward-cb" ${isChecked} style="cursor:pointer">
+        ${wLabel}
+      </label>
+    `;
+  });
+  wContainer.innerHTML = wHtml;
+  
+  document.getElementById('ueErr').textContent = '';
+  document.getElementById('unifiedEditModal').classList.add('open');
+}
+
+function saveUnifiedEdit() {
+  var docId = document.getElementById('ueDocId').value;
+  var email = document.getElementById('ueEmail').value;
+  var name = document.getElementById('ueName').value.trim();
+  var status = document.getElementById('ueStatus').value;
+  var hideOnIndex = document.getElementById('ueHideOnIndex').checked;
+  var selectedRoles = [];
+  document.querySelectorAll('.ue-role-cb:checked').forEach(cb => selectedRoles.push(cb.value));
+  var pB64 = (document.getElementById('uePhotoFile') && document.getElementById('uePhotoFile').dataset.b64) || '';
+  var sB64 = (document.getElementById('ueSignFile') && document.getElementById('ueSignFile').dataset.b64) || '';
+  
+  if (!name) { document.getElementById('ueErr').textContent = 'Name is required.'; return; }
+
+  // Get selected wards
+  var selectedWards = [];
+  document.querySelectorAll('.ue-ward-cb:checked').forEach(cb => selectedWards.push(cb.value));
+
+  var btn = document.querySelector('#unifiedEditModal .mbtn-pri');
+  var origText = btn ? btn.textContent : '💾 Save Changes';
+  if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+
+  var genderVal = document.getElementById('ueGender') ? document.getElementById('ueGender').value : 'Male';
+  var updates = {
+    name: name,
+    gender: genderVal,
+    status: status,
+    wards: selectedWards,
+    hideOnIndex: hideOnIndex,
+    roles: selectedRoles,
+    role: selectedRoles.length > 0 ? selectedRoles[0] : '',
+    ward: selectedWards.length > 0 ? selectedWards[0] : '',
+    photoBase64: pB64,
+    photo: pB64,
+    photoUrl: pB64,
+    signatureImage: sB64,
+    signatureUrl: sB64,
+    signature: sB64
+  };
+
+  var targetDoc = docId || email;
+  if (!targetDoc) {
+    if (btn) { btn.textContent = origText; btn.disabled = false; }
+    document.getElementById('ueErr').textContent = 'User document identifier missing.';
+    return;
+  }
+
+  var savePromise = db.collection('users').doc(targetDoc).set(updates, { merge: true });
+  
+  // If email differs from targetDoc, sync to email doc too
+  if (email && email !== targetDoc) {
+    savePromise = savePromise.then(function() {
+      return db.collection('users').doc(email).set(updates, { merge: true });
+    });
+  }
+
+  savePromise.then(function() {
+    // Update memory object in _allDirectoryUsers directly
+    if (window._allDirectoryUsers) {
+      var cached = window._allDirectoryUsers.find(u => u._docId === targetDoc || u.email === email);
+      if (cached) {
+        Object.assign(cached, updates);
+      }
+    }
+    document.getElementById('unifiedEditModal').classList.remove('open');
+    showToast('User profile, photo & signature updated successfully', 'success');
+    loadDirectory();
+  }).catch(function(e) {
+    console.error(e);
+    document.getElementById('ueErr').textContent = 'Error: ' + e.message;
+  }).finally(function() {
+    if (btn) { btn.textContent = origText; btn.disabled = false; }
+  });
+}
+
+// UNIFIED DIRECTORY LOGIC
 window._allDirectoryUsers = [];
 
 // Override old render functions to prevent errors if old code calls them
@@ -10603,10 +10864,17 @@ function renderDirectoryGrid(list) {
     var statusColor = (u.status === 'active' || u.status === 'approved') ? '#16a34a' : '#dc2626';
     var isEnabled = (u.status === 'active' || u.status === 'approved');
     
+    var photoSrc = u.photoBase64 || u.photo || u.photoUrl || '';
+    var sigSrc = u.signatureImage || u.signatureUrl || u.signature || '';
+
     var photoHtml = `<div class="user-av av-pmam">${ini}</div>`;
-    if (u.photoBase64) {
-      photoHtml = `<img src="${u.photoBase64}" style="width:46px;height:46px;border-radius:50%;object-fit:cover;flex-shrink:0;">`;
+    if (photoSrc) {
+      photoHtml = `<img src="${photoSrc}" style="width:46px;height:46px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid #dbeafe;box-shadow:0 2px 6px rgba(0,0,0,0.06);">`;
     }
+
+    var sigBadge = sigSrc 
+      ? `<span style="font-size:9.5px; font-weight:700; color:#047857; background:#d1fae5; border:1px solid #a7f3d0; border-radius:10px; padding:1px 7px; display:inline-flex; align-items:center; gap:3px;" title="Digital signature registered">✍️ Signed</span>`
+      : `<span style="font-size:9.5px; font-weight:600; color:#94a3b8; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:10px; padding:1px 7px; display:inline-flex; align-items:center; gap:3px;" title="No signature on file">No Sig</span>`;
 
     html += `
       <div class="user-card" style="position:relative;">
@@ -10618,6 +10886,7 @@ function renderDirectoryGrid(list) {
              ${rolesHtml || '<span class="user-role role-pmam">User</span>'}
              <span style="font-size:9px; font-weight:700; color:#374151; background:#f3f4f6; border:1px solid #d1d5db; border-radius:10px; padding:1px 6px;">${(u.gender || 'Male') === 'Female' ? '♀ Female' : '♂ Male'}</span>
              <span style="font-size:9px; font-weight:700; color:${statusColor}; text-transform:uppercase;">• ${(u.status||'').toUpperCase()}</span>
+             ${sigBadge}
           </div>
           <div style="font-size:10px; color:#6b7280; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
             ${wardsText ? '🏥 ' + wardsText : ''}
@@ -10714,162 +10983,6 @@ function dirDeleteUser(docId, email) {
       showToast('Error deleting user: ' + e.message, 'error');
     });
   }
-}
-
-// Unified Edit Modal Logic
-function openUnifiedEdit(docId) {
-  var user = window._allDirectoryUsers.find(u => u._docId === docId);
-  if (!user) return;
-  
-  document.getElementById('ueDocId').value = docId;
-  document.getElementById('ueEmail').value = user.email || '';
-  document.getElementById('ueName').value = user.name || '';
-  document.getElementById('ueEmailDisplay').value = user.email || '';
-  // Populate Roles Checkboxes
-  var rContainer = document.getElementById('ueRolesContainer');
-  var allRoles = ['PMAM', 'I/C AB-PMJAY', 'DEO', 'Admin', 'Accountant'];
-  var userRoles = Array.isArray(user.roles) ? user.roles.slice() : (user.role ? [user.role] : []);
-  if (user.desig && !userRoles.includes(user.desig)) userRoles.push(user.desig);
-
-  var rHtml = '';
-  allRoles.forEach(r => {
-    var isChecked = matchesRole(r, userRoles) ? 'checked' : '';
-    rHtml += `
-      <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;cursor:pointer;">
-        <input type="checkbox" value="${r}" class="ue-role-cb" ${isChecked}> ${r}
-      </label>
-    `;
-  });
-  rContainer.innerHTML = rHtml;
-  if (document.getElementById('ueGender')) document.getElementById('ueGender').value = user.gender || 'Male';
-  document.getElementById('ueStatus').value = (user.status === 'active' ? 'approved' : (user.status || 'approved'));
-  document.getElementById('ueHideOnIndex').checked = !!user.hideOnIndex;
-  
-  // Profile Photo
-  document.getElementById('uePhotoFile').value = '';
-  document.getElementById('uePhotoFile').dataset.b64 = user.photoBase64 || '';
-  var pPreview = document.getElementById('uePhotoPreview');
-  if (user.photoBase64) {
-    pPreview.innerHTML = `<img src="${user.photoBase64}" style="width:100%;height:100%;object-fit:cover;">`;
-  } else {
-    pPreview.innerHTML = (user.name||'U').substring(0,2).toUpperCase();
-  }
-
-  // Signature Image
-  document.getElementById('ueSignFile').value = '';
-  document.getElementById('ueSignFile').dataset.b64 = user.signatureImage || '';
-  var sPreview = document.getElementById('ueSignPreview');
-  if (user.signatureImage) {
-    sPreview.innerHTML = `<img src="${user.signatureImage}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
-  } else {
-    sPreview.innerHTML = '<span style="font-size:10px;color:#9ca3af">No Signature</span>';
-  }
-
-  // Populate Wards Checkboxes
-  var wContainer = document.getElementById('ueWardsContainer');
-  var allWards = [];
-  if (window.WARD_REGISTRY && typeof window.WARD_REGISTRY.list === 'function') {
-    allWards = window.WARD_REGISTRY.list().map(w => w.label);
-  }
-  
-  // Also add any legacy wards that user has but aren't in registry
-  var userWards = Array.isArray(user.wards) ? user.wards : (user.ward ? [user.ward] : []);
-  userWards.forEach(w => {
-    if (w && !allWards.includes(w)) allWards.push(w);
-  });
-  // Extras
-  ['Admin', 'Finance', 'OPD'].forEach(w => {
-     if(!allWards.includes(w)) allWards.push(w);
-  });
-  
-  var wHtml = '';
-  allWards.forEach(wLabel => {
-    var isChecked = userWards.includes(wLabel) ? 'checked' : '';
-    wHtml += `
-      <label style="display:flex;align-items:center;gap:4px;background:#fff;border:1px solid #cbd5e1;padding:4px 8px;border-radius:20px;font-size:11px;cursor:pointer;white-space:nowrap;font-weight:600;color:#334155;">
-        <input type="checkbox" value="${wLabel}" class="ue-ward-cb" ${isChecked} style="cursor:pointer">
-        ${wLabel}
-      </label>
-    `;
-  });
-  wContainer.innerHTML = wHtml;
-  
-  document.getElementById('ueErr').textContent = '';
-  document.getElementById('unifiedEditModal').classList.add('open');
-}
-
-function saveUnifiedEdit() {
-  var docId = document.getElementById('ueDocId').value;
-  var email = document.getElementById('ueEmail').value;
-  var name = document.getElementById('ueName').value.trim();
-  var status = document.getElementById('ueStatus').value;
-  var hideOnIndex = document.getElementById('ueHideOnIndex').checked;
-  var selectedRoles = [];
-  document.querySelectorAll('.ue-role-cb:checked').forEach(cb => selectedRoles.push(cb.value));
-  var pB64 = document.getElementById('uePhotoFile').dataset.b64 || '';
-  var sB64 = document.getElementById('ueSignFile').dataset.b64 || '';
-  
-  if (!name) { document.getElementById('ueErr').textContent = 'Name is required.'; return; }
-
-  // Get selected wards
-  var selectedWards = [];
-  document.querySelectorAll('.ue-ward-cb:checked').forEach(cb => selectedWards.push(cb.value));
-
-  var btn = document.querySelector('#unifiedEditModal .mbtn-pri');
-  var origText = btn.textContent;
-  btn.textContent = 'Saving...'; btn.disabled = true;
-
-  var genderVal = document.getElementById('ueGender') ? document.getElementById('ueGender').value : 'Male';
-  var updates = {
-    name: name,
-    gender: genderVal,
-    status: status,
-    wards: selectedWards,
-    hideOnIndex: hideOnIndex,
-    roles: selectedRoles,
-    role: selectedRoles.length > 0 ? selectedRoles[0] : ''
-  };
-  
-  // Only update ward (singular) for backward compatibility
-  if (selectedWards.length > 0) updates.ward = selectedWards[0];
-  else updates.ward = '';
-
-  if (pB64) updates.photoBase64 = pB64;
-  if (sB64) updates.signatureImage = sB64;
-
-  db.collection('users').doc(docId).update(updates).then(function() {
-    document.getElementById('unifiedEditModal').classList.remove('open');
-    showToast('User profile updated successfully', 'success');
-    loadDirectory();
-  }).catch(function(e) {
-    console.error(e);
-    document.getElementById('ueErr').textContent = 'Error: ' + e.message;
-  }).finally(function() {
-    btn.textContent = origText; btn.disabled = false;
-  });
-}
-
-function uePreviewPhoto(input) {
-  if (!input.files || !input.files[0]) return;
-  var file = input.files[0];
-  if (file.size > 400000) { alert('File is too large. Please select an image under 300KB.'); input.value=''; return; }
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    input.dataset.b64 = e.target.result;
-    document.getElementById('uePhotoPreview').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
-  };
-  reader.readAsDataURL(file);
-}
-
-function uePreviewSign(input) {
-  if (!input.files || !input.files[0]) return;
-  var file = input.files[0];
-  if (file.size > 200000) { alert('File is too large. Please select a PNG under 200KB.'); input.value=''; return; }
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    input.dataset.b64 = e.target.result;
-    document.getElementById('ueSignPreview').innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
-  };
 }
 
 // ==========================================
