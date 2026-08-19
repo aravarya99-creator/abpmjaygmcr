@@ -826,10 +826,7 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
         .ld-title-dash { width: 24px; height: 4px; background: #3b82f6; border-radius: 2px; }
         .ld-subtitle { font-size: 13px; color: #94a3b8; margin-top: 4px; font-weight: 500; }
         
-        .ld-cards-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 20px; }
-        @media (max-width: 1200px) { .ld-cards-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 768px) { .ld-cards-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 480px) { .ld-cards-grid { grid-template-columns: 1fr; } }
+        .ld-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 20px; }
         
         .ld-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease; }
         .ld-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06); }
@@ -936,38 +933,32 @@ input[type=date]::-webkit-calendar-picker-indicator { margin-left: 0px; padding-
           if (sel) {
             Array.from(sel.options).forEach(function(opt) {
               var val = (opt.value || '').toLowerCase();
+              if (!val) return; // Skip placeholder "-- Select Leave Type --"
+
+              var isEnabled = true;
               if (val.indexOf('casual') !== -1) {
-                if (rules.en_casual === false) { opt.disabled = true; opt.textContent = 'Casual Leave (Disabled by Admin)'; }
-                else { opt.disabled = false; opt.textContent = 'Casual Leave (Paid)'; }
-              } else if (val.indexOf('compensatory') !== -1) {
-                if (rules.en_comp === false) { opt.disabled = true; opt.textContent = 'Compensatory Leave (Disabled by Admin)'; }
-                else { opt.disabled = false; opt.textContent = 'Compensatory (Paid)'; }
+                isEnabled = (rules.en_casual !== false);
+              } else if (val.indexOf('compensatory') !== -1 || val.indexOf('comp') !== -1) {
+                isEnabled = (rules.en_comp !== false);
               } else if (val.indexOf('medical') !== -1) {
-                if (rules.en_medical === false) { opt.disabled = true; opt.textContent = 'Medical Leave (Disabled by Admin)'; }
-                else { opt.disabled = false; opt.textContent = 'Medical Leave (Unpaid)'; }
+                isEnabled = (rules.en_medical !== false);
               } else if (val.indexOf('maternity') !== -1) {
-                if (rules.en_mat === false) {
-                  opt.disabled = true; opt.hidden = true; opt.style.display = 'none'; opt.textContent = 'Maternity Leave (Disabled by Admin)';
-                  if (sel.value === opt.value) sel.value = 'Casual';
-                } else if (isMale) {
-                  opt.disabled = true; opt.hidden = true; opt.style.display = 'none'; opt.textContent = 'Maternity Leave (Female Only)';
-                  if (sel.value === opt.value) sel.value = 'Casual';
-                } else {
-                  opt.disabled = false; opt.hidden = false; opt.style.display = ''; opt.textContent = 'Maternity Leave (Unpaid)';
-                }
+                isEnabled = (rules.en_mat !== false && isFemale);
               } else if (val.indexOf('paternity') !== -1) {
-                if (rules.en_pat === false) {
-                  opt.disabled = true; opt.hidden = true; opt.style.display = 'none'; opt.textContent = 'Paternity Leave (Disabled by Admin)';
-                  if (sel.value === opt.value) sel.value = 'Casual';
-                } else if (isFemale) {
-                  opt.disabled = true; opt.hidden = true; opt.style.display = 'none'; opt.textContent = 'Paternity Leave (Male Only)';
-                  if (sel.value === opt.value) sel.value = 'Casual';
-                } else {
-                  opt.disabled = false; opt.hidden = false; opt.style.display = ''; opt.textContent = 'Paternity Leave (Unpaid)';
-                }
+                isEnabled = (rules.en_pat !== false && isMale);
               } else if (val.indexOf('lwp') !== -1 || val.indexOf('pay') !== -1) {
-                if (rules.en_lwp === false) { opt.disabled = true; opt.textContent = 'Leave Without Pay (Disabled by Admin)'; }
-                else { opt.disabled = false; opt.textContent = 'Leave Without Pay (Unpaid)'; }
+                isEnabled = (rules.en_lwp !== false);
+              }
+
+              if (isEnabled) {
+                opt.disabled = false;
+                opt.hidden = false;
+                opt.style.display = '';
+              } else {
+                opt.disabled = true;
+                opt.hidden = true;
+                opt.style.display = 'none';
+                if (sel.value === opt.value) sel.value = '';
               }
             });
           }
@@ -3025,8 +3016,11 @@ function renderLeaveSummary() {
   var isFemale = (g === 'female' || g === 'f');
   var isMale = !isFemale;
 
-  var leaveTypes = [
-    {
+  var leaveTypes = [];
+
+  // 1. Casual Leave
+  if (rules.en_casual !== false) {
+    leaveTypes.push({
       key: 'casual',
       title: 'Casual Leave (CL)',
       label: 'Casual Leave',
@@ -3037,8 +3031,12 @@ function renderLeaveSummary() {
       color: '#3b82f6',
       bgColor: '#eff6ff',
       iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M12 2a10 10 0 0 0-10 10c0 1 0 2 10 2 10 0 10-1 10-2A10 10 0 0 0 12 2z"/></svg>`
-    },
-    {
+    });
+  }
+
+  // 2. Medical Leave
+  if (rules.en_medical !== false) {
+    leaveTypes.push({
       key: 'medical',
       title: 'Medical Leave (ML)',
       label: 'Medical Leave',
@@ -3049,8 +3047,12 @@ function renderLeaveSummary() {
       color: '#a855f7',
       bgColor: '#f3e8ff',
       iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>`
-    },
-    {
+    });
+  }
+
+  // 3. Compensatory Leave
+  if (rules.en_comp !== false) {
+    leaveTypes.push({
       key: 'comp',
       title: 'Compensatory Leave',
       label: 'Compensatory',
@@ -3061,10 +3063,11 @@ function renderLeaveSummary() {
       color: '#22c55e',
       bgColor: '#f0fdf4',
       iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`
-    }
-  ];
+    });
+  }
 
-  if (isMale) {
+  // 4. Paternity Leave (Male only & enabled)
+  if (isMale && rules.en_pat !== false) {
     leaveTypes.push({
       key: 'paternity',
       title: 'Paternity Leave (PTL)',
@@ -3079,7 +3082,8 @@ function renderLeaveSummary() {
     });
   }
 
-  if (isFemale) {
+  // 5. Maternity Leave (Female only & enabled)
+  if (isFemale && rules.en_mat !== false) {
     leaveTypes.push({
       key: 'maternity',
       title: 'Maternity Leave (MTL)',
@@ -3094,18 +3098,21 @@ function renderLeaveSummary() {
     });
   }
 
-  leaveTypes.push({
-    key: 'lwp',
-    title: 'Leave Without Pay (LWP)',
-    label: 'LWP',
-    code: '(LWP)',
-    eligible: rules.lwp !== undefined ? rules.lwp : (rules.lwp_limit !== undefined ? rules.lwp_limit : 0),
-    taken: b.taken.lwp || 0,
-    balance: 0,
-    color: '#64748b',
-    bgColor: '#f1f5f9',
-    iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 8h6"/><path d="M9 11h6"/><path d="M9 8v7c0 1.5 2 2 3 2s3-.5 3-2"/></svg>`
-  });
+  // 6. Leave Without Pay (LWP)
+  if (rules.en_lwp !== false) {
+    leaveTypes.push({
+      key: 'lwp',
+      title: 'Leave Without Pay (LWP)',
+      label: 'LWP',
+      code: '(LWP)',
+      eligible: rules.lwp !== undefined ? rules.lwp : (rules.lwp_limit !== undefined ? rules.lwp_limit : 0),
+      taken: b.taken.lwp || 0,
+      balance: 0,
+      color: '#64748b',
+      bgColor: '#f1f5f9',
+      iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 8h6"/><path d="M9 11h6"/><path d="M9 8v7c0 1.5 2 2 3 2s3-.5 3-2"/></svg>`
+    });
+  }
 
   var totalEligible = 0;
   var totalTaken = 0;
@@ -3156,6 +3163,10 @@ function renderLeaveSummary() {
     `;
   }).join('');
 
+  if (leaveTypes.length === 0) {
+    topCardsHtml = '<div style="grid-column: 1 / -1; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; text-align:center; color:#64748b; font-weight:600; font-size:13px;">ℹ️ No leave types are currently enabled by Administration.</div>';
+  }
+
   var C = 2 * Math.PI * 75; // ~471.24
   var svgArcs = '';
   var currentOffset = 0;
@@ -3198,6 +3209,10 @@ function renderLeaveSummary() {
       </tr>
     `;
   }).join('');
+
+  if (leaveTypes.length === 0) {
+    tableRowsHtml = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8; font-weight:600;">No active leave categories.</td></tr>';
+  }
 
   var summaryCardsHtml = `
     <div class="ld-summary-card">
