@@ -3542,5 +3542,176 @@ window.addEventListener('DOMContentLoaded', function() {
 
 <script src="shared/logos.js"></script>
 <script src="shared/portal_header.js?v=20260725_16"></script>
+
+<!-- ═══════════════ FLOATING LEAVE PROCESS GUIDE WIDGET ═══════════════ -->
+<div id="leaveGuideWidget" style="position:fixed; bottom:36px; right:18px; z-index:999; font-family:'Inter',Arial,sans-serif;">
+  <style>
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35); transform: translateY(0); }
+      50% { box-shadow: 0 8px 24px rgba(124, 58, 237, 0.6); transform: translateY(-2px); }
+    }
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(16px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .leave-float-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #7c3aed 100%);
+      color: #ffffff;
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      border-radius: 30px;
+      padding: 7px 15px;
+      font-weight: 800;
+      font-size: 11.5px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35);
+      animation: pulseGlow 3s infinite ease-in-out;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .leave-float-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+    }
+    .leave-float-card {
+      position: absolute;
+      bottom: 44px;
+      right: 0;
+      width: 380px;
+      max-width: calc(100vw - 32px);
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+      animation: slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .leave-card-img-wrap {
+      position: relative;
+      background: #f8fafc;
+      cursor: zoom-in;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .leave-card-img-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .leave-card-img-wrap:hover img {
+      transform: scale(1.02);
+    }
+    .leave-zoom-overlay {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      pointer-events: none;
+    }
+    /* Fullscreen Lightbox */
+    .leave-lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      cursor: zoom-out;
+    }
+    .leave-lightbox.open {
+      display: flex;
+    }
+    .leave-lightbox-content {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 16px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      cursor: default;
+    }
+  </style>
+
+  <!-- Trigger Button -->
+  <button class="leave-float-btn" id="btnLeaveGuideToggle" onclick="toggleLeaveGuide()" title="Click to view PMAM Leave Approval Process">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+    <span>PMAM Leave Guide</span>
+  </button>
+
+  <!-- Floating Square Card -->
+  <div class="leave-float-card" id="leaveGuideCard">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg, #1e293b, #0f172a); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; color:#fff;">
+      <div style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; letter-spacing:0.2px;">
+        <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; background:rgba(37,99,235,0.3); border-radius:6px; font-size:11px;">📋</span>
+        <span>PMAM Leave Process</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button onclick="openLeaveLightbox()" title="View Full Screen" style="background:rgba(255,255,255,0.1); border:none; color:#cbd5e1; width:24px; height:24px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; transition:all 0.15s;">⤢</button>
+        <button onclick="toggleLeaveGuide()" title="Close" style="background:rgba(255,255,255,0.1); border:none; color:#cbd5e1; width:24px; height:24px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; transition:all 0.15s;">&times;</button>
+      </div>
+    </div>
+
+    <!-- Image Body -->
+    <div class="leave-card-img-wrap" onclick="openLeaveLightbox()" title="Click to view full size">
+      <img src="pmam_leave_process.jpg" alt="PMAM Leave Process Infographic">
+      <div class="leave-zoom-overlay">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+        <span>Click to Zoom</span>
+      </div>
+    </div>
+
+    <!-- Footer Note -->
+    <div style="background:#f8fafc; padding:8px 12px; border-top:1px solid #e2e8f0; font-size:10.5px; color:#475569; font-weight:600; line-height:1.3; display:flex; align-items:center; justify-content:space-between;">
+      <span>💡 4-step workflow for valid leave</span>
+      <a href="pmam_leave_process.jpg" download="PMAM_Leave_Process.jpg" style="color:#2563eb; font-weight:700; text-decoration:underline; font-size:10.5px;" onclick="event.stopPropagation();">Download</a>
+    </div>
+  </div>
+</div>
+
+<!-- Fullscreen Lightbox Modal -->
+<div class="leave-lightbox" id="leaveLightbox" onclick="closeLeaveLightbox()">
+  <div style="position:relative; max-width:92vw; max-height:92vh; display:flex; flex-direction:column; align-items:center;" onclick="event.stopPropagation();">
+    <button onclick="closeLeaveLightbox()" style="position:absolute; top:-14px; right:-14px; background:#ef4444; color:#fff; border:2px solid #fff; width:32px; height:32px; border-radius:50%; font-size:18px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:10001;">&times;</button>
+    <img src="pmam_leave_process.jpg" class="leave-lightbox-content" alt="PMAM Leave Process Fullscreen">
+  </div>
+</div>
+
+<script>
+function toggleLeaveGuide() {
+  var card = document.getElementById('leaveGuideCard');
+  if (card) {
+    var isShown = card.style.display === 'flex';
+    card.style.display = isShown ? 'none' : 'flex';
+  }
+}
+function openLeaveLightbox() {
+  var lb = document.getElementById('leaveLightbox');
+  if (lb) lb.classList.add('open');
+}
+function closeLeaveLightbox() {
+  var lb = document.getElementById('leaveLightbox');
+  if (lb) lb.classList.remove('open');
+}
+</script>
 </body>
 </html>
