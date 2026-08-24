@@ -7018,7 +7018,21 @@ function loadPmamNavSettings() {
     setVal('pn_en_substitute_duty', data.en_substitute_duty !== false);
     setVal('pn_en_leave_dashboard', data.en_leave_dashboard !== false);
     setVal('pn_en_roster', data.en_roster !== false);
-    setVal('pn_en_leave_popup', data.en_leave_popup !== false);
+    
+    if (data.en_leave_popup !== undefined) {
+      setVal('pn_en_leave_popup', data.en_leave_popup !== false);
+    } else {
+      // Fallback check to landing_page
+      db.collection('settings').doc('landing_page').get().then(function(ldoc) {
+        if (ldoc.exists) {
+          var ld = ldoc.data() || {};
+          setVal('pn_en_leave_popup', ld.en_leave_popup !== false);
+        } else {
+          setVal('pn_en_leave_popup', true);
+        }
+        togglePmamNavChildState();
+      }).catch(function(){ setVal('pn_en_leave_popup', true); togglePmamNavChildState(); });
+    }
 
     togglePmamNavChildState();
     if (statusEl) statusEl.textContent = '● Live Synced';
@@ -7053,8 +7067,12 @@ function savePmamNavSettings() {
   if (statusEl) statusEl.textContent = 'Saving...';
 
   db.collection('settings').doc('pmam_nav').set(payload, { merge: true }).then(function() {
-    // Also sync en_leave_popup to settings/leave_rules
-    db.collection('settings').doc('leave_rules').set({ en_leave_popup: payload.en_leave_popup }, { merge: true }).catch(function(){});
+    var popupSync = { en_leave_popup: payload.en_leave_popup, updatedAt: Date.now() };
+    db.collection('settings').doc('landing_page').set(popupSync, { merge: true }).catch(function(e){ console.warn(e); });
+    db.collection('settings').doc('leave_rules').set(popupSync, { merge: true }).catch(function(e){ console.warn(e); });
+    db.collection('settings').doc('portal').set(popupSync, { merge: true }).catch(function(e){ console.warn(e); });
+    try { localStorage.setItem('gmc_en_leave_popup', payload.en_leave_popup ? '1' : '0'); } catch(e){}
+
     if (statusEl) statusEl.textContent = '● Saved & Synced!';
     if (typeof showToast === 'function') showToast('PMAM Sidebar & Tab Controls saved successfully!', 'success');
     if (typeof writeAudit === 'function') writeAudit('EDIT', 'settings/pmam_nav', 'pmam_nav', payload);
@@ -10354,7 +10372,12 @@ function saveLeaveLimits() {
 
   db.collection('settings').doc('leave_rules').set(data, {merge:true})
   .then(function(){
-    db.collection('settings').doc('pmam_nav').set({ en_leave_popup: isLeavePopupEn }, { merge: true }).catch(function(){});
+    var popupSync = { en_leave_popup: isLeavePopupEn, updatedAt: Date.now() };
+    db.collection('settings').doc('pmam_nav').set(popupSync, { merge: true }).catch(function(){});
+    db.collection('settings').doc('landing_page').set(popupSync, { merge: true }).catch(function(){});
+    db.collection('settings').doc('portal').set(popupSync, { merge: true }).catch(function(){});
+    try { localStorage.setItem('gmc_en_leave_popup', isLeavePopupEn ? '1' : '0'); } catch(e){}
+
     var msg = document.getElementById('ll_msg');
     if(msg){ msg.textContent='Saved successfully'; msg.style.color='#166534'; setTimeout(function(){msg.textContent='';},3000); }
     if(btn) btn.textContent = 'Save Configuration';
