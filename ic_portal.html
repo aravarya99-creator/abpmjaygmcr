@@ -756,6 +756,18 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
               <span style="font-size:13px; margin-right:4px;">🗓️</span>
               <select id="rMonthWard" style="border:none; background:transparent; font-size:13px; font-weight:700; color:#1e1b4b; outline:none; font-family:'Tahoma', sans-serif; cursor:pointer;">
                 <option value="">All Months</option>
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
               </select>
             </div>
 
@@ -849,6 +861,18 @@ tr.tot-row td{background:linear-gradient(90deg,#0F2B8C,#1A3DB5)!important;color:
               <span style="font-size:13px; margin-right:4px;">🗓️</span>
               <select id="prMonth" style="border:none; background:transparent; font-size:13px; font-weight:700; color:#1e1b4b; outline:none; font-family:'Tahoma', sans-serif; cursor:pointer;">
                 <option value="">All Months</option>
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
               </select>
             </div>
 
@@ -2028,21 +2052,31 @@ function genWard(){
   const yearSel = document.getElementById('rYearWard');
   const year = yearSel ? parseInt(yearSel.value) : new Date().getFullYear();
   const monthSel = document.getElementById('rMonthWard');
-  const monthStr = monthSel ? monthSel.value : ''; // '' or '01'..'12'
+  const monthStr = monthSel ? monthSel.value : '';
   const ward = document.getElementById('wrWard').value;
+
+  var monthIdx = -1;
+  if (monthStr) {
+    var idx = MONTHS.indexOf(monthStr);
+    if (idx !== -1) monthIdx = idx;
+    else {
+      var p = parseInt(monthStr, 10);
+      if (!isNaN(p) && p >= 1 && p <= 12) monthIdx = p - 1;
+    }
+  }
 
   const filtered = allReports.filter(r => {
     if(!r.date) return false;
     const d = new Date(r.date);
     if(d.getFullYear() !== year) return false;
-    if(monthStr && (d.getMonth()+1) !== parseInt(monthStr)) return false;
+    if(monthIdx !== -1 && d.getMonth() !== monthIdx) return false;
     if(!r.wards) return false;
     return ward === "" || r.wards.includes(ward);
   });
 
   // Update subhead
   var subhead = document.getElementById('wardCardSubhead');
-  var monthName = monthStr ? MONTHS[parseInt(monthStr)-1] : 'All Months';
+  var monthName = (monthIdx !== -1) ? MONTHS[monthIdx] : 'All Months';
   var wardLabel = ward || 'All Wards';
 
   // Ensure toggle availability is in sync with current ward selection
@@ -2224,17 +2258,20 @@ function _genPmamYearWise(pmam, year, filtered){
 function _genPmamDayWise(pmam, year, filtered){
   // Day-wise: aggregate by date, show ALL days of selected month (or full year)
   const monthSel = document.getElementById('prMonth');
-  const monthStr = monthSel ? monthSel.value : ''; // '' or '01'..'12'
-  if(!monthStr){
-    // No month picked → fall back to year-wise to avoid 365-row table
-    alert('Please select a month for day-wise view.');
-    return;
+  const monthStr = monthSel ? monthSel.value : '';
+  var monthIdx = -1;
+  if (monthStr) {
+    var idx = MONTHS.indexOf(monthStr);
+    if (idx !== -1) monthIdx = idx;
+    else {
+      var p = parseInt(monthStr, 10);
+      if (!isNaN(p) && p >= 1 && p <= 12) monthIdx = p - 1;
+    }
   }
-  const monthNum = parseInt(monthStr); // 1-12
-  const monthName = MONTHS[monthNum-1];
+  const monthName = (monthIdx !== -1) ? MONTHS[monthIdx] : 'All Months';
 
-  // Further filter to just this month
-  const inMonth = filtered.filter(r => (new Date(r.date).getMonth()+1) === monthNum);
+  // Further filter to just this month if specified
+  const inMonth = filtered.filter(r => monthIdx === -1 || new Date(r.date).getMonth() === monthIdx);
 
   document.getElementById('pmamTitle').textContent = pmam + ' — Day-wise ' + monthName + ' ' + year;
   // Update header for day-wise (replace Month with Date, add Wards column at end before Conv%)
@@ -2684,23 +2721,21 @@ function populateFilters() {
     }).join('');
   }
 
-  // Month dropdown for Ward Wise (value = '01'..'12')
+  // Month dropdown for Ward Wise
   const rMonthWardEl = document.getElementById('rMonthWard');
   if(rMonthWardEl){
     const cur = rMonthWardEl.value;
-    rMonthWardEl.innerHTML = `<option value="">All Months</option>` + MONTHS.map((m, i) => {
-      const v = String(i+1).padStart(2,'0');
-      return `<option value="${v}" ${v===cur?'selected':''}>${m}</option>`;
+    rMonthWardEl.innerHTML = `<option value="">All Months</option>` + MONTHS.map(m => {
+      return `<option value="${m}" ${m===cur?'selected':''}>${m}</option>`;
     }).join('');
   }
 
   // Month dropdown for PMAM Wise (Day-wise mode)
   const prMonthEl = document.getElementById('prMonth');
   if(prMonthEl){
-    const cur = prMonthEl.value || String(new Date().getMonth()+1).padStart(2,'0');
-    prMonthEl.innerHTML = MONTHS.map((m, i) => {
-      const v = String(i+1).padStart(2,'0');
-      return `<option value="${v}" ${v===cur?'selected':''}>${m}</option>`;
+    const cur = prMonthEl.value;
+    prMonthEl.innerHTML = `<option value="">All Months</option>` + MONTHS.map(m => {
+      return `<option value="${m}" ${m===cur?'selected':''}>${m}</option>`;
     }).join('');
   }
 
@@ -3703,7 +3738,27 @@ function genWard(){
   if (tbody) tbody.innerHTML = '<tr><td colspan="11" class="empty-td">Loading…</td></tr>';
 
   var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var monthIdx = months.indexOf(month);
+  var monthIdx = -1;
+  if (month) {
+    var idx = months.indexOf(month);
+    if (idx !== -1) {
+      monthIdx = idx;
+    } else {
+      var p = parseInt(month, 10);
+      if (!isNaN(p) && p >= 1 && p <= 12) {
+        monthIdx = p - 1;
+      }
+    }
+  }
+
+  // Update Ward subhead / title
+  var subhead = document.getElementById('wardCardSubhead');
+  if (subhead) {
+    var monthName = (month && monthIdx !== -1) ? months[monthIdx] : 'All Months';
+    var wardLabel = ward || 'All Wards';
+    var modeLabel = isPmamMode ? ' (PMAM breakdown)' : '';
+    subhead.textContent = '— ' + wardLabel + ' / ' + monthName + ' ' + (year || '') + modeLabel;
+  }
 
   var filtered = allReports.filter(function(r){
     if (!r.date) return false;
@@ -3810,8 +3865,29 @@ function genPmam(){
   var year = yEl ? yEl.value : '';
   var isDay = document.getElementById('prModeToggle') && document.getElementById('prModeToggle').checked;
 
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var monthIdx = -1;
+  if (month) {
+    var idx = months.indexOf(month);
+    if (idx !== -1) {
+      monthIdx = idx;
+    } else {
+      var p = parseInt(month, 10);
+      if (!isNaN(p) && p >= 1 && p <= 12) {
+        monthIdx = p - 1;
+      }
+    }
+  }
+
+  var monthName = (month && monthIdx !== -1) ? months[monthIdx] : 'All Months';
   var titleEl = document.getElementById('pmamTitle');
-  if (titleEl) titleEl.textContent = pmam ? (pmam + ' — ' + (isDay ? 'Day-wise Breakdown' : 'Monthly Trend')) : 'Monthly Trend';
+  if (titleEl) {
+    if (pmam) {
+      titleEl.textContent = isDay ? (pmam + ' — Day-wise (' + monthName + ' ' + (year || '') + ')') : (pmam + ' — Monthly Trend (' + (year || '') + ')');
+    } else {
+      titleEl.textContent = isDay ? 'Day-wise Breakdown' : 'Monthly Trend';
+    }
+  }
 
   var tbody = document.getElementById('pmamTbody');
   var foot = document.getElementById('pmamFoot');
@@ -3822,9 +3898,6 @@ function genPmam(){
     if (foot) foot.innerHTML = '';
     return;
   }
-
-  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var monthIdx = months.indexOf(month);
 
   var filtered = allReports.filter(function(r){
     if (!r.date) return false;
@@ -3842,7 +3915,7 @@ function genPmam(){
     filtered.forEach(function(r){
       var key = r.date;
       if (!groupMap[key]) {
-        groupMap[key] = { label: new Date(r.date).toLocaleDateString('en-IN', {dateStyle:'medium'}), ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0 };
+        groupMap[key] = { rawDate: r.date, label: new Date(r.date).toLocaleDateString('en-IN', {dateStyle:'medium'}), ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0 };
       }
       var g = groupMap[key];
       g.ipd += Number(r.ipd||0); g.med += Number(r.med||0); g.surg += Number(r.surg||0);
@@ -3866,6 +3939,11 @@ function genPmam(){
   }
 
   var list = Object.values(groupMap);
+  if (isDay) {
+    list.sort(function(a, b){
+      return (a.rawDate || '') > (b.rawDate || '') ? 1 : -1;
+    });
+  }
   var totals = { ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0 };
 
   var html = list.map(function(g){
@@ -3915,6 +3993,29 @@ function populateFilters(){
   if (rMonthSel && !rMonthSel.dataset.userSelected) {
     rMonthSel.value = currentMonthName;
   }
+
+  // Month dropdowns for Ward Wise and PMAM Wise
+  ['rMonthWard', 'prMonth'].forEach(function(id){
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    var currVal = sel.value || '';
+    var opts = '<option value="">All Months</option>';
+    months.forEach(function(m){
+      opts += '<option value="' + m + '"' + (m === currVal ? ' selected' : '') + '>' + m + '</option>';
+    });
+    sel.innerHTML = opts;
+  });
+
+  // Month dropdown for All Records
+  document.querySelectorAll('#arMonth').forEach(function(sel){
+    var curVal = sel.value || '';
+    var opts = '<option value="">All Months</option>';
+    months.forEach(function(m, idx){
+      var v = String(idx + 1).padStart(2, '0');
+      opts += '<option value="' + v + '"' + (v === curVal || m === curVal ? ' selected' : '') + '>' + m + '</option>';
+    });
+    sel.innerHTML = opts;
+  });
 
   var years = [];
   var currentYear = new Date().getFullYear();
