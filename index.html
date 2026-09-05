@@ -1014,15 +1014,16 @@ window.addEventListener('DOMContentLoaded', function() {
     // missing any, we append it — so a stale config can never make a working
     // feature (Weekend Roster, Orders, About Us) disappear from the nav.
     var CORE_TABS = [
-      { id:'home',      label:'Home',           order:-1 },
-      { id:'about',     label:'About Us',       order:0 },
-      { id:'developer', label:'Developer',      order:1 },
-      { id:'staff',     label:'Staff',          order:2 },
-      { id:'roster',    label:'Ward Roster',    order:3 },
-      { id:'weekend',   label:'Weekend Roster', order:4 },
-      { id:'holiday',   label:'Holiday Roster', order:5 },
-      { id:'calendar',  label:'Holidays',       order:6 },
-      { id:'orders',    label:'Orders',         order:7 }
+      { id:'home',         label:'Home',               order:-1 },
+      { id:'about',        label:'About Us',           order:0 },
+      { id:'developer',    label:'Developer',          order:1 },
+      { id:'staff',        label:'Staff',              order:2 },
+      { id:'roster',       label:'Ward Roster',        order:3 },
+      { id:'weekend',      label:'Weekend Roster',     order:4 },
+      { id:'reportstatus', label:'PMAM Report Status', order:5 },
+      { id:'holiday',      label:'Holiday Roster',     order:6 },
+      { id:'calendar',     label:'Holidays',           order:7 },
+      { id:'orders',       label:'Orders',             order:8 }
     ]
 
     function renderNav(items){
@@ -2179,7 +2180,9 @@ window.addEventListener('DOMContentLoaded', function() {
     orders:          null,  // settings/orders
     aboutPage:       null,  // settings/about_page
     publishedRosters:[],    // holiday_roster_requests
-    userPhotos:      {}     // users collection photo mapping
+    userPhotos:      {},     // users collection photo mapping
+    pmamUsers:       [],     // active PMAM list
+    dailyReports:    []      // daily_reports collection
   };
   // Current open modal id (so we can re-render when data updates)
   var _openId = null;
@@ -2361,15 +2364,32 @@ window.addEventListener('DOMContentLoaded', function() {
 
     db.collection('users').onSnapshot(function(snap){
       var map = {};
+      var pmamList = [];
       snap.forEach(function(doc){
         var u = doc.data() || {};
-        var name = (u.name || '').trim().toLowerCase();
+        var name = (u.name || '').trim();
         var photo = u.photoBase64 || u.photo || u.photoUrl || '';
-        if (name && photo) map[name] = photo;
+        if (name && photo) map[name.toLowerCase()] = photo;
+        if (u.role === 'PMAM' && u.status !== 'pending' && u.status !== 'rejected') {
+          pmamList.push(u);
+        }
       });
+      pmamList.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
       LIVE.userPhotos = map;
-      if (_openId === 'weekend') renderInto(_openId);
+      LIVE.pmamUsers = pmamList;
+      if (_openId === 'weekend' || _openId === 'reportstatus' || _openId === 'pmamstatus') renderInto(_openId);
     }, function(err){ console.warn('users photo listener:', err && err.message); });
+
+    db.collection('daily_reports').onSnapshot(function(snap){
+      var list = [];
+      snap.forEach(function(doc){
+        var d = doc.data() || {};
+        d._id = doc.id;
+        list.push(d);
+      });
+      LIVE.dailyReports = list;
+      if (_openId === 'reportstatus' || _openId === 'pmamstatus') renderInto(_openId);
+    }, function(err){ console.warn('daily_reports listener:', err && err.message); });
 
     db.collection('settings').doc('orders').onSnapshot(function(doc){
       LIVE.orders = doc.exists ? (doc.data() || {}) : {};
@@ -2944,7 +2964,305 @@ window.addEventListener('DOMContentLoaded', function() {
     return html;
   }
 
-    // ── About Us modal: the AB-PMJAY / SEHAT scheme writeup ──
+  
+  // ════════════════════════════════════════════════════════════════════════
+  // PMAM REPORT STATUS — Interactive Matrix Grid tracking daily submission
+  // ════════════════════════════════════════════════════════════════════════
+  window._lpReportStatusRange = window._lpReportStatusRange || '1-5sep';
+  window._lpReportStatusCustomStart = window._lpReportStatusCustomStart || '2026-09-01';
+  window._lpReportStatusCustomEnd = window._lpReportStatusCustomEnd || '2026-09-05';
+
+  window.lpSetReportStatusRange = function(val, sDt, eDt) {
+    window._lpReportStatusRange = val;
+    if (sDt) window._lpReportStatusCustomStart = sDt;
+    if (eDt) window._lpReportStatusCustomEnd = eDt;
+    renderInto('reportstatus');
+  };
+
+  function renderPmamReportStatus(){
+    var range = window._lpReportStatusRange || '1-5sep';
+    var now = new Date();
+    var p = function(n){ return n < 10 ? '0'+n : n; };
+    var todayStr = now.getFullYear() + '-' + p(now.getMonth()+1) + '-' + p(now.getDate());
+
+    var dateList = [];
+    var rangeTitle = '';
+
+    // Calculate dates based on range selection
+    if (range === '1-5sep') {
+      rangeTitle = '1 Sep – 5 Sep 2026';
+      var dArr = ['2026-09-01', '2026-09-02', '2026-09-03', '2026-09-04', '2026-09-05'];
+      dArr.forEach(function(dtStr){
+        var parts = dtStr.split('-');
+        var d = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+        var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        dateList.push({
+          dateStr: dtStr,
+          dayNum: p(d.getDate()) + ' ' + months[d.getMonth()],
+          weekday: days[d.getDay()]
+        });
+      });
+    } else if (range === 'today') {
+      var d = now;
+      var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      rangeTitle = 'Today (' + p(d.getDate()) + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ')';
+      dateList.push({
+        dateStr: todayStr,
+        dayNum: p(d.getDate()) + ' ' + months[d.getMonth()],
+        weekday: days[d.getDay()]
+      });
+    } else if (range === 'past7') {
+      rangeTitle = 'Past 7 Days';
+      for (var i = 6; i >= 0; i--) {
+        var d = new Date(now.getTime() - i * 86400000);
+        var dtStr = d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate());
+        var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        dateList.push({
+          dateStr: dtStr,
+          dayNum: p(d.getDate()) + ' ' + months[d.getMonth()],
+          weekday: days[d.getDay()]
+        });
+      }
+    } else if (range === 'current_week') {
+      rangeTitle = 'Current Week (Mon – Sat)';
+      var curr = new Date(now);
+      var day = curr.getDay();
+      var diff = curr.getDate() - day + (day === 0 ? -6 : 1); // Monday
+      var mon = new Date(curr.setDate(diff));
+      for (var i = 0; i < 6; i++) {
+        var d = new Date(mon.getTime() + i * 86400000);
+        var dtStr = d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate());
+        var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        dateList.push({
+          dateStr: dtStr,
+          dayNum: p(d.getDate()) + ' ' + months[d.getMonth()],
+          weekday: days[d.getDay()]
+        });
+      }
+    } else if (range === 'custom') {
+      var sDt = window._lpReportStatusCustomStart || '2026-09-01';
+      var eDt = window._lpReportStatusCustomEnd || '2026-09-05';
+      rangeTitle = sDt + ' to ' + eDt;
+      var s = new Date(sDt);
+      var e = new Date(eDt);
+      if (s <= e) {
+        var cur = new Date(s);
+        var safety = 0;
+        while (cur <= e && safety < 31) {
+          var dtStr = cur.getFullYear() + '-' + p(cur.getMonth()+1) + '-' + p(cur.getDate());
+          var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+          var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          dateList.push({
+            dateStr: dtStr,
+            dayNum: p(cur.getDate()) + ' ' + months[cur.getMonth()],
+            weekday: days[cur.getDay()]
+          });
+          cur.setDate(cur.getDate() + 1);
+          safety++;
+        }
+      }
+    }
+
+    // PMAM list: either from LIVE.pmamUsers or fallback canonical list
+    var pmams = (LIVE.pmamUsers && LIVE.pmamUsers.length) ? LIVE.pmamUsers : [
+      { name: 'ABRAR CHOUDHARY' },
+      { name: 'AJAZ AHMED' },
+      { name: 'AMBIKA THAKUR' },
+      { name: 'ASIA FIRDOSE' },
+      { name: 'GAGANDEEP SINGH' },
+      { name: 'PAYAL SHARMA' },
+      { name: 'RUKHSAR AKHTER' },
+      { name: 'SAFEER AHMED' },
+      { name: 'TANIA MANHAS' },
+      { name: 'VINOD KUMAR' }
+    ];
+
+    // Build index of daily_reports: { 'NAME': { '2026-09-01': reportDoc, ... } }
+    var reportsMap = {};
+    var reports = LIVE.dailyReports || [];
+
+    reports.forEach(function(r){
+      var rDate = r.date || '';
+      if (!rDate && r.timestamp) {
+        try {
+          var t = new Date(r.timestamp);
+          rDate = t.getFullYear() + '-' + p(t.getMonth()+1) + '-' + p(t.getDate());
+        } catch(e){}
+      }
+      if (!rDate) return;
+
+      var rName = (r.name || '').trim().toLowerCase();
+      var rEmail = (r.email || r.pmam_email || '').trim().toLowerCase();
+
+      // Index by normalized name
+      if (rName) {
+        if (!reportsMap[rName]) reportsMap[rName] = {};
+        reportsMap[rName][rDate] = r;
+      }
+      // Index by email
+      if (rEmail) {
+        if (!reportsMap[rEmail]) reportsMap[rEmail] = {};
+        reportsMap[rEmail][rDate] = r;
+      }
+    });
+
+    // Helper: get photo
+    function getPmamPhoto(name) {
+      if (!name) return '';
+      var key = name.trim().toLowerCase();
+      if (LIVE.userPhotos && LIVE.userPhotos[key]) return LIVE.userPhotos[key];
+      if (typeof window.lpGetStaffCache === 'function') {
+        var staffList = window.lpGetStaffCache() || [];
+        for (var i = 0; i < staffList.length; i++) {
+          var s = staffList[i];
+          if (s && s.name && s.name.trim().toLowerCase() === key) {
+            var photo = s.photoBase64 || s.photo || s.photoUrl || '';
+            if (photo) return photo;
+          }
+        }
+      }
+      return '';
+    }
+
+    // Helper: check submission status for a PMAM on a specific date
+    function checkSubmission(pmam, dtStr) {
+      var name = (pmam.name || '').trim().toLowerCase();
+      var email = (pmam.email || '').trim().toLowerCase();
+
+      if (reportsMap[name] && reportsMap[name][dtStr]) return reportsMap[name][dtStr];
+      if (email && reportsMap[email] && reportsMap[email][dtStr]) return reportsMap[email][dtStr];
+
+      // Fuzzy name check
+      var keys = Object.keys(reportsMap);
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        if (name && (k.includes(name) || name.includes(k))) {
+          if (reportsMap[k][dtStr]) return reportsMap[k][dtStr];
+        }
+      }
+      return null;
+    }
+
+    // 5 Cycling Pastel Row Colors
+    var ROW_THEMES = [
+      '#eef7fc', // Sky Blue
+      '#ebf8ee', // Mint Green
+      '#fef9e8', // Warm Amber
+      '#fdeef2', // Rose Pink
+      '#f2effa'  // Soft Lavender
+    ];
+
+    // Build HTML
+    var html = '<div style="margin-bottom:16px;">';
+
+    // Header Card (Document icon + Title + Range Selector)
+    html += '<div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px 18px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">'
+      + '<div style="display:flex; align-items:center; gap:12px;">'
+      + '<div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #3b82f6, #1d4ed8); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(37,99,235,0.25); flex-shrink:0;">'
+      + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+      + '</div>'
+      + '<div>'
+      + '<div style="font-size:16px; font-weight:800; color:#0F2B8C; letter-spacing:0.3px;">PMAM REPORT STATUS <span style="font-size:13px; font-weight:600; color:#64748b;">(' + esc(rangeTitle) + ')</span></div>'
+      + '<div style="font-size:11.5px; color:#64748b; font-weight:500;">Real-time daily report submission monitoring for all PMAMs</div>'
+      + '</div>'
+      + '</div>'
+
+      // Dropdown & Presets
+      + '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">'
+      + '<div style="display:flex; align-items:center; background:#ffffff; border:1.5px solid #cbd5e1; border-radius:10px; padding:4px 10px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">'
+      + '<span style="font-size:14px; margin-right:6px;">📅</span>'
+      + '<select style="border:none; background:transparent; font-size:12.5px; font-weight:700; color:#0f172a; outline:none; cursor:pointer;" onchange="window.lpSetReportStatusRange(this.value)">'
+      + '<option value="1-5sep"' + (range==='1-5sep'?' selected':'') + '>1 Sep – 5 Sep 2026</option>'
+      + '<option value="current_week"' + (range==='current_week'?' selected':'') + '>Current Week (Mon–Sat)</option>'
+      + '<option value="past7"' + (range==='past7'?' selected':'') + '>Past 7 Days</option>'
+      + '<option value="today"' + (range==='today'?' selected':'') + '>Today (' + todayStr + ')</option>'
+      + '<option value="custom"' + (range==='custom'?' selected':'') + '>Custom Range...</option>'
+      + '</select>'
+      + '</div>'
+      + (range === 'custom' ? '<div style="display:flex; align-items:center; gap:6px;">'
+        + '<input type="date" value="' + (window._lpReportStatusCustomStart||'2026-09-01') + '" onchange="window.lpSetReportStatusRange(\'custom\', this.value, window._lpReportStatusCustomEnd)" style="padding:4px 8px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:11.5px; font-weight:700;">'
+        + '<span style="font-size:11px; font-weight:700; color:#64748b;">to</span>'
+        + '<input type="date" value="' + (window._lpReportStatusCustomEnd||'2026-09-05') + '" onchange="window.lpSetReportStatusRange(\'custom\', window._lpReportStatusCustomStart, this.value)" style="padding:4px 8px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:11.5px; font-weight:700;">'
+        + '</div>' : '')
+      + '</div>'
+      + '</div>';
+
+    // Status Matrix Table Wrap
+    html += '<div class="cm-scroll-x" style="overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.06); border:1.5px solid #cbd5e1;">'
+      + '<table style="width:100%; min-width:780px; border-collapse:collapse; table-layout:fixed; background:#ffffff;">'
+      + '<thead>'
+      + '<tr style="background:#0066cc; color:#ffffff;">'
+      + '<th style="width:240px; padding:12px 16px; font-size:13.5px; font-weight:800; text-align:left; letter-spacing:0.5px; text-transform:uppercase; border-right:1px solid rgba(255,255,255,0.2);">'
+      + '<div style="display:flex; align-items:center; gap:8px;">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+      + '<span>PMAM NAME</span>'
+      + '</div>'
+      + '</th>';
+
+    // Date Column Headers
+    dateList.forEach(function(col){
+      html += '<th style="padding:10px 8px; font-size:12.5px; font-weight:800; text-align:center; border-right:1px solid rgba(255,255,255,0.2);">'
+        + '<div style="display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:2px;">'
+        + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+        + '<span>' + esc(col.dayNum) + '</span>'
+        + '</div>'
+        + '<div style="font-size:11px; font-weight:600; opacity:0.9; letter-spacing:0.4px;">' + esc(col.weekday) + '</div>'
+        + '</th>';
+    });
+
+    html += '</tr></thead><tbody>';
+
+    // SVG Icons
+    var checkIcon = '<div style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:#10b981; color:#ffffff; box-shadow:0 1.5px 4px rgba(16,185,129,0.35);" title="Report Submitted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>';
+    var crossIcon = '<div style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:#ef4444; color:#ffffff; box-shadow:0 1.5px 4px rgba(239,68,68,0.35);" title="Report Pending / Not Submitted"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>';
+
+    // PMAM Rows
+    pmams.forEach(function(pmam, idx){
+      var rowBg = ROW_THEMES[idx % ROW_THEMES.length];
+      var name = (pmam.name || 'PMAM').trim();
+      var photo = getPmamPhoto(name);
+
+      var photoEl = '';
+      if (photo) {
+        photoEl = '<img src="' + esc(photo) + '" alt="' + esc(name) + '" style="width:40px; height:40px; object-fit:cover; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0.08); flex-shrink:0; background:#e2e8f0;">';
+      } else {
+        var initials = name.split(' ').filter(Boolean).map(function(w){ return w[0]; }).join('').slice(0, 2).toUpperCase() || 'P';
+        photoEl = '<div style="width:40px; height:40px; border-radius:8px; background:linear-gradient(135deg,#0f2b8c,#3b82f6); color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,0.1);">' + esc(initials) + '</div>';
+      }
+
+      html += '<tr style="background:' + rowBg + '; border-bottom:1px solid #e2e8f0; transition:background 0.15s;">'
+        // PMAM Name Cell
+        + '<td style="padding:10px 16px; border-right:1px solid #e2e8f0; vertical-align:middle;">'
+        + '<div style="display:flex; align-items:center; gap:12px;">'
+        + photoEl
+        + '<div style="font-weight:800; font-size:13px; color:#0F2B8C; text-transform:uppercase; letter-spacing:0.4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'
+        + esc(name)
+        + '</div>'
+        + '</div>'
+        + '</td>';
+
+      // Date Status Cells
+      dateList.forEach(function(col){
+        var rep = checkSubmission(pmam, col.dateStr);
+        var iconHtml = rep ? checkIcon : crossIcon;
+
+        html += '<td style="padding:8px 6px; text-align:center; vertical-align:middle; border-right:1px solid #e2e8f0;">'
+          + iconHtml
+          + '</td>';
+      });
+
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div></div>';
+    return html;
+  }
+
+  // ── About Us modal: the AB-PMJAY / SEHAT scheme writeup ──
   // Render one styled content section (shared by About Us & About Developer).
   // sec = { title, text, titleColor, textColor, bgColor, font, align }
   // ─── About Us icon set (circular badge icons for each section) ───
@@ -3337,6 +3655,7 @@ window.addEventListener('DOMContentLoaded', function() {
     roster:   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l7-3 7 3z"/></svg>',
     holiday:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
     weekend:  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    reportstatus: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
     orders:   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
     about:    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
     developer:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
@@ -3354,6 +3673,8 @@ window.addEventListener('DOMContentLoaded', function() {
   _reg('calendar',  typeof renderHolidayCalendar !== 'undefined' ? renderHolidayCalendar : null, 'renderHolidayCalendar');
   _reg('roster',    typeof renderWardRoster    !== 'undefined' ? renderWardRoster    : null, 'renderWardRoster');
   _reg('holiday',   typeof renderHolidayDuty   !== 'undefined' ? renderHolidayDuty   : null, 'renderHolidayDuty');
+  _reg('reportstatus', typeof renderPmamReportStatus !== 'undefined' ? renderPmamReportStatus : null, 'renderPmamReportStatus');
+  _reg('pmamstatus',   typeof renderPmamReportStatus !== 'undefined' ? renderPmamReportStatus : null, 'renderPmamReportStatus');
   _reg('weekend',   typeof renderWeekendRoster !== 'undefined' ? renderWeekendRoster : null, 'renderWeekendRoster');
   _reg('orders',    typeof renderOrders        !== 'undefined' ? renderOrders        : null, 'renderOrders');
   _reg('about',     typeof renderAbout         !== 'undefined' ? renderAbout         : null, 'renderAbout');

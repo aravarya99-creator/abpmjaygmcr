@@ -841,6 +841,7 @@ input:checked + .slider:before { transform: translateX(20px); }
       <!-- Dark Sleek Header Banner for Data Management Sub-Tabs -->
       <div class="um-banner-wrap">
         <button class="um-banner-btn active" id="dmt-wardmgmt" onclick="showDmTab('wardmgmt',this)">🏨 Ward Management</button>
+        <button class="um-banner-btn" id="dmt-pmamstatus" onclick="showDmTab('pmamstatus',this)">📋 PMAM Report Status</button>
         <button class="um-banner-btn" id="dmt-reports" onclick="showDmTab('reports',this)">📊 Monthly Reports</button>
         <button class="um-banner-btn" id="dmt-cleanup" onclick="showDmTab('cleanup',this)">🧹 Data Cleanup</button>
         <button class="um-refresh-btn" onclick="showDmTab('wardmgmt')">
@@ -858,6 +859,11 @@ input:checked + .slider:before { transform: translateX(20px); }
       <!-- ── TAB: Weekend Roster ── -->
 
       <!-- ── TAB: Ward Management ── -->
+      <!-- ── TAB: PMAM Report Status ── -->
+      <div class="dmt-pane" id="dmpane-pmamstatus">
+        <div id="adminPmamStatusWrap"></div>
+      </div>
+
       <div class="dmt-pane active" id="dmpane-wardmgmt">
 
         <!-- Hero info card -->
@@ -1380,12 +1386,12 @@ input:checked + .slider:before { transform: translateX(20px); }
 
       <!-- Dark Sleek Header Banner for Nav Bar Sub-Tabs -->
       <div class="um-banner-wrap">
-        <button class="um-banner-btn active" id="nbt-aboutpage" onclick="showNavTab('aboutpage',this)">ℹ️ About Us</button>
+        <button class="um-banner-btn active" id="nbt-navbar" onclick="showNavTab('navbar',this)">⚙️ Nav Bar Settings (Enable / Disable Tabs)</button>
+        <button class="um-banner-btn" id="nbt-aboutpage" onclick="showNavTab('aboutpage',this)">ℹ️ About Us</button>
         <button class="um-banner-btn" id="nbt-developer" onclick="showNavTab('developer',this)">👨‍💻 About Developer</button>
         <button class="um-banner-btn" id="nbt-staff" onclick="showNavTab('staff',this)">👥 Staff</button>
         <button class="um-banner-btn" id="nbt-orders" onclick="showNavTab('orders',this)">📋 Orders</button>
-        <button class="um-banner-btn" id="nbt-navbar" onclick="showNavTab('navbar',this)">⚙️ Nav Bar Settings</button>
-        <button class="um-refresh-btn" onclick="showNavTab('aboutpage')">
+        <button class="um-refresh-btn" onclick="showNavTab('navbar')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M2.5 16l1.2 1.8a10 10 0 0 0 18.8-4.3"/></svg>
           Refresh
         </button>
@@ -1458,7 +1464,7 @@ input:checked + .slider:before { transform: translateX(20px); }
           </div>
         </div>
       </div>
-      <div class="dmt-pane active" id="dmpane-aboutpage">
+      <div class="dmt-pane" id="dmpane-aboutpage">
         <div class="card" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #d8b4fe;margin-bottom:12px">
           <div class="card-hd" style="color:#6b21a8">ℹ️ About Us Page Editor</div>
           <div style="font-size:12px;color:#6b21a8;line-height:1.6">
@@ -1619,7 +1625,7 @@ input:checked + .slider:before { transform: translateX(20px); }
         </div>
       </div>
 
-      <div class="dmt-pane" id="dmpane-navbar">
+      <div class="dmt-pane active" id="dmpane-navbar">
 
         <!-- Hero info card -->
         <div class="card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;margin-bottom:12px">
@@ -1652,13 +1658,20 @@ input:checked + .slider:before { transform: translateX(20px); }
         <!-- Items editor -->
         <div class="card">
           <div class="card-hd" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-            <span style="display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#1A3DB5"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg> Navigation Items</span>
+            <span style="display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#1A3DB5"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg> Navigation Items (Enable / Disable Tabs)</span>
             <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn btn-grn" onclick="nbmEnableAll()" style="padding:5px 13px;font-size:11px;font-weight:800" title="Enable all tabs on index.html at once">✅ Enable All Tabs</button>
+              <button class="btn" onclick="nbmDisableAll()" style="padding:5px 13px;font-size:11px;font-weight:800;background:#fee2e2;border:1.5px solid #fca5a5;color:#991b1b" title="Disable all tabs on index.html">🚫 Disable All</button>
               <button class="btn" onclick="nbmReset()" style="padding:5px 12px;font-size:11px;background:#fff;border:1.5px solid #e5e7eb;color:#374151" title="Restore the 8 default tabs in their default order">↺ Reset to Defaults</button>
               <button class="btn btn-pri" onclick="nbmAdd()" style="padding:5px 12px;font-size:11px">+ Add Item</button>
             </div>
           </div>
-          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Edit the label, toggle <strong>Show/Hide</strong>, use ↑ ↓ to reorder, or Delete to remove. The order here is the order shown on the landing page. Click <strong>Save Nav Bar</strong> when done.</div>
+          <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <div style="font-size:12px;color:#1e3a8a;line-height:1.5">
+              <strong>👉 How to Enable / Disable Tabs on index.html:</strong> Click each tab's status badge (<strong>🔴 DISABLED</strong> or <strong>🟢 ENABLED</strong>) to toggle visibility, or click <strong>✅ Enable All Tabs</strong>. Don't forget to click <strong>💾 Save Nav Bar</strong> at the bottom right to apply changes to <code>index.html</code>!
+            </div>
+          </div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">Edit the label, click the Enable/Disable toggle, use ↑ ↓ to reorder, or Delete to remove. Click <strong>Save Nav Bar</strong> when done.</div>
           <div id="nbm-items-list" style="display:flex;flex-direction:column;gap:8px"></div>
           <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:14px">
             <span id="nbm-save-msg" style="font-size:11px;font-weight:600"></span>
@@ -2300,6 +2313,7 @@ input:checked + .slider:before { transform: translateX(20px); }
         <button class="um-banner-btn" id="stab-tickers" onclick="showSettingsTab('tickers',this)">📣 Tickers</button>
         <button class="um-banner-btn" id="stab-sysinfo" onclick="showSettingsTab('sysinfo',this)">⚙️ System</button>
         <button class="um-banner-btn" id="stab-audit" onclick="goSec('auditlog')">📜 Audit Log</button>
+        <button class="um-banner-btn" id="stab-lpnavbar" onclick="goSec('navbar'); showNavTab('navbar');" style="background:#eff6ff;border-color:#93c5fd;color:#1e40af;font-weight:700" title="Manage Landing Page Navigation Bar">🧭 Landing Page Nav Bar ↗</button>
         <button class="um-refresh-btn" onclick="showSettingsTab('branding')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M2.5 16l1.2 1.8a10 10 0 0 0 18.8-4.3"/></svg>
           Refresh
@@ -3594,308 +3608,16 @@ function addUser(){
 }
 
 // ══════════════════════════════════════════════════════
-// USER MANAGEMENT — Tab switcher
-// Handles 2 top sub-tabs: users, requests
-// ══════════════════════════════════════════════════════
-function showUmTab(tab, el){
-  document.querySelectorAll('#sec-directory button[id^="umtab-"]').forEach(function(b){ b.classList.remove('active'); });
-  document.querySelectorAll('#sec-directory > .dmt-pane').forEach(function(p){ p.classList.remove('active'); p.style.display = 'none'; });
-  if (el) el.classList.add('active');
-  var pane = document.getElementById('umpane-' + tab);
-  if (pane) { pane.classList.add('active'); pane.style.display = 'block'; }
-  if (typeof loadDirectory === 'function') loadDirectory();
-}
-
-// ══════════════════════════════════════════════════════
-// DATA MANAGEMENT — Tab switcher
-// ══════════════════════════════════════════════════════
-function showDmTab(tab, el){
-  document.querySelectorAll('#sec-datamgmt .um-banner-btn, #sec-datamgmt .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
-  document.querySelectorAll('#sec-datamgmt .dmt-pane').forEach(function(p){ p.classList.remove('active'); });
-  if (el) el.classList.add('active');
-  var pane = document.getElementById('dmpane-'+tab);
-  if (pane) pane.classList.add('active');
-  if (tab === 'wardmgmt') { if (typeof wmReload === 'function') wmReload(); else if (typeof renderWards === 'function') renderWards(); }
-  if (tab === 'reports')  { dmLoadFilters(); }
-  if (tab === 'leaves')   { dmLoadFilters(); }
-}
-
-// ══════════════════════════════════════════════════════
-// ROSTERS & CALENDARS — Tab switcher
-// ══════════════════════════════════════════════════════
-function showRosterTab(tab, el){
-  document.querySelectorAll('#sec-rosters .um-banner-btn, #sec-rosters .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
-  document.querySelectorAll('#sec-rosters .dmt-pane').forEach(function(p){ p.classList.remove('active'); p.style.display = 'none'; });
-  if (el) el.classList.add('active');
-  var pane = document.getElementById('dmpane-' + tab);
-  if (pane) { pane.classList.add('active'); pane.style.display = 'block'; }
-  if (tab === 'wardroster')    { if (typeof loadRosterFromDb === 'function') loadRosterFromDb(); }
-  if (tab === 'weekendroster') { if (typeof wrInit === 'function') wrInit(); }
-  if (tab === 'holidayrost')   {
-    if (typeof hcEnsureLoaded === 'function') hcEnsureLoaded();
-    if (typeof loadHolidayFromDb === 'function') loadHolidayFromDb();
-    var firstSub = document.getElementById('hrsubtab-publishing');
-    if (firstSub) showHolidaySubTab('publishing', firstSub);
-  }
-  if (tab === 'holidaycal')    { if (typeof hcInit === 'function') hcInit(); }
-}
-
-function showHolidaySubTab(mode, el) {
-  document.querySelectorAll('[id^="hrsubtab-"]').forEach(function(b){ b.classList.remove('active'); });
-  if (el) el.classList.add('active');
-  var pPub = document.getElementById('hrpane-publishing');
-  var pMan = document.getElementById('hrpane-manual');
-  if (pPub) pPub.style.display = (mode === 'publishing') ? 'block' : 'none';
-  if (pMan) pMan.style.display = (mode === 'manual') ? 'block' : 'none';
-  if (mode === 'publishing') {
-    var sel = document.getElementById('adminRosterYmSel');
-    var val = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
-    if (typeof renderAdminRoster === 'function') renderAdminRoster(val);
-  }
-}
-
-// ══════════════════════════════════════════════════════
-// OFFICIAL HOLIDAY ROSTER PUBLISHING (I/C SUBMISSIONS & ADMIN PUBLISH)
-// ══════════════════════════════════════════════════════
-function fetchIcRosters() {
-  var sel = document.getElementById('adminRosterYmSel');
-  var val = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
-  showToast('Fetching I/C Roster Submissions for ' + val + '...', 'info');
-  renderAdminRoster(val);
-}
-
-function renderAdminRoster(ym) {
-  var tbody = document.getElementById('adminRosterTbody');
-  if (!tbody) return;
-  if (!ym) {
-    var sel = document.getElementById('adminRosterYmSel');
-    ym = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
-    if (sel && !sel.value) sel.value = ym;
-  }
-
-  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#64748b;font-style:italic">Fetching I/C roster submissions for ' + ym + '...</td></tr>';
-
-  db.collection('holiday_roster_requests').get().then(function(snap) {
-    var list = [];
-    snap.forEach(function(doc) {
-      var d = doc.data() || {};
-      var docYm = d.yearMonth || (doc.id.indexOf('_') !== -1 ? doc.id.split('_')[1] : '');
-      if (docYm === ym || doc.id.indexOf(ym) !== -1) {
-        list.push({ id: doc.id, data: d });
-      }
-    });
-
-    if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:28px;color:#64748b;">No I/C roster submissions found for <strong>' + ym + '</strong>.<br><span style="font-size:12px;color:#94a3b8">Make sure I/C opens <strong>I/C Portal &rarr; Roster Management</strong> and clicks <strong>Save & Recommend for Publish</strong>.</span></td></tr>';
-      return;
-    }
-
-    renderAdminRosterRows(list, tbody, ym);
-  }).catch(function(err) {
-    console.error('renderAdminRoster error:', err);
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#dc2626">Error loading submissions: ' + err.message + '</td></tr>';
-  });
-}
-
-function renderAdminRosterRows(list, tbody, ym) {
-  tbody.innerHTML = list.map(function(item, idx) {
-    var d = item.data;
-    var name = d.name || d.email || 'PMAM';
-    var email = d.email || (item.id.indexOf('_') !== -1 ? item.id.split('_')[0] : '—');
-    var choices = d.choices || {};
-
-    // Filter out Sundays from Official Holiday Roster view (Sundays belong to Weekend Roster)
-    var pmamReqDates = Object.keys(choices).filter(function(k){
-      var dt = new Date(k);
-      return (choices[k] === 'Duty' || choices[k] === 'Off') && !isNaN(dt.getTime()) && dt.getDay() !== 0;
-    });
-    var reqBadgeHtml = pmamReqDates.length ? pmamReqDates.map(function(dt){
-      var c = choices[dt];
-      var bg = (c === 'Duty') ? '#dcfce7' : '#fee2e2';
-      var fg = (c === 'Duty') ? '#166534' : '#991b1b';
-      return '<span style="background:'+bg+';color:'+fg+';padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;margin:2px;display:inline-block">' + dt + ' (' + c + ')</span>';
-    }).join('') : '<span style="font-style:italic;color:#94a3b8;font-size:11px">No specific request</span>';
-
-    var icDutyDates = Object.keys(choices).filter(function(k){
-      var dt = new Date(k);
-      return choices[k] === 'Duty' && !isNaN(dt.getTime()) && dt.getDay() !== 0;
-    });
-    var icBadgeHtml = icDutyDates.length ? icDutyDates.map(function(dt){
-      return '<span style="background:#0F2B8C;color:#fff;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:800;margin:2px;display:inline-block">🎉 ' + dt + ' (Holiday)</span>';
-    }).join('') : '<span style="font-style:italic;color:#64748b;font-size:11px">Off / No duty</span>';
-
-    var isPub = (d.status === 'Published' || d.published === true);
-    var isRec = d.icRecommended || d.status === 'Recommended for Publish';
-    var statusHtml = isPub ?
-      '<span style="background:#dcfce7;color:#15803d;padding:4px 12px;border-radius:12px;font-weight:800;font-size:11px">✅ Published (Credited)</span>' :
-      isRec ?
-      '<span style="background:#fef3c7;color:#b45309;padding:4px 12px;border-radius:12px;font-weight:800;font-size:11px">⏳ Recommended by I/C</span>' :
-      '<span style="background:#f3f4f6;color:#6b7280;padding:4px 12px;border-radius:12px;font-weight:700;font-size:11px">Draft</span>';
-
-    var actionBtnHtml = isPub ?
-      '<span style="font-size:11px;color:#16a34a;font-weight:700">Published</span>' :
-      '<button class="btn btn-pri" onclick="publishAdminRosterDoc(\''+item.id+'\')" style="padding:4px 12px;font-size:11px;font-weight:800;background:#166534;border:none;border-radius:8px">🚀 Publish</button>';
-
-    return '<tr style="border-bottom:1px solid #f1f5f9">' +
-      '<td style="padding:12px;font-weight:800;color:#0f172a;font-size:13px">👤 ' + escAttr(name) + '</td>' +
-      '<td style="padding:12px;font-size:12px;color:#64748b">' + escAttr(email) + '</td>' +
-      '<td style="padding:12px;text-align:center">' + reqBadgeHtml + '</td>' +
-      '<td style="padding:12px;text-align:center">' + icBadgeHtml + '</td>' +
-      '<td style="padding:12px;text-align:center">' + statusHtml + '</td>' +
-      '<td style="padding:12px;text-align:center">' + actionBtnHtml + '</td>' +
-      '</tr>';
-  }).join('');
-}
-
-function publishAdminRosterDoc(docId) {
-  var sel = document.getElementById('adminRosterYmSel');
-  var ym = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
-
-  db.collection('holiday_roster_requests').doc(docId).update({
-    status: 'Published',
-    published: true,
-    publishedAt: Date.now(),
-    publishedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'admin@gmc.com')
-  }).then(function() {
-    showToast('✅ Roster entry published successfully!', 'success');
-    renderAdminRoster(ym);
-  }).catch(function(err) {
-    showToast('Error publishing roster: ' + err.message, 'error');
-  });
-}
-
-function publishAdminRoster() {
-  var sel = document.getElementById('adminRosterYmSel');
-  var ym = (sel && sel.value) ? sel.value : new Date().toISOString().substring(0, 7);
-
-  showToast('Publishing official roster for ' + ym + '...', 'info');
-
-  db.collection('holiday_roster_requests').get().then(function(snap) {
-    var batch = db.batch();
-    var count = 0;
-    var dateMap = {};
-
-    snap.forEach(function(doc) {
-      var d = doc.data() || {};
-      var docYm = d.yearMonth || (doc.id.indexOf('_') !== -1 ? doc.id.split('_')[1] : '');
-      if (docYm === ym || doc.id.indexOf(ym) !== -1) {
-        batch.update(doc.ref, {
-          status: 'Published',
-          published: true,
-          publishedAt: Date.now(),
-          publishedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'admin@gmc.com')
-        });
-        count++;
-
-        var name = d.name || d.email || 'PMAM';
-        var choices = d.choices || {};
-        Object.keys(choices).forEach(function(dt){
-          if (choices[dt] === 'Duty') {
-            if (!dateMap[dt]) dateMap[dt] = [];
-            if (!dateMap[dt].includes(name)) dateMap[dt].push(name);
-          }
-        });
-      }
-    });
-
-    if (count === 0) {
-      showToast('No roster submissions found for ' + ym + ' to publish.', 'error');
-      return;
-    }
-
-    batch.commit().then(function() {
-      // Dual-sync into settings/holidays for backwards compatibility across all views
-      db.collection('settings').doc('holidays').get().then(function(hDoc){
-        var existingRows = (hDoc.exists && Array.isArray(hDoc.data().rows)) ? hDoc.data().rows : [];
-        var otherRows = existingRows.filter(function(r){ return !r.date || r.date.indexOf(ym) !== 0; });
-        var newRows = Object.keys(dateMap).map(function(dt){
-          return { date: dt, name: 'Official Holiday Duty', pmams: dateMap[dt] };
-        });
-        var finalRows = otherRows.concat(newRows);
-        db.collection('settings').doc('holidays').set({ rows: finalRows, updatedAt: Date.now() }, { merge: true });
-      }).catch(function(){});
-
-      showToast('🎉 Official Roster for ' + ym + ' published successfully! (' + count + ' records updated)', 'success');
-      renderAdminRoster(ym);
-    }).catch(function(err) {
-      showToast('Error publishing roster: ' + err.message, 'error');
-    });
-  }).catch(function(err) {
-    showToast('Error querying submissions: ' + err.message, 'error');
-  });
-}
-
-
-
-window._adminRosterLocked = false;
-
-function initAdminRosterLockState() {
-  if (typeof db !== 'undefined' && db) {
-    db.collection('settings').doc('roster_settings').onSnapshot(function(doc){
-      window._adminRosterLocked = (doc.exists && typeof doc.data().pmamRosterLocked !== 'undefined') ? !!doc.data().pmamRosterLocked : false;
-      renderAdminRosterLockBtn();
-    }, function(err){
-      window._adminRosterLocked = false;
-      renderAdminRosterLockBtn();
-    });
-  }
-}
-
-function renderAdminRosterLockBtn() {
-  var btns = document.querySelectorAll('.admin-roster-lock-btn');
-  btns.forEach(function(b){
-    if (window._adminRosterLocked) {
-      b.style.background = '#fee2e2';
-      b.style.color = '#991b1b';
-      b.innerHTML = '🔒 Locked (Trial Basis)';
-    } else {
-      b.style.background = '#dcfce7';
-      b.style.color = '#166534';
-      b.innerHTML = '🔓 Open / Unlocked';
-    }
-  });
-}
-
-function toggleAdminRosterLock() {
-  var nextState = !window._adminRosterLocked;
-  db.collection('settings').doc('roster_settings').set({
-    pmamRosterLocked: nextState,
-    updatedAt: Date.now(),
-    updatedBy: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'admin@gmc.com')
-  }, { merge: true }).then(function(){
-    showToast('PMAM Roster Submissions are now ' + (nextState ? 'LOCKED (Trial Basis)' : 'OPEN / UNLOCKED') + '!', nextState ? 'warning' : 'success');
-  }).catch(function(err){
-    showToast('Error toggling lock state: ' + err.message, 'error');
-  });
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initAdminRosterLockState);
-} else {
-  initAdminRosterLockState();
-}
-
-// ══════════════════════════════════════════════════════
-// NAV BAR section — Tab switcher
-// ══════════════════════════════════════════════════════
-function showNavTab(tab, el){
-  document.querySelectorAll('#sec-navbar .um-banner-btn, #sec-navbar .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
-  document.querySelectorAll('#sec-navbar .dmt-pane').forEach(function(p){ p.classList.remove('active'); });
-  if (el) el.classList.add('active');
-  var pane = document.getElementById('dmpane-'+tab);
-  if (pane) pane.classList.add('active');
-}
-
-// ══════════════════════════════════════════════════════
 // NAV BAR section — Tab switcher (parallel to showDmTab)
 // Handles the panes that live in sec-navbar:
-//   aboutpage, developer, staff, orders, navbar
+//   navbar, aboutpage, developer, staff, orders
 // ══════════════════════════════════════════════════════
 function showNavTab(tab, el){
-  // Only deactivate Nav-section tab buttons and Nav-section panes
-  document.querySelectorAll('#sec-navbar .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
+  // Deactivate Nav-section tab buttons and Nav-section panes
+  document.querySelectorAll('#sec-navbar .um-banner-btn, #sec-navbar .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
   document.querySelectorAll('#sec-navbar .dmt-pane').forEach(function(p){ p.classList.remove('active'); });
-  if (el) el.classList.add('active');
+  var targetBtn = el || document.getElementById('nbt-' + tab);
+  if (targetBtn) targetBtn.classList.add('active');
   var pane = document.getElementById('dmpane-'+tab);
   if (pane) pane.classList.add('active');
   // Auto-actions
@@ -9403,11 +9125,11 @@ function nbmRender(){
     var navId = (it.id || '').toLowerCase();
     var known = !!NBM_KNOWN[navId];
     var isHidden = (it.visible === false);
-    var rowOpacity = isHidden ? '0.55' : '1';
-    var toggleBg = isHidden ? '#fee2e2' : '#dcfce7';
-    var toggleFg = isHidden ? '#991b1b' : '#166534';
-    var toggleBorder = isHidden ? '#fecaca' : '#86efac';
-    var toggleLabel = isHidden ? '👁\u200d🗨 Hidden' : '👁 Showing';
+    var rowOpacity = isHidden ? '0.75' : '1';
+    var toggleBg = isHidden ? '#fef2f2' : '#f0fdf4';
+    var toggleFg = isHidden ? '#b91c1c' : '#15803d';
+    var toggleBorder = isHidden ? '#f87171' : '#4ade80';
+    var toggleLabel = isHidden ? '🔴 DISABLED (Click to Enable)' : '🟢 ENABLED (Click to Disable)';
     return '<div style="background:#fff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center;opacity:' + rowOpacity + ';transition:opacity 0.15s">'
       // number
       + '<div style="font-weight:800;color:#9ca3af;text-align:center;font-size:13px">' + (i+1) + '</div>'
@@ -9422,7 +9144,7 @@ function nbmRender(){
       +   '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">'
       +     '<span style="background:' + (known ? '#e0f2fe;color:#0369a1' : '#fef3c7;color:#92400e') + ';padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:monospace">id: ' + (navId || '(none)') + (known ? '' : ' \u00b7 custom') + '</span>'
       +     '<button onclick="nbmToggleVisible(' + i + ')" '
-      +       'style="background:' + toggleBg + ';color:' + toggleFg + ';border:1px solid ' + toggleBorder + ';padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit" '
+      +       'style="background:' + toggleBg + ';color:' + toggleFg + ';border:1px solid ' + toggleBorder + ';padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.05)" '
       +       'title="' + (isHidden ? 'Click to show this tab on the landing page' : 'Click to hide this tab (without deleting it)') + '">' + toggleLabel + '</button>'
       +   '</div>'
       + '</div>'
@@ -9475,6 +9197,22 @@ function nbmToggleVisible(i){
   _nbmItems[i].visible = (_nbmItems[i].visible === false) ? true : false;
   nbmMarkDirty();
   nbmRender();
+}
+
+function nbmEnableAll(){
+  if (!_nbmItems || !_nbmItems.length) return;
+  _nbmItems.forEach(function(it){ it.visible = true; });
+  nbmMarkDirty();
+  nbmRender();
+  if (typeof showToast === 'function') showToast('✅ All tabs ENABLED. Click "Save Nav Bar" to publish.', 'success');
+}
+
+function nbmDisableAll(){
+  if (!_nbmItems || !_nbmItems.length) return;
+  _nbmItems.forEach(function(it){ it.visible = false; });
+  nbmMarkDirty();
+  nbmRender();
+  if (typeof showToast === 'function') showToast('All tabs DISABLED. Click "Save Nav Bar" to publish.', 'info');
 }
 
 // Reset to factory defaults: ask first, then restore the 8 canonical items
@@ -9888,8 +9626,8 @@ goSec = function(id, el) {
     setAdminUnlocked(isAdminUnlocked());
   }
   if (id === 'navbar') {
-    var firstTab = document.getElementById('nbt-aboutpage');
-    if (firstTab) showNavTab('aboutpage', firstTab);
+    var firstTab = document.getElementById('nbt-navbar');
+    if (firstTab) showNavTab('navbar', firstTab);
   }
   if (id === 'leaves') {
     var firstTab = document.getElementById('ltab-leave_requests');
@@ -11478,3 +11216,303 @@ if (typeof loadDirectory === 'function') loadDirectory();
 <script src="shared/logos.js"></script>
 <script src="shared/portal_header.js?v=20260725_16"></script>
 </body>
+
+<script>
+
+// ══════════════════════════════════════════════════════════════
+// PMAM REPORT STATUS (ADMIN PORTAL)
+// ══════════════════════════════════════════════════════════════
+window._adminPmamStatusRange = window._adminPmamStatusRange || '1-5sep';
+window._adminPmamStatusStart = window._adminPmamStatusStart || '2026-09-01';
+window._adminPmamStatusEnd   = window._adminPmamStatusEnd   || '2026-09-05';
+window._adminPmamReportsCache = null;
+window._adminPmamUsersCache = null;
+
+function showDmTab(tab, el){
+  document.querySelectorAll('#sec-datamgmt .um-banner-btn, #sec-datamgmt .dmt-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('#sec-datamgmt .dmt-pane').forEach(function(p){ p.classList.remove('active'); });
+  var targetBtn = el || document.getElementById('dmt-' + tab);
+  if (targetBtn) targetBtn.classList.add('active');
+  var pane = document.getElementById('dmpane-'+tab);
+  if (pane) pane.classList.add('active');
+  if (tab === 'pmamstatus') {
+    adminRenderPmamStatus();
+  }
+}
+
+function adminSetReportStatusRange(val, sDt, eDt){
+  window._adminPmamStatusRange = val;
+  if (sDt) window._adminPmamStatusStart = sDt;
+  if (eDt) window._adminPmamStatusEnd = eDt;
+  adminRenderPmamStatus();
+}
+
+function adminRenderPmamStatus(){
+  var wrap = document.getElementById('adminPmamStatusWrap');
+  if (!wrap) return;
+
+  var range = window._adminPmamStatusRange || '1-5sep';
+  var now = new Date();
+  var p = function(n){ return n < 10 ? '0'+n : n; };
+  var todayStr = now.getFullYear() + '-' + p(now.getMonth()+1) + '-' + p(now.getDate());
+
+  var dateList = [];
+  var rangeTitle = '';
+
+  if (range === '1-5sep') {
+    rangeTitle = '1 Sep – 5 Sep 2026';
+    var dArr = ['2026-09-01', '2026-09-02', '2026-09-03', '2026-09-04', '2026-09-05'];
+    dArr.forEach(function(dtStr){
+      var parts = dtStr.split('-');
+      var d = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+      var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      dateList.push({
+        dateStr: dtStr,
+        dayNum: p(d.getDate()) + ' ' + months[d.getMonth()],
+        weekday: days[d.getDay()]
+      });
+    });
+  } else if (range === 'today') {
+    var d = now;
+    var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    rangeTitle = 'Today (' + p(d.getDate()) + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ')';
+    dateList.push({
+      dateStr: todayStr,
+      dayNum: p(d.getDate()) + ' ' + months[d.getMonth()],
+      weekday: days[d.getDay()]
+    });
+  } else if (range === 'past7') {
+    rangeTitle = 'Past 7 Days';
+    for (var i = 6; i >= 0; i--) {
+      var d = new Date(now.getTime() - i * 86400000);
+      var dtStr = d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate());
+      var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      dateList.push({
+        dateStr: dtStr,
+        dayNum: p(d.getDate()) + ' ' + months[d.getMonth()],
+        weekday: days[d.getDay()]
+      });
+    }
+  } else if (range === 'current_week') {
+    rangeTitle = 'Current Week (Mon – Sat)';
+    var curr = new Date(now);
+    var day = curr.getDay();
+    var diff = curr.getDate() - day + (day === 0 ? -6 : 1);
+    var mon = new Date(curr.setDate(diff));
+    for (var i = 0; i < 6; i++) {
+      var d = new Date(mon.getTime() + i * 86400000);
+      var dtStr = d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate());
+      var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      dateList.push({
+        dateStr: dtStr,
+        dayNum: p(d.getDate()) + ' ' + months[d.getMonth()],
+        weekday: days[d.getDay()]
+      });
+    }
+  } else if (range === 'custom') {
+    var sDt = window._adminPmamStatusStart || '2026-09-01';
+    var eDt = window._adminPmamStatusEnd || '2026-09-05';
+    rangeTitle = sDt + ' to ' + eDt;
+    var s = new Date(sDt);
+    var e = new Date(eDt);
+    if (s <= e) {
+      var cur = new Date(s);
+      var safety = 0;
+      while (cur <= e && safety < 31) {
+        var dtStr = cur.getFullYear() + '-' + p(cur.getMonth()+1) + '-' + p(cur.getDate());
+        var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        dateList.push({
+          dateStr: dtStr,
+          dayNum: p(cur.getDate()) + ' ' + months[cur.getMonth()],
+          weekday: days[cur.getDay()]
+        });
+        cur.setDate(cur.getDate() + 1);
+        safety++;
+      }
+    }
+  }
+
+  // Header & Controls Card
+  var html = '<div class="card" style="margin-bottom:14px; background:#fff; border:1px solid #cbd5e1; border-radius:14px; padding:14px 18px;">'
+    + '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">'
+    + '<div style="display:flex; align-items:center; gap:10px;">'
+    + '<div style="width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg, #1d4ed8, #3b82f6); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(29,78,216,0.25);">'
+    + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+    + '</div>'
+    + '<div>'
+    + '<div style="font-size:16px; font-weight:800; color:#0F2B8C;">PMAM REPORT STATUS <span style="font-size:13px; font-weight:600; color:#64748b;">(' + rangeTitle + ')</span></div>'
+    + '<div style="font-size:11.5px; color:#64748b; font-weight:500;">Live submission compliance matrix across all PMAMs</div>'
+    + '</div>'
+    + '</div>'
+
+    + '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">'
+    + '<div style="display:flex; align-items:center; background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:8px; padding:4px 10px;">'
+    + '<span style="font-size:13px; margin-right:6px;">📅</span>'
+    + '<select style="border:none; background:transparent; font-size:12.5px; font-weight:700; color:#0f172a; outline:none; cursor:pointer;" onchange="adminSetReportStatusRange(this.value)">'
+    + '<option value="1-5sep"' + (range==='1-5sep'?' selected':'') + '>1 Sep – 5 Sep 2026</option>'
+    + '<option value="current_week"' + (range==='current_week'?' selected':'') + '>Current Week (Mon–Sat)</option>'
+    + '<option value="past7"' + (range==='past7'?' selected':'') + '>Past 7 Days</option>'
+    + '<option value="today"' + (range==='today'?' selected':'') + '>Today (' + todayStr + ')</option>'
+    + '<option value="custom"' + (range==='custom'?' selected':'') + '>Custom Range...</option>'
+    + '</select>'
+    + '</div>'
+    + (range === 'custom' ? '<div style="display:flex; align-items:center; gap:6px;">'
+      + '<input type="date" value="' + (window._adminPmamStatusStart||'2026-09-01') + '" onchange="adminSetReportStatusRange(\'custom\', this.value, window._adminPmamStatusEnd)" style="padding:4px 8px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:11.5px; font-weight:700;">'
+      + '<span style="font-size:11px; font-weight:700; color:#64748b;">to</span>'
+      + '<input type="date" value="' + (window._adminPmamStatusEnd||'2026-09-05') + '" onchange="adminSetReportStatusRange(\'custom\', window._adminPmamStatusStart, this.value)" style="padding:4px 8px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:11.5px; font-weight:700;">'
+      + '</div>' : '')
+    + '</div>'
+    + '</div>'
+    + '</div>';
+
+  wrap.innerHTML = html + '<div style="text-align:center; padding:30px; color:#64748b; font-weight:600;"><span class="loading-spinner"></span> Loading report status data…</div>';
+
+  // Fetch reports & users
+  var pUsers = (window._adminPmamUsersCache) ? Promise.resolve(window._adminPmamUsersCache) : db.collection('users').get().then(function(snap){
+    var list = [];
+    snap.forEach(function(doc){
+      var u = doc.data() || {};
+      if (u.role === 'PMAM' && u.status !== 'pending' && u.status !== 'rejected') {
+        list.push(u);
+      }
+    });
+    list.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+    window._adminPmamUsersCache = list;
+    return list;
+  });
+
+  var pReports = db.collection('daily_reports').get().then(function(snap){
+    var list = [];
+    snap.forEach(function(doc){
+      var d = doc.data() || {};
+      d._id = doc.id;
+      list.push(d);
+    });
+    return list;
+  });
+
+  Promise.all([pUsers, pReports]).then(function(res){
+    var pmams = res[0] || [];
+    var reports = res[1] || [];
+
+    if (!pmams.length) {
+      pmams = [
+        { name: 'ABRAR CHOUDHARY' }, { name: 'AJAZ AHMED' }, { name: 'AMBIKA THAKUR' },
+        { name: 'ASIA FIRDOSE' }, { name: 'GAGANDEEP SINGH' }, { name: 'PAYAL SHARMA' },
+        { name: 'RUKHSAR AKHTER' }, { name: 'SAFEER AHMED' }, { name: 'TANIA MANHAS' }, { name: 'VINOD KUMAR' }
+      ];
+    }
+
+    var reportsMap = {};
+    reports.forEach(function(r){
+      var rDate = r.date || '';
+      if (!rDate && r.timestamp) {
+        try {
+          var t = new Date(r.timestamp);
+          rDate = t.getFullYear() + '-' + p(t.getMonth()+1) + '-' + p(t.getDate());
+        } catch(e){}
+      }
+      if (!rDate) return;
+      var rName = (r.name || '').trim().toLowerCase();
+      var rEmail = (r.email || r.pmam_email || '').trim().toLowerCase();
+      if (rName) {
+        if (!reportsMap[rName]) reportsMap[rName] = {};
+        reportsMap[rName][rDate] = r;
+      }
+      if (rEmail) {
+        if (!reportsMap[rEmail]) reportsMap[rEmail] = {};
+        reportsMap[rEmail][rDate] = r;
+      }
+    });
+
+    function checkSub(pmam, dtStr) {
+      var name = (pmam.name || '').trim().toLowerCase();
+      var email = (pmam.email || '').trim().toLowerCase();
+      if (reportsMap[name] && reportsMap[name][dtStr]) return reportsMap[name][dtStr];
+      if (email && reportsMap[email] && reportsMap[email][dtStr]) return reportsMap[email][dtStr];
+      var keys = Object.keys(reportsMap);
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        if (name && (k.includes(name) || name.includes(k))) {
+          if (reportsMap[k][dtStr]) return reportsMap[k][dtStr];
+        }
+      }
+      return null;
+    }
+
+    var ROW_THEMES = ['#eef7fc','#ebf8ee','#fef9e8','#fdeef2','#f2effa'];
+
+    var tblHtml = '<div style="overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.06); border:1.5px solid #cbd5e1; background:#fff;">'
+      + '<table style="width:100%; min-width:780px; border-collapse:collapse; table-layout:fixed;">'
+      + '<thead>'
+      + '<tr style="background:#0066cc; color:#ffffff;">'
+      + '<th style="width:240px; padding:12px 16px; font-size:13px; font-weight:800; text-align:left; letter-spacing:0.5px; text-transform:uppercase; border-right:1px solid rgba(255,255,255,0.2);">'
+      + '<div style="display:flex; align-items:center; gap:8px;">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+      + '<span>PMAM NAME</span>'
+      + '</div>'
+      + '</th>';
+
+    dateList.forEach(function(col){
+      tblHtml += '<th style="padding:10px 8px; font-size:12px; font-weight:800; text-align:center; border-right:1px solid rgba(255,255,255,0.2);">'
+        + '<div style="display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:2px;">'
+        + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+        + '<span>' + col.dayNum + '</span>'
+        + '</div>'
+        + '<div style="font-size:11px; font-weight:600; opacity:0.9;">' + col.weekday + '</div>'
+        + '</th>';
+    });
+
+    tblHtml += '</tr></thead><tbody>';
+
+    var checkIcon = '<div style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:#10b981; color:#ffffff; box-shadow:0 1.5px 4px rgba(16,185,129,0.35);" title="Submitted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>';
+    var crossIcon = '<div style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:#ef4444; color:#ffffff; box-shadow:0 1.5px 4px rgba(239,68,68,0.35);" title="Pending / Not Submitted"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>';
+
+    pmams.forEach(function(pmam, idx){
+      var rowBg = ROW_THEMES[idx % ROW_THEMES.length];
+      var name = (pmam.name || 'PMAM').trim();
+      var photo = pmam.photoBase64 || pmam.photo || pmam.photoUrl || '';
+
+      var photoEl = '';
+      if (photo) {
+        photoEl = '<img src="' + photo + '" alt="" style="width:36px; height:36px; object-fit:cover; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0.08); flex-shrink:0; background:#e2e8f0;">';
+      } else {
+        var initials = name.split(' ').filter(Boolean).map(function(w){ return w[0]; }).join('').slice(0, 2).toUpperCase() || 'P';
+        photoEl = '<div style="width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg,#0f2b8c,#3b82f6); color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0;">' + initials + '</div>';
+      }
+
+      tblHtml += '<tr style="background:' + rowBg + '; border-bottom:1px solid #e2e8f0;">'
+        + '<td style="padding:8px 14px; border-right:1px solid #e2e8f0; vertical-align:middle;">'
+        + '<div style="display:flex; align-items:center; gap:10px;">'
+        + photoEl
+        + '<div style="font-weight:800; font-size:12.5px; color:#0F2B8C; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'
+        + name
+        + '</div>'
+        + '</div>'
+        + '</td>';
+
+      dateList.forEach(function(col){
+        var rep = checkSub(pmam, col.dateStr);
+        var iconHtml = rep ? checkIcon : crossIcon;
+        tblHtml += '<td style="padding:6px; text-align:center; vertical-align:middle; border-right:1px solid #e2e8f0;">'
+          + iconHtml
+          + '</td>';
+      });
+
+      tblHtml += '</tr>';
+    });
+
+    tblHtml += '</tbody></table></div>';
+    wrap.innerHTML = html + tblHtml;
+  }).catch(function(err){
+    console.error('adminRenderPmamStatus error:', err);
+    wrap.innerHTML = html + '<div style="padding:20px; color:#ef4444; font-weight:700;">Failed to load report status: ' + (err.message||err) + '</div>';
+  });
+}
+
+</script>
