@@ -72,14 +72,15 @@ a{text-decoration:none;color:inherit}
 .rs-head-title{font-size:13px;font-weight:800;color:#0F2B8C;letter-spacing:0.3px}
 .rs-tbl-wrap{overflow:auto;flex:1;border-radius:10px;border:1.5px solid #cbd5e1;min-height:0;background:#ffffff}
 .rs-tbl{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
-.rs-tbl thead th{background:#1547b8;color:#ffffff;font-weight:800;padding:6px 6px;text-align:center;white-space:nowrap;letter-spacing:0.3px;font-size:10.5px;position:sticky;top:0;z-index:2;line-height:1.2;border-right:1px solid rgba(255,255,255,0.2)}
-.rs-tbl thead th.name-col{text-align:left;width:145px;background:#0d3b9e;padding-left:10px;border-right:1px solid rgba(255,255,255,0.25)}
+.rs-tbl thead th{background:#1547b8;color:#ffffff;font-weight:800;padding:5px 2px;text-align:center;white-space:nowrap;letter-spacing:0.2px;font-size:10px;position:sticky;top:0;z-index:2;line-height:1.2;border-right:1px solid rgba(255,255,255,0.2)}
+.rs-tbl thead th.date-col{width:52px;min-width:48px;max-width:56px}
+.rs-tbl thead th.name-col{text-align:left;width:auto;min-width:180px;background:#0d3b9e;padding-left:8px;border-right:1px solid rgba(255,255,255,0.25)}
 .rs-tbl tbody tr{border-bottom:1px solid #e2e8f0;transition:background 0.15s}
 .rs-tbl tbody tr:nth-child(even){background:#f8faff}
 .rs-tbl tbody tr:nth-child(odd){background:#ffffff}
 .rs-tbl tbody tr:hover{background:#edf4fe}
-.rs-tbl tbody td{padding:5px 6px;text-align:center;border-right:1px solid #edf2f7;vertical-align:middle;line-height:1}
-.rs-tbl tbody td.name-cell{text-align:left;font-weight:800;color:#0F2B8C;font-size:11px;padding-left:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0.3px;text-transform:uppercase}
+.rs-tbl tbody td{padding:3.5px 2px;text-align:center;border-right:1px solid #edf2f7;vertical-align:middle;line-height:1}
+.rs-tbl tbody td.name-cell{text-align:left;font-weight:800;color:#0F2B8C;font-size:11px;padding-left:8px;padding-right:4px;white-space:nowrap;letter-spacing:0.25px;text-transform:uppercase}
 .rs-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex-shrink:0}
 .rs-stat{background:#f8fafc;border-radius:10px;padding:6px 8px;display:flex;align-items:center;gap:8px;border:1.5px solid #e2e8f0}
 .rs-stat-icon{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -1458,7 +1459,7 @@ window.addEventListener('DOMContentLoaded', function() {
     if(thead){
       var hRow='<tr><th class="name-col">PMAM NAME</th>';
       dates.forEach(function(d){
-        hRow+='<th class="'+(d.isToday?'today-col':'')+'">'+fmtDate(d)+'</th>';
+        hRow+='<th class="date-col '+(d.isToday?'today-col':'')+'">'+fmtDate(d)+'</th>';
       });
       hRow+='</tr>';
       thead.innerHTML=hRow;
@@ -1500,14 +1501,14 @@ window.addEventListener('DOMContentLoaded', function() {
 
         var photoEl = '';
         if (p.photo) {
-          photoEl = '<img src="' + esc(p.photo) + '" alt="" style="width:24px; height:24px; object-fit:cover; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0.08); flex-shrink:0; background:#e2e8f0;">';
+          photoEl = '<img src="' + esc(p.photo) + '" alt="" style="width:22px; height:22px; object-fit:cover; border-radius:5px; box-shadow:0 1px 2px rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0.08); flex-shrink:0; background:#e2e8f0;">';
         } else {
           var initials = p.name.split(' ').filter(Boolean).map(function(w){ return w[0]; }).join('').slice(0, 2).toUpperCase() || 'P';
-          photoEl = '<div style="width:24px; height:24px; border-radius:6px; background:linear-gradient(135deg,#0f2b8c,#3b82f6); color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:9.5px; font-weight:800; flex-shrink:0;">' + esc(initials) + '</div>';
+          photoEl = '<div style="width:22px; height:22px; border-radius:5px; background:linear-gradient(135deg,#0f2b8c,#3b82f6); color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; flex-shrink:0;">' + esc(initials) + '</div>';
         }
 
         var cells='<td class="name-cell">'
-          + '<div style="display:flex; align-items:center; gap:7px;">'
+          + '<div style="display:flex; align-items:center; gap:5px;">'
           + photoEl
           + '<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + esc(p.name) + '">' + esc(p.name) + '</span>'
           + '</div>'
