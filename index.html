@@ -1214,10 +1214,13 @@ window.addEventListener('DOMContentLoaded', function() {
   var REFRESH_SECS = 300; // 5 minutes
   var _countdownTimer, _refreshTimer;
 
+  function esc(s){
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   function getLast5Dates(){
     var dates = [];
     var today = new Date();
-    // Default to the 5 days window: 1 Sep - 5 Sep 2026 or last 5 days
     for(var i=4; i>=0; i--){
       var d = new Date(today);
       d.setDate(today.getDate() - i);
@@ -1245,6 +1248,10 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   function loadStatus(){
+    if (typeof db === 'undefined' || !db || !db.collection) {
+      return setTimeout(loadStatus, 300);
+    }
+
     var dates = getLast5Dates();
     var todayStr = dates[dates.length-1].str;
 
@@ -1367,6 +1374,7 @@ window.addEventListener('DOMContentLoaded', function() {
           + '<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + esc(p.name) + '">' + esc(p.name) + '</span>'
           + '</div>'
           + '</td>';
+
         dates.forEach(function(d){
           var filled = !!repMap['e:' + pemail + '|' + d.str]
                     || !!repMap['n:' + pname  + '|' + d.str];
