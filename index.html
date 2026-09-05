@@ -2178,7 +2178,8 @@ window.addEventListener('DOMContentLoaded', function() {
     weekendRoster:   null,  // settings/weekend_roster
     orders:          null,  // settings/orders
     aboutPage:       null,  // settings/about_page
-    publishedRosters:[]     // holiday_roster_requests
+    publishedRosters:[],    // holiday_roster_requests
+    userPhotos:      {}     // users collection photo mapping
   };
   // Current open modal id (so we can re-render when data updates)
   var _openId = null;
@@ -2357,6 +2358,18 @@ window.addEventListener('DOMContentLoaded', function() {
       LIVE.weekendRoster = data;
       if (_openId === 'weekend') renderInto(_openId);
     }, function(err){ console.warn('weekend_roster listener:', err && err.message); });
+
+    db.collection('users').onSnapshot(function(snap){
+      var map = {};
+      snap.forEach(function(doc){
+        var u = doc.data() || {};
+        var name = (u.name || '').trim().toLowerCase();
+        var photo = u.photoBase64 || u.photo || u.photoUrl || '';
+        if (name && photo) map[name] = photo;
+      });
+      LIVE.userPhotos = map;
+      if (_openId === 'weekend') renderInto(_openId);
+    }, function(err){ console.warn('users photo listener:', err && err.message); });
 
     db.collection('settings').doc('orders').onSnapshot(function(doc){
       LIVE.orders = doc.exists ? (doc.data() || {}) : {};
@@ -2669,38 +2682,80 @@ window.addEventListener('DOMContentLoaded', function() {
     var prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     var prevYm = prevDate.toISOString().substring(0, 7);
 
-    var weekendMap = {}; // { '2026-08-16' (Sunday): { sunday: '2026-08-16', saturday: '2026-08-15', pmams: ['VINOD KUMAR'] } }
-
     var wrData = LIVE.weekendRoster || {};
     var isActiveView = (ym === 'active' || ym === 'all');
     var activeRows = Array.isArray(wrData.rows) ? wrData.rows : [];
 
-    // 1. Gather rows from settings/weekend_roster
-    if (isActiveView) {
-      // In active view, show ALL published rows configured by the Admin
-      activeRows.forEach(function(r){
-        var sun = r.sunday || '';
-        var sat = r.saturday || '';
-        if (!sun && !sat) return;
-        var key = sun || sat;
-        if (!weekendMap[key]) {
-          weekendMap[key] = { sunday: sun, saturday: sat, pmams: [] };
-        }
-        [r.pmam1, r.pmam2].forEach(function(p){
-          if (p && (p||'').trim() && !weekendMap[key].pmams.includes(p.trim())) {
-            weekendMap[key].pmams.push(p.trim());
+    // Helper: format dates to "5 Sep 2026"
+    function fmtWeekendDisplayDate(dtStr) {
+      if (!dtStr) return '';
+      var d = null;
+      if (typeof dtStr === 'string') {
+        if (dtStr.indexOf('-') !== -1) {
+          var p = dtStr.split('-');
+          if (p[0].length === 4) d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+          else if (p[2] && p[2].length === 4) d = new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
+        } else if (dtStr.indexOf('/') !== -1) {
+          var p = dtStr.split('/');
+          if (p.length === 3) {
+            if (p[0].length === 4) d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+            else d = new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
           }
+        }
+      }
+      if (!d || isNaN(d.getTime())) d = new Date(dtStr);
+      if (isNaN(d.getTime())) return dtStr;
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    // Helper: get PMAM photo
+    function getPmamPhoto(name) {
+      if (!name) return '';
+      var key = name.trim().toLowerCase();
+      if (LIVE.userPhotos && LIVE.userPhotos[key]) return LIVE.userPhotos[key];
+      // Fallback to staff cache if available
+      if (typeof window.lpGetStaffCache === 'function') {
+        var staffList = window.lpGetStaffCache() || [];
+        for (var i = 0; i < staffList.length; i++) {
+          var s = staffList[i];
+          if (s && s.name && s.name.trim().toLowerCase() === key) {
+            var photo = s.photoBase64 || s.photo || s.photoUrl || '';
+            if (photo) return photo;
+          }
+        }
+      }
+      return '';
+    }
+
+    // List of weekend entries to render
+    var weekendList = [];
+
+    if (isActiveView) {
+      // In active view, render all published rows directly
+      activeRows.forEach(function(r, idx){
+        var sat = r.saturday || '';
+        var sun = r.sunday || '';
+        if (!sat && !sun) return;
+        weekendList.push({
+          saturday: sat,
+          sunday: sun,
+          pmam1: (r.pmam1 || '').trim(),
+          pmam2: (r.pmam2 || '').trim(),
+          weekendNum: (idx + 1)
         });
       });
     } else {
-      var wrRows = activeRows.concat(Array.isArray(wrData.history) ? wrData.history : []);
-      wrRows.forEach(function(r){
-        var sun = r.sunday || '';
-        var sat = r.saturday || '';
-        if (!sun && !sat) return;
+      var allRows = activeRows.concat(Array.isArray(wrData.history) ? wrData.history : []);
+      var wMap = {};
 
-        var sunYm = '';
+      allRows.forEach(function(r){
+        var sat = r.saturday || '';
+        var sun = r.sunday || '';
+        if (!sat && !sun) return;
+
         var refDate = sun || sat;
+        var sunYm = '';
         if (refDate.indexOf('-') !== -1) {
           var parts = refDate.split('-');
           if (parts[0].length === 4) sunYm = parts[0] + '-' + parts[1].padStart(2, '0');
@@ -2715,53 +2770,62 @@ window.addEventListener('DOMContentLoaded', function() {
 
         if (sunYm === ym || refDate.indexOf(ym) !== -1) {
           var key = sun || sat;
-          if (!weekendMap[key]) {
-            weekendMap[key] = { sunday: sun, saturday: sat, pmams: [] };
+          if (!wMap[key]) {
+            wMap[key] = {
+              saturday: sat,
+              sunday: sun,
+              pmam1: (r.pmam1 || '').trim(),
+              pmam2: (r.pmam2 || '').trim()
+            };
           }
-          [r.pmam1, r.pmam2].forEach(function(p){
-            if (p && (p||'').trim() && !weekendMap[key].pmams.includes(p.trim())) {
-              weekendMap[key].pmams.push(p.trim());
-            }
-          });
         }
       });
-    }
 
-    // 2. Gather published Sunday duty requests from PMAM/IC workflow (for month view)
-    if (!isActiveView) {
+      // Also gather published requests if any
       var pubList = LIVE.publishedRosters || [];
       pubList.forEach(function(item){
         var d = item.data || {};
         var docYm = d.yearMonth || (item.id.indexOf('_') !== -1 ? item.id.split('_')[1] : '');
         if ((docYm === ym || item.id.indexOf(ym) !== -1) && (d.status === 'Published' || d.published === true)) {
-          var pmamName = d.name || d.email || 'PMAM';
+          var pmamName = (d.name || d.email || 'PMAM').trim();
           var choices = d.choices || {};
           Object.keys(choices).forEach(function(dtStr){
             if (choices[dtStr] === 'Duty') {
               var dt = new Date(dtStr);
-              if (!isNaN(dt.getTime()) && dt.getDay() === 0) { // Is Sunday
+              if (!isNaN(dt.getTime()) && dt.getDay() === 0) { // Sunday
                 var satDt = new Date(dt.getTime() - 86400000);
                 var satStr = satDt.getFullYear() + '-' + String(satDt.getMonth() + 1).padStart(2, '0') + '-' + String(satDt.getDate()).padStart(2, '0');
-
-                if (!weekendMap[dtStr]) {
-                  weekendMap[dtStr] = { sunday: dtStr, saturday: satStr, pmams: [] };
-                }
-                if (!weekendMap[dtStr].pmams.includes(pmamName)) {
-                  weekendMap[dtStr].pmams.push(pmamName);
+                if (!wMap[dtStr]) {
+                  wMap[dtStr] = { saturday: satStr, sunday: dtStr, pmam1: pmamName, pmam2: '' };
+                } else if (!wMap[dtStr].pmam1) {
+                  wMap[dtStr].pmam1 = pmamName;
+                } else if (wMap[dtStr].pmam1 !== pmamName && !wMap[dtStr].pmam2) {
+                  wMap[dtStr].pmam2 = pmamName;
                 }
               }
             }
           });
         }
       });
+
+      var sortedKeys = Object.keys(wMap).sort();
+      sortedKeys.forEach(function(k, idx){
+        var item = wMap[k];
+        weekendList.push({
+          saturday: item.saturday,
+          sunday: item.sunday,
+          pmam1: item.pmam1,
+          pmam2: item.pmam2,
+          weekendNum: (idx + 1)
+        });
+      });
     }
 
-    var sunDates = Object.keys(weekendMap).sort();
     var activeCount = activeRows.length;
     var monthInputValue = isActiveView ? currentYm : ym;
 
-    // Controls Header
-    var html = '<div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px 18px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">'
+    // Controls Header (Tabs & Month filter)
+    var html = '<div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px 18px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">'
       + '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">'
       + '<button type="button" onclick="window.lpSetWeekendMonth(\'active\')" style="padding:7px 16px; border-radius:20px; font-size:12px; font-weight:800; cursor:pointer; border:none; transition:all 0.15s; background:'+(isActiveView?'#0F2B8C':'#e2e8f0')+'; color:'+(isActiveView?'#fff':'#334155')+';">⭐ Current Published Roster ('+activeCount+' Weekends)</button>'
       + '<button type="button" onclick="window.lpSetWeekendMonth(\''+currentYm+'\')" style="padding:7px 14px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:none; transition:all 0.15s; background:'+(!isActiveView && ym===currentYm?'#0F2B8C':'#e2e8f0')+'; color:'+(!isActiveView && ym===currentYm?'#fff':'#334155')+';">Current Month ('+currentYm+')</button>'
@@ -2773,35 +2837,114 @@ window.addEventListener('DOMContentLoaded', function() {
       + '</div>'
       + '</div>';
 
-    if (!sunDates.length) {
+    if (!weekendList.length) {
       html += '<div class="cm-empty">' + (isActiveView ? 'No published weekend roster entries found.<br><span style="font-size:12px;color:#94a3b8">The admin has not published any weekend assignments yet.</span>' : 'No published weekend/Sunday roster found for <strong>' + ym + '</strong>.<br><span style="font-size:12px;color:#94a3b8">Use the month selector above to switch to previous months or view roster history.</span>') + '</div>';
       return html;
     }
 
-    html += '<div class="cm-scroll-x"><div class="cm-tbl-wrap"><table class="cm-tbl cm-tbl-grid">'
-      + '<thead><tr><th style="width:42px;text-align:center">#</th><th>PMAMS ON WEEKEND DUTY</th><th>SATURDAY (DATE)</th><th>SUNDAY (DATE)</th></tr></thead>'
+    // 5 Cycling Theme Styles matching the design reference image
+    var THEMES = [
+      { bg: '#eef7fc', border: '#c7e3fa', pillBg: '#0d47a1' }, // 1. Sky Blue
+      { bg: '#ebf8ee', border: '#bce8c7', pillBg: '#1e7e34' }, // 2. Mint Green
+      { bg: '#fef9e8', border: '#fae7a5', pillBg: '#8c4a00' }, // 3. Warm Amber
+      { bg: '#fdeef2', border: '#f9c9d5', pillBg: '#a01036' }, // 4. Rose Pink
+      { bg: '#f2effa', border: '#dcd1f6', pillBg: '#4b28a4' }  // 5. Soft Lavender
+    ];
+
+    // Calendar SVGs
+    var calSatSvg = '<svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#0066cc" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="3" ry="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke-width="3"/></svg>';
+    var calSunSvg = '<svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="3" ry="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke-width="3"/></svg>';
+
+    // Render PMAM Column Content (Photo + Divider + Name)
+    function renderPmamBlock(name) {
+      if (!name) {
+        return '<div style="display:flex;align-items:center;gap:14px;padding:6px 14px;min-height:76px;">'
+          + '<div style="width:72px;height:66px;border-radius:8px;background:#e2e8f0;color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">👤</div>'
+          + '<div style="width:1.5px;height:44px;background:#cbd5e1;opacity:0.8;flex-shrink:0;"></div>'
+          + '<div style="font-weight:700;font-size:13px;color:#94a3b8;font-style:italic;">Not Assigned</div>'
+          + '</div>';
+      }
+
+      var photo = getPmamPhoto(name);
+      var photoEl = '';
+      if (photo) {
+        photoEl = '<img src="' + esc(photo) + '" alt="' + esc(name) + '" style="width:74px;height:68px;object-fit:cover;border-radius:8px;box-shadow:0 1.5px 4px rgba(0,0,0,0.12);border:1px solid rgba(0,0,0,0.08);flex-shrink:0;background:#e2e8f0;">';
+      } else {
+        var initials = name.split(' ').filter(Boolean).map(function(w){ return w[0]; }).join('').slice(0, 2).toUpperCase() || 'P';
+        photoEl = '<div style="width:74px;height:68px;border-radius:8px;background:linear-gradient(135deg,#0f2b8c,#3b82f6);color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0;box-shadow:0 1.5px 4px rgba(0,0,0,0.12);">' + esc(initials) + '</div>';
+      }
+
+      return '<div style="display:flex;align-items:center;gap:16px;padding:6px 14px;min-height:76px;">'
+        + photoEl
+        + '<div style="width:1.5px;height:46px;background:#94a3b8;opacity:0.6;flex-shrink:0;"></div>'
+        + '<div style="font-weight:800;font-size:14.5px;color:#0F2B8C;text-transform:uppercase;letter-spacing:0.5px;line-height:1.25;">' + esc(name) + '</div>'
+        + '</div>';
+    }
+
+    html += '<div class="cm-scroll-x" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">'
+      + '<table style="width:100%;min-width:760px;border-collapse:separate;border-spacing:0 10px;table-layout:fixed;margin-top:-6px;">'
+      + '<thead>'
+      + '<tr>'
+      + '<th style="width:34%;background:#0066cc;color:#ffffff;padding:12px 14px;font-size:13.5px;font-weight:800;text-align:center;border-radius:10px 0 0 10px;letter-spacing:0.6px;text-transform:uppercase;border:none;">DATE &amp; WEEKEND</th>'
+      + '<th style="width:33%;background:#4b32b3;color:#ffffff;padding:12px 14px;font-size:13.5px;font-weight:800;text-align:center;letter-spacing:0.6px;text-transform:uppercase;border:none;border-left:2px solid #ffffff;">PMAM – 1</th>'
+      + '<th style="width:33%;background:#4b32b3;color:#ffffff;padding:12px 14px;font-size:13.5px;font-weight:800;text-align:center;border-radius:0 10px 10px 0;letter-spacing:0.6px;text-transform:uppercase;border:none;border-left:2px solid #ffffff;">PMAM – 2</th>'
+      + '</tr>'
+      + '</thead>'
       + '<tbody>';
 
-    sunDates.forEach(function(sDate, i){
-      var wItem = weekendMap[sDate];
-      var pmams = wItem.pmams || [];
-      var pmamHtml = pmams.length
-        ? pmams.map(function(p){ return '<span class="cm-pill cm-pill-pmam" style="background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;font-weight:800;padding:4px 10px;margin:2px;display:inline-block">👤 '+esc(p)+'</span>'; }).join('')
-        : '<span style="color:#9ca3af;font-style:italic;font-size:11px">No PMAMs assigned</span>';
+    weekendList.forEach(function(item, idx){
+      var theme = THEMES[idx % THEMES.length];
+      var satFormatted = fmtWeekendDisplayDate(item.saturday);
+      var sunFormatted = fmtWeekendDisplayDate(item.sunday);
 
-      html += '<tr>'
-            + '<td style="text-align:center;color:#6b7280;font-weight:700">'+(i+1)+'</td>'
-            + '<td>'+pmamHtml+'</td>'
-            + '<td style="font-weight:800;color:#2563eb;white-space:nowrap">'+esc(fmtDate(wItem.saturday))+' <span style="font-size:10px;color:#64748b">(Sat)</span></td>'
-            + '<td style="font-weight:800;color:#dc2626;white-space:nowrap">'+esc(fmtDate(wItem.sunday))+' <span style="font-size:10px;color:#64748b">(Sun)</span></td>'
-            + '</tr>';
+      html += '<tr style="background:' + theme.bg + ';box-shadow:0 1px 3px rgba(0,0,0,0.04);">'
+        // Column 1: Date & Weekend
+        + '<td style="padding:12px 14px;border:1.5px solid ' + theme.border + ';border-right:none;border-radius:10px 0 0 10px;vertical-align:middle;">'
+        + '<div style="display:flex;align-items:center;justify-content:space-around;gap:6px;">'
+        // Saturday
+        + '<div style="display:flex;align-items:center;gap:8px;flex:1;justify-content:center;">'
+        + calSatSvg
+        + '<div style="display:flex;flex-direction:column;text-align:left;line-height:1.2;">'
+        + '<span style="font-size:11px;font-weight:800;color:#0066cc;letter-spacing:0.5px;">SAT</span>'
+        + '<span style="font-size:13px;font-weight:700;color:#0f172a;white-space:nowrap;">' + esc(satFormatted) + '</span>'
+        + '</div>'
+        + '</div>'
+        // Divider
+        + '<div style="width:1.5px;height:32px;background:#cbd5e1;opacity:0.8;margin:0 2px;"></div>'
+        // Sunday
+        + '<div style="display:flex;align-items:center;gap:8px;flex:1;justify-content:center;">'
+        + calSunSvg
+        + '<div style="display:flex;flex-direction:column;text-align:left;line-height:1.2;">'
+        + '<span style="font-size:11px;font-weight:800;color:#dc2626;letter-spacing:0.5px;">SUN</span>'
+        + '<span style="font-size:13px;font-weight:700;color:#0f172a;white-space:nowrap;">' + esc(sunFormatted) + '</span>'
+        + '</div>'
+        + '</div>'
+        + '</div>'
+        // Weekend Badge Pill
+        + '<div style="margin-top:10px;text-align:center;">'
+        + '<div style="display:inline-block;background:' + theme.pillBg + ';color:#ffffff;font-weight:800;font-size:11.5px;padding:3.5px 24px;border-radius:6px;letter-spacing:0.6px;text-transform:uppercase;box-shadow:0 1px 2px rgba(0,0,0,0.15);">'
+        + 'WEEKEND ' + item.weekendNum
+        + '</div>'
+        + '</div>'
+        + '</td>'
+
+        // Column 2: PMAM - 1
+        + '<td style="padding:8px 12px;border-top:1.5px solid ' + theme.border + ';border-bottom:1.5px solid ' + theme.border + ';border-left:1px solid ' + theme.border + ';border-right:1px solid ' + theme.border + ';vertical-align:middle;">'
+        + renderPmamBlock(item.pmam1)
+        + '</td>'
+
+        // Column 3: PMAM - 2
+        + '<td style="padding:8px 12px;border:1.5px solid ' + theme.border + ';border-left:none;border-radius:0 10px 10px 0;vertical-align:middle;">'
+        + renderPmamBlock(item.pmam2)
+        + '</td>'
+        + '</tr>';
     });
 
-    html += '</tbody></table></div></div>';
+    html += '</tbody></table></div>';
     return html;
   }
 
-  // ── About Us modal: the AB-PMJAY / SEHAT scheme writeup ──
+    // ── About Us modal: the AB-PMJAY / SEHAT scheme writeup ──
   // Render one styled content section (shared by About Us & About Developer).
   // sec = { title, text, titleColor, textColor, bgColor, font, align }
   // ─── About Us icon set (circular badge icons for each section) ───
