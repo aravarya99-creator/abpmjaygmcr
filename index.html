@@ -2654,7 +2654,7 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   // Global active month for Weekend Roster on landing page
-  window._lpWeekendMonth = window._lpWeekendMonth || new Date().toISOString().substring(0, 7);
+  window._lpWeekendMonth = window._lpWeekendMonth || 'active';
   window.lpSetWeekendMonth = function(ym) {
     if (!ym) return;
     window._lpWeekendMonth = ym;
@@ -2662,7 +2662,7 @@ window.addEventListener('DOMContentLoaded', function() {
   };
 
   function renderWeekendRoster(){
-    var ym = window._lpWeekendMonth || new Date().toISOString().substring(0, 7);
+    var ym = window._lpWeekendMonth || 'active';
     var now = new Date();
     var currentYm = now.toISOString().substring(0, 7);
     
@@ -2671,30 +2671,17 @@ window.addEventListener('DOMContentLoaded', function() {
 
     var weekendMap = {}; // { '2026-08-16' (Sunday): { sunday: '2026-08-16', saturday: '2026-08-15', pmams: ['VINOD KUMAR'] } }
 
-    // 1. Gather rows from settings/weekend_roster (combining active rows AND history)
     var wrData = LIVE.weekendRoster || {};
-    var wrRows = (Array.isArray(wrData.rows) ? wrData.rows : []).concat(Array.isArray(wrData.history) ? wrData.history : []);
-    
-    wrRows.forEach(function(r){
-      var sun = r.sunday || '';
-      var sat = r.saturday || '';
-      if (!sun && !sat) return;
+    var isActiveView = (ym === 'active' || ym === 'all');
+    var activeRows = Array.isArray(wrData.rows) ? wrData.rows : [];
 
-      var sunYm = '';
-      var refDate = sun || sat;
-      if (refDate.indexOf('-') !== -1) {
-        var parts = refDate.split('-');
-        if (parts[0].length === 4) sunYm = parts[0] + '-' + parts[1].padStart(2, '0');
-        else if (parts[2] && parts[2].length === 4) sunYm = parts[2] + '-' + parts[1].padStart(2, '0');
-      } else if (refDate.indexOf('/') !== -1) {
-        var parts = refDate.split('/');
-        if (parts.length === 3) {
-          if (parts[0].length === 4) sunYm = parts[0] + '-' + parts[1].padStart(2, '0');
-          else sunYm = parts[2] + '-' + parts[1].padStart(2, '0');
-        }
-      }
-
-      if (sunYm === ym || refDate.indexOf(ym) !== -1) {
+    // 1. Gather rows from settings/weekend_roster
+    if (isActiveView) {
+      // In active view, show ALL published rows configured by the Admin
+      activeRows.forEach(function(r){
+        var sun = r.sunday || '';
+        var sat = r.saturday || '';
+        if (!sun && !sat) return;
         var key = sun || sat;
         if (!weekendMap[key]) {
           weekendMap[key] = { sunday: sun, saturday: sat, pmams: [] };
@@ -2704,52 +2691,90 @@ window.addEventListener('DOMContentLoaded', function() {
             weekendMap[key].pmams.push(p.trim());
           }
         });
-      }
-    });
+      });
+    } else {
+      var wrRows = activeRows.concat(Array.isArray(wrData.history) ? wrData.history : []);
+      wrRows.forEach(function(r){
+        var sun = r.sunday || '';
+        var sat = r.saturday || '';
+        if (!sun && !sat) return;
 
-    // 2. Gather published Sunday duty requests from PMAM/IC workflow
-    var pubList = LIVE.publishedRosters || [];
-    pubList.forEach(function(item){
-      var d = item.data || {};
-      var docYm = d.yearMonth || (item.id.indexOf('_') !== -1 ? item.id.split('_')[1] : '');
-      if ((docYm === ym || item.id.indexOf(ym) !== -1) && (d.status === 'Published' || d.published === true)) {
-        var pmamName = d.name || d.email || 'PMAM';
-        var choices = d.choices || {};
-        Object.keys(choices).forEach(function(dtStr){
-          if (choices[dtStr] === 'Duty') {
-            var dt = new Date(dtStr);
-            if (!isNaN(dt.getTime()) && dt.getDay() === 0) { // Is Sunday
-              var satDt = new Date(dt.getTime() - 86400000);
-              var satStr = satDt.getFullYear() + '-' + String(satDt.getMonth() + 1).padStart(2, '0') + '-' + String(satDt.getDate()).padStart(2, '0');
+        var sunYm = '';
+        var refDate = sun || sat;
+        if (refDate.indexOf('-') !== -1) {
+          var parts = refDate.split('-');
+          if (parts[0].length === 4) sunYm = parts[0] + '-' + parts[1].padStart(2, '0');
+          else if (parts[2] && parts[2].length === 4) sunYm = parts[2] + '-' + parts[1].padStart(2, '0');
+        } else if (refDate.indexOf('/') !== -1) {
+          var parts = refDate.split('/');
+          if (parts.length === 3) {
+            if (parts[0].length === 4) sunYm = parts[0] + '-' + parts[1].padStart(2, '0');
+            else sunYm = parts[2] + '-' + parts[1].padStart(2, '0');
+          }
+        }
 
-              if (!weekendMap[dtStr]) {
-                weekendMap[dtStr] = { sunday: dtStr, saturday: satStr, pmams: [] };
-              }
-              if (!weekendMap[dtStr].pmams.includes(pmamName)) {
-                weekendMap[dtStr].pmams.push(pmamName);
+        if (sunYm === ym || refDate.indexOf(ym) !== -1) {
+          var key = sun || sat;
+          if (!weekendMap[key]) {
+            weekendMap[key] = { sunday: sun, saturday: sat, pmams: [] };
+          }
+          [r.pmam1, r.pmam2].forEach(function(p){
+            if (p && (p||'').trim() && !weekendMap[key].pmams.includes(p.trim())) {
+              weekendMap[key].pmams.push(p.trim());
+            }
+          });
+        }
+      });
+    }
+
+    // 2. Gather published Sunday duty requests from PMAM/IC workflow (for month view)
+    if (!isActiveView) {
+      var pubList = LIVE.publishedRosters || [];
+      pubList.forEach(function(item){
+        var d = item.data || {};
+        var docYm = d.yearMonth || (item.id.indexOf('_') !== -1 ? item.id.split('_')[1] : '');
+        if ((docYm === ym || item.id.indexOf(ym) !== -1) && (d.status === 'Published' || d.published === true)) {
+          var pmamName = d.name || d.email || 'PMAM';
+          var choices = d.choices || {};
+          Object.keys(choices).forEach(function(dtStr){
+            if (choices[dtStr] === 'Duty') {
+              var dt = new Date(dtStr);
+              if (!isNaN(dt.getTime()) && dt.getDay() === 0) { // Is Sunday
+                var satDt = new Date(dt.getTime() - 86400000);
+                var satStr = satDt.getFullYear() + '-' + String(satDt.getMonth() + 1).padStart(2, '0') + '-' + String(satDt.getDate()).padStart(2, '0');
+
+                if (!weekendMap[dtStr]) {
+                  weekendMap[dtStr] = { sunday: dtStr, saturday: satStr, pmams: [] };
+                }
+                if (!weekendMap[dtStr].pmams.includes(pmamName)) {
+                  weekendMap[dtStr].pmams.push(pmamName);
+                }
               }
             }
-          }
-        });
-      }
-    });
+          });
+        }
+      });
+    }
 
     var sunDates = Object.keys(weekendMap).sort();
+    var activeCount = activeRows.length;
+    var monthInputValue = isActiveView ? currentYm : ym;
 
     // Controls Header
     var html = '<div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px 18px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">'
-      + '<div style="display:flex; align-items:center; gap:10px;">'
-      + '<label style="font-size:12.5px; font-weight:800; color:#1e293b; display:flex; align-items:center; gap:6px;"><span>📆</span> Weekend Roster Month:</label>'
-      + '<input type="month" value="'+ym+'" onchange="window.lpSetWeekendMonth(this.value)" style="padding:6px 14px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:13px; font-weight:700; color:#0f172a; outline:none; background:#fff;">'
+      + '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">'
+      + '<button type="button" onclick="window.lpSetWeekendMonth(\'active\')" style="padding:7px 16px; border-radius:20px; font-size:12px; font-weight:800; cursor:pointer; border:none; transition:all 0.15s; background:'+(isActiveView?'#0F2B8C':'#e2e8f0')+'; color:'+(isActiveView?'#fff':'#334155')+';">⭐ Current Published Roster ('+activeCount+' Weekends)</button>'
+      + '<button type="button" onclick="window.lpSetWeekendMonth(\''+currentYm+'\')" style="padding:7px 14px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:none; transition:all 0.15s; background:'+(!isActiveView && ym===currentYm?'#0F2B8C':'#e2e8f0')+'; color:'+(!isActiveView && ym===currentYm?'#fff':'#334155')+';">Current Month ('+currentYm+')</button>'
+      + '<button type="button" onclick="window.lpSetWeekendMonth(\''+prevYm+'\')" style="padding:7px 14px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:none; transition:all 0.15s; background:'+(!isActiveView && ym===prevYm?'#0F2B8C':'#e2e8f0')+'; color:'+(!isActiveView && ym===prevYm?'#fff':'#334155')+';">Previous Month ('+prevYm+')</button>'
       + '</div>'
-      + '<div style="display:flex; gap:8px; flex-wrap:wrap;">'
-      + '<button type="button" onclick="window.lpSetWeekendMonth(\''+currentYm+'\')" style="padding:6px 14px; border-radius:20px; font-size:12px; font-weight:800; cursor:pointer; border:none; background:'+(ym===currentYm?'#0F2B8C':'#e2e8f0')+'; color:'+(ym===currentYm?'#fff':'#334155')+';">Current Month ('+currentYm+')</button>'
-      + '<button type="button" onclick="window.lpSetWeekendMonth(\''+prevYm+'\')" style="padding:6px 14px; border-radius:20px; font-size:12px; font-weight:800; cursor:pointer; border:none; background:'+(ym===prevYm?'#0F2B8C':'#e2e8f0')+'; color:'+(ym===prevYm?'#fff':'#334155')+';">Previous Month ('+prevYm+')</button>'
+      + '<div style="display:flex; align-items:center; gap:8px;">'
+      + '<label style="font-size:11.5px; font-weight:700; color:#64748b;">Month filter:</label>'
+      + '<input type="month" value="'+monthInputValue+'" onchange="window.lpSetWeekendMonth(this.value)" style="padding:5px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:12px; font-weight:700; color:#0f172a; outline:none; background:#fff;">'
       + '</div>'
       + '</div>';
 
     if (!sunDates.length) {
-      html += '<div class="cm-empty">No published weekend/Sunday roster found for <strong>' + ym + '</strong>.<br><span style="font-size:12px;color:#94a3b8">Use the month selector above to switch to previous months or view roster history.</span></div>';
+      html += '<div class="cm-empty">' + (isActiveView ? 'No published weekend roster entries found.<br><span style="font-size:12px;color:#94a3b8">The admin has not published any weekend assignments yet.</span>' : 'No published weekend/Sunday roster found for <strong>' + ym + '</strong>.<br><span style="font-size:12px;color:#94a3b8">Use the month selector above to switch to previous months or view roster history.</span>') + '</div>';
       return html;
     }
 
@@ -3545,7 +3570,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
 
 <!-- ═══════════════ CENTER FLOATING LEAVE PROCESS POPUP ═══════════════ -->
-<div id="leaveCenterModal" style="position:fixed; inset:0; z-index:10000; background:rgba(15,23,42,0.72); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; padding:18px; transition:opacity 0.25s ease;" onclick="closeLeaveCenterModal()">
+<div id="leaveCenterModal" style="position:fixed; inset:0; z-index:10000; background:rgba(15,23,42,0.72); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:none; opacity:0; align-items:center; justify-content:center; padding:18px; transition:opacity 0.25s ease;" onclick="closeLeaveCenterModal()">
   <style>
     @keyframes centerPopIn {
       from { opacity: 0; transform: scale(0.85) translateY(16px); }
@@ -3610,6 +3635,36 @@ window.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════
+// PMAM LEAVE PROCESS POPUP — FOOLPROOF ADMIN CONTROLLER WIRING
+// ═══════════════════════════════════════════════════════════════
+window._leaveProcessPopupEnabled = false;
+
+window.applyLeaveModalVisibility = function(enabled) {
+  // If explicitly disabled (false, 'false', 0, '0')
+  var isEn = (enabled === true || enabled === 'true' || enabled === 1 || enabled === '1');
+  window._leaveProcessPopupEnabled = isEn;
+  
+  var modal = document.getElementById('leaveCenterModal');
+  if (!modal) return;
+
+  if (!isEn) {
+    // ADMIN DISABLED -> HIDE IMMEDIATELY WITH ZERO FLASH
+    modal.style.opacity = '0';
+    modal.style.display = 'none';
+  } else {
+    // ADMIN ENABLED -> Show ONLY if user hasn't closed it in this session
+    if (!sessionStorage.getItem('leave_popup_closed')) {
+      modal.style.display = 'flex';
+      setTimeout(function() {
+        if (window._leaveProcessPopupEnabled) {
+          modal.style.opacity = '1';
+        }
+      }, 50);
+    }
+  }
+};
+
 function closeLeaveCenterModal() {
   var modal = document.getElementById('leaveCenterModal');
   if (modal) {
@@ -3617,8 +3672,10 @@ function closeLeaveCenterModal() {
     setTimeout(function() {
       modal.style.display = 'none';
     }, 220);
+    sessionStorage.setItem('leave_popup_closed', '1');
   }
 }
+
 function openLeaveCenterModal() {
   var modal = document.getElementById('leaveCenterModal');
   if (modal) {
@@ -3628,9 +3685,44 @@ function openLeaveCenterModal() {
     }, 10);
   }
 }
+
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeLeaveCenterModal();
 });
+
+// Live synchronization with Firestore
+(function initLeaveModalSync() {
+  if (typeof db === 'undefined') return;
+
+  // 1. Listen to settings/landing_page (Primary public document)
+  db.collection('settings').doc('landing_page').onSnapshot(function(doc) {
+    if (doc.exists) {
+      var d = doc.data() || {};
+      if (d.en_leave_popup !== undefined) {
+        window.applyLeaveModalVisibility(d.en_leave_popup);
+        return;
+      }
+    }
+    // Check pmam_nav if not explicitly configured in landing_page
+    db.collection('settings').doc('pmam_nav').get().then(function(pdoc) {
+      if (pdoc.exists && pdoc.data() && pdoc.data().en_leave_popup !== undefined) {
+        window.applyLeaveModalVisibility(pdoc.data().en_leave_popup);
+      }
+    }).catch(function() {});
+  }, function(err) {
+    console.warn('[leaveCenterModal] landing_page sync notice:', err);
+  });
+
+  // 2. Also listen to settings/pmam_nav for immediate real-time admin sync
+  db.collection('settings').doc('pmam_nav').onSnapshot(function(pdoc) {
+    if (pdoc.exists) {
+      var pd = pdoc.data() || {};
+      if (pd.en_leave_popup !== undefined) {
+        window.applyLeaveModalVisibility(pd.en_leave_popup);
+      }
+    }
+  }, function(err) {});
+})();
 </script>
 </body>
 </html>
