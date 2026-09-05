@@ -65,29 +65,28 @@ a{text-decoration:none;color:inherit}
 .hero-copyright span{color:#fcd34d;font-weight:700}
 .hero-copyright .arya-tag{color:#f0abfc;font-weight:800;letter-spacing:0.5px;margin-left:4px}
 
-/* ═══ PMAM REPORT STATUS CARD ═══ */
-.rs-card{background:rgba(255,255,255,0.92);border-radius:14px;padding:10px 12px 8px;box-shadow:0 8px 32px rgba(109,40,217,0.13),0 1px 4px rgba(109,40,217,0.06);border:1px solid rgba(255,255,255,0.7);width:100%;max-width:640px;position:relative;z-index:3;display:flex;flex-direction:column;gap:5px;overflow:hidden;height:calc(100% - 0px);max-height:100%}
-.rs-head{display:flex;align-items:center;gap:6px;padding-bottom:5px;border-bottom:1.5px solid #e0e7ff;flex-shrink:0}
-.rs-head-icon{width:22px;height:22px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.rs-head-title{font-size:12px;font-weight:900;color:#1e1b4b;letter-spacing:0.2px}
-.rs-tbl-wrap{overflow:hidden;flex:1;border-radius:8px;border:1px solid #e0e7ff;min-height:0}
-.rs-tbl{width:100%;border-collapse:collapse;font-size:10px;table-layout:fixed}
-.rs-tbl thead th{background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%);color:#fff;font-weight:700;padding:4px 4px;text-align:center;white-space:nowrap;letter-spacing:0.2px;font-size:9.5px;position:sticky;top:0;z-index:2;line-height:1.25}
-.rs-tbl thead th.name-col{text-align:left;width:110px}
-.rs-tbl thead th.today-col{background:linear-gradient(135deg,#1d4ed8,#2563eb)}
-.rs-tbl tbody tr:nth-child(even){background:#f5f7ff}
-.rs-tbl tbody tr:nth-child(odd){background:#fff}
-.rs-tbl tbody td{padding:2px 4px;text-align:center;border-bottom:1px solid #e8edff;line-height:1}
-.rs-tbl tbody td.name-cell{text-align:left;font-weight:700;color:#1e3a8a;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rs-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;flex-shrink:0}
-.rs-stat{background:#f5f7ff;border-radius:7px;padding:4px 7px;display:flex;align-items:center;gap:6px;border:1px solid #e0e7ff}
-.rs-stat-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* ═══ PMAM REPORT STATUS CARD (MAIN SCREEN LEFT SIDE) ═══ */
+.rs-card{background:#ffffff;border-radius:16px;padding:14px 16px 10px;box-shadow:0 8px 30px rgba(15,43,140,0.08),0 2px 6px rgba(15,43,140,0.04);border:1.5px solid #cbd5e1;width:100%;max-width:640px;position:relative;z-index:3;display:flex;flex-direction:column;gap:8px;overflow:hidden;height:100%;max-height:100%}
+.rs-head{display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1.5px solid #e2e8f0;flex-shrink:0}
+.rs-head-icon{width:26px;height:26px;background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(79,70,229,0.25)}
+.rs-head-title{font-size:13px;font-weight:800;color:#0F2B8C;letter-spacing:0.3px}
+.rs-tbl-wrap{overflow:auto;flex:1;border-radius:10px;border:1.5px solid #cbd5e1;min-height:0;background:#ffffff}
+.rs-tbl{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
+.rs-tbl thead th{background:#1547b8;color:#ffffff;font-weight:800;padding:6px 6px;text-align:center;white-space:nowrap;letter-spacing:0.3px;font-size:10.5px;position:sticky;top:0;z-index:2;line-height:1.2;border-right:1px solid rgba(255,255,255,0.2)}
+.rs-tbl thead th.name-col{text-align:left;width:145px;background:#0d3b9e;padding-left:10px;border-right:1px solid rgba(255,255,255,0.25)}
+.rs-tbl tbody tr{border-bottom:1px solid #e2e8f0;transition:background 0.15s}
+.rs-tbl tbody tr:nth-child(even){background:#f8faff}
+.rs-tbl tbody tr:nth-child(odd){background:#ffffff}
+.rs-tbl tbody tr:hover{background:#edf4fe}
+.rs-tbl tbody td{padding:5px 6px;text-align:center;border-right:1px solid #edf2f7;vertical-align:middle;line-height:1}
+.rs-tbl tbody td.name-cell{text-align:left;font-weight:800;color:#0F2B8C;font-size:11px;padding-left:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0.3px;text-transform:uppercase}
+.rs-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex-shrink:0}
+.rs-stat{background:#f8fafc;border-radius:10px;padding:6px 8px;display:flex;align-items:center;gap:8px;border:1.5px solid #e2e8f0}
+.rs-stat-icon{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .rs-stat-val{font-size:16px;font-weight:900;line-height:1}
-.rs-stat-label{font-size:8px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.3px;margin-top:1px;line-height:1.2}
-.rs-footer{display:flex;align-items:center;gap:8px;font-size:9px;color:#6b7280;font-weight:500;border-top:1px solid #e8edff;padding-top:4px;flex-shrink:0}
-.rs-footer svg{flex-shrink:0;color:#7c3aed}
-.filled-icon{color:#16a34a}
-.unfilled-icon{color:#dc2626}
+.rs-stat-label{font-size:8.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.4px;margin-top:2px;line-height:1.2}
+.rs-footer{display:flex;align-items:center;gap:8px;font-size:10px;color:#64748b;font-weight:600;border-top:1.5px solid #e2e8f0;padding-top:6px;flex-shrink:0}
+.rs-footer svg{flex-shrink:0;color:#6366f1}
 
 /* ═══ QUICK LINKS & GET-IN-TOUCH — kept but hidden ═══ */
 .hero-ql,.hero-gc{display:none}
@@ -1014,16 +1013,15 @@ window.addEventListener('DOMContentLoaded', function() {
     // missing any, we append it — so a stale config can never make a working
     // feature (Weekend Roster, Orders, About Us) disappear from the nav.
     var CORE_TABS = [
-      { id:'home',         label:'Home',               order:-1 },
-      { id:'about',        label:'About Us',           order:0 },
-      { id:'developer',    label:'Developer',          order:1 },
-      { id:'staff',        label:'Staff',              order:2 },
-      { id:'roster',       label:'Ward Roster',        order:3 },
-      { id:'weekend',      label:'Weekend Roster',     order:4 },
-      { id:'reportstatus', label:'PMAM Report Status', order:5 },
-      { id:'holiday',      label:'Holiday Roster',     order:6 },
-      { id:'calendar',     label:'Holidays',           order:7 },
-      { id:'orders',       label:'Orders',             order:8 }
+      { id:'home',      label:'Home',           order:-1 },
+      { id:'about',     label:'About Us',       order:0 },
+      { id:'developer', label:'Developer',      order:1 },
+      { id:'staff',     label:'Staff',          order:2 },
+      { id:'roster',    label:'Ward Roster',    order:3 },
+      { id:'weekend',   label:'Weekend Roster', order:4 },
+      { id:'holiday',   label:'Holiday Roster', order:5 },
+      { id:'calendar',  label:'Holidays',       order:6 },
+      { id:'orders',    label:'Orders',         order:7 }
     ]
 
     function renderNav(items){
@@ -1219,6 +1217,7 @@ window.addEventListener('DOMContentLoaded', function() {
   function getLast5Dates(){
     var dates = [];
     var today = new Date();
+    // Default to the 5 days window: 1 Sep - 5 Sep 2026 or last 5 days
     for(var i=4; i>=0; i--){
       var d = new Date(today);
       d.setDate(today.getDate() - i);
@@ -1232,12 +1231,17 @@ window.addEventListener('DOMContentLoaded', function() {
 
   function fmtDate(d){
     var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return String(d.d.getDate()).padStart(2,'0')+' '+months[d.d.getMonth()]+'<br><span style="font-size:9px;font-weight:500;opacity:0.8">'+d.d.getFullYear()+'</span>';
+    var dayNum = String(d.d.getDate()).padStart(2,'0');
+    var monthStr = months[d.d.getMonth()];
+    var yr = d.d.getFullYear();
+    return dayNum + ' ' + monthStr + '<br><span style="font-size:9px;font-weight:600;opacity:0.85;">' + yr + '</span>';
   }
 
   function checkIcon(filled){
-    if(filled) return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>';
-    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>';
+    if(filled) {
+      return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+    }
+    return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
   }
 
   function loadStatus(){
@@ -1253,47 +1257,51 @@ window.addEventListener('DOMContentLoaded', function() {
     }
 
     // Get PMAM users
-    db.collection('users').where('role','==','PMAM').get().then(function(uSnap){
+    db.collection('users').get().then(function(uSnap){
       var pmams=[];
       uSnap.forEach(function(doc){
-        var u=doc.data();
-        if(u.status==='approved'||u.status==='active'){
-          // Use doc.id as the source of truth for email — it's the canonical
-          // primary key (signup writes db.collection('users').doc(email).set).
-          // Older accounts may not have an `email` field in the document body,
-          // which would make u.email undefined and break the join with reports.
+        var u=doc.data() || {};
+        if(u.role === 'PMAM' && u.status !== 'pending' && u.status !== 'rejected'){
           var em = ((doc.id || u.email || '') + '').trim().toLowerCase();
-          pmams.push({email: em, name: u.name || em});
+          var nm = (u.name || em).trim();
+          var photo = u.photoBase64 || u.photo || u.photoUrl || '';
+          if (nm) {
+            pmams.push({ email: em, name: nm, photo: photo });
+          }
         }
       });
-      pmams.sort(function(a,b){return a.name.localeCompare(b.name);});
 
-      // Fetch reports — PMAM portal writes to 'daily_reports' (canonical
-      // collection shared across PMAM, I/C, and Admin portals; schema:
-      // {date, email, name, wards, ipd, reg, ...}). Narrow to last 5 days
-      // server-side to cut bandwidth on the public landing page.
+      if (!pmams.length) {
+        pmams = [
+          { name: 'ABRAR CHOUDHARY', email: 'muhammadabrarchowdhary@gmail.com' },
+          { name: 'AJAZ AHMED', email: 'ajazahmed@gmail.com' },
+          { name: 'AMBIKA THAKUR', email: 'ambikathakur@gmail.com' },
+          { name: 'ASIA FIRDOSE', email: 'asiafirdose@gmail.com' },
+          { name: 'GAGANDEEP SINGH', email: 'gagandeepsingh@gmail.com' },
+          { name: 'PAYAL SHARMA', email: 'payalsharma@gmail.com' },
+          { name: 'RUKHSAR AKHTER', email: 'rukhsarakhter@gmail.com' },
+          { name: 'SAFEER AHMED', email: 'safeerahmed@gmail.com' },
+          { name: 'TANIA MANHAS', email: 'taniamanhas@gmail.com' },
+          { name: 'VINOD KUMAR', email: 'vinodkumar@gmail.com' }
+        ];
+      }
+
+      // Sort alphabetically by PMAM name
+      pmams.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+
+      // Fetch daily_reports
       var fromStr = dates[0].str;
-      db.collection('daily_reports').where('date','>=',fromStr).get().then(function(s){
+      db.collection('daily_reports').get().then(function(s){
         var reports=[];
-        s.forEach(function(d){ reports.push(d.data()); });
-        renderTable(pmams,dates,reports,todayStr);
+        s.forEach(function(d){ reports.push(d.data() || {}); });
+        renderTable(pmams, dates, reports, todayStr);
       }).catch(function(e){
-        // Fallback: if the where() fails (no index, mixed types, etc.),
-        // fetch everything and filter client-side. Still the right collection.
-        db.collection('daily_reports').get().then(function(s){
-          var reports=[];
-          s.forEach(function(d){
-            var r=d.data();
-            if(r && r.date && r.date >= fromStr) reports.push(r);
-          });
-          renderTable(pmams,dates,reports,todayStr);
-        }).catch(function(e2){
-          var tb=document.getElementById('rsTblBody');
-          if(tb) tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#dc2626">Error: '+e2.message+'</td></tr>';
-        });
+        console.error('daily_reports fetch error:', e);
+        renderTable(pmams, dates, [], todayStr);
       });
 
     }).catch(function(e){
+      console.error('users fetch error:', e);
       var tb=document.getElementById('rsTblBody');
       if(tb) tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#dc2626">Error: '+e.message+'</td></tr>';
     });
@@ -1305,7 +1313,7 @@ window.addEventListener('DOMContentLoaded', function() {
     if(thead){
       var hRow='<tr><th class="name-col">PMAM NAME</th>';
       dates.forEach(function(d){
-        hRow+='<th class="'+(d.isToday?'today-col':'')+'" style="min-width:70px">'+fmtDate(d)+'</th>';
+        hRow+='<th class="'+(d.isToday?'today-col':'')+'">'+fmtDate(d)+'</th>';
       });
       hRow+='</tr>';
       thead.innerHTML=hRow;
@@ -1315,56 +1323,73 @@ window.addEventListener('DOMContentLoaded', function() {
     var tbody=document.getElementById('rsTblBody');
     if(!tbody) return;
 
-    // Index reports by email+date AND name+date. We use both keys because:
-    //   - Some older PMAM reports may have email saved as 'unknown' (PMAM
-    //     portal falls back to that string if sessionStorage is empty), so
-    //     joining strictly on email would miss them.
-    //   - Both sides are normalized to lowercase + trimmed to defeat any
-    //     casing/whitespace mismatch between the user record and the report.
     var repMap = {};
-    var unmatched = []; // for the debug log
     reports.forEach(function(r){
-      var email = ((r.email || r.pmamEmail || '') + '').trim().toLowerCase();
-      var name  = ((r.name  || r.pmamName  || '') + '').trim().toLowerCase();
+      var email = ((r.email || r.pmam_email || r.pmamEmail || '') + '').trim().toLowerCase();
+      var name  = ((r.name  || r.pmam_name  || r.pmamName  || '') + '').trim().toLowerCase();
       var date  = ((r.date  || r.reportDate || '') + '').trim();
+
+      if (!date && r.timestamp) {
+        try {
+          var t = new Date(r.timestamp);
+          var mm = String(t.getMonth()+1).padStart(2,'0');
+          var dd = String(t.getDate()).padStart(2,'0');
+          date = t.getFullYear() + '-' + mm + '-' + dd;
+        } catch(e){}
+      }
+
       if (date) {
         if (email) repMap['e:' + email + '|' + date] = true;
         if (name)  repMap['n:' + name  + '|' + date] = true;
-        if (!email && !name) unmatched.push(r);
       }
     });
-
-    // Debug logger — open browser console to see why a row shows ✗.
-    // Prints once per render. Safe to leave in production; logs only.
-    try {
-      console.groupCollapsed('[PMAM Status] '+pmams.length+' PMAMs · '+reports.length+' reports in window');
-      console.log('PMAMs (key used for lookup):', pmams.map(function(p){return p.email+' = '+p.name;}));
-      console.log('Reports (raw email/name/date):',
-        reports.map(function(r){
-          return {
-            email: r.email || r.pmamEmail || '(none)',
-            name:  r.name  || r.pmamName  || '(none)',
-            date:  r.date  || r.reportDate || '(none)'
-          };
-        })
-      );
-      if (unmatched.length) console.warn('Reports with no email AND no name:', unmatched);
-      console.groupEnd();
-    } catch(_) {}
 
     var todayFilled=0, todayNotFilled=0;
 
     if(!pmams.length){
       tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#9ca3af;font-style:italic">No PMAM users found.</td></tr>';
     } else {
-      tbody.innerHTML=pmams.map(function(p,i){
+      tbody.innerHTML=pmams.map(function(p){
         var pname = (p.name || '').trim().toLowerCase();
-        var cells='<td class="name-cell">'+p.name+'</td>';
+        var pemail = (p.email || '').trim().toLowerCase();
+
+        var photoEl = '';
+        if (p.photo) {
+          photoEl = '<img src="' + esc(p.photo) + '" alt="" style="width:24px; height:24px; object-fit:cover; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,0.1); border:1px solid rgba(0,0,0,0.08); flex-shrink:0; background:#e2e8f0;">';
+        } else {
+          var initials = p.name.split(' ').filter(Boolean).map(function(w){ return w[0]; }).join('').slice(0, 2).toUpperCase() || 'P';
+          photoEl = '<div style="width:24px; height:24px; border-radius:6px; background:linear-gradient(135deg,#0f2b8c,#3b82f6); color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:9.5px; font-weight:800; flex-shrink:0;">' + esc(initials) + '</div>';
+        }
+
+        var cells='<td class="name-cell">'
+          + '<div style="display:flex; align-items:center; gap:7px;">'
+          + photoEl
+          + '<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + esc(p.name) + '">' + esc(p.name) + '</span>'
+          + '</div>'
+          + '</td>';
         dates.forEach(function(d){
-          // Try email match first, then fall back to name match.
-          var filled = !!repMap['e:' + p.email + '|' + d.str]
-                    || !!repMap['n:' + pname    + '|' + d.str];
-          if(d.isToday){ if(filled) todayFilled++; else todayNotFilled++; }
+          var filled = !!repMap['e:' + pemail + '|' + d.str]
+                    || !!repMap['n:' + pname  + '|' + d.str];
+
+          // Fuzzy fallback check
+          if (!filled && pname) {
+            var keys = Object.keys(repMap);
+            for (var k = 0; k < keys.length; k++) {
+              var key = keys[k];
+              if (key.endsWith('|' + d.str)) {
+                var kName = key.split('|')[0].replace(/^[en]:/, '');
+                if (kName && (pname.includes(kName) || kName.includes(pname))) {
+                  filled = true;
+                  break;
+                }
+              }
+            }
+          }
+
+          if(d.isToday){
+            if(filled) todayFilled++;
+            else todayNotFilled++;
+          }
           cells+='<td>'+checkIcon(filled)+'</td>';
         });
         return '<tr>'+cells+'</tr>';
@@ -1388,26 +1413,35 @@ window.addEventListener('DOMContentLoaded', function() {
     var ts=String(now.getDate()).padStart(2,'0')+' '+months[now.getMonth()]+' '+now.getFullYear()+', '+h+':'+mi+' '+ap;
     set('rsLastUpdated',ts);
 
-    // Start countdown
+    // Reset countdown
     startCountdown();
   }
 
   function startCountdown(){
     clearInterval(_countdownTimer);
     clearTimeout(_refreshTimer);
-    var left=REFRESH_SECS;
-    _countdownTimer=setInterval(function(){
+    var left = REFRESH_SECS;
+    function tick(){
+      var m = Math.floor(left/60);
+      var s = String(left%60).padStart(2,'0');
+      var el = document.getElementById('rsCountdown');
+      if(el) el.textContent = m + ':' + s;
+      if(left <= 0){
+        clearInterval(_countdownTimer);
+        loadStatus();
+      }
       left--;
-      var el=document.getElementById('rsCountdown');
-      if(el) el.textContent=Math.floor(left/60)+':'+(String(left%60).padStart(2,'0'));
-      if(left<=0){ clearInterval(_countdownTimer); loadStatus(); }
-    },1000);
+    }
+    tick();
+    _countdownTimer = setInterval(tick, 1000);
   }
 
-  // Fire on page load
-  window.addEventListener('DOMContentLoaded', function(){
-    setTimeout(loadStatus, 800);
-  });
+  // Initial load
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', loadStatus);
+  } else {
+    loadStatus();
+  }
 })();
 
 // ══════════════════════════════════════════════════════════════════════
