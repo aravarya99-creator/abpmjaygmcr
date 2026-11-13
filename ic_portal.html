@@ -2155,7 +2155,7 @@ function _genWardPmamBreakdown(ward, filtered){
   const byPmam = {};
   filtered.forEach(r => {
     if(!Array.isArray(r.wards) || !r.wards.includes(ward)) return;
-    var key = (r.pmam_email && r.pmam_email.trim()) || r.email || r.name || 'unknown';
+    var key = (typeof getCanonicalPmamKey === 'function') ? getCanonicalPmamKey(r) : ((r.pmam_email && r.pmam_email.trim()) || r.email || r.name || 'unknown');
     if(!byPmam[key]){
       byPmam[key] = { key:key, name:r.name||key, ipd:0, med:0, surg:0, reg:0, pre:0, dis:0, clm:0 };
     }
@@ -3346,6 +3346,22 @@ function canonicalPmamName(name, email){
 
 // Similar resolver for ward labels: looks up by ward_id (immutable FK) first,
 // falls back to WARD_REGISTRY.canonical(label) for legacy records.
+// Uniform canonical key generator to prevent duplicate rows across reports
+function getCanonicalPmamKey(obj){
+  if (!obj) return 'UNKNOWN';
+  var canon = '';
+  if (typeof canonicalPmamName === 'function'){
+    canon = canonicalPmamName(obj.name, obj.pmam_email || obj.email);
+  }
+  if (!canon && obj.name) canon = obj.name;
+  if (canon && String(canon).trim()){
+    return 'NAME_' + String(canon).trim().toUpperCase();
+  }
+  var em = (obj.pmam_email || obj.email || '').toLowerCase().trim();
+  if (em) return 'EMAIL_' + em;
+  return 'UNKNOWN';
+}
+
 function canonicalWardLabel(label, wardId){
   if (wardId && window.WARD_REGISTRY && typeof WARD_REGISTRY.list === 'function'){
     var list = WARD_REGISTRY.list();
@@ -3400,19 +3416,21 @@ function genDaily(){
     var byPmam = {};
     // Seed with all known PMAMs (even if no report)
     pmamList.forEach(function(p){
-      byPmam[p.email || p.name] = {
+      var key = getCanonicalPmamKey(p);
+      byPmam[key] = {
         name: p.name, email: p.email,
         wards: [], ipd:0, reg:0, pre:0, preAmt:0, dis:0, clm:0,
         hasReport: false
       };
     });
     filtered.forEach(function(r){
-      var key = r.email || r.name || 'unknown';
+      var key = getCanonicalPmamKey(r);
       if (!byPmam[key]) {
-        byPmam[key] = { name: r.name || r.email || 'Unknown', email: r.email || '', wards:[], ipd:0, reg:0, pre:0, preAmt:0, dis:0, clm:0, hasReport:false };
+        byPmam[key] = { name: r.name || r.email || 'Unknown', email: r.email || r.pmam_email || '', wards:[], ipd:0, reg:0, pre:0, preAmt:0, dis:0, clm:0, hasReport:false };
       }
       var p = byPmam[key];
       p.hasReport = true;
+      if (!p.email && (r.email || r.pmam_email)) p.email = r.email || r.pmam_email;
       var wards = Array.isArray(r.wards) ? r.wards : (r.ward ? [r.ward] : []);
       wards.forEach(function(w){ if (w && p.wards.indexOf(w) === -1) p.wards.push(w); });
       p.ipd   += Number(r.ipd||0);
@@ -3525,19 +3543,21 @@ function genMonthly(){
   fetchPmamList(function(pmamList){
     var byPmam = {};
     pmamList.forEach(function(p){
-      byPmam[p.email || p.name] = {
+      var key = getCanonicalPmamKey(p);
+      byPmam[key] = {
         name: p.name, email: p.email, wards: [],
         ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0, hasReport: false
       };
     });
 
     filtered.forEach(function(r){
-      var key = r.email || r.name || 'unknown';
+      var key = getCanonicalPmamKey(r);
       if (!byPmam[key]) {
-        byPmam[key] = { name: r.name || r.email || 'Unknown', email: r.email || '', wards:[], ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0, hasReport:false };
+        byPmam[key] = { name: r.name || r.email || 'Unknown', email: r.email || r.pmam_email || '', wards:[], ipd:0, med:0, surg:0, reg:0, pre:0, preAmt:0, dis:0, clm:0, hasReport:false };
       }
       var p = byPmam[key];
       p.hasReport = true;
+      if (!p.email && (r.email || r.pmam_email)) p.email = r.email || r.pmam_email;
       var wards = Array.isArray(r.wards) ? r.wards : (r.ward ? [r.ward] : []);
       wards.forEach(function(w){ if (w && p.wards.indexOf(w) === -1) p.wards.push(w); });
       p.ipd   += Number(r.ipd||0);
@@ -4146,6 +4166,11 @@ function fetchFirebaseData() {
         data.pmam_email = String(data.email).toLowerCase().trim();
       } else if (data.pmam_email) {
         data.pmam_email = String(data.pmam_email).toLowerCase().trim();
+      }
+      if (!data.email && data.pmam_email) {
+        data.email = data.pmam_email;
+      } else if (data.email) {
+        data.email = String(data.email).toLowerCase().trim();
       }
       if (!Array.isArray(data.ward_ids)) {
         data.ward_ids = (Array.isArray(data.wards) ? data.wards : [])
