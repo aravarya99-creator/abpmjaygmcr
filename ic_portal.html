@@ -1933,7 +1933,7 @@ function genMonthly(){
     p.dis+=Number(r.dis||0);p.clm+=Number(r.clm||0);
   });
 
-  const rows=Object.values(byPmam).sort((a,b)=>b.reg-a.reg);
+  const rows=Object.values(byPmam).sort((a,b)=>(b.reg-a.reg) || (b.pre-a.pre) || (a.name||'').localeCompare(b.name||''));
   let totIPD=0,totMed=0,totSurg=0,totReg=0,totPre=0,totPreAmt=0,totDis=0,totClm=0;
   rows.forEach(r=>{totIPD+=r.ipd;totMed+=r.med;totSurg+=r.surg;totReg+=r.reg;totPre+=r.pre;totPreAmt+=r.preAmt;totDis+=r.dis;totClm+=r.clm;});
 
@@ -3571,6 +3571,9 @@ function genMonthly(){
     });
 
     var rows = Object.values(byPmam).sort(function(a,b){
+      // Rank by Registered count descending (PMAM with max registered patients on top)
+      if (b.reg !== a.reg) return b.reg - a.reg;
+      if (b.pre !== a.pre) return b.pre - a.pre;
       if (a.hasReport !== b.hasReport) return a.hasReport ? -1 : 1;
       return (a.name||'').localeCompare(b.name||'');
     });
